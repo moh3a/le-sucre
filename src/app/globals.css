@@ -49,38 +49,39 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.148 0.004 228.8);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.148 0.004 228.8);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.148 0.004 228.8);
-  --primary: oklch(0.852 0.199 91.936);
-  --primary-foreground: oklch(0.421 0.095 57.708);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.963 0.002 197.1);
-  --muted-foreground: oklch(0.56 0.021 213.5);
-  --accent: oklch(0.963 0.002 197.1);
-  --accent-foreground: oklch(0.218 0.008 223.9);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.925 0.005 214.3);
-  --input: oklch(0.925 0.005 214.3);
-  --ring: oklch(0.723 0.014 214.4);
-  --chart-1: oklch(0.872 0.007 219.6);
-  --chart-2: oklch(0.56 0.021 213.5);
-  --chart-3: oklch(0.45 0.017 213.2);
-  --chart-4: oklch(0.378 0.015 216);
-  --chart-5: oklch(0.275 0.011 216.9);
+  --lemon-lime: #c8d152;
+  --lemon-chiffon: #f9f7be;
+  --olive-leaf: #4d4c20;
+  --cream: #fff3e3;
+  --crimson-violet: #700145;
+
+  --background: var(--cream);
+  --foreground: var(--olive-leaf);
+  --card: #ffffff;
+  --card-foreground: var(--olive-leaf);
+  --popover: #ffffff;
+  --popover-foreground: var(--olive-leaf);
+  --primary: var(--lemon-lime);
+  --primary-foreground: var(--olive-leaf);
+  --secondary: var(--lemon-chiffon);
+  --secondary-foreground: var(--olive-leaf);
+  --muted: var(--lemon-chiffon);
+  --muted-foreground: color-mix(in srgb, var(--olive-leaf) 70%, transparent);
+  --accent: var(--lemon-chiffon);
+  --accent-foreground: var(--olive-leaf);
+  --destructive: var(--crimson-violet);
+  --border: color-mix(in srgb, var(--olive-leaf) 15%, transparent);
+  --input: color-mix(in srgb, var(--olive-leaf) 15%, transparent);
+  --ring: var(--lemon-lime);
   --radius: 0.625rem;
-  --sidebar: oklch(0.987 0.002 197.1);
-  --sidebar-foreground: oklch(0.148 0.004 228.8);
-  --sidebar-primary: oklch(0.681 0.162 75.834);
-  --sidebar-primary-foreground: oklch(0.987 0.026 102.212);
-  --sidebar-accent: oklch(0.963 0.002 197.1);
-  --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
-  --sidebar-border: oklch(0.925 0.005 214.3);
-  --sidebar-ring: oklch(0.723 0.014 214.4);
+  --sidebar: var(--cream);
+  --sidebar-foreground: var(--olive-leaf);
+  --sidebar-primary: var(--lemon-lime);
+  --sidebar-primary-foreground: var(--olive-leaf);
+  --sidebar-accent: var(--lemon-chiffon);
+  --sidebar-accent-foreground: var(--olive-leaf);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 .dark {
@@ -124,7 +125,8 @@
   body {
     @apply bg-background text-foreground;
   }
-  button:not(:disabled), [role="button"]:not(:disabled) {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   html {
@@ -132,9 +134,22 @@
   }
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   @apply font-heading;
 }
-p, span, li, a, button, input, textarea, select, option {
+p,
+span,
+li,
+a,
+button,
+input,
+textarea,
+select,
+option {
   @apply font-sans;
 }

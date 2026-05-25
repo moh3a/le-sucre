@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Noto_Sans, Noto_Serif } from "next/font/google";
 import "@/app/globals.css";
 import { cn } from "@/lib/utils";
+import { NextIntlClientProvider } from "next-intl";
+import { AppProviders } from "@/components/providers/app-providers";
+import { getLocale, getMessages } from "next-intl/server";
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],
@@ -15,24 +18,29 @@ export const metadata: Metadata = {
   description: "Your eCommerce platform.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={cn(
         "h-full",
-        "antialiased font-sans",
+        "font-sans antialiased",
         "font-sans",
         notoSans.variable,
         notoSerifHeading.variable,
       )}
     >
       <body className="min-h-full">
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          <AppProviders>{children}</AppProviders>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

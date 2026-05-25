@@ -1,19 +1,20 @@
-import { APP_NAME } from "@/consts";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-// import { db } from "./db";
-// import * as authSchema from "../features/authentication_and_authorization/db/schema";
+
+import { APP_NAME } from "@/consts";
+import * as authSchema from "@/features/authentication_and_authorization/auth/schema";
+import { db } from "../db";
 
 export const auth = betterAuth({
-//   database: drizzleAdapter(db, {
-//     provider: "mysql",
-//     schema: {
-//       user: authSchema.users,
-//       session: authSchema.sessions,
-//       account: authSchema.accounts,
-//       verification: authSchema.verifications,
-//     },
-//   }),
+  database: drizzleAdapter(db, {
+    provider: "mysql",
+    schema: {
+      user: authSchema.users,
+      session: authSchema.sessions,
+      account: authSchema.accounts,
+      verification: authSchema.verifications,
+    },
+  }),
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -30,7 +31,7 @@ export const auth = betterAuth({
   advanced: {
     cookiePrefix: "le_sucre",
     crossSubdomainCookie: {
-      enabled: true,
+      enabled: false,
     },
   },
   // Enforce secure TLS bound cookies in production
