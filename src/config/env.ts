@@ -2,6 +2,7 @@ import "dotenv/config";
 import { z } from "zod";
 
 const env_schema = z.object({
+  NODE_ENV: z.enum(["development", "production"]).default("development"),
   LOG_LEVEL: z.enum(["error", "warn", "info", "http", "debug"]).default("info"),
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),

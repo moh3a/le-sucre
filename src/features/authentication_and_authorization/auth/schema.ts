@@ -1,6 +1,15 @@
-import { mysqlTable, varchar, timestamp, boolean, text, uniqueIndex, index } from "drizzle-orm/mysql-core";
+import {
+  mysqlTable,
+  varchar,
+  timestamp,
+  boolean,
+  text,
+  uniqueIndex,
+  index,
+  primaryKey,
+} from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
+import { generate_id } from "@/lib/utils";
 
 // ==========================================
 // 1. USERS TABLE
@@ -8,7 +17,9 @@ import { createId } from "@paralleldrive/cuid2";
 export const users = mysqlTable(
   "users",
   {
-    id: varchar("id", { length: 24 }).primaryKey().$defaultFn(() => createId()),
+    id: varchar("id", { length: 24 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     email_verified: boolean("email_verified").default(false).notNull(),
@@ -17,10 +28,10 @@ export const users = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => ({
-    email_idx: uniqueIndex("email_uidx").on(table.email),
-    created_at_idx: index("users_created_at_idx").on(table.created_at),
-  })
+  (table) => [
+    uniqueIndex("email_uidx").on(table.email),
+    index("users_created_at_idx").on(table.created_at),
+  ],
 );
 
 // ==========================================
@@ -40,10 +51,10 @@ export const sessions = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => ({
-    token_uidx: uniqueIndex("sessions_token_uidx").on(table.token),
-    user_idx: index("sessions_user_idx").on(table.user_id),
-  })
+  (table) => [
+    uniqueIndex("sessions_token_uidx").on(table.token),
+    index("sessions_user_idx").on(table.user_id),
+  ],
 );
 
 // ==========================================
@@ -68,10 +79,10 @@ export const accounts = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => ({
-    provider_account_uidx: uniqueIndex("accounts_provider_account_uidx").on(table.provider_id, table.account_id),
-    user_idx: index("accounts_user_idx").on(table.user_id),
-  })
+  (table) => [
+    uniqueIndex("accounts_provider_account_uidx").on(table.provider_id, table.account_id),
+    index("accounts_user_idx").on(table.user_id),
+  ],
 );
 
 // ==========================================
@@ -87,9 +98,7 @@ export const verifications = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => ({
-    identifier_idx: index("verifications_identifier_idx").on(table.identifier),
-  })
+  (table) => [index("verifications_identifier_idx").on(table.identifier)],
 );
 
 // ==========================================
@@ -98,15 +107,15 @@ export const verifications = mysqlTable(
 export const roles = mysqlTable(
   "roles",
   {
-    id: varchar("id", { length: 24 }).primaryKey().$defaultFn(() => createId()),
+    id: varchar("id", { length: 24 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 100 }).notNull(),
     description: varchar("description", { length: 255 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => ({
-    name_idx: uniqueIndex("roles_name_uidx").on(table.name),
-  })
+  (table) => [uniqueIndex("roles_name_uidx").on(table.name)],
 );
 
 // ==========================================
@@ -115,15 +124,15 @@ export const roles = mysqlTable(
 export const permissions = mysqlTable(
   "permissions",
   {
-    id: varchar("id", { length: 24 }).primaryKey().$defaultFn(() => createId()),
+    id: varchar("id", { length: 24 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 100 }).notNull(), // e.g. "product:create"
     description: varchar("description", { length: 255 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => ({
-    name_idx: uniqueIndex("permissions_name_uidx").on(table.name),
-  })
+  (table) => [uniqueIndex("permissions_name_uidx").on(table.name)],
 );
 
 // ==========================================
@@ -140,10 +149,10 @@ export const user_roles = mysqlTable(
       .references(() => roles.id, { onDelete: "cascade" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
   },
-  (table) => ({
-    pk: index("user_roles_pk").on(table.user_id, table.role_id),
-    role_id_idx: index("user_roles_role_id_idx").on(table.role_id),
-  })
+  (table) => [
+    primaryKey({ columns: [table.user_id, table.role_id] }),
+    index("user_roles_role_id_idx").on(table.role_id),
+  ],
 );
 
 // ==========================================
@@ -160,10 +169,33 @@ export const role_permissions = mysqlTable(
       .references(() => permissions.id, { onDelete: "cascade" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
   },
-  (table) => ({
-    pk: index("role_permissions_pk").on(table.role_id, table.permission_id),
-    permission_id_idx: index("role_permissions_permission_id_idx").on(table.permission_id),
-  })
+  (table) => [
+    primaryKey({ columns: [table.role_id, table.permission_id] }),
+    index("role_permissions_permission_id_idx").on(table.permission_id),
+  ],
+);
+
+export const audit_logs = mysqlTable(
+  "audit_logs",
+  {
+    id: varchar("id", { length: 24 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
+    actor_user_id: varchar("actor_user_id", { length: 24 }).references(() => users.id, {
+      onDelete: "set null",
+    }),
+    action: varchar("action", { length: 100 }).notNull(),
+    resource_type: varchar("resource_type", { length: 100 }),
+    resource_id: varchar("resource_id", { length: 24 }),
+    metadata: text("metadata"),
+    ip_address: varchar("ip_address", { length: 45 }),
+    user_agent: varchar("user_agent", { length: 1024 }),
+    created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("audit_logs_actor_idx").on(t.actor_user_id),
+    index("audit_logs_action_idx").on(t.action),
+  ],
 );
 
 // ==========================================

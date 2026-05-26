@@ -3,5 +3,15 @@
     "title": "Console d'administration",
     "dashboard": "Tableau de bord",
     "sign_out": "Se déconnecter"
+  },
+  "auth": {
+    "title": "Connexion à la console",
+    "subtitle": "Identifiants réservés au personnel autorisé",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "forgot": "Mot de passe oublié ?",
+    "error_invalid": "E-mail ou mot de passe incorrect",
+    "error_forbidden": "Vous n'avez pas accès à la console"
   }
 }

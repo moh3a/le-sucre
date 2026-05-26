@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
-import { APP_NAME } from "@/consts";
+import { APP_NAME } from "@/constants";
 import * as authSchema from "@/features/authentication_and_authorization/auth/schema";
 import { db } from "../db";
 
@@ -22,7 +22,7 @@ export const auth = betterAuth({
   appName: APP_NAME,
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days session lifetime
-    updateAge: 60 * 60 * 24,     // Update session every 24 hours
+    updateAge: 60 * 60 * 24, // Update session every 24 hours
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60, // Cache session cookie in browser for 5 minutes
@@ -45,6 +45,12 @@ export const auth = betterAuth({
         path: "/",
       },
     },
+  },
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 20,
+    storage: "memory", // swap to custom redis store next iteration
   },
 });
 
