@@ -4,7 +4,7 @@ import { getSessionCookie } from "better-auth/cookies";
 const CONSOLE_PREFIX = "/console";
 const AUTH_PATH = "/auth";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
   response.headers.set("x-pathname", pathname);

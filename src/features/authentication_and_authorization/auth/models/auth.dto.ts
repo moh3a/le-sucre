@@ -15,3 +15,5 @@ export const assign_role_dto = z.object({
   user_id: z.string().length(24),
   role_name: z.enum(["admin", "moderator", "operator", "delivery_person", "customer"]),
 });
+
+export type LoginInput = z.infer<typeof login_dto>;
