@@ -58,7 +58,24 @@ const auth = betterAuth({
       emailVerified: "email_verified",
       createdAt: "created_at",
       updatedAt: "updated_at",
-    }
+    },
+  },
+  session: {
+    fields: {
+      createdAt: "created_at",
+      expiresAt: "expires_at",
+      updatedAt: "updated_at",
+      ipAddress: "ip_address",
+      userAgent: "user_agent",
+      userId: "user_id",
+    },
+  },
+  verification: {
+    fields: {
+      createdAt: "created_at",
+      expiresAt: "expires_at",
+      updatedAt: "updated_at",
+    },
   },
   emailAndPassword: { enabled: true },
 });
@@ -136,7 +153,7 @@ async function seed_admin_user() {
     logger.info(`Admin user already exists: ${email}`);
   } else {
     const result = await auth.api.signUpEmail({
-      body: { email, password, name },
+      body: { email, password, name, rememberMe: false },
     });
     user_id = result.user.id;
     logger.info(`Created admin user: ${email}`);

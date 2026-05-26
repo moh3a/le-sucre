@@ -4,10 +4,12 @@ import {
   admin_auth_router,
   auth_router,
 } from "@/features/authentication_and_authorization/auth/router";
+import { category_router } from "@/features/product_information_management/categories/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
   adminAuth: admin_auth_router,
+  categories: category_router,
 });
 
 export type AppRouter = typeof app_router;

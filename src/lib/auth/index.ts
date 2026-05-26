@@ -15,13 +15,6 @@ export const auth = betterAuth({
       verification: authSchema.verifications,
     },
   }),
-  user: {
-    fields: {
-      emailVerified: "email_verified",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-    },
-  },
   account: {
     fields: {
       accountId: "account_id",
@@ -36,12 +29,22 @@ export const auth = betterAuth({
       userId: "user_id",
     },
   },
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: true,
+  user: {
+    fields: {
+      emailVerified: "email_verified",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
   },
-  appName: APP_NAME,
   session: {
+    fields: {
+      createdAt: "created_at",
+      expiresAt: "expires_at",
+      updatedAt: "updated_at",
+      ipAddress: "ip_address",
+      userAgent: "user_agent",
+      userId: "user_id",
+    },
     expiresIn: 60 * 60 * 24 * 7, // 7 days session lifetime
     updateAge: 60 * 60 * 24, // Update session every 24 hours
     cookieCache: {
@@ -49,6 +52,18 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // Cache session cookie in browser for 5 minutes
     },
   },
+  verification: {
+    fields: {
+      createdAt: "created_at",
+      expiresAt: "expires_at",
+      updatedAt: "updated_at",
+    },
+  },
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+  },
+  appName: APP_NAME,
   advanced: {
     cookiePrefix: "le_sucre",
     crossSubdomainCookie: {
@@ -67,12 +82,12 @@ export const auth = betterAuth({
       },
     },
   },
-  rateLimit: {
-    enabled: true,
-    window: 60,
-    max: 20,
-    storage: "memory", // swap to custom redis store next iteration
-  },
+  // rateLimit: {
+  //   enabled: true,
+  //   window: 60,
+  //   max: 20,
+  //   storage: "memory", // swap to custom redis store next iteration
+  // },
 });
 
 export type AuthInstance = typeof auth;

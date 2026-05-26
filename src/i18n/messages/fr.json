@@ -13,5 +13,19 @@
     "forgot": "Mot de passe oublié ?",
     "error_invalid": "E-mail ou mot de passe incorrect",
     "error_forbidden": "Vous n'avez pas accès à la console"
+  },
+  "categories": {
+    "title": "Catégories",
+    "new": "Nouvelle catégorie",
+    "name": "Nom",
+    "slug": "Slug",
+    "parent": "Catégorie parente",
+    "description": "Description",
+    "sort_order": "Ordre",
+    "active": "Active",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "empty": "Aucune catégorie",
+    "breadcrumb_root": "Catalogue"
   }
 }

@@ -27,5 +27,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/console/:path*", "/auth/:path*"],
+  matcher: ["/admin/:path*"], // TODO this was only added to disable proxy for now
+  // matcher: ["/console/:path*", "/auth/:path*"],
 };

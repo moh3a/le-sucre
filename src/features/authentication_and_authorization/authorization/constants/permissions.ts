@@ -9,6 +9,8 @@ export const PERMISSIONS = {
   products_write: "products:write",
   delivery_manage: "delivery:manage",
   storefront_account: "storefront:account",
+  categories_read: "categories:read",
+  categories_write: "categories:write",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -22,12 +24,15 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.products_read,
     PERMISSIONS.products_write,
     PERMISSIONS.audit_read,
+    PERMISSIONS.categories_read,
+    PERMISSIONS.categories_write,
   ],
   operator: [
     PERMISSIONS.orders_read,
     PERMISSIONS.orders_write,
     PERMISSIONS.products_read,
     PERMISSIONS.products_write,
+    PERMISSIONS.categories_read,
   ],
   delivery_person: [PERMISSIONS.delivery_manage, PERMISSIONS.orders_read],
   customer: [PERMISSIONS.storefront_account],

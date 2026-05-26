@@ -44,6 +44,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       password: values.password,
     });
     if (result.error) {
+      console.log(result.error);
       set_root_error(t("error_invalid"));
       return;
     }
