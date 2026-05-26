@@ -15,6 +15,27 @@ export const auth = betterAuth({
       verification: authSchema.verifications,
     },
   }),
+  user: {
+    fields: {
+      emailVerified: "email_verified",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
+  },
+  account: {
+    fields: {
+      accountId: "account_id",
+      accessToken: "access_token",
+      accessTokenExpiresAt: "access_token_expires_at",
+      createdAt: "created_at",
+      idToken: "id_token",
+      providerId: "provider_id",
+      refreshToken: "refresh_token",
+      refreshTokenExpiresAt: "refresh_token_expires_at",
+      updatedAt: "updated_at",
+      userId: "user_id",
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

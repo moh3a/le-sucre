@@ -53,12 +53,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       set_root_error(t("error_invalid"));
       return;
     }
-    try {
-      await fetch("/api/admin/me", { credentials: "include" });
-      // Server enforces console RBAC; 403 → forbidden
-    } catch {
-      /* network */
-    }
     const me_res = await fetch("/api/admin/me", { credentials: "include" });
     if (!me_res.ok) {
       await authClient.signOut();

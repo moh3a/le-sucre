@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\aitab\\Dev\\le-sucre\\logs\\.65749c15d22fb2c9e732c1cd5d3a0df17acf6f5a-audit.json",
+    "files": [
+        {
+            "date": 1779796599215,
+            "name": "C:\\Users\\aitab\\Dev\\le-sucre\\logs\\error-2026-05-26.log",
+            "hash": "d950a804912d4bdd9c904ba8b035106b77fbb777053dcf7122fd7c26e60b9130"
+        }
+    ],
+    "hashType": "sha256"
+}

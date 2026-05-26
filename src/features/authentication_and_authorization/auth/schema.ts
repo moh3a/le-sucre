@@ -17,7 +17,7 @@ import { generate_id } from "@/lib/utils";
 export const users = mysqlTable(
   "users",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 255 }).notNull(),
@@ -41,7 +41,7 @@ export const sessions = mysqlTable(
   "sessions",
   {
     id: varchar("id", { length: 255 }).primaryKey(),
-    user_id: varchar("user_id", { length: 24 })
+    user_id: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     token: varchar("token", { length: 255 }).notNull(),
@@ -64,7 +64,7 @@ export const accounts = mysqlTable(
   "accounts",
   {
     id: varchar("id", { length: 255 }).primaryKey(),
-    user_id: varchar("user_id", { length: 24 })
+    user_id: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     account_id: varchar("account_id", { length: 255 }).notNull(),
@@ -107,7 +107,7 @@ export const verifications = mysqlTable(
 export const roles = mysqlTable(
   "roles",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 100 }).notNull(),
@@ -124,7 +124,7 @@ export const roles = mysqlTable(
 export const permissions = mysqlTable(
   "permissions",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 100 }).notNull(), // e.g. "product:create"
@@ -141,10 +141,10 @@ export const permissions = mysqlTable(
 export const user_roles = mysqlTable(
   "user_roles",
   {
-    user_id: varchar("user_id", { length: 24 })
+    user_id: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    role_id: varchar("role_id", { length: 24 })
+    role_id: varchar("role_id", { length: 255 })
       .notNull()
       .references(() => roles.id, { onDelete: "cascade" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
@@ -161,10 +161,10 @@ export const user_roles = mysqlTable(
 export const role_permissions = mysqlTable(
   "role_permissions",
   {
-    role_id: varchar("role_id", { length: 24 })
+    role_id: varchar("role_id", { length: 255 })
       .notNull()
       .references(() => roles.id, { onDelete: "cascade" }),
-    permission_id: varchar("permission_id", { length: 24 })
+    permission_id: varchar("permission_id", { length: 255 })
       .notNull()
       .references(() => permissions.id, { onDelete: "cascade" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
@@ -178,15 +178,15 @@ export const role_permissions = mysqlTable(
 export const audit_logs = mysqlTable(
   "audit_logs",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    actor_user_id: varchar("actor_user_id", { length: 24 }).references(() => users.id, {
+    actor_user_id: varchar("actor_user_id", { length: 255 }).references(() => users.id, {
       onDelete: "set null",
     }),
     action: varchar("action", { length: 100 }).notNull(),
     resource_type: varchar("resource_type", { length: 100 }),
-    resource_id: varchar("resource_id", { length: 24 }),
+    resource_id: varchar("resource_id", { length: 255 }),
     metadata: text("metadata"),
     ip_address: varchar("ip_address", { length: 45 }),
     user_agent: varchar("user_agent", { length: 1024 }),
