@@ -39,6 +39,7 @@ export const products = mysqlTable(
       .primaryKey()
       .$defaultFn(() => generate_id()),
     sku: varchar("sku", { length: 64 }).notNull(),
+    has_variants: boolean("has_variants").notNull().default(false),
     slug: varchar("slug", { length: 255 }).notNull(),
     category_id: varchar("category_id", { length: 255 })
       .notNull()

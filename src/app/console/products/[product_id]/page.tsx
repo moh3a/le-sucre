@@ -1,3 +1,4 @@
+// TODO this should have the ability to edit details, pricing, variants, inventory and everything related to products in tabs
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -27,7 +28,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-bold">{fr?.name ?? data.product.slug}</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("sku")}: {data.product.sku} · {t("slug")}: {data.product.slug}
           </p>
         </div>
@@ -38,17 +39,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border p-4">
-          <p className="text-xs text-muted-foreground">{t("status")}</p>
+          <p className="text-muted-foreground text-xs">{t("status")}</p>
           <p className="font-medium">{t(`status_${data.product.status}` as "status_draft")}</p>
         </div>
         <div className="rounded-lg border p-4">
-          <p className="text-xs text-muted-foreground">{t("base_price")}</p>
+          <p className="text-muted-foreground text-xs">{t("base_price")}</p>
           <p className="font-medium">
             {data.product.base_price} {data.product.currency}
           </p>
         </div>
         <div className="rounded-lg border p-4">
-          <p className="text-xs text-muted-foreground">{t("offer_price")}</p>
+          <p className="text-muted-foreground text-xs">{t("offer_price")}</p>
           <p className="font-medium">{data.product.offer_price ?? "—"}</p>
         </div>
       </section>
@@ -61,12 +62,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
       )}
 
       <section>
-        <h2 className="mb-4 font-heading text-lg font-semibold">{t("section_media")}</h2>
+        <h2 className="font-heading mb-4 text-lg font-semibold">{t("section_media")}</h2>
         <ProductMediaGallery product_id={product_id} initial_media={data.media} />
       </section>
 
       <section>
-        <h2 className="mb-4 font-heading text-lg font-semibold">{t("section_translations")}</h2>
+        <h2 className="font-heading mb-4 text-lg font-semibold">{t("section_translations")}</h2>
         <ProductTranslationsPanel product_id={product_id} translations={data.translations} />
       </section>
     </div>

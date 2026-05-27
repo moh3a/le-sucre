@@ -1,3 +1,4 @@
+// TODO implement category table, creating and editing categories
 import { CategoryTree } from "@/features/product_information_management/categories/components/category-tree";
 
 export default function CategoriesPage() {

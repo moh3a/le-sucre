@@ -1,3 +1,4 @@
+// TODO complete permissions
 export const PERMISSIONS = {
   users_read: "users:read",
   users_write: "users:write",
