@@ -78,3 +78,29 @@ export function normalize_error(error: unknown): AppError {
 
   return new InternalServerError("An unknown system error occurred");
 }
+
+// ─── Safe async wrapper ───────────────────────────────────
+export async function trySafe<T>(
+  fn: () => Promise<T>,
+): Promise<[T, null] | [null, Error]> {
+  try {
+    const result = await fn();
+    return [result, null];
+  } catch (error) {
+    return [null, error instanceof Error ? error : new Error(String(error))];
+  }
+}
+
+// ─── Assert helpers ───────────────────────────────────────
+export function assertFound<T>(value: T | null | undefined, resource: string): T {
+  if (value === null || value === undefined) {
+    throw new NotFoundError(resource);
+  }
+  return value;
+}
+
+export function assertAuth(condition: boolean, message?: string): void {
+  if (!condition) {
+    throw new ForbiddenError(message);
+  }
+}

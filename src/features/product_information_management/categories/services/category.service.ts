@@ -1,5 +1,7 @@
 import "server-only";
 
+import z from "zod";
+
 import { category_repository } from "@/features/product_information_management/categories/repositories/category.repository";
 import { category_cache_service } from "@/features/product_information_management/categories/services/category-cache.service";
 import {
@@ -8,6 +10,7 @@ import {
   slugify_name,
 } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
+import { create_category_dto, update_category_dto } from "../models/category.dto";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 
@@ -44,14 +47,7 @@ export class CategoryService {
     return tree;
   }
 
-  async create(input: {
-    name: string;
-    slug?: string;
-    description?: string | null;
-    parent_id?: string | null;
-    sort_order?: number;
-    is_active?: boolean;
-  }) {
+  async create(input: z.infer<typeof create_category_dto>) {
     const slug = input.slug ?? slugify_name(input.name);
     if (await this.repo.find_by_slug(slug)) throw new ConflictError("Ce slug existe déjà");
 
@@ -75,14 +71,7 @@ export class CategoryService {
     return this.repo.find_by_id(id);
   }
 
-  async update(input: {
-    id: string;
-    name?: string;
-    slug?: string;
-    description?: string | null;
-    sort_order?: number;
-    is_active?: boolean;
-  }) {
+  async update(input: z.infer<typeof update_category_dto>) {
     const current = await this.repo.find_by_id(input.id);
     if (!current) throw new NotFoundError("Catégorie introuvable");
 

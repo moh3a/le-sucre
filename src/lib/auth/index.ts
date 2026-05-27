@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin } from "better-auth/plugins";
 
 import { APP_NAME } from "@/constants";
 import * as authSchema from "@/features/authentication_and_authorization/auth/schema";
@@ -15,6 +16,25 @@ export const auth = betterAuth({
       verification: authSchema.verifications,
     },
   }),
+  plugins: [
+    admin({
+      // adminRoles: ["admin", "moderator"],
+      schema: {
+        user: {
+          fields: {
+            banExpires: "ban_expires",
+            banReason: "ban_reason",
+            impersonatedBy: "impersonated_by",
+          },
+        },
+        session: {
+          fields: {
+            impersonatedBy: "impersonated_by",
+          },
+        },
+      },
+    }),
+  ],
   account: {
     fields: {
       accountId: "account_id",
