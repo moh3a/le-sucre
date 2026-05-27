@@ -6,7 +6,9 @@ import { getTranslations } from "next-intl/server";
 import { product_service } from "@/features/product_information_management/products/services/product.service";
 import { ProductMediaGallery } from "@/features/product_information_management/products/components/product-media-gallery";
 import { ProductTranslationsPanel } from "@/features/product_information_management/products/components/product-translations-panel";
+import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
 import { Button } from "@/components/ui/button";
+import { ProductInventoryPanel } from "@/features/inventory_management_system/components/product-inventory-panel";
 
 type PageProps = { params: Promise<{ product_id: string }> };
 
@@ -69,6 +71,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <section>
         <h2 className="font-heading mb-4 text-lg font-semibold">{t("section_translations")}</h2>
         <ProductTranslationsPanel product_id={product_id} translations={data.translations} />
+      </section>
+
+      <section>
+        <ProductVariantsPanel
+          product_id={product_id}
+          product_sku={data.product.sku}
+          currency={data.product.currency}
+        />
+      </section>
+
+      <section>
+        <h2 className="font-heading mb-4 text-lg font-semibold">{t("section_inventory")}</h2>
+        <ProductInventoryPanel product_id={product_id} />
       </section>
     </div>
   );
