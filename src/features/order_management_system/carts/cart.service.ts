@@ -2,15 +2,17 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
-import { NotFoundError } from "@/lib/error_handling";
+import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { resolve_unit_price } from "@/features/product_information_management/variants/engines/pricing.engine";
-import { reservation_service } from "@/features/inventory_management_system/services/reservation.service";
+import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
 import { carts } from "../schema";
 import type { add_cart_item_dto } from "./models/cart.dto";
 import { cart_repository } from "./repository";
+import { availability_service } from "../preorders/services/availability.service";
+import { preorder_allocation_service } from "../preorders/services/preorder-allocation.service";
 
 const RESERVE_TTL_SEC = 900;
 
@@ -82,13 +84,31 @@ export class CartService {
       });
     }
 
-    const reservation = await reservation_service.create({
-      sku_id: input.sku_id,
-      warehouse_id: "default",
-      quantity: input.quantity,
-      cart_id,
-      expires_in_sec: RESERVE_TTL_SEC,
-    });
+    const availability = await availability_service.resolve(input.sku_id, input.quantity);
+    let reservation_id: string | null = null;
+    let preorder_allocation_id: string | null = null;
+    let fulfillment_type = "standard";
+    if (availability.mode === "in_stock") {
+      const reservation = await reservation_service.create({
+        sku_id: input.sku_id,
+        warehouse_id: "default",
+        quantity: input.quantity,
+        cart_id,
+        expires_in_sec: RESERVE_TTL_SEC,
+      });
+      reservation_id = reservation.id;
+    } else if (availability.mode === "preorder" || availability.mode === "backorder") {
+      const alloc = await preorder_allocation_service.reserve_for_cart({
+        sku_id: input.sku_id,
+        quantity: input.quantity,
+        cart_id,
+        estimated_available_at: availability.estimated_available_at,
+      });
+      preorder_allocation_id = alloc.id;
+      fulfillment_type = availability.fulfillment_type!;
+    } else {
+      throw new ConflictError("Produit indisponible");
+    }
 
     await this.repo.insert_item({
       id: generate_id(),
@@ -98,7 +118,9 @@ export class CartService {
       quantity: input.quantity,
       unit_price: price.unit_price,
       currency: price.currency,
-      reservation_id: reservation.id,
+      reservation_id,
+      preorder_allocation_id,
+      fulfillment_type,
     });
 
     return this.get_cart_view(cart_id);
@@ -107,22 +129,41 @@ export class CartService {
   async update_quantity(cart_id: string, item_id: string, input: { quantity: number }) {
     const item = await this.repo.find_item_by_id(item_id, cart_id);
     if (!item) throw new NotFoundError("Ligne panier introuvable");
-
     if (item.reservation_id) await reservation_service.release(item.reservation_id);
-
-    const reservation = await reservation_service.create({
-      sku_id: item.sku_id,
-      warehouse_id: "default",
-      quantity: input.quantity,
-      cart_id,
-      expires_in_sec: RESERVE_TTL_SEC,
-    });
-
+    if (item.preorder_allocation_id) {
+      await preorder_allocation_service.cancel(item.preorder_allocation_id);
+    }
+    const availability = await availability_service.resolve(item.sku_id, input.quantity);
+    let reservation_id: string | null = null;
+    let preorder_allocation_id: string | null = null;
+    let fulfillment_type = "standard";
+    if (availability.mode === "in_stock") {
+      const reservation = await reservation_service.create({
+        sku_id: item.sku_id,
+        warehouse_id: "default",
+        quantity: input.quantity,
+        cart_id,
+        expires_in_sec: RESERVE_TTL_SEC,
+      });
+      reservation_id = reservation.id;
+    } else if (availability.mode === "preorder" || availability.mode === "backorder") {
+      const alloc = await preorder_allocation_service.reserve_for_cart({
+        sku_id: item.sku_id,
+        quantity: input.quantity,
+        cart_id,
+        estimated_available_at: availability.estimated_available_at,
+      });
+      preorder_allocation_id = alloc.id;
+      fulfillment_type = availability.fulfillment_type!;
+    } else {
+      throw new ConflictError("Produit indisponible");
+    }
     await this.repo.update_item(item_id, {
       quantity: input.quantity,
-      reservation_id: reservation.id,
+      reservation_id,
+      preorder_allocation_id,
+      fulfillment_type,
     });
-
     return this.get_cart_view(cart_id);
   }
 
@@ -130,6 +171,9 @@ export class CartService {
     const item = await this.repo.find_item_by_id(item_id, cart_id);
     if (!item) return this.get_cart_view(cart_id);
     if (item.reservation_id) await reservation_service.release(item.reservation_id);
+    if (item.preorder_allocation_id) {
+      await preorder_allocation_service.cancel(item.preorder_allocation_id);
+    }
     await this.repo.delete_item(item_id);
     return this.get_cart_view(cart_id);
   }

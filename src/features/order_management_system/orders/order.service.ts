@@ -4,17 +4,13 @@ import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import {
-  NotFoundError,
-  ForbiddenError,
-  ValidationError,
-} from "@/lib/error_handling";
+import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { carts, cart_items } from "../schema";
 import { checkout_engine } from "../checkout/checkout.engine";
-import { reservation_service } from "@/features/inventory_management_system/services/reservation.service";
+import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
 import { assert_order_transition } from "./order-lifecycle.engine";
 import { build_order_number } from "./order-number.helper";
 import { order_repository } from "./repository";
@@ -23,6 +19,9 @@ import type {
   list_orders_dto,
   admin_update_order_status_dto,
 } from "./models/order.dto";
+import { preorder_allocation_service } from "../preorders/services/preorder-allocation.service";
+import { FULFILLMENT_TYPE, PREORDER_LINE_STATUS } from "../preorders/constants/preorder-status";
+import { preorder_repository } from "../preorders/repositories/preorder.repository";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -77,6 +76,72 @@ export class OrderService {
       placed_at: new Date().toISOString(),
     });
 
+    // const item_inserts = await Promise.all(
+    //   items.map(async (line) => {
+    //     const [sku] = await db
+    //       .select({ sku_code: product_skus.sku_code })
+    //       .from(product_skus)
+    //       .where(eq(product_skus.id, line.sku_id))
+    //       .limit(1);
+
+    //     const [tr] = await db
+    //       .select({ name: product_translations.name })
+    //       .from(product_translations)
+    //       .where(
+    //         and(
+    //           eq(product_translations.product_id, line.product_id),
+    //           eq(product_translations.locale, "fr"),
+    //         ),
+    //       )
+    //       .limit(1);
+
+    //     return {
+    //       id: generate_id(),
+    //       order_id,
+    //       sku_id: line.sku_id,
+    //       product_id: line.product_id,
+    //       sku_code: sku?.sku_code ?? line.sku_id,
+    //       product_name: tr?.name ?? line.product_id,
+    //       quantity: line.quantity,
+    //       unit_price: String(line.unit_price),
+    //       line_total: (Number(line.unit_price) * line.quantity).toFixed(2),
+    //       currency: line.currency,
+    //       reservation_id: line.reservation_id ?? null,
+    //     };
+    //   }),
+    // );
+
+    // await this.repo.insert_items(item_inserts);
+
+    // await this.repo.insert_adjustments(
+    //   totals.adjustments.map((a) => ({
+    //     id: generate_id(),
+    //     order_id,
+    //     type: a.type,
+    //     label: a.label,
+    //     amount: a.amount.startsWith("-") ? a.amount.slice(1) : a.amount,
+    //     currency: cart.currency,
+    //   })),
+    // );
+
+    // await this.repo.insert_status_event({
+    //   id: generate_id(),
+    //   order_id,
+    //   from_status: null,
+    //   to_status: "pending_payment",
+    //   note: "Commande créée",
+    // });
+
+    // // TODO
+    // // For preorder lines:
+    // // Do not commit inventory reservation.
+    // // confirm preorder allocation + set order_items.preorder_status = pending_stock.
+    // // Payment: if deposit_percent < 100, set payment_capture_mode = "deposit" and order payment_status = "partially_paid" until balance capture.
+
+    // for (const line of items) {
+    //   if (!line.reservation_id) continue;
+    //   await reservation_service.commit({ id: line.reservation_id, order_id });
+    // }
     const item_inserts = await Promise.all(
       items.map(async (line) => {
         const [sku] = await db
@@ -96,8 +161,21 @@ export class OrderService {
           )
           .limit(1);
 
+        const fulfillment_type = line.fulfillment_type ?? FULFILLMENT_TYPE.standard;
+        const is_preorder_line =
+          fulfillment_type === FULFILLMENT_TYPE.preorder ||
+          fulfillment_type === FULFILLMENT_TYPE.backorder;
+
+        let deposit_percent = 100;
+        if (is_preorder_line) {
+          const settings = await preorder_repository.get_settings(line.sku_id);
+          deposit_percent = Number(settings?.deposit_percent ?? 100);
+        }
+
+        const item_id = generate_id();
+
         return {
-          id: generate_id(),
+          id: item_id,
           order_id,
           sku_id: line.sku_id,
           product_id: line.product_id,
@@ -107,35 +185,44 @@ export class OrderService {
           unit_price: String(line.unit_price),
           line_total: (Number(line.unit_price) * line.quantity).toFixed(2),
           currency: line.currency,
-          reservation_id: line.reservation_id ?? null,
+          reservation_id: is_preorder_line ? null : (line.reservation_id ?? null),
+          fulfillment_type,
+          preorder_status: is_preorder_line ? PREORDER_LINE_STATUS.pending_stock : null,
+          estimated_available_at: null as string | null,
+          preorder_allocation_id: line.preorder_allocation_id ?? null,
+          payment_capture_mode: deposit_percent < 100 ? "deposit" : "full",
+          _deposit_percent: deposit_percent,
+          _confirm_allocation: is_preorder_line ? line.preorder_allocation_id : null,
         };
       }),
     );
 
-    await this.repo.insert_items(item_inserts);
-
-    await this.repo.insert_adjustments(
-      totals.adjustments.map((a) => ({
-        id: generate_id(),
-        order_id,
-        type: a.type,
-        label: a.label,
-        amount: a.amount.startsWith("-") ? a.amount.slice(1) : a.amount,
-        currency: cart.currency,
-      })),
+    const normalized_items = item_inserts.map(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ({ _deposit_percent, _confirm_allocation, ...row }) => row,
     );
+    await this.repo.insert_items(normalized_items);
 
-    await this.repo.insert_status_event({
-      id: generate_id(),
-      order_id,
-      from_status: null,
-      to_status: "pending_payment",
-      note: "Commande créée",
-    });
+    let has_deposit_lines = false;
+    for (const raw of item_inserts) {
+      if (raw._confirm_allocation) {
+        await preorder_allocation_service.confirm_for_order(
+          raw._confirm_allocation,
+          order_id,
+          raw.id,
+        );
+      }
+      if (raw.payment_capture_mode === "deposit") has_deposit_lines = true;
 
-    for (const line of items) {
-      if (!line.reservation_id) continue;
-      await reservation_service.commit({ id: line.reservation_id, order_id });
+      if (raw.reservation_id) {
+        await reservation_service.commit({ id: raw.reservation_id, order_id });
+      }
+    }
+
+    if (has_deposit_lines) {
+      await this.repo.update_order_status(order_id, "pending_payment", {
+        payment_status: "partially_paid",
+      });
     }
 
     await db.update(carts).set({ status: "converted" }).where(eq(carts.id, input.cart_id));

@@ -10,7 +10,7 @@ import type { GenerateSkusResult, OptionPair } from "../types";
 import { cartesian_combinations } from "./variant-combination.engine";
 import { build_option_signature, build_sku_code } from "./option-signature.engine";
 import { and, eq, inArray } from "drizzle-orm";
-import { inventory_levels } from "@/features/inventory_management_system/schema";
+import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 
 const INSERT_CHUNK = 500;
 

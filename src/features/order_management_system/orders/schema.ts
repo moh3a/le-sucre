@@ -109,9 +109,18 @@ export const order_items = mysqlTable(
     line_total: decimal("line_total", { precision: 12, scale: 2 }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
     reservation_id: varchar("reservation_id", { length: 24 }),
+    fulfillment_type: varchar("fulfillment_type", { length: 32 }).notNull().default("standard"),
+    preorder_status: varchar("preorder_status", { length: 32 }),
+    estimated_available_at: timestamp("estimated_available_at", { mode: "string" }),
+    preorder_allocation_id: varchar("preorder_allocation_id", { length: 24 }),
+    payment_capture_mode: varchar("payment_capture_mode", { length: 16 }).notNull().default("full"),
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
   },
-  (t) => [index("order_items_order_idx").on(t.order_id)],
+  (t) => [
+    index("order_items_order_idx").on(t.order_id),
+    index("order_items_preorder_status_idx").on(t.preorder_status),
+    index("order_items_preorder_alloc_idx").on(t.preorder_allocation_id),
+  ],
 );
 
 export const order_adjustments = mysqlTable(

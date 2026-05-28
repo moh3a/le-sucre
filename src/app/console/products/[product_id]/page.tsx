@@ -8,7 +8,7 @@ import { ProductMediaGallery } from "@/features/product_information_management/p
 import { ProductTranslationsPanel } from "@/features/product_information_management/products/components/product-translations-panel";
 import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
 import { Button } from "@/components/ui/button";
-import { ProductInventoryPanel } from "@/features/inventory_management_system/components/product-inventory-panel";
+import { ProductInventoryPanel } from "@/features/inventory_management_system/inventory/components/product-inventory-panel";
 
 type PageProps = { params: Promise<{ product_id: string }> };
 

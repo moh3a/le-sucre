@@ -56,6 +56,8 @@ export const cart_items = mysqlTable(
     unit_price: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
     reservation_id: varchar("reservation_id", { length: 24 }),
+    fulfillment_type: varchar("fulfillment_type", { length: 32 }).notNull().default("standard"),
+    preorder_allocation_id: varchar("preorder_allocation_id", { length: 24 }),
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
@@ -63,5 +65,6 @@ export const cart_items = mysqlTable(
   (t) => [
     uniqueIndex("cart_items_cart_sku_uidx").on(t.cart_id, t.sku_id),
     index("cart_items_cart_idx").on(t.cart_id),
+    index("cart_items_preorder_alloc_idx").on(t.preorder_allocation_id),
   ],
 );

@@ -30,7 +30,8 @@ const env_schema = z
     // RATE_LIMIT_WINDOW_SEC: z.coerce.number().int().positive().default(60),
     // RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
 
-    RECOMMENDATION_PROVIDER: z.enum(["local"]).default("local")
+    RECOMMENDATION_PROVIDER: z.enum(["local"]).default("local"),
+    FORECAST_PROVIDER: z.enum(["local"]).default("local"),
   })
   .superRefine((v, ctx) => {
     if (v.NODE_ENV === "production" && !v.BETTER_AUTH_SECRET) {

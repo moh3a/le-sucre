@@ -4,6 +4,8 @@ export const MOVEMENT_TYPES = {
   sale: "sale",
   reserve: "reserve",
   release: "release",
+  preorder_allocate: "preorder_allocate",
+  preorder_fulfill: "preorder_fulfill",
 } as const;
 
 export type MovementType = (typeof MOVEMENT_TYPES)[keyof typeof MOVEMENT_TYPES];

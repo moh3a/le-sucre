@@ -6,7 +6,7 @@ import type { z } from "zod";
 import { db } from "@/lib/db";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
-import { inventory_levels } from "@/features/inventory_management_system/schema";
+import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 import { products } from "@/features/product_information_management/products/schema";
 import { product_properties } from "../schema";
 

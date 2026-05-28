@@ -12,8 +12,12 @@ export const PERMISSIONS = {
   storefront_account: "storefront:account",
   categories_read: "categories:read",
   categories_write: "categories:write",
+  preorders_read: "preorders:read",
+  preorders_write: "preorders:write",
   inventory_read: "inventory:read",
   inventory_write: "inventory:write",
+  inventory_forecast_read: "inventory:forecast:read",
+  inventory_forecast_write: "inventory:forecast:write",
   reviews_read: "reviews:read",
   reviews_moderate: "reviews:moderate",
 } as const;

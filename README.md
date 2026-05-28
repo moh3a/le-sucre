@@ -7,3 +7,8 @@
 - each feature should have redis cache keys
 - admin should only fetch from trpc
 - all schema IDs should be varchar 255
+
+## Features to implement
+
+- Event Bus
+- Domain Events System

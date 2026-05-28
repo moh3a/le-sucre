@@ -19,6 +19,8 @@ import {
   invalidate_product_stock_cache,
   sync_sku_stock_denormalized,
 } from "../helpers/stock-sync.helper";
+import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
+import { preorder_fulfillment_service } from "@/features/order_management_system/preorders/services/preorder-fulfillment.service";
 
 export class InventoryService {
   constructor(private readonly repo = inventory_repository) {}
@@ -152,6 +154,9 @@ export class InventoryService {
       reference_type: input.reference_type ?? "receive",
       reference_id: input.reference_id ?? null,
     });
+
+    void forecast_index_service.enqueue("reindex_sku", { sku_id: input.sku_id });
+    void preorder_fulfillment_service.fulfill_incoming_stock(input.sku_id, input.warehouse_id);
 
     return this.get_level(input.sku_id, input.warehouse_id);
   }

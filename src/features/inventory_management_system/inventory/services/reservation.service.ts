@@ -138,6 +138,7 @@ export class ReservationService {
         reference_id: input.order_id ?? input.id,
       });
 
+      void forecast_index_service.enqueue("reindex_sku", { sku_id });
       const product_id = await sync_sku_stock_denormalized(reservation.sku_id, tx);
       if (product_id) await invalidate_product_stock_cache(product_id);
     });
