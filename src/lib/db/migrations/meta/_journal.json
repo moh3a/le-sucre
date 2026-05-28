@@ -29,6 +29,13 @@
       "when": 1779926219225,
       "tag": "0003_catalog_fulltext",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1779969451718,
+      "tag": "0004_greedy_earthquake",
+      "breakpoints": true
     }
   ]
 }

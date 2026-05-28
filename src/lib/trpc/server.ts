@@ -9,6 +9,9 @@ import { product_router } from "@/features/product_information_management/produc
 import { variants_router } from "@/features/product_information_management/variants/router";
 import { inventory_router } from "@/features/inventory_management_system/router";
 import { catalog_router } from "@/features/catalog_discovery/router";
+import { cart_router } from "@/features/order_management_system/carts/router";
+import { checkout_router } from "@/features/order_management_system/checkout/router";
+import { order_router } from "@/features/order_management_system/orders/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -18,6 +21,9 @@ export const app_router = create_trpc_router({
   variants: variants_router,
   inventory: inventory_router,
   catalog: catalog_router,
+  cart: cart_router,
+  checkout: checkout_router,
+  orders: order_router,
 });
 
 export type AppRouter = typeof app_router;
