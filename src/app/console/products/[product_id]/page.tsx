@@ -85,6 +85,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <h2 className="font-heading mb-4 text-lg font-semibold">{t("section_inventory")}</h2>
         <ProductInventoryPanel product_id={product_id} />
       </section>
+
+      {/* Integrate ProductRatingSummary + ProductReviewsList on product detail page. */}
+
     </div>
   );
 }

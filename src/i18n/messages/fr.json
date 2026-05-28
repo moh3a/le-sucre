@@ -146,6 +146,25 @@
     "apply": "Appliquer",
     "clear": "Effacer"
   },
+  "reviews": {
+    "title": "Avis clients",
+    "write_review": "Écrire un avis",
+    "rating": "Note",
+    "verified_purchase": "Achat vérifié",
+    "helpful": "Utile",
+    "report": "Signaler",
+    "pending_moderation": "Votre avis est en attente de modération",
+    "sort_newest": "Plus récents",
+    "sort_helpful": "Plus utiles",
+    "filter_verified": "Achats vérifiés uniquement",
+    "no_reviews": "Aucun avis pour le moment",
+    "average": "Moyenne",
+    "based_on": "Basé sur {count} avis",
+    "moderation_title": "Modération des avis",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "moderation_note": "Note de modération"
+  },
   "nav": {
     "catalog": "Catalogue",
     "categories": "Catégories",
