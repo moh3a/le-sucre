@@ -8,10 +8,17 @@ import * as auth_schema from "@/features/authentication_and_authorization/auth/s
 import * as pim_schema from "@/features/product_information_management/schema";
 import * as inventory_schema from "@/features/inventory_management_system/schema";
 import * as order_schema from "@/features/order_management_system/schema";
+import * as shipping_schema from "@/features/shipping_management_system/schema";
 
 const pool = mysql.createPool(env.DATABASE_URL);
 export const db = drizzle(pool, {
-  schema: { ...auth_schema, ...pim_schema, ...inventory_schema, ...order_schema },
+  schema: {
+    ...auth_schema,
+    ...pim_schema,
+    ...inventory_schema,
+    ...order_schema,
+    ...shipping_schema,
+  },
   mode: "default",
 });
 export type DbClient = typeof db;

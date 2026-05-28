@@ -36,6 +36,13 @@
       "when": 1779969451718,
       "tag": "0004_greedy_earthquake",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1779971007546,
+      "tag": "0005_gray_spot",
+      "breakpoints": true
     }
   ]
 }
