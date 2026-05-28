@@ -43,6 +43,13 @@
       "when": 1779971007546,
       "tag": "0005_gray_spot",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1780012355573,
+      "tag": "0006_mysterious_misty_knight",
+      "breakpoints": true
     }
   ]
 }
