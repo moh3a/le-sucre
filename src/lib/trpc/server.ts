@@ -12,6 +12,7 @@ import { catalog_router } from "@/features/catalog_discovery/router";
 import { cart_router } from "@/features/order_management_system/carts/router";
 import { checkout_router } from "@/features/order_management_system/checkout/router";
 import { order_router } from "@/features/order_management_system/orders/router";
+import { reviews_router } from "@/features/product_reviews_management/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -24,6 +25,7 @@ export const app_router = create_trpc_router({
   cart: cart_router,
   checkout: checkout_router,
   orders: order_router,
+  reviews: reviews_router
 });
 
 export type AppRouter = typeof app_router;

@@ -16,6 +16,8 @@ import {
 import { ProductRepository } from "../repositories/product.repository";
 import { product_media_service } from "./product_media.service";
 import { invalidate_catalog_cache } from "@/features/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { indexing_service } from "../../recommendations/services/indexing.service";
+import { invalidate_recommendations_for_product } from "../../recommendations/helpers/invalidate-recommendations.helper";
 
 const DEFAULT_LOCALE = "fr";
 
@@ -62,6 +64,7 @@ export class ProductService {
     });
 
     void invalidate_catalog_cache();
+    void invalidate_recommendations_for_product(id);
 
     return this.get_by_id(id);
   }
@@ -134,6 +137,8 @@ export class ProductService {
     }
 
     void invalidate_catalog_cache();
+    void invalidate_recommendations_for_product(input.id);
+    void indexing_service.enqueue("reindex_product", { product_id: input.id });
 
     return this.get_by_id(input.id);
   }
@@ -159,6 +164,7 @@ export class ProductService {
     await this.repo.delete(id);
 
     void invalidate_catalog_cache();
+    void invalidate_recommendations_for_product(id);
 
     return { ok: true };
   }

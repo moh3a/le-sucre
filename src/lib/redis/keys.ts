@@ -36,6 +36,19 @@ export const redisKeys = {
     ttl: 60 * 60, // 1 hour
   },
 
+  // ─── Recommendations ────────────────────────────────
+  recommendations: {
+    similar: (productId: string, locale: string) => `rec:similar:${productId}:${locale}`,
+    related: (productId: string, locale: string) => `rec:related:${productId}:${locale}`,
+    fbt: (productId: string, locale: string) => `rec:fbt:${productId}:${locale}`,
+    trending: (period: string, locale: string) => `rec:trending:${period}:${locale}`,
+    forYou: (userId: string, locale: string) => `rec:foryou:${userId}:${locale}`,
+    recent: (key: string) => `rec:recent:${key}`,
+    ttl: 600,
+    trendingTtl: 300,
+    recentTtl: 60 * 60 * 24 * 14,
+  },
+
   // ─── Cart ───────────────────────────────────────────
   cart: {
     byUserId: (userId: string) => `cart:user:${userId}`,
