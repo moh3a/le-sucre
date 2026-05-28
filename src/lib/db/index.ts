@@ -10,7 +10,14 @@ import * as inventory_schema from "@/features/inventory_management_system/schema
 import * as order_schema from "@/features/order_management_system/schema";
 import * as shipping_schema from "@/features/shipping_management_system/schema";
 
-const pool = mysql.createPool(env.DATABASE_URL);
+const pool = mysql.createPool({
+  uri: env.DATABASE_URL,
+  connectionLimit: 30,
+  waitForConnections: true,
+  queueLimit: 0,
+  enableKeepAlive: true,
+});
+
 export const db = drizzle(pool, {
   schema: {
     ...auth_schema,
@@ -21,4 +28,5 @@ export const db = drizzle(pool, {
   },
   mode: "default",
 });
+
 export type DbClient = typeof db;

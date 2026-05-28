@@ -8,8 +8,12 @@ const global_for_redis = globalThis as unknown as { redis?: Redis };
 
 function create_redis() {
   const client = new Redis(env.REDIS_URL, {
-    maxRetriesPerRequest: 2,
-    lazyConnect: true,
+    maxRetriesPerRequest: 3,
+    enableReadyCheck: true,
+    lazyConnect: false,
+    connectTimeout: 10_000,
+    retryStrategy: (times) => Math.min(times * 200, 5_000),
+    reconnectOnError: (err) => /READONLY|ETIMEDOUT|ECONNRESET/.test(err.message),
   });
   client.on("error", (err) => logger.error("redis_error", { message: err.message }));
   client.on("connect", () => logger.info("redis_connected"));

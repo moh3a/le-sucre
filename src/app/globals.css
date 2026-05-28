@@ -49,6 +49,12 @@
 }
 
 :root {
+  --ls-lemon-lime: #c8d152;
+  --ls-lemon-chiffon: #f9f7be;
+  --ls-olive-leaf: #4d4c20;
+  --ls-cream: #fff3e3;
+  --ls-crimson-violet: #700145;
+  
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);

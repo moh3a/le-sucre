@@ -1,6 +1,8 @@
 import "dotenv/config";
+
 import { shipping_job_runner_service } from "./services/shipping-job-runner.service";
 import logger from "@/lib/logger";
+
 export async function loop() {
   while (true) {
     try {

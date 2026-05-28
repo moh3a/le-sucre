@@ -1,0 +1,103 @@
+services:
+  app:
+    build: .
+    image: le-sucre-app:latest
+    restart: unless-stopped
+    env_file: .env.production
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/ready"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  worker-shipping:
+    image: le-sucre-app:latest
+    restart: unless-stopped
+    env_file: .env.production
+    command: ["node", "--import", "tsx", "src/lib/queue/workers/shipping.worker.ts"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker-reservations:
+    image: le-sucre-app:latest
+    restart: unless-stopped
+    env_file: .env.production
+    command: ["node", "--import", "tsx", "src/lib/queue/workers/reservation-expiry.worker.ts"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=2G
+      - --max-connections=500
+      - --slow-query-log=1
+      - --long-query-time=1
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./ops/mysql/conf.d:/etc/mysql/conf.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mysql-replica:
+    profiles: ["replica"]
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    command:
+      - --server-id=2
+      - --read-only=1
+      - --relay-log=relaylog
+    volumes:
+      - mysql_replica_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "1gb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mysql_data:
+  mysql_replica_data:
+  redis_data:
