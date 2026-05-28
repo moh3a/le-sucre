@@ -130,6 +130,22 @@
     "movements": "Historique des mouvements",
     "no_movements": "Aucun mouvement"
   },
+  "catalog": {
+    "search_placeholder": "Rechercher des produits…",
+    "filters": "Filtres",
+    "brands": "Marques",
+    "price": "Prix",
+    "in_stock": "En stock uniquement",
+    "sort": "Trier",
+    "sort_relevance": "Pertinence",
+    "sort_newest": "Nouveautés",
+    "sort_price_asc": "Prix croissant",
+    "sort_price_desc": "Prix décroissant",
+    "results": "{count} résultats",
+    "no_results": "Aucun produit trouvé",
+    "apply": "Appliquer",
+    "clear": "Effacer"
+  },
   "nav": {
     "catalog": "Catalogue",
     "categories": "Catégories",

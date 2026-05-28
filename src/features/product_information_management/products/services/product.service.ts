@@ -15,6 +15,7 @@ import {
 } from "../models/product.dto";
 import { ProductRepository } from "../repositories/product.repository";
 import { product_media_service } from "./product_media.service";
+import { invalidate_catalog_cache } from "@/features/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 
 const DEFAULT_LOCALE = "fr";
 
@@ -59,6 +60,8 @@ export class ProductService {
       seo_title: input.seo_title ?? null,
       seo_description: input.seo_description ?? null,
     });
+
+    void invalidate_catalog_cache();
 
     return this.get_by_id(id);
   }
@@ -130,6 +133,8 @@ export class ProductService {
       });
     }
 
+    void invalidate_catalog_cache();
+
     return this.get_by_id(input.id);
   }
 
@@ -152,6 +157,9 @@ export class ProductService {
     const current = await this.repo.find_by_id(id);
     if (!current) throw new NotFoundError("Produit introuvable");
     await this.repo.delete(id);
+
+    void invalidate_catalog_cache();
+
     return { ok: true };
   }
 

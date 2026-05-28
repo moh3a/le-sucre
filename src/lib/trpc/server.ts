@@ -8,6 +8,7 @@ import { category_router } from "@/features/product_information_management/categ
 import { product_router } from "@/features/product_information_management/products/router";
 import { variants_router } from "@/features/product_information_management/variants/router";
 import { inventory_router } from "@/features/inventory_management_system/router";
+import { catalog_router } from "@/features/catalog_discovery/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -16,6 +17,7 @@ export const app_router = create_trpc_router({
   products: product_router,
   variants: variants_router,
   inventory: inventory_router,
+  catalog: catalog_router,
 });
 
 export type AppRouter = typeof app_router;

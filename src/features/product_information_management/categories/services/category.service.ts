@@ -13,6 +13,7 @@ import type { CategoryTreeNode } from "@/features/product_information_management
 import { create_category_dto, update_category_dto } from "../models/category.dto";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
+import { invalidate_catalog_cache } from "@/features/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 
 export class CategoryService {
   constructor(
@@ -68,6 +69,8 @@ export class CategoryService {
     });
 
     await this.cache.invalidate_all();
+    void invalidate_catalog_cache();
+
     return this.repo.find_by_id(id);
   }
 
@@ -89,6 +92,8 @@ export class CategoryService {
 
     await this.cache.invalidate_category(input.id);
     await this.cache.invalidate_all();
+    void invalidate_catalog_cache();
+
     return this.repo.find_by_id(input.id);
   }
 
@@ -104,6 +109,8 @@ export class CategoryService {
     await this.tree.repath_subtree(node.path, new_path, depth_delta);
 
     await this.cache.invalidate_all();
+    void invalidate_catalog_cache();
+
     return this.repo.find_by_id(id);
   }
 
@@ -117,6 +124,8 @@ export class CategoryService {
 
     await this.repo.delete(id);
     await this.cache.invalidate_all();
+    void invalidate_catalog_cache();
+
     return { ok: true };
   }
 
