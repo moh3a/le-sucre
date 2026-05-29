@@ -80,4 +80,13 @@ export const redisKeys = {
     productViews: (productId: string) => `analytics:views:product:${productId}`,
     dailyRevenue: (date: string) => `analytics:revenue:${date}`,
   },
+
+  analyticsEvents: {
+    counter: (event: string, day: string) => `analytics:cnt:${event}:${day}`,
+    product: (productId: string, day: string) => `analytics:prod:${productId}:${day}`,
+    funnel: (step: string, day: string) => `analytics:funnel:${step}:${day}`,
+    realtime: () => `analytics:realtime:events`,
+    buffer: () => `analytics:buffer:events`,
+    ttl: 60 * 60 * 48,
+  },
 } as const;

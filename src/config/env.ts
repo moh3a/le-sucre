@@ -33,6 +33,10 @@ const env_schema = z
     RECOMMENDATION_PROVIDER: z.enum(["local"]).default("local"),
     FORECAST_PROVIDER: z.enum(["local"]).default("local"),
     PROMOTION_PROVIDER: z.enum(["local"]).default("local"),
+
+    ANALYTICS_PROVIDER: z.enum(["local"]).default("local"),
+    ANALYTICS_RAW_RETENTION_DAYS: z.coerce.number().int().min(7).default(90),
+    ANALYTICS_AGGREGATE_RETENTION_DAYS: z.coerce.number().int().min(30).default(730),
   })
   .superRefine((v, ctx) => {
     if (v.NODE_ENV === "production" && !v.BETTER_AUTH_SECRET) {

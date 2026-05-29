@@ -22,6 +22,7 @@ export const PERMISSIONS = {
   reviews_moderate: "reviews:moderate",
   promotions_read: "promotions:read",
   promotions_write: "promotions:write",
+  analytics_read: "analytics:read",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

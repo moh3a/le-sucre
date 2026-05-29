@@ -13,6 +13,7 @@ import type { add_cart_item_dto } from "./models/cart.dto";
 import { cart_repository } from "./repository";
 import { availability_service } from "../preorders/services/availability.service";
 import { preorder_allocation_service } from "../preorders/services/preorder-allocation.service";
+import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
 
 const RESERVE_TTL_SEC = 900;
 
@@ -121,6 +122,15 @@ export class CartService {
       reservation_id,
       preorder_allocation_id,
       fulfillment_type,
+    });
+
+    // [ ] example: track add_to_cart event
+    // [ ] TODO: implement in all relevant places
+    void event_ingestion_service.track({
+      event_type: "add_to_cart",
+      product_id: sku.product_id,
+      sku_id: sku.id,
+      quantity: input.quantity,
     });
 
     return this.get_cart_view(cart_id);

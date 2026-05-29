@@ -25,6 +25,7 @@ import { preorder_repository } from "../preorders/repositories/preorder.reposito
 import { promo_code_repository } from "../promotions/repositories/promo-code.repository";
 import { track_promotion_redemption } from "../promotions/analytics/promotion-analytics.hook";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -247,6 +248,19 @@ export class OrderService {
       action: "order.place_from_cart",
       resource_type: "cart_id",
       resource_id: input.cart_id,
+    });
+    
+    // [ ] example: track purchase event
+    // [ ] TODO: implement in all relevant places
+    void event_ingestion_service.track_purchase({
+      order_id,
+      user_id: input.user_id,
+      revenue: totals.grand_total,
+      lines: item_inserts.map((i) => ({
+        product_id: i.product_id,
+        sku_id: i.sku_id,
+        quantity: i.quantity,
+      })),
     });
 
     return this.repo.get_full(order_id);

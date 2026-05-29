@@ -2,6 +2,7 @@
 
 ## TODO
 
+- Implement data table
 - Add new pages for variants, inventory, users, authorization, global settings
 - each feature should have async/await function in its repositories, engines and services
 - each feature should have redis cache keys
