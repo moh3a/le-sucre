@@ -8,6 +8,7 @@ import { slugify_name } from "@/features/product_information_management/categori
 
 import type { create_brand_dto, update_brand_dto } from "../models/brand.dto";
 import { BrandRepository } from "../repositories/brand.repository";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class BrandService {
   constructor(private readonly repo = new BrandRepository()) {}
@@ -27,6 +28,11 @@ export class BrandService {
       logo_url: input.logo_url ?? null,
       is_active: input.is_active,
     });
+    void audit_service.log({
+      action: "brand.create",
+      resource_type: "brand_id",
+      resource_id: id,
+    });
     return this.repo.find_by_id(id);
   }
 
@@ -43,6 +49,11 @@ export class BrandService {
       ...(input.website_url !== undefined && { website_url: input.website_url }),
       ...(input.logo_url !== undefined && { logo_url: input.logo_url }),
       ...(input.is_active !== undefined && { is_active: input.is_active }),
+    });
+    void audit_service.log({
+      action: "brand.create",
+      resource_type: "brand_id",
+      resource_id: input.id,
     });
     return this.repo.find_by_id(input.id);
   }
@@ -65,6 +76,11 @@ export class BrandService {
     const brand = await this.repo.find_by_id(id);
     if (!brand) throw new NotFoundError("Marque introuvable");
     await this.repo.delete(id);
+    void audit_service.log({
+      action: "brand.create",
+      resource_type: "brand_id",
+      resource_id: id,
+    });
     return { ok: true };
   }
 }

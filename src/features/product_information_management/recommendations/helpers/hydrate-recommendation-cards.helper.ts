@@ -1,4 +1,4 @@
-import { search_repository } from "@/features/catalog_discovery/repositories/search.repository";
+import { search_repository } from "@/features/product_information_management/catalog_discovery/repositories/search.repository";
 import { RecommendationItem } from "../types";
 
 export async function hydrate_recommendation_cards(

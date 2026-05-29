@@ -13,7 +13,8 @@ import type { CategoryTreeNode } from "@/features/product_information_management
 import { create_category_dto, update_category_dto } from "../models/category.dto";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
-import { invalidate_catalog_cache } from "@/features/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class CategoryService {
   constructor(
@@ -71,6 +72,11 @@ export class CategoryService {
     await this.cache.invalidate_all();
     void invalidate_catalog_cache();
 
+    void audit_service.log({
+      action: "category.create",
+      resource_type: "category_id",
+      resource_id: id,
+    });
     return this.repo.find_by_id(id);
   }
 
@@ -94,6 +100,11 @@ export class CategoryService {
     await this.cache.invalidate_all();
     void invalidate_catalog_cache();
 
+    void audit_service.log({
+      action: "category.update",
+      resource_type: "category_id",
+      resource_id: input.id,
+    });
     return this.repo.find_by_id(input.id);
   }
 
@@ -126,6 +137,11 @@ export class CategoryService {
     await this.cache.invalidate_all();
     void invalidate_catalog_cache();
 
+    void audit_service.log({
+      action: "category.remove",
+      resource_type: "category_id",
+      resource_id: id,
+    });
     return { ok: true };
   }
 

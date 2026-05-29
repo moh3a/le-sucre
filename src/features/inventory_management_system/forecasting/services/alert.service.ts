@@ -3,6 +3,7 @@ import { generate_id } from "@/lib/utils";
 import { alert_repository } from "../repositories/alert.repository";
 import { trigger_inventory_notification } from "../notifications/inventory-notification.trigger";
 import { demand_forecast_service } from "./demand-forecast.service";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class AlertService {
   async evaluate_sku(sku_id: string, warehouse_id = "default") {
@@ -58,6 +59,12 @@ export class AlertService {
         await alert_repository.mark_notified(created.id);
       }
     }
+
+    void audit_service.log({
+      action: "forecasting.evaluate-sku",
+      resource_type: "sku_id",
+      resource_id: sku_id,
+    });
   }
 }
 export const alert_service = new AlertService();

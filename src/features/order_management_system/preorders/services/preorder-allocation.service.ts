@@ -6,6 +6,7 @@ import { ConflictError } from "@/lib/error_handling";
 import { preorder_allocations } from "../schema";
 import { preorder_repository } from "../repositories/preorder.repository";
 import { PREORDER_ALLOCATION_STATUS } from "../constants/preorder-status";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class PreorderAllocationService {
   async reserve_for_cart(input: {
@@ -34,6 +35,11 @@ export class PreorderAllocationService {
         cart_id: input.cart_id,
         status: PREORDER_ALLOCATION_STATUS.pending,
         estimated_available_at: input.estimated_available_at ?? settings.estimated_available_at,
+      });
+      void audit_service.log({
+        action: "preorder.reserve_for_cart",
+        resource_type: "sku_id",
+        resource_id: input.sku_id,
       });
       return { id };
     });

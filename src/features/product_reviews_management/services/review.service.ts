@@ -18,6 +18,7 @@ import {
   hash_text,
 } from "../engines/spam-guard.engine";
 import { createHash as createHashStable } from "node:crypto";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 function stable_list_hash(input: unknown) {
   return createHashStable("sha256").update(JSON.stringify(input)).digest("hex").slice(0, 16);
@@ -104,8 +105,9 @@ export class ReviewService {
 
     const content_hash = hash_text(`${input.title ?? ""}:${input.body}`);
 
+    const id = generate_id();
     await review_repository.create({
-      id: generate_id(),
+      id,
       product_id: input.product_id,
       user_id,
       order_id: purchase?.order_id ?? input.order_id ?? null,
@@ -120,6 +122,11 @@ export class ReviewService {
       ip_hash,
     });
 
+    void audit_service.log({
+      action: "review.create",
+      resource_type: "review_id",
+      resource_id: id,
+    });
     return { ok: true, status: REVIEW_STATUS.pending, is_verified_purchase: is_verified };
   }
 

@@ -4,11 +4,13 @@ import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
 import { AuthenticationError, ForbiddenError } from "@/lib/error_handling";
-import { ROLE_NAMES, type RoleName } from "@/features/authentication_and_authorization/authorization/constants/roles";
+import {
+  ROLE_NAMES,
+  type RoleName,
+} from "@/features/authentication_and_authorization/authorization/constants/roles";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { authorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
-
 import { user_repository } from "./repositories/user.repository";
 
 export class AuthService {

@@ -24,6 +24,7 @@ import { FULFILLMENT_TYPE, PREORDER_LINE_STATUS } from "../preorders/constants/p
 import { preorder_repository } from "../preorders/repositories/preorder.repository";
 import { promo_code_repository } from "../promotions/repositories/promo-code.repository";
 import { track_promotion_redemption } from "../promotions/analytics/promotion-analytics.hook";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -242,6 +243,11 @@ export class OrderService {
     }
 
     await db.update(carts).set({ status: "converted" }).where(eq(carts.id, input.cart_id));
+    void audit_service.log({
+      action: "order.place_from_cart",
+      resource_type: "cart_id",
+      resource_id: input.cart_id,
+    });
 
     return this.repo.get_full(order_id);
   }
@@ -297,6 +303,11 @@ export class OrderService {
       note: input.note ?? null,
     });
 
+    void audit_service.log({
+      action: "order.status.transition",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+    });
     return this.repo.get_full(input.order_id);
   }
 }

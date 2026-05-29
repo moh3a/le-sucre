@@ -1,5 +1,5 @@
 // types.ts
-import type { CatalogProductCard } from "@/features/catalog_discovery/types";
+import type { CatalogProductCard } from "@/features/product_information_management/catalog_discovery/types";
 
 export type ScoredCandidate = {
   product_id: string;

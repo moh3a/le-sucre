@@ -12,11 +12,11 @@ export class ForecastJobRunnerService {
         if (job.job_type === "rebuild_velocity") {
           await rebuild_velocity_from_orders(90);
         } else if (job.job_type === "reindex_sku") {
-          const sku_id = String(job.payload.sku_id);
+          const sku_id = String(job.payload?.sku_id);
           await demand_forecast_service.recompute_sku(sku_id);
           await alert_service.evaluate_sku(sku_id);
         } else if (job.job_type === "reindex_batch") {
-          const sku_ids = (job.payload.sku_ids as string[]) ?? [];
+          const sku_ids = (job.payload?.sku_ids as string[]) ?? [];
           for (const sku_id of sku_ids) {
             await demand_forecast_service.recompute_sku(sku_id);
             await alert_service.evaluate_sku(sku_id);

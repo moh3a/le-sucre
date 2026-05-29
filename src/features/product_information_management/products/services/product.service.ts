@@ -15,9 +15,10 @@ import {
 } from "../models/product.dto";
 import { ProductRepository } from "../repositories/product.repository";
 import { product_media_service } from "./product_media.service";
-import { invalidate_catalog_cache } from "@/features/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 import { indexing_service } from "../../recommendations/services/indexing.service";
 import { invalidate_recommendations_for_product } from "../../recommendations/helpers/invalidate-recommendations.helper";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 const DEFAULT_LOCALE = "fr";
 
@@ -65,7 +66,11 @@ export class ProductService {
 
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(id);
-
+    void audit_service.log({
+      action: "product.create",
+      resource_type: "product_id",
+      resource_id: id,
+    });
     return this.get_by_id(id);
   }
 
@@ -140,6 +145,11 @@ export class ProductService {
     void invalidate_recommendations_for_product(input.id);
     void indexing_service.enqueue("reindex_product", { product_id: input.id });
 
+    void audit_service.log({
+      action: "product.update",
+      resource_type: "product_id",
+      resource_id: input.id,
+    });
     return this.get_by_id(input.id);
   }
 
@@ -166,6 +176,11 @@ export class ProductService {
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(id);
 
+    void audit_service.log({
+      action: "product.remove",
+      resource_type: "product_id",
+      resource_id: id,
+    });
     return { ok: true };
   }
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import {

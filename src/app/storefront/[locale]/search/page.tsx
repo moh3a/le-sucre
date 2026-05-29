@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { CatalogSearchPageClient } from "@/features/catalog_discovery/components/catalog-search-page-client";
-import { parse_catalog_search_params } from "@/features/catalog_discovery/helpers/catalog-url.helper";
+import { CatalogSearchPageClient } from "@/features/product_information_management/catalog_discovery/components/catalog-search-page-client";
+import { parse_catalog_search_params } from "@/features/product_information_management/catalog_discovery/helpers/catalog-url.helper";
 
 type Props = {
   params: Promise<{ locale: string }>;

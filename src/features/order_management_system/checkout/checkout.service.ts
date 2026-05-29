@@ -51,8 +51,8 @@ export class CheckoutService {
     };
   }
 
-  place(input: z.infer<typeof place_order_dto> & { cart_id: string; user_id?: string | null }) {
-    return order_service.place_from_cart(input);
+  async place(input: z.infer<typeof place_order_dto> & { cart_id: string; user_id?: string | null }) {
+    return await order_service.place_from_cart(input);
   }
 }
 

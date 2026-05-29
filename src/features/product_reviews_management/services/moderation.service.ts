@@ -7,6 +7,7 @@ import { review_repository } from "../repositories/review.repository";
 import { review_cache_service } from "./review-cache.service";
 import { recompute_product_rating_aggregate } from "../engines/rating-aggregation.engine";
 import { REVIEW_STATUS } from "../constants/review-status";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class ModerationService {
   async moderate(actor_user_id: string, input: z.infer<typeof moderate_review_dto>) {
@@ -35,6 +36,11 @@ export class ModerationService {
     }
 
     await review_cache_service.invalidate_product(review.product_id);
+    void audit_service.log({
+      action: "review.moderate",
+      resource_type: "review_id",
+      resource_id: input.review_id,
+    });
     return review_repository.find_by_id(review.id);
   }
 

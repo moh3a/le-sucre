@@ -6,6 +6,7 @@ import { review_repository } from "../repositories/review.repository";
 import { product_reviews } from "../schema";
 import { REVIEW_STATUS } from "../constants/review-status";
 import { review_cache_service } from "./review-cache.service";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class HelpfulService {
   async vote(user_id: string, review_id: string) {
@@ -27,6 +28,11 @@ export class HelpfulService {
     }
 
     await review_cache_service.invalidate_product(review.product_id);
+    void audit_service.log({
+      action: "review.helpful.vote",
+      resource_type: "review_id",
+      resource_id: review_id,
+    });
     return { ok: true };
   }
 }

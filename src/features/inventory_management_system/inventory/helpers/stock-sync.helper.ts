@@ -7,7 +7,7 @@ import { redis } from "@/lib/redis";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { PRODUCT_CACHE } from "@/features/product_information_management/products/constants/cache-keys";
 import { inventory_levels } from "../schema";
-import { invalidate_catalog_cache } from "@/features/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 
 type Tx = Pick<DbClient, "select" | "update">;
 

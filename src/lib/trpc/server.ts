@@ -8,7 +8,7 @@ import { category_router } from "@/features/product_information_management/categ
 import { product_router } from "@/features/product_information_management/products/router";
 import { variants_router } from "@/features/product_information_management/variants/router";
 import { inventory_router } from "@/features/inventory_management_system/inventory/router";
-import { catalog_router } from "@/features/catalog_discovery/router";
+import { catalog_router } from "@/features/product_information_management/catalog_discovery/router";
 import { cart_router } from "@/features/order_management_system/carts/router";
 import { checkout_router } from "@/features/order_management_system/checkout/router";
 import { order_router } from "@/features/order_management_system/orders/router";

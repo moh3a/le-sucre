@@ -19,17 +19,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/constants";
 
 const navItems = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-  { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart, badge: null },
+  { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
   { href: "/admin/produits", label: "Produits", icon: Box },
   { href: "/admin/categories", label: "Catégories", icon: Grid3X3 },
   { href: "/admin/clients", label: "Clients", icon: Users },
@@ -56,19 +55,24 @@ export function AdminSidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          "relative flex h-screen flex-col border-r bg-brand-olive-leaf text-brand-lemon-chiffon transition-all duration-300",
+          "bg-brand-olive-leaf text-brand-lemon-chiffon relative flex h-screen flex-col border-r transition-all duration-300",
           collapsed ? "w-16" : "w-64",
         )}
       >
         {/* Logo */}
-        <div className={cn("flex h-16 items-center border-b border-brand-lemon-chiffon/10 px-4", collapsed && "justify-center")}>
+        <div
+          className={cn(
+            "border-brand-lemon-chiffon/10 flex h-16 items-center border-b px-4",
+            collapsed && "justify-center",
+          )}
+        >
           {!collapsed && (
-            <span className="font-heading text-lg font-bold text-brand-lemon-lime truncate">
+            <span className="font-heading text-brand-lemon-lime truncate text-lg font-bold">
               {siteConfig.name}
             </span>
           )}
           {collapsed && (
-            <span className="font-heading text-lg font-bold text-brand-lemon-lime">E</span>
+            <span className="font-heading text-brand-lemon-lime text-lg font-bold">E</span>
           )}
         </div>
 
@@ -78,7 +82,7 @@ export function AdminSidebar() {
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
-            "absolute -right-3 top-20 z-10 h-6 w-6 rounded-full border bg-background text-foreground shadow-md hover:bg-muted",
+            "bg-background text-foreground hover:bg-muted absolute top-20 -right-3 z-10 h-6 w-6 rounded-full border shadow-md",
           )}
         >
           <ChevronLeft className={cn("h-3 w-3 transition-transform", collapsed && "rotate-180")} />
@@ -104,11 +108,6 @@ export function AdminSidebar() {
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   {!collapsed && <span className="truncate">{item.label}</span>}
-                  {!collapsed && item.badge && (
-                    <Badge className="ml-auto bg-brand-crimson-violet text-white text-xs">
-                      {item.badge}
-                    </Badge>
-                  )}
                 </Link>
               );
 
@@ -125,16 +124,16 @@ export function AdminSidebar() {
         </ScrollArea>
 
         {/* Bottom nav */}
-        <div className="border-t border-brand-lemon-chiffon/10 py-4">
+        <div className="border-brand-lemon-chiffon/10 border-t py-4">
           <nav className="flex flex-col gap-1 px-2">
-            <Separator className="mb-2 bg-brand-lemon-chiffon/10" />
+            <Separator className="bg-brand-lemon-chiffon/10 mb-2" />
             {bottomItems.map((item) => {
               const Icon = item.icon;
               const linkContent = (
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-brand-lemon-chiffon/60 transition-colors hover:bg-brand-lemon-chiffon/10 hover:text-brand-lemon-chiffon",
+                    "text-brand-lemon-chiffon/60 hover:bg-brand-lemon-chiffon/10 hover:text-brand-lemon-chiffon flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     collapsed && "justify-center px-2",
                   )}
                 >

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Separator } from "@/components/ui/separator";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/constants";
 
 const footerLinks = {
   boutique: {
@@ -44,12 +44,12 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t bg-brand-olive-leaf text-brand-lemon-chiffon">
+    <footer className="bg-brand-olive-leaf text-brand-lemon-chiffon border-t">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {Object.values(footerLinks).map((section) => (
             <div key={section.title}>
-              <h3 className="font-heading mb-4 text-sm font-semibold uppercase tracking-wider text-brand-lemon-lime">
+              <h3 className="font-heading text-brand-lemon-lime mb-4 text-sm font-semibold tracking-wider uppercase">
                 {section.title}
               </h3>
               <ul className="space-y-2">
@@ -57,7 +57,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-brand-lemon-chiffon/70 transition-colors hover:text-brand-lemon-lime"
+                      className="text-brand-lemon-chiffon/70 hover:text-brand-lemon-lime text-sm transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -68,13 +68,11 @@ export function Footer() {
           ))}
         </div>
 
-        <Separator className="my-8 bg-brand-lemon-chiffon/20" />
+        <Separator className="bg-brand-lemon-chiffon/20 my-8" />
 
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="font-heading text-lg font-bold text-brand-lemon-lime">
-            {siteConfig.name}
-          </p>
-          <p className="text-sm text-brand-lemon-chiffon/60">
+          <p className="font-heading text-brand-lemon-lime text-lg font-bold">{siteConfig.name}</p>
+          <p className="text-brand-lemon-chiffon/60 text-sm">
             © {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.
           </p>
         </div>

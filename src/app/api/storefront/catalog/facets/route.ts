@@ -1,7 +1,7 @@
 import { json_ok, json_error } from "@/lib/http";
-import { catalog_facets_dto } from "@/features/catalog_discovery/models/search.dto";
-import { search_service } from "@/features/catalog_discovery/services/search.service";
-import { parse_catalog_search_params } from "@/features/catalog_discovery/helpers/catalog-url.helper";
+import { catalog_facets_dto } from "@/features/product_information_management/catalog_discovery/models/search.dto";
+import { search_service } from "@/features/product_information_management/catalog_discovery/services/search.service";
+import { parse_catalog_search_params } from "@/features/product_information_management/catalog_discovery/helpers/catalog-url.helper";
 
 export async function GET(req: Request) {
   try {

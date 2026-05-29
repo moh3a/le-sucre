@@ -6,6 +6,7 @@ import { forecast_cache_service } from "./forecast-cache.service";
 import { FORECAST_CACHE } from "../constants/cache-keys";
 import { inventory_repository } from "../../inventory/repositories/inventory.repository";
 import { inventory_forecast_snapshots } from "../schema";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class DemandForecastService {
   async get_sku_forecast(sku_id: string, warehouse_id = "default") {
@@ -48,6 +49,11 @@ export class DemandForecastService {
     });
 
     await forecast_cache_service.set(FORECAST_CACHE.sku(sku_id, warehouse_id), saved, 900);
+    void audit_service.log({
+      action: "forecasting.demand-forecast.recompute_sku",
+      resource_type: "sku_id",
+      resource_id: sku_id,
+    });
     return saved;
   }
 }

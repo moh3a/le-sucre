@@ -14,6 +14,8 @@ import {
   invalidate_product_stock_cache,
   sync_sku_stock_denormalized,
 } from "../helpers/stock-sync.helper";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
 
 export class ReservationService {
   constructor(private readonly repo = inventory_repository) {}
@@ -58,6 +60,11 @@ export class ReservationService {
       return id;
     });
 
+    void audit_service.log({
+      action: "inventory.reservation.create",
+      resource_type: "sku_id",
+      resource_id: input.sku_id,
+    });
     return { id: reservation_id, expires_at };
   }
 
@@ -92,6 +99,11 @@ export class ReservationService {
         reference_id: reservation_id,
       });
 
+      void audit_service.log({
+        action: "inventory.reservation.release",
+        resource_type: "reservation_id",
+        resource_id: reservation_id,
+      });
       const product_id = await sync_sku_stock_denormalized(reservation.sku_id, tx);
       if (product_id) await invalidate_product_stock_cache(product_id);
     });
@@ -138,7 +150,12 @@ export class ReservationService {
         reference_id: input.order_id ?? input.id,
       });
 
-      void forecast_index_service.enqueue("reindex_sku", { sku_id });
+      void forecast_index_service.enqueue("reindex_sku", { sku_id: reservation.sku_id });
+      void audit_service.log({
+        action: "inventory.reservation.commit",
+        resource_type: "reservation_id",
+        resource_id: reservation.id,
+      });
       const product_id = await sync_sku_stock_denormalized(reservation.sku_id, tx);
       if (product_id) await invalidate_product_stock_cache(product_id);
     });

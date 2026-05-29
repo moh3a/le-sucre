@@ -9,6 +9,7 @@ import type { report_review_dto } from "../models/review.dto";
 import { review_repository } from "../repositories/review.repository";
 import { product_reviews } from "../schema";
 import { db } from "@/lib/db";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class ReportService {
   async report(user_id: string, input: z.infer<typeof report_review_dto>) {
@@ -34,6 +35,11 @@ export class ReportService {
       throw new ConflictError("Signalement déjà envoyé");
     }
 
+    void audit_service.log({
+      action: "review.report",
+      resource_type: "review_id",
+      resource_id: input.review_id,
+    });
     return { ok: true };
   }
 }

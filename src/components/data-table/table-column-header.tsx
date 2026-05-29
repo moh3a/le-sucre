@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDown, EyeOff } from "lucide-react";
 import { type Column } from "@tanstack/react-table";
 

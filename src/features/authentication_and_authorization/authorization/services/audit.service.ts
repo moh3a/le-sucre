@@ -3,6 +3,7 @@ import "server-only";
 import { logger } from "@/lib/logger";
 
 import { AuditRepository } from "../repositories/audit.repository";
+import { auth_service } from "../../auth/service";
 
 export class AuditService {
   constructor(private readonly repo = new AuditRepository()) {}
@@ -16,9 +17,14 @@ export class AuditService {
     ip_address?: string;
     user_agent?: string;
   }) {
+    let default_user_id = input.actor_user_id;
+    if (!default_user_id) {
+      const session = await auth_service.get_session();
+      default_user_id = session.user.id;
+    }
     try {
       await this.repo.insert({
-        actor_user_id: input.actor_user_id ?? null,
+        actor_user_id: default_user_id,
         action: input.action,
         resource_type: input.resource_type ?? null,
         resource_id: input.resource_id ?? null,

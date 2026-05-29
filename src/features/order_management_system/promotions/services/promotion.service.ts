@@ -15,6 +15,7 @@ import type {
   create_bundle_dto,
   list_promotions_dto,
 } from "../models/promotion.dto";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 
 export class PromotionService {
   list(input: z.infer<typeof list_promotions_dto>) {
@@ -48,6 +49,11 @@ export class PromotionService {
       })),
     });
     await invalidate_promotion_cache();
+    void audit_service.log({
+      action: "promotion.create",
+      resource_type: "promotion_id",
+      resource_id: created?.id,
+    });
     return created;
   }
 
@@ -81,6 +87,11 @@ export class PromotionService {
     });
 
     await invalidate_promotion_cache();
+    void audit_service.log({
+      action: "promotion.update",
+      resource_type: "promotion_id",
+      resource_id: updated?.id,
+    });
     return updated;
   }
 
@@ -99,6 +110,11 @@ export class PromotionService {
     });
 
     await invalidate_promotion_cache();
+    void audit_service.log({
+      action: "promotion.promo_code.create",
+      resource_type: "promo_code_id",
+      resource_id: row.id,
+    });
     return row;
   }
 
@@ -123,6 +139,11 @@ export class PromotionService {
     await promotion_scheduler_service.schedule_flash_activation(sale!.id, input.starts_at);
     await promotion_scheduler_service.schedule_flash_deactivation(sale!.id, input.ends_at);
     await invalidate_promotion_cache();
+    void audit_service.log({
+      action: "promotion.flash_sale.create",
+      resource_type: "flash_sale_id",
+      resource_id: sale.id,
+    });
     return sale;
   }
 
@@ -142,6 +163,11 @@ export class PromotionService {
     });
 
     await invalidate_promotion_cache();
+    void audit_service.log({
+      action: "promotion.bundle.create",
+      resource_type: "bundle_id",
+      resource_id: bundle.id,
+    });
     return bundle;
   }
 }

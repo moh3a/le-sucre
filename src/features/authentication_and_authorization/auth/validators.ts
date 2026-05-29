@@ -2,11 +2,7 @@ import type { z } from "zod";
 
 import { ValidationError } from "@/lib/error_handling";
 
-import {
-  assign_role_dto,
-  login_dto,
-  register_dto,
-} from "./models/auth.dto";
+import { assign_role_dto, login_dto, register_dto } from "./models/auth.dto";
 
 function zod_field_errors(error: z.ZodError): Record<string, unknown> {
   return { fields: error.flatten().fieldErrors };

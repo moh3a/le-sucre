@@ -1,5 +1,5 @@
 import "server-only";
-import { search_repository } from "@/features/catalog_discovery/repositories/search.repository";
+import { search_repository } from "@/features/product_information_management/catalog_discovery/repositories/search.repository";
 import { get_recommendation_provider } from "../providers/provider-registry";
 import type { RecommendationContext, RecommendationItem } from "../types";
 import { recommendation_cache_service } from "./recommendation-cache.service";
