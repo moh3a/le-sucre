@@ -20,6 +20,8 @@ export const PERMISSIONS = {
   inventory_forecast_write: "inventory:forecast:write",
   reviews_read: "reviews:read",
   reviews_moderate: "reviews:moderate",
+  promotions_read: "promotions:read",
+  promotions_write: "promotions:write",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

@@ -15,6 +15,7 @@ import { order_router } from "@/features/order_management_system/orders/router";
 import { reviews_router } from "@/features/product_reviews_management/router";
 import { forecast_router } from "@/features/inventory_management_system/forecasting/router";
 import { preorder_router } from "@/features/order_management_system/preorders/router";
+import { promotion_router } from "@/features/order_management_system/promotions/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -30,6 +31,7 @@ export const app_router = create_trpc_router({
   checkout: checkout_router,
   orders: order_router,
   preorders: preorder_router,
+  promotions: promotion_router,
 });
 
 export type AppRouter = typeof app_router;

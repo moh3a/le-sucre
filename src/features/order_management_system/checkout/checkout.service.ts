@@ -40,6 +40,7 @@ export class CheckoutService {
       discount_code: input.discount_code,
       shipping_cost: input.shipping_cost ?? 0,
       tax_rate: input.tax_rate,
+      user_id: input.user_id ?? null,
     });
 
     return {

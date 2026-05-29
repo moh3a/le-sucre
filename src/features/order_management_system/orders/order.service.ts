@@ -22,6 +22,8 @@ import type {
 import { preorder_allocation_service } from "../preorders/services/preorder-allocation.service";
 import { FULFILLMENT_TYPE, PREORDER_LINE_STATUS } from "../preorders/constants/preorder-status";
 import { preorder_repository } from "../preorders/repositories/preorder.repository";
+import { promo_code_repository } from "../promotions/repositories/promo-code.repository";
+import { track_promotion_redemption } from "../promotions/analytics/promotion-analytics.hook";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -202,6 +204,20 @@ export class OrderService {
       ({ _deposit_percent, _confirm_allocation, ...row }) => row,
     );
     await this.repo.insert_items(normalized_items);
+
+    if (input.discount_code) {
+      const code_row = await promo_code_repository.find_by_code(input.discount_code);
+      if (code_row) {
+        await promo_code_repository.increment_usage(code_row.id);
+        await track_promotion_redemption({
+          promotion_id: code_row.promotion_id,
+          promo_code_id: code_row.id,
+          order_id,
+          user_id: input.user_id ?? null,
+          discount_amount: totals.discount_total,
+        });
+      }
+    }
 
     let has_deposit_lines = false;
     for (const raw of item_inserts) {
