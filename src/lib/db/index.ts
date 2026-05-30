@@ -9,6 +9,8 @@ import * as pim_schema from "@/features/product_information_management/schema";
 import * as inventory_schema from "@/features/inventory_management_system/inventory/schema";
 import * as order_schema from "@/features/order_management_system/schema";
 import * as shipping_schema from "@/features/shipping_management_system/schema";
+import * as analytics_schema from "@/features/analytics_management_system/schema";
+import * as reviews_schema from "@/features/product_reviews_management/schema";
 
 const pool = mysql.createPool({
   uri: env.DATABASE_URL,
@@ -25,6 +27,8 @@ export const db = drizzle(pool, {
     ...inventory_schema,
     ...order_schema,
     ...shipping_schema,
+    ...analytics_schema,
+    ...reviews_schema,
   },
   mode: "default",
 });
