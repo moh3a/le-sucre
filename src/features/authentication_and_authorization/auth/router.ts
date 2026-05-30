@@ -8,6 +8,8 @@ import { PERMISSIONS } from "@/features/authentication_and_authorization/authori
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { assign_role_dto } from "@/features/authentication_and_authorization/auth/models/auth.dto";
+import z from "zod";
+import { user_repository } from "./repositories/user.repository";
 
 export const auth_router = create_trpc_router({
   me: protected_procedure.query(async ({ ctx }) => {
@@ -30,5 +32,12 @@ export const admin_auth_router = create_trpc_router({
       });
       return { ok: true };
     }),
-  // TODO  listUsers: permission_procedure(PERMISSIONS.users_read).query(/* paginated */),
+  listUsers: permission_procedure(PERMISSIONS.users_read)
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(20),
+      }),
+    )
+    .query(({ input }) => user_repository.list_paginated(input.page, input.limit)),
 });

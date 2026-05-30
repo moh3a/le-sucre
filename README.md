@@ -8,6 +8,7 @@
 - each feature should have redis cache keys
 - admin should only fetch from trpc
 - all schema IDs should be varchar 255
+- Storefront: use https://www.abui.io/components/label-selector for variant selection
 
 ## Features to implement
 

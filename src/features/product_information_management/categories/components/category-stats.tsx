@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { Stat, StatDescription, StatIndicator, StatLabel, StatValue } from "@/components/ui/stat";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 export function CategoryStats() {
   const t = useTranslations("categories");
@@ -68,17 +69,21 @@ export function CategoryStats() {
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => (
-        <Stat key={stat.label}>
-          <StatLabel>{stat.label}</StatLabel>
-          <StatValue>{stat.value}</StatValue>
-          <StatIndicator variant="icon" color={stat.color}>
-            <stat.icon />
-          </StatIndicator>
-          <StatDescription>{stat.description}</StatDescription>
-        </Stat>
-      ))}
-    </div>
+    <Carousel>
+      <CarouselContent>
+        {stats.map((stat) => (
+          <CarouselItem key={stat.label} className="lg:basis-[22%]">
+            <Stat>
+              <StatLabel>{stat.label}</StatLabel>
+              <StatValue>{stat.value}</StatValue>
+              <StatIndicator variant="icon" color={stat.color}>
+                <stat.icon />
+              </StatIndicator>
+              <StatDescription>{stat.description}</StatDescription>
+            </Stat>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 }

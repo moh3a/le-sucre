@@ -14,6 +14,12 @@ import {
   ClipboardList,
   ShoppingCart,
   Truck,
+  MessageCircleCheck,
+  Banknote,
+  Warehouse,
+  TrendingUpDown,
+  ChartArea,
+  Gauge,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -44,27 +50,45 @@ export function AppSidebar() {
   const pathname = usePathname();
   const t = useTranslations("nav");
 
-  const catalog_items = [
-    { title: t("categories"), url: "/console/categories", icon: FolderTree },
-    { title: t("products"), url: "/console/products", icon: Package },
-    { title: "Variantes", url: "/console/variants", icon: Blend },
-  ];
-
-  const order_items = [
-    { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
-    { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
-    { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
-    { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
-    { title: "Livraisons", url: "/console/shipping", icon: Truck },
-  ];
-
-  // TODO copypaste ssadmin sidebar
-  // TODO add inventory, reviews, analytics
-
-  const user_items = [
-    { title: "Utilisateurs", url: "/console/users", icon: UsersRound },
-    { title: "Autorizations", url: "/console/authorization", icon: ShieldCog },
-    { title: "Audit", url: "/console/audit-logs", icon: ScrollText },
+  const nav = [
+    {
+      title: t("catalog"),
+      icon: Package,
+      items: [
+        { title: t("categories"), url: "/console/categories", icon: FolderTree },
+        { title: t("products"), url: "/console/products", icon: Package },
+        { title: "Variantes", url: "/console/variants", icon: Blend },
+        { title: "Avis", url: "/console/reviews", icon: MessageCircleCheck },
+      ],
+    },
+    {
+      title: "Stock",
+      icon: Warehouse,
+      items: [
+        { title: "Inventaire", url: "/console/inventory", icon: Warehouse },
+        { title: "Forecasting", url: "/console/inventory/forecast", icon: TrendingUpDown },
+      ],
+    },
+    {
+      title: "eCommerce",
+      icon: Banknote,
+      items: [
+        { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
+        { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
+        { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
+        { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
+        { title: "Livraisons", url: "/console/shipping", icon: Truck },
+      ],
+    },
+    {
+      title: "Auth",
+      icon: KeyRound,
+      items: [
+        { title: "Utilisateurs", url: "/console/users", icon: UsersRound },
+        { title: "Autorizations", url: "/console/authorization", icon: ShieldCog },
+        { title: "Audit", url: "/console/audit-logs", icon: ScrollText },
+      ],
+    },
   ];
 
   return (
@@ -75,83 +99,50 @@ export function AppSidebar() {
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>{t("catalog")}</SidebarGroupLabel>
+            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarMenu>
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={t("catalog")}>
-                      <Package />
-                      <span>{t("catalog")}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {catalog_items.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
-                            <Link href={item.url}>
-                              <item.icon className="size-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="eCommerce">
-                      <KeyRound />
-                      <span>eCommerce</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {order_items.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
-                            <Link href={item.url}>
-                              <item.icon className="size-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Auth">
-                      <KeyRound />
-                      <span>Auth</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {user_items.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
-                            <Link href={item.url}>
-                              <item.icon className="size-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+              <Link href="/console">
+                <SidebarMenuButton tooltip="Tableau de bord" isActive={pathname === "/console"}>
+                  <Gauge className="size-4" />
+                  <span>Tableau de bord</span>
+                </SidebarMenuButton>
+              </Link>
+              <Link href="/console/analytics">
+                <SidebarMenuButton
+                  tooltip="Analytics"
+                  isActive={pathname.startsWith("/console/analytics")}
+                >
+                  <ChartArea className="size-4" />
+                  <span>Analytics</span>
+                </SidebarMenuButton>
+              </Link>
+              {nav.map(({ icon: Icon, ...section }) => (
+                <Collapsible key={section.title} defaultOpen className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={section.title}>
+                        <Icon />
+                        <span>{section.title}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {section.items.map((item) => (
+                          <SidebarMenuSubItem key={item.url}>
+                            <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
+                              <Link href={item.url}>
+                                <item.icon className="size-4" />
+                                <span>{item.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ))}
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
