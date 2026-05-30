@@ -1,18 +1,22 @@
 "use client";
+
 import { trpc } from "@/components/providers/app-providers";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 import type { CategoryTreeNode } from "../types";
 
 function Node({ node, depth }: { node: CategoryTreeNode; depth: number }) {
   return (
-    <li>
-      <Link href={`/console/categories/${node.id}/edit`} style={{ paddingLeft: depth * 12 }}>
+    <div>
+      <span
+        className={cn("block rounded-md px-2 py-1 text-sm", !node.is_active && "opacity-50")}
+        style={{ paddingLeft: depth * 12 + 8 }}
+      >
         {node.name}
-      </Link>
+      </span>
       {node.children.map((child) => (
         <Node key={child.id} node={child} depth={depth + 1} />
       ))}
-    </li>
+    </div>
   );
 }
 

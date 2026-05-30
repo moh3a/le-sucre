@@ -1,44 +1,323 @@
 "use client";
 
-import Link from "next/link";
+import type { ColumnDef } from "@tanstack/react-table";
+import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import {
+  Calendar,
+  Hash,
+  MoreHorizontal,
+  Pencil,
+  Text,
+  ToggleLeft,
+  Trash2,
+} from "lucide-react";
+import * as React from "react";
 import { useTranslations } from "next-intl";
 
+import { DataTable } from "@/components/data-table/data-table";
+import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
+import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { trpc } from "@/components/providers/app-providers";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CategoryFormDialog } from "@/features/product_information_management/categories/components/category-form-dialog";
+import type { CategoryRecord } from "@/features/product_information_management/categories/types";
+import { useDataTable } from "@/hooks/use-data-table";
+import { formatDate } from "@/lib/format";
+
+function CategoryRowActions({
+  category,
+  on_edit,
+}: {
+  category: CategoryRecord;
+  on_edit: (id: string) => void;
+}) {
+  const t = useTranslations("categories");
+  const utils = trpc.useUtils();
+
+  const delete_mutation = trpc.categories.delete.useMutation({
+    onSuccess: async () => {
+      await utils.categories.list.invalidate();
+      await utils.categories.tree.invalidate();
+    },
+  });
+
+  async function on_delete() {
+    if (!window.confirm(t("delete_confirm", { name: category.name }))) return;
+    await delete_mutation.mutateAsync({ id: category.id });
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-8">
+          <MoreHorizontal className="size-4" />
+          <span className="sr-only">{t("actions")}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => on_edit(category.id)}>
+          <Pencil />
+          {t("edit")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          disabled={delete_mutation.isPending}
+          onClick={() => void on_delete()}
+        >
+          <Trash2 />
+          {t("delete")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function CategoryTable() {
   const t = useTranslations("categories");
-  const { data, isLoading } = trpc.categories.list.useQuery({ page: 1, limit: 100 });
+  const [edit_id, set_edit_id] = React.useState<string | null>(null);
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">…</p>;
-  if (!data?.items.length) return <p className="text-muted-foreground text-sm">{t("empty")}</p>;
+  const { data: tree } = trpc.categories.tree.useQuery();
+
+  const parent_name_by_id = React.useMemo(() => {
+    const map = new Map<string, string>();
+    if (!tree) return map;
+
+    function walk(nodes: typeof tree) {
+      for (const node of nodes) {
+        map.set(node.id, node.name);
+        if (node.children?.length) walk(node.children);
+      }
+    }
+
+    walk(tree);
+    return map;
+  }, [tree]);
+
+  const columns = React.useMemo<ColumnDef<CategoryRecord>[]>(
+    () => [
+      {
+        id: "name",
+        accessorKey: "name",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("name")} />
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium">{row.getValue("name")}</span>
+        ),
+        meta: {
+          label: t("name"),
+          placeholder: t("search_name"),
+          variant: "text",
+          icon: Text,
+        },
+        enableColumnFilter: true,
+        enableSorting: false,
+      },
+      {
+        id: "slug",
+        accessorKey: "slug",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("slug")} />
+        ),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground font-mono text-xs">{row.getValue("slug")}</span>
+        ),
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
+        id: "parent",
+        accessorFn: (row) =>
+          row.parent_id ? (parent_name_by_id.get(row.parent_id) ?? "—") : "—",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("parent")} />
+        ),
+        cell: ({ row }) => row.getValue("parent"),
+        enableSorting: false,
+      },
+      {
+        id: "description",
+        accessorKey: "description",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("description")} />
+        ),
+        cell: ({ row }) => {
+          const value = row.getValue("description") as string | null;
+          if (!value) return <span className="text-muted-foreground">—</span>;
+          return (
+            <span className="text-muted-foreground line-clamp-1 max-w-[200px] text-sm">
+              {value}
+            </span>
+          );
+        },
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
+        id: "depth",
+        accessorKey: "depth",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("depth")} />
+        ),
+        cell: ({ row }) => row.getValue("depth"),
+        meta: { label: t("depth"), icon: Hash },
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
+        id: "sort_order",
+        accessorKey: "sort_order",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("sort_order")} />
+        ),
+        cell: ({ row }) => row.getValue("sort_order"),
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
+        id: "is_active",
+        accessorKey: "is_active",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("active")} />
+        ),
+        cell: ({ row }) => {
+          const active = row.getValue("is_active") as boolean;
+          return (
+            <Badge variant={active ? "default" : "secondary"}>
+              {active ? t("status_active") : t("status_inactive")}
+            </Badge>
+          );
+        },
+        meta: {
+          label: t("active"),
+          variant: "select",
+          icon: ToggleLeft,
+          options: [
+            { label: t("status_active"), value: "true" },
+            { label: t("status_inactive"), value: "false" },
+          ],
+        },
+        enableColumnFilter: true,
+        enableSorting: false,
+      },
+      {
+        id: "created_at",
+        accessorKey: "created_at",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("created_at")} />
+        ),
+        cell: ({ row }) =>
+          formatDate(row.getValue("created_at"), {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        meta: { label: t("created_at"), icon: Calendar },
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
+        id: "updated_at",
+        accessorKey: "updated_at",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("updated_at")} />
+        ),
+        cell: ({ row }) =>
+          formatDate(row.getValue("updated_at"), {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
+        id: "actions",
+        cell: ({ row }) => (
+          <CategoryRowActions category={row.original} on_edit={set_edit_id} />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
+    ],
+    [parent_name_by_id, t],
+  );
+
+  const [page] = useQueryState("catPage", parseAsInteger.withDefault(1));
+  const [per_page] = useQueryState("catPerPage", parseAsInteger.withDefault(10));
+  const [name_filter] = useQueryState("name", parseAsString);
+  const [active_filter] = useQueryState("is_active", parseAsArrayOf(parseAsString, ","));
+
+  const search = name_filter?.trim() || undefined;
+  const active_value = active_filter?.[0];
+  const is_active =
+    active_value === "true" ? true : active_value === "false" ? false : undefined;
+
+  const { data, isLoading, isFetching } = trpc.categories.list.useQuery({
+    page,
+    limit: per_page,
+    search,
+    is_active,
+  });
+
+  const items = data?.items ?? [];
+  const page_count = data?.meta.total_pages ?? 0;
+
+  const { table } = useDataTable({
+    data: items,
+    columns,
+    pageCount: page_count,
+    queryKeys: {
+      page: "catPage",
+      perPage: "catPerPage",
+      sort: "catSort",
+    },
+    initialState: {
+      pagination: { pageSize: 10 },
+      columnVisibility: {
+        description: false,
+        depth: false,
+        updated_at: false,
+      },
+    },
+    getRowId: (row) => row.id,
+  });
+
+  if (isLoading && !data) {
+    return <DataTableSkeleton columnCount={columns.length} rowCount={10} filterCount={2} />;
+  }
 
   return (
-    <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/50 text-left">
-          <tr>
-            <th className="px-4 py-3">{t("name")}</th>
-            <th className="px-4 py-3">{t("slug")}</th>
-            <th className="px-4 py-3">{t("active")}</th>
-            <th className="px-4 py-3" />
-          </tr>
-        </thead>
-        <tbody>
-          {data.items.map((c) => (
-            <tr key={c.id} className="border-t">
-              <td className="px-4 py-3 font-medium">{c.name}</td>
-              <td className="text-muted-foreground px-4 py-3">{c.slug}</td>
-              <td className="px-4 py-3">{c.is_active ? "✓" : "—"}</td>
-              <td className="px-4 py-3 text-right">
-                <Button size="sm" variant="ghost" asChild>
-                  <Link href={`/console/categories/${c.id}/edit`}>Edit</Link>
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <DataTable table={table}>
+        <DataTableToolbar table={table}>
+          <DataTableSortList table={table} />
+        </DataTableToolbar>
+      </DataTable>
+
+      {isFetching && !isLoading ? (
+        <p className="text-muted-foreground text-xs">{t("refreshing")}</p>
+      ) : null}
+
+      <CategoryFormDialog
+        mode="edit"
+        category_id={edit_id ?? undefined}
+        open={!!edit_id}
+        onOpenChange={(open) => {
+          if (!open) set_edit_id(null);
+        }}
+      />
+    </>
   );
 }

@@ -12,7 +12,7 @@ import * as shipping_schema from "@/features/shipping_management_system/schema";
 
 const pool = mysql.createPool({
   uri: env.DATABASE_URL,
-  connectionLimit: 30,
+  // connectionLimit: 30,
   waitForConnections: true,
   queueLimit: 0,
   enableKeepAlive: true,
