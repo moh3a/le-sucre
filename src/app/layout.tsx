@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans, Noto_Serif } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,9 @@ export default async function RootLayout({
     >
       <body className="min-h-full">
         <NextIntlClientProvider messages={messages}>
-          <AppProviders>{children}</AppProviders>
+          <NuqsAdapter>
+            <AppProviders>{children}</AppProviders>
+          </NuqsAdapter>
         </NextIntlClientProvider>
       </body>
     </html>
