@@ -21,6 +21,7 @@ type ForecastRow = {
   risk_level: string | null;
 };
 
+// TODO Extend columns: current_stock, reserved_stock, days_until_stockout, recommended_reorder_qty.
 export function InventoryForecastTable() {
   const columns = React.useMemo<ColumnDef<ForecastRow>[]>(
     () => [

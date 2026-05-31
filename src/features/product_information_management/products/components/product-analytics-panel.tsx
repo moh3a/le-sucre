@@ -7,7 +7,7 @@ import { AnalyticsLineChart } from "@/features/analytics_management_system/compo
 export function ProductAnalyticsPanel({ product_id }: { product_id: string }) {
   const range = useMemo(() => {
     const to = new Date().toISOString().slice(0, 10);
-    const from = new Date(new Date() - 30 * 86400000).toISOString().slice(0, 10);
+    const from = new Date(+new Date() - 30 * 86400000).toISOString().slice(0, 10);
     return { from, to };
   }, []);
 

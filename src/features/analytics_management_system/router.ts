@@ -9,6 +9,7 @@ import {
   date_range_dto,
   product_analytics_query_dto,
 } from "./models/analytics.dto";
+import z from "zod";
 
 export const analytics_router = create_trpc_router({
   track: public_procedure.input(ingest_event_dto).mutation(({ input, ctx }) =>
@@ -31,6 +32,11 @@ export const analytics_router = create_trpc_router({
   products: permission_procedure(PERMISSIONS.analytics_read)
     .input(product_analytics_query_dto)
     .query(({ input }) => analytics_query_service.products(input)),
+
+  // TODO: implement analytics per product: analytics_product_daily
+  productDetail: permission_procedure(PERMISSIONS.analytics_read)
+    .input(product_analytics_query_dto.and(z.object({ product_id: z.string() })))
+    .query(({ input }) => analytics_query_service.productDetail(input)),
 
   realtime: permission_procedure(PERMISSIONS.analytics_read).query(() =>
     analytics_query_service.realtime(),

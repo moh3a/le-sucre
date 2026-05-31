@@ -56,4 +56,11 @@ export const inventory_router = create_trpc_router({
   expireStaleReservations: permission_procedure(PERMISSIONS.inventory_write).mutation(() =>
     reservation_service.expire_stale(),
   ),
+
+  adminDashboard: permission_procedure(PERMISSIONS.inventory_read).query(async () => ({
+    total_stock_value: await inventory_admin_repository.stock_value(),
+    out_of_stock: await inventory_admin_repository.count_out_of_stock(),
+    low_stock: await inventory_admin_repository.count_low_stock(),
+    forecast_shortages: await forecast_repository.count_high_risk(),
+  })),
 });

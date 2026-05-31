@@ -7,8 +7,9 @@ import { db } from "@/lib/db";
 import { NotFoundError, ValidationError } from "@/lib/error_handling";
 import { carts, cart_items } from "../schema";
 import { checkout_engine } from "./checkout.engine";
-import { order_service } from "../orders/order.service";
+import { order_service } from "../orders/services/order.service";
 import type { checkout_preview_dto, place_order_dto } from "../orders/models/order.dto";
+import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
 
 export class CheckoutService {
   async preview(
@@ -43,6 +44,12 @@ export class CheckoutService {
       user_id: input.user_id ?? null,
     });
 
+    event_ingestion_service.track({
+      event_type: "checkout_started",
+      cart_id: input.cart_id,
+      user_id: input.user_id,
+    });
+
     return {
       cart_id: input.cart_id,
       currency: cart.currency,
@@ -51,7 +58,9 @@ export class CheckoutService {
     };
   }
 
-  async place(input: z.infer<typeof place_order_dto> & { cart_id: string; user_id?: string | null }) {
+  async place(
+    input: z.infer<typeof place_order_dto> & { cart_id: string; user_id?: string | null },
+  ) {
     return await order_service.place_from_cart(input);
   }
 }

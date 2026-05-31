@@ -24,6 +24,7 @@ type OrderRow = {
   created_at: string;
 };
 
+// TODO Extend columns: customer_name, phone, email, fulfillment_status, link to /console/orders/[order_id]
 export function OrderTable({ compact = false }: { compact?: boolean }) {
   const columns = React.useMemo<ColumnDef<OrderRow>[]>(
     () => [

@@ -6,8 +6,9 @@ import {
   storefront_procedure,
 } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
-import { order_service } from "./order.service";
+import { order_service } from "./services/order.service";
 import { admin_update_order_status_dto, list_orders_dto } from "./models/order.dto";
+import { order_admin_service } from "./services/order-admin.service";
 
 export const order_router = create_trpc_router({
   myOrders: storefront_procedure
@@ -42,4 +43,10 @@ export const order_router = create_trpc_router({
         actor_user_id: ctx.session!.user.id,
       }),
     ),
+
+  adminStats: permission_procedure(PERMISSIONS.orders_read).query(() =>
+    order_admin_service.stats(),
+  ),
+
+  // TODO add adminListEnriched, adminCharts via order_admin_service
 });

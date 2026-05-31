@@ -3,7 +3,7 @@ import "server-only";
 import { and, count, desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { orders, order_items, order_adjustments, order_status_events } from "./schema";
+import { orders, order_items, order_adjustments, order_status_events } from "../schema";
 
 export class OrderRepository {
   async admin_list_by_product(product_id: string, page: number, limit: number) {

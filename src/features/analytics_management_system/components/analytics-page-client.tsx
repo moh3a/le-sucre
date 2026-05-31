@@ -4,6 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnalyticsDashboardClient } from "./analytics-dashboard-client";
 import { AnalyticsProductsTable } from "./analytics-products-table";
 
+// TODO
+// Extend analytics-page-client.tsx tabs:
+// - Catégories & marques — trpc.analytics.products
+// - Entonnoir — funnel chart from overview.funnel
+// - Campagnes — reporting_queries on promotion redemptions
+// - Recommandations — Redis rec:analytics:* + DB events
+
+// Switch AnalyticsDashboardClient from REST fetch to trpc.analytics.overview.useQuery.
 export function AnalyticsPageClient() {
   return (
     <ConsolePageShell title="Analytique" subtitle="Performance boutique et produits">

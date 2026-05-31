@@ -50,11 +50,18 @@ export const reviews_router = create_trpc_router({
     .input(report_review_dto)
     .mutation(({ ctx, input }) => report_service.report(ctx.session!.user.id, input)),
 
-  adminList: permission_procedure(PERMISSIONS.products_read)
+  adminList: permission_procedure(PERMISSIONS.reviews_read)
     .input(admin_list_reviews_dto)
     .query(({ input }) => moderation_service.admin_list(input)),
 
   moderate: permission_procedure(PERMISSIONS.products_write)
     .input(moderate_review_dto)
     .mutation(({ ctx, input }) => moderation_service.moderate(ctx.session!.user.id, input)),
+
+  adminStats: permission_procedure(PERMISSIONS.reviews_read).query(() =>
+    moderation_service.stats(),
+  ),
+  ratingTrends: permission_procedure(PERMISSIONS.reviews_read)
+    .input(z.object({ days: z.number().default(30) }))
+    .query(({ input }) => moderation_service.rating_trends(input.days)),
 });

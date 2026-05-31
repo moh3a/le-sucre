@@ -24,7 +24,7 @@ export function AdminReviewModerationTable() {
   const utils = trpc.useUtils();
   const { data: reviewsData, isLoading } = trpc.reviews.adminList.useQuery({
     page,
-    limit: 15,
+    limit: 20,
   });
 
   const moderateMutation = trpc.reviews.moderate.useMutation({

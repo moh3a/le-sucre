@@ -87,7 +87,14 @@
     "save_translation": "Enregistrer la traduction",
     "section_variants": "Variantes & SKU",
     "has_variants": "Avec variantes",
-    "section_inventory": "Stock & inventaire"
+    "section_inventory": "Stock & inventaire",
+    "stats_total": "Total produits",
+    "stats_active": "Actifs",
+    "stats_inactive": "Inactifs",
+    "stats_revenue": "Revenu généré",
+    "stats_units_sold": "Unités vendues",
+    "stats_avg_rating": "Note moyenne",
+    "stats_low_stock": "Stock bas"
   },
   "variants": {
     "title": "Variantes & SKU",
