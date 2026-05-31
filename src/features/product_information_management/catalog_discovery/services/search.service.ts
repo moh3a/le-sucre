@@ -53,7 +53,7 @@ export class SearchService {
       sort: "relevance",
     });
 
-    const where = search_repository["build_where"](filters); // or expose build_where as public
+    const where = search_repository.build_where(filters);
 
     const brand_rows = await db
       .select({

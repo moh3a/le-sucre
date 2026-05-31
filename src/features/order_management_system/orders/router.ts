@@ -24,6 +24,12 @@ export const order_router = create_trpc_router({
     .input(list_orders_dto)
     .query(({ input }) => order_service.admin_list(input)),
 
+  adminListByProduct: permission_procedure(PERMISSIONS.orders_read)
+    .input(list_orders_dto.and(z.object({ product_id: z.string() })))
+    .query(({ input }) =>
+      order_service.admin_list_by_product(input.product_id, input.page, input.limit),
+    ),
+
   adminGet: permission_procedure(PERMISSIONS.orders_read)
     .input(z.object({ order_id: z.string().min(1).max(255) }))
     .query(({ input }) => order_service.admin_get(input.order_id)),

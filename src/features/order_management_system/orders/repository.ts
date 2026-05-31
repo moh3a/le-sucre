@@ -6,6 +6,19 @@ import { db } from "@/lib/db";
 import { orders, order_items, order_adjustments, order_status_events } from "./schema";
 
 export class OrderRepository {
+  async admin_list_by_product(product_id: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+    const items = await db
+      .selectDistinct({ order: orders })
+      .from(orders)
+      .innerJoin(order_items, eq(order_items.order_id, orders.id))
+      .where(eq(order_items.product_id, product_id))
+      .orderBy(desc(orders.created_at))
+      .limit(limit)
+      .offset(offset);
+    return items.map((item) => item.order);
+  }
+  
   async find_by_id(id: string) {
     return await db
       .select()

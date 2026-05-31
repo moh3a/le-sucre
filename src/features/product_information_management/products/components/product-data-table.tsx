@@ -24,15 +24,27 @@ import {
 import { useDataTable } from "@/hooks/use-data-table";
 import { formatDate } from "@/lib/format";
 
+// TODO
+// Add filters: brand (from trpc.products.brandsActive), category select, stock_status, price range
+// Add bulk toolbar with trpc.products.bulkAction.useMutation
+
 type ProductRow = {
   id: string;
-  name: string | null;
-  sku: string;
   slug: string;
-  status: "draft" | "published" | "archived";
+  sku: string;
+  status: "draft" | "published" | "archived" | undefined;
   base_price: string;
-  offer_price: string | null;
   created_at: string;
+  name: string | null;
+  category_name: string | null;
+  brand_name: string | null;
+  image_url: string | null;
+  sku_count: number;
+  current_stock: number;
+  units_sold: number;
+  revenue: string;
+  review_count: number;
+  average_rating: string;
 };
 
 export function ProductDataTable() {
@@ -41,17 +53,28 @@ export function ProductDataTable() {
   const columns = React.useMemo<ColumnDef<ProductRow>[]>(
     () => [
       {
+        id: "Image",
+        accessorKey: "image_url",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Image" />,
+        cell: ({ row }) =>
+          row.original.image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={row.original.image_url}
+              alt={row.original.name ?? ""}
+              className="h-20 w-20 object-cover object-center"
+            />
+          ) : (
+            <div className="h-20 w-20 bg-neutral-500"></div>
+          ),
+      },
+      {
         id: "name",
         accessorKey: "name",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("name")} />,
         cell: ({ row }) => <span className="font-medium">{row.original.name ?? "—"}</span>,
         meta: { label: t("name"), placeholder: "Rechercher…", variant: "text", icon: Text },
         enableColumnFilter: true,
-      },
-      {
-        id: "sku",
-        accessorKey: "sku",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku")} />,
       },
       {
         id: "status",
@@ -74,6 +97,42 @@ export function ProductDataTable() {
         id: "base_price",
         accessorKey: "base_price",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("base_price")} />,
+      },
+      {
+        id: "Category",
+        accessorKey: "category_name",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Category" />,
+      },
+      {
+        id: "Brand",
+        accessorKey: "brand_name",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Brand" />,
+      },
+      {
+        id: "stock",
+        accessorKey: "current_stock",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Stock" />,
+      },
+      {
+        id: "Units sold",
+        accessorKey: "units_sold",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Sales" />,
+      },
+      {
+        id: "Revenue",
+        accessorKey: "revenue",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Revenue" />,
+      },
+      {
+        id: "Rating",
+        accessorKey: "average_rating",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Rating" />,
+        cell: ({ row }) => (
+          <div>
+            {row.original.average_rating}{" "}
+            <Badge variant="secondary">{row.original.review_count}</Badge>
+          </div>
+        ),
       },
       {
         id: "created_at",
@@ -112,14 +171,24 @@ export function ProductDataTable() {
 
   const status = status_filter?.[0] as ProductRow["status"] | undefined;
 
-  const { data, isLoading } = trpc.products.list.useQuery({
+  const utils = trpc.useUtils();
+  const { data, isLoading } = trpc.products.adminList.useQuery({
     page,
     limit: per_page,
     search: search?.trim() || undefined,
     status,
   });
 
-  const items = (data?.items ?? []) as ProductRow[];
+  const bulk = trpc.products.bulkAction.useMutation({
+    onSuccess: () => utils.products.adminList.invalidate(),
+  });
+  function run_bulk(action: "activate" | "deactivate" | "delete") {
+    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+    if (!ids.length) return;
+    bulk.mutate({ product_ids: ids, action });
+  }
+
+  const items = data?.items ?? [];
   const page_count = data?.meta.total_pages ?? 0;
 
   const { table } = useDataTable({
@@ -128,6 +197,7 @@ export function ProductDataTable() {
     pageCount: page_count,
     queryKeys: { page: "prodPage", perPage: "prodPerPage", sort: "prodSort" },
     getRowId: (row) => row.id,
+    enableRowSelection: true,
   });
 
   if (isLoading && !data)

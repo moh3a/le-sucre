@@ -83,5 +83,23 @@ export class RecommendationService {
     await recommendation_cache_service.set(cache_key, items);
     return items;
   }
+
+  async hydrate_ids(locale: string, ids: string[]) {
+    if (!ids.length) return [];
+    const { items } = await search_repository.search(
+      { locale, fulltext_product_ids: ids, in_stock_only: false, property_filters: [] },
+      "featured",
+      1,
+      ids.length,
+    );
+    const by_id = new Map(items.map((c) => [c.id, c]));
+    return ids
+      .map((id) => {
+        const card = by_id.get(id);
+        if (!card) return null;
+        return { ...card, score: 1, recommendation_type: "recent" };
+      })
+      .filter(Boolean) as RecommendationItem[];
+  }
 }
 export const recommendation_service = new RecommendationService();

@@ -2,8 +2,17 @@
 
 ## TODO
 
-- Implement data table
-- Add new pages for variants, inventory, users, authorization, global settings
+- assign operator to order
+- transfer order between operators
+- order notes
+- customer call history
+- failed delivery handling
+- return requests
+- replacement requests
+- stock adjustments
+- approval workflows
+- campaign approval
+- review moderation workflows
 - each feature should have async/await function in its repositories, engines and services
 - each feature should have redis cache keys
 - admin should only fetch from trpc

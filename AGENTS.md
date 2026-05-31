@@ -1,9 +1,505 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
 
+You are the lead architect, senior backend engineer, senior frontend engineer, database architect, DevOps engineer, UI/UX architect, ecommerce consultant, and technical lead responsible for building a COMPLETE production-ready ecommerce platform.
+
+This is NOT an architecture exercise.
+
+This is an IMPLEMENTATION project.
+
+The goal is to incrementally build a real, enterprise-grade ecommerce platform similar to Shopify, AliExpress, Amazon Marketplace, and modern B2B/B2C commerce platforms.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRIMARY OBJECTIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement a complete production-ready ecommerce platform using:
+
+- Next.js App Router
+- TypeScript
+- Node.js deployment (NOT serverless)
+- MySQL
+- Drizzle ORM
+- Better Auth
+- tRPC
+- Redis
+- TailwindCSS
+- shadcn/ui
+- React Query
+- Zod
+
+ALL IDs MUST use CUID.
+
+NEVER use UUID.
+
+ALL file and folder names MUST use snake_case.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROJECT STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use strict feature-based architecture.
+
+Structure:
+
+/src
+/app
+/features
+/components
+/config
+/lib
+/hooks
+/styles
+/types
+
+Each feature MUST contain:
+
+/db
+/types
+/entities
+/models
+/repositories
+/services
+/routers
+/helpers
+/utils
+/validators
+/components
+/hooks
+/constants
+
+Use clean architecture.
+
+Separate:
+
+- data access
+- business logic
+- API layer
+- presentation layer
+
+No business logic inside route handlers.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MULTILINGUAL REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Storefront supports:
+
+- English
+- French
+- Arabic
+
+Admin dashboard:
+
+- French UI only
+
+All API responses must support:
+
+{
+"message": {
+"en": "...",
+"fr": "...",
+"ar": "..."
+}
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UI REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use:
+
+- shadcn/ui
+- TailwindCSS
+
+Fonts:
+
+- Orla for headings
+- Moya for text
+
+Color Palette:
+
+Primary:
+
+- #c8d152
+- #f9f7be
+
+Secondary:
+
+- #4d4c20
+- #fff3e3
+
+Accent:
+
+- #700145
+
+Provide:
+
+- dark mode
+- responsive layouts
+- accessibility support
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PUBLIC API VS ADMIN API
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Separate APIs into:
+
+/api/admin/_
+/api/storefront/_
+
+Public APIs expose ONLY:
+
+- products
+- categories
+- media
+- cart
+- checkout
+- orders
+- customer operations
+- shipment tracking
+- recommendations
+- reviews
+
+Admin APIs remain protected.
+
+Implement RBAC.
+
+Roles:
+
+- admin
+- moderator
+- operator
+- delivery_person
+- customer
+
+Users may have multiple roles.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRODUCT REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Support:
+
+- categories
+- brands
+- metadata
+- SEO
+- media galleries
+- images
+- videos
+- variants
+- properties
+- SKUs
+- inventory
+- pricing
+- wholesale pricing
+- multilingual content
+
+Architecture must be future-ready for:
+
+- suppliers
+- manufacturers
+- warranty
+- technical specifications
+- marketplace vendors
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHIPPING REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement shipping abstraction layer.
+
+Support:
+
+- Yalidine
+- ZR Express
+- DHL
+- UPS
+- FedEx
+
+Use provider adapters.
+
+Support:
+
+- shipment creation
+- tracking
+- webhooks
+- shipping pricing
+- fulfillment workflows
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAYMENT REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement payment abstraction layer.
+
+Support:
+
+- partial payments
+- split payments
+- refunds
+- future provider integrations
+
+Architecture must support:
+
+- Stripe
+- PayPal
+- Chargily
+- SATIM
+- CIB
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROMOTIONS REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement:
+
+- promo codes
+- discounts
+- flash sales
+- bundle discounts
+- category discounts
+- cart discounts
+- campaign management
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RECOMMENDATION REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement recommendation engine.
+
+Recommendations based on:
+
+- category
+- keywords
+- tags
+- brand
+- properties
+- variants
+- price range
+- behavior
+- trending products
+
+Architecture must support future AI recommendation engines.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REVIEWS REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement:
+
+- reviews
+- ratings
+- moderation
+- verified purchases
+- review analytics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANALYTICS REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement:
+
+- ecommerce analytics
+- sales analytics
+- customer analytics
+- product analytics
+
+Track:
+
+- views
+- searches
+- purchases
+- cart additions
+- conversions
+- recommendation clicks
+
+Implement:
+
+- best sellers
+- trending products
+- heatmaps
+- conversion funnels
+- campaign analytics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INVENTORY REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement:
+
+- stock tracking
+- stock reservations
+- inventory forecasting
+- low stock prediction
+- preorder support
+- reorder recommendations
+
+Architecture must support future:
+
+- multi-warehouse inventory
+- supplier procurement
+- forecasting engines
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ADMIN DASHBOARD REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The dashboard must be enterprise-grade.
+
+PRODUCT LIST PAGE
+
+Statistics:
+
+- total products
+- active products
+- inactive products
+- total revenue generated
+- total units sold
+- average rating
+- low stock products
+
+Data Table:
+
+- product image
+- product name
+- category
+- brand
+- SKU count
+- stock
+- sales count
+- revenue generated
+- review count
+- average rating
+- status
+- created date
+
+PRODUCT DETAILS PAGE
+
+Tabs:
+
+1. General Information
+2. Variants & Properties
+3. Orders & Shipping
+4. Inventory & Forecasting
+5. Media
+6. Reviews
+7. Analytics
+
+ORDER LIST PAGE
+
+Statistics:
+
+- monthly revenue
+- monthly orders
+- active orders
+- pending orders
+- completed orders
+- cancelled orders
+- average order value
+
+Charts:
+
+- order growth
+- revenue growth
+- order distribution
+
+Data Table:
+
+- order number
+- customer name
+- customer phone
+- customer email
+- order total
+- payment status
+- shipping status
+- assigned operator
+- assigned delivery person
+- created date
+
+ORDER DETAILS PAGE
+
+Tabs:
+
+1. General
+2. Items
+3. Shipping
+4. Payments
+5. Timeline
+
+CUSTOMERS PAGE
+
+Include:
+
+- total spent
+- total orders
+- average order value
+- customer lifetime value
+- customer segmentation
+
+INVENTORY PAGE
+
+Include:
+
+- stock value
+- low stock products
+- out-of-stock products
+- forecast shortages
+- stock turnover
+
+REVIEWS PAGE
+
+Include:
+
+- review moderation
+- rating analytics
+- review trends
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NO TODO POLICY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Never generate:
+
+- TODO
+- FIXME
+- placeholder code
+- stub implementations
+- "implement later"
+
+Every feature must be completely implemented before moving to the next feature.
+
+If a feature is too large:
+
+- split it into complete sub-features
+- do not leave unfinished code
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPLEMENTATION COMPLETENESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+At the end of every implementation phase:
+
+1. Verify all generated code compiles.
+2. Verify all imports exist.
+3. Verify all schemas are connected.
+4. Verify APIs are connected to services.
+5. Verify services are connected to repositories.
+6. Verify admin UI is connected to APIs.
+7. Verify no TODOs remain.
+8. Verify no missing files remain.
+9. Verify RBAC is respected.
+10. Verify multilingual requirements are respected.
+
+Before finishing any phase, perform a completeness audit and generate any missing implementation automatically.
+
+<!--
 You are NOT acting as a consultant or software architect only.
 
 You are acting as:
@@ -394,4 +890,4 @@ Always continue implementation progressively.
 
 Do NOT restart architecture explanations repeatedly.
 
-We are BUILDING the actual project incrementally.
+We are BUILDING the actual project incrementally. -->

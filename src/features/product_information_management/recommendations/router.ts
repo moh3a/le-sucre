@@ -48,8 +48,7 @@ export const recommendations_router = create_trpc_router({
       session_key: input.session_key,
       limit: input.limit,
     });
-    // hydrate via recommendation_service
-    return { product_ids: ids };
+    return recommendation_service.hydrate_ids(input.locale, ids);
   }),
 
   trackView: public_procedure.input(track_product_view_dto).mutation(({ input, ctx }) =>

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { recommendation_index_jobs } from "../schema";
 import { indexing_service } from "./indexing.service";
 import { rebuild_co_purchase_window } from "../engines/collaborative.engine";
-import { trending_index_service } from "./trending-index.service.ts"; // persist redis zset -> product_trending_scores
+import { trending_index_service } from "./trending-index.service"; // persist redis zset -> product_trending_scores
 
 export class IndexJobRunnerService {
   async run_due(limit = 20) {

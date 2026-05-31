@@ -1,48 +1,54 @@
 "use client";
 
-import { Archive, CheckCircle2, FileEdit, Package } from "lucide-react";
+import { AlertTriangle, CheckCircle2, DollarSign, Package, ShoppingBag, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
-
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 
 export function ProductStats() {
   const t = useTranslations("products");
-
-  const total = trpc.products.list.useQuery({ page: 1, limit: 1 });
-  const published = trpc.products.list.useQuery({ page: 1, limit: 1, status: "published" });
-  const draft = trpc.products.list.useQuery({ page: 1, limit: 1, status: "draft" });
-  const archived = trpc.products.list.useQuery({ page: 1, limit: 1, status: "archived" });
-
-  const loading = total.isLoading || published.isLoading || draft.isLoading || archived.isLoading;
+  const { data, isLoading } = trpc.products.adminStats.useQuery();
 
   return (
     <StatsGrid
-      loading={loading}
+      loading={isLoading}
       items={[
+        { label: t("stats_total"), value: data?.total_products ?? 0, icon: Package, color: "info" },
         {
-          label: "Total",
-          value: total.data?.meta.total_records ?? 0,
-          icon: Package,
-          color: "info",
-        },
-        {
-          label: t("status_published"),
-          value: published.data?.meta.total_records ?? 0,
+          label: t("stats_active"),
+          value: data?.active_products ?? 0,
           icon: CheckCircle2,
           color: "success",
         },
         {
-          label: t("status_draft"),
-          value: draft.data?.meta.total_records ?? 0,
-          icon: FileEdit,
+          label: t("stats_inactive"),
+          value: data?.inactive_products ?? 0,
+          icon: Package,
+          color: "default",
+        },
+        {
+          label: t("stats_revenue"),
+          value: `${Number(data?.total_revenue ?? 0).toFixed(0)} DZD`,
+          icon: DollarSign,
+          color: "success",
+        },
+        {
+          label: t("stats_units_sold"),
+          value: data?.total_units_sold ?? 0,
+          icon: ShoppingBag,
+          color: "info",
+        },
+        {
+          label: t("stats_avg_rating"),
+          value: Number(data?.average_rating ?? 0).toFixed(1),
+          icon: Star,
           color: "warning",
         },
         {
-          label: t("status_archived"),
-          value: archived.data?.meta.total_records ?? 0,
-          icon: Archive,
-          color: "default",
+          label: t("stats_low_stock"),
+          value: data?.low_stock_products ?? 0,
+          icon: AlertTriangle,
+          color: "error",
         },
       ]}
     />

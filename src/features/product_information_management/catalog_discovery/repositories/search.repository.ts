@@ -18,7 +18,7 @@ import type {
 import { catalog_order_by, effective_list_price_sql } from "../engines/sort.engine";
 
 export class SearchRepository {
-  private build_where(filters: ResolvedCatalogFilters) {
+  public build_where(filters: ResolvedCatalogFilters) {
     const clauses = [eq(products.status, "published")];
 
     if (filters.category_ids?.length) {

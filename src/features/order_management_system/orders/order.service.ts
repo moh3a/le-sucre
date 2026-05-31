@@ -249,7 +249,7 @@ export class OrderService {
       resource_type: "cart_id",
       resource_id: input.cart_id,
     });
-    
+
     // [ ] example: track purchase event
     // [ ] TODO: implement in all relevant places
     void event_ingestion_service.track_purchase({
@@ -266,8 +266,12 @@ export class OrderService {
     return this.repo.get_full(order_id);
   }
 
-  list_for_customer(user_id: string, input: z.infer<typeof list_orders_dto>) {
-    return this.repo.list_for_customer(user_id, input.page, input.limit, input.status);
+  async list_for_customer(user_id: string, input: z.infer<typeof list_orders_dto>) {
+    return await this.repo.list_for_customer(user_id, input.page, input.limit, input.status);
+  }
+
+  async admin_list_by_product(product_id: string, page: number, limit: number) {
+    return await this.repo.admin_list_by_product(product_id, page, limit);
   }
 
   async get_customer_detail(order_id: string, user_id: string) {
