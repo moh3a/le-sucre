@@ -7,11 +7,12 @@ import Link from "next/link";
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
-import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
-import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
+import { DataTableToolbar } from "@/features/data-table/components/data-table-toolbar";
+import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDataTable } from "@/hooks/use-data-table";
 import { formatDate } from "@/lib/format";
 
 // TODO

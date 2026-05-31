@@ -5,7 +5,7 @@ import { BadgeCheck, CalendarIcon, Check, ListFilter, Text, X } from "lucide-rea
 import { useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTableRangeFilter } from "@/components/data-table/data-table-range-filter";
+import { DataTableRangeFilter } from "@/features/data-table/components/data-table-range-filter";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -26,12 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { getDefaultFilterOperator, getFilterOperators } from "@/lib/data-table";
+import { getDefaultFilterOperator, getFilterOperators } from "@/features/data-table/lib";
 import { formatDate } from "@/lib/format";
 import { generateId } from "@/lib/id";
-import { getFiltersStateParser } from "@/lib/parsers";
+import { getFiltersStateParser } from "@/features/data-table/lib/parsers";
 import { cn } from "@/lib/utils";
-import type { ExtendedColumnFilter, FilterOperator } from "@/types/data-table";
+import type { ExtendedColumnFilter, FilterOperator } from "@/features/data-table/types";
 
 const DEBOUNCE_MS = 300;
 const THROTTLE_MS = 50;

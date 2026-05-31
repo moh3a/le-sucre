@@ -4,13 +4,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { useDataTable } from "@/features/data-table/use-data-table";
+import { estimate_page_count } from "@/lib/console-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
-import { useDataTable } from "@/hooks/use-data-table";
-import { estimate_page_count } from "@/lib/console-table";
 
 type ForecastRow = {
   sku_id: string;

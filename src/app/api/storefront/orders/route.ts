@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { json_ok, json_error } from "@/lib/http";
 import { AuthenticationError } from "@/lib/error_handling";
 import { list_orders_dto } from "@/features/order_management_system/orders/models/order.dto";
-import { order_service } from "@/features/order_management_system/orders/order.service";
+import { order_service } from "@/features/order_management_system/orders/services/order.service";
 
 export async function GET(req: Request) {
   try {

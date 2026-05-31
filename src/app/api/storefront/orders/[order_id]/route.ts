@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { json_ok, json_error } from "@/lib/http";
 import { AuthenticationError, ValidationError } from "@/lib/error_handling";
-import { order_service } from "@/features/order_management_system/orders/order.service";
+import { order_service } from "@/features/order_management_system/orders/services/order.service";
 
 type RouteContext = { params: Promise<{ order_id: string }> };
 

@@ -5,13 +5,13 @@ import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nu
 import { ReceiptCent, ToggleLeft } from "lucide-react";
 import * as React from "react";
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
-import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableToolbar } from "@/features/data-table/components/data-table-toolbar";
+import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
-import { useDataTable } from "@/hooks/use-data-table";
 import { formatDate } from "@/lib/format";
 
 type OrderRow = {

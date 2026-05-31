@@ -12,7 +12,7 @@ import {
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTableRangeFilter } from "@/components/data-table/data-table-range-filter";
+import { DataTableRangeFilter } from "@/features/data-table/components/data-table-range-filter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -51,14 +51,14 @@ import {
   SortableItemHandle,
   SortableOverlay,
 } from "@/components/ui/sortable";
-import { dataTableConfig } from "@/config/data-table";
+import { dataTableConfig } from "@/features/data-table/config";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { getDefaultFilterOperator, getFilterOperators } from "@/lib/data-table";
+import { getDefaultFilterOperator, getFilterOperators } from "@/features/data-table/lib";
 import { formatDate } from "@/lib/format";
 import { generateId } from "@/lib/id";
-import { getFiltersStateParser } from "@/lib/parsers";
+import { getFiltersStateParser } from "@/features/data-table/lib/parsers";
 import { cn } from "@/lib/utils";
-import type { ExtendedColumnFilter, FilterOperator, JoinOperator } from "@/types/data-table";
+import type { ExtendedColumnFilter, FilterOperator, JoinOperator } from "@/features/data-table/types";
 
 const DEBOUNCE_MS = 300;
 const THROTTLE_MS = 50;
