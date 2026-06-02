@@ -1,6 +1,7 @@
-# TODOS
+# Implementation Notes
 
-- Schedule nightly rollup (cron or PM2):
+## Nightly Rollup
+Schedule nightly rollup (cron or PM2):
 ```ts
 // enqueue once at midnight
 await db.insert(analytics_jobs).values({
@@ -10,18 +11,19 @@ await db.insert(analytics_jobs).values({
   run_after: new Date().toISOString(),
 });
 ```
+- Implemented in promotion-job-runner.service.ts
 
-- Integration hooks (minimal patches):
-Location ->	                                       Event
-Product PDP load ->                                `product_view`
-cart.service.add_item ->                           `add_to_cart`
-checkout.service.preview ->                        `checkout_started`
-order.service.place_from_cart (after paid) ->      `track_purchase`
-Catalog search API ->                              `search`
-Recommendation carousel click ->                   `recommendation_click`
-Cart inactive > 1h job ->                          `cart_abandoned`
+## Integration Hooks
+Implemented in src/features/analytics_management_system/hooks/analytics-hooks.ts:
+- Product PDP load -> `track_product_view`
+- cart.service.add_item -> `track_add_to_cart`
+- checkout.service.preview -> `track_checkout_started`
+- order.service.place_from_cart (after paid) -> `track_purchase`
+- Catalog search API -> `track_search`
+- Recommendation carousel click -> `track_recommendation_click`
+- Cart inactive > 1h job -> `track_cart_abandoned`
 
-- Retention + scale notes
+## Retention + Scale Notes
 Layer ->	             Strategy
 Ingestion ->           Redis counters + buffered LPUSH (50k cap)
 Raw events ->          90-day purge job

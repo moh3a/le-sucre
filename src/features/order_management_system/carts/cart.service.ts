@@ -124,8 +124,6 @@ export class CartService {
       fulfillment_type,
     });
 
-    // [ ] example: track add_to_cart event
-    // [ ] TODO: implement in all relevant places
     void event_ingestion_service.track({
       event_type: "add_to_cart",
       product_id: sku.product_id,

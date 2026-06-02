@@ -1,0 +1,111 @@
+"use client";
+
+import type { ColumnDef } from "@tanstack/react-table";
+import { parseAsInteger, useQueryState } from "nuqs";
+import * as React from "react";
+
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { useDataTable } from "@/features/data-table/use-data-table";
+import { trpc } from "@/components/providers/app-providers";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/format";
+
+type UserRow = {
+  id: string;
+  name: string | null;
+  email: string;
+  email_verified: Date | null;
+  is_active: boolean;
+  created_at: Date;
+};
+
+export function UsersTable() {
+  const columns = React.useMemo<ColumnDef<UserRow>[]>(
+    () => [
+      {
+        id: "name",
+        accessorKey: "name",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Nom" />
+        ),
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-medium">{row.original.name ?? "—"}</span>
+            <span className="text-muted-foreground text-xs">{row.original.email}</span>
+          </div>
+        ),
+      },
+      {
+        id: "email_verified",
+        accessorKey: "email_verified",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Vérifié" />
+        ),
+        cell: ({ row }) => (
+          <Badge variant={row.original.email_verified ? "default" : "outline"}>
+            {row.original.email_verified ? "Oui" : "Non"}
+          </Badge>
+        ),
+      },
+      {
+        id: "is_active",
+        accessorKey: "is_active",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Actif" />
+        ),
+        cell: ({ row }) => (
+          <Badge variant={row.original.is_active ? "default" : "destructive"}>
+            {row.original.is_active ? "Actif" : "Inactif"}
+          </Badge>
+        ),
+      },
+      {
+        id: "created_at",
+        accessorKey: "created_at",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Inscription" />
+        ),
+        cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
+      },
+      {
+        id: "roles",
+        header: "Rôles",
+        cell: () => <Badge variant="outline">Client</Badge>,
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: () => <Button variant="outline" size="sm">Gérer</Button>,
+      },
+    ],
+    [],
+  );
+
+  const [page] = useQueryState("usersPage", parseAsInteger.withDefault(1));
+  const [perPage] = useQueryState("usersPerPage", parseAsInteger.withDefault(20));
+
+  const { data, isLoading } = trpc.adminAuth.listUsers.useQuery({
+    page,
+    limit: perPage,
+  });
+
+  const items = data?.items ?? [];
+  const pageCount = data?.meta.total_pages ?? 0;
+
+  const { table } = useDataTable({
+    data: items,
+    columns,
+    pageCount,
+    queryKeys: { page: "usersPage", perPage: "usersPerPage" },
+    getRowId: (row) => row.id,
+  });
+
+  if (isLoading && !data) {
+    return <DataTableSkeleton columnCount={6} rowCount={10} />;
+  }
+
+  return <DataTable table={table} />;
+}

@@ -1,7 +1,7 @@
-// TODO
-// On receive_stock:
+import "dotenv/config";
+import { run_worker_loop } from "@/lib/queue/job-runner";
+import { preorder_fulfillment_service } from "./services/preorder-fulfillment.service";
 
-// Query preorder_allocations FIFO status=confirmed for SKU.
-// For each, create real inventory_reservation + commit when order paid.
-// Set preorder_status → ready_to_ship, fulfillment_status partial on order.
-// Insert movement preorder_fulfill.
+run_worker_loop("preorders-fulfillment", async () => {
+  await preorder_fulfillment_service.fulfill_all_confirmed();
+}, 10000);

@@ -1,6 +1,5 @@
-// TODO
-// SKU settings form: enable preorder, cap, ETA, deposit %, backorder toggle
-// Allocations table: order #, qty, status, ETA, actions (update ETA, cancel)
+import { PreordersPageClient } from "@/features/order_management_system/preorders/components/preorders-page-client";
+
 export default function Preorders() {
-  return <div>Preorders</div>;
+  return <PreordersPageClient />;
 }

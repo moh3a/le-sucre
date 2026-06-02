@@ -16,9 +16,11 @@ export class OrderRepository {
       .orderBy(desc(orders.created_at))
       .limit(limit)
       .offset(offset);
-    return items.map((item) => item.order);
+    // TODO add customer name
+    // TODO add metadata: pagination total page count total records
+    return items.map((item) => ({ ...item.order, customer_name: "" }));
   }
-  
+
   async find_by_id(id: string) {
     return await db
       .select()

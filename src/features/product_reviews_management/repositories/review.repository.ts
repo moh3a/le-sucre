@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, avg, count, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { orders, order_items } from "@/features/order_management_system/orders/schema";
@@ -142,6 +142,57 @@ export class ReviewRepository {
 
   create_report(input: typeof product_review_reports.$inferInsert) {
     return db.insert(product_review_reports).values(input);
+  }
+
+  async stats() {
+    const [totals] = await db
+      .select({
+        total: count(),
+        pending:
+          sql<number>`SUM(CASE WHEN ${product_reviews.status} = 'pending' THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        approved:
+          sql<number>`SUM(CASE WHEN ${product_reviews.status} = 'approved' THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        rejected:
+          sql<number>`SUM(CASE WHEN ${product_reviews.status} = 'rejected' THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        verified:
+          sql<number>`SUM(CASE WHEN ${product_reviews.is_verified_purchase} = 1 THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        avg_rating: avg(product_reviews.rating),
+      })
+      .from(product_reviews);
+
+    const by_rating = await db
+      .select({
+        rating: product_reviews.rating,
+        count: count(),
+      })
+      .from(product_reviews)
+      .where(eq(product_reviews.status, "approved"))
+      .groupBy(product_reviews.rating)
+      .orderBy(product_reviews.rating);
+
+    return { totals, by_rating };
+  }
+
+  async rating_trends(days = 30) {
+    const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+    return db
+      .select({
+        day_key: sql<string>`DATE(${product_reviews.created_at})`,
+        count: count(),
+        avg_rating: avg(product_reviews.rating),
+      })
+      .from(product_reviews)
+      .where(and(eq(product_reviews.status, "approved"), gte(product_reviews.created_at, since)))
+      .groupBy(sql`DATE(${product_reviews.created_at})`)
+      .orderBy(sql`DATE(${product_reviews.created_at})`);
   }
 }
 

@@ -48,7 +48,13 @@ export class ModerationService {
     return review_repository.admin_list(input.page, input.limit, input.status, input.product_id);
   }
 
-  // TODO Implement moderation_service.stats() + rating_trends() in review repository
+  stats() {
+    return review_repository.stats();
+  }
+
+  rating_trends(days?: number) {
+    return review_repository.rating_trends(days);
+  }
 }
 
 export const moderation_service = new ModerationService();

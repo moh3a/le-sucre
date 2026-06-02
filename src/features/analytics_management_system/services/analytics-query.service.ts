@@ -9,12 +9,13 @@ import { analytics_cache_service } from "./analytics-cache.service";
 import { ANALYTICS_CACHE, ANALYTICS_CACHE_TTL } from "../constants/cache-keys";
 import type { date_range_dto, product_analytics_query_dto } from "../models/analytics.dto";
 import { reporting_queries } from "../queries/reporting.queries";
+import { IAnalyticsOverview, IProductsAnalytics, ISearchAnalytics } from "../types";
 
 export class AnalyticsQueryService {
-  async overview(input: z.infer<typeof date_range_dto>) {
+  async overview(input: z.infer<typeof date_range_dto>): Promise<IAnalyticsOverview> {
     const key = ANALYTICS_CACHE.overview(input.from, input.to);
     const cached = await analytics_cache_service.get(key);
-    if (cached) return cached;
+    if (cached) return cached as IAnalyticsOverview;
 
     const [totals, series, funnel, repeat] = await Promise.all([
       sales_analytics_engine.totals(input.from, input.to),
@@ -28,10 +29,10 @@ export class AnalyticsQueryService {
     return payload;
   }
 
-  async products(input: z.infer<typeof product_analytics_query_dto>) {
+  async products(input: z.infer<typeof product_analytics_query_dto>): Promise<IProductsAnalytics> {
     const key = ANALYTICS_CACHE.products(input.from, input.to);
     const cached = await analytics_cache_service.get(key);
-    if (cached) return cached;
+    if (cached) return cached as IProductsAnalytics;
 
     const [best_sellers, most_viewed, categories, brands] = await Promise.all([
       product_analytics_engine.best_sellers(input.from, input.to, input.limit),
@@ -41,6 +42,35 @@ export class AnalyticsQueryService {
     ]);
 
     const payload = { best_sellers, most_viewed, categories, brands };
+    await analytics_cache_service.set(key, payload, ANALYTICS_CACHE_TTL.dashboard);
+    return payload;
+  }
+
+  async productDetail(input: z.infer<typeof product_analytics_query_dto> & { product_id: string }) {
+    const key = `analytics:product_detail:${input.product_id}:${input.from}:${input.to}`;
+    const cached = await analytics_cache_service.get(key);
+    if (cached) return cached;
+
+    const [daily_series, totals] = await Promise.all([
+      product_analytics_engine.daily_series(input.product_id, input.from, input.to),
+      product_analytics_engine.product_totals(input.product_id, input.from, input.to),
+    ]);
+
+    const payload = { product_id: input.product_id, daily_series, totals };
+    await analytics_cache_service.set(key, payload, ANALYTICS_CACHE_TTL.dashboard);
+    return payload;
+  }
+
+  async search_analytics(
+    input: z.infer<typeof date_range_dto> & { limit?: number },
+  ): Promise<ISearchAnalytics> {
+    const limit = input.limit ?? 20;
+    const key = `analytics:search:${input.from}:${input.to}:${limit}`;
+    const cached = await analytics_cache_service.get(key);
+    if (cached) return cached as ISearchAnalytics;
+
+    const top_searches = await reporting_queries.top_searches(input.from, input.to, limit);
+    const payload = { top_searches };
     await analytics_cache_service.set(key, payload, ANALYTICS_CACHE_TTL.dashboard);
     return payload;
   }

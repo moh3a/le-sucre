@@ -9,7 +9,7 @@ export class AppError extends Error {
     code = "INTERNAL_SERVER_ERROR",
     status_code = 500,
     details: Record<string, unknown> | null = null,
-    is_operational = true
+    is_operational = true,
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -46,7 +46,10 @@ export class NotFoundError extends AppError {
 }
 
 export class ConflictError extends AppError {
-  constructor(message = "Resource conflict detected", details: Record<string, unknown> | null = null) {
+  constructor(
+    message = "Resource conflict detected",
+    details: Record<string, unknown> | null = null,
+  ) {
     super(message, "RESOURCE_CONFLICT", 409, details, true);
   }
 }
@@ -58,7 +61,10 @@ export class RateLimitError extends AppError {
 }
 
 export class InternalServerError extends AppError {
-  constructor(message = "An unexpected error occurred", details: Record<string, unknown> | null = null) {
+  constructor(
+    message = "An unexpected error occurred",
+    details: Record<string, unknown> | null = null,
+  ) {
     super(message, "INTERNAL_SERVER_ERROR", 500, details, false);
   }
 }
@@ -80,18 +86,38 @@ export function normalize_error(error: unknown): AppError {
 }
 
 // ─── Safe async wrapper ───────────────────────────────────
-export async function trySafe<T>(
-  fn: () => Promise<T>,
-): Promise<[T, null] | [null, Error]> {
+// export async function trySafe<T>(fn: () => Promise<T>): Promise<[T, null] | [null, Error]> {
+//   try {
+//     const result = await fn();
+//     return [result, null];
+//   } catch (error) {
+//     return [null, error instanceof Error ? error : new Error(String(error))];
+//   }
+// }
+
+export async function tryFn<T>(promise: Promise<T>): Promise<[undefined, T] | [Error]> {
   try {
-    const result = await fn();
-    return [result, null];
+    const data = await promise;
+    return [undefined, data] as [undefined, T];
   } catch (error) {
-    return [null, error instanceof Error ? error : new Error(String(error))];
+    const err = assertIsError(error);
+    return [err];
   }
 }
 
 // ─── Assert helpers ───────────────────────────────────────
+export function assertIsError(value: unknown): Error {
+  if (value instanceof Error) return value;
+
+  let stringified = "[Unable to stringify the thrown value]";
+  try {
+    stringified = JSON.stringify(value);
+  } catch {}
+
+  const error = new Error(`This value was thrown as is, not through an Error: ${stringified}`);
+  return error;
+}
+
 export function assertFound<T>(value: T | null | undefined, resource: string): T {
   if (value === null || value === undefined) {
     throw new NotFoundError(resource);

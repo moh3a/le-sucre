@@ -16,6 +16,7 @@ import { cart_router } from "@/features/order_management_system/carts/router";
 import { checkout_router } from "@/features/order_management_system/checkout/router";
 import { order_router } from "@/features/order_management_system/orders/router";
 import { preorder_router } from "@/features/order_management_system/preorders/router";
+import { customers_router } from "@/features/order_management_system/customers/router";
 import { promotion_router } from "@/features/order_management_system/promotions/router";
 import { analytics_router } from "@/features/analytics_management_system/router";
 import { shipping_router } from "@/features/shipping_management_system/router";
@@ -35,6 +36,7 @@ export const app_router = create_trpc_router({
   checkout: checkout_router,
   orders: order_router,
   preorders: preorder_router,
+  customers: customers_router,
   promotions: promotion_router,
   analytics: analytics_router,
   shipping: shipping_router,

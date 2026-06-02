@@ -17,5 +17,3 @@ export async function get_storefront_identity(req_headers: Headers) {
     new_guest_token: cart_id ? null : generate_id().replace(/-/g, "").slice(0, 32),
   };
 }
-
-// TODO: Set cookie on first cart creation: httpOnly, sameSite: 'lax', maxAge: 7d.

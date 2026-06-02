@@ -1,7 +1,8 @@
 import "server-only";
 
+import { count, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { audit_logs } from "@/features/authentication_and_authorization/auth/schema";
+import { audit_logs, users } from "@/features/authentication_and_authorization/auth/schema";
 
 export type AuditLogInsert = {
   actor_user_id?: string | null;
@@ -17,6 +18,47 @@ export class AuditRepository {
   async insert(input: AuditLogInsert) {
     const [row] = await db.insert(audit_logs).values(input).$returningId();
     return row;
+  }
+
+  async list_paginated(page = 1, limit = 20) {
+    const safe_limit = Math.min(Math.max(limit, 1), 100);
+    const offset = (Math.max(page, 1) - 1) * safe_limit;
+
+    const [items, total_row] = await Promise.all([
+      db
+        .select({
+          id: audit_logs.id,
+          action: audit_logs.action,
+          resource_type: audit_logs.resource_type,
+          resource_id: audit_logs.resource_id,
+          metadata: audit_logs.metadata,
+          ip_address: audit_logs.ip_address,
+          user_agent: audit_logs.user_agent,
+          created_at: audit_logs.created_at,
+          actor_email: users.email,
+          actor_name: users.name,
+        })
+        .from(audit_logs)
+        .leftJoin(users, eq(audit_logs.actor_user_id, users.id))
+        .orderBy(desc(audit_logs.created_at))
+        .limit(safe_limit)
+        .offset(offset),
+      db.select({ total: count() }).from(audit_logs),
+    ]);
+
+    const total_records = Number(total_row[0]?.total ?? 0);
+    const total_pages = Math.ceil(total_records / safe_limit) || 1;
+
+    return {
+      items,
+      meta: {
+        page,
+        limit: safe_limit,
+        total_records,
+        total_pages,
+        has_more: page < total_pages,
+      },
+    };
   }
 }
 

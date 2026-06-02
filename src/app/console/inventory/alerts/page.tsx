@@ -1,7 +1,8 @@
 // TODO
 // Open / ack / resolved tabs
 // Actions: acknowledge, resolve, jump to SKU
-// TODO
+import { AlertsPageClient } from "@/features/inventory_management_system/forecasting/components/alerts-page-client";
+
 export default function Alerts() {
-  return <div>Alerts</div>;
+  return <AlertsPageClient />;
 }

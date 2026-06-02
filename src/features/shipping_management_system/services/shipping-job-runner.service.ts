@@ -2,7 +2,7 @@ import "server-only";
 
 import { shipping_repository } from "../repository";
 import { shipping_service } from "./shipping.service";
-import { assertIsError } from "@/lib/utils";
+import { assertIsError } from "@/lib/error_handling";
 
 function next_backoff_minutes(attempt: number) {
   return Math.min(60, Math.pow(2, Math.max(0, attempt - 1)));

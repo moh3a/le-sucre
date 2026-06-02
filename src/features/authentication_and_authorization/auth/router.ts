@@ -7,6 +7,7 @@ import { authorizationService } from "@/features/authentication_and_authorizatio
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { audit_repository } from "@/features/authentication_and_authorization/authorization/repositories/audit.repository";
 import { assign_role_dto } from "@/features/authentication_and_authorization/auth/models/auth.dto";
 import z from "zod";
 import { user_repository } from "./repositories/user.repository";
@@ -40,4 +41,14 @@ export const admin_auth_router = create_trpc_router({
       }),
     )
     .query(({ input }) => user_repository.list_paginated(input.page, input.limit)),
+  getStats: permission_procedure(PERMISSIONS.users_read)
+    .query(() => user_repository.stats()),
+  listAuditLogs: permission_procedure(PERMISSIONS.audit_read)
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(20),
+      }),
+    )
+    .query(({ input }) => audit_repository.list_paginated(input.page, input.limit)),
 });

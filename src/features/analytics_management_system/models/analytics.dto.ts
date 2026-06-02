@@ -10,6 +10,7 @@ export const ingest_event_dto = z.object({
     ANALYTICS_EVENT.click,
     ANALYTICS_EVENT.wishlist_add,
     ANALYTICS_EVENT.recommendation_click,
+    ANALYTICS_EVENT.cart_abandoned,
   ]),
   session_key: z.string().min(8).max(64).optional(),
   product_id: z.string().max(24).optional(),

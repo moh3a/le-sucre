@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { analytics_product_daily } from "../schema";
 import {
@@ -52,5 +52,63 @@ export const product_analytics_engine = {
       .groupBy(analytics_product_daily.product_id)
       .orderBy(desc(sql`SUM(${analytics_product_daily.views})`))
       .limit(limit);
+  },
+
+  /** Per-product daily timeseries for a specific product detail view. */
+  async daily_series(product_id: string, from: string, to: string) {
+    return db
+      .select({
+        day_key: analytics_product_daily.day_key,
+        views: analytics_product_daily.views,
+        add_to_cart: analytics_product_daily.add_to_cart,
+        purchases: analytics_product_daily.purchases,
+        units_sold: analytics_product_daily.units_sold,
+        revenue: analytics_product_daily.revenue,
+        recommendation_clicks: analytics_product_daily.recommendation_clicks,
+        conversion_rate: analytics_product_daily.conversion_rate,
+      })
+      .from(analytics_product_daily)
+      .where(
+        and(
+          eq(analytics_product_daily.product_id, product_id),
+          gte(analytics_product_daily.day_key, from),
+          lte(analytics_product_daily.day_key, to),
+        ),
+      )
+      .orderBy(asc(analytics_product_daily.day_key));
+  },
+
+  /** Aggregated totals for a specific product over a date range. */
+  async product_totals(product_id: string, from: string, to: string) {
+    const [row] = await db
+      .select({
+        views: sql<number>`COALESCE(SUM(${analytics_product_daily.views}), 0)`.mapWith(Number),
+        add_to_cart: sql<number>`COALESCE(SUM(${analytics_product_daily.add_to_cart}), 0)`.mapWith(
+          Number,
+        ),
+        purchases: sql<number>`COALESCE(SUM(${analytics_product_daily.purchases}), 0)`.mapWith(
+          Number,
+        ),
+        units_sold: sql<number>`COALESCE(SUM(${analytics_product_daily.units_sold}), 0)`.mapWith(
+          Number,
+        ),
+        revenue: sql<string>`COALESCE(SUM(${analytics_product_daily.revenue}), 0)`,
+        recommendation_clicks:
+          sql<number>`COALESCE(SUM(${analytics_product_daily.recommendation_clicks}), 0)`.mapWith(
+            Number,
+          ),
+        avg_conversion: sql<number>`AVG(${analytics_product_daily.conversion_rate})`.mapWith(
+          Number,
+        ),
+      })
+      .from(analytics_product_daily)
+      .where(
+        and(
+          eq(analytics_product_daily.product_id, product_id),
+          gte(analytics_product_daily.day_key, from),
+          lte(analytics_product_daily.day_key, to),
+        ),
+      );
+    return row;
   },
 };

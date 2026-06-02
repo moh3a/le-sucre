@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { product_service } from "@/features/product_information_management/products/services/product.service";
-import { ProductDetailTabs } from "@/features/product_information_management/products/components/product-detail-tabs";
+import { ProductDetailTabs } from "@/features/product_information_management/products/components/details/product-detail-tabs";
 
 type PageProps = { params: Promise<{ product_id: string }> };
 

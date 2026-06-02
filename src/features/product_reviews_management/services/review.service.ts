@@ -19,16 +19,17 @@ import {
 } from "../engines/spam-guard.engine";
 import { createHash as createHashStable } from "node:crypto";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { IReviewProductSummary } from "../types";
 
 function stable_list_hash(input: unknown) {
   return createHashStable("sha256").update(JSON.stringify(input)).digest("hex").slice(0, 16);
 }
 
 export class ReviewService {
-  async get_product_summary(product_id: string) {
+  async get_product_summary(product_id: string): Promise<IReviewProductSummary> {
     const cache_key = REVIEW_CACHE.summary(product_id);
     const cached = await review_cache_service.get(cache_key);
-    if (cached) return cached;
+    if (cached) return cached as IReviewProductSummary;
 
     let summary = await aggregate_repository.get_by_product(product_id);
     if (!summary) {

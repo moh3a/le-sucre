@@ -9,7 +9,6 @@ import {
   Home,
   LayoutDashboard,
   Package,
-  Settings,
   Shield,
   ShoppingCart,
   Tag,
@@ -27,20 +26,19 @@ import { cn } from "@/lib/utils";
 import { siteConfig } from "@/constants";
 
 const navItems = [
-  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-  { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
-  { href: "/admin/produits", label: "Produits", icon: Box },
-  { href: "/admin/categories", label: "Catégories", icon: Grid3X3 },
-  { href: "/admin/clients", label: "Clients", icon: Users },
-  { href: "/admin/inventaire", label: "Inventaire", icon: Package },
-  { href: "/admin/promotions", label: "Promotions", icon: Tag },
-  { href: "/admin/analytiques", label: "Analytiques", icon: BarChart3 },
-  { href: "/admin/roles", label: "Rôles", icon: Shield },
-  { href: "/admin/audit", label: "Journal d'audit", icon: ClipboardList },
+  { href: "/console", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
+  { href: "/console/orders", label: "Commandes", icon: ShoppingCart },
+  { href: "/console/products", label: "Produits", icon: Box },
+  { href: "/console/categories", label: "Catégories", icon: Grid3X3 },
+  { href: "/console/customers", label: "Clients", icon: Users },
+  { href: "/console/inventory", label: "Inventaire", icon: Package },
+  { href: "/console/promotions", label: "Promotions", icon: Tag },
+  { href: "/console/analytics", label: "Analytiques", icon: BarChart3 },
+  { href: "/console/authorization", label: "Rôles", icon: Shield },
+  { href: "/console/audit-logs", label: "Journal d'audit", icon: ClipboardList },
 ];
 
 const bottomItems = [
-  { href: "/admin/parametres", label: "Paramètres", icon: Settings },
   { href: "/", label: "Voir la boutique", icon: Home },
 ];
 

@@ -102,12 +102,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <div className="flex items-center">
-                <FieldLabel htmlFor="login-password">{t("password")}</FieldLabel>
-                <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
-                  {t("forgot")}
-                </a>
-              </div>
+              <FieldLabel htmlFor="login-password">{t("password")}</FieldLabel>
               <Input
                 {...field}
                 id="login-password"

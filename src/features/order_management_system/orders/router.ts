@@ -7,7 +7,11 @@ import {
 } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { order_service } from "./services/order.service";
-import { admin_update_order_status_dto, list_orders_dto } from "./models/order.dto";
+import {
+  admin_update_order_status_dto,
+  list_orders_dto,
+  admin_list_enriched_dto,
+} from "./models/order.dto";
 import { order_admin_service } from "./services/order-admin.service";
 
 export const order_router = create_trpc_router({
@@ -48,5 +52,11 @@ export const order_router = create_trpc_router({
     order_admin_service.stats(),
   ),
 
-  // TODO add adminListEnriched, adminCharts via order_admin_service
+  adminListEnriched: permission_procedure(PERMISSIONS.orders_read)
+    .input(admin_list_enriched_dto)
+    .query(({ input }) => order_admin_service.list_enriched(input)),
+
+  adminCharts: permission_procedure(PERMISSIONS.orders_read)
+    .input(z.object({ days: z.coerce.number().int().min(7).max(365).default(30) }).optional())
+    .query(({ input }) => order_admin_service.charts(input?.days)),
 });

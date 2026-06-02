@@ -10,20 +10,6 @@ export function generate_id(): string {
   return createId();
 }
 
-export function assertIsError(value: unknown): Error {
-  if (value instanceof Error) return value;
-
-  let stringified = "[Unable to stringify the thrown value]";
-  try {
-    stringified = JSON.stringify(value);
-  } catch {}
-
-  const error = new Error(
-    `This value was thrown as is, not through an Error: ${stringified}`,
-  );
-  return error;
-}
-
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -55,13 +41,8 @@ export function titleCase(text: string): string {
     .join(" ");
 }
 
-
 // ─── Number utils ─────────────────────────────────────────
-export function formatCurrency(
-  amount: number,
-  currency = "EUR",
-  locale = "fr-FR",
-): string {
+export function formatCurrency(amount: number, currency = "EUR", locale = "fr-FR"): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
@@ -93,10 +74,7 @@ export function formatDateTime(date: Date | string, locale = "fr-FR"): string {
 }
 
 // ─── Object utils ─────────────────────────────────────────
-export function omit<T extends object, K extends keyof T>(
-  obj: T,
-  keys: K[],
-): Omit<T, K> {
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
   for (const key of keys) {
     delete result[key];
@@ -104,10 +82,7 @@ export function omit<T extends object, K extends keyof T>(
   return result;
 }
 
-export function pick<T extends object, K extends keyof T>(
-  obj: T,
-  keys: K[],
-): Pick<T, K> {
+export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   const result = {} as Pick<T, K>;
   for (const key of keys) {
     if (key in obj) result[key] = obj[key];
@@ -136,10 +111,7 @@ export function unique<T>(array: T[]): T[] {
   return [...new Set(array)];
 }
 
-export function groupBy<T>(
-  array: T[],
-  key: keyof T,
-): Record<string, T[]> {
+export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
   return array.reduce(
     (acc, item) => {
       const groupKey = String(item[key]);

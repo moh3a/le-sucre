@@ -8,6 +8,7 @@ import {
   batch_ingest_dto,
   date_range_dto,
   product_analytics_query_dto,
+  search_analytics_query_dto,
 } from "./models/analytics.dto";
 import z from "zod";
 
@@ -33,10 +34,13 @@ export const analytics_router = create_trpc_router({
     .input(product_analytics_query_dto)
     .query(({ input }) => analytics_query_service.products(input)),
 
-  // TODO: implement analytics per product: analytics_product_daily
   productDetail: permission_procedure(PERMISSIONS.analytics_read)
     .input(product_analytics_query_dto.and(z.object({ product_id: z.string() })))
     .query(({ input }) => analytics_query_service.productDetail(input)),
+
+  searchAnalytics: permission_procedure(PERMISSIONS.analytics_read)
+    .input(search_analytics_query_dto)
+    .query(({ input }) => analytics_query_service.search_analytics(input)),
 
   realtime: permission_procedure(PERMISSIONS.analytics_read).query(() =>
     analytics_query_service.realtime(),

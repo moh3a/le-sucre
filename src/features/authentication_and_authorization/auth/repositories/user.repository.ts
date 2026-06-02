@@ -1,6 +1,6 @@
 import "server-only";
 
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
@@ -53,6 +53,35 @@ export class UserRepository {
         total_pages,
         has_more: page < total_pages,
       },
+    };
+  }
+
+  async stats() {
+    const since_30d = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+
+    const [row] = await db
+      .select({
+        total: count(),
+        active:
+          sql<number>`SUM(CASE WHEN ${users.is_active} = 1 AND ${users.banned} IS NULL THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        new_30d:
+          sql<number>`SUM(CASE WHEN DATE(${users.created_at}) >= ${since_30d} THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        staff:
+          sql<number>`SUM(CASE WHEN ${users.role} IS NOT NULL AND ${users.role} != '' THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+      })
+      .from(users);
+
+    return {
+      total: Number(row?.total ?? 0),
+      active: row?.active ?? 0,
+      new_30d: row?.new_30d ?? 0,
+      staff: row?.staff ?? 0,
     };
   }
 }

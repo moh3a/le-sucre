@@ -1,8 +1,17 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { MoreHorizontal, Pencil, Text, ToggleLeft } from "lucide-react";
+import { parseAsArrayOf, parseAsInteger, parseAsFloat, parseAsString, useQueryState } from "nuqs";
+import {
+  Archive,
+  CheckCircle2,
+  Download,
+  FileText,
+  Folder,
+  MoreHorizontal,
+  Pencil,
+  Tag,
+} from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { useTranslations } from "next-intl";
@@ -10,23 +19,40 @@ import { useTranslations } from "next-intl";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
-import { DataTableToolbar } from "@/features/data-table/components/data-table-toolbar";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { XCircle } from "lucide-react";
 import { formatDate } from "@/lib/format";
-
-// TODO
-// Add filters: brand (from trpc.products.brandsActive), category select, stock_status, price range
-// Add bulk toolbar with trpc.products.bulkAction.useMutation
 
 type ProductRow = {
   id: string;
@@ -47,8 +73,200 @@ type ProductRow = {
   average_rating: string;
 };
 
+interface Option {
+  label: string;
+  value: string;
+}
+
+function FacetedFilter({
+  title,
+  options,
+  icon: Icon,
+  value,
+  onChange,
+}: {
+  title: string;
+  options: Option[];
+  icon?: React.ComponentType<{ className?: string }>;
+  value?: string;
+  onChange: (value: string | null) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="border-dashed font-normal">
+          {value ? (
+            <div
+              role="button"
+              aria-label={`Clear ${title} filter`}
+              tabIndex={0}
+              className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(null);
+              }}
+            >
+              <XCircle className="size-4" />
+            </div>
+          ) : (
+            Icon && <Icon className="size-4" />
+          )}
+          <span className="ml-2">{title}</span>
+          {value && (
+            <>
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
+              <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-56 p-0">
+        <div className="p-2">
+          {options.map((option) => (
+            <Button
+              key={option.value}
+              variant={value === option.value ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => {
+                onChange(value === option.value ? null : option.value);
+                setOpen(false);
+              }}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function RangeFilter({
+  title,
+  min,
+  max,
+  minValue,
+  maxValue,
+  onMinChange,
+  onMaxChange,
+  unit,
+}: {
+  title: string;
+  min: number;
+  max: number;
+  minValue?: number | null;
+  maxValue?: number | null;
+  onMinChange: (value: number | null) => void;
+  onMaxChange: (value: number | null) => void;
+  unit?: string;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="border-dashed font-normal">
+          {minValue != null || maxValue != null ? (
+            <div
+              role="button"
+              aria-label={`Clear ${title} filter`}
+              tabIndex={0}
+              className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMinChange(null);
+                onMaxChange(null);
+              }}
+            >
+              <XCircle className="size-4" />
+            </div>
+          ) : (
+            <div className="size-4" />
+          )}
+          <span className="ml-2">{title}</span>
+          {minValue != null || maxValue != null ? (
+            <>
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
+              <span className="ml-1">
+                {minValue != null ? minValue : "-"} - {maxValue != null ? maxValue : "-"}
+                {unit ? ` ${unit}` : ""}
+              </span>
+            </>
+          ) : null}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Label htmlFor={`${title}-min`} className="sr-only">
+                Min
+              </Label>
+              <Input
+                id={`${title}-min`}
+                type="number"
+                placeholder={min.toString()}
+                min={min}
+                max={max}
+                value={minValue ?? ""}
+                onChange={(e) => onMinChange(e.target.value ? Number(e.target.value) : null)}
+                className={unit ? "pr-8" : ""}
+              />
+              {unit && (
+                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
+                  {unit}
+                </span>
+              )}
+            </div>
+            <div className="relative flex-1">
+              <Label htmlFor={`${title}-max`} className="sr-only">
+                Max
+              </Label>
+              <Input
+                id={`${title}-max`}
+                type="number"
+                placeholder={max.toString()}
+                min={min}
+                max={max}
+                value={maxValue ?? ""}
+                onChange={(e) => onMaxChange(e.target.value ? Number(e.target.value) : null)}
+                className={unit ? "pr-8" : ""}
+              />
+              {unit && (
+                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
+                  {unit}
+                </span>
+              )}
+            </div>
+          </div>
+          <Slider
+            min={min}
+            max={max}
+            step={1}
+            value={[minValue ?? min, maxValue ?? max]}
+            onValueChange={([newMin, newMax]) => {
+              onMinChange(newMin);
+              onMaxChange(newMax);
+            }}
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function ProductDataTable() {
   const t = useTranslations("products");
+  const [assignCategoryOpen, setAssignCategoryOpen] = React.useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("");
 
   const columns = React.useMemo<ColumnDef<ProductRow>[]>(
     () => [
@@ -65,7 +283,9 @@ export function ProductDataTable() {
               className="h-20 w-20 object-cover object-center"
             />
           ) : (
-            <div className="h-20 w-20 bg-neutral-500"></div>
+            <div className="flex h-20 w-20 items-center justify-center bg-neutral-200 text-neutral-400">
+              <FileText className="h-8 w-8" />
+            </div>
           ),
       },
       {
@@ -73,30 +293,18 @@ export function ProductDataTable() {
         accessorKey: "name",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("name")} />,
         cell: ({ row }) => <span className="font-medium">{row.original.name ?? "—"}</span>,
-        meta: { label: t("name"), placeholder: "Rechercher…", variant: "text", icon: Text },
-        enableColumnFilter: true,
       },
       {
         id: "status",
         accessorKey: "status",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
         cell: ({ row }) => <Badge variant="secondary">{t(`status_${row.original.status}`)}</Badge>,
-        meta: {
-          label: t("status"),
-          variant: "select",
-          icon: ToggleLeft,
-          options: [
-            { label: t("status_draft"), value: "draft" },
-            { label: t("status_published"), value: "published" },
-            { label: t("status_archived"), value: "archived" },
-          ],
-        },
-        enableColumnFilter: true,
       },
       {
         id: "base_price",
         accessorKey: "base_price",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("base_price")} />,
+        cell: ({ row }) => `${Number(row.original.base_price).toFixed(2)} DZD`,
       },
       {
         id: "Category",
@@ -112,6 +320,19 @@ export function ProductDataTable() {
         id: "stock",
         accessorKey: "current_stock",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Stock" />,
+        cell: ({ row }) => (
+          <Badge
+            variant={
+              row.original.current_stock === 0
+                ? "destructive"
+                : row.original.current_stock <= 5
+                  ? "outline"
+                  : "default"
+            }
+          >
+            {row.original.current_stock}
+          </Badge>
+        ),
       },
       {
         id: "Units sold",
@@ -122,14 +343,15 @@ export function ProductDataTable() {
         id: "Revenue",
         accessorKey: "revenue",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Revenue" />,
+        cell: ({ row }) => `${Number(row.original.revenue).toFixed(2)} DZD`,
       },
       {
         id: "Rating",
         accessorKey: "average_rating",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Rating" />,
         cell: ({ row }) => (
-          <div>
-            {row.original.average_rating}{" "}
+          <div className="flex items-center gap-2">
+            <span>{row.original.average_rating}</span>
             <Badge variant="secondary">{row.original.review_count}</Badge>
           </div>
         ),
@@ -152,7 +374,7 @@ export function ProductDataTable() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link href={`/console/products/${row.original.id}/edit`}>
-                  <Pencil />
+                  <Pencil className="mr-2 size-4" />
                   {t("edit")}
                 </Link>
               </DropdownMenuItem>
@@ -166,48 +388,210 @@ export function ProductDataTable() {
 
   const [page] = useQueryState("prodPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("prodPerPage", parseAsInteger.withDefault(10));
-  const [search] = useQueryState("name", parseAsString);
+  const [search, setSearchQuery] = useQueryState("name", parseAsString);
   const [status_filter] = useQueryState("status", parseAsArrayOf(parseAsString, ","));
+  const [brand_id, setBrandId] = useQueryState("brand_id", parseAsString);
+  const [category_id, setCategoryId] = useQueryState("category_id", parseAsString);
+  const [stock_status, setStockStatus] = useQueryState("stock_status", parseAsString);
+  const [price_min, setPriceMin] = useQueryState("price_min", parseAsFloat);
+  const [price_max, setPriceMax] = useQueryState("price_max", parseAsFloat);
+  const [rating_min, setRatingMin] = useQueryState("rating_min", parseAsFloat);
+  const [rating_max, setRatingMax] = useQueryState("rating_max", parseAsFloat);
 
   const status = status_filter?.[0] as ProductRow["status"] | undefined;
 
   const utils = trpc.useUtils();
+  const { data: brandsData } = trpc.products.brandsActive.useQuery();
+  const { data: categoriesData } = trpc.categories.tree.useQuery();
   const { data, isLoading } = trpc.products.adminList.useQuery({
     page,
     limit: per_page,
     search: search?.trim() || undefined,
-    status,
+    status: status ?? undefined,
+    brand_id: brand_id ?? undefined,
+    category_id: category_id ?? undefined,
+    stock_status: (stock_status ?? undefined) as
+      | "in_stock"
+      | "low_stock"
+      | "out_of_stock"
+      | undefined,
+    price_min: price_min ?? undefined,
+    price_max: price_max ?? undefined,
+    rating_min: rating_min ?? undefined,
+    rating_max: rating_max ?? undefined,
   });
 
   const bulk = trpc.products.bulkAction.useMutation({
-    onSuccess: () => utils.products.adminList.invalidate(),
+    onSuccess: () => {
+      utils.products.adminList.invalidate();
+      setAssignCategoryOpen(false);
+    },
   });
-  function run_bulk(action: "activate" | "deactivate" | "delete") {
-    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
-    if (!ids.length) return;
-    bulk.mutate({ product_ids: ids, action });
-  }
 
   const items = data?.items ?? [];
   const page_count = data?.meta.total_pages ?? 0;
 
   const { table } = useDataTable({
     data: items,
-    columns,
+    columns: columns as ColumnDef<(typeof items)[number]>[],
     pageCount: page_count,
     queryKeys: { page: "prodPage", perPage: "prodPerPage", sort: "prodSort" },
     getRowId: (row) => row.id,
     enableRowSelection: true,
   });
+  // "name""status""brand_id""category_id""stock_status""price_min""price_max""rating_min""rating_max"
+
+  const brandOptions = brandsData?.map((b) => ({ label: b.name, value: b.id })) ?? [];
+  const categoryOptions = categoriesData?.map((c) => ({ label: c.name, value: c.id })) ?? [];
+  const stockOptions = [
+    { label: "En stock", value: "in_stock" },
+    { label: "Stock faible", value: "low_stock" },
+    { label: "Rupture de stock", value: "out_of_stock" },
+  ];
+
+  function runBulk(action: "activate" | "deactivate" | "delete" | "assign_category") {
+    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+    if (!ids.length) return;
+    if (action === "assign_category") {
+      setAssignCategoryOpen(true);
+    } else {
+      bulk.mutate({ product_ids: ids, action });
+    }
+  }
+
+  function handleAssignCategory() {
+    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+    if (!ids.length || !selectedCategoryId) return;
+    bulk.mutate({ product_ids: ids, action: "assign_category", category_id: selectedCategoryId });
+  }
 
   if (isLoading && !data)
-    return <DataTableSkeleton columnCount={6} rowCount={10} filterCount={2} />;
+    return <DataTableSkeleton columnCount={8} rowCount={10} filterCount={6} />;
 
   return (
-    <DataTable table={table}>
-      <DataTableToolbar table={table}>
-        <DataTableSortList table={table} />
-      </DataTableToolbar>
-    </DataTable>
+    <>
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <Input
+            placeholder="Rechercher un produit…"
+            value={search || ""}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
+          <FacetedFilter
+            title="Marque"
+            options={brandOptions}
+            icon={Tag}
+            value={brand_id ?? undefined}
+            onChange={setBrandId}
+          />
+          <FacetedFilter
+            title="Catégorie"
+            options={categoryOptions}
+            icon={Folder}
+            value={category_id ?? undefined}
+            onChange={setCategoryId}
+          />
+          <FacetedFilter
+            title="Stock"
+            options={stockOptions}
+            icon={Tag}
+            value={stock_status ?? undefined}
+            onChange={setStockStatus}
+          />
+          <RangeFilter
+            title="Prix"
+            min={0}
+            max={100000}
+            minValue={price_min}
+            maxValue={price_max}
+            onMinChange={setPriceMin}
+            onMaxChange={setPriceMax}
+            unit="DZD"
+          />
+          <RangeFilter
+            title="Note"
+            min={0}
+            max={5}
+            minValue={rating_min}
+            maxValue={rating_max}
+            onMinChange={setRatingMin}
+            onMaxChange={setRatingMax}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            </Badge>
+            <Button variant="secondary" size="sm" onClick={() => runBulk("activate")}>
+              <CheckCircle2 className="mr-1 h-4 w-4" />
+              Activer
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => runBulk("deactivate")}>
+              <Archive className="mr-1 h-4 w-4" />
+              Désactiver
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => runBulk("assign_category")}>
+              <Folder className="mr-1 h-4 w-4" />
+              Assigner catégorie
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => runBulk("delete")}>
+              <Archive className="mr-1 h-4 w-4" />
+              Supprimer
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/products/export?${new URLSearchParams({
+                  ...(search ? { search } : {}),
+                  ...(status ? { status } : {}),
+                  ...(brand_id ? { brand_id } : {}),
+                  ...(category_id ? { category_id } : {}),
+                  ...(stock_status ? { stock_status } : {}),
+                  ...(price_min != null ? { price_min: String(price_min) } : {}),
+                  ...(price_max != null ? { price_max: String(price_max) } : {}),
+                  ...(rating_min != null ? { rating_min: String(rating_min) } : {}),
+                  ...(rating_max != null ? { rating_max: String(rating_max) } : {}),
+                })}`}
+                download="products.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                Exporter
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
+
+      <Dialog open={assignCategoryOpen} onOpenChange={setAssignCategoryOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assigner une catégorie</DialogTitle>
+            <DialogDescription>
+              Sélectionnez une catégorie à assigner aux produits sélectionnés.
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une catégorie" />
+            </SelectTrigger>
+            <SelectContent>
+              {categoryOptions.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setAssignCategoryOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleAssignCategory}>Assigner</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

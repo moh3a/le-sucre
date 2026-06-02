@@ -1,17 +1,21 @@
 "use client";
 
+import z from "zod";
 import Link from "next/link";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ProductMediaGallery } from "./product-media-gallery";
-import { ProductTranslationsPanel } from "./product-translations-panel";
 import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
 import { ProductInventoryPanel } from "@/features/inventory_management_system/inventory/components/product-inventory-panel";
 import { ProductRatingSummary } from "@/features/product_reviews_management/components/product-rating-summary";
 import { ProductReviewsList } from "@/features/product_reviews_management/components/product-reviews-list";
 import { ProductOrdersPanel } from "./product-orders-panel";
-import { ProductAnalyticsPanel } from "./product-analytics-panel";
-import { ProductForecastPanel } from "./product-forecast-panel";
+import { ProductAnalyticsPanel } from "../product-analytics-panel";
+import { product_media_dto, upsert_translation_dto } from "../../models/product.dto";
+import { ProductDetailGeneralTab } from "./general-tab";
+
+const product_media_with_id = product_media_dto.and(z.object({ id: z.string() }));
 
 type Props = {
   product_id: string;
@@ -23,8 +27,8 @@ type Props = {
     offer_price: string | null;
     currency: string;
   };
-  translations: Array<{ locale: string; name: string; description?: string | null }>;
-  media: Array<{ id: string; url: string; is_primary: boolean }>;
+  translations: Array<z.infer<typeof upsert_translation_dto>>;
+  media: Array<z.infer<typeof product_media_with_id>>;
 };
 
 export function ProductDetailTabs({ product_id, product, translations, media }: Props) {
@@ -56,23 +60,11 @@ export function ProductDetailTabs({ product_id, product, translations, media }: 
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border p-4">
-              <p className="text-muted-foreground text-xs">Statut</p>
-              <p className="font-medium">{product.status}</p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <p className="text-muted-foreground text-xs">Prix</p>
-              <p className="font-medium">
-                {product.base_price} {product.currency}
-              </p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <p className="text-muted-foreground text-xs">Promo</p>
-              <p className="font-medium">{product.offer_price ?? "—"}</p>
-            </div>
-          </div>
-          <ProductTranslationsPanel product_id={product_id} translations={translations} />
+          <ProductDetailGeneralTab
+            product_id={product_id}
+            product={product}
+            translations={translations}
+          />
         </TabsContent>
 
         <TabsContent value="variants">
@@ -89,7 +81,6 @@ export function ProductDetailTabs({ product_id, product, translations, media }: 
 
         <TabsContent value="inventory" className="space-y-6">
           <ProductInventoryPanel product_id={product_id} />
-          <ProductForecastPanel product_id={product_id} />
         </TabsContent>
 
         <TabsContent value="media">
@@ -98,7 +89,7 @@ export function ProductDetailTabs({ product_id, product, translations, media }: 
 
         <TabsContent value="reviews" className="space-y-6">
           <ProductRatingSummary product_id={product_id} />
-          <ProductReviewsList product_id={product_id} admin />
+          <ProductReviewsList product_id={product_id} />
         </TabsContent>
 
         <TabsContent value="analytics">
