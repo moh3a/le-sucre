@@ -2,8 +2,10 @@ import "server-only";
 
 import { and, count, desc, eq } from "drizzle-orm";
 
+import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/lib/db";
 import { orders, order_items, order_adjustments, order_status_events } from "../schema";
+import { users } from "@/features/authentication_and_authorization/auth/schema";
 
 export class OrderRepository {
   async admin_list_by_product(product_id: string, page: number, limit: number) {
@@ -17,8 +19,10 @@ export class OrderRepository {
       .limit(limit)
       .offset(offset);
     // TODO add customer name
-    // TODO add metadata: pagination total page count total records
-    return items.map((item) => ({ ...item.order, customer_name: "" }));
+    return {
+      items: items.map((item) => ({ ...item.order, customer_name: "" })),
+      meta: { total_pages: Math.ceil(items.length / limit), total_records: items.length },
+    };
   }
 
   async find_by_id(id: string) {
@@ -59,8 +63,24 @@ export class OrderRepository {
   }
 
   async get_full(order_id: string) {
-    const [order] = await db.select().from(orders).where(eq(orders.id, order_id)).limit(1);
-    if (!order) return null;
+    const operator_users = alias(users, "operator_users");
+    const delivery_users = alias(users, "delivery_users");
+
+    const [row] = await db
+      .select({
+        order: orders,
+        operator_name: operator_users.name,
+        operator_email: operator_users.email,
+        delivery_name: delivery_users.name,
+        delivery_email: delivery_users.email,
+      })
+      .from(orders)
+      .leftJoin(operator_users, eq(operator_users.id, orders.assigned_operator_id))
+      .leftJoin(delivery_users, eq(delivery_users.id, orders.assigned_delivery_person_id))
+      .where(eq(orders.id, order_id))
+      .limit(1);
+
+    if (!row) return null;
 
     const [items, adjustments, status_events] = await Promise.all([
       db.select().from(order_items).where(eq(order_items.order_id, order_id)),
@@ -72,7 +92,18 @@ export class OrderRepository {
         .orderBy(desc(order_status_events.created_at)),
     ]);
 
-    return { order, items, adjustments, status_events };
+    return {
+      order: {
+        ...row.order,
+        operator_name: row.operator_name,
+        operator_email: row.operator_email,
+        delivery_name: row.delivery_name,
+        delivery_email: row.delivery_email,
+      },
+      items,
+      adjustments,
+      status_events,
+    };
   }
 
   async list_for_customer(user_id: string, page: number, limit: number, status?: string) {
@@ -111,10 +142,22 @@ export class OrderRepository {
     const offset = (page - 1) * limit;
     const where = status ? eq(orders.status, status) : undefined;
 
+    const operator_users = alias(users, "operator_users");
+    const delivery_users = alias(users, "delivery_users");
+
     const [items, [{ total }]] = await Promise.all([
       db
-        .select()
+        .select({
+          order: orders,
+          customer_name: users.name,
+          customer_email: users.email,
+          operator_name: operator_users.name,
+          delivery_name: delivery_users.name,
+        })
         .from(orders)
+        .leftJoin(users, eq(users.id, orders.user_id))
+        .leftJoin(operator_users, eq(operator_users.id, orders.assigned_operator_id))
+        .leftJoin(delivery_users, eq(delivery_users.id, orders.assigned_delivery_person_id))
         .where(where)
         .orderBy(desc(orders.created_at))
         .limit(limit)
@@ -126,7 +169,13 @@ export class OrderRepository {
     const total_pages = Math.ceil(total_records / limit) || 1;
 
     return {
-      items,
+      items: items.map((i) => ({
+        ...i.order,
+        customer_name: i.customer_name,
+        customer_email: i.customer_email,
+        operator_name: i.operator_name,
+        delivery_name: i.delivery_name,
+      })),
       meta: {
         page,
         limit,
@@ -148,6 +197,23 @@ export class OrderRepository {
         status,
         ...(patch ?? {}),
       })
+      .where(eq(orders.id, order_id));
+  }
+
+  async update_order_assignment(
+    order_id: string,
+    patch: { assigned_operator_id?: string | null; assigned_delivery_person_id?: string | null },
+  ) {
+    return await db
+      .update(orders)
+      .set(patch)
+      .where(eq(orders.id, order_id));
+  }
+
+  async update_notes(order_id: string, notes: string | null) {
+    return await db
+      .update(orders)
+      .set({ notes })
       .where(eq(orders.id, order_id));
   }
 }

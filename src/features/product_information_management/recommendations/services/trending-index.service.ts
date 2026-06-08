@@ -6,6 +6,7 @@ import { product_trending_scores } from "../schema";
 import { trending_period_key } from "../engines/trending.engine";
 import { and, eq } from "drizzle-orm";
 import { redisKeys } from "@/lib/redis/keys";
+import { format, subDays } from "date-fns";
 
 export class TrendingIndexService {
   async persist_trending_scores(period: "day" | "week" = "day") {
@@ -58,7 +59,7 @@ export class TrendingIndexService {
             order_count,
             score: String(candidate.score),
             rank,
-            updated_at: new Date().toISOString(),
+            updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
           })
           .where(eq(product_trending_scores.id, existing.id));
       } else {
@@ -76,9 +77,7 @@ export class TrendingIndexService {
     }
 
     // Del keys older than 14 days
-    const old_date = new Date();
-    old_date.setDate(old_date.getDate() - 14);
-    const old_period_key = old_date.toISOString().slice(0, 10);
+    const old_period_key = format(subDays(new Date(), 14), "yyyy-MM-dd");
     await redis.del(`rec:trending:z:${period}:${old_period_key}`);
   }
 

@@ -2,9 +2,10 @@ import "server-only";
 import { redis } from "@/lib/redis";
 import { redisKeys } from "@/lib/redis/keys";
 import { ANALYTICS_EVENT } from "../constants/event-types";
+import { format } from "date-fns";
 
 export function day_key(d = new Date()) {
-  return d.toISOString().slice(0, 10);
+  return format(d, "yyyy-MM-dd");
 }
 
 export async function increment_realtime_counter(

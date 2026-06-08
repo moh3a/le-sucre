@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
+import { format } from "date-fns";
 
 type PreorderAllocationRow = {
   id: string;
@@ -138,7 +139,7 @@ export function PreordersTable({
                         );
                         return;
                       }
-                      onUpdateEta(row.original.id, date.toISOString());
+                      onUpdateEta(row.original.id, format(date, "yyyy-MM-dd HH:mm:ss"));
                     }
                   }}
                 >

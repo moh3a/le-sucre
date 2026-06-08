@@ -15,10 +15,10 @@ import { orders } from "@/features/order_management_system/orders/schema";
 export const shipments = mysqlTable(
   "shipments",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    order_id: varchar("order_id", { length: 24 })
+    order_id: varchar("order_id", { length: 255 })
       .notNull()
       .references(() => orders.id, { onDelete: "cascade" }),
 
@@ -67,10 +67,10 @@ export const shipments = mysqlTable(
 export const shipment_tracking_events = mysqlTable(
   "shipment_tracking_events",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    shipment_id: varchar("shipment_id", { length: 24 })
+    shipment_id: varchar("shipment_id", { length: 255 })
       .notNull()
       .references(() => shipments.id, { onDelete: "cascade" }),
     provider_event_id: varchar("provider_event_id", { length: 128 }),
@@ -90,11 +90,11 @@ export const shipment_tracking_events = mysqlTable(
 export const shipping_jobs = mysqlTable(
   "shipping_jobs",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     job_type: varchar("job_type", { length: 64 }).notNull(), // sync_tracking | dispatch_retry
-    shipment_id: varchar("shipment_id", { length: 24 }).references(() => shipments.id, {
+    shipment_id: varchar("shipment_id", { length: 255 }).references(() => shipments.id, {
       onDelete: "cascade",
     }),
     provider: varchar("provider", { length: 32 }),

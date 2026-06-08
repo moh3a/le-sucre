@@ -3,12 +3,11 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { analytics_customer_cohorts } from "../schema";
+import { format, subDays } from "date-fns";
 
 export const customer_analytics_engine = {
   async repeat_purchase_rate(days = 90) {
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    const cutoff_iso = cutoff.toISOString();
+    const cutoff_iso = format(subDays(new Date(), days), "yyyy-MM-dd HH:mm:ss");
 
     const rows = await db
       .select({

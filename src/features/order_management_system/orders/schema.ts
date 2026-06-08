@@ -5,6 +5,7 @@ import {
   int,
   json,
   mysqlTable,
+  text,
   timestamp,
   uniqueIndex,
   varchar,
@@ -16,7 +17,7 @@ import { carts } from "../schema";
 export const customer_addresses = mysqlTable(
   "customer_addresses",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     user_id: varchar("user_id", { length: 255 })
@@ -42,7 +43,7 @@ export const customer_addresses = mysqlTable(
 export const orders = mysqlTable(
   "orders",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     order_number: varchar("order_number", { length: 32 }).notNull(),
@@ -50,7 +51,7 @@ export const orders = mysqlTable(
       onDelete: "set null",
     }),
     guest_email: varchar("guest_email", { length: 255 }),
-    cart_id: varchar("cart_id", { length: 24 }).references(() => carts.id, {
+    cart_id: varchar("cart_id", { length: 255 }).references(() => carts.id, {
       onDelete: "set null",
     }),
     currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
@@ -78,8 +79,23 @@ export const orders = mysqlTable(
     shipment_reference: varchar("shipment_reference", { length: 128 }),
 
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
+    notes: text("notes"),
     placed_at: timestamp("placed_at", { mode: "string" }),
     cancelled_at: timestamp("cancelled_at", { mode: "string" }),
+
+    assigned_operator_id: varchar("assigned_operator_id", { length: 255 }).references(
+      () => users.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    assigned_delivery_person_id: varchar("assigned_delivery_person_id", { length: 255 }).references(
+      () => users.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
@@ -88,31 +104,33 @@ export const orders = mysqlTable(
     uniqueIndex("orders_idempotency_uidx").on(t.idempotency_key),
     index("orders_user_created_idx").on(t.user_id, t.created_at),
     index("orders_status_idx").on(t.status, t.created_at),
+    index("orders_operator_idx").on(t.assigned_operator_id),
+    index("orders_delivery_idx").on(t.assigned_delivery_person_id),
   ],
 );
 
 export const order_items = mysqlTable(
   "order_items",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    order_id: varchar("order_id", { length: 24 })
+    order_id: varchar("order_id", { length: 255 })
       .notNull()
       .references(() => orders.id, { onDelete: "cascade" }),
-    sku_id: varchar("sku_id", { length: 24 }).notNull(),
-    product_id: varchar("product_id", { length: 24 }).notNull(),
+    sku_id: varchar("sku_id", { length: 255 }).notNull(),
+    product_id: varchar("product_id", { length: 255 }).notNull(),
     sku_code: varchar("sku_code", { length: 128 }).notNull(),
     product_name: varchar("product_name", { length: 255 }).notNull(),
     quantity: int("quantity").notNull(),
     unit_price: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
     line_total: decimal("line_total", { precision: 12, scale: 2 }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
-    reservation_id: varchar("reservation_id", { length: 24 }),
+    reservation_id: varchar("reservation_id", { length: 255 }),
     fulfillment_type: varchar("fulfillment_type", { length: 32 }).notNull().default("standard"),
     preorder_status: varchar("preorder_status", { length: 32 }),
     estimated_available_at: timestamp("estimated_available_at", { mode: "string" }),
-    preorder_allocation_id: varchar("preorder_allocation_id", { length: 24 }),
+    preorder_allocation_id: varchar("preorder_allocation_id", { length: 255 }),
     payment_capture_mode: varchar("payment_capture_mode", { length: 16 }).notNull().default("full"),
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
   },
@@ -126,10 +144,10 @@ export const order_items = mysqlTable(
 export const order_adjustments = mysqlTable(
   "order_adjustments",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    order_id: varchar("order_id", { length: 24 })
+    order_id: varchar("order_id", { length: 255 })
       .notNull()
       .references(() => orders.id, { onDelete: "cascade" }),
     type: varchar("type", { length: 32 }).notNull(), // tax | discount | shipping
@@ -144,10 +162,10 @@ export const order_adjustments = mysqlTable(
 export const order_status_events = mysqlTable(
   "order_status_events",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    order_id: varchar("order_id", { length: 24 })
+    order_id: varchar("order_id", { length: 255 })
       .notNull()
       .references(() => orders.id, { onDelete: "cascade" }),
     from_status: varchar("from_status", { length: 32 }),
@@ -162,7 +180,7 @@ export const order_status_events = mysqlTable(
 export const discount_codes = mysqlTable(
   "discount_codes",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     code: varchar("code", { length: 64 }).notNull(),

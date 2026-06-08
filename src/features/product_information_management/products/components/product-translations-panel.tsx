@@ -2,25 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import z from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { RichTextEditor } from "./rich-text-editor";
+import { upsert_translation_dto } from "../models/product.dto";
 
 const LOCALES = ["en", "ar"] as const;
 
 type ProductTranslationsPanelProps = {
   product_id: string;
-  translations: Array<{
-    locale: string;
-    name: string;
-    description: string | null;
-    keywords: string | null;
-    seo_title: string | null;
-    seo_description: string | null;
-  }>;
+  translations: Array<z.infer<typeof upsert_translation_dto>>;
 };
 
 export function ProductTranslationsPanel({

@@ -17,10 +17,10 @@ import { products } from "../schema";
 export const product_properties = mysqlTable(
   "product_properties",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     code: varchar("code", { length: 64 }).notNull(), // "color"
@@ -35,10 +35,10 @@ export const product_properties = mysqlTable(
 export const property_values = mysqlTable(
   "property_values",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    property_id: varchar("property_id", { length: 24 })
+    property_id: varchar("property_id", { length: 255 })
       .notNull()
       .references(() => product_properties.id, { onDelete: "cascade" }),
     code: varchar("code", { length: 64 }).notNull(), // "red"
@@ -53,10 +53,10 @@ export const property_values = mysqlTable(
 export const product_skus = mysqlTable(
   "product_skus",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     sku_code: varchar("sku_code", { length: 128 }).notNull(),
@@ -84,10 +84,10 @@ export const product_skus = mysqlTable(
 export const sku_option_values = mysqlTable(
   "sku_option_values",
   {
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "cascade" }),
-    property_value_id: varchar("property_value_id", { length: 24 })
+    property_value_id: varchar("property_value_id", { length: 255 })
       .notNull()
       .references(() => property_values.id, { onDelete: "restrict" }),
   },
@@ -101,10 +101,10 @@ export const sku_option_values = mysqlTable(
 export const sku_prices = mysqlTable(
   "sku_prices",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "cascade" }),
     channel: varchar("channel", { length: 32 }).notNull().default("retail"), // retail | wholesale
@@ -121,13 +121,13 @@ export const sku_prices = mysqlTable(
 export const wholesale_rules = mysqlTable(
   "wholesale_rules",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 }).references(() => products.id, {
+    product_id: varchar("product_id", { length: 255 }).references(() => products.id, {
       onDelete: "cascade",
     }),
-    sku_id: varchar("sku_id", { length: 24 }).references(() => product_skus.id, {
+    sku_id: varchar("sku_id", { length: 255 }).references(() => product_skus.id, {
       onDelete: "cascade",
     }),
     min_quantity: int("min_quantity").notNull(),

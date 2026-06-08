@@ -1,6 +1,7 @@
 "use client";
 
 import { FolderTree, Package, ReceiptCent } from "lucide-react";
+import { format, subDays } from "date-fns";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -8,10 +9,10 @@ import { trpc } from "@/components/providers/app-providers";
 import { OrderTable } from "@/features/order_management_system/orders/components/order-table";
 
 export function DashboardPageClient() {
-  const to = new Date().toISOString().slice(0, 10);
-  const from = new Date(new Date() - 7 * 86400000).toISOString().slice(0, 10);
-
-  const analytics = trpc.analytics.overview.useQuery({ from, to });
+  const analytics = trpc.analytics.overview.useQuery({
+    from: format(subDays(new Date(), 7), "yyyy-MM-dd"),
+    to: format(new Date(), "yyyy-MM-dd"),
+  });
   const orders = trpc.orders.adminList.useQuery({ page: 1, limit: 1 });
   const products = trpc.products.list.useQuery({ page: 1, limit: 1, status: "published" });
   const categories = trpc.categories.list.useQuery({ page: 1, limit: 1 });

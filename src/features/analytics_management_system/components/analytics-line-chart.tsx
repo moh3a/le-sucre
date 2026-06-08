@@ -15,7 +15,7 @@ export function AnalyticsLineChart({
   x_key,
   y_key,
 }: {
-  data: Array<Record<string, string | number>>;
+  data: Array<Record<string, string | number | null>>;
   x_key: string;
   y_key: string;
 }) {

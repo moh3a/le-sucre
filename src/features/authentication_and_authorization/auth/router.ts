@@ -51,4 +51,11 @@ export const admin_auth_router = create_trpc_router({
       }),
     )
     .query(({ input }) => audit_repository.list_paginated(input.page, input.limit)),
+  listUsersByRole: permission_procedure(PERMISSIONS.users_read)
+    .input(
+      z.object({
+        role: z.string().min(1).max(100),
+      }),
+    )
+    .query(({ input }) => user_repository.find_users_by_role(input.role)),
 });

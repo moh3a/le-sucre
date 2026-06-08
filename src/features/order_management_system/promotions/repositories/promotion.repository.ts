@@ -4,9 +4,10 @@ import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import { promotions, promotion_rules } from "../schema";
 import { PROMOTION_STATUS, PROMOTION_TYPE } from "../constants/promotion-types";
+import { format } from "date-fns";
 
 function now_iso() {
-  return new Date().toISOString();
+  return format(new Date(), "yyyy-MM-dd HH:mm:ss");
 }
 
 export class PromotionRepository {

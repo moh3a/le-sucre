@@ -1,13 +1,13 @@
 import "server-only";
 import { and, eq, gte } from "drizzle-orm";
+import { format, subDays } from "date-fns";
+
 import { db } from "@/lib/db";
 import { inventory_sales_velocity_daily } from "../schema";
 
 export class VelocityRepository {
   async list_series(sku_id: string, warehouse_id: string, window_days: number) {
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - window_days);
-    const day_key = cutoff.toISOString().slice(0, 10);
+    const day_key = format(subDays(new Date(), window_days), "yyyy-MM-dd");
 
     const rows = await db
       .select({

@@ -1,6 +1,10 @@
 import z from "zod";
+
 import { ProductTranslationsPanel } from "../product-translations-panel";
-import { upsert_translation_dto } from "../../models/product.dto";
+import { ProductStatusBadge } from "../product-status-badge";
+import { product_details_dto, upsert_translation_dto } from "../../models/product.dto";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export function ProductDetailGeneralTab({
   product,
@@ -8,35 +12,74 @@ export function ProductDetailGeneralTab({
   translations,
 }: {
   product_id: string;
-  product: {
-    sku: string;
-    slug: string;
-    status: string;
-    base_price: string;
-    offer_price: string | null;
-    currency: string;
-  };
+  product: z.infer<typeof product_details_dto>;
   translations: Array<z.infer<typeof upsert_translation_dto>>;
 }) {
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border p-4">
-          <p className="text-muted-foreground text-xs">Statut</p>
-          <p className="font-medium">{product.status}</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Details</CardTitle>
+        <CardDescription>Manage main product details.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <Card className="col-span-2 md:col-span-3">
+            <CardHeader>
+              <CardTitle>Reference</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Slug: <span className="font-semibold">{product.slug}</span>
+              </p>
+              <p>
+                Keywords:{" "}
+                <span>
+                  {product.keywords?.split(",").map((keyword) => (
+                    <Badge key={keyword} variant="outline">
+                      {keyword}
+                    </Badge>
+                  ))}
+                </span>
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProductStatusBadge status={product.status} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Prix</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {product.base_price} {product.currency}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Promo</CardTitle>
+            </CardHeader>
+            <CardContent>{product.offer_price ?? "—"}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Category</CardTitle>
+            </CardHeader>
+            <CardContent>{product.category_id}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Marque</CardTitle>
+            </CardHeader>
+            <CardContent>{product.brand_id}</CardContent>
+          </Card>
         </div>
-        <div className="rounded-lg border p-4">
-          <p className="text-muted-foreground text-xs">Prix</p>
-          <p className="font-medium">
-            {product.base_price} {product.currency}
-          </p>
-        </div>
-        <div className="rounded-lg border p-4">
-          <p className="text-muted-foreground text-xs">Promo</p>
-          <p className="font-medium">{product.offer_price ?? "—"}</p>
-        </div>
-      </div>
-      <ProductTranslationsPanel product_id={product_id} translations={translations} />
-    </>
+        <ProductTranslationsPanel product_id={product_id} translations={translations} />
+      </CardContent>
+    </Card>
   );
 }

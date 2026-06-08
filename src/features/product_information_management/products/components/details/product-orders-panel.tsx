@@ -1,14 +1,15 @@
 "use client";
 
-import * as React from "react";
-import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { trpc } from "@/components/providers/app-providers";
 import { DataTable } from "@/features/data-table/components/data-table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 
 type ProductOrderRow = {
@@ -73,7 +74,7 @@ export function ProductOrdersPanel({ product_id }: { product_id: string }) {
     limit: 10,
   });
 
-  const items = (data ?? []) as ProductOrderRow[];
+  const items = (data?.items ?? []) as ProductOrderRow[];
   const { table } = useDataTable({
     data: items,
     columns,
@@ -85,11 +86,16 @@ export function ProductOrdersPanel({ product_id }: { product_id: string }) {
   if (isLoading) return <DataTableSkeleton columnCount={5} rowCount={5} />;
 
   return (
-    <div className="space-y-4">
-      <p className="text-muted-foreground text-sm">
-        {data?.meta.total_records ?? 0} commande(s) contenant ce produit
-      </p>
-      <DataTable table={table} />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Commandes</CardTitle>
+        <CardDescription>
+          {data?.meta.total_records ?? 0} commande(s) contenant ce produit
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <DataTable table={table} />
+      </CardContent>
+    </Card>
   );
 }

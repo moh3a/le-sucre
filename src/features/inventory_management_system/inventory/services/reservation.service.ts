@@ -16,6 +16,7 @@ import {
 } from "../helpers/stock-sync.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
+import { addDays, format } from "date-fns";
 
 export class ReservationService {
   constructor(private readonly repo = inventory_repository) {}
@@ -23,7 +24,10 @@ export class ReservationService {
   async create(input: z.infer<typeof create_reservation_dto>) {
     await this.repo.ensure_level(input.sku_id, input.warehouse_id);
 
-    const expires_at = new Date(Date.now() + input.expires_in_sec * 1000).toISOString();
+    const expires_at = format(
+      addDays(new Date(), input.expires_in_sec * 1000),
+      "yyyy-MM-dd HH:mm:ss",
+    );
 
     const reservation_id = await db.transaction(async (tx) => {
       const level = await this.repo.get_level_for_update(tx, input.sku_id, input.warehouse_id);
@@ -164,7 +168,7 @@ export class ReservationService {
   }
 
   async expire_stale() {
-    const now = new Date().toISOString();
+    const now = format(new Date(), "yyyy-MM-dd HH:mm:ss");
     const stale = await db
       .select()
       .from(inventory_reservations)

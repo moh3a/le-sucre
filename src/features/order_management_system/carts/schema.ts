@@ -16,13 +16,13 @@ import { products } from "@/features/product_information_management/products/sch
 export const carts = mysqlTable(
   "carts",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     user_id: varchar("user_id", { length: 255 }).references(() => users.id, {
       onDelete: "set null",
     }),
-    guest_token: varchar("guest_token", { length: 64 }),
+    guest_token: varchar("guest_token", { length: 255 }),
     status: varchar("status", { length: 32 }).notNull().default("active"), // active | merged | converted
     currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
     channel: varchar("channel", { length: 32 }).notNull().default("retail"),
@@ -40,24 +40,24 @@ export const carts = mysqlTable(
 export const cart_items = mysqlTable(
   "cart_items",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    cart_id: varchar("cart_id", { length: 24 })
+    cart_id: varchar("cart_id", { length: 255 })
       .notNull()
       .references(() => carts.id, { onDelete: "cascade" }),
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "restrict" }),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     quantity: int("quantity").notNull().default(1),
     unit_price: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
-    reservation_id: varchar("reservation_id", { length: 24 }),
+    reservation_id: varchar("reservation_id", { length: 255 }),
     fulfillment_type: varchar("fulfillment_type", { length: 32 }).notNull().default("standard"),
-    preorder_allocation_id: varchar("preorder_allocation_id", { length: 24 }),
+    preorder_allocation_id: varchar("preorder_allocation_id", { length: 255 }),
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),

@@ -3,12 +3,7 @@
 import { trpc } from "@/components/providers/app-providers";
 import { AnalyticsLineChart } from "./analytics-line-chart";
 import { AnalyticsKpiCards } from "./analytics-kpi-cards";
-
-function default_range() {
-  const to = new Date().toISOString().slice(0, 10);
-  const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
-  return { from, to };
-}
+import { default_range } from "../helpers/default-range";
 
 export function AnalyticsDashboardClient() {
   const { from, to } = default_range();

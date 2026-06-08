@@ -8,6 +8,7 @@ import {
   inventory_forecast_jobs,
 } from "../schema";
 import type { ForecastOutput } from "../providers/forecast-provider.interface";
+import { format } from "date-fns";
 
 const DEFAULT_RULES = {
   lead_time_days: 7,
@@ -133,7 +134,7 @@ export class ForecastRepository {
   mark_done(id: string) {
     return db
       .update(inventory_forecast_jobs)
-      .set({ status: "done", updated_at: new Date().toISOString() })
+      .set({ status: "done", updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
       .where(eq(inventory_forecast_jobs.id, id));
   }
 
@@ -144,7 +145,7 @@ export class ForecastRepository {
         status: "failed",
         attempts: sql`${inventory_forecast_jobs.attempts} + 1`,
         last_error: error instanceof Error ? error.message : "unknown",
-        updated_at: new Date().toISOString(),
+        updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       })
       .where(eq(inventory_forecast_jobs.id, id));
   }

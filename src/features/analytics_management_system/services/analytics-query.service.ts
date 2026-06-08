@@ -9,7 +9,13 @@ import { analytics_cache_service } from "./analytics-cache.service";
 import { ANALYTICS_CACHE, ANALYTICS_CACHE_TTL } from "../constants/cache-keys";
 import type { date_range_dto, product_analytics_query_dto } from "../models/analytics.dto";
 import { reporting_queries } from "../queries/reporting.queries";
-import { IAnalyticsOverview, IProductsAnalytics, ISearchAnalytics } from "../types";
+import {
+  IAnalyticsOverview,
+  IProductDetailsAnalytics,
+  IProductsAnalytics,
+  ISearchAnalytics,
+} from "../types";
+import { format } from "date-fns";
 
 export class AnalyticsQueryService {
   async overview(input: z.infer<typeof date_range_dto>): Promise<IAnalyticsOverview> {
@@ -46,10 +52,12 @@ export class AnalyticsQueryService {
     return payload;
   }
 
-  async productDetail(input: z.infer<typeof product_analytics_query_dto> & { product_id: string }) {
+  async productDetail(
+    input: z.infer<typeof product_analytics_query_dto> & { product_id: string },
+  ): Promise<IProductDetailsAnalytics> {
     const key = `analytics:product_detail:${input.product_id}:${input.from}:${input.to}`;
     const cached = await analytics_cache_service.get(key);
-    if (cached) return cached;
+    if (cached) return cached as IProductDetailsAnalytics;
 
     const [daily_series, totals] = await Promise.all([
       product_analytics_engine.daily_series(input.product_id, input.from, input.to),
@@ -77,7 +85,7 @@ export class AnalyticsQueryService {
 
   async realtime() {
     const counters = await redis.hgetall("analytics:realtime:events");
-    return { counters, ts: new Date().toISOString() };
+    return { counters, ts: format(new Date(), "yyyy-MM-dd HH:mm:ss") };
   }
 }
 

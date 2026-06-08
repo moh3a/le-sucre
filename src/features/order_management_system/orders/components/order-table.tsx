@@ -25,11 +25,12 @@ type OrderRow = {
   payment_status: string;
   fulfillment_status: string;
   grand_total: string;
-  guest_email: string | null;
+  guest_phone: string | null;
   created_at: string;
   customer_name: string | null;
-  customer_email: string | null;
   customer_phone: string | null;
+  operator_name: string | null;
+  delivery_name: string | null;
 };
 
 const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -67,11 +68,11 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Client" />,
         cell: ({ row }) => {
           const name = row.original.customer_name;
-          const email = row.original.customer_email ?? row.original.guest_email;
+          const phone = row.original.customer_phone ?? row.original.guest_phone;
           return (
             <div className="flex flex-col">
               <span className="font-medium">{name ?? "—"}</span>
-              {email && <span className="text-muted-foreground text-xs">{email}</span>}
+              {phone && <span className="text-muted-foreground text-xs">{phone}</span>}
             </div>
           );
         },
@@ -117,6 +118,22 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         ),
       },
       {
+        id: "operator_name",
+        accessorKey: "operator_name",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Opérateur" />,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">{row.original.operator_name ?? "—"}</span>
+        ),
+      },
+      {
+        id: "delivery_name",
+        accessorKey: "delivery_name",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Livreur" />,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">{row.original.delivery_name ?? "—"}</span>
+        ),
+      },
+      {
         id: "grand_total",
         accessorKey: "grand_total",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Total" />,
@@ -140,9 +157,15 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
 
   const [page] = useQueryState("ordPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("ordPerPage", parseAsInteger.withDefault(compact ? 5 : 10));
-  const [status_filter, setStatusFilter] = useQueryState("status", parseAsArrayOf(parseAsString, ","));
+  const [status_filter, setStatusFilter] = useQueryState(
+    "status",
+    parseAsArrayOf(parseAsString, ","),
+  );
   const [payment_status, setPaymentStatus] = useQueryState("payment_status", parseAsString);
-  const [fulfillment_status, setFulfillmentStatus] = useQueryState("fulfillment_status", parseAsString);
+  const [fulfillment_status, setFulfillmentStatus] = useQueryState(
+    "fulfillment_status",
+    parseAsString,
+  );
   const [from, setFrom] = useQueryState("from", parseAsString);
   const [to, setTo] = useQueryState("to", parseAsString);
 
@@ -185,8 +208,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
     { label: "Expédié", value: "fulfilled" },
   ];
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={8} rowCount={compact ? 5 : 10} />;
+  if (isLoading && !data) return <DataTableSkeleton columnCount={8} rowCount={compact ? 5 : 10} />;
 
   return (
     <DataTable table={table}>

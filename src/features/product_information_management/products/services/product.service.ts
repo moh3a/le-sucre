@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { z } from "zod";
+import { z } from "zod";
 
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
@@ -9,6 +9,8 @@ import { slugify_name } from "@/features/product_information_management/categori
 
 import {
   create_product_dto,
+  product_details_dto,
+  full_product_media_dto,
   type ProductStatus,
   update_product_dto,
   upsert_translation_dto,
@@ -75,10 +77,12 @@ export class ProductService {
   }
 
   async get_by_id(id: string) {
-    const product = await this.repo.find_by_id(id);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    const productData = await this.repo.find_by_id(id);
+    if (!productData) throw new NotFoundError("Produit introuvable");
+    const product = product_details_dto.parse(productData);
     const translations = await this.repo.list_translations(id);
-    const media = await this.repo.list_media(id);
+    const mediaData = await this.repo.list_media(id);
+    const media = z.array(full_product_media_dto).parse(mediaData);
     return { product, translations, media };
   }
 

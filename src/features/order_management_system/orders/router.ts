@@ -59,4 +59,47 @@ export const order_router = create_trpc_router({
   adminCharts: permission_procedure(PERMISSIONS.orders_read)
     .input(z.object({ days: z.coerce.number().int().min(7).max(365).default(30) }).optional())
     .query(({ input }) => order_admin_service.charts(input?.days)),
+
+  adminAssignOperator: permission_procedure(PERMISSIONS.orders_write)
+    .input(
+      z.object({
+        order_id: z.string().min(1).max(255),
+        operator_id: z.string().max(255).nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      order_service.assign_operator({
+        ...input,
+        actor_user_id: ctx.session!.user.id,
+      }),
+    ),
+
+  adminAssignDeliveryPerson: permission_procedure(PERMISSIONS.orders_write)
+    .input(
+      z.object({
+        order_id: z.string().min(1).max(255),
+        delivery_person_id: z.string().max(255).nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      order_service.assign_delivery_person({
+        ...input,
+        actor_user_id: ctx.session!.user.id,
+      }),
+    ),
+
+  adminUpdateNotes: permission_procedure(PERMISSIONS.orders_write)
+    .input(
+      z.object({
+        order_id: z.string().min(1).max(255),
+        notes: z.string().max(4096).nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      order_service.update_notes({
+        order_id: input.order_id,
+        notes: input.notes,
+        actor_user_id: ctx.session!.user.id,
+      }),
+    ),
 });

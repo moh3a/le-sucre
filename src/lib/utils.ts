@@ -144,3 +144,23 @@ export function isNumber(value: unknown): value is number {
 export function isDefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
+
+export function objectToFormData(obj: Record<string, unknown>): FormData {
+  const formData = new FormData();
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+
+    if (value instanceof File || value instanceof Blob) {
+      formData.append(key, value);
+    } else if (Array.isArray(value)) {
+      value.forEach((item) => {
+        formData.append(`${key}[]`, String(item));
+      });
+    } else if (typeof value === "object") {
+      formData.append(key, JSON.stringify(value));
+    } else {
+      formData.append(key, String(value));
+    }
+  });
+  return formData;
+}

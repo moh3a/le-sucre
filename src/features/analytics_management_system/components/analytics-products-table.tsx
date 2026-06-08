@@ -8,6 +8,7 @@ import { DataTableColumnHeader } from "@/features/data-table/components/data-tab
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { Badge } from "@/components/ui/badge";
+import { default_range } from "../helpers/default-range";
 
 type ProductRow = {
   product_id: string;
@@ -16,12 +17,6 @@ type ProductRow = {
   revenue: string;
   views: number;
 };
-
-function default_range() {
-  const to = new Date().toISOString().slice(0, 10);
-  const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
-  return { from, to };
-}
 
 export function AnalyticsProductsTable() {
   const { from, to } = default_range();

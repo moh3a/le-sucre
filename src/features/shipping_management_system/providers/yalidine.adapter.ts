@@ -9,6 +9,7 @@ import type {
   CreateShipmentResult,
   TrackingResult,
 } from "./contracts";
+import { format } from "date-fns";
 
 const YALIDINE_API = process.env.YALIDINE_API_URL ?? "https://api.yalidine.app/v1";
 const YALIDINE_TOKEN = process.env.YALIDINE_API_TOKEN ?? "";
@@ -93,7 +94,7 @@ export class YalidineAdapter implements ShippingProviderAdapter {
           status: String(e.status ?? "unknown"),
           description: e.description ? String(e.description) : undefined,
           location: e.location ? String(e.location) : undefined,
-          occurred_at: e.occurred_at ?? new Date().toISOString(),
+          occurred_at: e.occurred_at ?? format(new Date(), "yyyy-MM-dd HH:mm:ss"),
           raw_payload: e,
         }))
       : [];

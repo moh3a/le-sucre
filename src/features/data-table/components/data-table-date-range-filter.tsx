@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { formatDate } from "@/lib/format";
+import { format } from "date-fns";
 
 interface DateRangeFilterProps {
   title: string;
@@ -34,8 +35,7 @@ export function DateRangeFilter({
 
   const formatDateRange = () => {
     if (!from && !to) return title;
-    if (from && to)
-      return `${formatDate(new Date(from))} - ${formatDate(new Date(to))}`;
+    if (from && to) return `${formatDate(new Date(from))} - ${formatDate(new Date(to))}`;
     if (from) return `From ${formatDate(new Date(from))}`;
     if (to) return `To ${formatDate(new Date(to))}`;
     return title;
@@ -72,8 +72,8 @@ export function DateRangeFilter({
           mode="range"
           selected={selectedRange}
           onSelect={(range) => {
-            onFromChange(range?.from ? range.from.toISOString().split("T")[0] : null);
-            onToChange(range?.to ? range.to.toISOString().split("T")[0] : null);
+            onFromChange(range?.from ? format(range.from, "yyyy-MM-dd") : null);
+            onToChange(range?.to ? format(range.to, "yyyy-MM-dd") : null);
             if (range?.from && range?.to) setOpen(false);
           }}
         />

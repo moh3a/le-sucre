@@ -15,10 +15,25 @@ import { inventory_levels } from "@/features/inventory_management_system/invento
 const INSERT_CHUNK = 500;
 
 export class SkuGenerationEngine {
+  async reset_skus_for_product(product_id: string) {
+    const skus = await db
+      .select()
+      .from(product_skus)
+      .where(eq(product_skus.product_id, product_id));
+    for (const sku of skus) {
+      await Promise.all([
+        db.delete(product_skus).where(eq(product_skus.id, sku.id)),
+        db.delete(inventory_levels).where(eq(inventory_levels.sku_id, sku.id)),
+        db.delete(sku_option_values).where(eq(sku_option_values.sku_id, sku.id)),
+      ]);
+    }
+  }
+
   async generate_for_product(input: {
     product_id: string;
     max_combinations: number;
   }): Promise<GenerateSkusResult> {
+    await this.reset_skus_for_product(input.product_id);
     const [product] = await db
       .select()
       .from(products)

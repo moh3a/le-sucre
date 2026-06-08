@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { AppError } from "./error_handling";
 
 export interface PaginationMeta {
@@ -38,7 +39,7 @@ export class ApiResponse {
       error: null,
       meta: {
         ...(pagination && { pagination }),
-        timestamp: new Date().toISOString(),
+        timestamp: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         ...(request_id && { request_id }),
       },
     };
@@ -60,7 +61,7 @@ export class ApiResponse {
         details: error.is_operational ? error.details : null,
       },
       meta: {
-        timestamp: new Date().toISOString(),
+        timestamp: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         ...(request_id && { request_id }),
       },
     };

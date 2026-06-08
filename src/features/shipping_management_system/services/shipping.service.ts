@@ -5,6 +5,7 @@ import { NotFoundError, ConflictError } from "@/lib/error_handling";
 import { shipping_repository } from "../repository";
 import { get_shipping_provider } from "../providers/provider-registry";
 import type { ShippingProviderName } from "../providers/contracts";
+import { format } from "date-fns";
 
 export class ShippingService {
   constructor(private readonly repo = shipping_repository) {}
@@ -76,7 +77,7 @@ export class ShippingService {
       metadata: created.raw_payload ?? {},
     });
 
-    await this.repo.update_shipment(shipment!.id, { last_sync_at: new Date().toISOString() });
+    await this.repo.update_shipment(shipment!.id, { last_sync_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") });
     await this.sync_tracking(shipment!.id);
 
     return this.get_shipment_detail(shipment!.id);
@@ -94,7 +95,7 @@ export class ShippingService {
       status: tracking.status,
       delivery_status: tracking.delivery_status,
       tracking_url: tracking.tracking_url ?? shipment.tracking_url,
-      last_sync_at: new Date().toISOString(),
+      last_sync_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       metadata: tracking.raw_payload ?? shipment.metadata,
     });
 

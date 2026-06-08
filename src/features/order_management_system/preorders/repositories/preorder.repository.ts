@@ -1,5 +1,8 @@
 import "server-only";
+
 import { and, asc, eq, sql } from "drizzle-orm";
+import { format } from "date-fns";
+
 import { db, type DbClient } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import { sku_preorder_settings, preorder_allocations, preorder_status_events } from "../schema";
@@ -57,7 +60,7 @@ export class PreorderRepository {
         status: PREORDER_ALLOCATION_STATUS.confirmed,
         order_id,
         order_item_id,
-        updated_at: new Date().toISOString(),
+        updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       })
       .where(eq(preorder_allocations.id, allocation_id));
 
@@ -86,7 +89,7 @@ export class PreorderRepository {
         .update(preorder_allocations)
         .set({
           status: PREORDER_ALLOCATION_STATUS.cancelled,
-          updated_at: new Date().toISOString(),
+          updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         })
         .where(eq(preorder_allocations.id, allocation_id));
 
@@ -117,8 +120,8 @@ export class PreorderRepository {
       .update(preorder_allocations)
       .set({
         status: PREORDER_ALLOCATION_STATUS.fulfilled,
-        fulfilled_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        fulfilled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+        updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       })
       .where(eq(preorder_allocations.id, allocation_id));
   }
@@ -136,7 +139,7 @@ export class PreorderRepository {
           deposit_percent: input.deposit_percent,
           lead_time_days: input.lead_time_days,
           is_active: input.is_active,
-          updated_at: new Date().toISOString(),
+          updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         },
       });
   }
@@ -156,7 +159,7 @@ export class PreorderRepository {
   update_estimated_date(allocation_id: string, estimated_available_at: string) {
     return db
       .update(preorder_allocations)
-      .set({ estimated_available_at, updated_at: new Date().toISOString() })
+      .set({ estimated_available_at, updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
       .where(eq(preorder_allocations.id, allocation_id));
   }
 }

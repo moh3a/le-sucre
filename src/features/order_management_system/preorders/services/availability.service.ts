@@ -3,6 +3,7 @@ import "server-only";
 import { preorder_repository } from "../repositories/preorder.repository";
 import { inventory_repository } from "@/features/inventory_management_system/inventory/repositories/inventory.repository";
 import { demand_forecast_service } from "@/features/inventory_management_system/forecasting/services/demand-forecast.service";
+import { addDays, format } from "date-fns";
 
 export class AvailabilityService {
   async resolve(sku_id: string, quantity: number, warehouse_id = "default") {
@@ -55,9 +56,10 @@ export class AvailabilityService {
   private async estimate_from_forecast(sku_id: string, warehouse_id: string) {
     const f = await demand_forecast_service.get_sku_forecast(sku_id, warehouse_id);
     if (f.days_until_stockout == null) return null;
-    const d = new Date();
-    d.setDate(d.getDate() + Math.ceil(Number(f.days_until_stockout)));
-    return d.toISOString();
+    return format(
+      addDays(new Date(), Math.ceil(Number(f.days_until_stockout))),
+      "yyyy-MM-dd HH:mm:ss",
+    );
   }
 }
 export const availability_service = new AvailabilityService();

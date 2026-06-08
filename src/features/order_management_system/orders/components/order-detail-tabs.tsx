@@ -12,9 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type OrderDetailTabsProps = { order_id: string };
 
@@ -30,6 +32,32 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const { data, isLoading, refetch } = trpc.orders.adminGet.useQuery({ order_id });
   const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => refetch() });
   const [next_status, set_next_status] = useState<string>("");
+
+
+  const { data: operators_data, isLoading: operators_loading } =
+    trpc.adminAuth.listUsersByRole.useQuery({ role: "operator" });
+  const { data: deliverers_data, isLoading: deliverers_loading } =
+    trpc.adminAuth.listUsersByRole.useQuery({ role: "delivery_person" });
+
+  const assign_operator = trpc.orders.adminAssignOperator.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Opérateur assigné avec succès");
+    },
+    onError: (err) => {
+      toast.error(`Erreur d'affectation: ${err.message}`);
+    },
+  });
+
+  const assign_delivery = trpc.orders.adminAssignDeliveryPerson.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Livreur assigné avec succès");
+    },
+    onError: (err) => {
+      toast.error(`Erreur d'affectation: ${err.message}`);
+    },
+  });
 
   if (isLoading) {
     return (
@@ -144,6 +172,69 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Affectation du personnel</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-1.5">
+                <label className="text-muted-foreground text-xs font-medium">Opérateur</label>
+                <Select
+                  value={order.assigned_operator_id ?? "unassigned"}
+                  onValueChange={(val) =>
+                    assign_operator.mutate({
+                      order_id: order.id,
+                      operator_id: val === "unassigned" ? null : val,
+                    })
+                  }
+                  disabled={operators_loading || assign_operator.isPending}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner un opérateur" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Non assigné</SelectItem>
+                    {operators_data?.map((op) => (
+                      <SelectItem key={op.id} value={op.id}>
+                        {op.name} ({op.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex-1 space-y-1.5">
+                <label className="text-muted-foreground text-xs font-medium">Livreur</label>
+                <Select
+                  value={order.assigned_delivery_person_id ?? "unassigned"}
+                  onValueChange={(val) =>
+                    assign_delivery.mutate({
+                      order_id: order.id,
+                      delivery_person_id: val === "unassigned" ? null : val,
+                    })
+                  }
+                  disabled={deliverers_loading || assign_delivery.isPending}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner un livreur" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Non assigné</SelectItem>
+                    {deliverers_data?.map((del) => (
+                      <SelectItem key={del.id} value={del.id}>
+                        {del.name} ({del.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <NotesCard order_id={order.id} initial_notes={order.notes ?? ""} on_saved={refetch} />
       </TabsContent>
 
       {/* ── Items ───────────────────────────────────── */}
@@ -310,5 +401,58 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         </div>
       </TabsContent>
     </Tabs>
+  );
+}
+
+type NotesCardProps = { order_id: string; initial_notes: string; on_saved: () => void };
+
+function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
+  const [draft, set_draft] = useState(initial_notes);
+  const update_notes = trpc.orders.adminUpdateNotes.useMutation({
+    onSuccess: () => {
+      on_saved();
+      toast.success("Notes sauvegardées");
+    },
+    onError: (err) => toast.error(`Erreur: ${err.message}`),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm font-medium">Notes internes</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Textarea
+          id="order-notes"
+          rows={5}
+          placeholder="Ajouter une note interne visible uniquement par l'équipe…"
+          value={draft}
+          onChange={(e) => set_draft(e.target.value)}
+          className="resize-none text-sm"
+        />
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            disabled={update_notes.isPending}
+            onClick={() => update_notes.mutate({ order_id, notes: draft || null })}
+          >
+            Sauvegarder
+          </Button>
+          {draft && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={update_notes.isPending}
+              onClick={() => {
+                set_draft("");
+                update_notes.mutate({ order_id, notes: null });
+              }}
+            >
+              Effacer
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -3,7 +3,8 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { product_reviews, product_review_aggregates } from "../schema";
 import { REVIEW_STATUS } from "../constants/review-status";
-
+import { format } from "date-fns";
+ 
 export async function recompute_product_rating_aggregate(product_id: string) {
   const [row] = await db
     .select({
@@ -42,7 +43,7 @@ export async function recompute_product_rating_aggregate(product_id: string) {
     rating_3: row?.rating_3 ?? 0,
     rating_4: row?.rating_4 ?? 0,
     rating_5: row?.rating_5 ?? 0,
-    updated_at: new Date().toISOString(),
+    updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
   };
 
   await db

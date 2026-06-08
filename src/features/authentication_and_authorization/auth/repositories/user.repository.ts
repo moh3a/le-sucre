@@ -3,7 +3,8 @@ import "server-only";
 import { count, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { users } from "@/features/authentication_and_authorization/auth/schema";
+import { users, user_roles, roles } from "@/features/authentication_and_authorization/auth/schema";
+import { format, subDays } from "date-fns";
 
 export class UserRepository {
   async find_by_id(id: string) {
@@ -57,8 +58,8 @@ export class UserRepository {
   }
 
   async stats() {
-    const since_30d = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
-
+    const since_30d =  format(subDays(new Date(), 30), "yyyy-MM-dd");
+    
     const [row] = await db
       .select({
         total: count(),
@@ -83,6 +84,20 @@ export class UserRepository {
       new_30d: row?.new_30d ?? 0,
       staff: row?.staff ?? 0,
     };
+  }
+
+  async find_users_by_role(role_name: string) {
+    return db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(user_roles, eq(user_roles.user_id, users.id))
+      .innerJoin(roles, eq(user_roles.role_id, roles.id))
+      .where(eq(roles.name, role_name))
+      .orderBy(users.name);
   }
 }
 

@@ -15,22 +15,22 @@ import { users } from "@/features/authentication_and_authorization/auth/schema";
 export const analytics_events = mysqlTable(
   "analytics_events",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     event_type: varchar("event_type", { length: 64 }).notNull(),
-    session_key: varchar("session_key", { length: 64 }),
+    session_key: varchar("session_key", { length: 255 }),
     user_id: varchar("user_id", { length: 255 }).references(() => users.id, {
       onDelete: "set null",
     }),
-    product_id: varchar("product_id", { length: 24 }),
-    sku_id: varchar("sku_id", { length: 24 }),
+    product_id: varchar("product_id", { length: 255 }),
+    sku_id: varchar("sku_id", { length: 255 }),
     category_id: varchar("category_id", { length: 255 }),
-    brand_id: varchar("brand_id", { length: 24 }),
-    order_id: varchar("order_id", { length: 24 }),
-    cart_id: varchar("cart_id", { length: 24 }),
+    brand_id: varchar("brand_id", { length: 255 }),
+    order_id: varchar("order_id", { length: 255 }),
+    cart_id: varchar("cart_id", { length: 255 }),
     search_query: varchar("search_query", { length: 512 }),
-    campaign_id: varchar("campaign_id", { length: 64 }),
+    campaign_id: varchar("campaign_id", { length: 255 }),
     slot_type: varchar("slot_type", { length: 64 }),
     revenue: decimal("revenue", { precision: 12, scale: 2 }),
     quantity: int("quantity"),
@@ -51,7 +51,7 @@ export const analytics_events = mysqlTable(
 export const analytics_daily_metrics = mysqlTable(
   "analytics_daily_metrics",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     day_key: varchar("day_key", { length: 10 }).notNull(),
@@ -75,13 +75,13 @@ export const analytics_daily_metrics = mysqlTable(
 export const analytics_product_daily = mysqlTable(
   "analytics_product_daily",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     day_key: varchar("day_key", { length: 10 }).notNull(),
-    product_id: varchar("product_id", { length: 24 }).notNull(),
+    product_id: varchar("product_id", { length: 255 }).notNull(),
     category_id: varchar("category_id", { length: 255 }),
-    brand_id: varchar("brand_id", { length: 24 }),
+    brand_id: varchar("brand_id", { length: 255 }),
     views: int("views").notNull().default(0),
     add_to_cart: int("add_to_cart").notNull().default(0),
     purchases: int("purchases").notNull().default(0),
@@ -103,7 +103,7 @@ export const analytics_product_daily = mysqlTable(
 export const analytics_category_daily = mysqlTable(
   "analytics_category_daily",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     day_key: varchar("day_key", { length: 10 }).notNull(),
@@ -119,11 +119,11 @@ export const analytics_category_daily = mysqlTable(
 export const analytics_brand_daily = mysqlTable(
   "analytics_brand_daily",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     day_key: varchar("day_key", { length: 10 }).notNull(),
-    brand_id: varchar("brand_id", { length: 24 }).notNull(),
+    brand_id: varchar("brand_id", { length: 255 }).notNull(),
     views: int("views").notNull().default(0),
     revenue: decimal("revenue", { precision: 14, scale: 2 }).notNull().default("0"),
     units_sold: int("units_sold").notNull().default(0),
@@ -136,7 +136,7 @@ export const analytics_brand_daily = mysqlTable(
 export const analytics_search_daily = mysqlTable(
   "analytics_search_daily",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     day_key: varchar("day_key", { length: 10 }).notNull(),
@@ -156,7 +156,7 @@ export const analytics_search_daily = mysqlTable(
 export const analytics_funnel_daily = mysqlTable(
   "analytics_funnel_daily",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     day_key: varchar("day_key", { length: 10 }).notNull(),
@@ -172,7 +172,7 @@ export const analytics_funnel_daily = mysqlTable(
 export const analytics_customer_cohorts = mysqlTable(
   "analytics_customer_cohorts",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     cohort_month: varchar("cohort_month", { length: 7 }).notNull(), // YYYY-MM
@@ -189,7 +189,7 @@ export const analytics_customer_cohorts = mysqlTable(
 export const analytics_jobs = mysqlTable(
   "analytics_jobs",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     job_type: varchar("job_type", { length: 64 }).notNull(),

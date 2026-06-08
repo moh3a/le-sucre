@@ -4,10 +4,11 @@ import { db } from "@/lib/db";
 import { product_trending_scores } from "../schema";
 import { redis } from "@/lib/redis";
 import { redisKeys } from "@/lib/redis/keys";
+import { format } from "date-fns";
 
 export function trending_period_key(period: "day" | "week") {
   const d = new Date();
-  if (period === "day") return d.toISOString().slice(0, 10);
+  if (period === "day") return format(d, "yyyy-MM-dd");
   const jan1 = new Date(d.getFullYear(), 0, 1);
   const week = Math.ceil(((d.getTime() - jan1.getTime()) / 86400000 + jan1.getDay() + 1) / 7);
   return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;

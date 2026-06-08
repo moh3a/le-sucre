@@ -11,6 +11,7 @@ import {
 } from "../schema";
 import { build_public_review_filters } from "../engines/review-filter.engine";
 import { review_order_by } from "../engines/review-sort.engine";
+import { format, subDays } from "date-fns";
 
 export class ReviewRepository {
   find_by_id(id: string) {
@@ -182,7 +183,7 @@ export class ReviewRepository {
   }
 
   async rating_trends(days = 30) {
-    const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+    const since = format(subDays(new Date(), days), "yyyy-MM-dd");
     return db
       .select({
         day_key: sql<string>`DATE(${product_reviews.created_at})`,

@@ -1,15 +1,19 @@
 import "server-only";
 import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { endOfMonth, format, startOfMonth, subDays } from "date-fns";
+import { alias } from "drizzle-orm/mysql-core";
+
 import { db } from "@/lib/db";
 import { orders } from "../schema";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 
 function month_bounds() {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
-  return { start, end };
-} 
+  return {
+    start: format(startOfMonth(now), "yyyy-MM-dd HH:mm:ss"),
+    end: format(endOfMonth(now), "yyyy-MM-dd HH:mm:ss"),
+  };
+}
 
 export class OrderAdminRepository {
   async stats() {
@@ -54,7 +58,7 @@ export class OrderAdminRepository {
   }
 
   async revenue_series(days = 30) {
-    const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+    const since = format(subDays(new Date(), days), "yyyy-MM-dd");
     return db
       .select({
         day_key: sql<string>`DATE(${orders.placed_at})`,
@@ -90,6 +94,9 @@ export class OrderAdminRepository {
     if (input.to) clauses.push(lte(orders.created_at, input.to));
     const where = clauses.length ? and(...clauses) : undefined;
 
+    const operator_users = alias(users, "operator_users");
+    const delivery_users = alias(users, "delivery_users");
+
     const items = await db
       .select({
         id: orders.id,
@@ -105,9 +112,15 @@ export class OrderAdminRepository {
         customer_phone: sql<
           string | null
         >`JSON_UNQUOTE(JSON_EXTRACT(${orders.shipping_address}, '$.phone'))`,
+        assigned_operator_id: orders.assigned_operator_id,
+        operator_name: operator_users.name,
+        assigned_delivery_person_id: orders.assigned_delivery_person_id,
+        delivery_name: delivery_users.name,
       })
       .from(orders)
       .leftJoin(users, eq(users.id, orders.user_id))
+      .leftJoin(operator_users, eq(operator_users.id, orders.assigned_operator_id))
+      .leftJoin(delivery_users, eq(delivery_users.id, orders.assigned_delivery_person_id))
       .where(where)
       .orderBy(desc(orders.created_at))
       .limit(input.limit)

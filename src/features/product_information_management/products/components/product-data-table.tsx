@@ -53,6 +53,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { XCircle } from "lucide-react";
 import { formatDate } from "@/lib/format";
+import { ProductStatusBadge } from "./product-status-badge";
 
 type ProductRow = {
   id: string;
@@ -293,13 +294,13 @@ export function ProductDataTable() {
         accessorKey: "name",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("name")} />,
         cell: ({ row }) => <span className="font-medium">{row.original.name ?? "—"}</span>,
-      },
+      }, 
       {
         id: "status",
         accessorKey: "status",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
-        cell: ({ row }) => <Badge variant="secondary">{t(`status_${row.original.status}`)}</Badge>,
-      },
+        cell: ({ row }) => <ProductStatusBadge status={row.original.status ?? "draft"} />,
+      }, 
       {
         id: "base_price",
         accessorKey: "base_price",
@@ -373,7 +374,7 @@ export function ProductDataTable() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/console/products/${row.original.id}/edit`}>
+                <Link href={`/console/products/${row.original.id}`}>
                   <Pencil className="mr-2 size-4" />
                   {t("edit")}
                 </Link>

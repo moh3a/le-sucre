@@ -5,6 +5,7 @@ import { recommendation_index_jobs } from "../schema";
 import { indexing_service } from "./indexing.service";
 import { rebuild_co_purchase_window } from "../engines/collaborative.engine";
 import { trending_index_service } from "./trending-index.service"; // persist redis zset -> product_trending_scores
+import { format } from "date-fns";
 
 export class IndexJobRunnerService {
   async run_due(limit = 20) {
@@ -30,7 +31,7 @@ export class IndexJobRunnerService {
         }
         await db
           .update(recommendation_index_jobs)
-          .set({ status: "done", updated_at: new Date().toISOString() })
+          .set({ status: "done", updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
           .where(eq(recommendation_index_jobs.id, job.id));
       } catch (e) {
         await db
@@ -39,7 +40,7 @@ export class IndexJobRunnerService {
             status: "failed",
             attempts: job.attempts + 1,
             last_error: e instanceof Error ? e.message : "unknown",
-            updated_at: new Date().toISOString(),
+            updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
           })
           .where(eq(recommendation_index_jobs.id, job.id));
       }

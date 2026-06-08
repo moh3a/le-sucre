@@ -1,34 +1,27 @@
 "use client";
 
 import z from "zod";
-import Link from "next/link";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ProductMediaGallery } from "./product-media-gallery";
 import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
 import { ProductInventoryPanel } from "@/features/inventory_management_system/inventory/components/product-inventory-panel";
 import { ProductRatingSummary } from "@/features/product_reviews_management/components/product-rating-summary";
 import { ProductReviewsList } from "@/features/product_reviews_management/components/product-reviews-list";
+import { ProductMediaGallery } from "./product-media-gallery";
 import { ProductOrdersPanel } from "./product-orders-panel";
-import { ProductAnalyticsPanel } from "../product-analytics-panel";
-import { product_media_dto, upsert_translation_dto } from "../../models/product.dto";
 import { ProductDetailGeneralTab } from "./general-tab";
-
-const product_media_with_id = product_media_dto.and(z.object({ id: z.string() }));
+import { ProductAnalyticsPanel } from "./product-analytics-panel";
+import {
+  full_product_media_dto,
+  product_details_dto,
+  upsert_translation_dto,
+} from "../../models/product.dto";
 
 type Props = {
   product_id: string;
-  product: {
-    sku: string;
-    slug: string;
-    status: string;
-    base_price: string;
-    offer_price: string | null;
-    currency: string;
-  };
+  product: z.infer<typeof product_details_dto>;
   translations: Array<z.infer<typeof upsert_translation_dto>>;
-  media: Array<z.infer<typeof product_media_with_id>>;
+  media: Array<z.infer<typeof full_product_media_dto>>;
 };
 
 export function ProductDetailTabs({ product_id, product, translations, media }: Props) {
@@ -36,16 +29,9 @@ export function ProductDetailTabs({ product_id, product, translations, media }: 
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-2xl font-bold">{fr?.name ?? product.slug}</h1>
-          <p className="text-muted-foreground text-sm">
-            SKU {product.sku} · {product.slug}
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <Link href={`/console/products/${product_id}/edit`}>Modifier</Link>
-        </Button>
+      <div>
+        <h1 className="font-heading text-2xl font-bold">{fr?.name ?? product.slug}</h1>
+        <p className="text-muted-foreground text-sm">Product details</p>
       </div>
 
       <Tabs defaultValue="general">
@@ -72,6 +58,7 @@ export function ProductDetailTabs({ product_id, product, translations, media }: 
             product_id={product_id}
             product_sku={product.sku}
             currency={product.currency}
+            has_variants={product.has_variants}
           />
         </TabsContent>
 

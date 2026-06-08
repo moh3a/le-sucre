@@ -18,20 +18,20 @@ import { orders, order_items } from "@/features/order_management_system/orders/s
 export const product_reviews = mysqlTable(
   "product_reviews",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     user_id: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
 
-    order_id: varchar("order_id", { length: 24 }).references(() => orders.id, {
+    order_id: varchar("order_id", { length: 255 }).references(() => orders.id, {
       onDelete: "set null",
     }),
-    order_item_id: varchar("order_item_id", { length: 24 }).references(() => order_items.id, {
+    order_item_id: varchar("order_item_id", { length: 255 }).references(() => order_items.id, {
       onDelete: "set null",
     }),
 
@@ -67,7 +67,7 @@ export const product_reviews = mysqlTable(
 );
 
 export const product_review_aggregates = mysqlTable("product_review_aggregates", {
-  product_id: varchar("product_id", { length: 24 })
+  product_id: varchar("product_id", { length: 255 })
     .primaryKey()
     .references(() => products.id, { onDelete: "cascade" }),
   average_rating: decimal("average_rating", { precision: 4, scale: 2 }).notNull().default("0"),
@@ -83,7 +83,7 @@ export const product_review_aggregates = mysqlTable("product_review_aggregates",
 export const product_review_helpful_votes = mysqlTable(
   "product_review_helpful_votes",
   {
-    review_id: varchar("review_id", { length: 24 })
+    review_id: varchar("review_id", { length: 255 })
       .notNull()
       .references(() => product_reviews.id, { onDelete: "cascade" }),
     user_id: varchar("user_id", { length: 255 })
@@ -100,10 +100,10 @@ export const product_review_helpful_votes = mysqlTable(
 export const product_review_reports = mysqlTable(
   "product_review_reports",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    review_id: varchar("review_id", { length: 24 })
+    review_id: varchar("review_id", { length: 255 })
       .notNull()
       .references(() => product_reviews.id, { onDelete: "cascade" }),
     reporter_user_id: varchar("reporter_user_id", { length: 255 })
@@ -123,10 +123,10 @@ export const product_review_reports = mysqlTable(
 export const product_review_moderation_events = mysqlTable(
   "product_review_moderation_events",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    review_id: varchar("review_id", { length: 24 })
+    review_id: varchar("review_id", { length: 255 })
       .notNull()
       .references(() => product_reviews.id, { onDelete: "cascade" }),
     actor_user_id: varchar("actor_user_id", { length: 255 }),

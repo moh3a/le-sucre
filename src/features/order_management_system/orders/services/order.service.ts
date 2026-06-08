@@ -19,6 +19,7 @@ import { preorder_repository } from "../../preorders/repositories/preorder.repos
 import { promo_code_repository } from "../../promotions/repositories/promo-code.repository";
 import { track_promotion_redemption } from "../../promotions/analytics/promotion-analytics.hook";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { user_repository } from "@/features/authentication_and_authorization/auth/repositories/user.repository";
 import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
@@ -26,6 +27,7 @@ import { reservation_service } from "@/features/inventory_management_system/inve
 import { db } from "@/lib/db";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
+import { format } from "date-fns";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -77,7 +79,7 @@ export class OrderService {
       billing_address: input.billing_address ?? null,
       idempotency_key: input.idempotency_key,
       payment_provider: input.payment_provider ?? null,
-      placed_at: new Date().toISOString(),
+      placed_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
 
     // const item_inserts = await Promise.all(
@@ -309,7 +311,7 @@ export class OrderService {
     assert_order_transition(current.status, input.status);
 
     await this.repo.update_order_status(input.order_id, input.status, {
-      ...(input.status === "cancelled" ? { cancelled_at: new Date().toISOString() } : {}),
+      ...(input.status === "cancelled" ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") } : {}),
     });
 
     await this.repo.insert_status_event({
@@ -326,6 +328,147 @@ export class OrderService {
       resource_type: "order_id",
       resource_id: input.order_id,
     });
+    return this.repo.get_full(input.order_id);
+  }
+
+  async assign_operator(input: {
+    order_id: string;
+    operator_id: string | null;
+    actor_user_id: string;
+  }) {
+    const current = await this.repo.find_by_id(input.order_id);
+    if (!current) throw new NotFoundError("Commande introuvable");
+
+    const old_operator_id = current.assigned_operator_id;
+    if (old_operator_id !== input.operator_id) {
+      let old_name = "Non assigné";
+      let new_name = "Non assigné";
+
+      if (old_operator_id) {
+        const old_user = await user_repository.find_by_id(old_operator_id);
+        if (old_user) old_name = old_user.name;
+      }
+      if (input.operator_id) {
+        const new_user = await user_repository.find_by_id(input.operator_id);
+        if (new_user) new_name = new_user.name;
+      }
+
+      let note = "";
+      if (!old_operator_id && input.operator_id) {
+        note = `Opérateur assigné : ${new_name}`;
+      } else if (old_operator_id && !input.operator_id) {
+        note = `Opérateur désassigné (précédemment : ${old_name})`;
+      } else {
+        note = `Opérateur modifié : de ${old_name} à ${new_name}`;
+      }
+
+      await this.repo.update_order_assignment(input.order_id, {
+        assigned_operator_id: input.operator_id,
+      });
+
+      await this.repo.insert_status_event({
+        id: generate_id(),
+        order_id: input.order_id,
+        from_status: current.status,
+        to_status: current.status,
+        actor_user_id: input.actor_user_id,
+        note,
+      });
+    }
+
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.assign_operator",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+      metadata: { operator_id: input.operator_id ?? undefined },
+    });
+
+    return this.repo.get_full(input.order_id);
+  }
+
+  async assign_delivery_person(input: {
+    order_id: string;
+    delivery_person_id: string | null;
+    actor_user_id: string;
+  }) {
+    const current = await this.repo.find_by_id(input.order_id);
+    if (!current) throw new NotFoundError("Commande introuvable");
+
+    const old_delivery_id = current.assigned_delivery_person_id;
+    if (old_delivery_id !== input.delivery_person_id) {
+      let old_name = "Non assigné";
+      let new_name = "Non assigné";
+
+      if (old_delivery_id) {
+        const old_user = await user_repository.find_by_id(old_delivery_id);
+        if (old_user) old_name = old_user.name;
+      }
+      if (input.delivery_person_id) {
+        const new_user = await user_repository.find_by_id(input.delivery_person_id);
+        if (new_user) new_name = new_user.name;
+      }
+
+      let note = "";
+      if (!old_delivery_id && input.delivery_person_id) {
+        note = `Livreur assigné : ${new_name}`;
+      } else if (old_delivery_id && !input.delivery_person_id) {
+        note = `Livreur désassigné (précédemment : ${old_name})`;
+      } else {
+        note = `Livreur modifié : de ${old_name} à ${new_name}`;
+      }
+
+      await this.repo.update_order_assignment(input.order_id, {
+        assigned_delivery_person_id: input.delivery_person_id,
+      });
+
+      await this.repo.insert_status_event({
+        id: generate_id(),
+        order_id: input.order_id,
+        from_status: current.status,
+        to_status: current.status,
+        actor_user_id: input.actor_user_id,
+        note,
+      });
+    }
+
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.assign_delivery_person",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+      metadata: { delivery_person_id: input.delivery_person_id ?? undefined },
+    });
+
+    return this.repo.get_full(input.order_id);
+  }
+
+  async update_notes(input: {
+    order_id: string;
+    notes: string | null;
+    actor_user_id: string;
+  }) {
+    const current = await this.repo.find_by_id(input.order_id);
+    if (!current) throw new NotFoundError("Commande introuvable");
+
+    await this.repo.update_notes(input.order_id, input.notes);
+
+    await this.repo.insert_status_event({
+      id: generate_id(),
+      order_id: input.order_id,
+      from_status: current.status,
+      to_status: current.status,
+      actor_user_id: input.actor_user_id,
+      note: input.notes ? "Notes mises à jour" : "Notes supprimées",
+    });
+
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.update_notes",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+    });
+
     return this.repo.get_full(input.order_id);
   }
 }

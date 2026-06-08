@@ -17,13 +17,13 @@ import { product_skus } from "@/features/product_information_management/variants
 export const inventory_sales_velocity_daily = mysqlTable(
   "inventory_sales_velocity_daily",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "cascade" }),
-    warehouse_id: varchar("warehouse_id", { length: 24 }).notNull().default("default"),
+    warehouse_id: varchar("warehouse_id", { length: 255 }).notNull().default("default"),
     day_key: varchar("day_key", { length: 10 }).notNull(), // YYYY-MM-DD
     units_sold: int("units_sold").notNull().default(0),
     units_returned: int("units_returned").notNull().default(0),
@@ -40,13 +40,13 @@ export const inventory_sales_velocity_daily = mysqlTable(
 export const inventory_forecast_snapshots = mysqlTable(
   "inventory_forecast_snapshots",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "cascade" }),
-    warehouse_id: varchar("warehouse_id", { length: 24 }).notNull().default("default"),
+    warehouse_id: varchar("warehouse_id", { length: 255 }).notNull().default("default"),
     avg_daily_sales: decimal("avg_daily_sales", { precision: 10, scale: 4 }).notNull().default("0"),
     trend_slope: decimal("trend_slope", { precision: 10, scale: 6 }).notNull().default("0"), // units/day change
     days_until_stockout: decimal("days_until_stockout", { precision: 10, scale: 2 }),
@@ -71,7 +71,7 @@ export const inventory_forecast_snapshots = mysqlTable(
 export const inventory_alert_rules = mysqlTable(
   "inventory_alert_rules",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     scope_type: varchar("scope_type", { length: 16 }).notNull(), // global|category|sku
@@ -95,11 +95,11 @@ export const inventory_alert_rules = mysqlTable(
 export const inventory_alerts = mysqlTable(
   "inventory_alerts",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    sku_id: varchar("sku_id", { length: 24 }).notNull(),
-    warehouse_id: varchar("warehouse_id", { length: 24 }).notNull().default("default"),
+    sku_id: varchar("sku_id", { length: 255 }).notNull(),
+    warehouse_id: varchar("warehouse_id", { length: 255 }).notNull().default("default"),
     alert_type: varchar("alert_type", { length: 32 }).notNull(), // low_stock|stockout_predicted|reorder
     severity: varchar("severity", { length: 16 }).notNull(), // info|warning|critical
     message: varchar("message", { length: 512 }).notNull(),
@@ -118,7 +118,7 @@ export const inventory_alerts = mysqlTable(
 export const inventory_forecast_jobs = mysqlTable(
   "inventory_forecast_jobs",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     job_type: varchar("job_type", { length: 64 }).notNull(),

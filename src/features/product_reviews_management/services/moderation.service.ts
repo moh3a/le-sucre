@@ -8,13 +8,14 @@ import { review_cache_service } from "./review-cache.service";
 import { recompute_product_rating_aggregate } from "../engines/rating-aggregation.engine";
 import { REVIEW_STATUS } from "../constants/review-status";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { format } from "date-fns";
 
 export class ModerationService {
   async moderate(actor_user_id: string, input: z.infer<typeof moderate_review_dto>) {
     const review = await review_repository.find_by_id(input.review_id);
     if (!review) throw new NotFoundError("Avis introuvable");
 
-    const now = new Date().toISOString();
+    const now = format(new Date(), "yyyy-MM-dd HH:mm:ss");
     await review_repository.update(review.id, {
       status: input.status,
       moderation_note: input.moderation_note ?? null,

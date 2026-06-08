@@ -15,6 +15,7 @@ import {
 import { orders, order_items } from "@/features/order_management_system/orders/schema";
 import { products } from "@/features/product_information_management/products/schema";
 import { invalidate_analytics_cache } from "../helpers/invalidate-analytics-cache.helper";
+import { format } from "date-fns";
 
 export class AggregationService {
   async rollup_day(day: string) {
@@ -82,7 +83,7 @@ export class AggregationService {
           abandoned_carts,
           searches: events_row?.searches ?? 0,
           conversion_rate: String(conversion_rate.toFixed(4)),
-          updated_at: new Date().toISOString(),
+          updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         },
       });
 
@@ -169,7 +170,7 @@ export class AggregationService {
             clicks: r.clicks,
             recommendation_clicks: r.recommendation_clicks,
             conversion_rate: String(conversion.toFixed(4)),
-            updated_at: new Date().toISOString(),
+            updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
           },
         });
 
@@ -223,7 +224,7 @@ export class AggregationService {
       await db
         .insert(analytics_funnel_daily)
         .values({ id: generate_id(), day_key: day, step, sessions })
-        .onDuplicateKeyUpdate({ set: { sessions, updated_at: new Date().toISOString() } });
+        .onDuplicateKeyUpdate({ set: { sessions, updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") } });
     }
   }
 
@@ -251,7 +252,7 @@ export class AggregationService {
         .onDuplicateKeyUpdate({
           set: {
             search_count: r.count,
-            updated_at: new Date().toISOString(),
+            updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
           },
         });
     }

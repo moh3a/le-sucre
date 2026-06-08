@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import { analytics_events } from "../schema";
 import { day_key } from "../engines/event-tracking.engine";
+import { format } from "date-fns";
 
 export class EventRepository {
   async insert_batch(rows: Array<typeof analytics_events.$inferInsert>) {
@@ -32,7 +33,7 @@ export class EventRepository {
       id: generate_id(),
       ...input,
       day_key: day_key(now),
-      occurred_at: now.toISOString(),
+      occurred_at: format(now, "yyyy-MM-dd HH:mm:ss"),
       metadata: input.metadata ?? {},
     };
   }

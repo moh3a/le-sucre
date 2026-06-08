@@ -12,6 +12,7 @@ import {
 import { get_fbt_candidates } from "../engines/collaborative.engine";
 import { invalidate_recommendations_for_product } from "../helpers/invalidate-recommendations.helper";
 import { RECOMMENDATION_TYPE } from "../constants/recommendation-types";
+import { format } from "date-fns";
 
 export class IndexingService {
   async enqueue(job_type: string, payload: Record<string, unknown>, run_after?: string) {
@@ -20,14 +21,14 @@ export class IndexingService {
       job_type,
       payload,
       status: "pending",
-      run_after: run_after ?? new Date().toISOString(),
+      run_after: run_after ?? format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
   }
 
   async reindex_product(product_id: string, locale = "fr") {
     const source = await load_source_product(product_id, locale);
     if (!source) return;
-    const computed_at = new Date().toISOString();
+    const computed_at = format(new Date(), "yyyy-MM-dd HH:mm:ss");
     const category_ids = await resolve_related_category_ids(source.category_path);
 
     const similar = await build_content_candidates(source, category_ids, 100);

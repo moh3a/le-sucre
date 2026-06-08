@@ -20,7 +20,7 @@ import { orders } from "@/features/order_management_system/orders/schema";
 export const promotions = mysqlTable(
   "promotions",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 255 }).notNull(),
@@ -49,10 +49,10 @@ export const promotions = mysqlTable(
 export const promotion_rules = mysqlTable(
   "promotion_rules",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    promotion_id: varchar("promotion_id", { length: 24 })
+    promotion_id: varchar("promotion_id", { length: 255 })
       .notNull()
       .references(() => promotions.id, { onDelete: "cascade" }),
     scope_type: varchar("scope_type", { length: 32 }).notNull(),
@@ -80,10 +80,10 @@ export const promotion_rules = mysqlTable(
 export const promo_codes = mysqlTable(
   "promo_codes",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    promotion_id: varchar("promotion_id", { length: 24 })
+    promotion_id: varchar("promotion_id", { length: 255 })
       .notNull()
       .references(() => promotions.id, { onDelete: "cascade" }),
     code: varchar("code", { length: 64 }).notNull(),
@@ -105,10 +105,10 @@ export const promo_codes = mysqlTable(
 export const flash_sales = mysqlTable(
   "flash_sales",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    promotion_id: varchar("promotion_id", { length: 24 })
+    promotion_id: varchar("promotion_id", { length: 255 })
       .notNull()
       .references(() => promotions.id, { onDelete: "cascade" }),
     title: varchar("title", { length: 255 }).notNull(),
@@ -130,16 +130,16 @@ export const flash_sales = mysqlTable(
 export const flash_sale_items = mysqlTable(
   "flash_sale_items",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    flash_sale_id: varchar("flash_sale_id", { length: 24 })
+    flash_sale_id: varchar("flash_sale_id", { length: 255 })
       .notNull()
       .references(() => flash_sales.id, { onDelete: "cascade" }),
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "cascade" }),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     flash_price: decimal("flash_price", { precision: 12, scale: 2 }).notNull(),
@@ -157,10 +157,10 @@ export const flash_sale_items = mysqlTable(
 export const promotion_bundles = mysqlTable(
   "promotion_bundles",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    promotion_id: varchar("promotion_id", { length: 24 })
+    promotion_id: varchar("promotion_id", { length: 255 })
       .notNull()
       .references(() => promotions.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 255 }).notNull(),
@@ -179,16 +179,16 @@ export const promotion_bundles = mysqlTable(
 export const promotion_bundle_items = mysqlTable(
   "promotion_bundle_items",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    bundle_id: varchar("bundle_id", { length: 24 })
+    bundle_id: varchar("bundle_id", { length: 255 })
       .notNull()
       .references(() => promotion_bundles.id, { onDelete: "cascade" }),
-    product_id: varchar("product_id", { length: 24 }).references(() => products.id, {
+    product_id: varchar("product_id", { length: 255 }).references(() => products.id, {
       onDelete: "cascade",
     }),
-    sku_id: varchar("sku_id", { length: 24 }).references(() => product_skus.id, {
+    sku_id: varchar("sku_id", { length: 255 }).references(() => product_skus.id, {
       onDelete: "cascade",
     }),
     quantity: int("quantity").notNull().default(1),
@@ -201,12 +201,12 @@ export const promotion_bundle_items = mysqlTable(
 export const promotion_redemptions = mysqlTable(
   "promotion_redemptions",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    promotion_id: varchar("promotion_id", { length: 24 }).notNull(),
-    promo_code_id: varchar("promo_code_id", { length: 24 }),
-    order_id: varchar("order_id", { length: 24 }).references(() => orders.id, {
+    promotion_id: varchar("promotion_id", { length: 255 }).notNull(),
+    promo_code_id: varchar("promo_code_id", { length: 255 }),
+    order_id: varchar("order_id", { length: 255 }).references(() => orders.id, {
       onDelete: "set null",
     }),
     user_id: varchar("user_id", { length: 255 }).references(() => users.id, {
@@ -224,7 +224,7 @@ export const promotion_redemptions = mysqlTable(
 export const promotion_jobs = mysqlTable(
   "promotion_jobs",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     job_type: varchar("job_type", { length: 64 }).notNull(),

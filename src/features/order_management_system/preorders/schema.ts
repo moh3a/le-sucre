@@ -1,19 +1,11 @@
 // preorders/schema.ts
-import {
-  boolean,
-  float,
-  index,
-  int,
-  mysqlTable,
-  timestamp,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { boolean, float, index, int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { generate_id } from "@/lib/utils";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { orders } from "@/features/order_management_system/orders/schema";
 
 export const sku_preorder_settings = mysqlTable("sku_preorder_settings", {
-  sku_id: varchar("sku_id", { length: 24 })
+  sku_id: varchar("sku_id", { length: 255 })
     .primaryKey()
     .references(() => product_skus.id, { onDelete: "cascade" }),
   is_preorder_enabled: boolean("is_preorder_enabled").notNull().default(false),
@@ -31,18 +23,18 @@ export const sku_preorder_settings = mysqlTable("sku_preorder_settings", {
 export const preorder_allocations = mysqlTable(
   "preorder_allocations",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    sku_id: varchar("sku_id", { length: 24 })
+    sku_id: varchar("sku_id", { length: 255 })
       .notNull()
       .references(() => product_skus.id, { onDelete: "cascade" }),
-    warehouse_id: varchar("warehouse_id", { length: 24 }).notNull().default("default"),
-    order_id: varchar("order_id", { length: 24 }).references(() => orders.id, {
+    warehouse_id: varchar("warehouse_id", { length: 255 }).notNull().default("default"),
+    order_id: varchar("order_id", { length: 255 }).references(() => orders.id, {
       onDelete: "set null",
     }),
-    cart_id: varchar("cart_id", { length: 24 }),
-    order_item_id: varchar("order_item_id", { length: 24 }),
+    cart_id: varchar("cart_id", { length: 255 }),
+    order_item_id: varchar("order_item_id", { length: 255 }),
     quantity: int("quantity").notNull(),
     status: varchar("status", { length: 32 }).notNull().default("pending"), // pending|confirmed|fulfilled|cancelled
     estimated_available_at: timestamp("estimated_available_at", { mode: "string" }),
@@ -60,10 +52,10 @@ export const preorder_allocations = mysqlTable(
 export const preorder_status_events = mysqlTable(
   "preorder_status_events",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    allocation_id: varchar("allocation_id", { length: 24 })
+    allocation_id: varchar("allocation_id", { length: 255 })
       .notNull()
       .references(() => preorder_allocations.id, { onDelete: "cascade" }),
     from_status: varchar("from_status", { length: 32 }),

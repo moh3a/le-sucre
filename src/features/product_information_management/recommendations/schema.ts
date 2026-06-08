@@ -17,13 +17,13 @@ import { users } from "@/features/authentication_and_authorization/auth/schema";
 export const product_recommendation_edges = mysqlTable(
   "product_recommendation_edges",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    source_product_id: varchar("source_product_id", { length: 24 })
+    source_product_id: varchar("source_product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
-    target_product_id: varchar("target_product_id", { length: 24 })
+    target_product_id: varchar("target_product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     recommendation_type: varchar("recommendation_type", { length: 32 }).notNull(),
@@ -54,11 +54,11 @@ export const product_recommendation_edges = mysqlTable(
 export const product_co_purchase_stats = mysqlTable(
   "product_co_purchase_stats",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_a_id: varchar("product_a_id", { length: 24 }).notNull(),
-    product_b_id: varchar("product_b_id", { length: 24 }).notNull(),
+    product_a_id: varchar("product_a_id", { length: 255 }).notNull(),
+    product_b_id: varchar("product_b_id", { length: 255 }).notNull(),
     pair_count: int("pair_count").notNull().default(0),
     score: decimal("score", { precision: 8, scale: 4 }).notNull().default("0"),
     window_days: int("window_days").notNull().default(90),
@@ -75,10 +75,10 @@ export const product_co_purchase_stats = mysqlTable(
 export const product_trending_scores = mysqlTable(
   "product_trending_scores",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     period: varchar("period", { length: 16 }).notNull(), // day | week
@@ -100,14 +100,14 @@ export const product_trending_scores = mysqlTable(
 export const customer_product_views = mysqlTable(
   "customer_product_views",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     user_id: varchar("user_id", { length: 255 }).references(() => users.id, {
       onDelete: "cascade",
     }),
     session_key: varchar("session_key", { length: 64 }),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     viewed_at: timestamp("viewed_at", { mode: "string" }).defaultNow().notNull(),
@@ -123,7 +123,7 @@ export const customer_product_views = mysqlTable(
 export const recommendation_index_jobs = mysqlTable(
   "recommendation_index_jobs",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     job_type: varchar("job_type", { length: 64 }).notNull(),
@@ -145,13 +145,13 @@ export const recommendation_index_jobs = mysqlTable(
 export const recommendationAnalyticsEvents = mysqlTable(
   "recommendation_analytics_events",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     event_type: varchar("event_type", { length: 32 }).notNull(), // impression | click
     slot_type: varchar("slot_type", { length: 32 }).notNull(),
-    source_product_id: varchar("source_product_id", { length: 24 }),
-    target_product_id: varchar("target_product_id", { length: 24 }).notNull(),
+    source_product_id: varchar("source_product_id", { length: 255 }),
+    target_product_id: varchar("target_product_id", { length: 255 }).notNull(),
     user_id: varchar("user_id", { length: 255 }),
     session_key: varchar("session_key", { length: 64 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),

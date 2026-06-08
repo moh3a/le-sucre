@@ -5,12 +5,13 @@ import { generate_id } from "@/lib/utils";
 import { flash_sales, flash_sale_items } from "../schema";
 import { promotion_cache_service } from "../services/promotion-cache.service";
 import { PROMOTION_CACHE } from "../constants/cache-keys";
+import { format } from "date-fns";
 
 export class FlashSaleRepository {
   async set_status(flash_sale_id: string, status: string) {
     await db
       .update(flash_sales)
-      .set({ status, updated_at: new Date().toISOString() })
+      .set({ status, updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
       .where(eq(flash_sales.id, flash_sale_id));
   }
 

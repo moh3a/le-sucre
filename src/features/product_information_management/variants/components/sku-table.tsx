@@ -127,8 +127,11 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-end">
+        <Button type="button">
+          TODO: bulk action
+        </Button>
         <Button type="button" onClick={open_create} disabled={properties.length === 0}>
           {t("create_sku")}
         </Button>

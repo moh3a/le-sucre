@@ -17,12 +17,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { AnalyticsDashboardClient } from "./analytics-dashboard-client";
 import { AnalyticsProductsTable } from "./analytics-products-table";
 import { format_currency } from "@/lib/format";
-
-function default_range() {
-  const to = new Date().toISOString().slice(0, 10);
-  const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
-  return { from, to };
-}
+import { default_range } from "../helpers/default-range";
 
 export function AnalyticsPageClient() {
   const { from, to } = default_range();

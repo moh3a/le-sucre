@@ -7,6 +7,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/app-providers";
+import { Toaster } from "@/components/ui/sonner"
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],
@@ -55,6 +56,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>
             <AppProviders>{children}</AppProviders>
+            <Toaster />
           </NuqsAdapter>
         </NextIntlClientProvider>
       </body>

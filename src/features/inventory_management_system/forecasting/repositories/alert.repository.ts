@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { inventory_alerts } from "../schema";
 import { forecast_repository } from "./forecast.repository";
+import { format } from "date-fns";
 
 export class AlertRepository {
   resolve_rules(sku_id: string) {
@@ -56,7 +57,7 @@ export class AlertRepository {
   mark_notified(id: string) {
     return db
       .update(inventory_alerts)
-      .set({ notified_at: new Date().toISOString() })
+      .set({ notified_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
       .where(eq(inventory_alerts.id, id));
   }
 
@@ -79,7 +80,7 @@ export class AlertRepository {
   resolve(id: string) {
     return db
       .update(inventory_alerts)
-      .set({ status: "resolved", resolved_at: new Date().toISOString() })
+      .set({ status: "resolved", resolved_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
       .where(eq(inventory_alerts.id, id));
   }
 }

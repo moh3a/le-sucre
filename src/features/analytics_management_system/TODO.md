@@ -1,5 +1,5 @@
 # Implementation Notes
-
+// format(new Date(), "yyyy-MM-dd HH:mm:ss")
 ## Nightly Rollup
 Schedule nightly rollup (cron or PM2):
 ```ts
@@ -8,7 +8,7 @@ await db.insert(analytics_jobs).values({
   id: generate_id(),
   job_type: "rollup_daily",
   payload: { day_key: yesterday },
-  run_after: new Date().toISOString(),
+  run_after: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
 });
 ```
 - Implemented in promotion-job-runner.service.ts

@@ -17,7 +17,7 @@ import { categories } from "@/features/product_information_management/categories
 export const brands = mysqlTable(
   "brands",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     name: varchar("name", { length: 255 }).notNull(),
@@ -35,7 +35,7 @@ export const brands = mysqlTable(
 export const products = mysqlTable(
   "products",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
     sku: varchar("sku", { length: 64 }).notNull(),
@@ -72,10 +72,10 @@ export const products = mysqlTable(
 export const product_translations = mysqlTable(
   "product_translations",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     locale: varchar("locale", { length: 5 }).notNull(), // en, fr, ar
@@ -94,10 +94,10 @@ export const product_translations = mysqlTable(
 export const product_media = mysqlTable(
   "product_media",
   {
-    id: varchar("id", { length: 24 })
+    id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 24 })
+    product_id: varchar("product_id", { length: 255 })
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     url: varchar("url", { length: 2048 }).notNull(), // full CDN URL or signed URL

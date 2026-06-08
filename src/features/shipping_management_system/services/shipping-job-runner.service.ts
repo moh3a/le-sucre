@@ -3,6 +3,7 @@ import "server-only";
 import { shipping_repository } from "../repository";
 import { shipping_service } from "./shipping.service";
 import { assertIsError } from "@/lib/error_handling";
+import { addMinutes, addSeconds, format } from "date-fns";
 
 function next_backoff_minutes(attempt: number) {
   return Math.min(60, Math.pow(2, Math.max(0, attempt - 1)));
@@ -12,7 +13,7 @@ export class ShippingJobRunnerService {
   constructor(private readonly repo = shipping_repository) {}
 
   async enqueue_tracking_sync(shipment_id: string, delay_seconds = 0) {
-    const run_at = new Date(Date.now() + delay_seconds * 1000).toISOString();
+    const run_at = format(addSeconds(new Date(), delay_seconds), "yyyy-MM-dd HH:mm:ss");
     await this.repo.create_job({
       job_type: "sync_tracking",
       shipment_id,
@@ -25,7 +26,7 @@ export class ShippingJobRunnerService {
   }
 
   async run_due(limit = 20) {
-    const now = new Date().toISOString();
+    const now = format(new Date(), "yyyy-MM-dd HH:mm:ss");
     const jobs = await this.repo.claim_due_jobs(now, limit);
 
     for (const job of jobs) {
@@ -41,7 +42,7 @@ export class ShippingJobRunnerService {
           continue;
         }
         const delay_minutes = next_backoff_minutes(job.attempts);
-        const run_at = new Date(Date.now() + delay_minutes * 60_000).toISOString();
+        const run_at = format(addMinutes(new Date(), delay_minutes), "yyyy-MM-dd HH:mm:ss");
         await this.repo.retry_job(job.id, run_at, String(e?.message ?? e));
       }
     }
