@@ -57,6 +57,13 @@
       "when": 1780179171751,
       "tag": "0007_red_violations",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1780957941610,
+      "tag": "0008_skinny_tag",
+      "breakpoints": true
     }
   ]
 }

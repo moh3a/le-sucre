@@ -13,6 +13,13 @@ export const REVIEW_SORT = {
   most_helpful: "most_helpful",
 } as const;
 
+export type ReviewStatus =
+  | "newest"
+  | "oldest"
+  | "highest_rating"
+  | "lowest_rating"
+  | "most_helpful";
+
 export const REPORT_STATUS = {
   open: "open",
   resolved: "resolved",

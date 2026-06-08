@@ -6,6 +6,7 @@ import {
   product_translations,
   products,
 } from "@/features/product_information_management/products/schema";
+import { tryFn } from "@/lib/error_handling";
 
 export const product_analytics_engine = {
   async best_sellers(from: string, to: string, limit: number) {
@@ -56,26 +57,30 @@ export const product_analytics_engine = {
 
   /** Per-product daily timeseries for a specific product detail view. */
   async daily_series(product_id: string, from: string, to: string) {
-    return db
-      .select({
-        day_key: analytics_product_daily.day_key,
-        views: analytics_product_daily.views,
-        add_to_cart: analytics_product_daily.add_to_cart,
-        purchases: analytics_product_daily.purchases,
-        units_sold: analytics_product_daily.units_sold,
-        revenue: analytics_product_daily.revenue,
-        recommendation_clicks: analytics_product_daily.recommendation_clicks,
-        conversion_rate: analytics_product_daily.conversion_rate,
-      })
-      .from(analytics_product_daily)
-      .where(
-        and(
-          eq(analytics_product_daily.product_id, product_id),
-          gte(analytics_product_daily.day_key, from),
-          lte(analytics_product_daily.day_key, to),
-        ),
-      )
-      .orderBy(asc(analytics_product_daily.day_key));
+    const [error, result] = await tryFn(
+      db
+        .select({
+          day_key: analytics_product_daily.day_key,
+          views: analytics_product_daily.views,
+          add_to_cart: analytics_product_daily.add_to_cart,
+          purchases: analytics_product_daily.purchases,
+          units_sold: analytics_product_daily.units_sold,
+          revenue: analytics_product_daily.revenue,
+          recommendation_clicks: analytics_product_daily.recommendation_clicks,
+          conversion_rate: analytics_product_daily.conversion_rate,
+        })
+        .from(analytics_product_daily)
+        .where(
+          and(
+            eq(analytics_product_daily.product_id, product_id),
+            gte(analytics_product_daily.day_key, from),
+            lte(analytics_product_daily.day_key, to),
+          ),
+        )
+        .orderBy(asc(analytics_product_daily.day_key)),
+    );
+    console.log(error);
+    return result;
   },
 
   /** Aggregated totals for a specific product over a date range. */

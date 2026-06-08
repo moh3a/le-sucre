@@ -14,15 +14,15 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
+import { ReviewStatus } from "../constants/review-status";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface ProductReviewsListProps {
   product_id: string;
 }
 
 export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
-  const [sort, setSort] = React.useState<
-    "newest" | "oldest" | "highest_rating" | "lowest_rating" | "most_helpful"
-  >("newest");
+  const [sort, setSort] = React.useState<ReviewStatus>("newest");
   const [page, setPage] = React.useState(1);
 
   const { data: reviewsData, isLoading } = trpc.reviews.listByProduct.useQuery({
@@ -71,17 +71,15 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
   const meta = reviewsData?.meta;
 
   return (
-    <div className="font-moya space-y-6 rounded-2xl border border-[#4d4c20]/15 bg-white p-6 shadow-sm">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="font-orla text-lg text-[#4d4c20]">
-          Avis des gourmets ({meta?.total_records ?? 0})
-        </h3>
-
-        {/* Sort Select */}
+    <Card>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardTitle>
+          Avis des gourmets <Badge>{meta?.total_records ?? 0}</Badge>
+        </CardTitle>
         <Select
           value={sort}
           onValueChange={(v: string) => {
-            setSort(v);
+            setSort(v as ReviewStatus);
             setPage(1);
           }}
         >
@@ -95,111 +93,114 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
             <SelectItem value="lowest_rating">Note la plus basse</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      {reviews.length === 0 ? (
-        <p className="text-secondary/60 py-10 text-center">
-          Aucun avis publié pour le moment. Soyez le premier à donner votre avis !
-        </p>
-      ) : (
-        <div className="space-y-6 divide-y divide-[#4d4c20]/10">
-          {reviews.map((review, idx) => (
-            <div key={review.id} className={`space-y-3 ${idx > 0 ? "pt-6" : ""}`}>
-              {/* Star Rating and Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center text-yellow-500">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`size-3.5 ${
-                          i < review.rating ? "fill-yellow-500" : "text-gray-300"
-                        }`}
-                      />
-                    ))}
+      </CardHeader>
+      <CardContent>
+        {reviews.length === 0 ? (
+          <p className="text-secondary/60 py-10 text-center">
+            Aucun avis publié pour le moment. Soyez le premier à donner votre avis !
+          </p>
+        ) : (
+          <div className="space-y-6 divide-y divide-[#4d4c20]/10">
+            {reviews.map((review, idx) => (
+              <div key={review.id} className={`space-y-3 ${idx > 0 ? "pt-6" : ""}`}>
+                {/* Star Rating and Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center text-yellow-500">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`size-3.5 ${
+                            i < review.rating ? "fill-yellow-500" : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {review.is_verified_purchase && (
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1 border-green-200 bg-green-50 px-2 py-0 text-xs font-semibold text-green-700 hover:bg-green-50"
+                      >
+                        <Check className="size-3" /> Achat vérifié
+                      </Badge>
+                    )}
                   </div>
-                  {review.is_verified_purchase && (
-                    <Badge
-                      variant="secondary"
-                      className="flex items-center gap-1 border-green-200 bg-green-50 px-2 py-0 text-xs font-semibold text-green-700 hover:bg-green-50"
-                    >
-                      <Check className="size-3" /> Achat vérifié
-                    </Badge>
+                  <span className="text-secondary/40 text-xs font-medium">
+                    {formatDate(review.created_at, { month: "short" })}
+                  </span>
+                </div>
+
+                {/* Title & Review Content */}
+                <div className="space-y-1">
+                  {review.title && (
+                    <h4 className="text-secondary text-base font-semibold">{review.title}</h4>
                   )}
+                  <p className="text-secondary/80 text-sm leading-relaxed whitespace-pre-line">
+                    {review.body}
+                  </p>
                 </div>
-                <span className="text-secondary/40 text-xs font-medium">
-                  {formatDate(review.created_at, { month: "short" })}
-                </span>
-              </div>
 
-              {/* Title & Review Content */}
-              <div className="space-y-1">
-                {review.title && (
-                  <h4 className="text-secondary text-base font-semibold">{review.title}</h4>
-                )}
-                <p className="text-secondary/80 text-sm leading-relaxed whitespace-pre-line">
-                  {review.body}
-                </p>
-              </div>
+                {/* Author and Action buttons */}
+                <div className="flex items-center justify-between pt-2 text-xs">
+                  <span className="text-secondary/60 font-semibold">
+                    Par {review.author_name || "Client anonyme"}
+                  </span>
 
-              {/* Author and Action buttons */}
-              <div className="flex items-center justify-between pt-2 text-xs">
-                <span className="text-secondary/60 font-semibold">
-                  Par {review.user?.name || "Client anonyme"}
-                </span>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => voteHelpfulMutation.mutate({ review_id: review.id })}
+                      disabled={voteHelpfulMutation.isPending}
+                      className="text-secondary/50 flex items-center gap-1 transition-colors hover:text-[#700145] focus:outline-none"
+                    >
+                      <ThumbsUp className="size-3.5" />
+                      <span>Utile ({review.helpful_count})</span>
+                    </button>
 
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => voteHelpfulMutation.mutate({ review_id: review.id })}
-                    disabled={voteHelpfulMutation.isPending}
-                    className="text-secondary/50 flex items-center gap-1 transition-colors hover:text-[#700145] focus:outline-none"
-                  >
-                    <ThumbsUp className="size-3.5" />
-                    <span>Utile ({review.helpful_count})</span>
-                  </button>
-
-                  <button
-                    onClick={() => reportMutation.mutate({ review_id: review.id, reason: "spam" })}
-                    disabled={reportMutation.isPending}
-                    className="text-secondary/35 flex items-center gap-1 transition-colors hover:text-red-600 focus:outline-none"
-                  >
-                    <AlertTriangle className="size-3.5" />
-                    <span>Signaler</span>
-                  </button>
+                    <button
+                      onClick={() =>
+                        reportMutation.mutate({ review_id: review.id, reason: "spam" })
+                      }
+                      disabled={reportMutation.isPending}
+                      className="text-secondary/35 flex items-center gap-1 transition-colors hover:text-red-600 focus:outline-none"
+                    >
+                      <AlertTriangle className="size-3.5" />
+                      <span>Signaler</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* Pagination */}
-      {meta && meta.total_pages > 1 && (
-        <div className="flex justify-center gap-2 border-t border-[#4d4c20]/10 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="rounded-xl border-[#4d4c20]/20"
-          >
-            Précédent
-          </Button>
-          <span className="text-secondary/60 self-center text-sm">
-            Page {page} sur {meta.total_pages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(meta.total_pages, p + 1))}
-            disabled={page === meta.total_pages}
-            className="rounded-xl border-[#4d4c20]/20"
-          >
-            Suivant
-          </Button>
-        </div>
-      )}
-    </div>
+        {/* Pagination */}
+        {meta && meta.total_pages > 1 && (
+          <div className="flex justify-center gap-2 border-t border-[#4d4c20]/10 pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="rounded-xl border-[#4d4c20]/20"
+            >
+              Précédent
+            </Button>
+            <span className="text-secondary/60 self-center text-sm">
+              Page {page} sur {meta.total_pages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(meta.total_pages, p + 1))}
+              disabled={page === meta.total_pages}
+              className="rounded-xl border-[#4d4c20]/20"
+            >
+              Suivant
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 export default ProductReviewsList;

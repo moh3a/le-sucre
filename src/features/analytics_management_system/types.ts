@@ -55,7 +55,7 @@ export interface IProductDetailsAnalytics {
     revenue: string;
     recommendation_clicks: number;
     conversion_rate: string | null;
-  }[];
+  }[] | undefined;
   totals: {
     views: number;
     add_to_cart: number;

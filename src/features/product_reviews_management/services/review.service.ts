@@ -19,7 +19,7 @@ import {
 } from "../engines/spam-guard.engine";
 import { createHash as createHashStable } from "node:crypto";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
-import { IReviewProductSummary } from "../types";
+import { IListProductReviews, IReviewProductSummary } from "../types";
 import { recompute_product_rating_aggregate } from "../engines/rating-aggregation.engine";
 
 function stable_list_hash(input: unknown) {
@@ -28,28 +28,15 @@ function stable_list_hash(input: unknown) {
 
 export class ReviewService {
   async get_product_summary(product_id: string): Promise<IReviewProductSummary> {
-    // const cache_key = REVIEW_CACHE.summary(product_id);
-    // const cached = await review_cache_service.get(cache_key);
-    // if (cached) return cached as IReviewProductSummary;
-    console.log("get_product_summary");
+    const cache_key = REVIEW_CACHE.summary(product_id);
+    const cached = await review_cache_service.get(cache_key);
+    if (cached) return cached as IReviewProductSummary;
 
     let summary = await aggregate_repository.get_by_product(product_id);
     if (!summary) {
       summary = await recompute_product_rating_aggregate(product_id);
-      // summary = {
-      //   product_id,
-      //   average_rating: "0",
-      //   review_count: 0,
-      //   rating_1: 0,
-      //   rating_2: 0,
-      //   rating_3: 0,
-      //   rating_4: 0,
-      //   rating_5: 0,
-      //   updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-      // };
     }
 
-    console.log(summary);
     const breakdown = [1, 2, 3, 4, 5].map((star) => ({
       stars: star,
       count: Number(summary[`rating_${star}` as keyof typeof summary] ?? 0),
@@ -62,15 +49,17 @@ export class ReviewService {
       breakdown,
     };
 
-    // await review_cache_service.set(cache_key, payload, 600);
+    await review_cache_service.set(cache_key, payload, 600);
     return payload;
   }
 
-  async list_product_reviews(input: z.infer<typeof list_product_reviews_dto>) {
+  async list_product_reviews(
+    input: z.infer<typeof list_product_reviews_dto>,
+  ): Promise<IListProductReviews> {
     const hash = stable_list_hash(input);
     const cache_key = REVIEW_CACHE.list(input.product_id, hash);
     const cached = await review_cache_service.get(cache_key);
-    if (cached) return cached;
+    if (cached) return cached as IListProductReviews;
 
     const result = await review_repository.list_public(input);
     await review_cache_service.set(cache_key, result, 180);
