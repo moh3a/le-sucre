@@ -20,6 +20,7 @@ import { customers_router } from "@/features/order_management_system/customers/r
 import { promotion_router } from "@/features/order_management_system/promotions/router";
 import { analytics_router } from "@/features/analytics_management_system/router";
 import { shipping_router } from "@/features/shipping_management_system/router";
+import { invoice_router } from "@/features/billing_and_finance_system/routers/invoice.router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -40,6 +41,7 @@ export const app_router = create_trpc_router({
   promotions: promotion_router,
   analytics: analytics_router,
   shipping: shipping_router,
+  invoices: invoice_router,
 });
 
 export type AppRouter = typeof app_router;

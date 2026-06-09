@@ -1,4 +1,3 @@
-// TODO: Refactor tip: change build_where on SearchRepository to public build_where(...) instead of bracket access.
 import "server-only";
 
 import { and, desc, eq, sql } from "drizzle-orm";

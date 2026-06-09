@@ -20,6 +20,7 @@ import {
   TrendingUpDown,
   ChartArea,
   Gauge,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -74,6 +75,7 @@ export function AppSidebar() {
       icon: Banknote,
       items: [
         { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
+        { title: "Factures", url: "/console/invoices", icon: FileText },
         { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
         { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
         { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
