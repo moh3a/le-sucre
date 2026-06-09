@@ -2,6 +2,7 @@
 
 ## TODO
 
+- continue Prompt 16 — Campaign Management System
 - customer call history
 - failed delivery handling
 - return requests
@@ -26,7 +27,5 @@ void event_ingestion_service.track({
 ## Features to implement
 
 - Prompt 13 — Payments, Partial Payments, Split Payments & Refunds
-- Prompt 14 — Invoice & Financial Document System
-- Prompt 16 — Campaign Management System
 - Event Bus
 - Domain Events System

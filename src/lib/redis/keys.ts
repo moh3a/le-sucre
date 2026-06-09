@@ -89,4 +89,14 @@ export const redisKeys = {
     buffer: () => `analytics:buffer:events`,
     ttl: 60 * 60 * 48,
   },
+
+  // ─── Campaign ────────────────────────────────────────────
+  campaign: {
+    byId: (id: string) => `campaign:id:${id}`,
+    active_sections: (page: string, locale: string, country: string) =>
+      `campaign:sections:${page}:${locale}:${country}`,
+    list: (params: string) => `campaign:list:${params}`,
+    ttl: 60 * 5, // 5 minutes
+    sectionsTtl: 60 * 2, // 2 minutes
+  },
 } as const;

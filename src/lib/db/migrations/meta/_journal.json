@@ -64,6 +64,13 @@
       "when": 1780957941610,
       "tag": "0008_skinny_tag",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1781028432129,
+      "tag": "0009_unique_rawhide_kid",
+      "breakpoints": true
     }
   ]
 }
