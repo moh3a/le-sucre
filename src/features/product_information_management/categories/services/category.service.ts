@@ -150,6 +150,10 @@ export class CategoryService {
   get_ancestors = (id: string) => this.tree.find_ancestors(id);
   resolve_filter_ids = (id: string, include_descendants: boolean) =>
     this.tree.resolve_filter_category_ids(id, include_descendants);
+
+  async get_stats() {
+    return await this.repo.get_stats();
+  }
 }
 
 export const category_service = new CategoryService();

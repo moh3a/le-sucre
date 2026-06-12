@@ -1,11 +1,12 @@
 "use client";
 
 import { MessageSquare, ShieldAlert, Star, Clock } from "lucide-react";
+
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
+import { LineChart } from "@/components/ui/line-chart";
 import { AdminReviewModerationTable } from "./admin-review-moderation-table";
-import { AnalyticsLineChart } from "@/features/analytics_management_system/components/analytics-line-chart";
 
 export function ReviewsPageClient() {
   const stats = trpc.reviews.adminStats.useQuery();
@@ -43,10 +44,13 @@ export function ReviewsPageClient() {
       }
     >
       {trends.data?.length ? (
-        <section className="rounded-lg border p-4">
-          <h2 className="font-heading mb-4 text-lg">Tendance des notes</h2>
-          <AnalyticsLineChart data={trends.data} x_key="day_key" y_key="average_rating" />
-        </section>
+        <LineChart
+          title="Tendance des notes"
+          description="Note moyenne des avis"
+          data={trends.data}
+          x_key="day_key"
+          y_key="average_rating"
+        />
       ) : null}
       <AdminReviewModerationTable />
     </ConsolePageShell>

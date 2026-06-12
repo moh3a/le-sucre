@@ -27,23 +27,7 @@ import { sku_generation_engine } from "../engines/sku-generation.engine";
 import { build_option_signature, build_sku_code } from "../engines/option-signature.engine";
 import { resolve_unit_price } from "../engines/pricing.engine";
 import { get_product_price_range } from "../engines/price-aggregation.engine";
-
-type SkuListRow = {
-  sku_id: string;
-  sku_code: string;
-  option_signature: string;
-  is_active: boolean;
-  stock_available: number;
-  base_price: string | null;
-  offer_price: string | null;
-  currency: string | null;
-  options: Array<{
-    property_code: string | null;
-    value_code: string | null;
-    value_label: string | null;
-    value_id: string | null;
-  }>;
-};
+import type { SkuListRow } from "../types";
 
 function group_sku_rows(
   rows: Awaited<ReturnType<typeof sku_repository.list_with_option_labels>>,
@@ -252,6 +236,37 @@ export class SkuService {
 
   async get_price_range(product_id: string) {
     return get_product_price_range(product_id);
+  }
+
+  async list_admin(input: { page: number; limit: number; search?: string; status?: string }) {
+    return this.skus.list_admin(input);
+  }
+
+  async stats_admin() {
+    return this.skus.stats_admin();
+  }
+
+  async bulk_update(input: {
+    ids: string[];
+    base_price?: number | null;
+    offer_price?: number | null;
+    is_active?: boolean;
+  }) {
+    await this.skus.bulk_update_skus(input.ids, {
+      ...(input.base_price !== undefined && {
+        base_price: input.base_price != null ? String(input.base_price) : null,
+      }),
+      ...(input.offer_price !== undefined && {
+        offer_price: input.offer_price != null ? String(input.offer_price) : null,
+      }),
+      ...(input.is_active !== undefined && { is_active: input.is_active }),
+    });
+    return { ok: true };
+  }
+
+  async bulk_delete(ids: string[]) {
+    await this.skus.bulk_delete_skus(ids);
+    return { ok: true };
   }
 }
 

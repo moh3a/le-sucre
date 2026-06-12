@@ -90,3 +90,20 @@ export type PriceResolution = {
     | "product_offer"
     | "product_base";
 };
+
+export type SkuListRow = {
+  sku_id: string;
+  sku_code: string;
+  option_signature: string;
+  is_active: boolean;
+  stock_available: number;
+  base_price: string | null;
+  offer_price: string | null;
+  currency: string | null;
+  options: Array<{
+    property_code: string | null;
+    value_code: string | null;
+    value_label: string | null;
+    value_id: string | null;
+  }>;
+};

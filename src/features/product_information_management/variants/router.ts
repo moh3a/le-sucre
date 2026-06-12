@@ -27,6 +27,20 @@ const property_id_dto = z.object({ id: z.string().min(1).max(255) });
 const value_id_dto = z.object({ id: z.string().min(1).max(255) });
 
 export const variants_router = create_trpc_router({
+  adminList: permission_procedure(PERMISSIONS.products_read)
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(20),
+        status: z.string().optional(),
+        search: z.string().optional(),
+      }),
+    )
+    .query(({ input }) => sku_service.list_admin(input)),
+
+  adminStats: permission_procedure(PERMISSIONS.products_read)
+    .query(() => sku_service.stats_admin()),
+
   // Variant config
   getConfig: permission_procedure(PERMISSIONS.products_read)
     .input(product_id_dto)
@@ -80,6 +94,25 @@ export const variants_router = create_trpc_router({
   deleteSku: permission_procedure(PERMISSIONS.products_write)
     .input(sku_id_dto)
     .mutation(({ input }) => sku_service.remove(input.id)),
+
+  bulkUpdateSku: permission_procedure(PERMISSIONS.products_write)
+    .input(
+      z.object({
+        ids: z.array(z.string().min(1)),
+        base_price: z.number().optional().nullable(),
+        offer_price: z.number().optional().nullable(),
+        is_active: z.boolean().optional(),
+      }),
+    )
+    .mutation(({ input }) => sku_service.bulk_update(input)),
+
+  bulkDeleteSku: permission_procedure(PERMISSIONS.products_write)
+    .input(
+      z.object({
+        ids: z.array(z.string().min(1)),
+      }),
+    )
+    .mutation(({ input }) => sku_service.bulk_delete(input.ids)),
 
   generateSkus: permission_procedure(PERMISSIONS.products_write)
     .input(generate_skus_dto)

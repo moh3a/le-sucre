@@ -21,6 +21,7 @@ import {
   ChartArea,
   Gauge,
   FileText,
+  Megaphone,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -77,6 +78,7 @@ export function AppSidebar() {
         { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
         { title: "Factures", url: "/console/invoices", icon: FileText },
         { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
+        { title: "Campagnes", url: "/console/campaigns", icon: Megaphone },
         { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
         { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
         { title: "Livraisons", url: "/console/shipping", icon: Truck },

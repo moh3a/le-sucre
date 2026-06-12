@@ -1,8 +1,9 @@
 import "server-only";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { inventory_forecast_snapshots, inventory_alerts } from "../schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
+import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 
 export const forecast_analytics_queries = {
   async dashboard(input: { risk_level?: string; page: number; limit: number }) {
@@ -20,9 +21,18 @@ export const forecast_analytics_queries = {
         recommended_reorder_qty: inventory_forecast_snapshots.recommended_reorder_qty,
         risk_level: inventory_forecast_snapshots.risk_level,
         computed_at: inventory_forecast_snapshots.computed_at,
+        current_stock: inventory_levels.quantity_on_hand,
+        reserved_stock: inventory_levels.quantity_reserved,
       })
       .from(inventory_forecast_snapshots)
       .innerJoin(product_skus, eq(product_skus.id, inventory_forecast_snapshots.sku_id))
+      .leftJoin(
+        inventory_levels,
+        and(
+          eq(inventory_levels.sku_id, inventory_forecast_snapshots.sku_id),
+          eq(inventory_levels.warehouse_id, inventory_forecast_snapshots.warehouse_id),
+        ),
+      )
       .where(where)
       .orderBy(
         desc(

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+
 import { trpc } from "@/components/providers/app-providers";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -9,6 +10,7 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { Badge } from "@/components/ui/badge";
 import { default_range } from "../helpers/default-range";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 type ProductRow = {
   product_id: string;
@@ -80,9 +82,14 @@ export function AnalyticsProductsTable() {
   if (isLoading) return <DataTableSkeleton columnCount={4} rowCount={10} />;
 
   return (
-    <div className="space-y-4">
-      <p className="text-muted-foreground text-sm">Meilleures ventes sur les 30 derniers jours</p>
-      <DataTable table={table} />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Meilleures ventes</CardTitle>
+        <CardDescription>Meilleures ventes sur les 30 derniers jours</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <DataTable table={table} />
+      </CardContent>
+    </Card>
   );
 }

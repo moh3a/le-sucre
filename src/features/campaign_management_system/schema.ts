@@ -29,12 +29,14 @@ export const campaigns = mysqlTable(
     description: text("description"),
 
     /**
+     * @type CampaignType
      * homepage | seasonal | flash_sale | targeted | banner |
      * category | brand | landing_page
      */
     campaign_type: varchar("campaign_type", { length: 64 }).notNull(),
 
     /**
+     * @type CampaignStatus
      * draft | scheduled | active | paused | ended | cancelled
      */
     status: varchar("status", { length: 32 }).notNull().default("draft"),
@@ -126,10 +128,10 @@ export const campaign_banners = mysqlTable(
       .notNull()
       .references(() => campaigns.id, { onDelete: "cascade" }),
 
-    /** hero | sidebar | popup | inline | countdown_bar | notification_bar */
+    /** @type BannerType hero | sidebar | popup | inline | countdown_bar | notification_bar */
     banner_type: varchar("banner_type", { length: 32 }).notNull().default("hero"),
 
-    /** desktop | mobile | both */
+    /** @type DeviceTarget desktop | mobile | both */
     device_target: varchar("device_target", { length: 16 }).notNull().default("both"),
 
     image_url: varchar("image_url", { length: 2048 }),
@@ -179,6 +181,7 @@ export const campaign_targets = mysqlTable(
       .references(() => campaigns.id, { onDelete: "cascade" }),
 
     /**
+     * @type TargetType
      * category | brand | customer_group | country | language |
      * behavior | new_customer | returning_customer | all
      */
@@ -214,6 +217,7 @@ export const campaign_sections = mysqlTable(
       .references(() => campaigns.id, { onDelete: "cascade" }),
 
     /**
+     * @type SectionType
      * product_grid | product_carousel | category_showcase |
      * brand_showcase | banner_row | countdown | text_block | video
      */

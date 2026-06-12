@@ -1,6 +1,6 @@
 "use client";
 
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart as RechartsLineChart, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,7 +10,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
-export function AnalyticsLineChart({
+export function LineChart({
   title,
   description,
   data,
@@ -38,7 +38,7 @@ export function AnalyticsLineChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <LineChart
+          <RechartsLineChart
             accessibilityLayer
             data={data}
             margin={{
@@ -62,7 +62,7 @@ export function AnalyticsLineChart({
               strokeWidth={2}
               dot={false}
             />
-          </LineChart>
+          </RechartsLineChart>
         </ChartContainer>
       </CardContent>
     </Card>

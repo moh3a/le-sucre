@@ -42,7 +42,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { objectToFormData } from "@/lib/utils";
 
 type ProductMediaGalleryProps = {
   product_id: string;
@@ -119,13 +118,13 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
               <DialogDescription>Ajouter une image ou une vidéo au produit.</DialogDescription>
             </DialogHeader>
             <form
-              method="post" 
+              method="post"
               action={`/api/admin/products/${product_id}/media/upload`}
               encType="multipart/form-data"
               // FIXME fix media upload
               onSubmit={(_event) => {
                 set_uploading(true);
-                void form.handleSubmit(async ({ files, ...values }, event) => {
+                void form.handleSubmit(async ({ files, ...values }) => {
                   await upload_media.mutateAsync(
                     { ...values, file: files[0] },
                     {

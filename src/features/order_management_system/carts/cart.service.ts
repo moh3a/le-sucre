@@ -197,6 +197,14 @@ export class CartService {
     await db.update(carts).set({ status: "merged" }).where(eq(carts.id, guest_cart_id));
     return user_cart.id;
   }
+
+  async list_admin(input: { page: number; limit: number; status?: string; search?: string }) {
+    return this.repo.list_admin(input);
+  }
+
+  async stats_admin() {
+    return this.repo.stats_admin();
+  }
 }
 
 export const cart_service = new CartService();

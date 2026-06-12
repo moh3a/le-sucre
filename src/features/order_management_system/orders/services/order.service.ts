@@ -138,12 +138,6 @@ export class OrderService {
     //   note: "Commande créée",
     // });
 
-    // // TODO
-    // // For preorder lines:
-    // // Do not commit inventory reservation.
-    // // confirm preorder allocation + set order_items.preorder_status = pending_stock.
-    // // Payment: if deposit_percent < 100, set payment_capture_mode = "deposit" and order payment_status = "partially_paid" until balance capture.
-
     // for (const line of items) {
     //   if (!line.reservation_id) continue;
     //   await reservation_service.commit({ id: line.reservation_id, order_id });
@@ -252,8 +246,6 @@ export class OrderService {
       resource_id: input.cart_id,
     });
 
-    // [ ] example: track purchase event
-    // [ ] TODO: implement in all relevant places
     void event_ingestion_service.track_purchase({
       order_id,
       user_id: input.user_id,
@@ -311,7 +303,9 @@ export class OrderService {
     assert_order_transition(current.status, input.status);
 
     await this.repo.update_order_status(input.order_id, input.status, {
-      ...(input.status === "cancelled" ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") } : {}),
+      ...(input.status === "cancelled"
+        ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") }
+        : {}),
     });
 
     await this.repo.insert_status_event({
@@ -443,11 +437,7 @@ export class OrderService {
     return this.repo.get_full(input.order_id);
   }
 
-  async update_notes(input: {
-    order_id: string;
-    notes: string | null;
-    actor_user_id: string;
-  }) {
+  async update_notes(input: { order_id: string; notes: string | null; actor_user_id: string }) {
     const current = await this.repo.find_by_id(input.order_id);
     if (!current) throw new NotFoundError("Commande introuvable");
 

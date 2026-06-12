@@ -46,4 +46,7 @@ export const category_router = create_trpc_router({
   delete: permission_procedure(PERMISSIONS.categories_write)
     .input(update_category_dto.pick({ id: true }))
     .mutation(({ input }) => category_service.remove(input.id)),
+
+  stats: permission_procedure(PERMISSIONS.categories_read)
+    .query(() => category_service.get_stats()),
 });

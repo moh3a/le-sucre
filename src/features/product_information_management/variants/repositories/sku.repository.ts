@@ -1,12 +1,10 @@
-import "server-only";
-
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 
-import { products } from "@/features/product_information_management/products/schema";
+import { products, product_translations } from "@/features/product_information_management/products/schema";
 import { product_properties, property_values, product_skus, sku_option_values } from "../schema";
 
 export class SkuRepository {
@@ -166,6 +164,170 @@ export class SkuRepository {
     if (!current) throw new NotFoundError("SKU introuvable");
     await db.delete(product_skus).where(eq(product_skus.id, id));
     return { ok: true };
+  }
+
+  async bulk_update_skus(
+    ids: string[],
+    input: Partial<{
+      base_price: string | null;
+      offer_price: string | null;
+      is_active: boolean;
+    }>,
+  ) {
+    if (!ids.length) return;
+    await db
+      .update(product_skus)
+      .set(input)
+      .where(inArray(product_skus.id, ids));
+  }
+
+  async bulk_delete_skus(ids: string[]) {
+    if (!ids.length) return;
+    await db.delete(product_skus).where(inArray(product_skus.id, ids));
+  }
+
+  async list_admin(input: {
+    page: number;
+    limit: number;
+    search?: string;
+    status?: string;
+  }) {
+    const offset = (input.page - 1) * input.limit;
+    const clauses = [];
+    if (input.status) {
+      clauses.push(eq(product_skus.is_active, input.status === "active"));
+    }
+    if (input.search) {
+      clauses.push(
+        or(
+          like(product_skus.sku_code, `%${input.search}%`),
+          like(product_translations.name, `%${input.search}%`),
+          like(product_skus.barcode, `%${input.search}%`),
+        )
+      );
+    }
+    const where = clauses.length ? and(...clauses) : undefined;
+
+    const totalRes = await db
+      .select({ total: count(product_skus.id) })
+      .from(product_skus)
+      .leftJoin(products, eq(products.id, product_skus.product_id))
+      .leftJoin(
+        product_translations,
+        and(
+          eq(product_translations.product_id, products.id),
+          eq(product_translations.locale, "fr"),
+        ),
+      )
+      .where(where);
+    const total_records = Number(totalRes[0]?.total ?? 0);
+
+    const sku_rows = await db
+      .select({
+        id: product_skus.id,
+        sku_code: product_skus.sku_code,
+        barcode: product_skus.barcode,
+        base_price: product_skus.base_price,
+        offer_price: product_skus.offer_price,
+        currency: product_skus.currency,
+        is_active: product_skus.is_active,
+        stock_available: product_skus.stock_available,
+        product_id: product_skus.product_id,
+        product_name: product_translations.name,
+      })
+      .from(product_skus)
+      .leftJoin(products, eq(products.id, product_skus.product_id))
+      .leftJoin(
+        product_translations,
+        and(
+          eq(product_translations.product_id, products.id),
+          eq(product_translations.locale, "fr"),
+        ),
+      )
+      .where(where)
+      .orderBy(desc(product_skus.created_at))
+      .limit(input.limit)
+      .offset(offset);
+
+    const sku_ids = sku_rows.map((r) => r.id);
+    let options: Array<{
+      sku_id: string;
+      property_code: string;
+      value_code: string;
+      value_label: string;
+    }> = [];
+
+    if (sku_ids.length > 0) {
+      options = await db
+        .select({
+          sku_id: sku_option_values.sku_id,
+          property_code: product_properties.code,
+          value_code: property_values.code,
+          value_label: property_values.label,
+        })
+        .from(sku_option_values)
+        .innerJoin(property_values, eq(property_values.id, sku_option_values.property_value_id))
+        .innerJoin(product_properties, eq(product_properties.id, property_values.property_id))
+        .where(inArray(sku_option_values.sku_id, sku_ids));
+    }
+
+    const options_by_sku = new Map<string, typeof options>();
+    for (const opt of options) {
+      if (!options_by_sku.has(opt.sku_id)) {
+        options_by_sku.set(opt.sku_id, []);
+      }
+      options_by_sku.get(opt.sku_id)!.push(opt);
+    }
+
+    const items = sku_rows.map((r) => ({
+      ...r,
+      options: options_by_sku.get(r.id) ?? [],
+    }));
+
+    return {
+      items,
+      meta: {
+        page: input.page,
+        limit: input.limit,
+        total_records,
+        total_pages: Math.max(1, Math.ceil(total_records / input.limit)),
+        has_more: input.page * input.limit < total_records,
+      },
+    };
+  }
+
+  async stats_admin() {
+    const counts = await db
+      .select({
+        is_active: product_skus.is_active,
+        total: count(product_skus.id),
+        total_stock: sql<number>`SUM(${product_skus.stock_available})`.mapWith(Number),
+      })
+      .from(product_skus)
+      .groupBy(product_skus.is_active);
+
+    const activeRow = counts.find((c) => c.is_active === true);
+    const inactiveRow = counts.find((c) => c.is_active === false);
+
+    const totalRes = await db
+      .select({
+        out_of_stock: count(product_skus.id),
+      })
+      .from(product_skus)
+      .where(eq(product_skus.stock_available, 0));
+
+    const active_count = Number(activeRow?.total ?? 0);
+    const inactive_count = Number(inactiveRow?.total ?? 0);
+    const total_stock_active = Number(activeRow?.total_stock ?? 0);
+    const total_stock_inactive = Number(inactiveRow?.total_stock ?? 0);
+
+    return {
+      total: active_count + inactive_count,
+      active: active_count,
+      inactive: inactive_count,
+      out_of_stock: Number(totalRes[0]?.out_of_stock ?? 0),
+      total_stock: total_stock_active + total_stock_inactive,
+    };
   }
 }
 

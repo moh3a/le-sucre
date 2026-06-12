@@ -85,6 +85,24 @@ export class CategoryRepository {
       .from(categories)
       .where(eq(categories.parent_id, parent_id));
   }
+
+  async get_stats() {
+    const [result] = await db
+      .select({
+        total: count(),
+        active: count(sql`CASE WHEN ${categories.is_active} = 1 THEN 1 ELSE NULL END`),
+        inactive: count(sql`CASE WHEN ${categories.is_active} = 0 THEN 1 ELSE NULL END`),
+        root: count(sql`CASE WHEN ${categories.parent_id} IS NULL THEN 1 ELSE NULL END`),
+      })
+      .from(categories);
+
+    return {
+      total: Number(result?.total ?? 0),
+      active: Number(result?.active ?? 0),
+      inactive: Number(result?.inactive ?? 0),
+      root: Number(result?.root ?? 0),
+    };
+  }
 }
 
 export const category_repository = new CategoryRepository();

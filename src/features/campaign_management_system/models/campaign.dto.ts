@@ -66,7 +66,7 @@ const translation_schema = z.object({
   seo_description: z.string().max(500).optional(),
 });
 
-const banner_schema = z.object({
+export const banner_schema = z.object({
   banner_type: z.enum(Object.values(BANNER_TYPE) as [string, ...string[]]).default("hero"),
   device_target: z.enum(["desktop", "mobile", "both"]).default("both"),
   image_url: z.string().url().optional().or(z.literal("")),
@@ -210,3 +210,27 @@ export const track_campaign_event_dto = z.object({
   locale: z.string().max(5).optional(),
   revenue: z.number().optional(),
 });
+
+export const full_campaign_dto = create_campaign_dto.and(
+  z.object({
+    id: z.string(),
+    translations: translation_schema.extend({ id: z.string() }).array(),
+    banners: banner_schema.extend({ id: z.string() }).array(),
+    targets: target_schema.extend({ id: z.string() }).array(),
+    sections: section_schema.extend({ id: z.string() }).array(),
+    linked_categories: z.array(
+      z.object({
+        id: z.string(),
+        category_id: z.string(),
+        campaign_id: z.string(),
+      }),
+    ),
+    linked_brands: z.array(
+      z.object({
+        id: z.string(),
+        brand_id: z.string(),
+        campaign_id: z.string(),
+      }),
+    ),
+  }),
+);
