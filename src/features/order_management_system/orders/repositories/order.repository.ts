@@ -29,7 +29,7 @@ export class OrderRepository {
         const fallbackName = typeof addr?.full_name === "string" ? addr.full_name : "";
         return {
           ...item.order,
-          customer_name: item.customer_name || fallbackName || item.order.guest_email || "Client",
+          customer_name: item.customer_name || fallbackName || item.order.guest_phone || "Client",
         };
       }),
       meta: { total_pages: Math.ceil(items.length / limit), total_records: items.length },
@@ -215,17 +215,11 @@ export class OrderRepository {
     order_id: string,
     patch: { assigned_operator_id?: string | null; assigned_delivery_person_id?: string | null },
   ) {
-    return await db
-      .update(orders)
-      .set(patch)
-      .where(eq(orders.id, order_id));
+    return await db.update(orders).set(patch).where(eq(orders.id, order_id));
   }
 
   async update_notes(order_id: string, notes: string | null) {
-    return await db
-      .update(orders)
-      .set({ notes })
-      .where(eq(orders.id, order_id));
+    return await db.update(orders).set({ notes }).where(eq(orders.id, order_id));
   }
 }
 

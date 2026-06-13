@@ -1,7 +1,8 @@
 import { auth } from "@/lib/auth";
 import { json_ok, json_error } from "@/lib/http";
-import { AuthenticationError, ValidationError } from "@/lib/error_handling";
+import { AuthenticationError } from "@/lib/error_handling";
 import { order_service } from "@/features/order_management_system/orders/services/order.service";
+import { phoneNumberSchema } from "@/lib/validations";
 
 type RouteContext = { params: Promise<{ order_id: string }> };
 
@@ -16,12 +17,13 @@ export async function GET(req: Request, context: RouteContext) {
     }
 
     const url = new URL(req.url);
-    const guest_email = url.searchParams.get("guest_email");
-    if (!guest_email) throw new AuthenticationError("Connexion ou guest_email requis");
+    const guest_phone_number = url.searchParams.get("guest_phone_number");
+    if (!guest_phone_number)
+      throw new AuthenticationError("Connexion ou guest_phone_number requis");
 
-    if (!guest_email.includes("@")) throw new ValidationError("guest_email invalide");
+    const guest_phone = phoneNumberSchema.parse(guest_phone_number);
 
-    const data = await order_service.get_guest_detail(order_id, guest_email);
+    const data = await order_service.get_guest_detail(order_id, guest_phone);
     return json_ok(data);
   } catch (e) {
     return json_error(e);

@@ -51,6 +51,7 @@ export const orders = mysqlTable(
       onDelete: "set null",
     }),
     guest_email: varchar("guest_email", { length: 255 }),
+    guest_phone: varchar("guest_phone", { length: 32 }),
     cart_id: varchar("cart_id", { length: 255 }).references(() => carts.id, {
       onDelete: "set null",
     }),

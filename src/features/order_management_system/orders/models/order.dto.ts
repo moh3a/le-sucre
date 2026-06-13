@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { address_snapshot_dto } from "./address.dto";
+import { phoneNumberSchema } from "@/lib/validations";
 
 export const checkout_preview_dto = z.object({
   discount_code: z.string().max(64).optional(),
@@ -8,7 +9,7 @@ export const checkout_preview_dto = z.object({
 });
 
 export const place_order_dto = z.object({
-  guest_email: z.string().email().optional(),
+  guest_phone: phoneNumberSchema.optional(),
   shipping_address: address_snapshot_dto,
   billing_address: address_snapshot_dto.optional(),
   discount_code: z.string().max(64).optional(),

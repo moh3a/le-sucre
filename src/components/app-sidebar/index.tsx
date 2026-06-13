@@ -22,6 +22,7 @@ import {
   Gauge,
   FileText,
   Megaphone,
+  Cog,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -48,6 +49,7 @@ import { authClient } from "@/lib/auth/client";
 import { TooltipProvider } from "../ui/tooltip";
 
 export function AppSidebar() {
+  // TODO add role to auth client data
   const { data } = authClient.useSession();
   const pathname = usePathname();
   const t = useTranslations("nav");
@@ -147,6 +149,15 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 </Collapsible>
               ))}
+              <Link href="/console/settings">
+                <SidebarMenuButton
+                  tooltip="Settings"
+                  isActive={pathname.startsWith("/console/settings")}
+                >
+                  <Cog className="size-4" />
+                  <span>Settings</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>

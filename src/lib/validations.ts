@@ -10,10 +10,12 @@ export const slugSchema = z
 
 export const emailSchema = z.string().email().toLowerCase().trim();
 export const passwordSchema = z.string().min(8).max(100);
-export const phoneSchema = z
+export const phoneNumberSchema = z
   .string()
-  .regex(/^\+?[1-9]\d{6,14}$/, "Invalid phone number")
-  .optional();
+  .regex(new RegExp(/^(0)(5|6|7)[0-9]{8}$/), {
+    message: "Invalid algerian phone number",
+  })
+  .length(10, { message: "Invalid algerian phone number" });
 
 export const urlSchema = z.string().url();
 
@@ -61,7 +63,7 @@ export const addressSchema = z.object({
   state: z.string().max(100).optional(),
   postal_code: z.string().min(1).max(20),
   country_code: z.string().length(2).toUpperCase(),
-  phone: phoneSchema,
+  phone: phoneNumberSchema,
 });
 
 export type Address = z.infer<typeof addressSchema>;

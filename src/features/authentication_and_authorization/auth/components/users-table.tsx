@@ -10,12 +10,15 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
+import { EditUser } from "./edit-user";
 
+// TODO add phone number and role
 type UserRow = {
   id: string;
   name: string | null;
+  phone: string;
+  role: string;
   email: string;
   email_verified: Date | null;
   is_active: boolean;
@@ -28,9 +31,7 @@ export function UsersTable() {
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Nom" />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Nom" />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-medium">{row.original.name ?? "—"}</span>
@@ -41,9 +42,7 @@ export function UsersTable() {
       {
         id: "email_verified",
         accessorKey: "email_verified",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Vérifié" />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Vérifié" />,
         cell: ({ row }) => (
           <Badge variant={row.original.email_verified ? "default" : "outline"}>
             {row.original.email_verified ? "Oui" : "Non"}
@@ -53,9 +52,7 @@ export function UsersTable() {
       {
         id: "is_active",
         accessorKey: "is_active",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Actif" />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Actif" />,
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? "default" : "destructive"}>
             {row.original.is_active ? "Actif" : "Inactif"}
@@ -65,20 +62,19 @@ export function UsersTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Inscription" />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Inscription" />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
-        id: "roles",
-        header: "Rôles",
-        cell: () => <Badge variant="outline">Client</Badge>,
+        id: "role",
+        accessorKey: "role",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Rôle" />,
+        cell: ({ row }) => <Badge variant="outline">{row.original.role}</Badge>,
       },
       {
         id: "actions",
         header: "Actions",
-        cell: () => <Button variant="outline" size="sm">Gérer</Button>,
+        cell: ({ row }) => <EditUser userId={row.original.id} />,
       },
     ],
     [],

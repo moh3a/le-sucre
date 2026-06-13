@@ -58,7 +58,7 @@ const default_company: CompanyInfo = {
   address: "123 Rue de la Liberté, Alger, Algérie",
   vat_number: "AI-198273645000",
   email: "contact@lesucre.dz",
-  phone: "+213 21 00 00 00",
+  phone: "0000 00 00 00",
 };
 
 export const InvoicePdfTemplate: React.FC<{

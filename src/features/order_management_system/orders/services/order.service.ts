@@ -63,7 +63,7 @@ export class OrderService {
       id: generate_id(),
       order_number: build_order_number(),
       user_id: input.user_id ?? null,
-      guest_email: input.user_id ? null : (input.guest_email ?? null),
+      guest_phone: input.user_id ? null : (input.guest_phone ?? null),
       cart_id: input.cart_id,
       currency: cart.currency,
       channel: cart.channel,
@@ -275,10 +275,10 @@ export class OrderService {
     return data;
   }
 
-  async get_guest_detail(order_id: string, guest_email: string) {
+  async get_guest_detail(order_id: string, guest_phone: string) {
     const data = await this.repo.get_full(order_id);
     if (!data) throw new NotFoundError("Commande introuvable");
-    if (!data.order.guest_email || data.order.guest_email !== guest_email) {
+    if (!data.order.guest_phone || data.order.guest_phone !== guest_phone) {
       throw new ForbiddenError("Accès refusé");
     }
     return data;

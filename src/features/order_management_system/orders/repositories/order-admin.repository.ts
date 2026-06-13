@@ -105,7 +105,7 @@ export class OrderAdminRepository {
         payment_status: orders.payment_status,
         fulfillment_status: orders.fulfillment_status,
         grand_total: orders.grand_total,
-        guest_email: orders.guest_email,
+        guest_phone: orders.guest_phone,
         created_at: orders.created_at,
         customer_name: users.name,
         customer_email: users.email,

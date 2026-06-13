@@ -45,6 +45,8 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.inventory_write,
     PERMISSIONS.reviews_read,
     PERMISSIONS.reviews_moderate,
+    PERMISSIONS.analytics_read,
+    PERMISSIONS.customers_read,
     PERMISSIONS.campaigns_read,
     PERMISSIONS.campaigns_write,
   ],
