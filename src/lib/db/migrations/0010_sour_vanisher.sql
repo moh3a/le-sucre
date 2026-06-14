@@ -1,0 +1,1 @@
+ALTER TABLE `orders` ADD `guest_phone` varchar(32);

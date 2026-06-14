@@ -71,6 +71,13 @@
       "when": 1781028432129,
       "tag": "0009_unique_rawhide_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1781350409060,
+      "tag": "0010_sour_vanisher",
+      "breakpoints": true
     }
   ]
 }

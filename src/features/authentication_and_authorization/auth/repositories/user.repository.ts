@@ -21,7 +21,7 @@ export class UserRepository {
     await db.update(users).set({ is_active }).where(eq(users.id, id));
   }
 
-  async list_paginated(page = 1, limit = 20) {
+  async list_paginated(page: number = 1, limit: number = 20) {
     const safe_limit = Math.min(Math.max(limit, 1), 100);
     const offset = (Math.max(page, 1) - 1) * safe_limit;
 
@@ -34,8 +34,22 @@ export class UserRepository {
           email_verified: users.email_verified,
           is_active: users.is_active,
           created_at: users.created_at,
+          roles:
+            sql<string>`GROUP_CONCAT(DISTINCT ${roles.name} ORDER BY ${roles.name} SEPARATOR ', ')`.as(
+              "roles",
+            ),
         })
         .from(users)
+        .leftJoin(user_roles, eq(user_roles.user_id, users.id))
+        .leftJoin(roles, eq(user_roles.role_id, roles.id))
+        .groupBy(
+          users.id,
+          users.name,
+          users.email,
+          users.email_verified,
+          users.is_active,
+          users.created_at,
+        )
         .orderBy(desc(users.created_at))
         .limit(safe_limit)
         .offset(offset),
@@ -46,7 +60,11 @@ export class UserRepository {
     const total_pages = Math.ceil(total_records / safe_limit) || 1;
 
     return {
-      items,
+      items: items.map((item) => ({
+        ...item,
+        role: item.roles?.split(", ")[0] ?? "—",
+        phone: "—",
+      })),
       meta: {
         page,
         limit: safe_limit,
@@ -57,9 +75,49 @@ export class UserRepository {
     };
   }
 
+  // async list_paginated(page = 1, limit = 20) {
+  //   const safe_limit = Math.min(Math.max(limit, 1), 100);
+  //   const offset = (Math.max(page, 1) - 1) * safe_limit;
+
+  //   const [items, total_row] = await Promise.all([
+  //     db
+  //       .select({
+  //         id: users.id,
+  //         name: users.name,
+  //         email: users.email,
+  //         email_verified: users.email_verified,
+  //         is_active: users.is_active,
+  //         created_at: users.created_at,
+  //       })
+  //       .from(users)
+  //       .orderBy(desc(users.created_at))
+  //       .limit(safe_limit)
+  //       .offset(offset),
+  //     db.select({ total: count() }).from(users),
+  //   ]);
+
+  //   const total_records = Number(total_row[0]?.total ?? 0);
+  //   const total_pages = Math.ceil(total_records / safe_limit) || 1;
+
+  //   return {
+  //     items,
+  //     meta: {
+  //       page,
+  //       limit: safe_limit,
+  //       total_records,
+  //       total_pages,
+  //       has_more: page < total_pages,
+  //     },
+  //   };
+  // }
+
+  async update_profile(id: string, patch: { name?: string; is_active?: boolean }) {
+    await db.update(users).set(patch).where(eq(users.id, id));
+  }
+
   async stats() {
-    const since_30d =  format(subDays(new Date(), 30), "yyyy-MM-dd");
-    
+    const since_30d = format(subDays(new Date(), 30), "yyyy-MM-dd");
+
     const [row] = await db
       .select({
         total: count(),

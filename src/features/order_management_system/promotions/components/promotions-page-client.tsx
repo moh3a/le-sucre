@@ -1,7 +1,5 @@
 "use client";
 
-// [ ] not to standards
-
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { trpc } from "@/components/providers/app-providers";
 import { PromotionsTable } from "./promotions-table";

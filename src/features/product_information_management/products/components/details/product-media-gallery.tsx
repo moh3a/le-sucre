@@ -118,24 +118,30 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
               <DialogDescription>Ajouter une image ou une vidéo au produit.</DialogDescription>
             </DialogHeader>
             <form
-              method="post"
-              action={`/api/admin/products/${product_id}/media/upload`}
-              encType="multipart/form-data"
+              // method="post"
+              // action={`/api/admin/products/${product_id}/media/upload`}
+              // encType="multipart/form-data"
               // FIXME fix media upload
-              onSubmit={(_event) => {
-                set_uploading(true);
+              onSubmit={(event) => {
+                event.preventDefault();
                 void form.handleSubmit(async ({ files, ...values }) => {
-                  await upload_media.mutateAsync(
-                    { ...values, file: files[0] },
-                    {
-                      onSuccess() {
-                        toast("Successfully uploaded media.");
-                        void utils.products.byId.invalidate({ id: product_id });
-                      },
-                    },
-                  );
-                })(_event);
-                set_uploading(false);
+                  set_uploading(true);
+                  try {
+                    await upload_media.mutateAsync({ ...values, file: files[0] });
+                    toast.success("Média téléversé avec succès.");
+                    form.reset({
+                      product_id,
+                      alt: "",
+                      is_primary: false,
+                      sort_order: 1,
+                      files: [],
+                    });
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : "Échec du téléversement.");
+                  } finally {
+                    set_uploading(false);
+                  }
+                })(event);
               }}
             >
               <FieldGroup>

@@ -40,6 +40,14 @@ export function UsersTable() {
         ),
       },
       {
+        id: "phone",
+        accessorKey: "phone",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Téléphone" />,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">{row.original.phone ?? "—"}</span>
+        ),
+      },
+      {
         id: "email_verified",
         accessorKey: "email_verified",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Vérifié" />,
@@ -74,7 +82,15 @@ export function UsersTable() {
       {
         id: "actions",
         header: "Actions",
-        cell: ({ row }) => <EditUser userId={row.original.id} />,
+        cell: ({ row }) => (
+          <EditUser
+            userId={row.original.id}
+            name={row.original.name}
+            email={row.original.email}
+            is_active={row.original.is_active}
+            role={row.original.role}
+          />
+        ),
       },
     ],
     [],

@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ShipmentPanel } from "@/features/shipping_management_system/components/shipment-panel";
 
 type OrderDetailTabsProps = { order_id: string };
 
@@ -32,7 +33,6 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const { data, isLoading, refetch } = trpc.orders.adminGet.useQuery({ order_id });
   const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => refetch() });
   const [next_status, set_next_status] = useState<string>("");
-
 
   const { data: operators_data, isLoading: operators_loading } =
     trpc.adminAuth.listUsersByRole.useQuery({ role: "operator" });
@@ -313,7 +313,8 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
             <p>{shipping_addr.country_code}</p>
           </CardContent>
         </Card>
-        {order.shipment_provider && (
+        {/* 
+        {order.shipment_provider && ( 
           <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-sm font-medium">Transporteur</CardTitle>
@@ -329,7 +330,8 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
+        <ShipmentPanel order_id={order_id} />
       </TabsContent>
 
       {/* ── Payments ────────────────────────────────── */}

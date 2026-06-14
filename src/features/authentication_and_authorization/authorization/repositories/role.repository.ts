@@ -11,6 +11,42 @@ import {
 } from "@/features/authentication_and_authorization/auth/schema";
 
 export class RoleRepository {
+  async list_roles_with_permissions() {
+    const all_roles = await db.select().from(roles);
+    const links = await db
+      .select({
+        role_name: roles.name,
+        permission_name: permissions.name,
+      })
+      .from(role_permissions)
+      .innerJoin(roles, eq(role_permissions.role_id, roles.id))
+      .innerJoin(permissions, eq(role_permissions.permission_id, permissions.id));
+
+    return all_roles.map((role) => ({
+      id: role.id,
+      name: role.name,
+      description: role.description,
+      permissions: links.filter((l) => l.role_name === role.name).map((l) => l.permission_name),
+    }));
+  }
+
+  async replace_role_permissions(role_name: string, permission_names: string[]) {
+    const [role] = await db.select().from(roles).where(eq(roles.name, role_name)).limit(1);
+    if (!role) throw new Error(`Role ${role_name} not found`);
+
+    await db.delete(role_permissions).where(eq(role_permissions.role_id, role.id));
+
+    const all_permissions = await db.select().from(permissions);
+    for (const permission_name of permission_names) {
+      const perm = all_permissions.find((p) => p.name === permission_name);
+      if (!perm) continue;
+      await db.insert(role_permissions).values({
+        role_id: role.id,
+        permission_id: perm.id,
+      });
+    }
+  }
+
   async find_roles_by_user_id(user_id: string) {
     return db
       .select({ id: roles.id, name: roles.name })

@@ -1,7 +1,5 @@
+import { SettingsPageClient } from "@/features/console_dashboard/components/settings-page-client";
+
 export default function SettingsPage() {
-  return (
-    <div>
-      <h1>Settings</h1>
-    </div>
-  );
+  return <SettingsPageClient />;
 }

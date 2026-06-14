@@ -23,6 +23,8 @@ import {
   FileText,
   Megaphone,
   Cog,
+  TriangleAlert,
+  Handshake,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -47,10 +49,16 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { NavUser } from "./nav-user";
 import { authClient } from "@/lib/auth/client";
 import { TooltipProvider } from "../ui/tooltip";
+import { trpc } from "../providers/app-providers";
 
 export function AppSidebar() {
   // TODO add role to auth client data
   const { data } = authClient.useSession();
+  const { data: me } = trpc.auth.me.useQuery(undefined, {
+    enabled: Boolean(data?.user),
+  }); 
+  const primary_role = me?.roles?.[0];
+
   const pathname = usePathname();
   const t = useTranslations("nav");
 
@@ -70,6 +78,7 @@ export function AppSidebar() {
       icon: Warehouse,
       items: [
         { title: "Inventaire", url: "/console/inventory", icon: Warehouse },
+        { title: "Alertes", url: "/console/inventory/alerts", icon: TriangleAlert },
         { title: "Forecasting", url: "/console/inventory/forecast", icon: TrendingUpDown },
       ],
     },
@@ -78,6 +87,7 @@ export function AppSidebar() {
       icon: Banknote,
       items: [
         { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
+        { title: "Clients", url: "/console/customers", icon: Handshake },
         { title: "Factures", url: "/console/invoices", icon: FileText },
         { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
         { title: "Campagnes", url: "/console/campaigns", icon: Megaphone },
@@ -167,6 +177,7 @@ export function AppSidebar() {
               name: data?.user.name ?? "",
               email: data?.user.email ?? "",
               avatar: data?.user.image ?? "",
+              role: primary_role
             }}
           />
         </SidebarFooter>

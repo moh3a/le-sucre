@@ -1,7 +1,5 @@
 "use client";
 
-// [ ] not to standards
-
 import * as React from "react";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

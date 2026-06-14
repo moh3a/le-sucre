@@ -1,11 +1,82 @@
 import "server-only";
 
-import { and, asc, desc, eq, lte } from "drizzle-orm";
+import { and, asc, count, desc, eq, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { shipments, shipment_tracking_events, shipping_jobs } from "./schema";
 
 export class ShippingRepository {
+  async admin_list_enriched(page: number, limit: number, status?: string) {
+    const safe_limit = Math.min(Math.max(limit, 1), 100);
+    const offset = (Math.max(page, 1) - 1) * safe_limit;
+    const where = status ? eq(shipments.status, status) : undefined;
+    const [items, total_row] = await Promise.all([
+      db
+        .select({
+          id: shipments.id,
+          order_id: shipments.order_id,
+          order_number: orders.order_number,
+          provider: shipments.provider,
+          tracking_number: shipments.tracking_number,
+          tracking_url: shipments.tracking_url,
+          status: shipments.status,
+          delivery_status: shipments.delivery_status,
+          recipient_name: shipments.recipient_name,
+          recipient_phone: shipments.recipient_phone,
+          city: shipments.city,
+          country_code: shipments.country_code,
+          shipping_cost: shipments.shipping_cost,
+          currency: shipments.currency,
+          last_sync_at: shipments.last_sync_at,
+          created_at: shipments.created_at,
+        })
+        .from(shipments)
+        .innerJoin(orders, eq(shipments.order_id, orders.id))
+        .where(where)
+        .orderBy(desc(shipments.created_at))
+        .limit(safe_limit)
+        .offset(offset),
+      db.select({ total: count() }).from(shipments).where(where),
+    ]);
+    const total_records = Number(total_row[0]?.total ?? 0);
+    const total_pages = Math.ceil(total_records / safe_limit) || 1;
+    return {
+      items,
+      meta: {
+        page,
+        limit: safe_limit,
+        total_records,
+        total_pages,
+        has_more: page < total_pages,
+      },
+    };
+  }
+  async admin_stats() {
+    const rows = await db
+      .select({
+        status: shipments.status,
+        count: count(),
+      })
+      .from(shipments)
+      .groupBy(shipments.status);
+    const map = Object.fromEntries(rows.map((r) => [r.status, Number(r.count)]));
+    const [pending_sync_row] = await db
+      .select({ count: count() })
+      .from(shipments)
+      .where(
+        sql`${shipments.tracking_number} IS NOT NULL AND (${shipments.last_sync_at} IS NULL OR ${shipments.last_sync_at} < DATE_SUB(NOW(), INTERVAL 6 HOUR))`,
+      );
+    return {
+      total: Object.values(map).reduce((a, b) => a + b, 0),
+      draft: map.draft ?? 0,
+      dispatched: map.dispatched ?? 0,
+      in_transit: map.in_transit ?? 0,
+      delivered: map.delivered ?? 0,
+      failed: map.failed ?? 0,
+      pending_sync: Number(pending_sync_row?.count ?? 0),
+    };
+  }
+
   async get_order(order_id: string) {
     return await db
       .select()

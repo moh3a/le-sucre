@@ -1,4 +1,3 @@
-// TODO complete permissions
 export const PERMISSIONS = {
   users_read: "users:read",
   users_write: "users:write",
@@ -26,6 +25,12 @@ export const PERMISSIONS = {
   customers_read: "customers:read",
   campaigns_read: "campaigns:read",
   campaigns_write: "campaigns:write",
+  invoices_read: "invoices:read",
+  invoices_write: "invoices:write",
+  shipping_read: "shipping:read",
+  shipping_write: "shipping:write",
+  settings_read: "settings:read",
+  settings_write: "settings:write",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -49,6 +54,9 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.customers_read,
     PERMISSIONS.campaigns_read,
     PERMISSIONS.campaigns_write,
+    PERMISSIONS.invoices_read,
+    PERMISSIONS.shipping_read,
+    PERMISSIONS.settings_read,
   ],
   operator: [
     PERMISSIONS.orders_read,
@@ -58,7 +66,13 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.categories_read,
     PERMISSIONS.inventory_read,
     PERMISSIONS.inventory_write,
+    PERMISSIONS.shipping_read,
+    PERMISSIONS.shipping_write,
   ],
-  delivery_person: [PERMISSIONS.delivery_manage, PERMISSIONS.orders_read],
+  delivery_person: [
+    PERMISSIONS.delivery_manage,
+    PERMISSIONS.orders_read,
+    PERMISSIONS.shipping_read,
+  ],
   customer: [PERMISSIONS.storefront_account],
 };

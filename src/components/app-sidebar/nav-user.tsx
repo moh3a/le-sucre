@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,8 +19,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Badge } from "../ui/badge";
 import { authClient } from "@/lib/auth/client";
-import Link from "next/link";
+import { RoleName } from "@/features/authentication_and_authorization/authorization/constants/roles";
 
 export function NavUser({
   user,
@@ -28,6 +30,7 @@ export function NavUser({
     name: string;
     email: string;
     avatar: string;
+    role: RoleName | null;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -53,6 +56,7 @@ export function NavUser({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
+                {user.role ? <Badge>{user.role}</Badge> : null}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>

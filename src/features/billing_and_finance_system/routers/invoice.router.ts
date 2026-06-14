@@ -148,6 +148,7 @@ export const invoice_router = create_trpc_router({
       }
     }),
 
+  // TODO fix error Invalid ISO datetime
   get_summary: admin_procedure.input(financial_query_schema).query(async ({ input }) => {
     return await invoice_service.get_financial_summary(input.start_date, input.end_date);
   }),

@@ -187,15 +187,15 @@ export class InvoiceRepository {
     // Daily breakdown for revenue growth
     const daily_breakdown = await db
       .select({
-        day: sql<string>`DATE(${invoices.created_at})`,
+        day: invoices.created_at,
         revenue: sum(invoices.grand_total),
         tax: sum(invoices.tax_total),
         count: count(invoices.id),
       })
       .from(invoices)
       .where(and(where_clause, eq(invoices.status, "paid")))
-      .groupBy(sql`DATE(${invoices.created_at})`)
-      .orderBy(sql`DATE(${invoices.created_at})`);
+      .groupBy(invoices.created_at)
+      .orderBy(invoices.created_at);
 
     // Status aggregates
     const status_aggregates = await db

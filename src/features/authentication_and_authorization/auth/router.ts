@@ -33,6 +33,28 @@ export const admin_auth_router = create_trpc_router({
       });
       return { ok: true };
     }),
+  updateUser: permission_procedure(PERMISSIONS.users_write)
+    .input(
+      z.object({
+        user_id: z.string().min(1),
+        name: z.string().min(2).max(255).optional(),
+        is_active: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await user_repository.update_profile(input.user_id, {
+        name: input.name,
+        is_active: input.is_active,
+      });
+      await audit_service.log({
+        actor_user_id: ctx.user.id,
+        action: "user.updated",
+        resource_type: "user",
+        resource_id: input.user_id,
+        metadata: input,
+      });
+      return { ok: true };
+    }),
   listUsers: permission_procedure(PERMISSIONS.users_read)
     .input(
       z.object({
@@ -41,8 +63,7 @@ export const admin_auth_router = create_trpc_router({
       }),
     )
     .query(({ input }) => user_repository.list_paginated(input.page, input.limit)),
-  getStats: permission_procedure(PERMISSIONS.users_read)
-    .query(() => user_repository.stats()),
+  getStats: permission_procedure(PERMISSIONS.users_read).query(() => user_repository.stats()),
   listAuditLogs: permission_procedure(PERMISSIONS.audit_read)
     .input(
       z.object({

@@ -6,6 +6,20 @@ import { format, startOfMonth } from "date-fns";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 
+type StatusAggregate = {
+  status: string;
+  count: number;
+  total_amount: number;
+};
+
+function count_for_status(rows: StatusAggregate[] | undefined, status: string) {
+  return rows?.find((row) => row.status === status)?.count ?? 0;
+}
+
+function amount_for_status(rows: StatusAggregate[] | undefined, status: string) {
+  return rows?.find((row) => row.status === status)?.total_amount ?? 0;
+}
+
 export function InvoiceStats() {
   const today = new Date();
   const start = format(startOfMonth(today), "yyyy-MM-dd");
@@ -16,13 +30,20 @@ export function InvoiceStats() {
     end_date: end,
   });
 
+  const status_rows = data?.status_aggregates;
+  const total_invoices = status_rows?.reduce((sum, row) => sum + row.count, 0) ?? 0;
+  const paid_revenue = amount_for_status(status_rows, "paid");
+  const refunded_amount =
+    amount_for_status(status_rows, "refunded") +
+    amount_for_status(status_rows, "partially_refunded");
+
   return (
     <StatsGrid
       loading={isFetching || isLoading}
       items={[
         {
           label: "Chiffre d'affaires (mois)",
-          value: Number(data?.total_revenue ?? 0).toLocaleString("fr-FR", {
+          value: paid_revenue.toLocaleString("fr-FR", {
             style: "currency",
             currency: "DZD",
             maximumFractionDigits: 0,
@@ -32,25 +53,25 @@ export function InvoiceStats() {
         },
         {
           label: "Factures totales",
-          value: data?.total_invoices ?? 0,
+          value: total_invoices,
           icon: ReceiptCent,
           color: "default",
         },
         {
           label: "Factures payées",
-          value: data?.paid_invoices ?? 0,
+          value: count_for_status(status_rows, "paid"),
           icon: CheckCircle2,
           color: "success",
         },
         {
           label: "Factures impayées",
-          value: data?.unpaid_invoices ?? 0,
+          value: count_for_status(status_rows, "unpaid"),
           icon: Clock,
           color: "warning",
         },
         {
           label: "Remboursements",
-          value: Number(data?.total_refunded ?? 0).toLocaleString("fr-FR", {
+          value: refunded_amount.toLocaleString("fr-FR", {
             style: "currency",
             currency: "DZD",
             maximumFractionDigits: 0,
@@ -60,7 +81,7 @@ export function InvoiceStats() {
         },
         {
           label: "Factures annulées",
-          value: data?.voided_invoices ?? 0,
+          value: count_for_status(status_rows, "void"),
           icon: FileX,
           color: "error",
         },
