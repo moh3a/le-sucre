@@ -7,6 +7,7 @@ import type {
   place_order_dto,
   list_orders_dto,
   admin_update_order_status_dto,
+  admin_create_order_dto,
 } from "../models/order.dto";
 import { order_repository } from "../repositories/order.repository";
 import { build_order_number } from "../order-number.helper";
@@ -28,6 +29,7 @@ import { db } from "@/lib/db";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
+import { cart_service } from "../../carts/cart.service";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -460,6 +462,28 @@ export class OrderService {
     });
 
     return this.repo.get_full(input.order_id);
+  }
+
+  async admin_create(input: z.infer<typeof admin_create_order_dto>) {
+    const cart = await cart_service.get_or_create_cart({ user_id: input.user_id });
+    if (!cart) throw new NotFoundError("Impossible de créer un panier");
+
+    for (const item of input.items) {
+      await cart_service.add_item(cart.id, { sku_id: item.sku_id, quantity: item.quantity });
+    }
+
+    return this.place_from_cart({
+      cart_id: cart.id,
+      user_id: input.user_id,
+      shipping_address: input.shipping_address,
+      billing_address: input.billing_address,
+      discount_code: input.discount_code,
+      shipping_cost: input.shipping_cost,
+      tax_rate: input.tax_rate,
+      idempotency_key: `admin_${generate_id()}`,
+      payment_provider: "manual",
+      guest_phone: undefined,
+    });
   }
 }
 

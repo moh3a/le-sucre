@@ -5,6 +5,7 @@ import { StatsGrid } from "@/components/console/stats-grid";
 import { Users, UserCheck, Clock, Shield } from "lucide-react";
 import { trpc } from "@/components/providers/app-providers";
 import { UsersTable } from "./users-table";
+import { CreateUserDialog } from "./create-user-dialog";
 
 export function UsersPageClient() {
   const { data: statsData, isLoading: isLoadingStats } = trpc.adminAuth.getStats.useQuery();
@@ -20,6 +21,7 @@ export function UsersPageClient() {
     <ConsolePageShell
       title="Utilisateurs"
       subtitle="Gestion des utilisateurs et des rôles"
+      actions={<CreateUserDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

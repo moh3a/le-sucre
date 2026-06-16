@@ -1,8 +1,15 @@
 import "server-only";
 import { count, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { users } from "@/features/authentication_and_authorization/auth/schema";
+import { users, user_roles, roles } from "@/features/authentication_and_authorization/auth/schema";
 import { orders } from "../../orders/schema";
+
+const customer_role_subquery = db
+  .select({ user_id: user_roles.user_id })
+  .from(user_roles)
+  .innerJoin(roles, eq(user_roles.role_id, roles.id))
+  .where(eq(roles.name, "customer"))
+  .as("customer_users");
 
 export class CustomerRepository {
   async list(page: number, limit: number) {
@@ -20,13 +27,17 @@ export class CustomerRepository {
         last_order_at: sql<string | null>`MAX(${orders.placed_at})`,
       })
       .from(users)
+      .innerJoin(customer_role_subquery, eq(users.id, customer_role_subquery.user_id))
       .leftJoin(orders, eq(orders.user_id, users.id))
       .groupBy(users.id, users.name, users.email, users.image, users.created_at)
       .orderBy(desc(sql`MAX(${orders.placed_at})`))
       .limit(limit)
       .offset(offset);
 
-    const [{ total }] = await db.select({ total: count() }).from(users);
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(users)
+      .innerJoin(customer_role_subquery, eq(users.id, customer_role_subquery.user_id));
     const total_records = Number(total ?? 0);
 
     return {
@@ -54,6 +65,7 @@ export class CustomerRepository {
         last_order_at: sql<string | null>`MAX(${orders.placed_at})`,
       })
       .from(users)
+      .innerJoin(customer_role_subquery, eq(users.id, customer_role_subquery.user_id))
       .leftJoin(orders, eq(orders.user_id, users.id))
       .where(eq(users.id, user_id))
       .groupBy(users.id, users.name, users.email, users.image, users.created_at)
@@ -70,6 +82,7 @@ export class CustomerRepository {
         avg_order_value: sql<string>`COALESCE(AVG(CASE WHEN ${orders.payment_status} = 'paid' THEN ${orders.grand_total} END), 0)`,
       })
       .from(users)
+      .innerJoin(customer_role_subquery, eq(users.id, customer_role_subquery.user_id))
       .leftJoin(orders, eq(orders.user_id, users.id));
 
     return row;

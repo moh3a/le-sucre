@@ -11,6 +11,7 @@ import {
   admin_update_order_status_dto,
   list_orders_dto,
   admin_list_enriched_dto,
+  admin_create_order_dto,
 } from "./models/order.dto";
 import { order_admin_service } from "./services/order-admin.service";
 
@@ -102,4 +103,8 @@ export const order_router = create_trpc_router({
         actor_user_id: ctx.session!.user.id,
       }),
     ),
+
+  adminCreateOrder: permission_procedure(PERMISSIONS.orders_write)
+    .input(admin_create_order_dto)
+    .mutation(({ input }) => order_service.admin_create(input)),
 });

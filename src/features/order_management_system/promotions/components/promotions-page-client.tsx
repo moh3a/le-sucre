@@ -3,6 +3,7 @@
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { trpc } from "@/components/providers/app-providers";
 import { PromotionsTable } from "./promotions-table";
+import { CreatePromotionDialog } from "./create-promotion-dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export function PromotionsPageClient() {
@@ -15,6 +16,7 @@ export function PromotionsPageClient() {
     <ConsolePageShell
       title="Promotions"
       subtitle="Gestion des codes promo, ventes flash et bundles"
+      actions={<CreatePromotionDialog />}
     >
       <div className="space-y-6">
         <Card>

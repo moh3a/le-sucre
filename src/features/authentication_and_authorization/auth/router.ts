@@ -8,8 +8,12 @@ import { PERMISSIONS } from "@/features/authentication_and_authorization/authori
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { audit_repository } from "@/features/authentication_and_authorization/authorization/repositories/audit.repository";
-import { assign_role_dto } from "@/features/authentication_and_authorization/auth/models/auth.dto";
+import {
+  assign_role_dto,
+  create_user_dto,
+} from "@/features/authentication_and_authorization/auth/models/auth.dto";
 import z from "zod";
+import { auth } from "@/lib/auth";
 import { user_repository } from "./repositories/user.repository";
 
 export const auth_router = create_trpc_router({
@@ -54,6 +58,32 @@ export const admin_auth_router = create_trpc_router({
         metadata: input,
       });
       return { ok: true };
+    }),
+  createUser: permission_procedure(PERMISSIONS.users_write)
+    .input(create_user_dto)
+    .mutation(async ({ ctx, input }) => {
+      const result = await auth.api.signUpEmail({
+        body: {
+          email: input.email,
+          password: input.password,
+          name: input.name,
+          rememberMe: false,
+        },
+      });
+
+      const user_id = result.user.id;
+
+      await role_repository.assign_role(user_id, input.role);
+
+      await audit_service.log({
+        actor_user_id: ctx.user.id,
+        action: "user.created",
+        resource_type: "user",
+        resource_id: user_id,
+        metadata: { email: input.email, role: input.role },
+      });
+
+      return { user_id };
     }),
   listUsers: permission_procedure(PERMISSIONS.users_read)
     .input(

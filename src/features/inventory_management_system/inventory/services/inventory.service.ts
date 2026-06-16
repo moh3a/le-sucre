@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { NotFoundError } from "@/lib/error_handling";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 
 import type {
@@ -14,6 +14,8 @@ import type {
   list_movements_dto,
 } from "../models/inventory.dto";
 import { MOVEMENT_TYPES } from "../constants/movement-types";
+import { INVENTORY_ERROR } from "../constants/error-codes";
+import { throw_error } from "../../shared/error-codes";
 import { inventory_repository } from "../repositories/inventory.repository";
 import {
   invalidate_product_stock_cache,
@@ -32,8 +34,8 @@ export class InventoryService {
       .from(product_skus)
       .where(eq(product_skus.id, sku_id))
       .limit(1);
-    if (!sku) throw new NotFoundError("SKU introuvable");
-    return sku;
+    if (!sku) throw_error(INVENTORY_ERROR.SKU_NOT_FOUND, { sku_id });
+    return sku!;
   }
 
   private async apply_on_hand_change(input: {
@@ -49,17 +51,21 @@ export class InventoryService {
 
     const product_id = await db.transaction(async (tx) => {
       const level = await this.repo.get_level_for_update(tx, input.sku_id, input.warehouse_id);
-      if (!level) throw new NotFoundError("Niveau de stock introuvable");
+      if (!level) throw_error(INVENTORY_ERROR.LEVEL_NOT_FOUND, { sku_id: input.sku_id });
 
-      if (input.new_on_hand < 0) throw new ConflictError("Stock insuffisant");
+      if (input.new_on_hand < 0) throw_error(INVENTORY_ERROR.NEGATIVE_STOCK, { sku_id: input.sku_id, warehouse_id: input.warehouse_id });
       if (input.new_on_hand < level.quantity_reserved) {
-        throw new ConflictError("Le stock ne peut pas être inférieur aux réservations");
+        throw_error(INVENTORY_ERROR.STOCK_BELOW_RESERVED, {
+          sku_id: input.sku_id,
+          on_hand: input.new_on_hand,
+          reserved: level.quantity_reserved,
+        });
       }
 
       const ok = await this.repo.update_level_optimistic(tx, level.id, level.version, {
         quantity_on_hand: input.new_on_hand,
       });
-      if (!ok) throw new ConflictError("Conflit de version — réessayez");
+      if (!ok) throw_error(INVENTORY_ERROR.VERSION_CONFLICT, { level_id: level.id });
 
       await this.repo.insert_movement(tx, {
         sku_id: input.sku_id,

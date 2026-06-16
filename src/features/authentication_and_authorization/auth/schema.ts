@@ -14,6 +14,7 @@ import { generate_id } from "@/lib/utils";
 // ==========================================
 // 1. USERS TABLE
 // ==========================================
+// TODO add user phone number
 export const users = mysqlTable(
   "users",
   {

@@ -4,10 +4,11 @@ import { and, eq, lt } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
 
 import type { create_reservation_dto, commit_reservation_dto } from "../models/inventory.dto";
 import { MOVEMENT_TYPES, RESERVATION_STATUS } from "../constants/movement-types";
+import { INVENTORY_ERROR } from "../constants/error-codes";
+import { throw_error } from "../../shared/error-codes";
 import { inventory_reservations } from "../schema";
 import { inventory_repository } from "../repositories/inventory.repository";
 import {
@@ -31,17 +32,21 @@ export class ReservationService {
 
     const reservation_id = await db.transaction(async (tx) => {
       const level = await this.repo.get_level_for_update(tx, input.sku_id, input.warehouse_id);
-      if (!level) throw new NotFoundError("Niveau de stock introuvable");
+      if (!level) throw_error(INVENTORY_ERROR.LEVEL_NOT_FOUND, { sku_id: input.sku_id });
 
       const available = level.quantity_on_hand - level.quantity_reserved;
       if (available < input.quantity) {
-        throw new ConflictError("Stock disponible insuffisant");
+        throw_error(INVENTORY_ERROR.STOCK_INSUFFICIENT, {
+          sku_id: input.sku_id,
+          available,
+          requested: input.quantity,
+        });
       }
 
       const ok = await this.repo.update_level_optimistic(tx, level.id, level.version, {
         quantity_reserved: level.quantity_reserved + input.quantity,
       });
-      if (!ok) throw new ConflictError("Conflit de version — réessayez");
+      if (!ok) throw_error(INVENTORY_ERROR.VERSION_CONFLICT, { level_id: level.id });
 
       const id = await this.repo.create_reservation(tx, {
         sku_id: input.sku_id,
@@ -75,9 +80,9 @@ export class ReservationService {
   async release(reservation_id: string) {
     await db.transaction(async (tx) => {
       const reservation = await this.repo.get_reservation_for_update(tx, reservation_id);
-      if (!reservation) throw new NotFoundError("Réservation introuvable");
+      if (!reservation) throw_error(INVENTORY_ERROR.RESERVATION_NOT_FOUND, { reservation_id });
       if (reservation.status !== RESERVATION_STATUS.active) {
-        throw new ConflictError("Réservation non active");
+        throw_error(INVENTORY_ERROR.RESERVATION_NOT_ACTIVE, { reservation_id, status: reservation.status });
       }
 
       const level = await this.repo.get_level_for_update(
@@ -85,12 +90,12 @@ export class ReservationService {
         reservation.sku_id,
         reservation.warehouse_id,
       );
-      if (!level) throw new NotFoundError("Niveau de stock introuvable");
+      if (!level) throw_error(INVENTORY_ERROR.LEVEL_NOT_FOUND, { sku_id: reservation.sku_id });
 
       const ok = await this.repo.update_level_optimistic(tx, level.id, level.version, {
         quantity_reserved: Math.max(0, level.quantity_reserved - reservation.quantity),
       });
-      if (!ok) throw new ConflictError("Conflit de version — réessayez");
+      if (!ok) throw_error(INVENTORY_ERROR.VERSION_CONFLICT, { level_id: level.id });
 
       await this.repo.set_reservation_status(tx, reservation_id, RESERVATION_STATUS.released);
 
@@ -118,9 +123,9 @@ export class ReservationService {
   async commit(input: z.infer<typeof commit_reservation_dto>) {
     await db.transaction(async (tx) => {
       const reservation = await this.repo.get_reservation_for_update(tx, input.id);
-      if (!reservation) throw new NotFoundError("Réservation introuvable");
+      if (!reservation) throw_error(INVENTORY_ERROR.RESERVATION_NOT_FOUND, { reservation_id: input.id });
       if (reservation.status !== RESERVATION_STATUS.active) {
-        throw new ConflictError("Réservation non active");
+        throw_error(INVENTORY_ERROR.RESERVATION_NOT_ACTIVE, { reservation_id: input.id, status: reservation.status });
       }
 
       const level = await this.repo.get_level_for_update(
@@ -128,18 +133,22 @@ export class ReservationService {
         reservation.sku_id,
         reservation.warehouse_id,
       );
-      if (!level) throw new NotFoundError("Niveau de stock introuvable");
+      if (!level) throw_error(INVENTORY_ERROR.LEVEL_NOT_FOUND, { sku_id: reservation.sku_id });
 
       const new_reserved = level.quantity_reserved - reservation.quantity;
       const new_on_hand = level.quantity_on_hand - reservation.quantity;
 
-      if (new_on_hand < 0) throw new ConflictError("Stock insuffisant pour valider la commande");
+      if (new_on_hand < 0) throw_error(INVENTORY_ERROR.RESERVATION_COMMIT_FAILED, {
+        sku_id: reservation.sku_id,
+        on_hand: level.quantity_on_hand,
+        requested: reservation.quantity,
+      });
 
       const ok = await this.repo.update_level_optimistic(tx, level.id, level.version, {
         quantity_reserved: new_reserved,
         quantity_on_hand: new_on_hand,
       });
-      if (!ok) throw new ConflictError("Conflit de version — réessayez");
+      if (!ok) throw_error(INVENTORY_ERROR.VERSION_CONFLICT, { level_id: level.id });
 
       await this.repo.set_reservation_status(tx, input.id, RESERVATION_STATUS.committed, {
         order_id: input.order_id ?? null,

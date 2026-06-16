@@ -13,8 +13,10 @@ import {
   reservation_id_dto,
   commit_reservation_dto,
 } from "./models/inventory.dto";
+import { admin_list_stock_dto, admin_list_movements_dto } from "./models/inventory-admin.dto";
 import { inventory_service } from "./services/inventory.service";
 import { reservation_service } from "./services/reservation.service";
+import { inventory_admin_service } from "./services/inventory-admin.service";
 
 export const inventory_router = create_trpc_router({
   getLevel: permission_procedure(PERMISSIONS.inventory_read)
@@ -57,10 +59,20 @@ export const inventory_router = create_trpc_router({
     reservation_service.expire_stale(),
   ),
 
-  adminDashboard: permission_procedure(PERMISSIONS.inventory_read).query(async () => ({
-    total_stock_value: await inventory_admin_repository.stock_value(),
-    out_of_stock: await inventory_admin_repository.count_out_of_stock(),
-    low_stock: await inventory_admin_repository.count_low_stock(),
-    forecast_shortages: await forecast_repository.count_high_risk(),
-  })),
+  // Admin dashboard procedures
+  adminStats: permission_procedure(PERMISSIONS.inventory_read).query(() =>
+    inventory_admin_service.stats(),
+  ),
+
+  adminListStock: permission_procedure(PERMISSIONS.inventory_read)
+    .input(admin_list_stock_dto)
+    .query(({ input }) => inventory_admin_service.list_stock(input)),
+
+  adminListMovements: permission_procedure(PERMISSIONS.inventory_read)
+    .input(admin_list_movements_dto)
+    .query(({ input }) => inventory_admin_service.list_movements(input)),
+
+  adminCharts: permission_procedure(PERMISSIONS.inventory_read).query(() =>
+    inventory_admin_service.charts(30),
+  ),
 });

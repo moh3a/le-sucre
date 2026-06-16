@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { EditUser } from "./edit-user";
 
-// TODO add phone number and role
 type UserRow = {
   id: string;
   name: string | null;

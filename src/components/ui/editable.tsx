@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  Direction as DirectionPrimitive,
-  Slot as SlotPrimitive,
-} from "radix-ui";
+import { Direction as DirectionPrimitive, Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 import { useComposedRefs } from "@/lib/compose-refs";
 import { cn } from "@/lib/utils";
@@ -55,10 +52,7 @@ function useStoreContext(consumerName: string) {
   return context;
 }
 
-function useStore<T>(
-  selector: (state: StoreState) => T,
-  ogStore?: Store | null,
-): T {
+function useStore<T>(selector: (state: StoreState) => T, ogStore?: Store | null): T {
   const contextStore = React.useContext(StoreContext);
 
   const store = ogStore ?? contextStore;
@@ -67,10 +61,7 @@ function useStore<T>(
     throw new Error(`\`useStore\` must be used within \`${ROOT_NAME}\``);
   }
 
-  const getSnapshot = React.useCallback(
-    () => selector(store.getState()),
-    [store, selector],
-  );
+  const getSnapshot = React.useCallback(() => selector(store.getState()), [store, selector]);
 
   return React.useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
@@ -171,9 +162,7 @@ function Editable(props: EditableProps) {
 
   const previousValueRef = React.useRef(defaultValue);
 
-  const [formTrigger, setFormTrigger] = React.useState<RootElement | null>(
-    null,
-  );
+  const [formTrigger, setFormTrigger] = React.useState<RootElement | null>(null);
   const composedRef = useComposedRefs(ref, (node) => setFormTrigger(node));
   const isFormControl = formTrigger ? !!formTrigger.closest("form") : true;
 
@@ -352,7 +341,7 @@ function EditableLabel(props: EditableLabelProps) {
       id={context.labelId}
       htmlFor={context.inputId}
       className={cn(
-        "font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 data-required:after:ml-0.5 data-required:after:text-destructive data-required:after:content-['*']",
+        "data-required:after:text-destructive text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 data-required:after:ml-0.5 data-required:after:content-['*']",
         className,
       )}
     >
@@ -488,7 +477,7 @@ function EditablePreview(props: EditablePreviewProps) {
       onFocus={onFocus}
       onKeyDown={onKeyDown}
       className={cn(
-        "cursor-text truncate rounded-sm border border-transparent py-1 text-base focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring data-disabled:cursor-not-allowed data-readonly:cursor-default data-empty:text-muted-foreground data-disabled:opacity-50 md:text-sm",
+        "focus-visible:ring-ring data-empty:text-muted-foreground cursor-text truncate rounded-sm border border-transparent py-1 text-base focus-visible:ring-1 focus-visible:outline-hidden data-disabled:cursor-not-allowed data-disabled:opacity-50 data-readonly:cursor-default md:text-sm",
         className,
       )}
     >
@@ -652,7 +641,7 @@ function EditableInput(props: EditableInputProps) {
       onChange={onChange}
       onKeyDown={onKeyDown}
       className={cn(
-        "flex rounded-sm border border-input bg-transparent py-1 text-base shadow-xs transition-colors file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "border-input file:text-foreground placeholder:text-muted-foreground focus-visible:ring-ring flex rounded-sm border bg-transparent py-1 text-base shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         context.autosize ? "w-auto" : "w-full",
         className,
       )}
@@ -701,13 +690,7 @@ interface EditableToolbarProps extends React.ComponentProps<"div"> {
 }
 
 function EditableToolbar(props: EditableToolbarProps) {
-  const {
-    asChild,
-    className,
-    orientation = "horizontal",
-    ref,
-    ...toolbarProps
-  } = props;
+  const { asChild, className, orientation = "horizontal", ref, ...toolbarProps } = props;
   const context = useEditableContext(TOOLBAR_NAME);
 
   const ToolbarPrimitive = asChild ? SlotPrimitive.Slot : "div";
@@ -721,11 +704,7 @@ function EditableToolbar(props: EditableToolbarProps) {
       dir={context.dir}
       {...toolbarProps}
       ref={ref}
-      className={cn(
-        "flex items-center gap-2",
-        orientation === "vertical" && "flex-col",
-        className,
-      )}
+      className={cn("flex items-center gap-2", orientation === "vertical" && "flex-col", className)}
     />
   );
 }

@@ -14,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogTrigger,
+} from "@/components/ui/responsive-dialog";
 
 export function AuthorizationRoleEditor() {
   const utils = trpc.useUtils();
@@ -46,43 +54,54 @@ export function AuthorizationRoleEditor() {
   };
 
   return (
-    <div className="space-y-4">
-      <Select value={selected_role} onValueChange={setSelectedRole}>
-        <SelectTrigger className="max-w-sm">
-          <SelectValue placeholder="Choisir un rôle" />
-        </SelectTrigger>
-        <SelectContent>
-          {roles.map((role) => (
-            <SelectItem key={role.id} value={role.name}>
-              {role.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <ResponsiveDialog>
+      <ResponsiveDialogTrigger asChild>
+        <Button>Modifier les permissions</Button>
+      </ResponsiveDialogTrigger>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>Modifier les permissions d&apos;un rôle</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>Réservé aux administrateurs.</ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
+        <div className="space-y-4">
+          <Select value={selected_role} onValueChange={setSelectedRole}>
+            <SelectTrigger className="max-w-sm capitalize">
+              <SelectValue placeholder="Choisir un rôle" />
+            </SelectTrigger>
+            <SelectContent>
+              {roles.map((role) => (
+                <SelectItem key={role.id} value={role.name}>
+                  {role.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      <div className="grid gap-2 md:grid-cols-2">
-        {Object.values(PERMISSIONS).map((permission) => (
-          <label key={permission} className="flex items-center gap-2 text-sm">
-            <Checkbox
-              checked={effective_permissions.includes(permission)}
-              onCheckedChange={(checked) => toggle_permission(permission, checked === true)}
-            />
-            <span className="font-mono text-xs">{permission}</span>
-          </label>
-        ))}
-      </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {Object.values(PERMISSIONS).map((permission) => (
+              <label key={permission} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={effective_permissions.includes(permission)}
+                  onCheckedChange={(checked) => toggle_permission(permission, checked === true)}
+                />
+                <span className="font-mono text-xs">{permission}</span>
+              </label>
+            ))}
+          </div>
 
-      <Button
-        disabled={selected_role === "admin" || update_permissions.isPending}
-        onClick={() =>
-          update_permissions.mutate({
-            role_name: selected_role,
-            permissions: effective_permissions,
-          })
-        }
-      >
-        Enregistrer les permissions
-      </Button>
-    </div>
+          <Button
+            disabled={selected_role === "admin" || update_permissions.isPending}
+            onClick={() =>
+              update_permissions.mutate({
+                role_name: selected_role,
+                permissions: effective_permissions,
+              })
+            }
+          >
+            Enregistrer les permissions
+          </Button>
+        </div>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

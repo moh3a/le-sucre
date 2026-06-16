@@ -16,4 +16,12 @@ export const assign_role_dto = z.object({
   role_name: z.enum(["admin", "moderator", "operator", "delivery_person", "customer"]),
 });
 
+export const create_user_dto = z.object({
+  name: z.string().min(2).max(255),
+  email: z.email(),
+  password: z.string().min(8).max(128),
+  role: z.enum(["admin", "moderator", "operator", "delivery_person", "customer"]).default("customer"),
+});
+
 export type LoginInput = z.infer<typeof login_dto>;
+export type CreateUserInput = z.infer<typeof create_user_dto>;

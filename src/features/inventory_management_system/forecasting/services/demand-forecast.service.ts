@@ -8,6 +8,8 @@ import { inventory_repository } from "../../inventory/repositories/inventory.rep
 import { inventory_forecast_snapshots } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { format } from "date-fns";
+import { FORECAST_ERROR } from "../constants/error-codes";
+import { throw_error } from "../../shared/error-codes";
 
 export class DemandForecastService {
   async get_sku_forecast(sku_id: string, warehouse_id = "default") {
@@ -26,12 +28,15 @@ export class DemandForecastService {
   }
 
   async recompute_sku(sku_id: string, warehouse_id = "default") {
+    const provider = get_forecast_provider();
+    if (!provider) throw_error(FORECAST_ERROR.PROVIDER_UNAVAILABLE, { sku_id, warehouse_id });
+
     const level = await inventory_repository.ensure_level(sku_id, warehouse_id);
     const available = Math.max(0, level.quantity_on_hand - level.quantity_reserved);
     const series = await velocity_repository.list_series(sku_id, warehouse_id, 90);
     const rules = await forecast_repository.resolve_rules_for_sku(sku_id);
 
-    const output = await get_forecast_provider().predict({
+    const output = await provider.predict({
       sku_id,
       warehouse_id,
       available,

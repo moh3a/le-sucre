@@ -58,7 +58,7 @@ export function AnalyticsLineChart({
             <Line
               dataKey={y_key}
               type="natural"
-              stroke="var(--color-revenu)"
+              stroke="var(--color-y_key)"
               strokeWidth={2}
               dot={false}
             />

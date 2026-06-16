@@ -13,6 +13,7 @@ import { recommendations_router } from "@/features/product_information_managemen
 import { reviews_router } from "@/features/product_reviews_management/router";
 import { inventory_router } from "@/features/inventory_management_system/inventory/router";
 import { forecast_router } from "@/features/inventory_management_system/forecasting/router";
+import { warehouse_router } from "@/features/inventory_management_system/warehouses/router";
 import { cart_router } from "@/features/order_management_system/carts/router";
 import { checkout_router } from "@/features/order_management_system/checkout/router";
 import { order_router } from "@/features/order_management_system/orders/router";
@@ -36,6 +37,7 @@ export const app_router = create_trpc_router({
   reviews: reviews_router,
   inventory: inventory_router,
   forecast: forecast_router,
+  warehouses: warehouse_router,
   cart: cart_router,
   checkout: checkout_router,
   orders: order_router,

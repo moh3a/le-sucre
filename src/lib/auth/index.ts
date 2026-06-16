@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin } from "better-auth/plugins";
+import { admin, customSession } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import { APP_NAME } from "@/constants";
 import * as authSchema from "@/features/authentication_and_authorization/auth/schema";
@@ -33,6 +34,23 @@ export const auth = betterAuth({
           },
         },
       },
+    }),
+    customSession(async ({ user, session }) => {
+      const rows = await db
+        .select({ roleName: authSchema.roles.name })
+        .from(authSchema.user_roles)
+        .innerJoin(
+          authSchema.roles,
+          eq(authSchema.user_roles.role_id, authSchema.roles.id),
+        )
+        .where(eq(authSchema.user_roles.user_id, user.id))
+        .limit(1);
+
+      return {
+        user,
+        session,
+        userRole: rows[0]?.roleName ?? null,
+      };
     }),
   ],
   account: {

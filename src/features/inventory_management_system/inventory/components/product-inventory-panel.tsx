@@ -72,19 +72,19 @@ export function ProductInventoryPanel({ product_id }: ProductInventoryPanelProps
             },
             {
               label: "Total disponible",
-              value: data?.items.reduce((sum, item) => sum + item.stock_available, 0),
+              value: data?.items.reduce((sum, item) => sum + item.stock_available, 0) ?? 0,
               icon: Package,
               color: "info",
             },
             {
               label: "Total en stock",
-              value: data?.items.reduce((sum, item) => sum + item.quantity_on_hand, 0),
+              value: data?.items.reduce((sum, item) => sum + item.quantity_on_hand, 0) ?? 0,
               icon: Package,
               color: "success",
             },
             {
               label: "Total réservé",
-              value: data?.items.reduce((sum, item) => sum + item.quantity_reserved, 0),
+              value: data?.items.reduce((sum, item) => sum + item.quantity_reserved, 0) ?? 0,
               icon: Truck,
               color: "default",
             },
