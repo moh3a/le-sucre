@@ -128,6 +128,34 @@ export class OrderRepository {
     };
   }
 
+  async find_by_user_id(user_id: string) {
+    const order_rows = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.user_id, user_id))
+      .orderBy(desc(orders.placed_at ?? orders.created_at));
+
+    if (!order_rows.length) return [];
+
+    const order_ids = order_rows.map((o) => o.id);
+    const item_rows = await db
+      .select()
+      .from(order_items)
+      .where(inArray(order_items.order_id, order_ids));
+
+    const items_by_order = new Map<string, typeof item_rows>();
+    for (const item of item_rows) {
+      const existing = items_by_order.get(item.order_id) ?? [];
+      existing.push(item);
+      items_by_order.set(item.order_id, existing);
+    }
+
+    return order_rows.map((order) => ({
+      ...order,
+      items: items_by_order.get(order.id) ?? [],
+    }));
+  }
+
   async list_for_customer(user_id: string, page: number, limit: number, status?: string) {
     const offset = (page - 1) * limit;
     const where = status

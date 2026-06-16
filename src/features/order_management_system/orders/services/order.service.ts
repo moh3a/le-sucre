@@ -35,6 +35,7 @@ import { ORDER_ERROR } from "../constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
+import { assert_order_transition } from "../order-lifecycle.engine";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -311,9 +312,16 @@ export class OrderService {
     const current = await this.repo.find_by_id(input.order_id);
     if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
+    assert_order_transition(current.status, input.status);
+
+    const cancelled_or_refunded = input.status === "cancelled" || input.status === "refunded";
+
     await this.repo.update_order_status(input.order_id, input.status, {
-      ...(input.status === "cancelled"
+      ...(cancelled_or_refunded
         ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") }
+        : {}),
+      ...(input.status === "failed_delivery" || input.status === "refunded"
+        ? { fulfillment_status: "returned" }
         : {}),
     });
 

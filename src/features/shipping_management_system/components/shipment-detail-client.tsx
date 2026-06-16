@@ -38,7 +38,7 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Informations</CardTitle>
+          <CardTitle>Informations</CardTitle>
           <div className="flex gap-2">
             {shipment.tracking_url ? (
               <Button variant="outline" size="sm" asChild>
@@ -104,7 +104,7 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Historique de suivi</CardTitle>
+          <CardTitle>Historique de suivi</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {tracking_events.length === 0 ? (

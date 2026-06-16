@@ -23,75 +23,28 @@ import { Separator } from "@/components/ui/separator";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { formatDate } from "@/lib/format";
 import { ShipmentPanel } from "@/features/shipping_management_system/components/shipment-panel";
+import { ReturnPanel } from "@/features/order_management_system/return_replacement/components/return-panel";
+import {
+  PAYMENT_STATUS_OPTIONS,
+  ORDER_LABELS,
+  PAYMENT_LABELS,
+  FULFILLMENT_LABELS,
+  PAYMENT_BADGE,
+  FULFILLMENT_BADGE,
+  STATUS_BADGE,
+} from "../constants/order-status";
 
 type OrderDetailTabsProps = { order_id: string };
-
-const ORDER_LABELS: Record<string, string> = {
-  pending_payment: "En attente de paiement",
-  confirmed: "Confirmée",
-  paid: "Payée",
-  processing: "En cours",
-  shipped: "Expédiée",
-  delivered: "Livrée",
-  cancelled: "Annulée",
-  refunded: "Remboursée",
-};
-
-const PAYMENT_LABELS: Record<string, string> = {
-  pending: "En attente",
-  authorized: "Autorisé",
-  paid: "Payé",
-  failed: "Échoué",
-  refunded: "Remboursé",
-};
-
-const FULFILLMENT_LABELS: Record<string, string> = {
-  unfulfilled: "Non expédié",
-  partial: "Partiel",
-  fulfilled: "Expédié",
-  returned: "Retourné",
-};
-
-const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending_payment: "outline",
-  confirmed: "secondary",
-  paid: "default",
-  processing: "secondary",
-  shipped: "default",
-  delivered: "default",
-  cancelled: "destructive",
-  refunded: "destructive",
-};
-
-const PAYMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "outline",
-  authorized: "secondary",
-  paid: "default",
-  failed: "destructive",
-  refunded: "destructive",
-};
-
-const FULFILLMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  unfulfilled: "outline",
-  partial: "secondary",
-  fulfilled: "default",
-  returned: "destructive",
-};
-
-const PAYMENT_STATUS_OPTIONS = [
-  { value: "pending", label: "En attente" },
-  { value: "authorized", label: "Autorisé" },
-  { value: "paid", label: "Payé" },
-  { value: "failed", label: "Échoué" },
-  { value: "refunded", label: "Remboursé" },
-];
 
 const STATUS_OPTIONS = [
   { value: "pending_payment", label: "En attente de paiement" },
   { value: "paid", label: "Payé" },
   { value: "processing", label: "En cours" },
-  { value: "fulfilled", label: "Livré" },
-  { value: "cancelled", label: "Annulé" },
+  { value: "shipped", label: "Expédiée" },
+  { value: "delivered", label: "Livrée" },
+  { value: "failed_delivery", label: "Livraison échouée" },
+  { value: "cancelled", label: "Annulée" },
+  { value: "refunded", label: "Remboursée" },
 ] as const;
 
 type EditableItem = {
@@ -171,11 +124,10 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   });
 
   // ── Invoice operations ──
-  const { data: invoices_data, refetch: refetch_invoices } =
-    trpc.invoices.list_by_order.useQuery(
-      { order_id },
-      { enabled: !!order_id },
-    );
+  const { data: invoices_data, refetch: refetch_invoices } = trpc.invoices.list_by_order.useQuery(
+    { order_id },
+    { enabled: !!order_id },
+  );
 
   const generate_invoice = trpc.invoices.generate_invoice.useMutation({
     onSuccess: () => {
@@ -360,6 +312,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         <TabsTrigger value="shipping">Expédition</TabsTrigger>
         <TabsTrigger value="payments">Paiements</TabsTrigger>
         <TabsTrigger value="invoices">Factures</TabsTrigger>
+        <TabsTrigger value="returns">Retours</TabsTrigger>
         <TabsTrigger value="timeline">Chronologie</TabsTrigger>
       </TabsList>
 
@@ -368,7 +321,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Statut commande</CardTitle>
+              <CardTitle>Statut commande</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={STATUS_BADGE[order.status] ?? "secondary"}>
@@ -378,7 +331,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Paiement</CardTitle>
+              <CardTitle>Paiement</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
@@ -388,7 +341,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Expédition</CardTitle>
+              <CardTitle>Expédition</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={FULFILLMENT_BADGE[order.fulfillment_status] ?? "outline"}>
@@ -400,7 +353,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Récapitulatif financier</CardTitle>
+            <CardTitle>Récapitulatif financier</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -433,7 +386,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Changer le statut</CardTitle>
+            <CardTitle>Changer le statut</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-2">
             <Select onValueChange={set_next_status} value={next_status}>
@@ -459,7 +412,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Affectation du personnel</CardTitle>
+            <CardTitle>Affectation du personnel</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -525,7 +478,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="items">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm font-medium">Articles de la commande</CardTitle>
+            <CardTitle>Articles de la commande</CardTitle>
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={init_items_form}>
                 Modifier les articles
@@ -572,7 +525,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {edit_items.length > 0 && (
           <Card className="mt-4 border-blue-200">
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Édition des articles</CardTitle>
+              <CardTitle>Édition des articles</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="divide-y rounded-md border">
@@ -677,7 +630,12 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                         className="h-8 w-24 text-xs"
                         placeholder="Prix unit."
                       />
-                      <Button type="button" size="sm" className="h-8 text-xs" onClick={add_item_to_list}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={add_item_to_list}
+                      >
                         <Plus className="mr-1 h-3 w-3" />
                         Ajouter
                       </Button>
@@ -687,11 +645,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => set_edit_items([])}
-                >
+                <Button size="sm" variant="outline" onClick={() => set_edit_items([])}>
                   Annuler
                 </Button>
                 <Button
@@ -709,7 +663,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {adjustments.length > 0 && (
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Ajustements</CardTitle>
+              <CardTitle>Ajustements</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
               {adjustments.map((adj) => (
@@ -730,7 +684,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="shipping">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm font-medium">Adresse de livraison</CardTitle>
+            <CardTitle>Adresse de livraison</CardTitle>
             <Button size="sm" variant="outline" onClick={init_shipping_form}>
               Modifier l&apos;adresse
             </Button>
@@ -752,7 +706,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {ship_full_name !== "" && (
           <Card className="mt-4 border-blue-200">
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Modifier l&apos;adresse</CardTitle>
+              <CardTitle>Modifier l&apos;adresse</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 md:grid-cols-2">
@@ -765,58 +719,36 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                 </Field>
                 <Field>
                   <FieldLabel>Téléphone</FieldLabel>
-                  <Input
-                    value={ship_phone}
-                    onChange={(e) => set_ship_phone(e.target.value)}
-                  />
+                  <Input value={ship_phone} onChange={(e) => set_ship_phone(e.target.value)} />
                 </Field>
               </div>
               <Field>
                 <FieldLabel>Adresse</FieldLabel>
-                <Input
-                  value={ship_line1}
-                  onChange={(e) => set_ship_line1(e.target.value)}
-                />
+                <Input value={ship_line1} onChange={(e) => set_ship_line1(e.target.value)} />
               </Field>
               <Field>
                 <FieldLabel>Complément d&apos;adresse</FieldLabel>
-                <Input
-                  value={ship_line2}
-                  onChange={(e) => set_ship_line2(e.target.value)}
-                />
+                <Input value={ship_line2} onChange={(e) => set_ship_line2(e.target.value)} />
               </Field>
               <div className="grid gap-3 md:grid-cols-3">
                 <Field>
                   <FieldLabel>Ville</FieldLabel>
-                  <Input
-                    value={ship_city}
-                    onChange={(e) => set_ship_city(e.target.value)}
-                  />
+                  <Input value={ship_city} onChange={(e) => set_ship_city(e.target.value)} />
                 </Field>
                 <Field>
                   <FieldLabel>Wilaya / État</FieldLabel>
-                  <Input
-                    value={ship_state}
-                    onChange={(e) => set_ship_state(e.target.value)}
-                  />
+                  <Input value={ship_state} onChange={(e) => set_ship_state(e.target.value)} />
                 </Field>
                 <Field>
                   <FieldLabel>Code postal</FieldLabel>
-                  <Input
-                    value={ship_postal}
-                    onChange={(e) => set_ship_postal(e.target.value)}
-                  />
+                  <Input value={ship_postal} onChange={(e) => set_ship_postal(e.target.value)} />
                 </Field>
               </div>
               <div className="flex justify-end gap-2">
                 <Button size="sm" variant="outline" onClick={() => set_ship_full_name("")}>
                   Annuler
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={on_save_shipping}
-                  disabled={update_shipping.isPending}
-                >
+                <Button size="sm" onClick={on_save_shipping} disabled={update_shipping.isPending}>
                   {update_shipping.isPending ? "Enregistrement..." : "Enregistrer"}
                 </Button>
               </div>
@@ -831,7 +763,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="payments">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm font-medium">Informations de paiement</CardTitle>
+            <CardTitle>Informations de paiement</CardTitle>
             <Button size="sm" variant="outline" onClick={init_payment_form}>
               Modifier le paiement
             </Button>
@@ -864,15 +796,12 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {pay_status && (
           <Card className="mt-4 border-blue-200">
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Modifier le paiement</CardTitle>
+              <CardTitle>Modifier le paiement</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Field>
                 <FieldLabel>Statut</FieldLabel>
-                <Select
-                  value={pay_status}
-                  onValueChange={set_pay_status}
-                >
+                <Select value={pay_status} onValueChange={set_pay_status}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -905,11 +834,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                 <Button size="sm" variant="outline" onClick={() => set_pay_status("")}>
                   Annuler
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={on_save_payment}
-                  disabled={update_payment.isPending}
-                >
+                <Button size="sm" onClick={on_save_payment} disabled={update_payment.isPending}>
                   {update_payment.isPending ? "Enregistrement..." : "Enregistrer"}
                 </Button>
               </div>
@@ -922,7 +847,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="invoices" className="space-y-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle className="text-sm font-medium">Factures liées</CardTitle>
+            <CardTitle>Factures liées</CardTitle>
             <Button
               size="sm"
               variant="outline"
@@ -935,7 +860,9 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
           </CardHeader>
           <CardContent className="p-0">
             {!invoices_data || invoices_data.length === 0 ? (
-              <p className="text-muted-foreground p-4 text-sm">Aucune facture pour cette commande.</p>
+              <p className="text-muted-foreground p-4 text-sm">
+                Aucune facture pour cette commande.
+              </p>
             ) : (
               <table className="w-full text-sm">
                 <thead className="border-b">
@@ -966,8 +893,16 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                             : inv.status === "refunded"
                               ? "Remboursée"
                               : "Partiellement remboursée";
-                    const status_variant: Record<string, "default" | "secondary" | "destructive" | "outline"> =
-                      { unpaid: "outline", paid: "default", void: "destructive", refunded: "secondary", partially_refunded: "secondary" };
+                    const status_variant: Record<
+                      string,
+                      "default" | "secondary" | "destructive" | "outline"
+                    > = {
+                      unpaid: "outline",
+                      paid: "default",
+                      void: "destructive",
+                      refunded: "secondary",
+                      partially_refunded: "secondary",
+                    };
                     return (
                       <tr key={inv.id}>
                         <td className="px-4 py-3 font-mono text-xs font-medium">
@@ -1036,6 +971,23 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         </Card>
       </TabsContent>
 
+      {/* ── Returns & Replacements ──────────────────── */}
+      <TabsContent value="returns">
+        <ReturnPanel
+          order_id={order.id}
+          items={items.map((i) => ({
+            id: i.id,
+            sku_id: i.sku_id,
+            product_name: i.product_name,
+            sku_code: i.sku_code,
+            quantity: i.quantity,
+            unit_price: i.unit_price,
+          }))}
+          order_status={order.status}
+          on_update={refetch}
+        />
+      </TabsContent>
+
       {/* ── Timeline ────────────────────────────────── */}
       <TabsContent value="timeline">
         <div className="space-y-3">
@@ -1057,12 +1009,10 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                   )}
                   <Badge className="text-xs">{ORDER_LABELS[ev.to_status] ?? ev.to_status}</Badge>
                 </div>
-                  {ev.actor_name && (
-                    <p className="text-muted-foreground mt-1 text-xs font-medium">
-                      {ev.actor_name}
-                    </p>
-                  )}
-                  {ev.note && <p className="text-muted-foreground mt-1 text-sm">{ev.note}</p>}
+                {ev.actor_name && (
+                  <p className="text-muted-foreground mt-1 text-xs font-medium">{ev.actor_name}</p>
+                )}
+                {ev.note && <p className="text-muted-foreground mt-1 text-sm">{ev.note}</p>}
                 <p className="text-muted-foreground mt-1 text-xs">
                   {formatDate(ev.created_at, {
                     month: "short",
@@ -1097,7 +1047,7 @@ function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium">Notes internes</CardTitle>
+        <CardTitle>Notes internes</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <Textarea

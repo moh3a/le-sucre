@@ -96,7 +96,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
     <Card className="border shadow-md">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
-          <CardTitle className="text-xl">Règles de Ciblage Client</CardTitle>
+          <CardTitle>Règles de Ciblage Client</CardTitle>
           <p className="text-muted-foreground text-sm">
             Configurez qui voit cette campagne sur la boutique (pays, langues, typologie client).
           </p>

@@ -161,7 +161,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
       {/* Daily analytics details list */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-bold">Historique quotidien (Détails)</CardTitle>
+          <CardTitle>Historique quotidien (Détails)</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {timeseries.length === 0 ? (

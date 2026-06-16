@@ -5,9 +5,14 @@ import { eq } from "drizzle-orm";
 
 import { APP_NAME } from "@/constants";
 import * as authSchema from "@/features/authentication_and_authorization/auth/schema";
+import {
+  ROLE_NAMES,
+} from "@/features/authentication_and_authorization/authorization/constants/roles";
+import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { db } from "../db";
 
-export const auth = betterAuth({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const auth_options: any = {
   database: drizzleAdapter(db, {
     provider: "mysql",
     schema: {
@@ -126,7 +131,21 @@ export const auth = betterAuth({
   //   max: 20,
   //   storage: "memory", // swap to custom redis store next iteration
   // },
-});
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user: Record<string, unknown>) => {
+          await role_repository.assign_role(
+            user.id as string,
+            ROLE_NAMES.customer,
+          );
+        },
+      },
+    },
+  },
+};
+
+export const auth = betterAuth(auth_options);
 
 export type AuthInstance = typeof auth;
 export default auth;

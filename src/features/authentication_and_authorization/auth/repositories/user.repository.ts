@@ -33,6 +33,9 @@ export class UserRepository {
           email: users.email,
           email_verified: users.email_verified,
           is_active: users.is_active,
+          banned: users.banned,
+          ban_reason: users.ban_reason,
+          ban_expires: users.ban_expires,
           created_at: users.created_at,
           roles:
             sql<string>`GROUP_CONCAT(DISTINCT ${roles.name} ORDER BY ${roles.name} SEPARATOR ', ')`.as(
@@ -48,6 +51,9 @@ export class UserRepository {
           users.email,
           users.email_verified,
           users.is_active,
+          users.banned,
+          users.ban_reason,
+          users.ban_expires,
           users.created_at,
         )
         .orderBy(desc(users.created_at))
@@ -111,8 +117,21 @@ export class UserRepository {
   //   };
   // }
 
-  async update_profile(id: string, patch: { name?: string; is_active?: boolean }) {
-    await db.update(users).set(patch).where(eq(users.id, id));
+  async update_profile(
+    id: string,
+    patch: {
+      name?: string;
+      is_active?: boolean;
+      banned?: boolean | null;
+      ban_reason?: string | null;
+      ban_expires?: Date | null;
+    },
+  ) {
+    const clean_patch = Object.fromEntries(
+      Object.entries(patch).filter(([, v]) => v !== undefined),
+    );
+    if (Object.keys(clean_patch).length === 0) return;
+    await db.update(users).set(clean_patch).where(eq(users.id, id));
   }
 
   async stats() {

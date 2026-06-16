@@ -67,10 +67,8 @@ export class RoleRepository {
   async assign_role(user_id: string, role_name: string) {
     const [role] = await db.select().from(roles).where(eq(roles.name, role_name)).limit(1);
     if (!role) throw new Error(`Role ${role_name} not found`);
-    await db
-      .insert(user_roles)
-      .values({ user_id, role_id: role.id })
-      .onDuplicateKeyUpdate({ set: {} });
+    await db.delete(user_roles).where(eq(user_roles.user_id, user_id));
+    await db.insert(user_roles).values({ user_id, role_id: role.id });
   }
 
   async user_has_role(user_id: string, role_names: string[]) {

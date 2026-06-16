@@ -188,7 +188,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
-          <CardTitle className="text-xl">Bannières Marketing</CardTitle>
+          <CardTitle>Bannières Marketing</CardTitle>
           <p className="text-muted-foreground text-sm">
             Bannières visuelles affichées sur les pages storefront de la campagne.
           </p>

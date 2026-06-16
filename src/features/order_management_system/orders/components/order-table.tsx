@@ -33,57 +33,14 @@ type OrderRow = {
   delivery_name: string | null;
 };
 
-const ORDER_LABELS: Record<string, string> = {
-  pending_payment: "En attente de paiement",
-  confirmed: "Confirmée",
-  paid: "Payée",
-  processing: "En cours",
-  shipped: "Expédiée",
-  delivered: "Livrée",
-  cancelled: "Annulée",
-  refunded: "Remboursée",
-};
-
-const PAYMENT_LABELS: Record<string, string> = {
-  pending: "En attente",
-  authorized: "Autorisé",
-  paid: "Payé",
-  failed: "Échoué",
-  refunded: "Remboursé",
-};
-
-const FULFILLMENT_LABELS: Record<string, string> = {
-  unfulfilled: "Non expédié",
-  partial: "Partiel",
-  fulfilled: "Expédié",
-  returned: "Retourné",
-};
-
-const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending_payment: "outline",
-  confirmed: "secondary",
-  paid: "default",
-  processing: "secondary",
-  shipped: "default",
-  delivered: "default",
-  cancelled: "destructive",
-  refunded: "destructive",
-};
-
-const PAYMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "outline",
-  authorized: "secondary",
-  paid: "default",
-  failed: "destructive",
-  refunded: "destructive",
-};
-
-const FULFILLMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  unfulfilled: "outline",
-  partial: "secondary",
-  fulfilled: "default",
-  returned: "destructive",
-};
+import {
+  ORDER_LABELS,
+  PAYMENT_LABELS,
+  FULFILLMENT_LABELS,
+  STATUS_BADGE,
+  PAYMENT_BADGE,
+  FULFILLMENT_BADGE,
+} from "../constants/order-status";
 
 export function OrderTable({ compact = false }: { compact?: boolean }) {
   const columns = React.useMemo<ColumnDef<OrderRow>[]>(

@@ -78,6 +78,13 @@
       "when": 1781350409060,
       "tag": "0010_sour_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1781635910640,
+      "tag": "0011_brown_giant_girl",
+      "breakpoints": true
     }
   ]
 }

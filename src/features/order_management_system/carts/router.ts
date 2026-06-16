@@ -24,6 +24,10 @@ export const cart_router = create_trpc_router({
   adminStats: permission_procedure(PERMISSIONS.orders_read)
     .query(() => cart_service.stats_admin()),
 
+  adminGetById: permission_procedure(PERMISSIONS.orders_read)
+    .input(z.object({ cart_id: z.string().min(1).max(255), locale: z.string().default("fr") }))
+    .query(({ input }) => cart_service.get_cart_view(input.cart_id, input.locale)),
+
   byId: storefront_procedure
     .input(z.object({ cart_id: z.string().min(1).max(255), locale: z.string().default("fr") }))
     .query(({ input }) => cart_service.get_cart_view(input.cart_id, input.locale)),

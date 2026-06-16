@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { User } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -38,7 +39,10 @@ export function CustomersTable() {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Nom" />,
         cell: ({ row }) => {
           return (
-            <div className="flex items-center gap-3">
+            <Link
+              href={`/console/customers/${row.original.user_id}`}
+              className="flex items-center gap-3 hover:opacity-75"
+            >
               {row.original.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -55,7 +59,7 @@ export function CustomersTable() {
                 <span className="font-medium">{row.original.name ?? "—"}</span>
                 <span className="text-muted-foreground text-xs">{row.original.email}</span>
               </div>
-            </div>
+            </Link>
           );
         },
       },

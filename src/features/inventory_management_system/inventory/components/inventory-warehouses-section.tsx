@@ -71,7 +71,7 @@ export function InventoryWarehousesSection() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-base">{wh.name}</CardTitle>
+                      <CardTitle>{wh.name}</CardTitle>
                       <Badge variant="outline" className="mt-1 font-mono text-xs">
                         {wh.slug}
                       </Badge>

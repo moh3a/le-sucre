@@ -106,15 +106,40 @@ export class ReviewRepository {
     return row[0] ?? null;
   }
 
-  list_by_user(user_id: string, page: number, limit: number) {
+  async list_by_user(user_id: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
+    const [items, [{ total }]] = await Promise.all([
+      db
+        .select()
+        .from(product_reviews)
+        .where(eq(product_reviews.user_id, user_id))
+        .orderBy(desc(product_reviews.created_at))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ total: count() })
+        .from(product_reviews)
+        .where(eq(product_reviews.user_id, user_id)),
+    ]);
+    const total_records = Number(total ?? 0);
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total_records,
+        total_pages: Math.max(1, Math.ceil(total_records / limit)),
+        has_more: page < Math.ceil(total_records / limit),
+      },
+    };
+  }
+
+  async list_by_user_all(user_id: string) {
     return db
       .select()
       .from(product_reviews)
       .where(eq(product_reviews.user_id, user_id))
-      .orderBy(desc(product_reviews.created_at))
-      .limit(limit)
-      .offset(offset);
+      .orderBy(desc(product_reviews.created_at));
   }
 
   admin_list(page: number, limit: number, status?: string, product_id?: string) {

@@ -82,6 +82,92 @@ export class CartRepository {
     return await db.update(carts).set({ status: "converted" }).where(eq(carts.id, cart_id));
   }
 
+  async find_by_user_id(user_id: string) {
+    const rows = await db
+      .select({
+        id: carts.id,
+        user_id: carts.user_id,
+        guest_token: carts.guest_token,
+        status: carts.status,
+        currency: carts.currency,
+        channel: carts.channel,
+        created_at: carts.created_at,
+        updated_at: carts.updated_at,
+        expires_at: carts.expires_at,
+        item_id: cart_items.id,
+        item_sku_id: cart_items.sku_id,
+        item_product_id: cart_items.product_id,
+        item_quantity: cart_items.quantity,
+        item_unit_price: cart_items.unit_price,
+        item_currency: cart_items.currency,
+        item_reservation_id: cart_items.reservation_id,
+        item_fulfillment_type: cart_items.fulfillment_type,
+        item_created_at: cart_items.created_at,
+      })
+      .from(carts)
+      .leftJoin(cart_items, eq(cart_items.cart_id, carts.id))
+      .where(eq(carts.user_id, user_id))
+      .orderBy(desc(carts.updated_at));
+
+    const cart_map = new Map<
+      string,
+      {
+        id: string;
+        user_id: string | null;
+        guest_token: string | null;
+        status: string;
+        currency: string;
+        channel: string;
+        created_at: string;
+        updated_at: string;
+        expires_at: string | null;
+        items: Array<{
+          id: string;
+          sku_id: string;
+          product_id: string;
+          quantity: number;
+          unit_price: string;
+          currency: string;
+          reservation_id: string | null;
+          fulfillment_type: string;
+          created_at: string;
+        }>;
+      }
+    >();
+
+    for (const row of rows) {
+      if (!cart_map.has(row.id)) {
+        cart_map.set(row.id, {
+          id: row.id,
+          user_id: row.user_id,
+          guest_token: row.guest_token,
+          status: row.status,
+          currency: row.currency,
+          channel: row.channel,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          expires_at: row.expires_at,
+          items: [],
+        });
+      }
+      if (row.item_id) {
+        cart_map.get(row.id)!.items.push({
+          id: row.item_id,
+          sku_id: row.item_sku_id!,
+          product_id: row.item_product_id!,
+          quantity: row.item_quantity!,
+          unit_price: row.item_unit_price!,
+          currency: row.item_currency!,
+          reservation_id: row.item_reservation_id,
+          fulfillment_type: row.item_fulfillment_type!,
+          created_at: row.item_created_at!,
+        });
+      }
+    }
+
+    return Array.from(cart_map.values());
+  }
+
   async list_admin(input: {
     page: number;
     limit: number;

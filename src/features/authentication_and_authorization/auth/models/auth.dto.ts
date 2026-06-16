@@ -12,7 +12,7 @@ export const register_dto = z.object({
 });
 
 export const assign_role_dto = z.object({
-  user_id: z.string().length(24),
+  user_id: z.string().min(1),
   role_name: z.enum(["admin", "moderator", "operator", "delivery_person", "customer"]),
 });
 

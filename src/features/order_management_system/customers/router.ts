@@ -18,6 +18,10 @@ export const customers_router = create_trpc_router({
     .input(z.object({ user_id: z.string().min(1) }))
     .query(({ input }) => customer_service.get(input.user_id)),
 
+  adminGetFullDetail: permission_procedure(PERMISSIONS.customers_read)
+    .input(z.object({ user_id: z.string().min(1) }))
+    .query(({ input }) => customer_service.get_full_detail(input.user_id)),
+
   adminStats: permission_procedure(PERMISSIONS.customers_read).query(() =>
     customer_service.stats(),
   ),

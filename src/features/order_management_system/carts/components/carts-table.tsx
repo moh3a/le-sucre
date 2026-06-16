@@ -282,7 +282,7 @@ interface CartItemsDialogProps {
 }
 
 function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
-  const { data, isLoading } = trpc.cart.byId.useQuery(
+  const { data, isLoading } = trpc.cart.adminGetById.useQuery(
     { cart_id: cartId },
     { enabled: open && !!cartId },
   );

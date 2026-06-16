@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, inArray, lte, gte, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import { promotions, promotion_rules } from "../schema";
+import { promotions, promotion_rules, promotion_redemptions, promo_codes } from "../schema";
 import { PROMOTION_STATUS, PROMOTION_TYPE } from "../constants/promotion-types";
 import { format } from "date-fns";
 
@@ -144,6 +144,27 @@ export class PromotionRepository {
     }
 
     return this.get_with_rules(id);
+  }
+
+  async find_redemptions_by_user_id(user_id: string) {
+    return db
+      .select({
+        id: promotion_redemptions.id,
+        promotion_id: promotion_redemptions.promotion_id,
+        promo_code_id: promotion_redemptions.promo_code_id,
+        order_id: promotion_redemptions.order_id,
+        user_id: promotion_redemptions.user_id,
+        discount_amount: promotion_redemptions.discount_amount,
+        created_at: promotion_redemptions.created_at,
+        promotion_name: promotions.name,
+        promotion_type: promotions.promotion_type,
+        code: promo_codes.code,
+      })
+      .from(promotion_redemptions)
+      .leftJoin(promotions, eq(promotions.id, promotion_redemptions.promotion_id))
+      .leftJoin(promo_codes, eq(promo_codes.id, promotion_redemptions.promo_code_id))
+      .where(eq(promotion_redemptions.user_id, user_id))
+      .orderBy(desc(promotion_redemptions.created_at));
   }
 }
 

@@ -54,7 +54,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
     return (
       <Card className="mt-4">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Créer une expédition</CardTitle>
+          <CardTitle>Créer une expédition</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Select value={provider} onValueChange={(v) => setProvider(v as typeof provider)}>
@@ -100,7 +100,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
   return (
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm font-medium">Expédition</CardTitle>
+        <CardTitle>Expédition</CardTitle>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>
             <Link href={`/console/shipping/${shipment.id}`}>Voir détail</Link>

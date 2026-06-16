@@ -219,7 +219,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
-          <CardTitle className="text-xl">Sections Dynamiques</CardTitle>
+          <CardTitle>Sections Dynamiques</CardTitle>
           <p className="text-muted-foreground text-sm">
             Composants de mise en page dynamiques injectés sur la page de la campagne.
           </p>

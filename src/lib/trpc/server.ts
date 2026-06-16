@@ -20,6 +20,7 @@ import { order_router } from "@/features/order_management_system/orders/router";
 import { preorder_router } from "@/features/order_management_system/preorders/router";
 import { customers_router } from "@/features/order_management_system/customers/router";
 import { promotion_router } from "@/features/order_management_system/promotions/router";
+import { return_replacement_router } from "@/features/order_management_system/return_replacement/router";
 import { analytics_router } from "@/features/analytics_management_system/router";
 import { shipping_router } from "@/features/shipping_management_system/router";
 import { invoice_router } from "@/features/billing_and_finance_system/routers/invoice.router";
@@ -44,6 +45,7 @@ export const app_router = create_trpc_router({
   preorders: preorder_router,
   customers: customers_router,
   promotions: promotion_router,
+  returns: return_replacement_router,
   analytics: analytics_router,
   shipping: shipping_router,
   invoices: invoice_router,

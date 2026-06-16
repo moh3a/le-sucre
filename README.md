@@ -4,14 +4,11 @@
 
 - continue Prompt 16 — Campaign Management System
 - customer call history
-- failed delivery handling
-- return requests
 - replacement requests
 - stock adjustments
 - approval workflows
 - campaign approval
 - review moderation workflows
-- admin should only fetch from trpc
 - Storefront: use https://www.abui.io/components/label-selector for variant selection
 - Implement event, example:
 

@@ -43,18 +43,44 @@ export const admin_auth_router = create_trpc_router({
         user_id: z.string().min(1),
         name: z.string().min(2).max(255).optional(),
         is_active: z.boolean().optional(),
+        password: z.string().min(8).max(128).optional(),
+        banned: z.boolean().optional(),
+        ban_reason: z.string().max(500).optional(),
+        ban_expires: z.string().datetime().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await user_repository.update_profile(input.user_id, {
-        name: input.name,
-        is_active: input.is_active,
-      });
+      const { user_id, password, banned, ban_reason, ban_expires, ...profile_patch } = input;
+
+      const update_data: Parameters<typeof user_repository.update_profile>[1] = {
+        name: profile_patch.name,
+        is_active: profile_patch.is_active,
+      };
+
+      if (banned !== undefined) {
+        update_data.banned = banned;
+        if (banned) {
+          update_data.ban_reason = ban_reason ?? null;
+          update_data.ban_expires = ban_expires ? new Date(ban_expires) : null;
+        } else {
+          update_data.ban_reason = null;
+          update_data.ban_expires = null;
+        }
+      }
+
+      await user_repository.update_profile(user_id, update_data);
+
+      if (password) {
+        await auth.api.setUserPassword({
+          body: { userId: user_id, newPassword: password },
+        });
+      }
+
       await audit_service.log({
         actor_user_id: ctx.user.id,
         action: "user.updated",
         resource_type: "user",
-        resource_id: input.user_id,
+        resource_id: user_id,
         metadata: input,
       });
       return { ok: true };

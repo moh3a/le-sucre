@@ -18,10 +18,14 @@ type UserRow = {
   name: string | null;
   phone: string;
   role: string;
+  roles: string | null;
   email: string;
-  email_verified: Date | null;
+  email_verified: boolean;
   is_active: boolean;
-  created_at: Date;
+  banned: boolean | null;
+  ban_reason: string | null;
+  ban_expires: string | null;
+  created_at: string;
 };
 
 export function UsersTable() {
@@ -87,6 +91,7 @@ export function UsersTable() {
             name={row.original.name}
             email={row.original.email}
             is_active={row.original.is_active}
+            banned={row.original.banned}
             role={row.original.role}
           />
         ),

@@ -9,13 +9,9 @@ import { CreateUserDialog } from "./create-user-dialog";
 
 export function UsersPageClient() {
   const { data: statsData, isLoading: isLoadingStats } = trpc.adminAuth.getStats.useQuery();
-  const { data: usersData, isLoading: isLoadingUsers } = trpc.adminAuth.listUsers.useQuery({
-    page: 1,
-    limit: 1,
-  });
 
-  const isLoading = isLoadingStats || isLoadingUsers;
-  const totalUsers = statsData?.total ?? usersData?.meta.total_records ?? 0;
+  const isLoading = isLoadingStats;
+  const totalUsers = statsData?.total ?? 0;
 
   return (
     <ConsolePageShell
