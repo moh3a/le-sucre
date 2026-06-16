@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, X } from "lucide-react";
+import { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,8 @@ import { SkuTable } from "./sku-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+
+const inner_tab_schema = z.enum(["properties", "skus", "wholesale"]);
 
 type ProductVariantsPanelProps = {
   product_id: string;
@@ -29,7 +33,8 @@ export function ProductVariantsPanel({
 }: ProductVariantsPanelProps) {
   const t = useTranslations("variants");
   const utils = trpc.useUtils();
-  const [refresh_key, set_refresh_key] = useState(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { data: price_range } = trpc.variants.getPriceRange.useQuery({ product_id });
 
@@ -43,10 +48,20 @@ export function ProductVariantsPanel({
     discount_percent: "",
   });
 
-  const bump = () => set_refresh_key((k) => k + 1);
+  const parsed = inner_tab_schema.safeParse(searchParams.get("variant_tab"));
+  const active_tab = parsed.success ? parsed.data : "properties";
+
+  const on_tab_change = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("variant_tab", value);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
 
   return (
-    <Card key={refresh_key}>
+    <Card>
       <CardHeader className="flex flex-row flex-wrap justify-between gap-4">
         <div>
           <CardTitle>{t("title")}</CardTitle>
@@ -69,21 +84,20 @@ export function ProductVariantsPanel({
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="properties" className="space-y-6">
+        <Tabs value={active_tab} onValueChange={on_tab_change} className="space-y-6">
           <TabsList>
             <TabsTrigger value="properties">{t("section_properties")}</TabsTrigger>
             <TabsTrigger value="skus">{t("section_skus")}</TabsTrigger>
             <TabsTrigger value="wholesale">Gros</TabsTrigger>
           </TabsList>
           <TabsContent value="properties">
-            <VariantPropertyEditor product_id={product_id} on_change={bump} />
+            <VariantPropertyEditor product_id={product_id} />
           </TabsContent>
           <TabsContent value="skus">
             <SkuTable
               product_id={product_id}
               product_sku={product_sku}
               currency={currency}
-              on_change={bump}
             />
           </TabsContent>
           <TabsContent value="wholesale">

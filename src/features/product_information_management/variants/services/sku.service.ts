@@ -250,6 +250,7 @@ export class SkuService {
     ids: string[];
     base_price?: number | null;
     offer_price?: number | null;
+    stock_available?: number;
     is_active?: boolean;
   }) {
     await this.skus.bulk_update_skus(input.ids, {
@@ -258,6 +259,9 @@ export class SkuService {
       }),
       ...(input.offer_price !== undefined && {
         offer_price: input.offer_price != null ? String(input.offer_price) : null,
+      }),
+      ...(input.stock_available !== undefined && {
+        stock_available: input.stock_available,
       }),
       ...(input.is_active !== undefined && { is_active: input.is_active }),
     });

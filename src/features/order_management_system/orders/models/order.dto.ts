@@ -47,6 +47,35 @@ export const list_orders_dto = z.object({
   status: z.string().optional(),
 });
 
+export const update_order_payment_dto = z.object({
+  order_id: z.string().min(1).max(255),
+  payment_status: z
+    .enum(["pending", "authorized", "paid", "failed", "refunded"])
+    .optional(),
+  payment_provider: z.string().max(32).optional().nullable(),
+  payment_reference: z.string().max(128).optional().nullable(),
+});
+
+export const update_order_item_line_dto = z.object({
+  id: z.string().optional(),
+  sku_id: z.string().min(1).max(255),
+  product_id: z.string().optional(),
+  sku_code: z.string().optional(),
+  product_name: z.string().optional(),
+  quantity: z.coerce.number().int().min(1).max(9999),
+  unit_price: z.coerce.number().min(0),
+});
+
+export const update_order_items_dto = z.object({
+  order_id: z.string().min(1).max(255),
+  items: z.array(update_order_item_line_dto).min(1),
+});
+
+export const update_order_shipping_dto = z.object({
+  order_id: z.string().min(1).max(255),
+  shipping_address: address_snapshot_dto,
+});
+
 export const admin_list_enriched_dto = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

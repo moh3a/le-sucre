@@ -171,6 +171,7 @@ export class SkuRepository {
     input: Partial<{
       base_price: string | null;
       offer_price: string | null;
+      stock_available: number;
       is_active: boolean;
     }>,
   ) {

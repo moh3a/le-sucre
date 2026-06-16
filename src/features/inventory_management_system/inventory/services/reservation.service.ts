@@ -17,7 +17,7 @@ import {
 } from "../helpers/stock-sync.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
-import { addDays, format } from "date-fns";
+import { addSeconds, format } from "date-fns";
 
 export class ReservationService {
   constructor(private readonly repo = inventory_repository) {}
@@ -26,7 +26,7 @@ export class ReservationService {
     await this.repo.ensure_level(input.sku_id, input.warehouse_id);
 
     const expires_at = format(
-      addDays(new Date(), input.expires_in_sec * 1000),
+      addSeconds(new Date(), input.expires_in_sec),
       "yyyy-MM-dd HH:mm:ss",
     );
 

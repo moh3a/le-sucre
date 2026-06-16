@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
 
 import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/lib/db";
@@ -93,12 +93,23 @@ export class OrderRepository {
 
     if (!row) return null;
 
-    const [items, adjustments, status_events] = await Promise.all([
+    const actor_users = alias(users, "actor_users");
+    const [items, adjustments, status_events_raw] = await Promise.all([
       db.select().from(order_items).where(eq(order_items.order_id, order_id)),
       db.select().from(order_adjustments).where(eq(order_adjustments.order_id, order_id)),
       db
-        .select()
+        .select({
+          id: order_status_events.id,
+          order_id: order_status_events.order_id,
+          from_status: order_status_events.from_status,
+          to_status: order_status_events.to_status,
+          actor_user_id: order_status_events.actor_user_id,
+          actor_name: actor_users.name,
+          note: order_status_events.note,
+          created_at: order_status_events.created_at,
+        })
         .from(order_status_events)
+        .leftJoin(actor_users, eq(actor_users.id, order_status_events.actor_user_id))
         .where(eq(order_status_events.order_id, order_id))
         .orderBy(desc(order_status_events.created_at)),
     ]);
@@ -113,7 +124,7 @@ export class OrderRepository {
       },
       items,
       adjustments,
-      status_events,
+      status_events: status_events_raw,
     };
   }
 
@@ -220,6 +231,28 @@ export class OrderRepository {
 
   async update_notes(order_id: string, notes: string | null) {
     return await db.update(orders).set({ notes }).where(eq(orders.id, order_id));
+  }
+
+  async update_order_payment(
+    order_id: string,
+    patch: { payment_status?: string; payment_provider?: string | null; payment_reference?: string | null },
+  ) {
+    return await db.update(orders).set(patch).where(eq(orders.id, order_id));
+  }
+
+  async find_items_by_order(order_id: string) {
+    return await db.select().from(order_items).where(eq(order_items.order_id, order_id));
+  }
+
+  async delete_items_by_order(order_id: string, keep_ids?: string[]) {
+    const where = keep_ids?.length
+      ? and(eq(order_items.order_id, order_id), inArray(order_items.id, keep_ids).not())
+      : eq(order_items.order_id, order_id);
+    await db.delete(order_items).where(where);
+  }
+
+  async update_shipping_address(order_id: string, address: Record<string, unknown>) {
+    return await db.update(orders).set({ shipping_address: address }).where(eq(orders.id, order_id));
   }
 }
 

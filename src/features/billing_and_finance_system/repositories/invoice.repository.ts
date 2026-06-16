@@ -42,6 +42,14 @@ export class InvoiceRepository {
     return await db.select().from(invoices).where(eq(invoices.order_id, order_id));
   }
 
+  async list_by_order(order_id: string) {
+    return await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.order_id, order_id))
+      .orderBy(desc(invoices.created_at));
+  }
+
   async create_invoice(invoice_data: NewInvoice, items_data: NewInvoiceItem[]) {
     return await db.transaction(async (tx) => {
       const [inserted] = await tx.insert(invoices).values(invoice_data).$returningId();

@@ -299,6 +299,10 @@ export class InvoiceService {
     return await this.repo.list_customer_invoices(user_id, page, limit, status);
   }
 
+  async list_by_order(order_id: string) {
+    return await this.repo.list_by_order(order_id);
+  }
+
   async list_invoices_admin(params: {
     page: number;
     limit: number;

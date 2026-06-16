@@ -45,6 +45,21 @@ type SkuTableProps = {
   on_change?: () => void;
 };
 
+function flatten_options(
+  options: SkuListRow["options"],
+): Record<string, { label: string; value_id: string }> {
+  const map: Record<string, { label: string; value_id: string }> = {};
+  for (const opt of options) {
+    if (opt.property_code) {
+      map[opt.property_code] = {
+        label: opt.value_label ?? opt.value_code ?? "",
+        value_id: opt.value_id ?? "",
+      };
+    }
+  }
+  return map;
+}
+
 export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTableProps) {
   const t = useTranslations("variants");
   const utils = trpc.useUtils();
@@ -61,6 +76,20 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   const update_sku = trpc.variants.updateSku.useMutation({ onSuccess: invalidate });
   const delete_sku = trpc.variants.deleteSku.useMutation({ onSuccess: invalidate });
   const create_sku = trpc.variants.createSku.useMutation({ onSuccess: invalidate });
+  const bulk_update = trpc.variants.bulkUpdateSku.useMutation({
+    onSuccess: async () => {
+      setRowSelection({});
+      set_bulk_price_dialog_open(false);
+      set_bulk_stock_dialog_open(false);
+      await invalidate();
+    },
+  });
+  const bulk_delete = trpc.variants.bulkDeleteSku.useMutation({
+    onSuccess: async () => {
+      setRowSelection({});
+      await invalidate();
+    },
+  });
 
   const [sheet_open, set_sheet_open] = useState(false);
   const [editing_id, set_editing_id] = useState<string | null>(null);
@@ -88,23 +117,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     offer_price: "",
   });
 
+  const [bulk_stock_dialog_open, set_bulk_stock_dialog_open] = useState(false);
+  const [bulk_stock_value, set_bulk_stock_value] = useState("");
+
+  // Inline editing state: { sku_id: { field: value } }
+  const [inline_edits, set_inline_edits] = useState<
+    Record<string, { base_price?: string; offer_price?: string; stock_available?: string }>
+  >({});
+
   const items = useMemo(() => (data?.items ?? []) as SkuListRow[], [data?.items]);
-  const properties = config?.properties ?? [];
-
-  const bulk_delete = trpc.variants.bulkDeleteSku.useMutation({
-    onSuccess: async () => {
-      setRowSelection({});
-      await invalidate();
-    },
-  });
-
-  const bulk_update = trpc.variants.bulkUpdateSku.useMutation({
-    onSuccess: async () => {
-      setRowSelection({});
-      set_bulk_price_dialog_open(false);
-      await invalidate();
-    },
-  });
+  const properties = useMemo(() => config?.properties ?? [], [config?.properties]);
 
   function open_create() {
     set_editing_id(null);
@@ -177,6 +199,96 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     set_sheet_open(false);
   }
 
+  // Inline edit handlers
+  const start_inline_edit = useCallback((sku_id: string, field: string, value: string | number) => {
+    set_inline_edits((prev) => ({
+      ...prev,
+      [sku_id]: {
+        ...prev[sku_id],
+        [field]: String(value),
+      },
+    }));
+  }, []);
+
+  const commit_inline_edit = useCallback(
+    async (sku_id: string) => {
+      const edit = inline_edits[sku_id];
+      if (!edit) return;
+
+      const payload: {
+        id: string;
+        base_price?: number | null;
+        offer_price?: number | null;
+      } = { id: sku_id };
+
+      if (edit.base_price !== undefined) {
+        payload.base_price = edit.base_price ? Number(edit.base_price) : null;
+      }
+      if (edit.offer_price !== undefined) {
+        payload.offer_price = edit.offer_price ? Number(edit.offer_price) : null;
+      }
+
+      await update_sku.mutateAsync(payload);
+
+      set_inline_edits((prev) => {
+        const next = { ...prev };
+        delete next[sku_id];
+        return next;
+      });
+    },
+    [inline_edits, update_sku],
+  );
+
+  const cancel_inline_edit = useCallback((sku_id: string) => {
+    set_inline_edits((prev) => {
+      const next = { ...prev };
+      delete next[sku_id];
+      return next;
+    });
+  }, []);
+
+  const commit_stock_inline = useCallback(
+    async (sku_id: string) => {
+      const edit = inline_edits[sku_id];
+      if (!edit || edit.stock_available === undefined) return;
+
+      // Update stock via the single SKU update — stock_available is not in update_sku_dto
+      // so use bulk_update with a single ID
+      await bulk_update.mutateAsync({
+        ids: [sku_id],
+        stock_available: Number(edit.stock_available),
+      });
+
+      set_inline_edits((prev) => {
+        const next = { ...prev };
+        delete next[sku_id];
+        return next;
+      });
+    },
+    [inline_edits, bulk_update],
+  );
+
+  // Dynamic property columns
+  const property_columns = useMemo<ColumnDef<SkuListRow>[]>(
+    () =>
+      properties.map((prop) => ({
+        id: `prop_${prop.code}`,
+        accessorFn: (row: SkuListRow) => {
+          const flat = flatten_options(row.options);
+          return flat[prop.code]?.label ?? null;
+        },
+        header: ({ column }) => <DataTableColumnHeader column={column} label={prop.name} />,
+        cell: ({ row }) => {
+          const flat = flatten_options(row.original.options);
+          const val = flat[prop.code];
+          if (!val) return <span className="text-muted-foreground">—</span>;
+          return <Badge variant="outline">{val.label}</Badge>;
+        },
+        enableSorting: true,
+      })),
+    [properties],
+  );
+
   const columns = useMemo<ColumnDef<SkuListRow>[]>(
     () => [
       {
@@ -211,40 +323,143 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_code")} />,
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.sku_code}</span>,
       },
-      {
-        id: "options",
-        header: () => <span>{t("options")}</span>,
-        cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1">
-            {row.original.options.map((opt) => (
-              <Badge key={`${row.original.sku_id}-${opt.value_id}`} variant="outline">
-                {opt.value_label ?? opt.value_code}
-              </Badge>
-            ))}
-          </div>
-        ),
-      },
+      ...property_columns,
       {
         id: "base_price",
         accessorKey: "base_price",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("base_price")} />,
-        cell: ({ row }) => (
-          <span>
-            {row.original.base_price ?? "—"} {row.original.currency ?? currency}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const sku_id = row.original.sku_id;
+          const edit = inline_edits[sku_id];
+          if (edit?.base_price !== undefined) {
+            return (
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={edit.base_price}
+                  onChange={(e) => start_inline_edit(sku_id, "base_price", e.target.value)}
+                  className="h-7 w-20 text-xs"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commit_inline_edit(sku_id);
+                    if (e.key === "Escape") cancel_inline_edit(sku_id);
+                  }}
+                />
+                <button
+                  className="text-xs text-blue-600 hover:underline"
+                  onClick={() => commit_inline_edit(sku_id)}
+                >
+                  ✓
+                </button>
+              </div>
+            );
+          }
+          return (
+            <span
+              className="hover:bg-accent cursor-pointer rounded px-1 py-0.5"
+              onClick={() => {
+                const item = items.find((r) => r.sku_id === sku_id);
+                start_inline_edit(sku_id, "base_price", item?.base_price ?? "");
+              }}
+              title="Cliquer pour modifier"
+            >
+              {row.original.base_price ?? "—"} {row.original.currency ?? currency}
+            </span>
+          );
+        },
       },
       {
         id: "offer_price",
         accessorKey: "offer_price",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("offer_price")} />,
-        cell: ({ row }) => <span>{row.original.offer_price ?? "—"}</span>,
+        cell: ({ row }) => {
+          const sku_id = row.original.sku_id;
+          const edit = inline_edits[sku_id];
+          if (edit?.offer_price !== undefined) {
+            return (
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={edit.offer_price}
+                  onChange={(e) => start_inline_edit(sku_id, "offer_price", e.target.value)}
+                  className="h-7 w-20 text-xs"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commit_inline_edit(sku_id);
+                    if (e.key === "Escape") cancel_inline_edit(sku_id);
+                  }}
+                />
+                <button
+                  className="text-xs text-blue-600 hover:underline"
+                  onClick={() => commit_inline_edit(sku_id)}
+                >
+                  ✓
+                </button>
+              </div>
+            );
+          }
+          return (
+            <span
+              className="hover:bg-accent cursor-pointer rounded px-1 py-0.5"
+              onClick={() => {
+                const item = items.find((r) => r.sku_id === sku_id);
+                start_inline_edit(sku_id, "offer_price", item?.offer_price ?? "");
+              }}
+              title="Cliquer pour modifier"
+            >
+              {row.original.offer_price ?? "—"}
+            </span>
+          );
+        },
       },
       {
         id: "stock_available",
         accessorKey: "stock_available",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("stock")} />,
-        cell: ({ row }) => <span>{row.original.stock_available}</span>,
+        cell: ({ row }) => {
+          const sku_id = row.original.sku_id;
+          const edit = inline_edits[sku_id];
+          if (edit?.stock_available !== undefined) {
+            return (
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min={0}
+                  step="1"
+                  value={edit.stock_available}
+                  onChange={(e) => start_inline_edit(sku_id, "stock_available", e.target.value)}
+                  className="h-7 w-16 text-xs"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commit_stock_inline(sku_id);
+                    if (e.key === "Escape") cancel_inline_edit(sku_id);
+                  }}
+                />
+                <button
+                  className="text-xs text-blue-600 hover:underline"
+                  onClick={() => commit_stock_inline(sku_id)}
+                >
+                  ✓
+                </button>
+              </div>
+            );
+          }
+          return (
+            <span
+              className="hover:bg-accent cursor-pointer rounded px-1 py-0.5"
+              onClick={() =>
+                start_inline_edit(sku_id, "stock_available", row.original.stock_available)
+              }
+              title="Cliquer pour modifier"
+            >
+              {row.original.stock_available}
+            </span>
+          );
+        },
       },
       {
         id: "is_active",
@@ -284,7 +499,20 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
         ),
       },
     ],
-    [currency, delete_sku, open_edit, t],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      currency,
+      delete_sku,
+      open_edit,
+      t,
+      properties,
+      property_columns,
+      inline_edits,
+      start_inline_edit,
+      commit_inline_edit,
+      commit_stock_inline,
+      cancel_inline_edit,
+    ],
   );
 
   const table = useReactTable({
@@ -313,17 +541,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     enableRowSelection: true,
   });
 
+  // Bulk actions
   const selected_ids = useMemo(
-    () => table.getFilteredSelectedRowModel().rows.map((row) => row.id),
-    [table],
+    () => table?.getFilteredSelectedRowModel().rows.map((row) => row.id) ?? [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rowSelection, items],
   );
 
   async function bulk_toggle_active(active: boolean) {
     if (!selected_ids.length) return;
-    await bulk_update.mutateAsync({
-      ids: selected_ids,
-      is_active: active,
-    });
+    await bulk_update.mutateAsync({ ids: selected_ids, is_active: active });
   }
 
   async function on_save_bulk_price() {
@@ -334,10 +561,82 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     });
   }
 
+  async function on_save_bulk_stock() {
+    if (!bulk_stock_value) return;
+    await bulk_update.mutateAsync({
+      ids: selected_ids,
+      stock_available: Number(bulk_stock_value),
+    });
+  }
+
   async function on_bulk_delete() {
     if (!window.confirm("Voulez-vous vraiment supprimer les variantes sélectionnées ?")) return;
     await bulk_delete.mutateAsync({ ids: selected_ids });
   }
+
+  const action_bar = useMemo(
+    () =>
+      selected_ids.length > 0 ? (
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground text-xs font-semibold">
+            {selected_ids.length} sélectionné(s) :
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={() => bulk_toggle_active(true)}
+            disabled={bulk_update.isPending}
+          >
+            Activer
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={() => bulk_toggle_active(false)}
+            disabled={bulk_update.isPending}
+          >
+            Désactiver
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={() => {
+              set_bulk_price_form({ base_price: "", offer_price: "" });
+              set_bulk_price_dialog_open(true);
+            }}
+            disabled={bulk_update.isPending}
+          >
+            Prix
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={() => {
+              set_bulk_stock_value("");
+              set_bulk_stock_dialog_open(true);
+            }}
+            disabled={bulk_update.isPending}
+          >
+            Stock
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={on_bulk_delete}
+            disabled={bulk_delete.isPending}
+          >
+            Supprimer
+          </Button>
+        </div>
+      ) : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selected_ids, bulk_update.isPending, bulk_delete.isPending],
+  );
 
   const editing_item = useMemo(
     () => items.find((item) => item.sku_id === editing_id) ?? null,
@@ -360,57 +659,17 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
           />
         </div>
         <div className="flex items-center gap-2">
-          {selected_ids.length > 0 && (
-            <div className="mr-2 flex items-center gap-1.5 border-r pr-4">
-              <span className="text-muted-foreground text-xs font-semibold">
-                {selected_ids.length} sélectionné(s) :
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => bulk_toggle_active(true)}
-                disabled={bulk_update.isPending}
-              >
-                Activer
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => bulk_toggle_active(false)}
-                disabled={bulk_update.isPending}
-              >
-                Désactiver
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  set_bulk_price_form({ base_price: "", offer_price: "" });
-                  set_bulk_price_dialog_open(true);
-                }}
-                disabled={bulk_update.isPending}
-              >
-                Modifier prix
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={on_bulk_delete}
-                disabled={bulk_delete.isPending}
-              >
-                Supprimer
-              </Button>
-            </div>
-          )}
           <Button type="button" size="sm" onClick={open_create} disabled={properties.length === 0}>
             {t("create_sku")}
           </Button>
         </div>
       </div>
+
+      {action_bar && (
+        <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2">
+          {action_bar}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <p className="text-muted-foreground text-sm">{t("empty_skus")}</p>
@@ -546,6 +805,48 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             </Button>
             <Button type="button" onClick={on_save_bulk_price} disabled={bulk_update.isPending}>
               Mettre à jour
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={bulk_stock_dialog_open} onOpenChange={set_bulk_stock_dialog_open}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Définir le stock en masse</DialogTitle>
+            <DialogDescription>
+              Définit la quantité en stock pour toutes les variantes sélectionnées.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Field>
+              <FieldLabel>Quantité en stock</FieldLabel>
+              <Input
+                type="number"
+                min={0}
+                step="1"
+                value={bulk_stock_value}
+                onChange={(e) => set_bulk_stock_value(e.target.value)}
+                placeholder="Nouveau stock"
+              />
+            </Field>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => set_bulk_stock_dialog_open(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              onClick={on_save_bulk_stock}
+              disabled={bulk_update.isPending || !bulk_stock_value}
+            >
+              Définir
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,8 @@
 "use client";
 
-import z from "zod";
+import { useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { z } from "zod";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
@@ -17,6 +19,16 @@ import {
   upsert_translation_dto,
 } from "../../models/product.dto";
 
+const outer_tab_schema = z.enum([
+  "general",
+  "variants",
+  "orders",
+  "inventory",
+  "media",
+  "reviews",
+  "analytics",
+]);
+
 type Props = {
   product_id: string;
   product: z.infer<typeof product_details_dto>;
@@ -25,7 +37,21 @@ type Props = {
 };
 
 export function ProductDetailTabs({ product_id, product, translations, media }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const fr = translations.find((t) => t.locale === "fr");
+
+  const parsed = outer_tab_schema.safeParse(searchParams.get("tab"));
+  const active_tab = parsed.success ? parsed.data : "general";
+
+  const on_tab_change = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", value);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
 
   return (
     <div className="space-y-6">
@@ -34,7 +60,7 @@ export function ProductDetailTabs({ product_id, product, translations, media }: 
         <p className="text-muted-foreground text-sm">Product details</p>
       </div>
 
-      <Tabs defaultValue="general">
+      <Tabs value={active_tab} onValueChange={on_tab_change}>
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="general">Général</TabsTrigger>
           <TabsTrigger value="variants">Variantes</TabsTrigger>

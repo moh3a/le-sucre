@@ -33,18 +33,56 @@ type OrderRow = {
   delivery_name: string | null;
 };
 
+const ORDER_LABELS: Record<string, string> = {
+  pending_payment: "En attente de paiement",
+  confirmed: "Confirmée",
+  paid: "Payée",
+  processing: "En cours",
+  shipped: "Expédiée",
+  delivered: "Livrée",
+  cancelled: "Annulée",
+  refunded: "Remboursée",
+};
+
+const PAYMENT_LABELS: Record<string, string> = {
+  pending: "En attente",
+  authorized: "Autorisé",
+  paid: "Payé",
+  failed: "Échoué",
+  refunded: "Remboursé",
+};
+
+const FULFILLMENT_LABELS: Record<string, string> = {
+  unfulfilled: "Non expédié",
+  partial: "Partiel",
+  fulfilled: "Expédié",
+  returned: "Retourné",
+};
+
 const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending_payment: "outline",
+  confirmed: "secondary",
   paid: "default",
   processing: "secondary",
-  fulfilled: "default",
+  shipped: "default",
+  delivered: "default",
   cancelled: "destructive",
+  refunded: "destructive",
+};
+
+const PAYMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  pending: "outline",
+  authorized: "secondary",
+  paid: "default",
+  failed: "destructive",
+  refunded: "destructive",
 };
 
 const FULFILLMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   unfulfilled: "outline",
   partial: "secondary",
   fulfilled: "default",
+  returned: "destructive",
 };
 
 export function OrderTable({ compact = false }: { compact?: boolean }) {
@@ -93,7 +131,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE[row.original.status] ?? "secondary"}>
-            {row.original.status}
+            {ORDER_LABELS[row.original.status] ?? row.original.status}
           </Badge>
         ),
       },
@@ -103,7 +141,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Expédition" />,
         cell: ({ row }) => (
           <Badge variant={FULFILLMENT_BADGE[row.original.fulfillment_status] ?? "outline"}>
-            {row.original.fulfillment_status}
+            {FULFILLMENT_LABELS[row.original.fulfillment_status] ?? row.original.fulfillment_status}
           </Badge>
         ),
       },
@@ -112,8 +150,8 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         accessorKey: "payment_status",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Paiement" />,
         cell: ({ row }) => (
-          <Badge variant={row.original.payment_status === "paid" ? "default" : "outline"}>
-            {row.original.payment_status}
+          <Badge variant={PAYMENT_BADGE[row.original.payment_status] ?? "outline"}>
+            {PAYMENT_LABELS[row.original.payment_status] ?? row.original.payment_status}
           </Badge>
         ),
       },

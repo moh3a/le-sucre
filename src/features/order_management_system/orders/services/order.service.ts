@@ -8,10 +8,12 @@ import type {
   list_orders_dto,
   admin_update_order_status_dto,
   admin_create_order_dto,
+  update_order_payment_dto,
+  update_order_items_dto,
+  update_order_shipping_dto,
 } from "../models/order.dto";
 import { order_repository } from "../repositories/order.repository";
 import { build_order_number } from "../order-number.helper";
-import { assert_order_transition } from "../order-lifecycle.engine";
 import { cart_items, carts } from "../../schema";
 import { checkout_engine } from "../../checkout/checkout.engine";
 import { preorder_allocation_service } from "../../preorders/services/preorder-allocation.service";
@@ -25,6 +27,8 @@ import { event_ingestion_service } from "@/features/analytics_management_system/
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
+import { invoice_service } from "@/features/billing_and_finance_system/services/invoice.service";
+import { order_items, orders } from "../schema";
 import { db } from "@/lib/db";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
@@ -259,6 +263,10 @@ export class OrderService {
       })),
     });
 
+    void invoice_service.generate_order_invoice(order_id).catch((err) => {
+      console.error("Failed to auto-generate invoice:", err);
+    });
+
     return this.repo.get_full(order_id);
   }
 
@@ -301,8 +309,6 @@ export class OrderService {
   ) {
     const current = await this.repo.find_by_id(input.order_id);
     if (!current) throw new NotFoundError("Commande introuvable");
-
-    assert_order_transition(current.status, input.status);
 
     await this.repo.update_order_status(input.order_id, input.status, {
       ...(input.status === "cancelled"
@@ -484,6 +490,202 @@ export class OrderService {
       payment_provider: "manual",
       guest_phone: undefined,
     });
+  }
+
+  async admin_update_payment(
+    input: z.infer<typeof update_order_payment_dto> & { actor_user_id: string },
+  ) {
+    const current = await this.repo.find_by_id(input.order_id);
+    if (!current) throw new NotFoundError("Commande introuvable");
+
+    const changes: string[] = [];
+    if (input.payment_status && input.payment_status !== current.payment_status) {
+      changes.push(`paiement: ${current.payment_status} → ${input.payment_status}`);
+    }
+    if (input.payment_provider !== undefined && input.payment_provider !== current.payment_provider) {
+      changes.push(`prestataire: ${current.payment_provider ?? "—"} → ${input.payment_provider ?? "—"}`);
+    }
+    if (input.payment_reference !== undefined && input.payment_reference !== current.payment_reference) {
+      changes.push(`référence: ${current.payment_reference ?? "—"} → ${input.payment_reference ?? "—"}`);
+    }
+
+    if (changes.length === 0) return this.repo.get_full(input.order_id);
+
+    await this.repo.update_order_payment(input.order_id, {
+      ...(input.payment_status !== undefined && { payment_status: input.payment_status }),
+      ...(input.payment_provider !== undefined && { payment_provider: input.payment_provider }),
+      ...(input.payment_reference !== undefined && { payment_reference: input.payment_reference }),
+    });
+
+    // Sync invoice status with payment status
+    if (input.payment_status && input.payment_status !== current.payment_status) {
+      void (async () => {
+        try {
+          const invoices = await invoice_service.list_by_order(input.order_id);
+          const main_invoice = invoices.find((inv) => inv.type === "order_invoice");
+          if (!main_invoice) return;
+
+          if (input.payment_status === "paid") {
+            await invoice_service.mark_as_paid(main_invoice.id);
+          } else if (input.payment_status === "refunded") {
+            await invoice_service.void_invoice(main_invoice.id);
+          }
+        } catch (err) {
+          console.error("Failed to sync invoice with payment status:", err);
+        }
+      })();
+    }
+
+    await this.repo.insert_status_event({
+      id: generate_id(),
+      order_id: input.order_id,
+      from_status: current.status,
+      to_status: current.status,
+      actor_user_id: input.actor_user_id,
+      note: `Paiement modifié : ${changes.join("; ")}`,
+    });
+
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.payment.update",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+      metadata: { changes },
+    });
+
+    return this.repo.get_full(input.order_id);
+  }
+
+  async admin_update_items(
+    input: z.infer<typeof update_order_items_dto> & { actor_user_id: string },
+  ) {
+    const current = await this.repo.find_by_id(input.order_id);
+    if (!current) throw new NotFoundError("Commande introuvable");
+    if (current.status === "cancelled" || current.status === "refunded") {
+      throw new ValidationError("Impossible de modifier les articles d'une commande annulée ou remboursée");
+    }
+
+    const enriched_items = await Promise.all(
+      input.items.map(async (line) => {
+        const [sku] = await db
+          .select({ sku_code: product_skus.sku_code, product_id: product_skus.product_id })
+          .from(product_skus)
+          .where(eq(product_skus.id, line.sku_id))
+          .limit(1);
+
+        if (!sku) throw new NotFoundError(`SKU ${line.sku_id} introuvable`);
+
+        const [tr] = await db
+          .select({ name: product_translations.name })
+          .from(product_translations)
+          .where(
+            and(
+              eq(product_translations.product_id, sku.product_id),
+              eq(product_translations.locale, "fr"),
+            ),
+          )
+          .limit(1);
+
+        return {
+          id: line.id ?? generate_id(),
+          order_id: input.order_id,
+          sku_id: line.sku_id,
+          product_id: sku.product_id,
+          sku_code: sku.sku_code,
+          product_name: tr?.name ?? line.product_name ?? line.sku_id,
+          quantity: line.quantity,
+          unit_price: String(line.unit_price),
+          line_total: (line.unit_price * line.quantity).toFixed(2),
+          currency: current.currency,
+          fulfillment_type: "standard",
+          payment_capture_mode: "full",
+        };
+      }),
+    );
+
+    // Recalculate totals
+    const new_subtotal = enriched_items.reduce(
+      (sum, item) => sum + Number(item.unit_price) * item.quantity,
+      0,
+    );
+    const old_grand = Number(current.grand_total);
+    const old_subtotal = Number(current.subtotal);
+    const ratio = old_subtotal > 0 ? new_subtotal / old_subtotal : 1;
+    const new_discount = Math.round(Number(current.discount_total) * ratio * 100) / 100;
+    const new_tax = Math.round(Number(current.tax_total) * ratio * 100) / 100;
+    const new_shipping = Number(current.shipping_total);
+    const new_grand = Math.max(0, new_subtotal - new_discount + new_tax + new_shipping);
+
+    // Replace items in transaction
+    await db.transaction(async (tx) => {
+      await tx.delete(order_items).where(eq(order_items.order_id, input.order_id));
+      await tx.insert(order_items).values(enriched_items);
+      await tx
+        .update(orders)
+        .set({
+          subtotal: String(new_subtotal.toFixed(2)),
+          discount_total: String(new_discount.toFixed(2)),
+          tax_total: String(new_tax.toFixed(2)),
+          grand_total: String(new_grand.toFixed(2)),
+        })
+        .where(eq(orders.id, input.order_id));
+    });
+
+    const old_qty = (
+      await this.repo.find_items_by_order(input.order_id)
+    ).reduce((s, i) => s + i.quantity, 0);
+    const new_qty = enriched_items.reduce((s, i) => s + i.quantity, 0);
+    const diff = new_qty - old_qty;
+
+    await this.repo.insert_status_event({
+      id: generate_id(),
+      order_id: input.order_id,
+      from_status: current.status,
+      to_status: current.status,
+      actor_user_id: input.actor_user_id,
+      note: `Articles modifiés : ${enriched_items.length} ligne(s), ${diff > 0 ? "+" : ""}${diff} unité(s), total ${new_grand.toFixed(2)} ${current.currency}`,
+    });
+
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.items.update",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+      metadata: { items: enriched_items, old_grand_total: old_grand, new_grand_total: new_grand },
+    });
+
+    return this.repo.get_full(input.order_id);
+  }
+
+  async admin_update_shipping(
+    input: z.infer<typeof update_order_shipping_dto> & { actor_user_id: string },
+  ) {
+    const current = await this.repo.find_by_id(input.order_id);
+    if (!current) throw new NotFoundError("Commande introuvable");
+
+    await this.repo.update_shipping_address(
+      input.order_id,
+      input.shipping_address as unknown as Record<string, unknown>,
+    );
+
+    await this.repo.insert_status_event({
+      id: generate_id(),
+      order_id: input.order_id,
+      from_status: current.status,
+      to_status: current.status,
+      actor_user_id: input.actor_user_id,
+      note: `Adresse de livraison modifiée : ${input.shipping_address.full_name}, ${input.shipping_address.city}`,
+    });
+
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.shipping.update",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+      metadata: { new_address: input.shipping_address },
+    });
+
+    return this.repo.get_full(input.order_id);
   }
 }
 

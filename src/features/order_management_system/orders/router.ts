@@ -12,6 +12,9 @@ import {
   list_orders_dto,
   admin_list_enriched_dto,
   admin_create_order_dto,
+  update_order_payment_dto,
+  update_order_items_dto,
+  update_order_shipping_dto,
 } from "./models/order.dto";
 import { order_admin_service } from "./services/order-admin.service";
 
@@ -107,4 +110,22 @@ export const order_router = create_trpc_router({
   adminCreateOrder: permission_procedure(PERMISSIONS.orders_write)
     .input(admin_create_order_dto)
     .mutation(({ input }) => order_service.admin_create(input)),
+
+  adminUpdatePayment: permission_procedure(PERMISSIONS.orders_write)
+    .input(update_order_payment_dto)
+    .mutation(({ ctx, input }) =>
+      order_service.admin_update_payment({ ...input, actor_user_id: ctx.session!.user.id }),
+    ),
+
+  adminUpdateItems: permission_procedure(PERMISSIONS.orders_write)
+    .input(update_order_items_dto)
+    .mutation(({ ctx, input }) =>
+      order_service.admin_update_items({ ...input, actor_user_id: ctx.session!.user.id }),
+    ),
+
+  adminUpdateShipping: permission_procedure(PERMISSIONS.orders_write)
+    .input(update_order_shipping_dto)
+    .mutation(({ ctx, input }) =>
+      order_service.admin_update_shipping({ ...input, actor_user_id: ctx.session!.user.id }),
+    ),
 });

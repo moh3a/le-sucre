@@ -148,6 +148,12 @@ export const invoice_router = create_trpc_router({
       }
     }),
 
+  list_by_order: admin_procedure
+    .input(z.object({ order_id: z.string().min(1) }))
+    .query(async ({ input }) => {
+      return await invoice_service.list_by_order(input.order_id);
+    }),
+
   get_summary: admin_procedure.input(financial_query_schema).query(async ({ input }) => {
     return await invoice_service.get_financial_summary(input.start_date, input.end_date);
   }),

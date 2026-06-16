@@ -101,6 +101,7 @@ export const variants_router = create_trpc_router({
         ids: z.array(z.string().min(1)),
         base_price: z.number().optional().nullable(),
         offer_price: z.number().optional().nullable(),
+        stock_available: z.number().int().min(0).optional(),
         is_active: z.boolean().optional(),
       }),
     )
