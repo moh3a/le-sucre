@@ -1,6 +1,7 @@
 import "server-only";
 import type { z } from "zod";
-import { NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { PROMOTION_ERROR } from "../constants/error-codes";
 import { promotion_repository } from "../repositories/promotion.repository";
 import { promo_code_repository } from "../repositories/promo-code.repository";
 import { flash_sale_repository } from "../repositories/flash-sale.repository";
@@ -59,7 +60,7 @@ export class PromotionService {
 
   async update(input: z.infer<typeof update_promotion_dto>) {
     const existing = await promotion_repository.get_by_id(input.id);
-    if (!existing) throw new NotFoundError("Promotion introuvable");
+    if (!existing) throw_error(PROMOTION_ERROR.NOT_FOUND);
 
     const updated = await promotion_repository.update(input.id, {
       name: input.name,
@@ -97,7 +98,7 @@ export class PromotionService {
 
   async create_promo_code(input: z.infer<typeof create_promo_code_dto>) {
     const promo = await promotion_repository.get_by_id(input.promotion_id);
-    if (!promo) throw new NotFoundError("Promotion introuvable");
+    if (!promo) throw_error(PROMOTION_ERROR.NOT_FOUND);
 
     const row = await promo_code_repository.create({
       promotion_id: input.promotion_id,
@@ -120,7 +121,7 @@ export class PromotionService {
 
   async create_flash_sale(input: z.infer<typeof create_flash_sale_dto>) {
     const promo = await promotion_repository.get_by_id(input.promotion_id);
-    if (!promo) throw new NotFoundError("Promotion introuvable");
+    if (!promo) throw_error(PROMOTION_ERROR.NOT_FOUND);
 
     const sale = await flash_sale_repository.create_with_items({
       promotion_id: input.promotion_id,
@@ -149,7 +150,7 @@ export class PromotionService {
 
   async create_bundle(input: z.infer<typeof create_bundle_dto>) {
     const promo = await promotion_repository.get_by_id(input.promotion_id);
-    if (!promo) throw new NotFoundError("Promotion introuvable");
+    if (!promo) throw_error(PROMOTION_ERROR.NOT_FOUND);
 
     const bundle = await bundle_repository.create_with_items({
       promotion_id: input.promotion_id,

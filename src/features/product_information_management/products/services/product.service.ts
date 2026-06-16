@@ -2,8 +2,9 @@ import "server-only";
 
 import { z } from "zod";
 
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { PRODUCT_ERROR } from "../constants/error-codes";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { slugify_name } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 
@@ -30,11 +31,11 @@ export class ProductService {
   async create(input: z.infer<typeof create_product_dto>) {
     const slug = input.slug ?? slugify_name(input.name);
     if (await this.repo.find_by_slug(slug)) {
-      throw new ConflictError("Ce slug de produit existe déjà");
+      throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
     }
 
     const resolved_ids = await category_service.resolve_filter_ids(input.category_id, false);
-    if (!resolved_ids.length) throw new NotFoundError("Catégorie introuvable");
+    if (!resolved_ids.length) throw_error(PRODUCT_ERROR.CATEGORY_NOT_FOUND);
 
     const id = generate_id();
 
@@ -78,7 +79,7 @@ export class ProductService {
 
   async get_by_id(id: string) {
     const productData = await this.repo.find_by_id(id);
-    if (!productData) throw new NotFoundError("Produit introuvable");
+    if (!productData) throw_error(PRODUCT_ERROR.NOT_FOUND);
     const product = product_details_dto.parse(productData);
     const translations = await this.repo.list_translations(id);
     const mediaData = await this.repo.list_media(id);
@@ -88,7 +89,7 @@ export class ProductService {
 
   async get_by_slug(slug: string, locale = DEFAULT_LOCALE) {
     const product = await this.repo.find_by_slug(slug);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    if (!product) throw_error(PRODUCT_ERROR.NOT_FOUND);
     const translation =
       (await this.repo.get_translation(product.id, locale)) ??
       (await this.repo.get_translation(product.id, DEFAULT_LOCALE));
@@ -98,15 +99,15 @@ export class ProductService {
 
   async update(input: z.infer<typeof update_product_dto>) {
     const current = await this.repo.find_by_id(input.id);
-    if (!current) throw new NotFoundError("Produit introuvable");
+    if (!current) throw_error(PRODUCT_ERROR.NOT_FOUND);
 
     if (input.slug && input.slug !== current.slug && (await this.repo.find_by_slug(input.slug))) {
-      throw new ConflictError("Ce slug de produit existe déjà");
+      throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
     }
 
     if (input.category_id) {
       const resolved = await category_service.resolve_filter_ids(input.category_id, false);
-      if (!resolved.length) throw new NotFoundError("Catégorie introuvable");
+      if (!resolved.length) throw_error(PRODUCT_ERROR.CATEGORY_NOT_FOUND);
     }
 
     await this.repo.update(input.id, {
@@ -174,7 +175,7 @@ export class ProductService {
 
   async remove(id: string) {
     const current = await this.repo.find_by_id(id);
-    if (!current) throw new NotFoundError("Produit introuvable");
+    if (!current) throw_error(PRODUCT_ERROR.NOT_FOUND);
     await this.repo.delete(id);
 
     void invalidate_catalog_cache();

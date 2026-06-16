@@ -1,6 +1,7 @@
 import "server-only";
 import type { z } from "zod";
-import { NotFoundError, ValidationError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { CAMPAIGN_ERROR } from "../constants/error-codes";
 import { slugify } from "@/lib/utils";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { campaign_repository } from "../repositories/campaign.repository";
@@ -36,7 +37,7 @@ export class CampaignService {
 
   async get_by_id(id: string) {
     const campaign = await campaign_repository.get_full(id);
-    if (!campaign) throw new NotFoundError("Campagne introuvable");
+    if (!campaign) throw_error(CAMPAIGN_ERROR.NOT_FOUND);
     return campaign;
   }
 
@@ -46,7 +47,7 @@ export class CampaignService {
     const slug = input.slug ?? slugify(input.name);
 
     const existing = await campaign_repository.get_by_slug(slug);
-    if (existing) throw new ValidationError("Ce slug est déjà utilisé");
+    if (existing) throw_error(CAMPAIGN_ERROR.SLUG_CONFLICT);
 
     const campaign = await campaign_repository.create({
       ...input,
@@ -81,12 +82,12 @@ export class CampaignService {
 
   async update(input: z.infer<typeof update_campaign_dto>) {
     const existing = await campaign_repository.get_by_id(input.id);
-    if (!existing) throw new NotFoundError("Campagne introuvable");
+    if (!existing) throw_error(CAMPAIGN_ERROR.NOT_FOUND);
 
     if (input.slug && input.slug !== existing.slug) {
       const conflict = await campaign_repository.get_by_slug(input.slug);
       if (conflict && conflict.id !== input.id) {
-        throw new ValidationError("Ce slug est déjà utilisé");
+        throw_error(CAMPAIGN_ERROR.SLUG_CONFLICT);
       }
     }
 
@@ -139,7 +140,7 @@ export class CampaignService {
 
   async set_status(input: z.infer<typeof set_campaign_status_dto>) {
     const existing = await campaign_repository.get_by_id(input.id);
-    if (!existing) throw new NotFoundError("Campagne introuvable");
+    if (!existing) throw_error(CAMPAIGN_ERROR.NOT_FOUND);
 
     this._validate_transition(existing.status, input.status);
 
@@ -165,7 +166,7 @@ export class CampaignService {
       cancelled: [],
     };
     if (!allowed[from]?.includes(to)) {
-      throw new ValidationError(`Transition de statut invalide: ${from} → ${to}`);
+      throw_error(CAMPAIGN_ERROR.DATE_RANGE_INVALID, { from, to });
     }
   }
 
@@ -173,7 +174,7 @@ export class CampaignService {
 
   async add_banner(input: z.infer<typeof add_banner_dto>) {
     const campaign = await campaign_repository.get_by_id(input.campaign_id);
-    if (!campaign) throw new NotFoundError("Campagne introuvable");
+    if (!campaign) throw_error(CAMPAIGN_ERROR.NOT_FOUND);
 
     const { campaign_id, ...banner_data } = input;
     const banner = await campaign_repository.add_banner(
@@ -190,7 +191,7 @@ export class CampaignService {
       id,
       data as Parameters<typeof campaign_repository.update_banner>[1],
     );
-    if (!banner) throw new NotFoundError("Bannière introuvable");
+    if (!banner) throw_error(CAMPAIGN_ERROR.BANNER_NOT_FOUND);
     await campaign_cache.invalidate_all_sections();
     return banner;
   }
@@ -209,7 +210,7 @@ export class CampaignService {
 
   async add_section(input: z.infer<typeof add_section_dto>) {
     const campaign = await campaign_repository.get_by_id(input.campaign_id);
-    if (!campaign) throw new NotFoundError("Campagne introuvable");
+    if (!campaign) throw_error(CAMPAIGN_ERROR.NOT_FOUND);
 
     const { campaign_id, ...section_data } = input;
     const section = await campaign_repository.add_section(
@@ -226,7 +227,7 @@ export class CampaignService {
       id,
       data as Parameters<typeof campaign_repository.update_section>[1],
     );
-    if (!section) throw new NotFoundError("Section introuvable");
+    if (!section) throw_error(CAMPAIGN_ERROR.SECTION_NOT_FOUND);
     await campaign_cache.invalidate_all_sections();
     return section;
   }

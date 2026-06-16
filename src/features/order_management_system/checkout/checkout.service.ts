@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { NotFoundError, ValidationError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { CHECKOUT_ERROR } from "./constants/error-codes";
 import { carts, cart_items } from "../schema";
 import { checkout_engine } from "./checkout.engine";
 import { order_service } from "../orders/services/order.service";
@@ -19,14 +20,14 @@ export class CheckoutService {
     },
   ) {
     const [cart] = await db.select().from(carts).where(eq(carts.id, input.cart_id)).limit(1);
-    if (!cart) throw new NotFoundError("Panier introuvable");
+    if (!cart) throw_error(CHECKOUT_ERROR.CART_NOT_FOUND);
 
     if (input.user_id && cart.user_id && cart.user_id !== input.user_id) {
-      throw new ValidationError("Ce panier n'appartient pas à cet utilisateur");
+      throw_error(CHECKOUT_ERROR.ITEMS_UNAVAILABLE);
     }
 
     const items = await db.select().from(cart_items).where(eq(cart_items.cart_id, input.cart_id));
-    if (!items.length) throw new ValidationError("Panier vide");
+    if (!items.length) throw_error(CHECKOUT_ERROR.CART_EMPTY);
 
     const lines = items.map((i) => ({
       sku_id: i.sku_id,

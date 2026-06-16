@@ -1,7 +1,8 @@
 import "server-only";
 import type { z } from "zod";
 import { generate_id } from "@/lib/utils";
-import { NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { MODERATION_ERROR } from "../constants/error-codes";
 import type { moderate_review_dto } from "../models/review.dto";
 import { review_repository } from "../repositories/review.repository";
 import { review_cache_service } from "./review-cache.service";
@@ -13,7 +14,7 @@ import { format } from "date-fns";
 export class ModerationService {
   async moderate(actor_user_id: string, input: z.infer<typeof moderate_review_dto>) {
     const review = await review_repository.find_by_id(input.review_id);
-    if (!review) throw new NotFoundError("Avis introuvable");
+    if (!review) throw_error(MODERATION_ERROR.REVIEW_NOT_FOUND);
 
     const now = format(new Date(), "yyyy-MM-dd HH:mm:ss");
     await review_repository.update(review.id, {

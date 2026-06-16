@@ -4,8 +4,9 @@ import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { SKU_ERROR, VARIANT_ERROR } from "../constants/error-codes";
 import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 import { products } from "@/features/product_information_management/products/schema";
 import { product_properties } from "../schema";
@@ -89,7 +90,7 @@ export class SkuService {
 
   async list_by_product(product_id: string) {
     const product = await this.skus.get_product(product_id);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    if (!product) throw_error(SKU_ERROR.PRODUCT_HAS_NO_VARIANTS);
 
     const rows = await this.skus.list_with_option_labels(product_id);
     return { product_id, items: group_sku_rows(rows) };
@@ -97,7 +98,7 @@ export class SkuService {
 
   async get_by_id(id: string) {
     const sku = await this.skus.find_by_id(id);
-    if (!sku) throw new NotFoundError("SKU introuvable");
+    if (!sku) throw_error(SKU_ERROR.NOT_FOUND);
 
     const tiers = await pricing_repository.list_sku_price_tiers(id);
     const wholesale_sku = await pricing_repository.list_wholesale_rules_for_sku(id);
@@ -110,16 +111,16 @@ export class SkuService {
 
   async create(input: z.infer<typeof create_sku_dto>) {
     const product = await this.skus.get_product(input.product_id);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    if (!product) throw_error(SKU_ERROR.PRODUCT_HAS_NO_VARIANTS);
 
     const values = await this.properties.get_values_by_ids(input.property_value_ids);
     if (values.length !== input.property_value_ids.length) {
-      throw new NotFoundError("Une ou plusieurs valeurs de propriété sont introuvables");
+      throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
     }
 
     const property_ids = new Set(values.map((v) => v.property_id));
     if (property_ids.size !== values.length) {
-      throw new ConflictError("Une seule valeur par propriété est requise");
+      throw_error(SKU_ERROR.CODE_CONFLICT);
     }
 
     const props = await db
@@ -131,13 +132,13 @@ export class SkuService {
 
     const pairs = values.map((v) => {
       const p = prop_by_id.get(v.property_id);
-      if (!p) throw new ConflictError("Valeur de propriété invalide pour ce produit");
+      if (!p) throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
       return { property_code: p.code, value_code: v.code };
     });
 
     const signature = build_option_signature(pairs);
     const existing = await this.skus.find_by_signature(input.product_id, signature);
-    if (existing) throw new ConflictError("Cette combinaison existe déjà");
+    if (existing) throw_error(SKU_ERROR.CODE_CONFLICT);
 
     const sku_code = input.sku_code || build_sku_code(product.sku, signature);
 
@@ -163,7 +164,7 @@ export class SkuService {
 
   async update(input: z.infer<typeof update_sku_dto>) {
     const current = await this.skus.find_by_id(input.id);
-    if (!current) throw new NotFoundError("SKU introuvable");
+    if (!current) throw_error(SKU_ERROR.NOT_FOUND);
 
     await this.skus.update_sku(input.id, {
       ...(input.sku_code !== undefined && { sku_code: input.sku_code }),
@@ -194,7 +195,7 @@ export class SkuService {
 
   async set_price_tier(input: z.infer<typeof set_sku_price_tier_dto>) {
     const sku = await this.skus.find_by_id(input.sku_id);
-    if (!sku) throw new NotFoundError("SKU introuvable");
+    if (!sku) throw_error(SKU_ERROR.NOT_FOUND);
 
     await pricing_repository.upsert_sku_price_tier({
       sku_id: input.sku_id,

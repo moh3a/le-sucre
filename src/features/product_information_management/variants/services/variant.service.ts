@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { VARIANT_ERROR } from "../constants/error-codes";
 import { products } from "@/features/product_information_management/products/schema";
 
 import type {
@@ -25,7 +26,7 @@ export class VariantService {
       .where(eq(products.id, product_id))
       .limit(1)
       .then((r) => r[0] ?? null);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    if (!product) throw_error(VARIANT_ERROR.PRODUCT_NOT_FOUND);
     return product;
   }
 
@@ -58,7 +59,7 @@ export class VariantService {
 
   async update_property(input: z.infer<typeof update_property_dto>) {
     const current = await this.properties.get_property(input.id);
-    if (!current) throw new NotFoundError("Propriété introuvable");
+    if (!current) throw_error(VARIANT_ERROR.NOT_FOUND);
     return this.properties.update_property(input.id, input);
   }
 
@@ -68,7 +69,7 @@ export class VariantService {
 
   async create_property_value(input: z.infer<typeof create_property_value_dto>) {
     const property = await this.properties.get_property(input.property_id);
-    if (!property) throw new NotFoundError("Propriété introuvable");
+    if (!property) throw_error(VARIANT_ERROR.NOT_FOUND);
     return this.properties.create_value({
       property_id: input.property_id,
       code: input.code,

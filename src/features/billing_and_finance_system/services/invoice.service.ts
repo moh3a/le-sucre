@@ -6,7 +6,8 @@ import { pdf_generation_service } from "./pdf_generation.service";
 import { email_service } from "./email.service";
 import { generate_sequential_number } from "../helpers/number_generator";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
-import { NotFoundError, ValidationError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { INVOICE_ERROR } from "../constants/error-codes";
 
 export class InvoiceService {
   constructor(
@@ -20,7 +21,7 @@ export class InvoiceService {
   async generate_order_invoice(order_id: string) {
     const full_order = await this.order_repo.get_full(order_id);
     if (!full_order) {
-      throw new NotFoundError("Commande introuvable");
+      throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
     }
 
     const { order, items } = full_order;
@@ -89,7 +90,7 @@ export class InvoiceService {
     const invoice = await this.repo.find_by_id(invoice_id);
 
     if (!invoice) {
-      throw new Error("Erreur lors de la création de la facture");
+      throw_error(INVOICE_ERROR.NUMBER_GENERATION_FAILED);
     }
 
     // Generate PDF and deliver via email background worker trigger
@@ -131,7 +132,7 @@ export class InvoiceService {
     const { order_id, refund_items, notes } = params;
     const full_order = await this.order_repo.get_full(order_id);
     if (!full_order) {
-      throw new NotFoundError("Commande introuvable");
+      throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
     }
 
     const { order, items } = full_order;
@@ -141,9 +142,7 @@ export class InvoiceService {
     const list_items = refund_items.map((ri) => {
       const match = items.find((oi) => oi.sku_id === ri.sku_id);
       if (!match) {
-        throw new ValidationError(
-          `L'article SKU ${ri.sku_id} ne fait pas partie de cette commande`,
-        );
+        throw_error(INVOICE_ERROR.ITEM_NOT_IN_ORDER, { sku_id: ri.sku_id });
       }
       return {
         unit_price: ri.amount,
@@ -211,7 +210,7 @@ export class InvoiceService {
     const { order_id, amount, notes } = params;
     const full_order = await this.order_repo.get_full(order_id);
     if (!full_order) {
-      throw new NotFoundError("Commande introuvable");
+      throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
     }
 
     const { order } = full_order;
@@ -271,7 +270,7 @@ export class InvoiceService {
   async mark_as_paid(invoice_id: string) {
     const invoice = await this.repo.find_by_id(invoice_id);
     if (!invoice) {
-      throw new NotFoundError("Facture introuvable");
+      throw_error(INVOICE_ERROR.NOT_FOUND);
     }
     const now_str = new Date().toISOString().slice(0, 19).replace("T", " ");
     await this.repo.update_status(invoice_id, "paid", now_str);
@@ -281,7 +280,7 @@ export class InvoiceService {
   async void_invoice(invoice_id: string) {
     const invoice = await this.repo.find_by_id(invoice_id);
     if (!invoice) {
-      throw new NotFoundError("Facture introuvable");
+      throw_error(INVOICE_ERROR.NOT_FOUND);
     }
     await this.repo.update_status(invoice_id, "void");
     return this.repo.find_by_id(invoice_id);

@@ -2,7 +2,8 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { CART_ERROR } from "./constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
@@ -68,7 +69,7 @@ export class CartService {
       .from(product_skus)
       .where(eq(product_skus.id, input.sku_id))
       .limit(1);
-    if (!sku || !sku.is_active) throw new NotFoundError("SKU introuvable");
+    if (!sku || !sku.is_active) throw_error(CART_ERROR.SKU_NOT_FOUND);
 
     const price = await resolve_unit_price({
       sku_id: sku.id,
@@ -108,7 +109,7 @@ export class CartService {
       preorder_allocation_id = alloc.id;
       fulfillment_type = availability.fulfillment_type!;
     } else {
-      throw new ConflictError("Produit indisponible");
+      throw_error(CART_ERROR.SKU_OUT_OF_STOCK);
     }
 
     await this.repo.insert_item({
@@ -136,7 +137,7 @@ export class CartService {
 
   async update_quantity(cart_id: string, item_id: string, input: { quantity: number }) {
     const item = await this.repo.find_item_by_id(item_id, cart_id);
-    if (!item) throw new NotFoundError("Ligne panier introuvable");
+    if (!item) throw_error(CART_ERROR.ITEM_NOT_FOUND);
     if (item.reservation_id) await reservation_service.release(item.reservation_id);
     if (item.preorder_allocation_id) {
       await preorder_allocation_service.cancel(item.preorder_allocation_id);
@@ -164,7 +165,7 @@ export class CartService {
       preorder_allocation_id = alloc.id;
       fulfillment_type = availability.fulfillment_type!;
     } else {
-      throw new ConflictError("Produit indisponible");
+      throw_error(CART_ERROR.SKU_OUT_OF_STOCK);
     }
     await this.repo.update_item(item_id, {
       quantity: input.quantity,

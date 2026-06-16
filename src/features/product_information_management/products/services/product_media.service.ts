@@ -3,8 +3,9 @@ import "server-only";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
-import { NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { PRODUCT_ERROR } from "../constants/error-codes";
 import { build_product_media_key, build_public_media_url, media_config } from "@/config/media";
 
 import type { product_media_dto } from "../models/product.dto";
@@ -22,7 +23,7 @@ export class ProductMediaService {
 
   async assert_product_exists(product_id: string) {
     const product = await this.repo.find_by_id(product_id);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    if (!product) throw_error(PRODUCT_ERROR.NOT_FOUND);
     return product;
   }
 

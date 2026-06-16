@@ -1,5 +1,6 @@
 import "server-only";
-import { NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { CUSTOMER_ERROR } from "../constants/error-codes";
 import { customer_repository } from "../repositories/customer.repository";
 
 // Segmentation thresholds
@@ -26,7 +27,7 @@ export class CustomerService {
 
   async get(user_id: string) {
     const customer = await customer_repository.find_by_id(user_id);
-    if (!customer) throw new NotFoundError("Client introuvable");
+    if (!customer) throw_error(CUSTOMER_ERROR.NOT_FOUND);
     return {
       ...customer,
       segment: segment(customer.total_spent, customer.total_orders),

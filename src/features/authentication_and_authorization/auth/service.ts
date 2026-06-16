@@ -3,7 +3,9 @@ import "server-only";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
-import { AuthenticationError, ForbiddenError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { AUTH_ERROR } from "./constants/error-codes";
+import { AUTHORIZATION_ERROR } from "@/features/authentication_and_authorization/authorization/constants/error-codes";
 import {
   ROLE_NAMES,
   type RoleName,
@@ -16,7 +18,7 @@ import { user_repository } from "./repositories/user.repository";
 export class AuthService {
   async get_session() {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user) throw new AuthenticationError();
+    if (!session?.user) throw_error(AUTH_ERROR.SESSION_REQUIRED);
     return session;
   }
 
@@ -51,7 +53,7 @@ export class AuthService {
     try {
       await authorizationService.assert_admin_console(user_id);
     } catch {
-      throw new ForbiddenError("Vous n'avez pas accès à la console");
+      throw_error(AUTHORIZATION_ERROR.CONSOLE_ACCESS_REQUIRED);
     }
   }
 

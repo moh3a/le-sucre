@@ -30,7 +30,8 @@ import { reservation_service } from "@/features/inventory_management_system/inve
 import { invoice_service } from "@/features/billing_and_finance_system/services/invoice.service";
 import { order_items, orders } from "../schema";
 import { db } from "@/lib/db";
-import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { ORDER_ERROR } from "../constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
@@ -45,10 +46,10 @@ export class OrderService {
     if (existing) return this.repo.get_full(existing.id);
 
     const [cart] = await db.select().from(carts).where(eq(carts.id, input.cart_id)).limit(1);
-    if (!cart || cart.status !== "active") throw new NotFoundError("Panier introuvable ou inactif");
+    if (!cart || cart.status !== "active") throw_error(ORDER_ERROR.CART_NOT_FOUND);
 
     const items = await db.select().from(cart_items).where(eq(cart_items.cart_id, input.cart_id));
-    if (!items.length) throw new ValidationError("Panier vide");
+    if (!items.length) throw_error(ORDER_ERROR.INSUFFICIENT_STOCK);
 
     const lines = items.map((i) => ({
       sku_id: i.sku_id,
@@ -280,16 +281,16 @@ export class OrderService {
 
   async get_customer_detail(order_id: string, user_id: string) {
     const data = await this.repo.get_full(order_id);
-    if (!data) throw new NotFoundError("Commande introuvable");
-    if (data.order.user_id !== user_id) throw new ForbiddenError("Accès refusé");
+    if (!data) throw_error(ORDER_ERROR.NOT_FOUND);
+    if (data.order.user_id !== user_id) throw_error(ORDER_ERROR.GUEST_ACCESS_DENIED);
     return data;
   }
 
   async get_guest_detail(order_id: string, guest_phone: string) {
     const data = await this.repo.get_full(order_id);
-    if (!data) throw new NotFoundError("Commande introuvable");
+    if (!data) throw_error(ORDER_ERROR.NOT_FOUND);
     if (!data.order.guest_phone || data.order.guest_phone !== guest_phone) {
-      throw new ForbiddenError("Accès refusé");
+      throw_error(ORDER_ERROR.GUEST_ACCESS_DENIED);
     }
     return data;
   }
@@ -300,7 +301,7 @@ export class OrderService {
 
   async admin_get(order_id: string) {
     const data = await this.repo.get_full(order_id);
-    if (!data) throw new NotFoundError("Commande introuvable");
+    if (!data) throw_error(ORDER_ERROR.NOT_FOUND);
     return data;
   }
 
@@ -308,7 +309,7 @@ export class OrderService {
     input: z.infer<typeof admin_update_order_status_dto> & { actor_user_id: string },
   ) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
     await this.repo.update_order_status(input.order_id, input.status, {
       ...(input.status === "cancelled"
@@ -339,7 +340,7 @@ export class OrderService {
     actor_user_id: string;
   }) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
     const old_operator_id = current.assigned_operator_id;
     if (old_operator_id !== input.operator_id) {
@@ -395,7 +396,7 @@ export class OrderService {
     actor_user_id: string;
   }) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
     const old_delivery_id = current.assigned_delivery_person_id;
     if (old_delivery_id !== input.delivery_person_id) {
@@ -447,7 +448,7 @@ export class OrderService {
 
   async update_notes(input: { order_id: string; notes: string | null; actor_user_id: string }) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
     await this.repo.update_notes(input.order_id, input.notes);
 
@@ -472,7 +473,7 @@ export class OrderService {
 
   async admin_create(input: z.infer<typeof admin_create_order_dto>) {
     const cart = await cart_service.get_or_create_cart({ user_id: input.user_id });
-    if (!cart) throw new NotFoundError("Impossible de créer un panier");
+    if (!cart) throw_error(ORDER_ERROR.CART_NOT_FOUND);
 
     for (const item of input.items) {
       await cart_service.add_item(cart.id, { sku_id: item.sku_id, quantity: item.quantity });
@@ -496,7 +497,7 @@ export class OrderService {
     input: z.infer<typeof update_order_payment_dto> & { actor_user_id: string },
   ) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
     const changes: string[] = [];
     if (input.payment_status && input.payment_status !== current.payment_status) {
@@ -560,9 +561,9 @@ export class OrderService {
     input: z.infer<typeof update_order_items_dto> & { actor_user_id: string },
   ) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
     if (current.status === "cancelled" || current.status === "refunded") {
-      throw new ValidationError("Impossible de modifier les articles d'une commande annulée ou remboursée");
+      throw_error(ORDER_ERROR.ALREADY_CANCELLED);
     }
 
     const enriched_items = await Promise.all(
@@ -573,7 +574,7 @@ export class OrderService {
           .where(eq(product_skus.id, line.sku_id))
           .limit(1);
 
-        if (!sku) throw new NotFoundError(`SKU ${line.sku_id} introuvable`);
+        if (!sku) throw_error(ORDER_ERROR.INSUFFICIENT_STOCK, { sku_id: line.sku_id });
 
         const [tr] = await db
           .select({ name: product_translations.name })
@@ -661,7 +662,7 @@ export class OrderService {
     input: z.infer<typeof update_order_shipping_dto> & { actor_user_id: string },
   ) {
     const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw new NotFoundError("Commande introuvable");
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
 
     await this.repo.update_shipping_address(
       input.order_id,

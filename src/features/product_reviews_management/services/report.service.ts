@@ -4,7 +4,8 @@ import { eq, sql } from "drizzle-orm";
 import z from "zod";
 
 import { generate_id } from "@/lib/utils";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { REPORT_ERROR } from "../constants/error-codes";
 import type { report_review_dto } from "../models/review.dto";
 import { review_repository } from "../repositories/review.repository";
 import { product_reviews } from "../schema";
@@ -14,9 +15,9 @@ import { audit_service } from "@/features/authentication_and_authorization/autho
 export class ReportService {
   async report(user_id: string, input: z.infer<typeof report_review_dto>) {
     const review = await review_repository.find_by_id(input.review_id);
-    if (!review) throw new NotFoundError("Avis introuvable");
+    if (!review) throw_error(REPORT_ERROR.REVIEW_NOT_FOUND);
     if (review.user_id === user_id)
-      throw new ConflictError("Impossible de signaler votre propre avis");
+      throw_error(REPORT_ERROR.REASON_INVALID);
 
     try {
       await review_repository.create_report({
@@ -32,7 +33,7 @@ export class ReportService {
         .set({ report_count: sql`${product_reviews.report_count} + 1` })
         .where(eq(product_reviews.id, input.review_id));
     } catch {
-      throw new ConflictError("Signalement déjà envoyé");
+      throw_error(REPORT_ERROR.ALREADY_EXISTS);
     }
 
     void audit_service.log({

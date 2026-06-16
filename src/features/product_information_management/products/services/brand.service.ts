@@ -2,8 +2,9 @@ import "server-only";
 
 import type { z } from "zod";
 
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { PRODUCT_ERROR, BRAND_ERROR } from "../constants/error-codes";
 import { slugify_name } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 
 import type { create_brand_dto, update_brand_dto } from "../models/brand.dto";
@@ -16,7 +17,7 @@ export class BrandService {
   async create(input: z.infer<typeof create_brand_dto>) {
     const slug = input.slug ?? slugify_name(input.name);
     if (await this.repo.find_by_slug(slug)) {
-      throw new ConflictError("Ce slug de marque existe déjà");
+      throw_error(BRAND_ERROR.SLUG_CONFLICT);
     }
     const id = generate_id();
     await this.repo.create({
@@ -38,9 +39,9 @@ export class BrandService {
 
   async update(input: z.infer<typeof update_brand_dto>) {
     const current = await this.repo.find_by_id(input.id);
-    if (!current) throw new NotFoundError("Marque introuvable");
+    if (!current) throw_error(BRAND_ERROR.NOT_FOUND);
     if (input.slug && input.slug !== current.slug && (await this.repo.find_by_slug(input.slug))) {
-      throw new ConflictError("Ce slug de marque existe déjà");
+      throw_error(BRAND_ERROR.SLUG_CONFLICT);
     }
     await this.repo.update(input.id, {
       ...(input.name !== undefined && { name: input.name }),
@@ -68,13 +69,13 @@ export class BrandService {
 
   async get_by_id(id: string) {
     const brand = await this.repo.find_by_id(id);
-    if (!brand) throw new NotFoundError("Marque introuvable");
+    if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
     return brand;
   }
 
   async remove(id: string) {
     const brand = await this.repo.find_by_id(id);
-    if (!brand) throw new NotFoundError("Marque introuvable");
+    if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
     await this.repo.delete(id);
     void audit_service.log({
       action: "brand.create",

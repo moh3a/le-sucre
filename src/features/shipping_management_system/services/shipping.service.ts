@@ -1,7 +1,8 @@
 import "server-only";
 
 import { generate_id } from "@/lib/utils";
-import { NotFoundError, ConflictError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { SHIPPING_ERROR } from "../constants/error-codes";
 import { shipping_repository } from "../repository";
 import { get_shipping_provider } from "../providers/provider-registry";
 import type { ShippingProviderName } from "../providers/contracts";
@@ -28,10 +29,10 @@ export class ShippingService {
     weight_kg: number;
   }) {
     const order = await this.repo.get_order(input.order_id);
-    if (!order) throw new NotFoundError("Commande introuvable");
+    if (!order) throw_error(SHIPPING_ERROR.ORDER_NOT_FOUND);
 
     const exists = await this.repo.find_shipment_by_order(input.order_id);
-    if (exists) throw new ConflictError("Expédition déjà créée pour cette commande");
+    if (exists) throw_error(SHIPPING_ERROR.ALREADY_EXISTS);
 
     const shipping_address = order.shipping_address as Record<string, unknown>;
     const provider = get_shipping_provider(input.provider);
@@ -85,8 +86,8 @@ export class ShippingService {
 
   async sync_tracking(shipment_id: string) {
     const shipment = await this.repo.find_shipment(shipment_id);
-    if (!shipment) throw new NotFoundError("Expédition introuvable");
-    if (!shipment.tracking_number) throw new ConflictError("Numéro de suivi manquant");
+    if (!shipment) throw_error(SHIPPING_ERROR.SHIPMENT_NOT_FOUND);
+    if (!shipment.tracking_number) throw_error(SHIPPING_ERROR.TRACKING_MISSING);
 
     const provider = get_shipping_provider(shipment.provider as ShippingProviderName);
     const tracking = await provider.get_tracking(shipment.tracking_number);
@@ -117,14 +118,14 @@ export class ShippingService {
 
   async get_shipment_detail(shipment_id: string) {
     const shipment = await this.repo.find_shipment(shipment_id);
-    if (!shipment) throw new NotFoundError("Expédition introuvable");
+    if (!shipment) throw_error(SHIPPING_ERROR.SHIPMENT_NOT_FOUND);
     const events = await this.repo.get_tracking_events(shipment_id);
     return { shipment, tracking_events: events };
   }
 
   async tracking_by_order(order_id: string) {
     const shipment = await this.repo.find_shipment_by_order(order_id);
-    if (!shipment) throw new NotFoundError("Aucune expédition");
+    if (!shipment) throw_error(SHIPPING_ERROR.NO_SHIPMENT_FOR_ORDER);
     return this.get_shipment_detail(shipment.id);
   }
 }

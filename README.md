@@ -2,7 +2,6 @@
 
 ## TODO
 
-- error -follow inventory service- error codes should unique to each feature
 - continue Prompt 16 — Campaign Management System
 - customer call history
 - failed delivery handling

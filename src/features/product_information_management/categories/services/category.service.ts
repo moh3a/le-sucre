@@ -11,7 +11,8 @@ import {
 } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 import { create_category_dto, update_category_dto } from "../models/category.dto";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { CATEGORY_ERROR } from "../constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
@@ -51,7 +52,7 @@ export class CategoryService {
 
   async create(input: z.infer<typeof create_category_dto>) {
     const slug = input.slug ?? slugify_name(input.name);
-    if (await this.repo.find_by_slug(slug)) throw new ConflictError("Ce slug existe déjà");
+    if (await this.repo.find_by_slug(slug)) throw_error(CATEGORY_ERROR.SLUG_CONFLICT);
 
     const { parent_path, depth } = await this.tree.assert_parent_valid(input.parent_id ?? null);
     const id = generate_id();
@@ -82,10 +83,10 @@ export class CategoryService {
 
   async update(input: z.infer<typeof update_category_dto>) {
     const current = await this.repo.find_by_id(input.id);
-    if (!current) throw new NotFoundError("Catégorie introuvable");
+    if (!current) throw_error(CATEGORY_ERROR.NOT_FOUND);
 
     if (input.slug && input.slug !== current.slug && (await this.repo.find_by_slug(input.slug))) {
-      throw new ConflictError("Ce slug existe déjà");
+      throw_error(CATEGORY_ERROR.SLUG_CONFLICT);
     }
 
     await this.repo.update(input.id, {
@@ -110,7 +111,7 @@ export class CategoryService {
 
   async move(id: string, new_parent_id: string | null) {
     const node = await this.repo.find_by_id(id);
-    if (!node) throw new NotFoundError("Catégorie introuvable");
+    if (!node) throw_error(CATEGORY_ERROR.NOT_FOUND);
 
     const { parent_path, depth } = await this.tree.assert_parent_valid(new_parent_id, id);
     const new_path = build_path(parent_path, id);
@@ -127,11 +128,11 @@ export class CategoryService {
 
   async remove(id: string) {
     const node = await this.repo.find_by_id(id);
-    if (!node) throw new NotFoundError("Catégorie introuvable");
+    if (!node) throw_error(CATEGORY_ERROR.NOT_FOUND);
 
     const [{ total }] = await this.repo.count_direct_children(id);
     if (Number(total) > 0)
-      throw new ConflictError("Supprimez ou déplacez les sous-catégories d'abord");
+      throw_error(CATEGORY_ERROR.HAS_CHILDREN);
 
     await this.repo.delete(id);
     await this.cache.invalidate_all();

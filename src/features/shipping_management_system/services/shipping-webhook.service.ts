@@ -1,5 +1,7 @@
 import "server-only";
 
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { SHIPPING_ERROR } from "../constants/error-codes";
 import { shipping_repository } from "../repository";
 import { get_shipping_provider } from "../providers/provider-registry";
 import { shipping_service } from "./shipping.service";
@@ -10,7 +12,7 @@ export class ShippingWebhookService {
 
     if (adapter.verify_webhook) {
       const ok = await adapter.verify_webhook(headers, raw_body);
-      if (!ok) throw new Error("Invalid webhook signature");
+      if (!ok) throw_error(SHIPPING_ERROR.WEBHOOK_INVALID_SIGNATURE);
     }
 
     const payload = JSON.parse(raw_body || "{}");

@@ -2,7 +2,8 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import { ConflictError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { PREORDER_ERROR } from "../constants/error-codes";
 import { preorder_allocations } from "../schema";
 import { preorder_repository } from "../repositories/preorder.repository";
 import { PREORDER_ALLOCATION_STATUS } from "../constants/preorder-status";
@@ -18,12 +19,12 @@ export class PreorderAllocationService {
     return db.transaction(async (tx) => {
       const settings = await preorder_repository.get_settings_for_update(tx, input.sku_id);
       if (!settings?.is_preorder_enabled && !settings?.allow_backorder) {
-        throw new ConflictError("Précommande non disponible");
+        throw_error(PREORDER_ERROR.ALLOCATION_NOT_FOUND);
       }
 
       if (settings.is_preorder_enabled && settings.max_preorder_qty != null) {
         const next = settings.preorder_sold + input.quantity;
-        if (next > settings.max_preorder_qty) throw new ConflictError("Quota précommande atteint");
+        if (next > settings.max_preorder_qty) throw_error(PREORDER_ERROR.ALLOCATION_EXPIRED);
         await preorder_repository.increment_preorder_sold(tx, input.sku_id, input.quantity);
       }
 

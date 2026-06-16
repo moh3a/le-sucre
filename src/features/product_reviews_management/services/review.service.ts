@@ -2,7 +2,8 @@ import "server-only";
 import type { z } from "zod";
 import { createHash } from "node:crypto";
 import { generate_id } from "@/lib/utils";
-import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { REVIEW_ERROR } from "../constants/error-codes";
 import { products } from "@/features/product_information_management/products/schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
@@ -76,10 +77,10 @@ export class ReviewService {
       .from(products)
       .where(eq(products.id, input.product_id))
       .limit(1);
-    if (!product) throw new NotFoundError("Produit introuvable");
+    if (!product) throw_error(REVIEW_ERROR.PRODUCT_NOT_FOUND);
 
     if (await review_repository.has_user_reviewed_product(user_id, input.product_id)) {
-      throw new ConflictError("Vous avez déjà laissé un avis pour ce produit");
+      throw_error(REVIEW_ERROR.ALREADY_EXISTS);
     }
 
     const ip_hash = ip ? createHash("sha256").update(ip).digest("hex") : null;
@@ -94,7 +95,7 @@ export class ReviewService {
 
     const is_verified = Boolean(purchase);
     if (input.order_id && !is_verified) {
-      throw new ForbiddenError("Achat vérifié requis pour lier cette commande");
+      throw_error(REVIEW_ERROR.PURCHASE_REQUIRED);
     }
 
     const content_hash = hash_text(`${input.title ?? ""}:${input.body}`);
