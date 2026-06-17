@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 import { trpc } from "@/components/providers/app-providers";
 import {
   AlertDialog,
@@ -33,7 +35,10 @@ export function DeletePropertyDialog({
     on_change?.();
   }
 
-  const delete_property = trpc.variants.deleteProperty.useMutation({ onSuccess: invalidate });
+  const delete_property = trpc.variants.deleteProperty.useMutation({
+    onSuccess: invalidate,
+    onError: (err) => toast.error(err.message),
+  });
 
   return (
     <AlertDialog>

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -6,6 +7,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { ImageIcon, Plus } from "lucide-react";
+import { toast } from "sonner";
+import {
+  ColorPicker,
+  ColorPickerArea,
+  ColorPickerContent,
+  ColorPickerHueSlider,
+  ColorPickerInput,
+  ColorPickerSwatch,
+  ColorPickerTrigger,
+} from "@/components/ui/color-picker";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -45,7 +56,10 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
 
   const create_property = trpc.variants.createProperty.useMutation({ onSuccess: invalidate });
   const create_value = trpc.variants.createPropertyValue.useMutation({ onSuccess: invalidate });
-  const delete_value = trpc.variants.deletePropertyValue.useMutation({ onSuccess: invalidate });
+  const delete_value = trpc.variants.deletePropertyValue.useMutation({
+    onSuccess: invalidate,
+    onError: (err) => toast.error(err.message),
+  });
 
   const property_form = useForm<PropertyFormValues>({
     resolver: zodResolver(create_property_dto),
@@ -256,25 +270,31 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           />
                         </Field>
                         <Field>
-                          <FieldLabel>Couleur (hex)</FieldLabel>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={get_value_defaults(property.id).color_hex ?? ""}
-                              onChange={(e) =>
-                                set_value_field(property.id, "color_hex", e.target.value || null)
-                              }
-                              placeholder="#FF0000"
-                            />
-                            {get_value_defaults(property.id).color_hex && (
-                              <span
-                                className="inline-block h-8 w-8 flex-shrink-0 rounded border"
-                                style={{
-                                  backgroundColor:
-                                    get_value_defaults(property.id).color_hex ?? undefined,
-                                }}
-                              />
-                            )}
-                          </div>
+                          <FieldLabel>Couleur</FieldLabel>
+                          <ColorPicker
+                            value={get_value_defaults(property.id).color_hex ?? undefined}
+                            onValueChange={(value) =>
+                              set_value_field(property.id, "color_hex", value)
+                            }
+                          >
+                            {/* <ColorPickerTrigger className="w-full justify-start gap-2">
+                              <ColorPickerSwatch className="size-6 rounded" />
+                              <span className="text-muted-foreground font-mono text-sm">
+                                {get_value_defaults(property.id).color_hex ?? "Choisir une couleur"}
+                              </span>
+                            </ColorPickerTrigger> */}
+                            <ColorPickerTrigger asChild>
+                              <Button variant="outline" className="flex items-center gap-2 px-3">
+                                <ColorPickerSwatch className="size-4" />
+                                {get_value_defaults(property.id).color_hex ?? "Choisir une couleur"}
+                              </Button>
+                            </ColorPickerTrigger>
+                            <ColorPickerContent>
+                              <ColorPickerArea />
+                              <ColorPickerHueSlider />
+                              <ColorPickerInput />
+                            </ColorPickerContent>
+                          </ColorPicker>
                         </Field>
                         <Field>
                           <FieldLabel>{t("property_sort")}</FieldLabel>

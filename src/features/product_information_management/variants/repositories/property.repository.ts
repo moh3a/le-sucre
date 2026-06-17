@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 
-import { product_properties, property_values } from "../schema";
+import { product_properties, property_values, sku_option_values } from "../schema";
 
 export class PropertyRepository {
   async list_properties(product_id: string) {
@@ -115,6 +115,15 @@ export class PropertyRepository {
   async delete_property(id: string) {
     const current = await this.get_property(id);
     if (!current) throw new NotFoundError("Propriété introuvable");
+
+    const values = await this.list_values(id);
+    const value_ids = values.map((v) => v.id);
+
+    if (value_ids.length > 0) {
+      await db.delete(sku_option_values).where(inArray(sku_option_values.property_value_id, value_ids));
+      await db.delete(property_values).where(eq(property_values.property_id, id));
+    }
+
     await db.delete(product_properties).where(eq(product_properties.id, id));
     return { ok: true };
   }
@@ -204,6 +213,8 @@ export class PropertyRepository {
   async delete_value(id: string) {
     const current = await this.get_value(id);
     if (!current) throw new NotFoundError("Valeur introuvable");
+
+    await db.delete(sku_option_values).where(eq(sku_option_values.property_value_id, id));
     await db.delete(property_values).where(eq(property_values.id, id));
     return { ok: true };
   }

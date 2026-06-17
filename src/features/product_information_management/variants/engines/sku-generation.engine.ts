@@ -11,22 +11,26 @@ import { cartesian_combinations } from "./variant-combination.engine";
 import { build_option_signature, build_sku_code } from "./option-signature.engine";
 import { and, eq, inArray } from "drizzle-orm";
 import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
+import { cart_items } from "@/features/order_management_system/carts/schema";
 
 const INSERT_CHUNK = 500;
 
 export class SkuGenerationEngine {
   async reset_skus_for_product(product_id: string) {
     const skus = await db
-      .select()
+      .select({ id: product_skus.id })
       .from(product_skus)
       .where(eq(product_skus.product_id, product_id));
-    for (const sku of skus) {
-      await Promise.all([
-        db.delete(product_skus).where(eq(product_skus.id, sku.id)),
-        db.delete(inventory_levels).where(eq(inventory_levels.sku_id, sku.id)),
-        db.delete(sku_option_values).where(eq(sku_option_values.sku_id, sku.id)),
-      ]);
+
+    const sku_ids = skus.map((s) => s.id);
+
+    if (sku_ids.length > 0) {
+      // cart_items.sku_id has onDelete: "restrict" — must be cleared first
+      await db.delete(cart_items).where(inArray(cart_items.sku_id, sku_ids));
     }
+
+    // Everything else (sku_option_values, inventory_levels, etc.) cascades
+    await db.delete(product_skus).where(eq(product_skus.product_id, product_id));
   }
 
   async generate_for_product(input: {

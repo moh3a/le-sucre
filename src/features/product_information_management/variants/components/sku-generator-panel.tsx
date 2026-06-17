@@ -45,7 +45,14 @@ export function SkuGeneratorPanel({ product_id, on_change }: SkuGeneratorPanelPr
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("section_generate")}</DialogTitle>
-          <DialogDescription>Generer les SKUs depuis les proprietes crees.</DialogDescription>
+          <DialogDescription>
+            Générer les SKUs depuis les propriétés créées.
+            <br />
+            <span className="text-destructive">
+              Attention&nbsp;: la régénération supprime les SKUs existants et vide les paniers
+              contenant ce produit.
+            </span>
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <Field>
