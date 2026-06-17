@@ -75,6 +75,8 @@ export class VariantService {
       code: input.code,
       label: input.label,
       sort_order: input.sort_order,
+      thumbnail_image: input.thumbnail_image ?? null,
+      color_hex: input.color_hex ?? null,
       metadata: input.metadata ?? {},
     });
   }
@@ -84,6 +86,8 @@ export class VariantService {
       ...(input.code !== undefined && { code: input.code }),
       ...(input.label !== undefined && { label: input.label }),
       ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
+      ...(input.thumbnail_image !== undefined && { thumbnail_image: input.thumbnail_image }),
+      ...(input.color_hex !== undefined && { color_hex: input.color_hex }),
       ...(input.metadata !== undefined && { metadata: input.metadata }),
     });
   }

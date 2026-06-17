@@ -56,6 +56,8 @@ function group_sku_rows(
         value_code: row.value_code,
         value_label: row.value_label,
         value_id: row.value_id,
+        thumbnail_image: row.thumbnail_image,
+        color_hex: row.color_hex,
       });
     }
   }

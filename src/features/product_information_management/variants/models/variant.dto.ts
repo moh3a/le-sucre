@@ -19,6 +19,8 @@ export const update_property_dto = create_property_dto.partial().extend({
   id: z.string().min(1).max(255),
 });
 
+export const color_hex_regex = /^#[0-9a-fA-F]{6}$/;
+
 export const create_property_value_dto = z.object({
   property_id: z.string().min(1).max(255),
   code: z
@@ -28,6 +30,8 @@ export const create_property_value_dto = z.object({
     .regex(/^[a-z0-9]+(?:_[a-z0-9]+)*$/),
   label: z.string().min(1).max(255),
   sort_order: z.number().int().min(0).default(0),
+  thumbnail_image: z.string().url().max(1024).optional().nullable(),
+  color_hex: z.string().regex(color_hex_regex, "Format hexadécimal invalide (#RRGGBB)").optional().nullable(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 

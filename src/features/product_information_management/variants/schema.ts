@@ -44,6 +44,8 @@ export const property_values = mysqlTable(
     code: varchar("code", { length: 64 }).notNull(), // "red"
     label: varchar("label", { length: 255 }).notNull(),
     sort_order: int("sort_order").notNull().default(0),
+    thumbnail_image: varchar("thumbnail_image", { length: 1024 }),
+    color_hex: varchar("color_hex", { length: 7 }),
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
   },
   (t) => [uniqueIndex("property_values_property_code_uidx").on(t.property_id, t.code)],

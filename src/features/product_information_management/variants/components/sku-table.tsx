@@ -282,7 +282,27 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
           const flat = flatten_options(row.original.options);
           const val = flat[prop.code];
           if (!val) return <span className="text-muted-foreground">—</span>;
-          return <Badge variant="outline">{val.label}</Badge>;
+          const option = row.original.options.find(
+            (o) => o.property_code === prop.code,
+          );
+          return (
+            <Badge variant="outline" className="gap-1.5">
+              {option?.color_hex ? (
+                <span
+                  className="inline-block h-3.5 w-3.5 flex-shrink-0 rounded-full border"
+                  style={{ backgroundColor: option.color_hex }}
+                  title={option.color_hex}
+                />
+              ) : option?.thumbnail_image ? (
+                <img
+                  src={option.thumbnail_image}
+                  alt=""
+                  className="h-5 w-5 flex-shrink-0 rounded object-cover"
+                />
+              ) : null}
+              {val.label}
+            </Badge>
+          );
         },
         enableSorting: true,
       })),

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { Plus } from "lucide-react";
+import { ImageIcon, Plus } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,8 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
         code: "",
         label: "",
         sort_order: 0,
+        thumbnail_image: null,
+        color_hex: null,
       }
     );
   }
@@ -74,7 +76,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
   function set_value_field(
     property_id: string,
     field: keyof ValueFormValues,
-    value: string | number,
+    value: string | number | null,
   ) {
     set_value_forms((prev) => ({
       ...prev,
@@ -182,6 +184,19 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                     {property.values.map((value) => (
                       <div key={value.id}>
                         <Badge variant="outline" className="gap-2 pr-1">
+                          {value.color_hex ? (
+                            <span
+                              className="inline-block h-4 w-4 rounded-full border"
+                              style={{ backgroundColor: value.color_hex }}
+                              title={value.color_hex}
+                            />
+                          ) : value.thumbnail_image ? (
+                            <img
+                              src={value.thumbnail_image}
+                              alt=""
+                              className="h-4 w-4 rounded object-cover"
+                            />
+                          ) : null}
                           {value.label}
                           <button
                             type="button"
@@ -206,7 +221,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           {t("add_value")}
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                           <DialogTitle>{t("add_value")}</DialogTitle>
                         </DialogHeader>
@@ -225,6 +240,41 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                             onChange={(e) => set_value_field(property.id, "label", e.target.value)}
                             placeholder="XL"
                           />
+                        </Field>
+                        <Field>
+                          <FieldLabel>Image (URL)</FieldLabel>
+                          <Input
+                            value={get_value_defaults(property.id).thumbnail_image ?? ""}
+                            onChange={(e) =>
+                              set_value_field(
+                                property.id,
+                                "thumbnail_image",
+                                e.target.value || null,
+                              )
+                            }
+                            placeholder="https://..."
+                          />
+                        </Field>
+                        <Field>
+                          <FieldLabel>Couleur (hex)</FieldLabel>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={get_value_defaults(property.id).color_hex ?? ""}
+                              onChange={(e) =>
+                                set_value_field(property.id, "color_hex", e.target.value || null)
+                              }
+                              placeholder="#FF0000"
+                            />
+                            {get_value_defaults(property.id).color_hex && (
+                              <span
+                                className="inline-block h-8 w-8 flex-shrink-0 rounded border"
+                                style={{
+                                  backgroundColor:
+                                    get_value_defaults(property.id).color_hex ?? undefined,
+                                }}
+                              />
+                            )}
+                          </div>
                         </Field>
                         <Field>
                           <FieldLabel>{t("property_sort")}</FieldLabel>

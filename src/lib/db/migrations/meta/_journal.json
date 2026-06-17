@@ -85,6 +85,13 @@
       "when": 1781635910640,
       "tag": "0011_brown_giant_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1781730479594,
+      "tag": "0012_normal_stranger",
+      "breakpoints": true
     }
   ]
 }

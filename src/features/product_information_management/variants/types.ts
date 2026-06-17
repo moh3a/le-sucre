@@ -15,6 +15,8 @@ export type VariantPropertyValue = {
   code: string;
   label: string;
   sort_order: number;
+  thumbnail_image: string | null;
+  color_hex: string | null;
   metadata: Record<string, unknown>;
 };
 
@@ -105,5 +107,7 @@ export type SkuListRow = {
     value_code: string | null;
     value_label: string | null;
     value_id: string | null;
+    thumbnail_image: string | null;
+    color_hex: string | null;
   }>;
 };

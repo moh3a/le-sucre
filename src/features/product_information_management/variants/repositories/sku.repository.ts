@@ -56,6 +56,8 @@ export class SkuRepository {
         value_code: property_values.code,
         value_label: property_values.label,
         value_id: property_values.id,
+        thumbnail_image: property_values.thumbnail_image,
+        color_hex: property_values.color_hex,
       })
       .from(product_skus)
       .leftJoin(sku_option_values, eq(sku_option_values.sku_id, product_skus.id))
@@ -256,6 +258,8 @@ export class SkuRepository {
       property_code: string;
       value_code: string;
       value_label: string;
+      thumbnail_image: string | null;
+      color_hex: string | null;
     }> = [];
 
     if (sku_ids.length > 0) {
@@ -265,6 +269,8 @@ export class SkuRepository {
           property_code: product_properties.code,
           value_code: property_values.code,
           value_label: property_values.label,
+          thumbnail_image: property_values.thumbnail_image,
+          color_hex: property_values.color_hex,
         })
         .from(sku_option_values)
         .innerJoin(property_values, eq(property_values.id, sku_option_values.property_value_id))

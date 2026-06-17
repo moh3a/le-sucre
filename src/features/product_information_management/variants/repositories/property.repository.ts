@@ -124,6 +124,8 @@ export class PropertyRepository {
     code: string;
     label: string;
     sort_order: number;
+    thumbnail_image?: string | null;
+    color_hex?: string | null;
     metadata: Record<string, unknown>;
   }) {
     const existing = await db
@@ -147,6 +149,8 @@ export class PropertyRepository {
       code: input.code,
       label: input.label,
       sort_order: input.sort_order,
+      thumbnail_image: input.thumbnail_image ?? null,
+      color_hex: input.color_hex ?? null,
       metadata: input.metadata,
     });
 
@@ -159,6 +163,8 @@ export class PropertyRepository {
       code: string;
       label: string;
       sort_order: number;
+      thumbnail_image: string | null;
+      color_hex: string | null;
       metadata: Record<string, unknown>;
     }>,
   ) {
@@ -186,6 +192,8 @@ export class PropertyRepository {
         ...(input.code !== undefined && { code: input.code }),
         ...(input.label !== undefined && { label: input.label }),
         ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
+        ...(input.thumbnail_image !== undefined && { thumbnail_image: input.thumbnail_image }),
+        ...(input.color_hex !== undefined && { color_hex: input.color_hex }),
         ...(input.metadata !== undefined && { metadata: input.metadata }),
       })
       .where(eq(property_values.id, id));

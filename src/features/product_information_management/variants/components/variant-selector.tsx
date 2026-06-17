@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type VariantSelectorProps = {
   product_id: string;
@@ -54,7 +55,7 @@ export function VariantSelector({ product_id, on_sku_change }: VariantSelectorPr
         <div key={property.id}>
           <p className="mb-2 text-sm font-medium">{property.name}</p>
           <div className="flex flex-wrap gap-2">
-            {property.values.map((value) => {
+              {property.values.map((value) => {
               const is_selected = selected[property.id] === value.id;
               return (
                 <Button
@@ -63,7 +64,31 @@ export function VariantSelector({ product_id, on_sku_change }: VariantSelectorPr
                   variant={is_selected ? "default" : "outline"}
                   size="sm"
                   onClick={() => pick(property.id, value.id)}
+                  className={cn(
+                    "gap-1.5",
+                    value.color_hex && is_selected && "text-white",
+                  )}
+                  style={
+                    value.color_hex && is_selected
+                      ? { backgroundColor: value.color_hex, borderColor: value.color_hex }
+                      : undefined
+                  }
                 >
+                  {value.color_hex ? (
+                    <span
+                      className={cn(
+                        "inline-block h-3.5 w-3.5 flex-shrink-0 rounded-full border",
+                        is_selected && "border-white/50",
+                      )}
+                      style={{ backgroundColor: value.color_hex }}
+                    />
+                  ) : value.thumbnail_image ? (
+                    <img
+                      src={value.thumbnail_image}
+                      alt=""
+                      className="h-4 w-4 flex-shrink-0 rounded object-cover"
+                    />
+                  ) : null}
                   {value.label}
                 </Button>
               );

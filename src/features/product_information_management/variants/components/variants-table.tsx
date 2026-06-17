@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { Check, Clipboard, Search } from "lucide-react";
+import { Check, Clipboard, ImageIcon, Search } from "lucide-react";
 import Link from "next/link";
 
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -28,6 +28,8 @@ type SkuOption = {
   property_code: string;
   value_code: string;
   value_label: string;
+  thumbnail_image: string | null;
+  color_hex: string | null;
 };
 
 type SkuRow = {
@@ -106,11 +108,27 @@ export function VariantsTable() {
         header: () => <span>Variations</span>,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
-            {row.original.options.length === 0 ? (
+              {row.original.options.length === 0 ? (
               <span className="text-muted-foreground text-xs">—</span>
             ) : (
               row.original.options.map((opt) => (
-                <Badge key={`${opt.property_code}-${opt.value_code}`} variant="outline" className="text-[10px]">
+                <Badge
+                  key={`${opt.property_code}-${opt.value_code}`}
+                  variant="outline"
+                  className="gap-1 text-[10px]"
+                >
+                  {opt.color_hex ? (
+                    <span
+                      className="inline-block h-3 w-3 flex-shrink-0 rounded-full border"
+                      style={{ backgroundColor: opt.color_hex }}
+                    />
+                  ) : opt.thumbnail_image ? (
+                    <img
+                      src={opt.thumbnail_image}
+                      alt=""
+                      className="h-4 w-4 flex-shrink-0 rounded object-cover"
+                    />
+                  ) : null}
                   {opt.value_label || opt.value_code}
                 </Badge>
               ))
