@@ -23,9 +23,16 @@ import {
   Gauge,
   FileText,
   Megaphone,
+  CalendarClock,
   Cog,
   TriangleAlert,
   Handshake,
+  Ban,
+  RefreshCw,
+  Wrench,
+  ListTodo,
+  Phone,
+  HeadphonesIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -96,6 +103,25 @@ export function AppSidebar() {
         { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
         { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
         { title: "Livraisons", url: "/console/shipping", icon: Truck },
+      ],
+    },
+    {
+      title: "Opérations",
+      icon: TriangleAlert,
+      items: [
+        { title: "Dashboard", url: "/console/operations", icon: Gauge },
+        { title: "Escalades", url: "/console/operations/escalations", icon: TriangleAlert },
+        { title: "Annulations", url: "/console/operations/cancellations", icon: Ban },
+        { title: "Vérifications", url: "/console/operations/payment-verifications", icon: Banknote },
+        { title: "Remboursements", url: "/console/operations/refunds", icon: RefreshCw },
+        { title: "Garanties", url: "/console/operations/warranty", icon: Wrench },
+        { title: "Validations promo", url: "/console/operations/promotion-reviews", icon: TicketPercent },
+        { title: "Tâches", url: "/console/operations/tasks", icon: ListTodo },
+        { title: "Relances", url: "/console/operations/follow-ups", icon: Phone },
+        { title: "Support", url: "/console/operations/support-cases", icon: HeadphonesIcon },
+        { title: "Livraisons", url: "/console/operations/delivery", icon: Truck },
+        { title: "Ajust. stock", url: "/console/operations/inventory-adjustments", icon: Warehouse },
+        { title: "Publications", url: "/console/operations/publishing-schedules", icon: CalendarClock },
       ],
     },
     {

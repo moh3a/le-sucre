@@ -16,6 +16,10 @@ import {
   RotateCcw,
   Gift,
   MessageSquare,
+  Phone,
+  StickyNote,
+  HeadphonesIcon,
+  Bell,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -24,6 +28,10 @@ import { trpc } from "@/components/providers/app-providers";
 import { StatsGrid } from "@/components/console/stats-grid";
 import type { StatItem } from "@/components/console/stats-grid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CustomerContactsTab } from "./customer-contacts-tab";
+import { CustomerNotesTab } from "./customer-notes-tab";
+import { CustomerSupportTab } from "./customer-support-tab";
+import { CustomerFollowupsTab } from "./customer-followups-tab";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -580,6 +588,22 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
             <Gift className="h-4 w-4" />
             Promos ({promo_redemptions.length})
           </TabsTrigger>
+          <TabsTrigger value="contacts" className="gap-2">
+            <Phone className="h-4 w-4" />
+            Contacts
+          </TabsTrigger>
+          <TabsTrigger value="notes" className="gap-2">
+            <StickyNote className="h-4 w-4" />
+            Notes
+          </TabsTrigger>
+          <TabsTrigger value="support" className="gap-2">
+            <HeadphonesIcon className="h-4 w-4" />
+            Support
+          </TabsTrigger>
+          <TabsTrigger value="followups" className="gap-2">
+            <Bell className="h-4 w-4" />
+            Relances
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="space-y-3">
@@ -639,6 +663,22 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
               <PromoRedemptionCard key={red.id as string} redemption={red as unknown as Record<string, unknown>} />
             ))
           )}
+        </TabsContent>
+
+        <TabsContent value="contacts">
+          <CustomerContactsTab user_id={user_id} />
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <CustomerNotesTab user_id={user_id} />
+        </TabsContent>
+
+        <TabsContent value="support">
+          <CustomerSupportTab user_id={user_id} />
+        </TabsContent>
+
+        <TabsContent value="followups">
+          <CustomerFollowupsTab user_id={user_id} />
         </TabsContent>
       </Tabs>
     </div>

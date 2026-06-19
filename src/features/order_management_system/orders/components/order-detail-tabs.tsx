@@ -24,6 +24,9 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { formatDate } from "@/lib/format";
 import { ShipmentPanel } from "@/features/shipping_management_system/components/shipment-panel";
 import { ReturnPanel } from "@/features/order_management_system/return_replacement/components/return-panel";
+import { OrderOperationsTab } from "./order-operations-tab";
+import { OrderCommentsTab } from "./order-comments-tab";
+import { TimelineTab } from "./timeline-tab";
 import {
   PAYMENT_STATUS_OPTIONS,
   ORDER_LABELS,
@@ -313,6 +316,8 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         <TabsTrigger value="payments">Paiements</TabsTrigger>
         <TabsTrigger value="invoices">Factures</TabsTrigger>
         <TabsTrigger value="returns">Retours</TabsTrigger>
+        <TabsTrigger value="operations">Opérations</TabsTrigger>
+        <TabsTrigger value="comments">Commentaires</TabsTrigger>
         <TabsTrigger value="timeline">Chronologie</TabsTrigger>
       </TabsList>
 
@@ -988,45 +993,19 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         />
       </TabsContent>
 
+      {/* ── Operations ──────────────────────────────── */}
+      <TabsContent value="operations">
+        <OrderOperationsTab order_id={order.id} order_status={order.status} />
+      </TabsContent>
+
+      {/* ── Comments ────────────────────────────────── */}
+      <TabsContent value="comments">
+        <OrderCommentsTab order_id={order.id} />
+      </TabsContent>
+
       {/* ── Timeline ────────────────────────────────── */}
       <TabsContent value="timeline">
-        <div className="space-y-3">
-          {status_events.map((ev, idx) => (
-            <div key={ev.id} className="relative flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="bg-primary h-3 w-3 rounded-full" />
-                {idx < status_events.length - 1 && <div className="bg-border mt-1 w-px flex-1" />}
-              </div>
-              <div className="pb-4">
-                <div className="flex items-center gap-2">
-                  {ev.from_status && (
-                    <>
-                      <Badge variant="outline" className="text-xs">
-                        {ORDER_LABELS[ev.from_status] ?? ev.from_status}
-                      </Badge>
-                      <span className="text-muted-foreground text-xs">→</span>
-                    </>
-                  )}
-                  <Badge className="text-xs">{ORDER_LABELS[ev.to_status] ?? ev.to_status}</Badge>
-                </div>
-                {ev.actor_name && (
-                  <p className="text-muted-foreground mt-1 text-xs font-medium">{ev.actor_name}</p>
-                )}
-                {ev.note && <p className="text-muted-foreground mt-1 text-sm">{ev.note}</p>}
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {formatDate(ev.created_at, {
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
-          ))}
-          {status_events.length === 0 && (
-            <p className="text-muted-foreground text-sm">Aucun événement enregistré.</p>
-          )}
-        </div>
+        <TimelineTab order_id={order.id} />
       </TabsContent>
     </Tabs>
   );

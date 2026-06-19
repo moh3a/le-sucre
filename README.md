@@ -2,16 +2,13 @@
 
 ## TODO
 
+- instead of having all operations in one feature, seperate into multiple operations endpoints in each feature
+- fix analytics
 - fix SKUs table single editing or bulk editing
 - brand combobox can select a brand or create one
 - create a media libray to manage all media from property thumbnail images, to product media, brand images...
 - continue Prompt 16 — Campaign Management System
-- customer call history
-- replacement requests
-- stock adjustments
-- approval workflows
-- campaign approval
-- review moderation workflows
+- continue Prompt 19 - Operational Workflows Audit & Business Process Completion
 - Storefront: use https://www.abui.io/components/label-selector for variant selection
 - Implement event, example:
 

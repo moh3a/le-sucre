@@ -26,6 +26,7 @@ import { analytics_router } from "@/features/analytics_management_system/router"
 import { shipping_router } from "@/features/shipping_management_system/router";
 import { invoice_router } from "@/features/billing_and_finance_system/routers/invoice.router";
 import { campaign_router } from "@/features/campaign_management_system/router";
+import { operations_router } from "@/features/operations_workflows/routers/operations.router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -52,6 +53,7 @@ export const app_router = create_trpc_router({
   shipping: shipping_router,
   invoices: invoice_router,
   campaigns: campaign_router,
+  operations: operations_router,
 });
 
 export type AppRouter = typeof app_router;
