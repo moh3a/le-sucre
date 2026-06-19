@@ -1,4 +1,4 @@
-import { RefundsPageClient } from "@/features/operations_workflows/components/refunds-page-client";
+import { RefundsPageClient } from "@/features/payment_management_system/operations/components/refunds-page-client";
 
 export default function RefundsPage() {
   return <RefundsPageClient />;

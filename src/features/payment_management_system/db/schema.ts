@@ -1,3 +1,5 @@
+export * from "../operations/schema";
+
 import {
   decimal,
   index,

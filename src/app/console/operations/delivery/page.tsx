@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
-import { SimpleDataTable } from "@/features/operations_workflows/components/simple-data-table";
+import { SimpleDataTable } from "@/components/console/simple-data-table";
 import { StatsGrid } from "@/components/console/stats-grid";
 import type { StatItem } from "@/components/console/stats-grid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -10,4 +10,5 @@ const t = initTRPC.context<TrpcContext>().create({
 });
 
 export const create_trpc_router = t.router;
+export const t_instance = t;
 export const public_procedure = t.procedure;

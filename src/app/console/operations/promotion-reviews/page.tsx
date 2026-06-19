@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/components/providers/app-providers";
-import { SimpleDataTable } from "@/features/operations_workflows/components/simple-data-table";
+import { SimpleDataTable } from "@/components/console/simple-data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -1,4 +1,4 @@
-import { FollowUpsPageClient } from "@/features/operations_workflows/components/follow-ups-page-client";
+import { FollowUpsPageClient } from "@/features/order_management_system/customers/operations/components/follow-ups-page-client";
 
 export default function FollowUpsPage() {
   return <FollowUpsPageClient />;

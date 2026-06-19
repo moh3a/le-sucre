@@ -3,3 +3,7 @@ export * from "./orders/schema";
 export * from "./preorders/schema";
 export * from "./promotions/schema";
 export * from "./return_replacement/schema";
+export * from "./orders/operations/schema";
+export * from "./customers/operations/schema";
+export * from "./warranty/schema";
+export * from "./promotions/operations/schema";

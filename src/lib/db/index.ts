@@ -15,6 +15,8 @@ import * as billing_schema from "@/features/billing_and_finance_system/db/schema
 import * as campaign_schema from "@/features/campaign_management_system/schema";
 import * as payment_schema from "@/features/payment_management_system/db/schema";
 import * as wishlist_schema from "@/features/wishlist_management_system/schema";
+import * as console_schema from "@/features/console_dashboard/tasks/schema";
+import * as console_notifications_schema from "@/features/console_dashboard/notifications/schema";
 
 const pool = mysql.createPool({
   uri: env.DATABASE_URL,
@@ -37,6 +39,8 @@ export const db = drizzle(pool, {
     ...campaign_schema,
     ...payment_schema,
     ...wishlist_schema,
+    ...console_schema,
+    ...console_notifications_schema,
   },
   mode: "default",
 });

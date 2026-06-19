@@ -1,4 +1,4 @@
-import { PaymentVerificationsPageClient } from "@/features/operations_workflows/components/payment-verifications-page-client";
+import { PaymentVerificationsPageClient } from "@/features/payment_management_system/operations/components/payment-verifications-page-client";
 
 export default function PaymentVerificationsPage() {
   return <PaymentVerificationsPageClient />;

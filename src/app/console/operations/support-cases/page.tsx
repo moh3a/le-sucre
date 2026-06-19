@@ -1,4 +1,4 @@
-import { SupportCasesPageClient } from "@/features/operations_workflows/components/support-cases-page-client";
+import { SupportCasesPageClient } from "@/features/order_management_system/customers/operations/components/support-cases-page-client";
 
 export default function SupportCasesPage() {
   return <SupportCasesPageClient />;

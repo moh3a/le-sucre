@@ -1,3 +1,5 @@
+export * from "./operations/schema";
+
 import { generate_id } from "@/lib/utils";
 import { index, int, mysqlTable, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 import { product_skus } from "../../product_information_management/schema";

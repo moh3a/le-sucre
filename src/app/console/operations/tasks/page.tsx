@@ -1,4 +1,4 @@
-import { TasksPageClient } from "@/features/operations_workflows/components/tasks-page-client";
+import { TasksPageClient } from "@/features/console_dashboard/tasks/components/tasks-page-client";
 
 export default function TasksPage() {
   return <TasksPageClient />;
