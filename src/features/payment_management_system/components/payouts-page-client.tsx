@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 import { PayoutsTable } from "./payouts-table";
+import { CreatePayoutDialog } from "./create-payout-dialog";
 
 export function PayoutsPageClient() {
   const { data: stats, isFetching: statsLoading } = trpc.payments.adminPayoutStats.useQuery();
@@ -13,6 +14,7 @@ export function PayoutsPageClient() {
     <ConsolePageShell
       title="Paiements fournisseurs"
       subtitle="Gestion des paiements aux vendeurs et fournisseurs"
+      actions={<CreatePayoutDialog />}
       stats={
         <StatsGrid
           loading={statsLoading}

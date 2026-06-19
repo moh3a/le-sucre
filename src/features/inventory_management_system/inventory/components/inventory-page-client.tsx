@@ -18,12 +18,14 @@ import { InventoryMovementsTable } from "./inventory-movements-table";
 import { InventoryWarehousesSection } from "./inventory-warehouses-section";
 import { InventoryForecastTable } from "./inventory-forecast-table";
 import { InventoryAlertsTable } from "./inventory-alerts-table";
+import { RecordStockDialog } from "./record-stock-dialog";
 
 export function InventoryPageClient() {
   return (
     <ConsolePageShell
       title="Inventaire"
       subtitle="Gestion complète des stocks, entrepôts, mouvements et prévisions"
+      actions={<RecordStockDialog />}
       stats={<InventoryStats />}
       tabs={
         <Tabs defaultValue="stock">

@@ -7,6 +7,7 @@ import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 import { LineChart } from "@/components/ui/line-chart";
 import { AdminReviewModerationTable } from "./admin-review-moderation-table";
+import { CreateReviewDialog } from "./create-review-dialog";
 
 export function ReviewsPageClient() {
   const stats = trpc.reviews.adminStats.useQuery();
@@ -15,6 +16,7 @@ export function ReviewsPageClient() {
     <ConsolePageShell
       title="Avis clients"
       subtitle="Modération et performance"
+      actions={<CreateReviewDialog />}
       stats={
         <StatsGrid
           loading={stats.isLoading}

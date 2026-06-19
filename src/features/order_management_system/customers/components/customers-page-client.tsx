@@ -5,6 +5,7 @@ import { StatsGrid } from "@/components/console/stats-grid";
 import { User, ShoppingCart, TrendingUp } from "lucide-react";
 import { trpc } from "@/components/providers/app-providers";
 import { CustomersTable } from "./customers-table";
+import { CreateCustomerDialog } from "./create-customer-dialog";
 
 export function CustomersPageClient() {
   const { data: stats, isLoading } = trpc.customers.adminStats.useQuery();
@@ -13,6 +14,7 @@ export function CustomersPageClient() {
     <ConsolePageShell
       title="Clients"
       subtitle="Gestion des clients et analyses"
+      actions={<CreateCustomerDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

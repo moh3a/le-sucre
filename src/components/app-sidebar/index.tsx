@@ -9,7 +9,6 @@ import {
   ShieldCog,
   UsersRound,
   ScrollText,
-  KeyRound,
   ReceiptCent,
   TicketPercent,
   ClipboardList,
@@ -34,12 +33,12 @@ import {
   Phone,
   HeadphonesIcon,
   CreditCard,
-  ArrowLeftRight,
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 import {
   Sidebar,
@@ -55,8 +54,15 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { NavUser } from "./nav-user";
 import { authClient } from "@/lib/auth/client";
 import { TooltipProvider } from "../ui/tooltip";
@@ -69,6 +75,8 @@ export function AppSidebar() {
     enabled: Boolean(data?.user),
   }); 
   const primary_role = me?.roles?.[0];
+  const { state } = useSidebar();
+  const is_collapsed = state === "collapsed";
 
   const pathname = usePathname();
   const t = useTranslations("nav");
@@ -78,11 +86,46 @@ export function AppSidebar() {
       title: t("catalog"),
       icon: Package,
       items: [
+        { title: t("products"), url: "/console/products", icon: Package },
         { title: t("categories"), url: "/console/categories", icon: FolderTree },
         { title: "Marques", url: "/console/brands", icon: Building2 },
-        { title: t("products"), url: "/console/products", icon: Package },
         { title: "Variantes", url: "/console/variants", icon: Blend },
         { title: "Avis", url: "/console/reviews", icon: MessageCircleCheck },
+      ],
+    },
+    {
+      title: "Commandes",
+      icon: ReceiptCent,
+      items: [
+        { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
+        { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
+        { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
+        { title: "Clients", url: "/console/customers", icon: Handshake },
+      ],
+    },
+    {
+      title: "Expéditions",
+      icon: Truck,
+      items: [
+        { title: "Livraisons", url: "/console/shipping", icon: Truck },
+      ],
+    },
+    {
+      title: "Paiements & Factures",
+      icon: CreditCard,
+      items: [
+        { title: "Paiements", url: "/console/payments", icon: CreditCard },
+        { title: "Factures", url: "/console/invoices", icon: FileText },
+        { title: "Remboursements", url: "/console/refunds", icon: RefreshCw },
+        { title: "Paiements fournisseurs", url: "/console/payouts", icon: Wallet },
+      ],
+    },
+    {
+      title: "Marketing",
+      icon: Megaphone,
+      items: [
+        { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
+        { title: "Campagnes", url: "/console/campaigns", icon: Megaphone },
       ],
     },
     {
@@ -91,58 +134,34 @@ export function AppSidebar() {
       items: [
         { title: "Inventaire", url: "/console/inventory", icon: Warehouse },
         { title: "Alertes", url: "/console/inventory/alerts", icon: TriangleAlert },
-        { title: "Forecasting", url: "/console/inventory/forecast", icon: TrendingUpDown },
-      ],
-    },
-    {
-      title: "eCommerce",
-      icon: Banknote,
-      items: [
-        { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
-        { title: "Clients", url: "/console/customers", icon: Handshake },
-        { title: "Factures", url: "/console/invoices", icon: FileText },
-        { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
-        { title: "Campagnes", url: "/console/campaigns", icon: Megaphone },
-        { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
-        { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
-        { title: "Livraisons", url: "/console/shipping", icon: Truck },
-        { title: "Paiements", url: "/console/payments", icon: CreditCard },
-      ],
-    },
-    {
-      title: "Finance",
-      icon: Banknote,
-      items: [
-        { title: "Transactions", url: "/console/payments", icon: ArrowLeftRight },
-        { title: "Remboursements", url: "/console/refunds", icon: RefreshCw },
-        { title: "Paiements fournisseurs", url: "/console/payouts", icon: Wallet },
+        { title: "Prévisions", url: "/console/inventory/forecast", icon: TrendingUpDown },
       ],
     },
     {
       title: "Opérations",
-      icon: TriangleAlert,
+      icon: Gauge,
       items: [
         { title: "Dashboard", url: "/console/operations", icon: Gauge },
-        { title: "Escalades", url: "/console/operations/escalations", icon: TriangleAlert },
+        { title: "Livraisons", url: "/console/operations/delivery", icon: Truck },
+        { title: "Remboursements", url: "/console/operations/refunds", icon: RefreshCw },
         { title: "Annulations", url: "/console/operations/cancellations", icon: Ban },
         { title: "Vérifications", url: "/console/operations/payment-verifications", icon: Banknote },
-        { title: "Remboursements", url: "/console/operations/refunds", icon: RefreshCw },
         { title: "Garanties", url: "/console/operations/warranty", icon: Wrench },
         { title: "Validations promo", url: "/console/operations/promotion-reviews", icon: TicketPercent },
         { title: "Tâches", url: "/console/operations/tasks", icon: ListTodo },
         { title: "Relances", url: "/console/operations/follow-ups", icon: Phone },
         { title: "Support", url: "/console/operations/support-cases", icon: HeadphonesIcon },
-        { title: "Livraisons", url: "/console/operations/delivery", icon: Truck },
         { title: "Ajust. stock", url: "/console/operations/inventory-adjustments", icon: Warehouse },
         { title: "Publications", url: "/console/operations/publishing-schedules", icon: CalendarClock },
+        { title: "Escalades", url: "/console/operations/escalations", icon: TriangleAlert },
       ],
     },
     {
-      title: "Auth",
-      icon: KeyRound,
+      title: "Administration",
+      icon: ShieldCog,
       items: [
         { title: "Utilisateurs", url: "/console/users", icon: UsersRound },
-        { title: "Autorizations", url: "/console/authorization", icon: ShieldCog },
+        { title: "Autorisations", url: "/console/authorization", icon: ShieldCog },
         { title: "Audit", url: "/console/audit-logs", icon: ScrollText },
       ],
     },
@@ -174,31 +193,60 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </Link>
               {nav.map(({ icon: Icon, ...section }) => (
-                <Collapsible key={section.title} defaultOpen className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={section.title}>
-                        <Icon />
-                        <span>{section.title}</span>
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
+                is_collapsed ? (
+                  <SidebarMenuItem key={section.title}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton tooltip={section.title}>
+                          <Icon />
+                          <span>{section.title}</span>
+                        </SidebarMenuButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" align="start" className="min-w-48">
                         {section.items.map((item) => (
-                          <SidebarMenuSubItem key={item.url}>
-                            <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
-                              <Link href={item.url}>
-                                <item.icon className="size-4" />
-                                <span>{item.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
+                          <DropdownMenuItem key={item.url} asChild>
+                            <Link
+                              href={item.url}
+                              className={cn(
+                                "flex items-center gap-2",
+                                pathname.startsWith(item.url) && "font-medium",
+                              )}
+                            >
+                              <item.icon className="size-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </DropdownMenuItem>
                         ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </SidebarMenuItem>
-                </Collapsible>
+                ) : (
+                  <Collapsible key={section.title} defaultOpen className="group/collapsible">
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip={section.title}>
+                          <Icon />
+                          <span>{section.title}</span>
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {section.items.map((item) => (
+                            <SidebarMenuSubItem key={item.url}>
+                              <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
+                                <Link href={item.url}>
+                                  <item.icon className="size-4" />
+                                  <span>{item.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                )
               ))}
               <Link href="/console/settings">
                 <SidebarMenuButton
@@ -218,7 +266,7 @@ export function AppSidebar() {
               name: data?.user.name ?? "",
               email: data?.user.email ?? "",
               avatar: data?.user.image ?? "",
-              role: primary_role
+              role: primary_role ?? null
             }}
           />
         </SidebarFooter>

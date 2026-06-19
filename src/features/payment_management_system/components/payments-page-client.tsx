@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 import { PaymentsTable } from "./payments-table";
+import { RecordPaymentDialog } from "./record-payment-dialog";
 
 export function PaymentsPageClient() {
   const { data: stats, isFetching: statsLoading } = trpc.payments.adminStats.useQuery();
@@ -13,6 +14,7 @@ export function PaymentsPageClient() {
     <ConsolePageShell
       title="Paiements"
       subtitle="Gestion des transactions de paiement"
+      actions={<RecordPaymentDialog />}
       stats={
         <StatsGrid
           loading={statsLoading}

@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 import { RefundsTable } from "./refunds-table";
+import { CreateRefundDialog } from "./create-refund-dialog";
 
 export function RefundsPageClient() {
   const { data: stats, isFetching: statsLoading } = trpc.payments.adminRefundStats.useQuery();
@@ -13,6 +14,7 @@ export function RefundsPageClient() {
     <ConsolePageShell
       title="Remboursements"
       subtitle="Gestion des remboursements"
+      actions={<CreateRefundDialog />}
       stats={
         <StatsGrid
           loading={statsLoading}
