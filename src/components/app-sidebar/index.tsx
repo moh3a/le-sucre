@@ -34,6 +34,7 @@ import {
   HeadphonesIcon,
   CreditCard,
   Wallet,
+  Flag,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -163,6 +164,7 @@ export function AppSidebar() {
         { title: "Utilisateurs", url: "/console/users", icon: UsersRound },
         { title: "Autorisations", url: "/console/authorization", icon: ShieldCog },
         { title: "Audit", url: "/console/audit-logs", icon: ScrollText },
+        { title: "Feature Flags", url: "/console/feature-flags", icon: Flag },
       ],
     },
   ];

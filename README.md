@@ -2,12 +2,12 @@
 
 ## TODO
 
-- remove all hard coded text
-- add feature flags to enable or disable features
-- fix analytics
+- add operations create actions
 - fix SKUs table single editing or bulk editing
 - brand combobox can select a brand or create one
+- fix analytics
 - create a media libray to manage all media from property thumbnail images, to product media, brand images...
+- remove all hard coded text
 - continue Prompt 16 — Campaign Management System
 - continue Prompt 19 - Operational Workflows Audit & Business Process Completion
 - Storefront: use https://www.abui.io/components/label-selector for variant selection
