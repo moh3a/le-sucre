@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { Banknote, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { RefundsTable } from "./refunds-table";
+import { RequestRefundDialog } from "./request-refund-dialog";
 
 export function RefundsPageClient() {
   const { data, isLoading } = trpc.operations.paymentListRefundRequests.useQuery({
@@ -22,6 +23,7 @@ export function RefundsPageClient() {
     <ConsolePageShell
       title="Remboursements"
       subtitle="Gestion des demandes de remboursement"
+      actions={<RequestRefundDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

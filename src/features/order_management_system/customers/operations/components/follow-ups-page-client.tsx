@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertTriangle, Phone } from "lucide-react";
 import { FollowUpsTable } from "./follow-ups-table";
+import { CreateFollowUpDialog } from "./create-follow-up-dialog";
 
 export function FollowUpsPageClient() {
   const { data, isLoading } = trpc.operations.customerListMyFollowUps.useQuery({ page: 1, limit: 100 });
@@ -16,6 +17,7 @@ export function FollowUpsPageClient() {
     <ConsolePageShell
       title="Relances et suivis"
       subtitle="Gestion des rappels et suivis clients"
+      actions={<CreateFollowUpDialog />}
       stats={
         <StatsGrid
           loading={isLoading || overdueLoading}

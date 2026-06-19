@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertCircle, CheckCircle2, Clock, Eye } from "lucide-react";
 import { EscalationsTable } from "./escalations-table";
+import { EscalateOrderDialog } from "./escalate-order-dialog";
 
 export function EscalationsPageClient() {
   const { data, isLoading } = trpc.operations.orderListEscalations.useQuery({ page: 1, limit: 100 });
@@ -18,6 +19,7 @@ export function EscalationsPageClient() {
     <ConsolePageShell
       title="Escalades"
       subtitle="Gestion des escalades de commandes"
+      actions={<EscalateOrderDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

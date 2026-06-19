@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertTriangle, Ban, Calendar, CheckCircle2 } from "lucide-react";
 import { PublishingSchedulesTable } from "./publishing-schedules-table";
+import { SchedulePublishingDialog } from "./schedule-publishing-dialog";
 
 export function PublishingSchedulesPageClient() {
   const { data: stats, isLoading } = trpc.operations.productGetScheduleStats.useQuery();
@@ -13,6 +14,7 @@ export function PublishingSchedulesPageClient() {
     <ConsolePageShell
       title="Planifications de publication"
       subtitle="Gérer les publications et dépublications programmées de produits"
+      actions={<SchedulePublishingDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

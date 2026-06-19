@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { CheckCircle2, Clock, Headphones, XCircle } from "lucide-react";
 import { SupportCasesTable } from "./support-cases-table";
+import { CreateSupportCaseDialog } from "./create-support-case-dialog";
 
 export function SupportCasesPageClient() {
   const { data, isLoading } = trpc.operations.customerListCases.useQuery({
@@ -21,6 +22,7 @@ export function SupportCasesPageClient() {
     <ConsolePageShell
       title="Cas de support"
       subtitle="Gestion des cas de support client"
+      actions={<CreateSupportCaseDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

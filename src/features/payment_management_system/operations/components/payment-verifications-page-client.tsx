@@ -5,6 +5,8 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { PaymentVerificationsTable } from "./payment-verifications-table";
+import { CreateVerificationDialog } from "./create-verification-dialog";
+import { RecordPartialPaymentDialog } from "./record-partial-payment-dialog";
 
 export function PaymentVerificationsPageClient() {
   const { data, isLoading } = trpc.operations.paymentListVerifications.useQuery({
@@ -21,6 +23,12 @@ export function PaymentVerificationsPageClient() {
     <ConsolePageShell
       title="Vérifications de paiement"
       subtitle="Vérification manuelle des paiements"
+      actions={
+        <div className="flex gap-2">
+          <CreateVerificationDialog />
+          <RecordPartialPaymentDialog />
+        </div>
+      }
       stats={
         <StatsGrid
           loading={isLoading}

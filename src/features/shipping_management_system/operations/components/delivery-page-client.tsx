@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertTriangle, RotateCcw, Truck, XCircle } from "lucide-react";
 import { DeliveryAttemptsTable } from "./delivery-attempts-table";
+import { LogAttemptDialog } from "./log-attempt-dialog";
 
 export function DeliveryPageClient() {
   const { data: stats, isLoading } = trpc.operations.deliveryGetStats.useQuery();
@@ -13,6 +14,7 @@ export function DeliveryPageClient() {
     <ConsolePageShell
       title="Livraisons"
       subtitle="Gestion des tentatives de livraison, des retours et des réexpéditions"
+      actions={<LogAttemptDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

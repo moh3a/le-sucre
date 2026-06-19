@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertTriangle, CheckCircle2, Clock, ListTodo } from "lucide-react";
 import { TasksTable } from "./tasks-table";
+import { CreateTaskDialog } from "./create-task-dialog";
 
 export function TasksPageClient() {
   const { data: dashboard, isLoading } = trpc.operations.adminTaskDashboard.useQuery();
@@ -13,6 +14,7 @@ export function TasksPageClient() {
     <ConsolePageShell
       title="Tâches"
       subtitle="Gestion des tâches internes"
+      actions={<CreateTaskDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

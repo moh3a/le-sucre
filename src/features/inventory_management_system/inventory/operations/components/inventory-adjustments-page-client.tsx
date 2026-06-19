@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { CheckCircle2, Clock, Warehouse } from "lucide-react";
 import { InventoryAdjustmentsTable } from "./inventory-adjustments-table";
+import { RequestAdjustmentDialog } from "./request-adjustment-dialog";
 
 export function InventoryAdjustmentsPageClient() {
   const { data: stats, isLoading } = trpc.operations.inventoryAdjustmentStats.useQuery();
@@ -13,6 +14,7 @@ export function InventoryAdjustmentsPageClient() {
     <ConsolePageShell
       title="Ajustements de stock"
       subtitle="Demandes d'ajustement d'inventaire"
+      actions={<RequestAdjustmentDialog />}
       stats={
         <StatsGrid
           loading={isLoading}

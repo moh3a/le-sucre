@@ -2,7 +2,6 @@
 
 ## TODO
 
-- add operations create actions
 - fix SKUs table single editing or bulk editing
 - brand combobox can select a brand or create one
 - fix analytics

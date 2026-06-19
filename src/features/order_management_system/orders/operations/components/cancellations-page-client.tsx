@@ -5,6 +5,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { CancellationsTable } from "./cancellations-table";
+import { RequestCancellationDialog } from "./request-cancellation-dialog";
 
 export function CancellationsPageClient() {
   const { data, isLoading } = trpc.operations.orderListCancellationRequests.useQuery({
@@ -21,6 +22,7 @@ export function CancellationsPageClient() {
     <ConsolePageShell
       title="Demandes d'annulation"
       subtitle="Gérer les demandes d'annulation de commandes"
+      actions={<RequestCancellationDialog />}
       stats={
         <StatsGrid
           loading={isLoading}
