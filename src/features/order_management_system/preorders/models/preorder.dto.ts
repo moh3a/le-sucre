@@ -15,6 +15,8 @@ export const list_preorder_allocations_dto = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   status: z.string().optional(),
+  search: z.string().optional(),
+  sku_id: z.string().optional(),
 });
 
 export const update_preorder_eta_dto = z.object({

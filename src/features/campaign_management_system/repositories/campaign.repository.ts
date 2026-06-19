@@ -56,7 +56,33 @@ export class CampaignRepository {
         .where(where),
     ]);
 
-    return { rows, total: Number(count) };
+    const total = Number(count);
+    return {
+      items: rows,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async stats() {
+    const [total, active, scheduled, draft, paused, ended, cancelled] = await Promise.all([
+      db.select({ count: sql<number>`count(*)` }).from(campaigns),
+      db.select({ count: sql<number>`count(*)` }).from(campaigns).where(eq(campaigns.status, CAMPAIGN_STATUS.active)),
+      db.select({ count: sql<number>`count(*)` }).from(campaigns).where(eq(campaigns.status, CAMPAIGN_STATUS.scheduled)),
+      db.select({ count: sql<number>`count(*)` }).from(campaigns).where(eq(campaigns.status, CAMPAIGN_STATUS.draft)),
+      db.select({ count: sql<number>`count(*)` }).from(campaigns).where(eq(campaigns.status, CAMPAIGN_STATUS.paused)),
+      db.select({ count: sql<number>`count(*)` }).from(campaigns).where(eq(campaigns.status, CAMPAIGN_STATUS.ended)),
+      db.select({ count: sql<number>`count(*)` }).from(campaigns).where(eq(campaigns.status, CAMPAIGN_STATUS.cancelled)),
+    ]);
+
+    return {
+      total: Number(total[0].count),
+      active: Number(active[0].count),
+      scheduled: Number(scheduled[0].count),
+      draft: Number(draft[0].count),
+      paused: Number(paused[0].count),
+      ended: Number(ended[0].count),
+      cancelled: Number(cancelled[0].count),
+    };
   }
 
   async get_by_id(id: string) {

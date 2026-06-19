@@ -1,84 +1,315 @@
 "use client";
 
+import type { ColumnDef } from "@tanstack/react-table";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import {
-  Megaphone,
-  Plus,
-  Search,
-  Eye,
-  Pencil,
-  Loader2,
   BarChart3,
-  Layers,
   Calendar,
+  Download,
+  Eye,
+  Layers,
+  Megaphone,
+  MoreHorizontal,
+  Pencil,
+  Play,
+  Square,
 } from "lucide-react";
-import { useState } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import * as React from "react";
 
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
+import { useDataTable } from "@/features/data-table/use-data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { XCircle } from "lucide-react";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
-import {
-  CAMPAIGN_STATUS,
-  CAMPAIGN_TYPE,
-} from "@/features/campaign_management_system/constants/campaign_types";
 import { CampaignStatusBadge } from "./campaign_status_badge";
+import { formatDate } from "@/lib/format";
 import { trpc } from "@/components/providers/app-providers";
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "Tous les statuts" },
-  { value: CAMPAIGN_STATUS.draft, label: "Brouillon" },
-  { value: CAMPAIGN_STATUS.scheduled, label: "Planifiée" },
-  { value: CAMPAIGN_STATUS.active, label: "Active" },
-  { value: CAMPAIGN_STATUS.paused, label: "En pause" },
-  { value: CAMPAIGN_STATUS.ended, label: "Terminée" },
-  { value: CAMPAIGN_STATUS.cancelled, label: "Annulée" },
+type CampaignRow = {
+  id: string;
+  name: string;
+  slug: string;
+  campaign_type: string;
+  status: string;
+  priority: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  created_at: string;
+};
+
+interface Option {
+  label: string;
+  value: string;
+}
+
+const STATUS_OPTIONS: Option[] = [
+  { value: "draft", label: "Brouillon" },
+  { value: "scheduled", label: "Planifiée" },
+  { value: "active", label: "Active" },
+  { value: "paused", label: "En pause" },
+  { value: "ended", label: "Terminée" },
+  { value: "cancelled", label: "Annulée" },
 ];
 
-const TYPE_OPTIONS = [
-  { value: "all", label: "Tous les types" },
-  { value: CAMPAIGN_TYPE.homepage, label: "Page d'accueil" },
-  { value: CAMPAIGN_TYPE.seasonal, label: "Saisonnière" },
-  { value: CAMPAIGN_TYPE.flash_sale, label: "Vente flash" },
-  { value: CAMPAIGN_TYPE.targeted, label: "Ciblée" },
-  { value: CAMPAIGN_TYPE.banner, label: "Bannière" },
-  { value: CAMPAIGN_TYPE.category, label: "Catégorie" },
-  { value: CAMPAIGN_TYPE.brand, label: "Marque" },
-  { value: CAMPAIGN_TYPE.landing_page, label: "Page d'atterrissage" },
+const TYPE_OPTIONS: Option[] = [
+  { value: "homepage", label: "Page d'accueil" },
+  { value: "seasonal", label: "Saisonnière" },
+  { value: "flash_sale", label: "Vente flash" },
+  { value: "targeted", label: "Ciblée" },
+  { value: "banner", label: "Bannière" },
+  { value: "category", label: "Catégorie" },
+  { value: "brand", label: "Marque" },
+  { value: "landing_page", label: "Page d'atterrissage" },
 ];
+
+const TYPE_BADGE_LABELS: Record<string, string> = {
+  homepage: "Accueil",
+  seasonal: "Saisonnière",
+  flash_sale: "Flash",
+  targeted: "Ciblée",
+  banner: "Bannière",
+  category: "Catégorie",
+  brand: "Marque",
+  landing_page: "Landing",
+};
+
+function FacetedFilter({
+  title,
+  options,
+  icon: Icon,
+  value,
+  onChange,
+}: {
+  title: string;
+  options: Option[];
+  icon?: React.ComponentType<{ className?: string }>;
+  value?: string;
+  onChange: (value: string | null) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="border-dashed font-normal">
+          {value ? (
+            <div
+              role="button"
+              aria-label={`Clear ${title} filter`}
+              tabIndex={0}
+              className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(null);
+              }}
+            >
+              <XCircle className="size-4" />
+            </div>
+          ) : (
+            Icon && <Icon className="size-4" />
+          )}
+          <span className="ml-2">{title}</span>
+          {value && (
+            <>
+              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-56 p-0">
+        <div className="p-2">
+          {options.map((option) => (
+            <Button
+              key={option.value}
+              variant={value === option.value ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => {
+                onChange(value === option.value ? null : option.value);
+                setOpen(false);
+              }}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function CampaignListPage() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [campaign_type, setCampaignType] = useState("all");
+  const [page, setPage] = useQueryState("cmpPage", parseAsInteger.withDefault(1));
+  const [per_page] = useQueryState("cmpPerPage", parseAsInteger.withDefault(20));
+  const [search, setSearch] = useQueryState("cmpSearch", parseAsString);
+  const [status, setStatus] = useQueryState("cmpStatus", parseAsString);
+  const [campaign_type, setCampaignType] = useQueryState("cmpType", parseAsString);
 
   const { data, isLoading } = trpc.campaigns.adminList.useQuery({
     page,
-    limit: 20,
-    status: status === "all" ? undefined : status,
-    campaign_type: campaign_type === "all" ? undefined : campaign_type,
+    limit: per_page,
     search: search || undefined,
+    status: (status || undefined) as
+      | "draft" | "scheduled" | "active" | "paused" | "ended" | "cancelled"
+      | undefined,
+    campaign_type: (campaign_type || undefined) as
+      | "homepage" | "seasonal" | "flash_sale" | "targeted" | "banner" | "category"
+      | "brand" | "landing_page"
+      | undefined,
   });
+
+  const { data: stats, isLoading: statsLoading } = trpc.campaigns.campaignStats.useQuery();
+
+  const columns = React.useMemo<ColumnDef<CampaignRow>[]>(
+    () => [
+      {
+        id: "select",
+        enableSorting: false,
+        enableHiding: false,
+      },
+      {
+        id: "name",
+        accessorKey: "name",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Campagne" />,
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <Link
+              href={`/console/campaigns/${row.original.id}`}
+              className="font-medium hover:underline"
+            >
+              {row.original.name}
+            </Link>
+            <span className="text-muted-foreground font-mono text-xs">{row.original.slug}</span>
+          </div>
+        ),
+      },
+      {
+        id: "campaign_type",
+        accessorKey: "campaign_type",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        cell: ({ row }) => (
+          <Badge variant="outline" className="text-xs">
+            {TYPE_BADGE_LABELS[row.original.campaign_type] ?? row.original.campaign_type}
+          </Badge>
+        ),
+      },
+      {
+        id: "status",
+        accessorKey: "status",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        cell: ({ row }) => <CampaignStatusBadge status={row.original.status} />,
+      },
+      {
+        id: "priority",
+        accessorKey: "priority",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Priorité" />,
+        cell: ({ row }) => <span className="font-mono text-sm">{row.original.priority}</span>,
+      },
+      {
+        id: "starts_at",
+        accessorKey: "starts_at",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Début" />,
+        cell: ({ row }) =>
+          row.original.starts_at
+            ? formatDate(row.original.starts_at, { month: "short" })
+            : "—",
+      },
+      {
+        id: "ends_at",
+        accessorKey: "ends_at",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Fin" />,
+        cell: ({ row }) =>
+          row.original.ends_at
+            ? formatDate(row.original.ends_at, { month: "short" })
+            : "—",
+      },
+      {
+        id: "actions",
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/console/campaigns/${row.original.id}/analytics`}>
+                  <BarChart3 className="mr-2 size-4" />
+                  Analytiques
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/console/campaigns/${row.original.id}`}>
+                  <Pencil className="mr-2 size-4" />
+                  Modifier
+                </Link>
+              </DropdownMenuItem>
+              {row.original.status !== "active" && (
+                <DropdownMenuItem>
+                  <Play className="mr-2 size-4 text-emerald-600" />
+                  Activer
+                </DropdownMenuItem>
+              )}
+              {row.original.status === "active" && (
+                <DropdownMenuItem>
+                  <Square className="mr-2 size-4 text-amber-600" />
+                  Mettre en pause
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const items = (data?.items ?? []) as CampaignRow[];
+  const page_count = data?.meta.totalPages ?? 0;
+
+  const { table } = useDataTable({
+    data: items,
+    columns: columns as ColumnDef<(typeof items)[number]>[],
+    pageCount: page_count,
+    queryKeys: { page: "cmpPage", perPage: "cmpPerPage", sort: "cmpSort" },
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
+  });
+
+  if (isLoading && !data)
+    return (
+      <ConsolePageShell
+        title="Campagnes"
+        subtitle="Gérez vos campagnes marketing et bannières"
+        actions={
+          <Button asChild>
+            <Link href="/console/campaigns/new">
+              <Megaphone className="mr-2 h-4 w-4" />
+              Nouvelle campagne
+            </Link>
+          </Button>
+        }
+      >
+        <DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />
+      </ConsolePageShell>
+    );
 
   return (
     <ConsolePageShell
@@ -87,228 +318,84 @@ export function CampaignListPage() {
       actions={
         <Button asChild>
           <Link href="/console/campaigns/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Megaphone className="mr-2 h-4 w-4" />
             Nouvelle campagne
           </Link>
         </Button>
       }
-      stats={<CampaignStatsRow />}
+      stats={
+        <StatsGrid
+          loading={statsLoading}
+          items={[
+            { label: "Total", value: stats?.total ?? 0, icon: Layers, color: "info" },
+            { label: "Actives", value: stats?.active ?? 0, icon: Megaphone, color: "success" },
+            { label: "Planifiées", value: stats?.scheduled ?? 0, icon: Calendar, color: "warning" },
+            { label: "Brouillons", value: stats?.draft ?? 0, icon: Eye, color: "default" },
+            { label: "Terminées", value: stats?.ended ?? 0, icon: Square, color: "default" },
+          ]}
+        />
+      }
     >
-      <div className="space-y-6">
-        {/* Filters */}
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex flex-wrap gap-3">
-              <div className="relative min-w-[200px] flex-1">
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <Input
-                  placeholder="Rechercher une campagne..."
-                  className="pl-9"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                />
-              </div>
-              <Select
-                value={status}
-                onValueChange={(v) => {
-                  setStatus(v);
-                  setPage(1);
-                }}
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <Input
+            placeholder="Rechercher une campagne…"
+            value={search || ""}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="max-w-sm"
+          />
+          <FacetedFilter
+            title="Statut"
+            options={STATUS_OPTIONS}
+            value={status ?? undefined}
+            onChange={(val) => {
+              setStatus(val);
+              setPage(1);
+            }}
+          />
+          <FacetedFilter
+            title="Type"
+            options={TYPE_OPTIONS}
+            value={campaign_type ?? undefined}
+            onChange={(val) => {
+              setCampaignType(val);
+              setPage(1);
+            }}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            </Badge>
+            <Button variant="secondary" size="sm">
+              <Play className="mr-1 h-4 w-4" />
+              Activer
+            </Button>
+            <Button variant="secondary" size="sm">
+              <Square className="mr-1 h-4 w-4" />
+              Mettre en pause
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/campaigns/export?${new URLSearchParams({
+                  ...(search ? { search } : {}),
+                  ...(status ? { status } : {}),
+                  ...(campaign_type ? { campaign_type } : {}),
+                })}`}
+                download="campaigns.csv"
               >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={campaign_type}
-                onValueChange={(v) => {
-                  setCampaignType(v);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPE_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Table */}
-        <Card>
-          <CardContent className="p-0">
-            {isLoading ? (
-              <div className="flex h-48 items-center justify-center">
-                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Campagne</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Priorité</TableHead>
-                    <TableHead>Début</TableHead>
-                    <TableHead>Fin</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.rows?.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-muted-foreground py-12 text-center">
-                        Aucune campagne trouvée
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {data?.rows?.map((campaign) => (
-                    <TableRow key={campaign.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{campaign.name}</p>
-                          <p className="text-muted-foreground text-xs">{campaign.slug}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <CampaignTypeBadge type={campaign.campaign_type} />
-                      </TableCell>
-                      <TableCell>
-                        <CampaignStatusBadge status={campaign.status} />
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-mono text-sm">{campaign.priority}</span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {campaign.starts_at
-                          ? format(new Date(campaign.starts_at), "dd MMM yyyy HH:mm", {
-                              locale: fr,
-                            })
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {campaign.ends_at
-                          ? format(new Date(campaign.ends_at), "dd MMM yyyy HH:mm", { locale: fr })
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button asChild variant="ghost" size="icon">
-                            <Link href={`/console/campaigns/${campaign.id}/analytics`}>
-                              <BarChart3 className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button asChild variant="ghost" size="icon">
-                            <Link href={`/console/campaigns/${campaign.id}`}>
-                              <Pencil className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Pagination */}
-        {data && data.total > 20 && (
-          <div className="flex items-center justify-between">
-            <p className="text-muted-foreground text-sm">{data.total} campagnes au total</p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                Précédent
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page * 20 >= data.total}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Suivant
-              </Button>
-            </div>
+                <Download className="mr-1 h-4 w-4" />
+                Exporter
+              </a>
+            </Button>
           </div>
         )}
-      </div>
+      </DataTable>
     </ConsolePageShell>
-  );
-}
-
-function CampaignStatsRow() {
-  const { data, isFetching, isLoading } = trpc.campaigns.adminList.useQuery({ page: 1, limit: 1 });
-
-  return (
-    <StatsGrid
-      loading={isFetching || isLoading}
-      items={[
-        {
-          label: "Total",
-          value: data?.total ?? 0,
-          icon: Layers,
-          color: "info",
-        },
-        {
-          label: "Actives",
-          value: data?.rows.filter((row) => row.status === CAMPAIGN_STATUS.active).length ?? 0,
-          icon: Megaphone,
-          color: "success",
-        },
-        {
-          label: "Planifiées",
-          value: data?.rows.filter((row) => row.status === CAMPAIGN_STATUS.scheduled).length ?? 0,
-          icon: Calendar,
-          color: "warning",
-        },
-        {
-          label: "Brouillons",
-          value: data?.rows.filter((row) => row.status === CAMPAIGN_STATUS.draft).length ?? 0,
-          icon: Eye,
-          color: "default",
-        },
-      ]}
-    />
-  );
-}
-
-function CampaignTypeBadge({ type }: { type: string }) {
-  const labels: Record<string, string> = {
-    homepage: "Accueil",
-    seasonal: "Saisonnière",
-    flash_sale: "Flash",
-    targeted: "Ciblée",
-    banner: "Bannière",
-    category: "Catégorie",
-    brand: "Marque",
-    landing_page: "Landing",
-  };
-  return (
-    <Badge variant="outline" className="text-xs">
-      {labels[type] ?? type}
-    </Badge>
   );
 }

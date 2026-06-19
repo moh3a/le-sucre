@@ -1,8 +1,9 @@
 import "server-only";
-import { and, avg, count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, avg, count, desc, eq, gte, sql, sum } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { orders, order_items } from "@/features/order_management_system/orders/schema";
+import { product_translations } from "@/features/product_information_management/products/schema";
 import {
   product_reviews,
   product_review_helpful_votes,
@@ -142,20 +143,63 @@ export class ReviewRepository {
       .orderBy(desc(product_reviews.created_at));
   }
 
-  admin_list(page: number, limit: number, status?: string, product_id?: string) {
+  async admin_list(page: number, limit: number, status?: string, product_id?: string) {
     const offset = (page - 1) * limit;
     const filters = [];
     if (status) filters.push(eq(product_reviews.status, status));
     if (product_id) filters.push(eq(product_reviews.product_id, product_id));
     const where = filters.length ? and(...filters) : undefined;
 
-    return db
-      .select()
+    const [total_res] = await db
+      .select({ total: count() })
       .from(product_reviews)
+      .where(where);
+    const total_records = Number(total_res?.total ?? 0);
+
+    const items = await db
+      .select({
+        id: product_reviews.id,
+        product_id: product_reviews.product_id,
+        user_id: product_reviews.user_id,
+        rating: product_reviews.rating,
+        title: product_reviews.title,
+        body: product_reviews.body,
+        status: product_reviews.status,
+        moderation_note: product_reviews.moderation_note,
+        is_verified_purchase: product_reviews.is_verified_purchase,
+        locale: product_reviews.locale,
+        helpful_count: product_reviews.helpful_count,
+        report_count: product_reviews.report_count,
+        created_at: product_reviews.created_at,
+        updated_at: product_reviews.updated_at,
+        author_name: users.name,
+        author_email: users.email,
+        product_name: product_translations.name,
+      })
+      .from(product_reviews)
+      .leftJoin(users, eq(users.id, product_reviews.user_id))
+      .leftJoin(
+        product_translations,
+        and(
+          eq(product_translations.product_id, product_reviews.product_id),
+          eq(product_translations.locale, "fr"),
+        ),
+      )
       .where(where)
       .orderBy(desc(product_reviews.created_at))
       .limit(limit)
       .offset(offset);
+
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total_records,
+        total_pages: Math.max(1, Math.ceil(total_records / limit)),
+        has_more: page < Math.ceil(total_records / limit),
+      },
+    };
   }
 
   insert_moderation_event(input: typeof product_review_moderation_events.$inferInsert) {
@@ -190,7 +234,11 @@ export class ReviewRepository {
           sql<number>`SUM(CASE WHEN ${product_reviews.is_verified_purchase} = 1 THEN 1 ELSE 0 END)`.mapWith(
             Number,
           ),
-        avg_rating: avg(product_reviews.rating),
+        reported:
+          sql<number>`SUM(CASE WHEN ${product_reviews.report_count} > 0 THEN 1 ELSE 0 END)`.mapWith(
+            Number,
+          ),
+        average_rating: avg(product_reviews.rating),
       })
       .from(product_reviews);
 
@@ -204,7 +252,15 @@ export class ReviewRepository {
       .groupBy(product_reviews.rating)
       .orderBy(product_reviews.rating);
 
-    return { totals, by_rating };
+    return {
+      total: Number(totals?.total ?? 0),
+      pending: Number(totals?.pending ?? 0),
+      approved: Number(totals?.approved ?? 0),
+      rejected: Number(totals?.rejected ?? 0),
+      verified: Number(totals?.verified ?? 0),
+      reported: Number(totals?.reported ?? 0),
+      average_rating: Number(totals?.average_rating ?? 0).toFixed(1),
+    };
   }
 
   async rating_trends(days = 30) {
@@ -213,7 +269,7 @@ export class ReviewRepository {
       .select({
         day_key: sql<string>`DATE(${product_reviews.created_at})`,
         count: count(),
-        avg_rating: avg(product_reviews.rating),
+        average_rating: avg(product_reviews.rating),
       })
       .from(product_reviews)
       .where(and(eq(product_reviews.status, "approved"), gte(product_reviews.created_at, since)))

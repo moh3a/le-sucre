@@ -1,7 +1,9 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { inventory_alerts } from "../schema";
+import { product_skus } from "@/features/product_information_management/variants/schema";
+import { product_translations } from "@/features/product_information_management/products/schema";
 import { forecast_repository } from "./forecast.repository";
 import { format } from "date-fns";
 
@@ -61,16 +63,61 @@ export class AlertRepository {
       .where(eq(inventory_alerts.id, id));
   }
 
-  list(input: { status?: string; page: number; limit: number }) {
+  async list(input: { status?: string; page: number; limit: number }) {
     const offset = (input.page - 1) * input.limit;
     const where = input.status ? eq(inventory_alerts.status, input.status) : undefined;
-    return db
-      .select()
-      .from(inventory_alerts)
-      .where(where)
-      .orderBy(desc(inventory_alerts.created_at))
-      .limit(input.limit)
-      .offset(offset);
+
+    const [[{ total }], items] = await Promise.all([
+      db.select({ total: count() }).from(inventory_alerts).where(where),
+      db
+        .select({
+          id: inventory_alerts.id,
+          sku_id: inventory_alerts.sku_id,
+          warehouse_id: inventory_alerts.warehouse_id,
+          alert_type: inventory_alerts.alert_type,
+          severity: inventory_alerts.severity,
+          message: inventory_alerts.message,
+          status: inventory_alerts.status,
+          created_at: inventory_alerts.created_at,
+          resolved_at: inventory_alerts.resolved_at,
+          product_name: product_translations.name,
+        })
+        .from(inventory_alerts)
+        .leftJoin(product_skus, eq(inventory_alerts.sku_id, product_skus.id))
+        .leftJoin(
+          product_translations,
+          eq(product_skus.product_id, product_translations.product_id),
+        )
+        .where(where)
+        .orderBy(desc(inventory_alerts.created_at))
+        .limit(input.limit)
+        .offset(offset),
+    ]);
+
+    return {
+      items,
+      meta: { total, page: input.page, limit: input.limit, totalPages: Math.ceil(total / input.limit) },
+    };
+  }
+
+  async stats() {
+    const [total, open, ack, resolved, critical, warning] = await Promise.all([
+      db.select({ count: count() }).from(inventory_alerts),
+      db.select({ count: count() }).from(inventory_alerts).where(eq(inventory_alerts.status, "open")),
+      db.select({ count: count() }).from(inventory_alerts).where(eq(inventory_alerts.status, "ack")),
+      db.select({ count: count() }).from(inventory_alerts).where(eq(inventory_alerts.status, "resolved")),
+      db.select({ count: count() }).from(inventory_alerts).where(eq(inventory_alerts.severity, "critical")),
+      db.select({ count: count() }).from(inventory_alerts).where(eq(inventory_alerts.severity, "warning")),
+    ]);
+
+    return {
+      total: total[0].count,
+      open: open[0].count,
+      ack: ack[0].count,
+      resolved: resolved[0].count,
+      critical: critical[0].count,
+      warning: warning[0].count,
+    };
   }
 
   ack(id: string) {

@@ -1,79 +1,53 @@
 "use client";
 
-import * as React from "react";
+import { parseAsString, useQueryState } from "nuqs";
+import { AlertTriangle, Bell, BellOff, CheckCircle2, ShieldAlert } from "lucide-react";
+
 import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { StatsGrid } from "@/components/console/stats-grid";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { trpc } from "@/components/providers/app-providers";
 import { AlertsTable } from "./alerts-table";
 
+const TABS = [
+  { value: "open", label: "Actives" },
+  { value: "ack", label: "Pris acte" },
+  { value: "resolved", label: "Résolues" },
+];
+
 export function AlertsPageClient() {
-  const [status, setStatus] = React.useState<string>("open");
-  const utils = trpc.useUtils();
+  const [status, setStatus] = useQueryState("alertStatus", parseAsString.withDefault("open"));
 
-  const { data: alertsData, isLoading } = trpc.forecast.alerts.useQuery({
-    status: status || undefined,
-    page: 1,
-    limit: 50,
-  });
-
-  const ackMutation = trpc.forecast.ackAlert.useMutation({
-    onSuccess: () => {
-      void utils.forecast.alerts.invalidate();
-      void utils.forecast.dashboard.invalidate();
-    },
-  });
-
-  const resolveMutation = trpc.forecast.resolveAlert.useMutation({
-    onSuccess: () => {
-      void utils.forecast.alerts.invalidate();
-      void utils.forecast.dashboard.invalidate();
-    },
-  });
-
-  const handleAck = (id: string) => {
-    ackMutation.mutate({ id });
-  };
-
-  const handleResolve = (id: string) => {
-    resolveMutation.mutate({ id });
-  };
-
-  const isMutating = ackMutation.isPending || resolveMutation.isPending;
+  const { data: stats, isLoading: statsLoading } = trpc.forecast.alertStats.useQuery();
 
   return (
-    <ConsolePageShell title="Alertes Stock" subtitle="Gestion des alertes de stock faible">
+    <ConsolePageShell
+      title="Alertes Stock"
+      subtitle="Gestion des alertes de stock et des prévisions de rupture"
+      stats={
+        <StatsGrid
+          loading={statsLoading}
+          items={[
+            { label: "Total alertes", value: stats?.total ?? 0, icon: Bell, color: "default" },
+            { label: "Actives", value: stats?.open ?? 0, icon: ShieldAlert, color: "error" },
+            { label: "Pris acte", value: stats?.ack ?? 0, icon: BellOff, color: "warning" },
+            { label: "Résolues", value: stats?.resolved ?? 0, icon: CheckCircle2, color: "success" },
+            { label: "Critiques", value: stats?.critical ?? 0, icon: AlertTriangle, color: "error" },
+            { label: "Avertissements", value: stats?.warning ?? 0, icon: AlertTriangle, color: "warning" },
+          ]}
+        />
+      }
+    >
       <Tabs value={status} onValueChange={setStatus} className="space-y-6">
         <TabsList>
-          <TabsTrigger value="open">Actives</TabsTrigger>
-          <TabsTrigger value="ack">Pris acte</TabsTrigger>
-          <TabsTrigger value="resolved">Résolues</TabsTrigger>
+          {TABS.map((t) => (
+            <TabsTrigger key={t.value} value={t.value}>
+              {t.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Low Stock Alerts</CardTitle>
-            <CardDescription>
-              Alertes automatiques générées par l&apos;analyse prévisionnelle des niveaux de stock.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p className="text-muted-foreground py-4 text-sm">Chargement des alertes…</p>
-            ) : !alertsData || alertsData.length === 0 ? (
-              <p className="text-muted-foreground py-4 text-sm">
-                Aucune alerte de stock dans cette catégorie.
-              </p>
-            ) : (
-              <AlertsTable
-                data={alertsData}
-                onAck={handleAck}
-                onResolve={handleResolve}
-                isMutating={isMutating}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <AlertsTable status={status === "open" ? undefined : status} />
       </Tabs>
     </ConsolePageShell>
   );

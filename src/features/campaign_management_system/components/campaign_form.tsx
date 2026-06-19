@@ -654,7 +654,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                       onChange={(e) => field.onChange(e.target.value || null)}
                     >
                       <option value="">Aucune promotion</option>
-                      {promotions?.map((p) => (
+                      {promotions?.items?.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name} (
                           {p.discount_type === "percentage"

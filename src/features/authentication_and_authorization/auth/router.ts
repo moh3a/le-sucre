@@ -21,6 +21,55 @@ export const auth_router = create_trpc_router({
     const rbac = await authorizationService.get_auth_context(ctx.user.id);
     return { user: ctx.user, ...rbac };
   }),
+
+  updateProfile: protected_procedure
+    .input(z.object({ name: z.string().min(2).max(255) }))
+    .mutation(async ({ ctx, input }) => {
+      await user_repository.update_profile(ctx.user.id, { name: input.name });
+      await audit_service.log({
+        actor_user_id: ctx.user.id,
+        action: "profile.updated",
+        resource_type: "user",
+        resource_id: ctx.user.id,
+        metadata: { name: input.name },
+      });
+      return { ok: true };
+    }),
+
+  changePassword: protected_procedure
+    .input(
+      z.object({
+        current_password: z.string().min(1),
+        new_password: z.string().min(8).max(128),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await auth.api.changePassword({
+        body: {
+          newPassword: input.new_password,
+          currentPassword: input.current_password,
+          revokeOtherSessions: true,
+        },
+      });
+      await audit_service.log({
+        actor_user_id: ctx.user.id,
+        action: "password.changed",
+        resource_type: "user",
+        resource_id: ctx.user.id,
+      });
+      return { ok: true };
+    }),
+
+  myActivity: protected_procedure
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return audit_repository.list_by_user(ctx.user.id, input.page, input.limit);
+    }),
 });
 
 export const admin_auth_router = create_trpc_router({

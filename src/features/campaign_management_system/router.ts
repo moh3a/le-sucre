@@ -3,6 +3,7 @@ import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { campaign_service } from "./services/campaign.service";
+import { campaign_repository } from "./repositories/campaign.repository";
 import {
   list_campaigns_dto,
   create_campaign_dto,
@@ -25,6 +26,10 @@ export const campaign_router = create_trpc_router({
   adminList: permission_procedure(PERMISSIONS.campaigns_read)
     .input(list_campaigns_dto)
     .query(({ input }) => campaign_service.list(input)),
+
+  campaignStats: permission_procedure(PERMISSIONS.campaigns_read)
+    .input(z.object({}).optional())
+    .query(() => campaign_repository.stats()),
 
   byId: permission_procedure(PERMISSIONS.campaigns_read)
     .input(id_input)

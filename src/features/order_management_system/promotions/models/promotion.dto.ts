@@ -80,6 +80,7 @@ export const list_promotions_dto = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   status: z.string().optional(),
   promotion_type: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export const create_promo_code_dto = z.object({

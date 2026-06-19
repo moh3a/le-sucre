@@ -92,6 +92,13 @@
       "when": 1781730479594,
       "tag": "0012_normal_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1781884656003,
+      "tag": "0013_purple_mysterio",
+      "breakpoints": true
     }
   ]
 }

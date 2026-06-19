@@ -3,6 +3,7 @@ import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { promotion_service } from "./services/promotion.service";
+import { promotion_repository } from "./repositories/promotion.repository";
 import { flash_sale_service } from "./services/flash-sale.service";
 import { cart_discount_service } from "./services/cart-discount.service";
 import {
@@ -19,6 +20,10 @@ export const promotion_router = create_trpc_router({
   adminList: permission_procedure(PERMISSIONS.promotions_read)
     .input(list_promotions_dto)
     .query(({ input }) => promotion_service.list(input)),
+
+  promotionStats: permission_procedure(PERMISSIONS.promotions_read)
+    .input(z.object({}).optional())
+    .query(() => promotion_repository.stats()),
 
   byId: permission_procedure(PERMISSIONS.promotions_read)
     .input(z.object({ id: z.string().min(1).max(255) }))

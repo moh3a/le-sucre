@@ -18,10 +18,20 @@ export const preorder_router = create_trpc_router({
     .input(upsert_preorder_settings_dto)
     .mutation(({ input }) => preorder_repository.upsert_settings(input)),
 
+  preorderStats: permission_procedure(PERMISSIONS.preorders_read)
+    .input(z.object({}).optional())
+    .query(() => preorder_repository.stats()),
+
   adminListAllocations: permission_procedure(PERMISSIONS.preorders_read)
     .input(list_preorder_allocations_dto)
     .query(({ input }) =>
-      preorder_repository.admin_list_allocations(input.page, input.limit, input.status),
+      preorder_repository.admin_list_allocations(
+        input.page,
+        input.limit,
+        input.status,
+        input.search,
+        input.sku_id,
+      ),
     ),
 
   updateEstimatedDate: permission_procedure(PERMISSIONS.preorders_write)

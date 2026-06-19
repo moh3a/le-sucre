@@ -23,6 +23,10 @@ export const forecast_router = create_trpc_router({
     )
     .query(({ input }) => forecast_analytics_queries.dashboard(input)),
 
+  forecastStats: permission_procedure(PERMISSIONS.inventory_forecast_read)
+    .input(z.object({}).optional())
+    .query(() => forecast_analytics_queries.stats()),
+
   alerts: permission_procedure(PERMISSIONS.inventory_forecast_read)
     .input(
       z.object({
@@ -32,6 +36,10 @@ export const forecast_router = create_trpc_router({
       }),
     )
     .query(({ input }) => alert_repository.list(input)),
+
+  alertStats: permission_procedure(PERMISSIONS.inventory_forecast_read)
+    .input(z.object({}).optional())
+    .query(() => alert_repository.stats()),
 
   ackAlert: permission_procedure(PERMISSIONS.inventory_forecast_write)
     .input(z.object({ id: z.string().min(1).max(255) }))

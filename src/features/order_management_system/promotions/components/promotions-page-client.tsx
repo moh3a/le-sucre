@@ -1,43 +1,41 @@
 "use client";
 
+import { DollarSign, Hash, Percent, Play, Tag, TicketCheck } from "lucide-react";
+
 import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 import { PromotionsTable } from "./promotions-table";
 import { CreatePromotionDialog } from "./create-promotion-dialog";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export function PromotionsPageClient() {
-  const { data: promotionsData, isLoading } = trpc.promotions.adminList.useQuery({
-    page: 1,
-    limit: 50,
-  });
+  const { data: stats, isLoading: statsLoading } = trpc.promotions.promotionStats.useQuery();
 
   return (
     <ConsolePageShell
       title="Promotions"
-      subtitle="Gestion des codes promo, ventes flash et bundles"
+      subtitle="Gestion des codes promo, ventes flash et offres groupées"
       actions={<CreatePromotionDialog />}
+      stats={
+        <StatsGrid
+          loading={statsLoading}
+          items={[
+            { label: "Total", value: stats?.total ?? 0, icon: Tag, color: "default" },
+            { label: "Actives", value: stats?.active ?? 0, icon: Play, color: "success" },
+            { label: "Brouillons", value: stats?.draft ?? 0, icon: Hash, color: "default" },
+            { label: "Planifiées", value: stats?.scheduled ?? 0, icon: Percent, color: "info" },
+            { label: "En Pause", value: stats?.paused ?? 0, icon: TicketCheck, color: "warning" },
+            {
+              label: "Remise Totale",
+              value: `${Number(stats?.total_discount_amount ?? 0).toLocaleString("fr-FR", { minimumFractionDigits: 0 })} DZD`,
+              icon: DollarSign,
+              color: "success",
+            },
+          ]}
+        />
+      }
     >
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Campagnes et Remises</CardTitle>
-            <CardDescription>
-              Liste des règles de remise automatiques, codes promotionnels, ventes flash et offres
-              groupées.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p className="text-muted-foreground py-4 text-sm">Chargement des promotions…</p>
-            ) : !promotionsData || promotionsData.length === 0 ? (
-              <p className="text-muted-foreground py-4 text-sm">Aucune promotion configurée.</p>
-            ) : (
-              <PromotionsTable data={promotionsData} />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <PromotionsTable />
     </ConsolePageShell>
   );
 }

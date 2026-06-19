@@ -2,7 +2,8 @@
 
 ## TODO
 
-- instead of having all operations in one feature, seperate into multiple operations endpoints in each feature
+- remove all hard coded text
+- add feature flags to enable or disable features
 - fix analytics
 - fix SKUs table single editing or bulk editing
 - brand combobox can select a brand or create one

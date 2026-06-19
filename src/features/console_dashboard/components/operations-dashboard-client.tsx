@@ -1,19 +1,19 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
+import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { StatsGrid } from "@/components/console/stats-grid";
 import {
   AlertCircle,
   Ban,
-  Wrench,
   Banknote,
-  RefreshCw,
+  HeadphonesIcon,
   ListTodo,
   Phone,
-  HeadphonesIcon,
+  RefreshCw,
   Warehouse,
+  Wrench,
 } from "lucide-react";
 
 export function OperationsDashboardClient() {
@@ -31,102 +31,96 @@ export function OperationsDashboardClient() {
   const pendingPayments = trpc.operations.paymentCountPendingVerifications.useQuery();
   const overdueFollowups = trpc.operations.customerGetOverdueFollowUps.useQuery();
 
-  if (escalations.isLoading && cancellations.isLoading && tasks.isLoading)
-    return <Skeleton className="h-96 w-full" />;
+  const loading =
+    escalations.isLoading && cancellations.isLoading && tasks.isLoading;
 
-  const widgets = [
-    {
-      title: "Escalades ouvertes",
-      count: escalations.data?.meta?.total_records ?? 0,
-      icon: AlertCircle,
-      href: "/console/operations/escalations",
-      color: "text-destructive",
-    },
-    {
-      title: "Annulations en attente",
-      count: cancellations.data?.meta?.total_records ?? 0,
-      icon: Ban,
-      href: "/console/operations/cancellations",
-      color: "text-destructive",
-    },
-    {
-      title: "Tâches en attente",
-      count: tasks.data?.pending ?? 0,
-      icon: ListTodo,
-      href: "/console/operations/tasks",
-      color: "text-secondary",
-    },
-    {
-      title: "Tâches en retard",
-      count: tasks.data?.overdue ?? 0,
-      icon: AlertCircle,
-      href: "/console/operations/tasks",
-      color: "text-destructive",
-    },
-    {
-      title: "Paiements en attente",
-      count: pendingPayments.data ?? 0,
-      icon: Banknote,
-      href: "/console/operations/payment-verifications",
-      color: "text-secondary",
-    },
-    {
-      title: "Relances en retard",
-      count: overdueFollowups.data?.length ?? 0,
-      icon: Phone,
-      href: "/console/operations/follow-ups",
-      color: "text-destructive",
-    },
-    {
-      title: "Garanties",
-      icon: Wrench,
-      href: "/console/operations/warranty",
-      color: "text-secondary",
-    },
-    {
-      title: "Remboursements",
-      icon: RefreshCw,
-      href: "/console/operations/refunds",
-      color: "text-secondary",
-    },
-    {
-      title: "Cas de support",
-      icon: HeadphonesIcon,
-      href: "/console/operations/support-cases",
-      color: "text-secondary",
-    },
-    {
-      title: "Ajustements stock",
-      icon: Warehouse,
-      href: "/console/operations/inventory-adjustments",
-      color: "text-secondary",
-    },
-  ];
+  if (loading)
+    return (
+      <ConsolePageShell title="Opérations" subtitle="Tableau de bord des opérations quotidiennes">
+        <Skeleton className="h-96 w-full" />
+      </ConsolePageShell>
+    );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Opérations</h1>
-        <p className="text-muted-foreground">Tableau de bord des opérations quotidiennes</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {widgets.map((w) => (
-          <Link key={w.href} href={w.href}>
-            <Card className="hover:bg-accent/5 cursor-pointer transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{w.title}</CardTitle>
-                <w.icon className={`h-4 w-4 ${w.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${w.color}`}>
-                  {"count" in w ? w.count : "—"}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    </div>
+    <ConsolePageShell
+      title="Opérations"
+      subtitle="Tableau de bord des opérations quotidiennes"
+    >
+      <StatsGrid
+        loading={false}
+        items={[
+          {
+            label: "Escalades ouvertes",
+            value: escalations.data?.meta?.total_records ?? 0,
+            icon: AlertCircle,
+            color: "error",
+            link: "/console/operations/escalations",
+          },
+          {
+            label: "Annulations en attente",
+            value: cancellations.data?.meta?.total_records ?? 0,
+            icon: Ban,
+            color: "error",
+            link: "/console/operations/cancellations",
+          },
+          {
+            label: "Tâches en attente",
+            value: tasks.data?.pending ?? 0,
+            icon: ListTodo,
+            color: "info",
+            link: "/console/operations/tasks",
+          },
+          {
+            label: "Tâches en retard",
+            value: tasks.data?.overdue ?? 0,
+            icon: AlertCircle,
+            color: "error",
+            link: "/console/operations/tasks",
+          },
+          {
+            label: "Paiements en attente",
+            value: pendingPayments.data ?? 0,
+            icon: Banknote,
+            color: "warning",
+            link: "/console/operations/payment-verifications",
+          },
+          {
+            label: "Relances en retard",
+            value: overdueFollowups.data?.length ?? 0,
+            icon: Phone,
+            color: "error",
+            link: "/console/operations/follow-ups",
+          },
+          {
+            label: "Garanties",
+            value: "—",
+            icon: Wrench,
+            color: "default",
+            link: "/console/operations/warranty",
+          },
+          {
+            label: "Remboursements",
+            value: "—",
+            icon: RefreshCw,
+            color: "default",
+            link: "/console/operations/refunds",
+          },
+          {
+            label: "Cas de support",
+            value: "—",
+            icon: HeadphonesIcon,
+            color: "default",
+            link: "/console/operations/support-cases",
+          },
+          {
+            label: "Ajustements stock",
+            value: "—",
+            icon: Warehouse,
+            color: "default",
+            link: "/console/operations/inventory-adjustments",
+          },
+        ]}
+      />
+    </ConsolePageShell>
   );
 }

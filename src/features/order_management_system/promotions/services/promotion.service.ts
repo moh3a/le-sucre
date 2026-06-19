@@ -25,6 +25,7 @@ export class PromotionService {
       input.limit,
       input.status,
       input.promotion_type,
+      input.search,
     );
   }
 

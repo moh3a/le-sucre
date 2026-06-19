@@ -8,7 +8,6 @@ import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
-import { estimate_page_count } from "@/lib/console-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 
@@ -114,12 +113,13 @@ export function InventoryForecastTable() {
   const [per_page] = useQueryState("invPerPage", parseAsInteger.withDefault(20));
 
   const { data, isLoading } = trpc.forecast.dashboard.useQuery({ page, limit: per_page });
-  const items = (data?.rows ?? []) as ForecastRow[];
+  const items = (data?.items ?? []) as ForecastRow[];
+  const page_count = data?.meta.totalPages ?? 0;
 
   const { table } = useDataTable({
     data: items,
     columns,
-    pageCount: estimate_page_count(page, per_page, items.length),
+    pageCount: page_count,
     queryKeys: { page: "invPage", perPage: "invPerPage" },
     getRowId: (row) => row.sku_id,
   });

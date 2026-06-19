@@ -3,27 +3,20 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { Eye, Loader2, Search, User, Clipboard, Check } from "lucide-react";
+import { Download, Eye, Loader2, MoreHorizontal, User, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
-import { estimate_page_count } from "@/lib/console-table";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +24,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 type CartRow = {
   id: string;
@@ -56,64 +57,112 @@ const CART_STATUS_CONFIG: Record<
   abandoned: { label: "Abandonné", variant: "destructive" },
 };
 
-const STATUS_FILTER_OPTIONS = [
-  { value: "all", label: "Tous les statuts" },
-  { value: "active", label: "Actif uniquement" },
-  { value: "abandoned", label: "Abandonné uniquement" },
-  { value: "converted", label: "Converti uniquement" },
-  { value: "merged", label: "Fusionné uniquement" },
+const STATUS_OPTIONS = [
+  { label: "Actif", value: "active" },
+  { label: "Abandonné", value: "abandoned" },
+  { label: "Converti", value: "converted" },
+  { label: "Fusionné", value: "merged" },
 ];
 
-const getCartStatus = (row: CartRow): string => {
+function getCartStatus(row: CartRow): string {
   if (row.status === "active") {
     const isOld = new Date(row.updated_at).getTime() < Date.now() - 24 * 60 * 60 * 1000;
     if (isOld && row.item_count > 0) return "abandoned";
   }
   return row.status;
-};
+}
+
+function FacetedFilter({
+  title,
+  options,
+  icon: Icon,
+  value,
+  onChange,
+}: {
+  title: string;
+  options: { label: string; value: string }[];
+  icon?: React.ComponentType<{ className?: string }>;
+  value?: string;
+  onChange: (value: string | null) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="border-dashed font-normal">
+          {value ? (
+            <div
+              role="button"
+              aria-label={`Clear ${title} filter`}
+              tabIndex={0}
+              className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(null);
+              }}
+            >
+              <XCircle className="size-4" />
+            </div>
+          ) : (
+            Icon && <Icon className="size-4" />
+          )}
+          <span className="ml-2">{title}</span>
+          {value && (
+            <>
+              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
+            </>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-56 p-0">
+        <div className="p-2">
+          {options.map((option) => (
+            <Button
+              key={option.value}
+              variant={value === option.value ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => {
+                onChange(value === option.value ? null : option.value);
+                setOpen(false);
+              }}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function CartsTable() {
-  const [page, setPage] = useQueryState("cartPage", parseAsInteger.withDefault(1));
+  const [page] = useQueryState("cartPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("cartPerPage", parseAsInteger.withDefault(20));
-  const [status, setStatus] = useQueryState("cartStatus", parseAsString.withDefault("all"));
-  const [search, setSearch] = useQueryState("cartSearch", parseAsString.withDefault(""));
+  const [search, setSearch] = useQueryState("cartSearch", parseAsString);
+  const [status, setStatus] = useQueryState("cartStatus", parseAsString);
 
   const [selectedCartId, setSelectedCartId] = React.useState<string | null>(null);
-  const [copiedId, setCopiedId] = React.useState<string | null>(null);
-
-  const handleCopy = (id: string) => {
-    void navigator.clipboard.writeText(id);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1500);
-  };
 
   const columns = React.useMemo<ColumnDef<CartRow>[]>(
     () => [
+      {
+        id: "select",
+        enableSorting: false,
+        enableHiding: false,
+      },
       {
         id: "id",
         accessorKey: "id",
         header: ({ column }) => <DataTableColumnHeader column={column} label="Panier ID" />,
         cell: ({ row }) => (
-          <div className="flex items-center gap-1.5 font-mono text-xs">
-            <span className="max-w-[80px] truncate">{row.original.id}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-muted h-5 w-5"
-              onClick={() => handleCopy(row.original.id)}
-            >
-              {copiedId === row.original.id ? (
-                <Check className="h-3 w-3 text-emerald-500" />
-              ) : (
-                <Clipboard className="text-muted-foreground h-3 w-3" />
-              )}
-            </Button>
-          </div>
+          <span className="font-mono text-xs">{row.original.id}</span>
         ),
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Client / Session" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Client" />,
         cell: ({ row }) => {
           const name = row.original.customer_name;
           const email = row.original.customer_email;
@@ -186,92 +235,95 @@ export function CartsTable() {
       },
       {
         id: "actions",
-        header: () => <span className="sr-only">Actions</span>,
         cell: ({ row }) => (
-          <div className="flex items-center justify-end">
-            <Button variant="ghost" size="icon" onClick={() => setSelectedCartId(row.original.id)}>
-              <Eye className="text-muted-foreground hover:text-foreground h-4 w-4" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setSelectedCartId(row.original.id)}>
+                <Eye className="mr-2 h-4 w-4" />
+                Voir les articles
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ),
       },
     ],
-    [copiedId],
+    [],
   );
 
   const { data, isLoading } = trpc.cart.adminList.useQuery({
     page,
     limit: per_page,
-    status: status === "all" ? undefined : status,
+    status: status || undefined,
     search: search || undefined,
   });
 
   const items = (data?.items ?? []) as CartRow[];
-  const totalRecords = data?.meta.total_records ?? 0;
+  const page_count = data?.meta.total_pages ?? 0;
 
   const { table } = useDataTable({
     data: items,
-    columns,
-    pageCount: estimate_page_count(page, per_page, totalRecords),
-    queryKeys: { page: "cartPage", perPage: "cartPerPage" },
+    columns: columns as ColumnDef<(typeof items)[number]>[],
+    pageCount: page_count,
+    queryKeys: { page: "cartPage", perPage: "cartPerPage", sort: "cartSort" },
     getRowId: (row) => row.id,
+    enableRowSelection: true,
   });
 
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-wrap gap-4">
-            <div className="relative min-w-[200px] flex-1">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
-                placeholder="Rechercher par ID, client, guest token..."
-                className="pl-9"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <Select
-              value={status}
-              onValueChange={(val) => {
-                setStatus(val);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Filtrer par statut" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_FILTER_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+  if (isLoading && !data)
+    return <DataTableSkeleton columnCount={7} rowCount={10} filterCount={2} />;
 
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <DataTableSkeleton columnCount={7} rowCount={10} />
-          ) : (
-            <DataTable table={table} />
-          )}
-        </CardContent>
-      </Card>
+  return (
+    <>
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <Input
+            placeholder="Rechercher par ID, client, guest token…"
+            value={search || ""}
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            className="max-w-sm"
+          />
+          <FacetedFilter
+            title="Statut"
+            options={STATUS_OPTIONS}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/carts/export?${new URLSearchParams({
+                  ...(search ? { search } : {}),
+                  ...(status ? { status } : {}),
+                })}`}
+                download="carts.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                Exporter
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
 
       <CartItemsDialog
         cartId={selectedCartId || ""}
         open={!!selectedCartId}
         onOpenChange={(open) => !open && setSelectedCartId(null)}
       />
-    </div>
+    </>
   );
 }
 

@@ -11,7 +11,6 @@ import { AdminReviewModerationTable } from "./admin-review-moderation-table";
 export function ReviewsPageClient() {
   const stats = trpc.reviews.adminStats.useQuery();
   const trends = trpc.reviews.ratingTrends.useQuery({ days: 30 });
-
   return (
     <ConsolePageShell
       title="Avis clients"
@@ -28,7 +27,7 @@ export function ReviewsPageClient() {
             },
             {
               label: "Note moyenne",
-              value: stats.data?.average_rating ?? 0,
+              value: stats.data?.average_rating ?? "0.0",
               icon: Star,
               color: "warning",
             },
@@ -46,7 +45,7 @@ export function ReviewsPageClient() {
       {trends.data?.length ? (
         <LineChart
           title="Tendance des notes"
-          description="Note moyenne des avis"
+          description="Note moyenne des avis sur 30 jours"
           data={trends.data}
           x_key="day_key"
           y_key="average_rating"
