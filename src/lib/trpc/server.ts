@@ -28,6 +28,7 @@ import { invoice_router } from "@/features/billing_and_finance_system/routers/in
 import { campaign_router } from "@/features/campaign_management_system/router";
 import { operations_router } from "@/features/operations_workflows/routers/operations.router";
 import { payment_router } from "@/features/payment_management_system/router";
+import { wishlist_management_router } from "@/features/wishlist_management_system/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -56,6 +57,7 @@ export const app_router = create_trpc_router({
   campaigns: campaign_router,
   operations: operations_router,
   payments: payment_router,
+  wishlistManagement: wishlist_management_router,
 });
 
 export type AppRouter = typeof app_router;

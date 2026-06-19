@@ -55,6 +55,9 @@ export const PERMISSIONS = {
   notifications_read: "notifications:read",
   payments_read: "payments:read",
   payments_write: "payments:write",
+  wishlists_read: "wishlists:read",
+  wishlists_write: "wishlists:write",
+  wishlists_analytics: "wishlists:analytics",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -99,6 +102,8 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.notifications_read,
     PERMISSIONS.payments_read,
     PERMISSIONS.payments_write,
+    PERMISSIONS.wishlists_read,
+    PERMISSIONS.wishlists_analytics,
   ],
   operator: [
     PERMISSIONS.orders_read,
@@ -124,6 +129,8 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.tasks_read,
     PERMISSIONS.tasks_write,
     PERMISSIONS.notifications_read,
+    PERMISSIONS.wishlists_read,
+    PERMISSIONS.wishlists_write,
   ],
   delivery_person: [
     PERMISSIONS.delivery_manage,
@@ -131,5 +138,5 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.shipping_read,
     PERMISSIONS.notifications_read,
   ],
-  customer: [PERMISSIONS.storefront_account],
+  customer: [PERMISSIONS.storefront_account, PERMISSIONS.wishlists_read, PERMISSIONS.wishlists_write],
 };

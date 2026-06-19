@@ -23,6 +23,5 @@ void event_ingestion_service.track({
 
 ## Features to implement
 
-- Prompt 13 — Payments, Partial Payments, Split Payments & Refunds
 - Event Bus
 - Domain Events System
