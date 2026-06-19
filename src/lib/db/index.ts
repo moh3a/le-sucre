@@ -13,6 +13,7 @@ import * as analytics_schema from "@/features/analytics_management_system/schema
 import * as reviews_schema from "@/features/product_reviews_management/schema";
 import * as billing_schema from "@/features/billing_and_finance_system/db/schema";
 import * as campaign_schema from "@/features/campaign_management_system/schema";
+import * as payment_schema from "@/features/payment_management_system/db/schema";
 
 const pool = mysql.createPool({
   uri: env.DATABASE_URL,
@@ -33,6 +34,7 @@ export const db = drizzle(pool, {
     ...reviews_schema,
     ...billing_schema,
     ...campaign_schema,
+    ...payment_schema,
   },
   mode: "default",
 });

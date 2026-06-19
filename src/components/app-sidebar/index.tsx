@@ -33,6 +33,9 @@ import {
   ListTodo,
   Phone,
   HeadphonesIcon,
+  CreditCard,
+  ArrowLeftRight,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -103,6 +106,16 @@ export function AppSidebar() {
         { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
         { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
         { title: "Livraisons", url: "/console/shipping", icon: Truck },
+        { title: "Paiements", url: "/console/payments", icon: CreditCard },
+      ],
+    },
+    {
+      title: "Finance",
+      icon: Banknote,
+      items: [
+        { title: "Transactions", url: "/console/payments", icon: ArrowLeftRight },
+        { title: "Remboursements", url: "/console/refunds", icon: RefreshCw },
+        { title: "Paiements fournisseurs", url: "/console/payouts", icon: Wallet },
       ],
     },
     {

@@ -53,6 +53,8 @@ export const PERMISSIONS = {
   tasks_read: "tasks:read",
   tasks_write: "tasks:write",
   notifications_read: "notifications:read",
+  payments_read: "payments:read",
+  payments_write: "payments:write",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -95,6 +97,8 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.tasks_read,
     PERMISSIONS.tasks_write,
     PERMISSIONS.notifications_read,
+    PERMISSIONS.payments_read,
+    PERMISSIONS.payments_write,
   ],
   operator: [
     PERMISSIONS.orders_read,

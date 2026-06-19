@@ -91,6 +91,13 @@ export const redisKeys = {
   },
 
   // ─── Campaign ────────────────────────────────────────────
+  payment: {
+    transaction: (id: string) => `payment:tx:${id}`,
+    orderTransactions: (orderId: string) => `payment:order:${orderId}`,
+    stats: () => `payment:stats`,
+    ttl: 60 * 5,
+  },
+
   campaign: {
     byId: (id: string) => `campaign:id:${id}`,
     active_sections: (page: string, locale: string, country: string) =>
