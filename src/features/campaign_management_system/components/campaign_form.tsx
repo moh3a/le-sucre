@@ -73,7 +73,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
   // Load supporting options
   const { data: promotions } = trpc.promotions.adminList.useQuery({ page: 1, limit: 100 });
   const { data: categoriesTree } = trpc.categories.tree.useQuery();
-  const { data: activeBrands } = trpc.products.brandsActive.useQuery();
+  const { data: activeBrands } = trpc.brands.active.useQuery();
 
   const create_mutation = trpc.campaigns.create.useMutation({
     onSuccess: (newCampaign) => {

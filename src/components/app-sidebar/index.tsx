@@ -2,6 +2,7 @@
 
 import {
   FolderTree,
+  Building2,
   Package,
   ChevronRight,
   Blend,
@@ -68,6 +69,7 @@ export function AppSidebar() {
       icon: Package,
       items: [
         { title: t("categories"), url: "/console/categories", icon: FolderTree },
+        { title: "Marques", url: "/console/brands", icon: Building2 },
         { title: t("products"), url: "/console/products", icon: Package },
         { title: "Variantes", url: "/console/variants", icon: Blend },
         { title: "Avis", url: "/console/reviews", icon: MessageCircleCheck },

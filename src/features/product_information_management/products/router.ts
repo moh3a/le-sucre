@@ -13,9 +13,7 @@ import {
   delete_media_dto,
   upload_intent_dto,
 } from "./models/product.dto";
-import { create_brand_dto, update_brand_dto, list_brands_dto } from "./models/brand.dto";
 import { product_service } from "./services/product.service";
-import { brand_service } from "./services/brand.service";
 import { product_admin_service } from "./services/product-admin.service";
 import { admin_list_products_dto, bulk_product_action_dto } from "./models/product-admin.dto";
 import { product_media_service } from "./services/product_media.service";
@@ -99,23 +97,6 @@ export const product_router = create_trpc_router({
       });
       return { saved, media };
     }),
- 
-  brandsList: permission_procedure(PERMISSIONS.products_read)
-    .input(list_brands_dto)
-    .query(({ input }) => brand_service.list(input)),
-
-  brandsActive: permission_procedure(PERMISSIONS.products_read).query(() =>
-    brand_service.list_active(),
-  ),
-
-  brandCreate: permission_procedure(PERMISSIONS.products_write)
-    .input(create_brand_dto)
-    .mutation(({ input }) => brand_service.create(input)),
-
-  brandUpdate: permission_procedure(PERMISSIONS.products_write)
-    .input(update_brand_dto)
-    .mutation(({ input }) => brand_service.update(input)),
-
   adminStats: permission_procedure(PERMISSIONS.products_read).query(() =>
     product_admin_service.stats(),
   ),

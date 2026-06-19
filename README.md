@@ -3,7 +3,7 @@
 ## TODO
 
 - fix SKUs table single editing or bulk editing
-- create brands page client, brand combobox can select a brand or create one
+- brand combobox can select a brand or create one
 - create a media libray to manage all media from property thumbnail images, to product media, brand images...
 - continue Prompt 16 — Campaign Management System
 - customer call history

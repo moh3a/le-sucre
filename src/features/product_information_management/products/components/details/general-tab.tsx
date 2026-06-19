@@ -82,7 +82,7 @@ export function ProductDetailGeneralTab({
   const utils = trpc.useUtils();
 
   const { data: tree } = trpc.categories.tree.useQuery();
-  const { data: brands_data } = trpc.products.brandsActive.useQuery();
+  const { data: brands_data } = trpc.brands.active.useQuery();
 
   const update = trpc.products.update.useMutation({
     onSuccess: () => {

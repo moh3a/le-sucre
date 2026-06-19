@@ -14,7 +14,7 @@ import { relations } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { categories } from "@/features/product_information_management/categories/schema";
-import { brands } from "@/features/product_information_management/products/schema";
+import { brands } from "@/features/product_information_management/brands/schema";
 
 // ─── Campaign (master entity) ────────────────────────────────────────────────
 

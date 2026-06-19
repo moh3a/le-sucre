@@ -5,6 +5,7 @@ import {
   auth_router,
 } from "@/features/authentication_and_authorization/auth/router";
 import { authorization_router } from "@/features/authentication_and_authorization/authorization/router";
+import { brand_router } from "@/features/product_information_management/brands/router";
 import { category_router } from "@/features/product_information_management/categories/router";
 import { product_router } from "@/features/product_information_management/products/router";
 import { variants_router } from "@/features/product_information_management/variants/router";
@@ -30,6 +31,7 @@ export const app_router = create_trpc_router({
   auth: auth_router,
   authorization: authorization_router,
   adminAuth: admin_auth_router,
+  brands: brand_router,
   categories: category_router,
   products: product_router,
   variants: variants_router,

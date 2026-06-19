@@ -4,7 +4,8 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { products, brands } from "@/features/product_information_management/products/schema";
+import { products } from "@/features/product_information_management/products/schema";
+import { brands } from "@/features/product_information_management/brands/schema";
 import {
   product_properties,
   property_values,

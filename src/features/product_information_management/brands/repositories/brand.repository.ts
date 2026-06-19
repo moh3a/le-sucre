@@ -19,7 +19,7 @@ export class BrandRepository {
   async list(params: { page: number; limit: number; search?: string; is_active?: boolean }) {
     const { page, limit } = params;
     const offset = (page - 1) * limit;
-    const filters = [];
+    const filters: ReturnType<typeof eq>[] = [];
     if (params.is_active !== undefined) filters.push(eq(brands.is_active, params.is_active));
     if (params.search) {
       const q = `%${params.search}%`;
@@ -53,6 +53,17 @@ export class BrandRepository {
 
   async list_active() {
     return db.select().from(brands).where(eq(brands.is_active, true)).orderBy(brands.name);
+  }
+
+  async count_by_active() {
+    const [active_result, inactive_result] = await Promise.all([
+      db.select({ count: count() }).from(brands).where(eq(brands.is_active, true)),
+      db.select({ count: count() }).from(brands).where(eq(brands.is_active, false)),
+    ]);
+    return {
+      active: Number(active_result[0].count ?? 0),
+      inactive: Number(inactive_result[0].count ?? 0),
+    };
   }
 
   create(data: typeof brands.$inferInsert) {

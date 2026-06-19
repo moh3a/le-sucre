@@ -1,7 +1,8 @@
 import "server-only";
 import { and, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { products, product_translations, brands } from "../schema";
+import { products, product_translations } from "../schema";
+import { brands } from "@/features/product_information_management/brands/schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { order_items, orders } from "@/features/order_management_system/orders/schema";
 import { product_review_aggregates } from "@/features/product_reviews_management/schema";

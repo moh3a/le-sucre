@@ -402,7 +402,7 @@ export function ProductDataTable() {
   const status = status_filter?.[0] as ProductRow["status"] | undefined;
 
   const utils = trpc.useUtils();
-  const { data: brandsData } = trpc.products.brandsActive.useQuery();
+  const { data: brandsData } = trpc.brands.active.useQuery();
   const { data: categoriesData } = trpc.categories.tree.useQuery();
   const { data, isLoading } = trpc.products.adminList.useQuery({
     page,

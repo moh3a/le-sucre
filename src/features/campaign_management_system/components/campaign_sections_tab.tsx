@@ -71,7 +71,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
   // tRPC calls for options
   const { data: products } = trpc.products.list.useQuery({ page: 1, limit: 100 });
   const { data: categoriesTree } = trpc.categories.tree.useQuery();
-  const { data: activeBrands } = trpc.products.brandsActive.useQuery();
+  const { data: activeBrands } = trpc.brands.active.useQuery();
 
   const add_section = trpc.campaigns.addSection.useMutation({
     onSuccess: () => {

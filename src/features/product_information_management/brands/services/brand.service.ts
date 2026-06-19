@@ -4,7 +4,7 @@ import type { z } from "zod";
 
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
-import { PRODUCT_ERROR, BRAND_ERROR } from "../constants/error-codes";
+import { BRAND_ERROR } from "../constants/error-codes";
 import { slugify_name } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 
 import type { create_brand_dto, update_brand_dto } from "../models/brand.dto";
@@ -52,7 +52,7 @@ export class BrandService {
       ...(input.is_active !== undefined && { is_active: input.is_active }),
     });
     void audit_service.log({
-      action: "brand.create",
+      action: "brand.update",
       resource_type: "brand_id",
       resource_id: input.id,
     });
@@ -78,11 +78,24 @@ export class BrandService {
     if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
     await this.repo.delete(id);
     void audit_service.log({
-      action: "brand.create",
+      action: "brand.delete",
       resource_type: "brand_id",
       resource_id: id,
     });
     return { ok: true };
+  }
+
+  async stats() {
+    const [all, active_result] = await Promise.all([
+      this.repo.list({ page: 1, limit: 1 }),
+      this.repo.count_by_active(),
+    ]);
+    return {
+      total: all.meta.total_records,
+      active: active_result.active,
+      inactive: active_result.inactive,
+      total_products: 0,
+    };
   }
 }
 
