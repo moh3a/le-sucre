@@ -18,6 +18,7 @@ import * as wishlist_schema from "@/features/wishlist_management_system/schema";
 import * as console_schema from "@/features/console_dashboard/tasks/schema";
 import * as console_notifications_schema from "@/features/console_dashboard/notifications/schema";
 import * as feature_flag_schema from "@/features/feature_flag_system/schema";
+import * as media_schema from "@/features/media_library/db/schema";
 
 const pool = mysql.createPool({
   uri: env.DATABASE_URL,
@@ -43,6 +44,7 @@ export const db = drizzle(pool, {
     ...console_schema,
     ...console_notifications_schema,
     ...feature_flag_schema,
+    ...media_schema,
   },
   mode: "default",
 });

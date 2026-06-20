@@ -1,32 +1,31 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
 
-const CONSOLE_PREFIX = "/console";
-const AUTH_PATH = "/auth";
+const CSRF_COOKIE = "le_sucre_csrf";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
   response.headers.set("x-pathname", pathname);
 
-  const has_session = Boolean(getSessionCookie(request));
-
-  if (pathname.startsWith(CONSOLE_PREFIX) && !has_session) {
-    const url = request.nextUrl.clone();
-    url.pathname = AUTH_PATH;
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (pathname.startsWith(AUTH_PATH) && has_session && !request.nextUrl.searchParams.get("force")) {
-    const next = request.nextUrl.searchParams.get("next") ?? CONSOLE_PREFIX;
-    return NextResponse.redirect(new URL(next, request.url));
+  // Set CSRF cookie for admin routes if not present
+  if (
+    pathname.startsWith("/console") ||
+    pathname.startsWith("/api/admin")
+  ) {
+    if (!request.cookies.has(CSRF_COOKIE)) {
+      const token = crypto.randomUUID();
+      response.cookies.set(CSRF_COOKIE, token, {
+        httpOnly: false,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      });
+    }
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"], // TODO this was only added to disable proxy for now
-  // matcher: ["/console/:path*", "/auth/:path*"],
+  matcher: ["/console/:path*", "/api/admin/:path*"],
 };

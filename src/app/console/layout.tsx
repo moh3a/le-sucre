@@ -9,7 +9,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { auth } from "@/lib/auth";
 import { AuthorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
 
-// French metadata; optional issue_csrf_token() for forms.
 export const metadata: Metadata = {
   title: "Le Sucré",
   description: "Your eCommerce platform.",

@@ -2,8 +2,10 @@
 
 ## TODO
 
+- media library should be used by all
+- implement media library image optimization and security from harmful input
+- implement blacklisting clients by ip
 - fix analytics
-- create a media libray to manage all media from property thumbnail images, to product media, brand images...
 - remove all hard coded text
 - continue Prompt 16 — Campaign Management System
 - continue Prompt 19 - Operational Workflows Audit & Business Process Completion

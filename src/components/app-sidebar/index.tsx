@@ -35,6 +35,7 @@ import {
   CreditCard,
   Wallet,
   Flag,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -92,6 +93,7 @@ export function AppSidebar() {
         { title: "Marques", url: "/console/brands", icon: Building2 },
         { title: "Variantes", url: "/console/variants", icon: Blend },
         { title: "Avis", url: "/console/reviews", icon: MessageCircleCheck },
+        { title: "Médiathèque", url: "/console/media", icon: ImageIcon },
       ],
     },
     {
