@@ -1,5 +1,6 @@
 import "server-only";
 import { PAYMENT_PROVIDER } from "../constants/payment-status";
+import { verify_stripe_signature } from "@/lib/security/webhook";
 import type {
   PaymentProviderAdapter,
   CapturePaymentInput,
@@ -188,7 +189,10 @@ export class StripePaymentAdapter implements PaymentProviderAdapter {
   async verify_webhook(headers: Headers, raw_body: string): Promise<boolean> {
     const signature = headers.get("stripe-signature");
     if (!signature) return false;
-    return true;
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) return false;
+    const result = verify_stripe_signature(raw_body, signature, secret);
+    return result.valid;
   }
 
   async parse_webhook(payload: Record<string, unknown>): Promise<{

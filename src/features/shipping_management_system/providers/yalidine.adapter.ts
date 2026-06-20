@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 
+import { verify_hmac_signature, verify_webhook_timestamp } from "@/lib/security/webhook";
 import type {
   ShippingProviderAdapter,
   ShippingQuoteInput,
@@ -109,11 +110,16 @@ export class YalidineAdapter implements ShippingProviderAdapter {
     };
   }
 
-  async verify_webhook(headers: Headers) {
+  async verify_webhook(headers: Headers, raw_body?: string) {
     const secret = process.env.YALIDINE_WEBHOOK_SECRET;
-    if (!secret) return true;
-    const incoming = headers.get("x-yalidine-signature");
-    return incoming === secret; // replace by HMAC if provider supports it
+    if (!secret) return false;
+    const signature = headers.get("x-yalidine-signature");
+    const timestamp = headers.get("x-yalidine-timestamp");
+    if (!signature || !timestamp) return false;
+    if (!verify_webhook_timestamp(timestamp)) return false;
+    if (!raw_body) return false;
+    const signed_payload = `${timestamp}.${raw_body}`;
+    return verify_hmac_signature(signed_payload, signature, secret, "sha256");
   }
 
   async parse_webhook(payload: any) {

@@ -1,6 +1,7 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import path from "path";
+import { redact } from "@/lib/security/redaction";
 
 const logDirectory = path.join(process.cwd(), "logs");
 
@@ -10,6 +11,7 @@ const levels = {
   info: 2,
   http: 3,
   debug: 4,
+  audit: 5,
 };
 
 const colors = {
@@ -18,22 +20,37 @@ const colors = {
   info: "green",
   http: "magenta",
   debug: "white",
+  audit: "blue",
 };
 
 winston.addColors(colors);
 
-// In development, display colorized messages; in production, use standard JSON logs
+const redact_format = winston.format((info) => {
+  if (info.metadata) info.metadata = redact(info.metadata);
+  if (info.err) info.err = redact(info.err);
+  if (info.stack) info.stack = "[REDACTED]";
+  if (info.headers) info.headers = redact(info.headers);
+  if (info.body) {
+    const safe = redact(info.body);
+    if (typeof safe === "string") info.body = safe.substring(0, 1000);
+    else info.body = safe;
+  }
+  return info;
+});
+
 const format = winston.format.combine(
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
-  winston.format.errors({ stack: true }),
+  winston.format.errors({ stack: false }),
+  redact_format(),
   process.env.NODE_ENV === "production"
     ? winston.format.json()
     : winston.format.combine(
         winston.format.colorize({ all: true }),
         winston.format.printf(
-          (info) => `[${info.timestamp}] [${info.level}]: ${info.message}${info.stack ? `\n${info.stack}` : ""}`
-        )
-      )
+          (info) =>
+            `[${info.timestamp}] [${info.level}]: ${info.message}${info.stack ? `\n${info.stack}` : ""}`,
+        ),
+      ),
 );
 
 const transports: winston.transport[] = [
@@ -53,6 +70,14 @@ const transports: winston.transport[] = [
     maxSize: "40m",
     maxFiles: "14d",
   }),
+  new DailyRotateFile({
+    filename: path.join(logDirectory, "audit-%DATE%.log"),
+    datePattern: "YYYY-MM-DD",
+    zippedArchive: true,
+    maxSize: "40m",
+    maxFiles: "90d",
+    level: "audit",
+  }),
 ];
 
 export const logger = winston.createLogger({
@@ -62,5 +87,16 @@ export const logger = winston.createLogger({
   transports,
   exitOnError: false,
 });
+
+export function audit_log(
+  actor: string | null,
+  action: string,
+  resource: string,
+  metadata?: Record<string, unknown>,
+) {
+  logger.log("audit", `${action} on ${resource}`, {
+    metadata: { actor, action, resource, ...(metadata ? redact(metadata) : {}) },
+  });
+}
 
 export default logger;

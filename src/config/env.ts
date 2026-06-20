@@ -14,21 +14,22 @@ const env_schema = z
     BETTER_AUTH_SECRET: z.string().min(32),
     BETTER_AUTH_URL: z.url(),
 
-    // SENTRY_DSN: z.string().url().optional(),
-    // SENTRY_ENVIRONMENT: z.string().optional(),
-
-    // YALIDINE_API_URL: z.string().url().optional(),
-    // YALIDINE_API_TOKEN: z.string().optional(),
-    // YALIDINE_WEBHOOK_SECRET: z.string().optional(),
-
     CHECKOUT_TAX_RATE: z.coerce.number().min(0).max(1).default(0.19),
 
-    // NEXT_PUBLIC_CDN_URL: z.string().url().optional(),
-    // MEDIA_UPLOAD_DIR: z.string().default("public/media"),
+    ALLOWED_ORIGINS: z.string().optional(),
 
-    // TRUST_PROXY: z.coerce.boolean().default(true),
-    // RATE_LIMIT_WINDOW_SEC: z.coerce.number().int().positive().default(60),
-    // RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    PAYPAL_CLIENT_ID: z.string().optional(),
+    PAYPAL_CLIENT_SECRET: z.string().optional(),
+    PAYPAL_WEBHOOK_ID: z.string().optional(),
+
+    YALIDINE_API_URL: z.string().url().optional(),
+    YALIDINE_API_TOKEN: z.string().optional(),
+    YALIDINE_WEBHOOK_SECRET: z.string().optional(),
+
+    MEDIA_PUBLIC_BASE_URL: z.string().url().default("http://localhost:3000/media"),
+    MEDIA_STORAGE_ROOT: z.string().default("public/media"),
 
     RECOMMENDATION_PROVIDER: z.enum(["local"]).default("local"),
     FORECAST_PROVIDER: z.enum(["local"]).default("local"),
@@ -37,10 +38,16 @@ const env_schema = z
     ANALYTICS_PROVIDER: z.enum(["local"]).default("local"),
     ANALYTICS_RAW_RETENTION_DAYS: z.coerce.number().int().min(7).default(90),
     ANALYTICS_AGGREGATE_RETENTION_DAYS: z.coerce.number().int().min(30).default(730),
+
+    RATE_LIMIT_ENABLED: z.coerce.boolean().default(true),
+    RATE_LIMIT_REDIS_PREFIX: z.string().default("rl:"),
   })
   .superRefine((v, ctx) => {
     if (v.NODE_ENV === "production" && !v.BETTER_AUTH_SECRET) {
       ctx.addIssue({ code: "custom", message: "BETTER_AUTH_SECRET required in production" });
+    }
+    if (v.NODE_ENV === "production" && v.ALLOWED_ORIGINS && !v.ALLOWED_ORIGINS.includes(v.BETTER_AUTH_URL)) {
+      ctx.addIssue({ code: "custom", message: "ALLOWED_ORIGINS must include BETTER_AUTH_URL in production" });
     }
   });
 

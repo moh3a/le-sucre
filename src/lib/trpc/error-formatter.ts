@@ -1,5 +1,6 @@
 import { AppError } from "@/lib/error_handling";
 import { extract_messages } from "@/features/inventory_management_system/shared/error-codes";
+import { redact } from "@/lib/security/redaction";
 
 const HTTP_TO_TRPC_CODE: Record<number, string> = {
   400: "BAD_REQUEST",
@@ -13,20 +14,21 @@ const HTTP_TO_TRPC_CODE: Record<number, string> = {
   503: "SERVICE_UNAVAILABLE",
 };
 
-export function app_error_formatter({ shape, error }: { shape: Record<string, unknown>; error: { cause?: unknown; message?: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function app_error_formatter({ shape, error }: any) {
   const cause = error.cause;
   if (cause instanceof AppError) {
     const httpStatus = cause.status_code;
     const messages = extract_messages(cause.details);
     return {
       ...shape,
-      message: cause.message,
+      message: cause.is_operational ? cause.message : "An error occurred",
       data: {
         ...((shape.data ?? {}) as Record<string, unknown>),
         code: HTTP_TO_TRPC_CODE[httpStatus] ?? "INTERNAL_SERVER_ERROR",
         httpStatus,
         appCode: cause.code,
-        details: cause.details,
+        details: cause.is_operational ? redact(cause.details) : null,
         messages,
       },
     };

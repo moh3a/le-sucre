@@ -1,26 +1,24 @@
 import { redis } from "@/lib/redis";
+import {
+  RATE_LIMIT_PRESETS,
+  type RateLimitPreset,
+  type RateLimitAction,
+} from "@/lib/security/rate-limit-presets";
 import logger from "./logger";
 
 export interface RateLimitConfig {
-  /** unique action name e.g. "login", "register" */
   action: string;
-  /** max requests in the window */
   limit: number;
-  /** window in seconds */
   windowSec: number;
 }
 
 export interface RateLimitResult {
   success: boolean;
   remaining: number;
-  resetAt: number; // unix ms
+  resetAt: number;
   retryAfterSec: number;
 }
 
-/**
- * Sliding-window rate limiter backed by Redis.
- * Key format: ratelimit:{action}:{identifier}
- */
 export async function rateLimit(
   identifier: string,
   config: RateLimitConfig,
@@ -31,10 +29,10 @@ export async function rateLimit(
 
   try {
     const pipeline = redis.pipeline();
-    pipeline.zremrangebyscore(key, 0, now - windowMs);        // remove expired
-    pipeline.zadd(key, now, `${now}-${Math.random()}`);       // add current
-    pipeline.zcard(key);                                       // count
-    pipeline.pexpire(key, windowMs);                          // auto-expire
+    pipeline.zremrangebyscore(key, 0, now - windowMs);
+    pipeline.zadd(key, now, `${now}-${Math.random()}`);
+    pipeline.zcard(key);
+    pipeline.pexpire(key, windowMs);
 
     const results = await pipeline.exec();
     const count = (results?.[2]?.[1] as number) ?? 0;
@@ -44,18 +42,33 @@ export async function rateLimit(
     const resetAt = now + windowMs;
 
     if (!success) {
-      logger.warn("Rate limit exceeded", { identifier, action: config.action, count });
+      logger.warn("Rate limit exceeded", {
+        identifier,
+        action: config.action,
+        count,
+        limit: config.limit,
+      });
     }
 
     return { success, remaining, resetAt, retryAfterSec: success ? 0 : config.windowSec };
   } catch (err) {
-    logger.error("Rate limiter Redis error — allowing request", { err });
-    // Fail open: if Redis is down, don't block traffic
+    logger.error("Rate limiter Redis error allowing request", { err });
     return { success: true, remaining: config.limit, resetAt: now + windowMs, retryAfterSec: 0 };
   }
 }
 
-// ─── Preset configs ──────────────────────────────────────
+export async function rateLimitWithPreset(
+  identifier: string,
+  action: RateLimitAction,
+): Promise<RateLimitResult> {
+  const preset = RATE_LIMIT_PRESETS[action] as RateLimitPreset;
+  return rateLimit(identifier, {
+    action: preset.action,
+    limit: preset.limit,
+    windowSec: preset.window_sec,
+  });
+}
+
 export const RATE_LIMITS = {
   login: { action: "login", limit: 5, windowSec: 60 },
   register: { action: "register", limit: 3, windowSec: 60 * 60 },
@@ -66,8 +79,6 @@ export const RATE_LIMITS = {
 
 export function getClientIp(headers: Headers): string {
   return (
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    headers.get("x-real-ip") ??
-    "unknown"
+    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? headers.get("x-real-ip") ?? "unknown"
   );
 }

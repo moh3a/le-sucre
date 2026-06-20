@@ -1,4 +1,5 @@
 import "server-only";
+import { sanitize_csv_value } from "@/lib/security/export";
 import type { z } from "zod";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
@@ -50,18 +51,18 @@ export class ProductAdminService {
     const rows = items
       .map((p) =>
         [
-          p.id,
-          `"${(p.name ?? "").replace(/"/g, '""')}"`,
-          p.sku,
-          p.status,
-          p.category_name ?? "",
-          p.brand_name ?? "",
-          p.current_stock,
-          p.units_sold,
-          p.revenue,
-          p.average_rating,
-          p.review_count,
-          p.created_at,
+          sanitize_csv_value(p.id),
+          sanitize_csv_value(p.name ?? ""),
+          sanitize_csv_value(p.sku ?? ""),
+          sanitize_csv_value(p.status ?? ""),
+          sanitize_csv_value(p.category_name ?? ""),
+          sanitize_csv_value(p.brand_name ?? ""),
+          String(p.current_stock ?? 0),
+          String(p.units_sold ?? 0),
+          String(p.revenue ?? 0),
+          String(p.average_rating ?? 0),
+          String(p.review_count ?? 0),
+          sanitize_csv_value(p.created_at ?? ""),
         ].join(","),
       )
       .join("\n");

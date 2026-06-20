@@ -2,16 +2,43 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const CSRF_COOKIE = "le_sucre_csrf";
 
-export async function proxy(request: NextRequest) {
+function get_cors_origin(origin: string | null): string {
+  if (!origin) return "";
+  const envOrigins: string[] =
+    process.env.NODE_ENV === "production"
+      ? []
+      : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"];
+  if (process.env.ALLOWED_ORIGINS) {
+    envOrigins.push(...process.env.ALLOWED_ORIGINS.split(",").map((o: string) => o.trim()));
+  }
+  if (process.env.BETTER_AUTH_URL && envOrigins.indexOf(process.env.BETTER_AUTH_URL) === -1) {
+    envOrigins.push(process.env.BETTER_AUTH_URL);
+  }
+  return envOrigins.includes(origin) ? origin : "";
+}
+
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
+
   response.headers.set("x-pathname", pathname);
 
-  // Set CSRF cookie for admin routes if not present
-  if (
-    pathname.startsWith("/console") ||
-    pathname.startsWith("/api/admin")
-  ) {
+  const origin = request.headers.get("origin");
+  const allowed = get_cors_origin(origin);
+  if (allowed) {
+    response.headers.set("Access-Control-Allow-Origin", allowed);
+    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-csrf-token, x-request-id");
+    response.headers.set("Access-Control-Expose-Headers", "x-request-id");
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    response.headers.set("Access-Control-Max-Age", "7200");
+  }
+
+  if (request.method === "OPTIONS") {
+    return new NextResponse(null, { status: 204, headers: response.headers });
+  }
+
+  if (pathname.startsWith("/console") || pathname.startsWith("/api/admin")) {
     if (!request.cookies.has(CSRF_COOKIE)) {
       const token = crypto.randomUUID();
       response.cookies.set(CSRF_COOKIE, token, {
@@ -23,9 +50,24 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), interest-cohort=()",
+  );
+  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  response.headers.set("X-DNS-Prefetch-Control", "on");
+  response.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
+
   return response;
 }
 
 export const config = {
-  matcher: ["/console/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|media/).*)",
+  ],
 };
