@@ -18,17 +18,25 @@ type BrandFormProps = {
   brand_id?: string;
   default_values?: Partial<BrandFormValues>;
   onSuccess?: () => void;
+  onCreated?: (brand_id: string) => void;
 };
 
-export function BrandForm({ mode, brand_id, default_values, onSuccess }: BrandFormProps) {
+export function BrandForm({
+  mode,
+  brand_id,
+  default_values,
+  onSuccess,
+  onCreated,
+}: BrandFormProps) {
   const t = useTranslations("brands");
   const utils = trpc.useUtils();
 
   const create_mutation = trpc.brands.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (brand) => {
       await utils.brands.list.invalidate();
       await utils.brands.active.invalidate();
       await utils.brands.stats.invalidate();
+      if (brand?.id) onCreated?.(brand.id);
       onSuccess?.();
     },
   });
@@ -43,7 +51,7 @@ export function BrandForm({ mode, brand_id, default_values, onSuccess }: BrandFo
   });
 
   const form = useForm<BrandFormValues>({
-    resolver: zodResolver(create_brand_dto) as any,
+    resolver: zodResolver(create_brand_dto),
     defaultValues: {
       name: "",
       slug: "",

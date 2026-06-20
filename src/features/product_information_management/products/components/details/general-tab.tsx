@@ -17,11 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   TagsInput,
   TagsInputInput,
@@ -36,9 +32,14 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { BrandCombobox } from "@/features/product_information_management/brands/components/brand-combobox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { product_details_dto, product_status_enum, upsert_translation_dto } from "../../models/product.dto";
+import {
+  product_details_dto,
+  product_status_enum,
+  upsert_translation_dto,
+} from "../../models/product.dto";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 
 const general_form_schema = z.object({
@@ -82,7 +83,6 @@ export function ProductDetailGeneralTab({
   const utils = trpc.useUtils();
 
   const { data: tree } = trpc.categories.tree.useQuery();
-  const { data: brands_data } = trpc.brands.active.useQuery();
 
   const update = trpc.products.update.useMutation({
     onSuccess: () => {
@@ -143,12 +143,7 @@ export function ProductDetailGeneralTab({
     return parent?.children?.map((c) => ({ id: c.id, name: c.name })) ?? [];
   }, [tree, watched_category_id]);
 
-  const brand_options = useMemo(
-    () => brands_data?.map((b) => ({ id: b.id, name: b.name })) ?? [],
-    [brands_data],
-  );
-
-  const data_ready = !!tree && !!brands_data;
+  const data_ready = !!tree;
 
   const pending = update.isPending || upsert_en.isPending || upsert_ar.isPending;
 
@@ -367,9 +362,7 @@ export function ProductDetailGeneralTab({
                       min="0"
                       value={field.value}
                       onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? 0 : parseFloat(e.target.value) || 0,
-                        )
+                        field.onChange(e.target.value === "" ? 0 : parseFloat(e.target.value) || 0)
                       }
                     />
                     <FieldError errors={[fieldState.error]} />
@@ -467,34 +460,19 @@ export function ProductDetailGeneralTab({
               />
             </div>
 
-              <Controller
-                name="brand_id"
-                control={form.control}
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>Marque</FieldLabel>
-                    {data_ready ? (
-                      <Combobox
-                        value={field.value ?? ""}
-                        onValueChange={(val) => field.onChange(val || null)}
-                      >
-                        <ComboboxInput placeholder="Rechercher une marque..." showClear />
-                        <ComboboxContent>
-                          <ComboboxList>
-                            {brand_options.map((brand) => (
-                              <ComboboxItem key={brand.id} value={brand.id}>
-                                {brand.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    ) : (
-                      <Input value={field.value ?? ""} disabled />
-                    )}
-                  </Field>
-                )}
-              />
+            <Controller
+              name="brand_id"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>Marque</FieldLabel>
+                  <BrandCombobox
+                    value={field.value ?? ""}
+                    onValueChange={(val) => field.onChange(val ?? null)}
+                  />
+                </Field>
+              )}
+            />
 
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={pending}>

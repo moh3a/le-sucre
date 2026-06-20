@@ -2,8 +2,6 @@
 
 ## TODO
 
-- fix SKUs table single editing or bulk editing
-- brand combobox can select a brand or create one
 - fix analytics
 - create a media libray to manage all media from property thumbnail images, to product media, brand images...
 - remove all hard coded text

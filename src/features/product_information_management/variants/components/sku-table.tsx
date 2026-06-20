@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useTranslations } from "next-intl";
 import {
   type ColumnDef,
@@ -60,6 +63,25 @@ function flatten_options(
   return map;
 }
 
+const sku_form_schema = z.object({
+  sku_code: z.string().max(128).default(""),
+  base_price: z.string().default(""),
+  offer_price: z.string().default(""),
+  is_active: z.boolean().default(true),
+});
+type SkuFormValues = z.infer<typeof sku_form_schema>;
+
+const bulk_price_schema = z.object({
+  base_price: z.string().default(""),
+  offer_price: z.string().default(""),
+});
+type BulkPriceFormValues = z.infer<typeof bulk_price_schema>;
+
+const bulk_stock_schema = z.object({
+  stock: z.string().default(""),
+});
+type BulkStockFormValues = z.infer<typeof bulk_stock_schema>;
+
 export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTableProps) {
   const t = useTranslations("variants");
   const utils = trpc.useUtils();
@@ -93,14 +115,12 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
 
   const [sheet_open, set_sheet_open] = useState(false);
   const [editing_id, set_editing_id] = useState<string | null>(null);
-  const [form, set_form] = useState({
-    sku_code: "",
-    barcode: "",
-    base_price: "",
-    offer_price: "",
-    is_active: true,
-  });
   const [manual_values, set_manual_values] = useState<Record<string, string>>({});
+
+  const sku_form = useForm<SkuFormValues>({
+    resolver: zodResolver(sku_form_schema) as any,
+    defaultValues: { sku_code: "", base_price: "", offer_price: "", is_active: true },
+  });
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -112,13 +132,17 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   });
 
   const [bulk_price_dialog_open, set_bulk_price_dialog_open] = useState(false);
-  const [bulk_price_form, set_bulk_price_form] = useState({
-    base_price: "",
-    offer_price: "",
+  const [bulk_stock_dialog_open, set_bulk_stock_dialog_open] = useState(false);
+
+  const bulk_price_form = useForm<BulkPriceFormValues>({
+    resolver: zodResolver(bulk_price_schema) as any,
+    defaultValues: { base_price: "", offer_price: "" },
   });
 
-  const [bulk_stock_dialog_open, set_bulk_stock_dialog_open] = useState(false);
-  const [bulk_stock_value, set_bulk_stock_value] = useState("");
+  const bulk_stock_form = useForm<BulkStockFormValues>({
+    resolver: zodResolver(bulk_stock_schema) as any,
+    defaultValues: { stock: "" },
+  });
 
   // Inline editing state: { sku_id: { field: value } }
   const [inline_edits, set_inline_edits] = useState<
@@ -130,13 +154,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
 
   function open_create() {
     set_editing_id(null);
-    set_form({
-      sku_code: "",
-      barcode: "",
-      base_price: "",
-      offer_price: "",
-      is_active: true,
-    });
+    sku_form.reset({ sku_code: "", base_price: "", offer_price: "", is_active: true });
     set_manual_values({});
     set_sheet_open(true);
   }
@@ -146,26 +164,27 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       const item = items.find((row) => row.sku_id === sku_id);
       if (!item) return;
       set_editing_id(sku_id);
-      set_form({
+      sku_form.reset({
         sku_code: item.sku_code,
-        barcode: "",
         base_price: item.base_price ?? "",
         offer_price: item.offer_price ?? "",
         is_active: item.is_active,
       });
       set_sheet_open(true);
     },
-    [items],
+    [items, sku_form],
   );
 
   async function on_save_sheet() {
+    const values = sku_form.getValues();
+
     if (editing_id) {
       await update_sku.mutateAsync({
         id: editing_id,
-        sku_code: form.sku_code,
-        base_price: form.base_price ? Number(form.base_price) : null,
-        offer_price: form.offer_price ? Number(form.offer_price) : null,
-        is_active: form.is_active,
+        sku_code: values.sku_code,
+        base_price: values.base_price ? Number(values.base_price) : null,
+        offer_price: values.offer_price ? Number(values.offer_price) : null,
+        is_active: values.is_active,
         currency,
       });
       set_sheet_open(false);
@@ -184,16 +203,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     });
 
     const signature = build_option_signature(pairs);
-    const sku_code = form.sku_code.trim() || build_sku_code(product_sku, signature);
+    const sku_code = values.sku_code.trim() || build_sku_code(product_sku, signature);
 
     await create_sku.mutateAsync({
       product_id,
       sku_code,
-      barcode: form.barcode || null,
-      base_price: form.base_price ? Number(form.base_price) : null,
-      offer_price: form.offer_price ? Number(form.offer_price) : null,
+      barcode: null,
+      base_price: values.base_price ? Number(values.base_price) : null,
+      offer_price: values.offer_price ? Number(values.offer_price) : null,
       currency,
-      is_active: form.is_active,
+      is_active: values.is_active,
       property_value_ids,
     });
     set_sheet_open(false);
@@ -232,7 +251,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
 
       set_inline_edits((prev) => {
         const next = { ...prev };
-        delete next[sku_id];
+        if (next[sku_id]) {
+          const remaining = { ...next[sku_id] };
+          delete remaining.base_price;
+          delete remaining.offer_price;
+          if (Object.keys(remaining).length === 0) {
+            delete next[sku_id];
+          } else {
+            next[sku_id] = remaining;
+          }
+        }
         return next;
       });
     },
@@ -261,7 +289,15 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
 
       set_inline_edits((prev) => {
         const next = { ...prev };
-        delete next[sku_id];
+        if (next[sku_id]) {
+          const remaining = { ...next[sku_id] };
+          delete remaining.stock_available;
+          if (Object.keys(remaining).length === 0) {
+            delete next[sku_id];
+          } else {
+            next[sku_id] = remaining;
+          }
+        }
         return next;
       });
     },
@@ -574,18 +610,23 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   }
 
   async function on_save_bulk_price() {
-    await bulk_update.mutateAsync({
-      ids: selected_ids,
-      base_price: bulk_price_form.base_price ? Number(bulk_price_form.base_price) : null,
-      offer_price: bulk_price_form.offer_price ? Number(bulk_price_form.offer_price) : null,
-    });
+    const { base_price, offer_price } = bulk_price_form.getValues();
+    const payload: Record<string, unknown> = { ids: selected_ids };
+    if (base_price !== "") {
+      payload.base_price = Number(base_price);
+    }
+    if (offer_price !== "") {
+      payload.offer_price = Number(offer_price);
+    }
+    await bulk_update.mutateAsync(payload as Parameters<typeof bulk_update.mutateAsync>[0]);
   }
 
   async function on_save_bulk_stock() {
-    if (!bulk_stock_value) return;
+    const { stock } = bulk_stock_form.getValues();
+    if (!stock) return;
     await bulk_update.mutateAsync({
       ids: selected_ids,
-      stock_available: Number(bulk_stock_value),
+      stock_available: Number(stock),
     });
   }
 
@@ -624,7 +665,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             size="sm"
             className="h-8 text-xs"
             onClick={() => {
-              set_bulk_price_form({ base_price: "", offer_price: "" });
+              bulk_price_form.reset({ base_price: "", offer_price: "" });
               set_bulk_price_dialog_open(true);
             }}
             disabled={bulk_update.isPending}
@@ -636,7 +677,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             size="sm"
             className="h-8 text-xs"
             onClick={() => {
-              set_bulk_stock_value("");
+              bulk_stock_form.reset({ stock: "" });
               set_bulk_stock_dialog_open(true);
             }}
             disabled={bulk_update.isPending}
@@ -729,42 +770,50 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               ))}
 
             <FieldGroup className="grid gap-4">
-              <Field>
-                <FieldLabel>{t("sku_code")}</FieldLabel>
-                <Input
-                  value={form.sku_code}
-                  onChange={(e) => set_form((f) => ({ ...f, sku_code: e.target.value }))}
-                  placeholder={editing_item?.sku_code ?? "auto"}
-                />
-              </Field>
-              <Field>
-                <FieldLabel>{t("base_price")}</FieldLabel>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.base_price}
-                  onChange={(e) => set_form((f) => ({ ...f, base_price: e.target.value }))}
-                />
-              </Field>
-              <Field>
-                <FieldLabel>{t("offer_price")}</FieldLabel>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.offer_price}
-                  onChange={(e) => set_form((f) => ({ ...f, offer_price: e.target.value }))}
-                />
-              </Field>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.is_active}
-                  onChange={(e) => set_form((f) => ({ ...f, is_active: e.target.checked }))}
-                />
-                {t("active")}
-              </label>
+              <Controller
+                name="sku_code"
+                control={sku_form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t("sku_code")}</FieldLabel>
+                    <Input {...field} placeholder={editing_item?.sku_code ?? "auto"} />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="base_price"
+                control={sku_form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t("base_price")}</FieldLabel>
+                    <Input type="number" min={0} step="0.01" {...field} />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="offer_price"
+                control={sku_form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t("offer_price")}</FieldLabel>
+                    <Input type="number" min={0} step="0.01" {...field} />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="is_active"
+                control={sku_form.control}
+                render={({ field }) => (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                    {t("active")}
+                  </label>
+                )}
+              />
             </FieldGroup>
           </div>
 
@@ -791,28 +840,26 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <Field>
-              <FieldLabel>{t("base_price")}</FieldLabel>
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                value={bulk_price_form.base_price}
-                onChange={(e) => set_bulk_price_form((f) => ({ ...f, base_price: e.target.value }))}
-              />
-            </Field>
-            <Field>
-              <FieldLabel>{t("offer_price")}</FieldLabel>
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                value={bulk_price_form.offer_price}
-                onChange={(e) =>
-                  set_bulk_price_form((f) => ({ ...f, offer_price: e.target.value }))
-                }
-              />
-            </Field>
+            <Controller
+              name="base_price"
+              control={bulk_price_form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>{t("base_price")}</FieldLabel>
+                  <Input type="number" min={0} step="0.01" {...field} />
+                </Field>
+              )}
+            />
+            <Controller
+              name="offer_price"
+              control={bulk_price_form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>{t("offer_price")}</FieldLabel>
+                  <Input type="number" min={0} step="0.01" {...field} />
+                </Field>
+              )}
+            />
           </div>
 
           <DialogFooter>
@@ -840,17 +887,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
           </DialogHeader>
 
           <div className="py-4">
-            <Field>
-              <FieldLabel>Quantité en stock</FieldLabel>
-              <Input
-                type="number"
-                min={0}
-                step="1"
-                value={bulk_stock_value}
-                onChange={(e) => set_bulk_stock_value(e.target.value)}
-                placeholder="Nouveau stock"
-              />
-            </Field>
+            <Controller
+              name="stock"
+              control={bulk_stock_form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>Quantité en stock</FieldLabel>
+                  <Input type="number" min={0} step="1" {...field} placeholder="Nouveau stock" />
+                </Field>
+              )}
+            />
           </div>
 
           <DialogFooter>
@@ -864,7 +910,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             <Button
               type="button"
               onClick={on_save_bulk_stock}
-              disabled={bulk_update.isPending || !bulk_stock_value}
+              disabled={bulk_update.isPending || !bulk_stock_form.watch("stock")}
             >
               Définir
             </Button>
