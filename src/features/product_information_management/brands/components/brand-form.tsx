@@ -9,7 +9,10 @@ import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { MediaPickerField } from "@/features/media_library/components/media-picker-field";
+import type { MediaDTO } from "@/features/media_library/types";
 import { create_brand_dto } from "../models/brand.dto";
+import { format } from "date-fns";
 
 type BrandFormValues = z.input<typeof create_brand_dto>;
 
@@ -64,6 +67,30 @@ export function BrandForm({
   });
 
   const pending = create_mutation.isPending || update_mutation.isPending;
+
+  const logo_url_value = form.watch("logo_url");
+  const logo_media_item: MediaDTO | null = logo_url_value
+    ? {
+        id: "",
+        url: logo_url_value,
+        alt: null,
+        filename: "",
+        original_name: "",
+        mime_type: "image/*",
+        kind: "image",
+        size: 0,
+        width: null,
+        height: null,
+        storage_key: "",
+        provider: "",
+        caption: null,
+        metadata: {},
+        is_public: true,
+        uploaded_by: null,
+        created_at: format(new Date(), "yyyy-MM-dd HH:mm"),
+        updated_at: format(new Date(), "yyyy-MM-dd HH:mm"),
+      }
+    : null;
 
   async function on_submit(values: BrandFormValues) {
     if (mode === "create") {
@@ -133,38 +160,35 @@ export function BrandForm({
           />
 
           <Controller
-            name="logo_url"
+            name="is_active"
             control={form.control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t("logo_url")}</FieldLabel>
-                <Input
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.value || null)}
-                  placeholder="https://"
-                />
+                <FieldLabel>{t("active")}</FieldLabel>
+                <select
+                  className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                  value={field.value ? "true" : "false"}
+                  onChange={(e) => field.onChange(e.target.value === "true")}
+                >
+                  <option value="true">{t("status_active")}</option>
+                  <option value="false">{t("status_inactive")}</option>
+                </select>
               </Field>
             )}
           />
         </div>
 
-        <Controller
-          name="is_active"
-          control={form.control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>{t("active")}</FieldLabel>
-              <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                value={field.value ? "true" : "false"}
-                onChange={(e) => field.onChange(e.target.value === "true")}
-              >
-                <option value="true">{t("status_active")}</option>
-                <option value="false">{t("status_inactive")}</option>
-              </select>
-            </Field>
-          )}
-        />
+        <Field>
+          <FieldLabel>{t("logo_url")}</FieldLabel>
+          <MediaPickerField
+            value={logo_url_value}
+            media_item={logo_media_item}
+            onSelect={(media) => form.setValue("logo_url", media.url)}
+            onClear={() => form.setValue("logo_url", null)}
+            entity_type="brand"
+            field="logo"
+          />
+        </Field>
 
         <Button type="submit" disabled={pending}>
           {pending ? "…" : t("save")}

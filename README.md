@@ -2,7 +2,7 @@
 
 ## TODO
 
-- media library should be used by all
+- SEO title and descirption
 - implement media library image optimization and security from harmful input
 - implement blacklisting clients by ip
 - fix analytics

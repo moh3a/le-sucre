@@ -121,6 +121,7 @@ export class UserRepository {
     id: string,
     patch: {
       name?: string;
+      image?: string | null;
       is_active?: boolean;
       banned?: boolean | null;
       ban_reason?: string | null;

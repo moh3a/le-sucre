@@ -6,7 +6,7 @@ export type ProductStatus = z.infer<typeof product_status_enum>;
 export const product_details_dto = z.object({
   id: z.string().min(1).max(255),
   category_id: z.string().min(1).max(255),
-  brand_id: z.string().min(1).max(255).optional().nullable(),
+  brand_id: z.string().min(1).max(255).nullish(),
   sku: z.string().min(1).max(64),
   slug: z
     .string()
@@ -15,15 +15,16 @@ export const product_details_dto = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     .optional(),
   base_price: z.coerce.number().min(0),
-  offer_price: z.coerce.number().min(0).optional().nullable(),
+  offer_price: z.coerce.number().min(0).nullish(),
   currency: z.string().length(3).default("DZD"),
   status: product_status_enum.default("draft"),
   is_featured: z.boolean().default(false),
   has_variants: z.boolean().default(false),
-  metadata: z.string().optional(),
-  seo_title: z.string().max(255).optional().nullable(),
-  seo_description: z.string().max(500).optional().nullable(),
-  seo_keywords: z.string().max(512).optional().nullable(),
+  metadata: z.string().nullish(),
+  // metadata: z.record(z.string(), z.unknown()).nullish(),
+  seo_title: z.string().max(255).nullish(),
+  seo_description: z.string().max(500).nullish(),
+  seo_keywords: z.string().max(512).nullish(),
   created_at: z.string().min(1).max(255),
   updated_at: z.string().min(1).max(255),
 });
@@ -33,8 +34,8 @@ export const create_product_dto = product_details_dto
   .extend({
     // default locale (e.g. fr) – required
     name: z.string().min(2).max(255),
-    description: z.string().optional().nullable(),
-    keywords: z.string().max(512).optional().nullable(),
+    description: z.string().nullish(),
+    keywords: z.string().max(512).nullish(),
     metadata: z.record(z.string(), z.unknown()).optional(),
   });
 
@@ -57,10 +58,10 @@ export const upsert_translation_dto = z.object({
   product_id: z.string().min(1).max(255),
   locale: z.string().min(2).max(5),
   name: z.string().min(2).max(255),
-  description: z.string().optional().nullable(),
-  keywords: z.string().max(512).optional().nullable(),
-  seo_title: z.string().max(255).optional().nullable(),
-  seo_description: z.string().max(500).optional().nullable(),
+  description: z.string().nullish(),
+  keywords: z.string().max(512).nullish(),
+  seo_title: z.string().max(255).nullish(),
+  seo_description: z.string().max(500).nullish(),
 });
 
 export const list_products_dto = z.object({
@@ -74,13 +75,14 @@ export const list_products_dto = z.object({
 
 export const product_media_dto = z.object({
   product_id: z.string().min(1).max(255),
-  url: z.string().url(),
-  filename: z.string().max(255).optional(),
-  mime_type: z.string().max(128).optional(),
+  url: z.string(),
+  filename: z.string().max(255).nullish(),
+  mime_type: z.string().max(128).nullish(),
   kind: z.enum(["image", "video", "document"]).default("image"),
-  alt: z.string().max(255).optional().nullable(),
+  alt: z.string().max(255).nullish(),
   sort_order: z.number().int().min(0).default(0),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.string().nullish(),
+  // metadata: z.record(z.string(), z.unknown()).nullish(),
   is_primary: z.boolean().default(false),
 });
 

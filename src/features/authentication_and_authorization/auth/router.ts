@@ -23,9 +23,20 @@ export const auth_router = create_trpc_router({
   }),
 
   updateProfile: protected_procedure
-    .input(z.object({ name: z.string().min(2).max(255) }))
+    .input(
+      z.object({
+        name: z.string().min(2).max(255),
+        image: z.string().max(2048).optional().nullable(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await user_repository.update_profile(ctx.user.id, { name: input.name });
+      const patch: Parameters<typeof user_repository.update_profile>[1] = {
+        name: input.name,
+      };
+      if (input.image !== undefined) {
+        patch.image = input.image;
+      }
+      await user_repository.update_profile(ctx.user.id, patch);
       await audit_service.log({
         actor_user_id: ctx.user.id,
         action: "profile.updated",

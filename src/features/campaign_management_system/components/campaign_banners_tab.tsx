@@ -9,6 +9,8 @@ import {
   Phone,
   Layers,
   Image as ImageIcon,
+  ImagePlus,
+  Video,
 } from "lucide-react";
 import { z } from "zod";
 import { useState } from "react";
@@ -28,6 +30,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
 import { BANNER_TYPE, CAMPAIGN_PLACEMENT_PAGES } from "../constants/campaign_types";
 import { banner_schema } from "../models/campaign.dto";
 import { DeviceTarget } from "../types";
@@ -334,32 +337,72 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
               <div className="space-y-3">
                 <Field>
-                  <FieldLabel>Image URL (Desktop / Principal)</FieldLabel>
-                  <Input
-                    value={formState.image_url}
-                    onChange={(e) => setFormState({ ...formState, image_url: e.target.value })}
-                    placeholder="https://example.com/images/banner.jpg"
-                  />
+                  <FieldLabel>Image (Desktop / Principal)</FieldLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      value={formState.image_url}
+                      onChange={(e) => setFormState({ ...formState, image_url: e.target.value })}
+                      placeholder="https://example.com/images/banner.jpg"
+                      className="flex-1"
+                    />
+                    <MediaPickerDialog
+                      onSelect={(media) =>
+                        setFormState({ ...formState, image_url: media.url })
+                      }
+                      trigger={
+                        <Button type="button" variant="outline" size="icon" title="Choisir depuis la médiathèque">
+                          <ImagePlus className="size-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
                 </Field>
 
                 <Field>
-                  <FieldLabel>Image URL (Mobile)</FieldLabel>
-                  <Input
-                    value={formState.mobile_image_url}
-                    onChange={(e) =>
-                      setFormState({ ...formState, mobile_image_url: e.target.value })
-                    }
-                    placeholder="https://example.com/images/banner-mobile.jpg (facultatif)"
-                  />
+                  <FieldLabel>Image (Mobile)</FieldLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      value={formState.mobile_image_url}
+                      onChange={(e) =>
+                        setFormState({ ...formState, mobile_image_url: e.target.value })
+                      }
+                      placeholder="https://example.com/banner-mobile.jpg (facultatif)"
+                      className="flex-1"
+                    />
+                    <MediaPickerDialog
+                      onSelect={(media) =>
+                        setFormState({ ...formState, mobile_image_url: media.url })
+                      }
+                      trigger={
+                        <Button type="button" variant="outline" size="icon" title="Choisir depuis la médiathèque">
+                          <ImagePlus className="size-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
                 </Field>
 
                 <Field>
-                  <FieldLabel>Vidéo URL</FieldLabel>
-                  <Input
-                    value={formState.video_url}
-                    onChange={(e) => setFormState({ ...formState, video_url: e.target.value })}
-                    placeholder="https://example.com/videos/banner.mp4 (facultatif)"
-                  />
+                  <FieldLabel>Vidéo</FieldLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      value={formState.video_url}
+                      onChange={(e) => setFormState({ ...formState, video_url: e.target.value })}
+                      placeholder="https://example.com/videos/banner.mp4 (facultatif)"
+                      className="flex-1"
+                    />
+                    <MediaPickerDialog
+                      onSelect={(media) =>
+                        setFormState({ ...formState, video_url: media.url })
+                      }
+                      allowed_types={["video"]}
+                      trigger={
+                        <Button type="button" variant="outline" size="icon" title="Choisir depuis la médiathèque">
+                          <Video className="size-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
                 </Field>
               </div>
 

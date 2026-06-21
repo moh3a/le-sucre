@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
 import {
   CAMPAIGN_TYPE,
   CAMPAIGN_STATUS,
@@ -21,6 +22,7 @@ import {
 import { slugify } from "@/lib/utils";
 import { full_campaign_dto } from "../models/campaign.dto";
 import { CategoryTreeNode } from "@/features/product_information_management/categories/types";
+import type { MediaDTO } from "@/features/media_library/types";
 
 // Form value schema matching Zod DTO
 const form_schema = z.object({
@@ -38,6 +40,7 @@ const form_schema = z.object({
     accent_color: z.string().max(32).optional(),
     overlay_opacity: z.number().min(0).max(1).optional(),
     layout: z.enum(["full_width", "split", "card_grid", "carousel"]).optional(),
+    bg_image_url: z.string().max(2048).optional().nullable(),
   }),
   promotion_id: z.string().max(255).optional().nullable(),
   ab_test_group: z.string().max(64).optional().nullable(),
@@ -129,6 +132,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           accent_color: "#700145",
           overlay_opacity: 0,
           layout: "full_width",
+          bg_image_url: null,
         },
         promotion_id: "",
         ab_test_group: "",
@@ -199,6 +203,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
         accent_color: default_values.theme?.accent_color ?? "#700145",
         overlay_opacity: default_values.theme?.overlay_opacity ?? 0,
         layout: default_values.theme?.layout ?? "full_width",
+        bg_image_url: default_values.theme?.bg_image_url ?? null,
       },
       promotion_id: default_values.promotion_id ?? "",
       ab_test_group: default_values.ab_test_group ?? "",
@@ -633,6 +638,52 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   )}
                 />
               </div>
+
+              <Controller
+                name="theme.bg_image_url"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>Image de fond</FieldLabel>
+                    <div className="flex items-center gap-3">
+                      <MediaPickerDialog
+                        onSelect={(media) => field.onChange(media.url)}
+                        trigger={
+                          field.value ? (
+                            <div className="group relative inline-flex cursor-pointer overflow-hidden rounded-lg border">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={field.value}
+                                alt="Fond"
+                                className="h-20 w-32 object-cover transition-opacity group-hover:opacity-75"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/20">
+                                <span className="text-white text-xs opacity-0 transition-opacity group-hover:opacity-100">
+                                  Changer
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button type="button" variant="outline" className="h-20 w-32">
+                              <span className="text-xs">Choisir</span>
+                            </Button>
+                          )
+                        }
+                      />
+                      {field.value && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => field.onChange(null)}
+                        >
+                          Effacer
+                        </Button>
+                      )}
+                    </div>
+                  </Field>
+                )}
+              />
             </CardContent>
           </Card>
 

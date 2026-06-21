@@ -121,6 +121,7 @@ export class ProductAdminRepository {
         sku: products.sku,
         status: products.status,
         base_price: products.base_price,
+        is_featured: products.is_featured,
         created_at: products.created_at,
         name: product_translations.name,
         category_name: categories.name,

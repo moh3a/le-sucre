@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Camera } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -11,10 +13,13 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
 import { formatDate } from "@/lib/format";
+import type { MediaDTO } from "@/features/media_library/types";
 
 const profile_form_schema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(255),
+  image: z.string().max(2048).nullable().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profile_form_schema>;
@@ -25,7 +30,7 @@ export function AccountProfileTab() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profile_form_schema),
-    values: { name: data?.user.name ?? "" },
+    values: { name: data?.user.name ?? "", image: data?.user.image ?? null },
   });
 
   const update = trpc.auth.updateProfile.useMutation({
@@ -35,7 +40,10 @@ export function AccountProfileTab() {
   });
 
   async function on_submit(values: ProfileFormValues) {
-    await update.mutateAsync(values);
+    await update.mutateAsync({
+      name: values.name,
+      image: values.image ?? undefined,
+    });
   }
 
   if (isLoading) {
@@ -56,8 +64,58 @@ export function AccountProfileTab() {
     );
   }
 
+  const image_value = form.watch("image");
+
+  function handle_image_select(media: MediaDTO) {
+    form.setValue("image", media.url, { shouldDirty: true });
+  }
+
+  function handle_image_clear() {
+    form.setValue("image", null, { shouldDirty: true });
+  }
+
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Photo de profil</CardTitle>
+          <CardDescription>Choisissez une photo depuis la médiathèque</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <MediaPickerDialog
+            onSelect={handle_image_select}
+            trigger={
+              <div className="group relative inline-flex cursor-pointer overflow-hidden rounded-full">
+                {image_value ? (
+                  <Image
+                    src={image_value}
+                    alt="Avatar"
+                    width={96}
+                    height={96}
+                    className="size-24 object-cover transition-opacity group-hover:opacity-75"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="bg-muted flex size-24 items-center justify-center rounded-full">
+                    <Camera className="text-muted-foreground size-8" />
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/20">
+                  <span className="text-white text-xs opacity-0 transition-opacity group-hover:opacity-100">
+                    Changer
+                  </span>
+                </div>
+              </div>
+            }
+          />
+          {image_value && (
+            <Button type="button" variant="ghost" size="sm" className="mt-2" onClick={handle_image_clear}>
+              Supprimer la photo
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Informations personnelles</CardTitle>

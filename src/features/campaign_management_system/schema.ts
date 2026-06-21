@@ -63,6 +63,7 @@ export const campaigns = mysqlTable(
         accent_color?: string;
         overlay_opacity?: number;
         layout?: "full_width" | "split" | "card_grid" | "carousel";
+        bg_image_url?: string | null;
       }>()
       .default({}),
 

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { ImageIcon, Plus } from "lucide-react";
+import { ImageIcon, ImagePlus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   ColorPicker,
@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
 import { create_property_dto, create_property_value_dto } from "../models/variant.dto";
 import { SkuGeneratorPanel } from "./sku-generator-panel";
 import { DeletePropertyDialog } from "./delete-property-dialog";
@@ -256,18 +257,46 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           />
                         </Field>
                         <Field>
-                          <FieldLabel>Image (URL)</FieldLabel>
-                          <Input
-                            value={get_value_defaults(property.id).thumbnail_image ?? ""}
-                            onChange={(e) =>
-                              set_value_field(
-                                property.id,
-                                "thumbnail_image",
-                                e.target.value || null,
-                              )
-                            }
-                            placeholder="https://..."
-                          />
+                          <FieldLabel>Image</FieldLabel>
+                          <div className="flex items-center gap-2">
+                            {get_value_defaults(property.id).thumbnail_image ? (
+                              <div className="group relative inline-flex overflow-hidden rounded-lg border">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={get_value_defaults(property.id).thumbnail_image!}
+                                  alt=""
+                                  className="h-14 w-14 object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    set_value_field(property.id, "thumbnail_image", null)
+                                  }
+                                  className="bg-destructive text-destructive-foreground absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-full"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              </div>
+                            ) : null}
+                            <MediaPickerDialog
+                              onSelect={(media) =>
+                                set_value_field(property.id, "thumbnail_image", media.url)
+                              }
+                              trigger={
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1"
+                                >
+                                  <ImagePlus className="size-4" />
+                                  {get_value_defaults(property.id).thumbnail_image
+                                    ? "Changer"
+                                    : "Choisir"}
+                                </Button>
+                              }
+                            />
+                          </div>
                         </Field>
                         <Field>
                           <FieldLabel>Couleur</FieldLabel>

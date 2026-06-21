@@ -10,6 +10,7 @@ import {
   Folder,
   MoreHorizontal,
   Pencil,
+  Star,
   Tag,
 } from "lucide-react";
 import Link from "next/link";
@@ -72,6 +73,7 @@ type ProductRow = {
   revenue: string;
   review_count: number;
   average_rating: string;
+  is_featured: boolean;
 };
 
 interface Option {
@@ -300,7 +302,16 @@ export function ProductDataTable() {
         accessorKey: "status",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
         cell: ({ row }) => <ProductStatusBadge status={row.original.status ?? "draft"} />,
-      }, 
+      },
+      {
+        id: "featured",
+        accessorKey: "is_featured",
+        header: ({ column }) => <DataTableColumnHeader column={column} label="À la une" />,
+        cell: ({ row }) =>
+          row.original.is_featured ? (
+            <Star className="size-4 fill-yellow-400 text-yellow-400" />
+          ) : null,
+      },
       {
         id: "base_price",
         accessorKey: "base_price",
@@ -377,6 +388,12 @@ export function ProductDataTable() {
                 <Link href={`/console/products/${row.original.id}`}>
                   <Pencil className="mr-2 size-4" />
                   {t("edit")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/console/products/${row.original.id}?tab=recommendations`}>
+                  <Star className="mr-2 size-4" />
+                  Recommandations
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

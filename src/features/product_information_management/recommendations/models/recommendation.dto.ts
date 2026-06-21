@@ -42,3 +42,25 @@ export const recent_query_dto = z.object({
   session_key: z.string().min(8).max(64).optional(),
   limit: z.coerce.number().int().min(1).max(24).default(12),
 });
+
+// ─── Admin recommendation management DTOs ───
+
+export const admin_recommendation_edges_dto = z.object({
+  source_product_id: z.string().min(1).max(255),
+});
+
+export const admin_add_recommendation_edge_dto = z.object({
+  source_product_id: z.string().min(1).max(255),
+  target_product_id: z.string().min(1).max(255),
+  recommendation_type: z.enum(["similar", "related", "fbt"]),
+  score: z.number().min(0).max(100).default(75),
+});
+
+export const admin_remove_recommendation_edge_dto = z.object({
+  edge_id: z.string().min(1).max(255),
+});
+
+export const admin_reindex_product_dto = z.object({
+  product_id: z.string().min(1).max(255),
+  locale: z.enum(["fr", "en", "ar"]).default("fr"),
+});

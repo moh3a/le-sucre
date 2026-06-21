@@ -53,6 +53,7 @@ const campaign_theme_schema = z
     accent_color: z.string().max(32).optional(),
     overlay_opacity: z.number().min(0).max(1).optional(),
     layout: z.enum(["full_width", "split", "card_grid", "carousel"]).optional(),
+    bg_image_url: z.string().max(2048).optional().nullable(),
   })
   .optional();
 
