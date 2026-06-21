@@ -98,6 +98,12 @@ export const redisKeys = {
     ttl: 60 * 5,
   },
 
+  // ─── IP Blacklist ────────────────────────────────
+  blacklist: {
+    byIp: (ip: string) => `blacklist:ip:${ip}`,
+    ttl: 300, // 5 minutes
+  },
+
   campaign: {
     byId: (id: string) => `campaign:id:${id}`,
     active_sections: (page: string, locale: string, country: string) =>

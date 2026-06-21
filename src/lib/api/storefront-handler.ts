@@ -1,10 +1,10 @@
 import { apply_api_guards } from "@/features/authentication_and_authorization/authorization/middleware/api-guards";
-import { AuthorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
 import { auth } from "@/lib/auth";
 import { json_ok, json_error } from "@/lib/http";
 import { AuthenticationError } from "@/lib/error_handling";
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/rate-limit";
+import { assert_ip_not_blacklisted } from "@/lib/security/ip-blacklist";
 
 type StorefrontHandler = (ctx: {
   user?: { id: string; email: string; name: string } | null;
@@ -16,6 +16,7 @@ export function storefront_route(handler: StorefrontHandler) {
   return async (req: Request) => {
     try {
       await apply_api_guards(req, "storefront");
+      await assert_ip_not_blacklisted(req);
 
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.api);
@@ -36,6 +37,7 @@ export function storefront_auth_route(handler: StorefrontHandler) {
   return async (req: Request) => {
     try {
       await apply_api_guards(req, "storefront");
+      await assert_ip_not_blacklisted(req);
 
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.api);

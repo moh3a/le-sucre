@@ -3,10 +3,10 @@ import { AuthorizationService } from "@/features/authentication_and_authorizatio
 import { auth } from "@/lib/auth";
 import { json_ok, json_error } from "@/lib/http";
 import { AuthenticationError, AppError } from "@/lib/error_handling";
-import { redaction_service } from "@/lib/security/redaction";
 import { ownership_service } from "@/lib/security/ownership";
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/rate-limit";
+import { assert_ip_not_blacklisted } from "@/lib/security/ip-blacklist";
 
 type AdminHandler = (ctx: {
   user: { id: string; email: string; name: string };
@@ -25,6 +25,7 @@ export function admin_route(handler: AdminHandler, permission?: string) {
   return async (req: Request) => {
     try {
       await apply_api_guards(req, "admin");
+      await assert_ip_not_blacklisted(req);
 
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.adminApi);
@@ -40,7 +41,6 @@ export function admin_route(handler: AdminHandler, permission?: string) {
       if (permission) await authz.assert_permission(session.user.id, permission);
 
       const rbac = await authz.get_auth_context(session.user.id);
-      const redacted = redaction_service.redact(session.user);
       const data = await handler({
         user: session.user,
         rbac,
@@ -62,6 +62,7 @@ export function ownership_aware_admin_route(
   return async (req: Request) => {
     try {
       await apply_api_guards(req, "admin");
+      await assert_ip_not_blacklisted(req);
 
       const session = await auth.api.getSession({ headers: req.headers });
       if (!session?.user) return json_error(new AuthenticationError());

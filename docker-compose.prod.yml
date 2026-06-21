@@ -28,6 +28,17 @@ services:
       redis:
         condition: service_healthy
 
+  worker-blacklist-expiry:
+    image: le-sucre-app:latest
+    restart: unless-stopped
+    env_file: .env.production
+    command: ["node", "--import", "tsx", "src/features/ip_blacklist/scripts/expire-blacklist.ts"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   worker-reservations:
     image: le-sucre-app:latest
     restart: unless-stopped

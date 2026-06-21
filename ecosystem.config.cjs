@@ -31,5 +31,16 @@ module.exports = {
       max_memory_restart: "300M",
       env_production: { NODE_ENV: "production" },
     },
+    {
+      name: "le-sucre-worker-blacklist-expiry",
+      script: "tsx",
+      args: "src/features/ip_blacklist/scripts/expire-blacklist.ts",
+      instances: 1,
+      exec_mode: "fork",
+      cron_restart: "0 * * * *",
+      autorestart: false,
+      max_memory_restart: "200M",
+      env_production: { NODE_ENV: "production" },
+    },
   ],
 };

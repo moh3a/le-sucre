@@ -74,7 +74,7 @@ export function AppSidebar() {
   const { data } = authClient.useSession();
   const { data: me } = trpc.auth.me.useQuery(undefined, {
     enabled: Boolean(data?.user),
-  }); 
+  });
   const primary_role = me?.roles?.[0];
   const { state } = useSidebar();
   const is_collapsed = state === "collapsed";
@@ -108,9 +108,7 @@ export function AppSidebar() {
     {
       title: "Expéditions",
       icon: Truck,
-      items: [
-        { title: "Livraisons", url: "/console/shipping", icon: Truck },
-      ],
+      items: [{ title: "Livraisons", url: "/console/shipping", icon: Truck }],
     },
     {
       title: "Paiements & Factures",
@@ -147,14 +145,30 @@ export function AppSidebar() {
         { title: "Livraisons", url: "/console/operations/delivery", icon: Truck },
         { title: "Remboursements", url: "/console/operations/refunds", icon: RefreshCw },
         { title: "Annulations", url: "/console/operations/cancellations", icon: Ban },
-        { title: "Vérifications", url: "/console/operations/payment-verifications", icon: Banknote },
+        {
+          title: "Vérifications",
+          url: "/console/operations/payment-verifications",
+          icon: Banknote,
+        },
         { title: "Garanties", url: "/console/operations/warranty", icon: Wrench },
-        { title: "Validations promo", url: "/console/operations/promotion-reviews", icon: TicketPercent },
+        {
+          title: "Validations promo",
+          url: "/console/operations/promotion-reviews",
+          icon: TicketPercent,
+        },
         { title: "Tâches", url: "/console/operations/tasks", icon: ListTodo },
         { title: "Relances", url: "/console/operations/follow-ups", icon: Phone },
         { title: "Support", url: "/console/operations/support-cases", icon: HeadphonesIcon },
-        { title: "Ajust. stock", url: "/console/operations/inventory-adjustments", icon: Warehouse },
-        { title: "Publications", url: "/console/operations/publishing-schedules", icon: CalendarClock },
+        {
+          title: "Ajust. stock",
+          url: "/console/operations/inventory-adjustments",
+          icon: Warehouse,
+        },
+        {
+          title: "Publications",
+          url: "/console/operations/publishing-schedules",
+          icon: CalendarClock,
+        },
         { title: "Escalades", url: "/console/operations/escalations", icon: TriangleAlert },
       ],
     },
@@ -166,6 +180,7 @@ export function AppSidebar() {
         { title: "Autorisations", url: "/console/authorization", icon: ShieldCog },
         { title: "Audit", url: "/console/audit-logs", icon: ScrollText },
         { title: "Feature Flags", url: "/console/feature-flags", icon: Flag },
+        { title: "Liste noire IP", url: "/console/blacklist", icon: Ban },
       ],
     },
   ];
@@ -195,7 +210,7 @@ export function AppSidebar() {
                   <span>Analytics</span>
                 </SidebarMenuButton>
               </Link>
-              {nav.map(({ icon: Icon, ...section }) => (
+              {nav.map(({ icon: Icon, ...section }) =>
                 is_collapsed ? (
                   <SidebarMenuItem key={section.title}>
                     <DropdownMenu>
@@ -237,7 +252,10 @@ export function AppSidebar() {
                         <SidebarMenuSub>
                           {section.items.map((item) => (
                             <SidebarMenuSubItem key={item.url}>
-                              <SidebarMenuSubButton asChild isActive={pathname.startsWith(item.url)}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={pathname.startsWith(item.url)}
+                              >
                                 <Link href={item.url}>
                                   <item.icon className="size-4" />
                                   <span>{item.title}</span>
@@ -249,8 +267,8 @@ export function AppSidebar() {
                       </CollapsibleContent>
                     </SidebarMenuItem>
                   </Collapsible>
-                )
-              ))}
+                ),
+              )}
               <Link href="/console/settings">
                 <SidebarMenuButton
                   tooltip="Settings"
@@ -269,7 +287,7 @@ export function AppSidebar() {
               name: data?.user.name ?? "",
               email: data?.user.email ?? "",
               avatar: data?.user.image ?? "",
-              role: primary_role ?? null
+              role: primary_role ?? null,
             }}
           />
         </SidebarFooter>

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Ban,
   BarChart3,
   Box,
   ChevronLeft,
@@ -36,6 +37,7 @@ const navItems = [
   { href: "/console/analytics", label: "Analytiques", icon: BarChart3 },
   { href: "/console/authorization", label: "Rôles", icon: Shield },
   { href: "/console/audit-logs", label: "Journal d'audit", icon: ClipboardList },
+  { href: "/console/blacklist", label: "Liste noire IP", icon: Ban },
 ];
 
 const bottomItems = [

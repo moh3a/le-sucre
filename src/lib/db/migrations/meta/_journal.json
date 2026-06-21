@@ -113,6 +113,13 @@
       "when": 1781970404656,
       "tag": "0015_media_library",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1782080848337,
+      "tag": "0016_add_ip_blacklist",
+      "breakpoints": true
     }
   ]
 }

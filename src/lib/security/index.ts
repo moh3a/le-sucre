@@ -1,3 +1,4 @@
+export { assert_ip_not_blacklisted, extract_client_ip, ip_blacklist_service } from "./ip-blacklist";
 export {
   sanitize_html,
   sanitize_plain_text,

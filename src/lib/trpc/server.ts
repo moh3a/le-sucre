@@ -40,6 +40,7 @@ import { payment_router } from "@/features/payment_management_system/router";
 import { wishlist_management_router } from "@/features/wishlist_management_system/router";
 import { feature_flag_router } from "@/features/feature_flag_system/router";
 import { media_router } from "@/features/media_library/routers/media.router";
+import { blacklist_router } from "@/features/ip_blacklist/routers/blacklist.router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -82,6 +83,7 @@ export const app_router = create_trpc_router({
   wishlistManagement: wishlist_management_router,
   featureFlags: feature_flag_router,
   media: media_router,
+  blacklist: blacklist_router,
 });
 
 export type AppRouter = typeof app_router;

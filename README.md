@@ -34,7 +34,6 @@
 }
 ```
 
-- implement blacklisting clients by ip
 - fix analytics
 - remove all hard coded text
 - continue Prompt 16 — Campaign Management System

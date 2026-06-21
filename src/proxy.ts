@@ -17,9 +17,44 @@ function get_cors_origin(origin: string | null): string {
   return envOrigins.includes(origin) ? origin : "";
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
+
+  const client_ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    request.headers.get("cf-connecting-ip") ??
+    "unknown";
+  if (
+    client_ip !== "unknown" &&
+    client_ip !== "127.0.0.1" &&
+    client_ip !== "::1" &&
+    pathname.startsWith("/api/")
+  ) {
+    try {
+      const { default: Redis } = await import("ioredis");
+      const redis = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
+        lazyConnect: true,
+        maxRetriesPerRequest: 1,
+        connectTimeout: 1000,
+      });
+      const cached = await redis.get(`blacklist:ip:${client_ip}`);
+      if (cached === "1") {
+        await redis.quit();
+        return new NextResponse(
+          JSON.stringify({
+            success: false,
+            error: { code: "IP_BLOCKED", message: "Accès refusé" },
+          }),
+          { status: 403, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      await redis.quit();
+    } catch {
+      // Edge-level blacklist check unavailable — fall through to route-level check
+    }
+  }
 
   response.headers.set("x-pathname", pathname);
 
