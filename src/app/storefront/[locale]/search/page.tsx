@@ -11,7 +11,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const sp = await searchParams;
   const q = (Array.isArray(sp.q) ? sp.q[0] : sp.q) ?? "";
   return {
-    title: q ? `Recherche : ${q} | Le Sucré` : "Recherche | Le Sucré",
+    title: q ? `Recherche : ${q}` : "Recherche",
     robots: { index: true, follow: true },
   };
 }

@@ -157,6 +157,11 @@ export class MediaRepository {
     return Number(result?.total ?? 0);
   }
 
+  async find_usage_by_id(id: string) {
+    const [row] = await db.select().from(media_usage).where(eq(media_usage.id, id)).limit(1);
+    return row ?? null;
+  }
+
   create(data: typeof media.$inferInsert) {
     return db.insert(media).values(data);
   }

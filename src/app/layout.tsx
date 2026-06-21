@@ -8,6 +8,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/app-providers";
 import { Toaster } from "@/components/ui/sonner"
+import { APP_NAME } from "@/constants";
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],
@@ -16,21 +17,9 @@ const notoSerifHeading = Noto_Serif({
 
 const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
-// import localFont from "next/font/local";
-// export const font_heading = localFont({
-//   src: [{ path: "../../public/fonts/Orla.woff2", weight: "400 700", style: "normal" }],
-//   variable: "--font-heading",
-//   display: "swap",
-// });
-// export const font_sans = localFont({
-//   src: [{ path: "../../public/fonts/Moya.woff2", weight: "400 600", style: "normal" }],
-//   variable: "--font-sans",
-//   display: "swap",
-// });
-
 export const metadata: Metadata = {
-  title: "Le Sucré",
-  description: "Your eCommerce platform.",
+  title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
+  description: "Votre plateforme e-commerce de confiance.",
 };
 
 export default async function RootLayout({

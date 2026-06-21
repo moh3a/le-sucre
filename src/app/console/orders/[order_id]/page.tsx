@@ -22,6 +22,6 @@ export default async function OrderDetailPage({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { order_id } = await params;
   return {
-    title: `Commande ${order_id} — Le Sucre`,
+    title: `Commande ${order_id}`,
   };
 }

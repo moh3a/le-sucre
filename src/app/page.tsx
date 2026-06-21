@@ -1,3 +1,5 @@
+export const metadata = { title: "Accueil" };
+
 export default function Home() {
   return (
     <div className="p-4">

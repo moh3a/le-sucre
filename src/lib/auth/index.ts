@@ -11,8 +11,7 @@ import {
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { db } from "../db";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const auth_options: any = {
+const auth_options = {
   database: drizzleAdapter(db, {
     provider: "mysql",
     schema: {

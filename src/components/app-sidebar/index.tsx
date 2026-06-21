@@ -71,7 +71,6 @@ import { TooltipProvider } from "../ui/tooltip";
 import { trpc } from "../providers/app-providers";
 
 export function AppSidebar() {
-  // TODO add role to auth client data
   const { data } = authClient.useSession();
   const { data: me } = trpc.auth.me.useQuery(undefined, {
     enabled: Boolean(data?.user),

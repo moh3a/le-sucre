@@ -1,6 +1,8 @@
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { CampaignForm } from "@/features/campaign_management_system/components/campaign_form";
 
+export const metadata = { title: "Nouvelle campagne" };
+
 export default function NewCampaignPage() {
   return (
     <ConsolePageShell

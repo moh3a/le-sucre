@@ -28,10 +28,10 @@ async function getCategory(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category_slug } = await params;
   const category = await getCategory(category_slug);
-  if (!category) return { title: "Catégorie non trouvée | Le Sucré" };
+  if (!category) return { title: "Catégorie non trouvée" };
 
   return {
-    title: `${category.name} | Le Sucré`,
+    title: category.name,
     description: `Découvrez nos produits de la catégorie ${category.name}`,
     robots: { index: true, follow: true },
   };

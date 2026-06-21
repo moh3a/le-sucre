@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { NextIntlClientProvider } from "next-intl";
 import { AppProviders } from "@/components/providers/app-providers";
 import { getLocale, getMessages } from "next-intl/server";
+import { APP_NAME } from "@/constants";
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],
@@ -14,8 +15,8 @@ const notoSerifHeading = Noto_Serif({
 const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Le Sucré",
-  description: "Your eCommerce platform.",
+  title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
+  description: "Votre plateforme e-commerce de confiance.",
 };
 
 export default async function RootLayout({

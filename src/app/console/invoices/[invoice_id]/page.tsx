@@ -21,6 +21,6 @@ export default async function InvoiceDetailPage({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { invoice_id } = await params;
   return {
-    title: `Facture ${invoice_id} - Le Sucré`,
+    title: `Facture ${invoice_id}`,
   };
 }

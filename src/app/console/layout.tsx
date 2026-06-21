@@ -8,10 +8,11 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { auth } from "@/lib/auth";
 import { AuthorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
+import { APP_NAME } from "@/constants";
 
 export const metadata: Metadata = {
-  title: "Le Sucré",
-  description: "Your eCommerce platform.",
+  title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
+  description: "Votre plateforme e-commerce de confiance.",
 };
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {

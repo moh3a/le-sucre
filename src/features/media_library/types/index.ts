@@ -53,3 +53,45 @@ export interface MediaPickerOptions {
   entity_id?: string;
   field?: string;
 }
+
+export interface ImageSize {
+  width: number;
+  height: number;
+  size: number;
+  storage_key: string;
+  url: string;
+  format: string;
+}
+
+export interface ImageSizes {
+  thumbnail: ImageSize;
+  medium: ImageSize;
+  original: ImageSize;
+}
+
+export interface UploadResult {
+  id: string;
+  filename: string;
+  original_name: string;
+  mime_type: string;
+  kind: MediaKind;
+  size: number;
+  width: number | null;
+  height: number | null;
+  url: string;
+  storage_key: string;
+  provider: MediaProvider;
+  alt: string | null;
+  caption: string | null;
+  is_public: boolean;
+  uploaded_by: string | null;
+  variants?: ImageSizes;
+  blur_hash?: string | null;
+}
+
+export interface UploadValidation {
+  valid: boolean;
+  error?: string;
+  warnings?: string[];
+  sanitized_svg?: string;
+}

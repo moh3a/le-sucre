@@ -4,6 +4,8 @@ import { GalleryVerticalEnd } from "lucide-react";
 import { LoginForm } from "@/features/authentication_and_authorization/auth/components/login-form";
 import { APP_NAME } from "@/constants";
 
+export const metadata = { title: "Connexion" };
+
 export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">

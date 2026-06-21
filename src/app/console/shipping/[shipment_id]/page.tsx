@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { ShipmentDetailClient } from "@/features/shipping_management_system/components/shipment-detail-client";
 
 type Props = { params: Promise<{ shipment_id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { shipment_id } = await params;
+  return { title: `Expédition ${shipment_id}` };
+}
 
 export default async function ShipmentDetailPage({ params }: Props) {
   const { shipment_id } = await params;

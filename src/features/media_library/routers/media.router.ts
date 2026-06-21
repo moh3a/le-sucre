@@ -48,4 +48,12 @@ export const media_router = create_trpc_router({
     .mutation(({ input }) => media_service.detach_from_entity(input.usage_id)),
 
   stats: permission_procedure(PERMISSIONS.products_read).query(() => media_service.stats()),
+
+  optimize: permission_procedure(PERMISSIONS.products_write)
+    .input(z.object({ id: z.string() }))
+    .mutation(({ input }) => media_service.generate_variants(input.id)),
+
+  regenerate: permission_procedure(PERMISSIONS.products_write)
+    .input(z.object({ id: z.string() }))
+    .mutation(({ input }) => media_service.regenerate_variants(input.id)),
 });

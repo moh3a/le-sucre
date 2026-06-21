@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 
 import { ProductForm } from "@/features/product_information_management/products/components/product-form";
 
+export const metadata = { title: "Nouveau produit" };
+
 export default async function NewProductPage() {
   const t = await getTranslations("products");
 

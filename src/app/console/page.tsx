@@ -1,5 +1,7 @@
 import { DashboardPageClient } from "@/features/console_dashboard/components/dashboard-page-client";
 
+export const metadata = { title: "Tableau de bord" };
+
 export default function Home() {
   return (
     <>

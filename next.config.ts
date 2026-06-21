@@ -34,13 +34,13 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: "5mb",
+      bodySizeLimit: "200mb",
     },
   },
   httpAgentOptions: {
     keepAlive: true,
   },
-  serverExternalPackages: ["winston", "winston-daily-rotate-file"],
+  serverExternalPackages: ["winston", "winston-daily-rotate-file", "sharp"],
 };
 
 export default with_next_intl(nextConfig);
