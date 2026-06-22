@@ -17,6 +17,7 @@ import {
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
 import { cn } from "@/lib/utils";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { MediaUploadDialog } from "./media-upload-dialog";
 import type { MediaDTO } from "../types";
@@ -101,6 +102,7 @@ export function MediaPickerDialog({
   }, [open]);
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ResponsiveDialog open={open} onOpenChange={on_open_change}>
       {trigger ? <ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger> : null}
       <ResponsiveDialogContent className="sm:max-w-3xl">
@@ -249,5 +251,6 @@ export function MediaPickerDialog({
         )}
       </ResponsiveDialogContent>
     </ResponsiveDialog>
+    </QueryGuard>
   );
 }

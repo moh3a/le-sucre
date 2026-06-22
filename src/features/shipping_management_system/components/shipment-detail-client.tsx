@@ -5,6 +5,7 @@ import { ExternalLink, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import { formatDate } from "@/lib/format";
 export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
   const utils = trpc.useUtils();
 
-  const { data, isLoading, refetch } = trpc.shipping.adminGetDetail.useQuery({ shipment_id });
+  const { data, isLoading, refetch, error } = trpc.shipping.adminGetDetail.useQuery({ shipment_id });
 
   const sync_mutation = trpc.shipping.sync.useMutation({
     onSuccess: () => {
@@ -24,10 +25,6 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
     onError: (err) => toast.error(err.message),
   });
 
-  if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Chargement de l&apos;expédition…</p>;
-  }
-
   if (!data) {
     return <p className="text-muted-foreground text-sm">Expédition introuvable.</p>;
   }
@@ -35,6 +32,7 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
   const { shipment, tracking_events } = data;
 
   return (
+    <QueryGuard query={{ isLoading, error }}>
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -130,5 +128,6 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

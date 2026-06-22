@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Trash2, LinkIcon, Check, Download, FileVideo, FileText } from "lucide-react";
 import { toast } from "sonner";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,8 +68,8 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
     },
   });
 
-  if (isLoading) {
-    return (
+  return (
+    <QueryGuard query={{ isLoading }} loadingFallback={
       <div className="space-y-3">
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
@@ -76,18 +77,8 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
       </div>
-    );
-  }
-
-  if (!data || data.items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground text-lg">Aucun fichier trouvé</p>
-      </div>
-    );
-  }
-
-  return (
+    }>
+    {!data ? null : (
     <div>
       <div className="rounded-md border">
         <Table>
@@ -234,5 +225,7 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
         </Button>
       </div>
     </div>
+    )}
+    </QueryGuard>
   );
 }

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { QueryGuard } from "@/components/query-guard";
 import { formatDate } from "@/lib/format";
 
 type ProductOrderRow = {
@@ -68,11 +69,12 @@ const columns: ColumnDef<ProductOrderRow>[] = [
 ];
 
 export function ProductOrdersPanel({ product_id }: { product_id: string }) {
-  const { data, isLoading } = trpc.orders.adminListByProduct.useQuery({
+  const query = trpc.orders.adminListByProduct.useQuery({
     product_id,
     page: 1,
     limit: 10,
   });
+  const { data, isLoading } = query;
 
   const items = (data?.items ?? []) as ProductOrderRow[];
   const { table } = useDataTable({
@@ -83,9 +85,8 @@ export function ProductOrdersPanel({ product_id }: { product_id: string }) {
     getRowId: (row) => row.id,
   });
 
-  if (isLoading) return <DataTableSkeleton columnCount={5} rowCount={5} />;
-
   return (
+    <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={5} rowCount={5} />}>
     <Card>
       <CardHeader>
         <CardTitle>Commandes</CardTitle>
@@ -97,5 +98,6 @@ export function ProductOrdersPanel({ product_id }: { product_id: string }) {
         <DataTable table={table} />
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

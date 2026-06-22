@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
 
 export function RecommendedForYouSection({
@@ -10,20 +11,23 @@ export function RecommendedForYouSection({
   locale: "fr" | "en";
   limit?: number;
 }) {
-  const { data, isLoading, error } = trpc.recommendations.forYou.useQuery(
+  const query = trpc.recommendations.forYou.useQuery(
     { locale, limit },
     {
-      retry: false, // Don't spam retries if unauthenticated
+      retry: false,
     },
   );
+  const { data, isLoading, error } = query;
 
-  if (error) return null; // Gracefully hide if unauthenticated or error
+  if (error) return null;
 
   return (
+    <QueryGuard query={query}>
     <ProductRecommendationCarousel
       title={locale === "fr" ? "Recommandé pour vous" : "Recommended For You"}
       items={data ?? []}
       isLoading={isLoading}
     />
+    </QueryGuard>
   );
 }

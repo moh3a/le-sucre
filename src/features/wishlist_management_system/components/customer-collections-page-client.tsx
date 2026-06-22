@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Bookmark, Plus, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function CustomerCollectionsPageClient() {
   }
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Mes collections</h1>
 
@@ -86,5 +88,6 @@ export function CustomerCollectionsPageClient() {
         </div>
       )}
     </div>
+    </QueryGuard>
   );
 }

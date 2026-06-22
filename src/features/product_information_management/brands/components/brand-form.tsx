@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -103,6 +104,7 @@ export function BrandForm({
   }
 
   return (
+    <QueryGuard mutation={{ isPending: pending }}>
     <form className="space-y-6" onSubmit={form.handleSubmit(on_submit)}>
       <FieldGroup>
         <Controller
@@ -195,5 +197,6 @@ export function BrandForm({
         </Button>
       </FieldGroup>
     </form>
+    </QueryGuard>
   );
 }

@@ -7,6 +7,7 @@ import { Loader2, Plus, Trash2, RefreshCw, Star } from "lucide-react";
 import Image from "next/image";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -137,6 +138,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
   }
 
   return (
+    <QueryGuard mutation={add_edge}>
     <div className="space-y-6">
       {/* ─── Catalog Discovery Section ─── */}
       <Card>
@@ -368,6 +370,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }
 

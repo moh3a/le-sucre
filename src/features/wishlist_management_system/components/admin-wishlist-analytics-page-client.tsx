@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import {
   Heart,
   TrendingUp,
   Package,
   ShoppingBag,
-  Loader2,
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ export function AdminWishlistAnalyticsPageClient() {
   const invalidateMut = trpc.wishlistManagement.admin.invalidateCache.useMutation();
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -76,12 +77,7 @@ export function AdminWishlistAnalyticsPageClient() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      ) : (
-        <>
+      {<>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
@@ -276,7 +272,8 @@ export function AdminWishlistAnalyticsPageClient() {
             )}
           </div>
         </>
-      )}
+      }
     </div>
+    </QueryGuard>
   );
 }

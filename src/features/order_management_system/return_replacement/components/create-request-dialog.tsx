@@ -5,6 +5,7 @@ import { ArrowLeftRight, PackageX, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -84,6 +85,7 @@ export function CreateRequestDialog({
         : <ArrowLeftRight className="h-3 w-3" />;
 
   return (
+    <QueryGuard mutation={create_mutation}>
     <Dialog open={open} onOpenChange={set_open}>
       <DialogTrigger asChild>
         <Button
@@ -167,5 +169,6 @@ export function CreateRequestDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,7 +104,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
 
-  const { data, isLoading } = trpc.invoices.get_invoice.useQuery({ id });
+  const { data, isLoading, error } = trpc.invoices.get_invoice.useQuery({ id });
   const mark_paid_mutation = trpc.invoices.mark_as_paid.useMutation({
     onSuccess: () => {
       toast.success("Facture marquée comme payée");
@@ -141,16 +142,6 @@ export function InvoiceDetailClient({ id }: { id: string }) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
-
   if (!invoice) return null;
 
   const billing = invoice.billing_address as BillingAddress;
@@ -164,6 +155,13 @@ export function InvoiceDetailClient({ id }: { id: string }) {
     });
 
   return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={
+      <div className="space-y-6">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    }>
     <div className="space-y-6">
       {/* Header Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -388,5 +386,6 @@ export function InvoiceDetailClient({ id }: { id: string }) {
         </div>
       </div>
     </div>
+    </QueryGuard>
   );
 }

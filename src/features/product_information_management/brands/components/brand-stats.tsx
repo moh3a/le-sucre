@@ -4,6 +4,7 @@ import { Building2, CheckCircle2, XCircle, Package } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Stat, StatDescription, StatIndicator, StatLabel, StatValue } from "@/components/ui/stat";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -11,17 +12,8 @@ import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carouse
 export function BrandStats() {
   const t = useTranslations("brands");
 
-  const { data: statsData, isLoading } = trpc.brands.stats.useQuery();
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[88px] rounded-lg" />
-        ))}
-      </div>
-    );
-  }
+  const query = trpc.brands.stats.useQuery();
+  const { data: statsData, isLoading } = query;
 
   const stats = [
     {
@@ -55,6 +47,13 @@ export function BrandStats() {
   ];
 
   return (
+    <QueryGuard query={query} loadingFallback={
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-[88px] rounded-lg" />
+        ))}
+      </div>
+    }>
     <Carousel>
       <CarouselContent>
         {stats.map((stat) => (
@@ -71,5 +70,6 @@ export function BrandStats() {
         ))}
       </CarouselContent>
     </Carousel>
+    </QueryGuard>
   );
 }

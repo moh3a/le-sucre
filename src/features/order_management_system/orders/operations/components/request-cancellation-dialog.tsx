@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Ban } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function RequestCancellationDialog() {
   const [open, setOpen] = useState(false);
@@ -62,6 +63,7 @@ export function RequestCancellationDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive">
@@ -123,5 +125,6 @@ export function RequestCancellationDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

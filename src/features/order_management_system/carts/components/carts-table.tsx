@@ -7,6 +7,7 @@ import { Download, Eye, Loader2, MoreHorizontal, User, XCircle } from "lucide-re
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -274,10 +275,8 @@ export function CartsTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={7} rowCount={10} filterCount={2} />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={2} />}>
     <>
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
@@ -324,6 +323,7 @@ export function CartsTable() {
         onOpenChange={(open) => !open && setSelectedCartId(null)}
       />
     </>
+    </QueryGuard>
   );
 }
 

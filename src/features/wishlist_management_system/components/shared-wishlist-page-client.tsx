@@ -1,18 +1,10 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
-import { Loader2 } from "lucide-react";
 
 export function SharedWishlistPageClient({ token }: { token: string }) {
   const { data, isLoading, error } = trpc.wishlistManagement.sharedWishlists.getByToken.useQuery({ token });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   if (error || !data) {
     return (
@@ -26,6 +18,7 @@ export function SharedWishlistPageClient({ token }: { token: string }) {
   const { wishlist, items } = data as any;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6 max-w-3xl">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">{wishlist.name}</h1>
@@ -64,5 +57,6 @@ export function SharedWishlistPageClient({ token }: { token: string }) {
         )}
       </div>
     </div>
+    </QueryGuard>
   );
 }

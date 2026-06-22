@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +26,7 @@ export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps)
   });
 
   return (
+    <QueryGuard mutation={update_notes}>
     <Card>
       <CardHeader>
         <CardTitle>Notes internes</CardTitle>
@@ -62,5 +64,6 @@ export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps)
         </div>
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

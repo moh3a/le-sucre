@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,26 +22,15 @@ export function MediaGrid({ search }: MediaGridProps) {
     page,
   });
 
-  if (isLoading) {
-    return (
+  return (
+    <QueryGuard query={{ isLoading }} loadingFallback={
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {Array.from({ length: 12 }).map((_, i) => (
           <Skeleton key={i} className="aspect-square rounded-lg" />
         ))}
       </div>
-    );
-  }
-
-  if (!data || data.items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground text-lg">Aucun fichier trouvé</p>
-        <p className="text-muted-foreground text-sm">Importez des fichiers pour commencer.</p>
-      </div>
-    );
-  }
-
-  return (
+    }>
+    {!data ? null : (
     <div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {(data.items as MediaListItem[]).map((item) => (
@@ -69,5 +59,7 @@ export function MediaGrid({ search }: MediaGridProps) {
         </Button>
       </div>
     </div>
+    )}
+    </QueryGuard>
   );
 }

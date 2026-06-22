@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -20,6 +21,7 @@ export function RefundsPageClient() {
   const failed = items.filter((r) => r.status === "failed").length;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Remboursements"
       subtitle="Gestion des demandes de remboursement"
@@ -38,5 +40,6 @@ export function RefundsPageClient() {
     >
       <RefundsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

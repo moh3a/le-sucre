@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpDown, BadgeDollarSign, Banknote, CreditCard, TrendingUp, Wallet } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
@@ -8,10 +9,11 @@ import { PaymentsTable } from "./payments-table";
 import { RecordPaymentDialog } from "./record-payment-dialog";
 
 export function PaymentsPageClient() {
-  const { data: stats, isFetching: statsLoading } = trpc.payments.adminStats.useQuery();
+  const { data: stats, isLoading: statsLoading } = trpc.payments.adminStats.useQuery();
 
   return (
-    <ConsolePageShell
+    <QueryGuard query={{ isLoading: statsLoading }}>
+      <ConsolePageShell
       title="Paiements"
       subtitle="Gestion des transactions de paiement"
       actions={<RecordPaymentDialog />}
@@ -85,5 +87,6 @@ export function PaymentsPageClient() {
     >
       <PaymentsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

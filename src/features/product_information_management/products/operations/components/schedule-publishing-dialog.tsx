@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Calendar } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function SchedulePublishingDialog() {
   const [open, setOpen] = useState(false);
@@ -62,6 +63,7 @@ export function SchedulePublishingDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -124,5 +126,6 @@ export function SchedulePublishingDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

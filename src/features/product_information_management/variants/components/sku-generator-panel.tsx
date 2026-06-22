@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ export function SkuGeneratorPanel({ product_id, on_change }: SkuGeneratorPanelPr
   });
 
   return (
+    <QueryGuard mutation={generate}>
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">Générer les SKUs</Button>
@@ -93,5 +95,6 @@ export function SkuGeneratorPanel({ product_id, on_change }: SkuGeneratorPanelPr
         )}
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

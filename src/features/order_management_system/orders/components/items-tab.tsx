@@ -5,6 +5,7 @@ import { Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -138,6 +139,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
     .filter((s) => !edit_items.some((i) => i.sku_id === s.sku_id));
 
   return (
+    <QueryGuard query={{isLoading: false}}>
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -335,5 +337,6 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
         </Card>
       )}
     </>
+    </QueryGuard>
   );
 }

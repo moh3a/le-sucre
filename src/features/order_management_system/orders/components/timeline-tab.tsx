@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
 import { ORDER_LABELS } from "../constants/order-status";
 import {
@@ -72,13 +72,12 @@ const TYPE_STYLES: Record<
 export function TimelineTab({ order_id }: TimelineTabProps) {
   const { data: timeline, isLoading } = trpc.operations.orderGetTimeline.useQuery({ order_id });
 
-  if (isLoading) return <Skeleton className="h-64 w-full" />;
-
   if (!timeline || timeline.length === 0) {
     return <p className="text-muted-foreground text-sm">Aucun événement enregistré.</p>;
   }
 
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<div className="bg-muted h-64 animate-pulse rounded-lg" />}>
     <div className="space-y-3">
       {timeline.map((ev, idx) => {
         const style = TYPE_STYLES[ev.type] ?? {
@@ -135,5 +134,6 @@ export function TimelineTab({ order_id }: TimelineTabProps) {
         );
       })}
     </div>
+    </QueryGuard>
   );
 }

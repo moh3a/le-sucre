@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Check, Star, ThumbsUp, AlertTriangle } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,24 +54,11 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="border-secondary/15 space-y-3 rounded-2xl border bg-white p-6">
-            <div className="bg-muted h-4 w-1/4 rounded" />
-            <div className="bg-muted h-4 w-full rounded" />
-            <div className="bg-muted h-4 w-1/2 rounded" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   const reviews = reviewsData?.items ?? [];
   const meta = reviewsData?.meta;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>
@@ -201,6 +189,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
         )}
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }
 export default ProductReviewsList;

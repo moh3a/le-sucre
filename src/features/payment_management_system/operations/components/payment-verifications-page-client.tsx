@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -20,6 +21,7 @@ export function PaymentVerificationsPageClient() {
   const rejected = items.filter((v) => v.status === "rejected").length;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Vérifications de paiement"
       subtitle="Vérification manuelle des paiements"
@@ -47,5 +49,6 @@ export function PaymentVerificationsPageClient() {
     >
       <PaymentVerificationsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

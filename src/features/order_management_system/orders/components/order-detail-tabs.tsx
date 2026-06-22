@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { FileText, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -175,15 +176,6 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     [edit_items],
   );
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="bg-muted h-24 animate-pulse rounded-lg" />
-        ))}
-      </div>
-    );
-  }
   if (!data) return <p className="text-muted-foreground">Commande introuvable.</p>;
 
   const { order, items, adjustments, status_events } = data;
@@ -308,6 +300,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     .filter((s) => !edit_items.some((i) => i.sku_id === s.sku_id));
 
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<div className="space-y-4">{Array.from({ length: 3 }).map((_, i) => (<div key={i} className="bg-muted h-24 animate-pulse rounded-lg" />))}</div>}>
     <Tabs defaultValue="general">
       <TabsList className="mb-4">
         <TabsTrigger value="general">Général</TabsTrigger>
@@ -1008,6 +1001,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         <TimelineTab order_id={order.id} />
       </TabsContent>
     </Tabs>
+    </QueryGuard>
   );
 }
 

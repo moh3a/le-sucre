@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 const PROVIDERS = [
   { value: "stripe", label: "Stripe" },
@@ -65,6 +66,7 @@ export function RecordPaymentDialog() {
   }
 
   return (
+    <QueryGuard mutation={process}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -117,5 +119,6 @@ export function RecordPaymentDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

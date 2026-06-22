@@ -9,11 +9,11 @@ import {
   Coins,
   ShoppingCart,
   Calendar,
-  Loader2,
 } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,14 +41,6 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
     from: fromStr,
     to: toStr,
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex h-48 items-center justify-center">
-        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   // Fallback calculations if data is empty
   const summary = data?.summary ?? {
@@ -113,6 +105,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
   ];
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="space-y-6">
       {/* Date filter range */}
       <div className="flex items-center justify-between">
@@ -212,5 +205,6 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Truck } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 type LogAttemptDialogProps = {
   order_id?: string;
@@ -74,6 +75,7 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -156,5 +158,6 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

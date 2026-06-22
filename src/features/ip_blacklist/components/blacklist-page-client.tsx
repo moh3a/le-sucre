@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Plus, ShieldBan } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export function BlacklistPageClient() {
   }, [refetch]);
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Liste noire IP"
       subtitle="Gérez les adresses IP bloquées pour sécuriser votre plateforme"
@@ -108,5 +110,6 @@ export function BlacklistPageClient() {
         </CardContent>
       </Card>
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { PreordersTable } from "./preorders-table";
 
@@ -42,6 +43,7 @@ export function PreordersPageClient() {
   });
 
   return (
+    <QueryGuard query={{ isLoading: statsLoading }}>
     <ConsolePageShell
       title="Précommandes"
       subtitle="Gestion des précommandes et des allocations"
@@ -114,5 +116,6 @@ export function PreordersPageClient() {
     >
       <PreordersTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

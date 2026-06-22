@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
   });
 
   return (
+    <QueryGuard query={{ isLoading: !comments?.length }} mutation={add_comment}>
     <div className="space-y-4">
       <Card>
         <CardHeader>
@@ -123,5 +125,6 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
         </Card>
       )}
     </div>
+    </QueryGuard>
   );
 }

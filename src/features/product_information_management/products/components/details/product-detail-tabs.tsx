@@ -15,6 +15,7 @@ import { ProductDetailGeneralTab } from "./general-tab";
 import { ProductAnalyticsPanel } from "./product-analytics-panel";
 import { ProductRecommendationsTab } from "./product-recommendations-tab";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 const outer_tab_schema = z.enum([
   "general",
@@ -54,6 +55,7 @@ export function ProductDetailTabs({ product_id }: Props) {
   );
 
   return (
+    <QueryGuard query={product_details_query}>
     <div className="space-y-6">
       {product && (
         <>
@@ -121,5 +123,6 @@ export function ProductDetailTabs({ product_id }: Props) {
         </>
       )}
     </div>
+    </QueryGuard>
   );
 }

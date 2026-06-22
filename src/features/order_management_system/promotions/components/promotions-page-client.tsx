@@ -4,6 +4,7 @@ import { DollarSign, Hash, Percent, Play, Tag, TicketCheck } from "lucide-react"
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { PromotionsTable } from "./promotions-table";
 import { CreatePromotionDialog } from "./create-promotion-dialog";
@@ -12,6 +13,7 @@ export function PromotionsPageClient() {
   const { data: stats, isLoading: statsLoading } = trpc.promotions.promotionStats.useQuery();
 
   return (
+    <QueryGuard query={{ isLoading: statsLoading }}>
     <ConsolePageShell
       title="Promotions"
       subtitle="Gestion des codes promo, ventes flash et offres groupées"
@@ -37,5 +39,6 @@ export function PromotionsPageClient() {
     >
       <PromotionsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

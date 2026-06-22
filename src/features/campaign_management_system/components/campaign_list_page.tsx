@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator";
 import { XCircle } from "lucide-react";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
+import { QueryGuard } from "@/components/query-guard";
 import { CampaignStatusBadge } from "./campaign_status_badge";
 import { formatDate } from "@/lib/format";
 import { trpc } from "@/components/providers/app-providers";
@@ -293,25 +294,8 @@ export function CampaignListPage() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return (
-      <ConsolePageShell
-        title="Campagnes"
-        subtitle="Gérez vos campagnes marketing et bannières"
-        actions={
-          <Button asChild>
-            <Link href="/console/campaigns/new">
-              <Megaphone className="mr-2 h-4 w-4" />
-              Nouvelle campagne
-            </Link>
-          </Button>
-        }
-      >
-        <DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />
-      </ConsolePageShell>
-    );
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />}>
     <ConsolePageShell
       title="Campagnes"
       subtitle="Gérez vos campagnes marketing et bannières"
@@ -397,5 +381,6 @@ export function CampaignListPage() {
         )}
       </DataTable>
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

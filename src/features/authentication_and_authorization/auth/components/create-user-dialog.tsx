@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +61,7 @@ export function CreateUserDialog() {
   };
 
   return (
+    <QueryGuard mutation={create_user}>
     <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogTrigger asChild>
         <Button>
@@ -137,5 +139,6 @@ export function CreateUserDialog() {
         </form>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
+    </QueryGuard>
   );
 }

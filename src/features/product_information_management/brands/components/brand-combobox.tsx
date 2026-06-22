@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Input } from "@/components/ui/input";
 import {
   Combobox,
@@ -50,11 +51,8 @@ export function BrandCombobox({
     set_create_open(false);
   }
 
-  if (isLoading) {
-    return <Input value={value} disabled placeholder={placeholder} />;
-  }
-
   return (
+    <QueryGuard isLoading={isLoading} loadingFallback={<Input value={value} disabled placeholder={placeholder} />}>
     <>
       <Combobox
         value={value}
@@ -105,5 +103,6 @@ export function BrandCombobox({
         </ResponsiveDialogContent>
       </ResponsiveDialog>
     </>
+    </QueryGuard>
   );
 }

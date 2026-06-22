@@ -1,7 +1,8 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
-import { Loader2, ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function CustomerCollectionDetailPageClient({ collectionId }: { collectionId: string }) {
@@ -17,19 +18,10 @@ export function CustomerCollectionDetailPageClient({ collectionId }: { collectio
     utils.wishlistManagement.collections.listItems.invalidate({ collection_id: collectionId });
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!collection) {
-    return <div className="text-center py-20 text-muted-foreground">Collection introuvable</div>;
-  }
+  if (!collection) return null;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6">
       <Button variant="ghost" className="mb-4" asChild>
         <a href="/account/collections">
@@ -79,5 +71,6 @@ export function CustomerCollectionDetailPageClient({ collectionId }: { collectio
         )}
       </div>
     </div>
+    </QueryGuard>
   );
 }

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -47,6 +48,7 @@ export function AccountSecurityTab() {
   }
 
   return (
+    <QueryGuard mutation={{ isPending: change.isPending, error: change.error }}>
     <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -100,5 +102,6 @@ export function AccountSecurityTab() {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

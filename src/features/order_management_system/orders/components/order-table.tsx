@@ -12,6 +12,7 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
@@ -203,9 +204,8 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
     { label: "Expédié", value: "fulfilled" },
   ];
 
-  if (isLoading && !data) return <DataTableSkeleton columnCount={8} rowCount={compact ? 5 : 10} />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={8} rowCount={compact ? 5 : 10} />}>
     <DataTable table={table}>
       {!compact ? (
         <DataTableAdvancedToolbar table={table}>
@@ -241,5 +241,6 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         </DataTableAdvancedToolbar>
       ) : null}
     </DataTable>
+    </QueryGuard>
   );
 }

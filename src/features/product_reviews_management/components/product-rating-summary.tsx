@@ -1,6 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,25 +14,12 @@ interface ProductRatingSummaryProps {
 export function ProductRatingSummary({ product_id }: ProductRatingSummaryProps) {
   const { data: summary, isLoading } = trpc.reviews.summaryByProduct.useQuery({ product_id });
 
-  if (isLoading) {
-    return (
-      <div className="border-secondary/15 animate-pulse space-y-4 rounded-2xl border bg-muted/20 p-6">
-        <div className="bg-muted h-6 w-1/3 rounded" />
-        <div className="bg-muted h-10 w-1/4 rounded" />
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="bg-muted h-4 w-full rounded" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   if (!summary) return null;
 
   const totalReviews = summary.review_count;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <Card>
       <CardHeader>
         <CardTitle>Avis des clients</CardTitle>
@@ -79,6 +67,7 @@ export function ProductRatingSummary({ product_id }: ProductRatingSummaryProps) 
         </div>
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }
 export default ProductRatingSummary;

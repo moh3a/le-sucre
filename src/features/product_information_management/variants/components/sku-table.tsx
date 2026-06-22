@@ -23,6 +23,7 @@ import {
 } from "@tanstack/react-table";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -704,11 +705,8 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     [items, editing_id],
   );
 
-  if (isLoading) {
-    return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
-  }
-
   return (
+    <QueryGuard isLoading={isLoading} loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}>
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex max-w-sm flex-1 items-center gap-2">
@@ -918,5 +916,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
         </DialogContent>
       </Dialog>
     </div>
+    </QueryGuard>
   );
 }

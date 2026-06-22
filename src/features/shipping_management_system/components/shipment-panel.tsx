@@ -6,6 +6,7 @@ import { ExternalLink, Plus, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,10 +46,6 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
     },
     onError: (err) => toast.error(err.message),
   });
-
-  if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Chargement de l&apos;expédition…</p>;
-  }
 
   if (isError || !data) {
     return (
@@ -98,6 +95,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
   const { shipment, tracking_events } = data;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Expédition</CardTitle>
@@ -142,5 +140,6 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
         ))}
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

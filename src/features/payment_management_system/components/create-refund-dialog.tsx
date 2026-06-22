@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function CreateRefundDialog() {
   const [open, setOpen] = React.useState(false);
@@ -60,6 +61,7 @@ export function CreateRefundDialog() {
   }
 
   return (
+    <QueryGuard mutation={create}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -119,5 +121,6 @@ export function CreateRefundDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

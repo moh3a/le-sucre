@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function CreateVerificationDialog() {
   const [open, setOpen] = useState(false);
@@ -65,6 +66,7 @@ export function CreateVerificationDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -153,5 +155,6 @@ export function CreateVerificationDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

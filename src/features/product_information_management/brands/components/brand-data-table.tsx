@@ -19,6 +19,7 @@ import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { DataTableToolbar } from "@/features/data-table/components/data-table-toolbar";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
@@ -250,12 +251,13 @@ export function BrandDataTable() {
   const is_active =
     active_value === "true" ? true : active_value === "false" ? false : undefined;
 
-  const { data, isLoading, isFetching } = trpc.brands.list.useQuery({
+  const query = trpc.brands.list.useQuery({
     page,
     limit: per_page,
     search,
     is_active,
   });
+  const { data, isLoading, isFetching } = query;
 
   const items = data?.items ?? [];
   const page_count = data?.meta.total_pages ?? 0;
@@ -280,11 +282,8 @@ export function BrandDataTable() {
     getRowId: (row) => row.id,
   });
 
-  if (isLoading && !data) {
-    return <DataTableSkeleton columnCount={columns.length} rowCount={10} filterCount={2} />;
-  }
-
   return (
+    <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={columns.length} rowCount={10} filterCount={2} />}>
     <>
       <DataTable table={table}>
         <DataTableToolbar table={table}>
@@ -305,5 +304,6 @@ export function BrandDataTable() {
         }}
       />
     </>
+    </QueryGuard>
   );
 }

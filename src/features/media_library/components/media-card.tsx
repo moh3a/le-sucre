@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import type { MediaDTO } from "../types";
 
 function format_bytes(bytes: number) {
@@ -60,6 +61,7 @@ export function MediaCard({ item, onDelete }: MediaCardProps) {
   }
 
   return (
+    <QueryGuard mutation={delete_media}>
     <Card className="group relative overflow-hidden">
       <div className="bg-muted relative aspect-square overflow-hidden">
         {item.kind === "image" ? (
@@ -160,5 +162,6 @@ export function MediaCard({ item, onDelete }: MediaCardProps) {
         </DropdownMenu>
       </CardFooter>
     </Card>
+    </QueryGuard>
   );
 }

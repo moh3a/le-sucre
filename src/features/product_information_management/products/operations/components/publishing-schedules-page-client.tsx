@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertTriangle, Ban, Calendar, CheckCircle2 } from "lucide-react";
@@ -8,9 +9,11 @@ import { PublishingSchedulesTable } from "./publishing-schedules-table";
 import { SchedulePublishingDialog } from "./schedule-publishing-dialog";
 
 export function PublishingSchedulesPageClient() {
-  const { data: stats, isLoading } = trpc.operations.productGetScheduleStats.useQuery();
+  const query = trpc.operations.productGetScheduleStats.useQuery();
+  const { data: stats, isLoading } = query;
 
   return (
+    <QueryGuard query={query}>
     <ConsolePageShell
       title="Planifications de publication"
       subtitle="Gérer les publications et dépublications programmées de produits"
@@ -29,5 +32,6 @@ export function PublishingSchedulesPageClient() {
     >
       <PublishingSchedulesTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

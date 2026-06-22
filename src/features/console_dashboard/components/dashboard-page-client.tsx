@@ -6,6 +6,7 @@ import { format, subDays } from "date-fns";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { OrderTable } from "@/features/order_management_system/orders/components/order-table";
 
 export function DashboardPageClient() {
@@ -21,7 +22,13 @@ export function DashboardPageClient() {
     analytics.isLoading || orders.isLoading || products.isLoading || categories.isLoading;
 
   return (
-    <ConsolePageShell
+    <QueryGuard
+      query={{
+        isLoading: loading,
+        error: analytics.error ?? orders.error ?? products.error ?? categories.error,
+      }}
+    >
+      <ConsolePageShell
       title="Tableau de bord"
       subtitle="Vue d'ensemble de la boutique"
       stats={
@@ -64,6 +71,7 @@ export function DashboardPageClient() {
         <h2 className="text-sm font-medium">Dernières commandes</h2>
         <OrderTable compact />
       </section>
-    </ConsolePageShell>
+      </ConsolePageShell>
+    </QueryGuard>
   );
 }

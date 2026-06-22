@@ -12,6 +12,7 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -273,10 +274,8 @@ export function PaymentVerificationsTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={7} rowCount={10} filterCount={1} />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={1} />}>
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
@@ -306,5 +305,6 @@ export function PaymentVerificationsTable() {
         </div>
       )}
     </DataTable>
+    </QueryGuard>
   );
 }

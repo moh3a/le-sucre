@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +42,7 @@ export function DeletePropertyDialog({
   });
 
   return (
+    <QueryGuard mutation={delete_property}>
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button type="button" variant="destructive" size="icon">
@@ -65,5 +67,6 @@ export function DeletePropertyDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+    </QueryGuard>
   );
 }

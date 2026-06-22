@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function CreateSupportCaseDialog() {
   const [open, setOpen] = useState(false);
@@ -74,6 +75,7 @@ export function CreateSupportCaseDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -181,5 +183,6 @@ export function CreateSupportCaseDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

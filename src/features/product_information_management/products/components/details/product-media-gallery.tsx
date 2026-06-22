@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ImagePlus } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
@@ -49,6 +50,7 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
   }
 
   return (
+    <QueryGuard mutation={link_media}>
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-6">
         <div>
@@ -103,5 +105,6 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
         </div>
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

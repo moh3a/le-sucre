@@ -15,6 +15,7 @@ import { DataTableSortList } from "@/features/data-table/components/data-table-s
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { FacetedFilter } from "@/features/data-table/components/data-table-faceted-filter-simple";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
@@ -182,7 +183,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
 
   const status = status_filter || undefined;
 
-  const { data, isLoading } = trpc.shipping.adminList.useQuery({
+  const { data, isLoading, error } = trpc.shipping.adminList.useQuery({
     page,
     limit: per_page,
     status,
@@ -206,11 +207,8 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
     { label: "Échec", value: "failed" },
   ];
 
-  if (isLoading && !data) {
-    return <DataTableSkeleton columnCount={9} rowCount={compact ? 5 : 10} />;
-  }
-
   return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={compact ? 5 : 10} />}>
     <DataTable table={table}>
       {!compact ? (
         <DataTableAdvancedToolbar table={table}>
@@ -225,5 +223,6 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
         </DataTableAdvancedToolbar>
       ) : null}
     </DataTable>
+    </QueryGuard>
   );
 }

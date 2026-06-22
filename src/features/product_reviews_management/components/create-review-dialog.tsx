@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function CreateReviewDialog() {
   const [open, setOpen] = React.useState(false);
@@ -60,6 +61,7 @@ export function CreateReviewDialog() {
   }
 
   return (
+    <QueryGuard mutation={create}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -114,5 +116,6 @@ export function CreateReviewDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

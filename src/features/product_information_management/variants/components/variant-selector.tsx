@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -46,10 +47,9 @@ export function VariantSelector({ product_id, on_sku_change }: VariantSelectorPr
     on_sku_change?.(item?.sku_id ?? null);
   }
 
-  if (isLoading) return null;
-  if (!config?.properties.length) return null;
-
   return (
+    <QueryGuard isLoading={isLoading} loadingFallback={null}>
+    {!config?.properties.length ? null : (
     <div className="space-y-4">
       {config.properties.map((property) => (
         <div key={property.id}>
@@ -102,5 +102,7 @@ export function VariantSelector({ product_id, on_sku_change }: VariantSelectorPr
         </Badge>
       )}
     </div>
+    )}
+    </QueryGuard>
   );
 }

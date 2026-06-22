@@ -2,6 +2,7 @@
 
 import { MessageSquare, ShieldAlert, Star, Clock } from "lucide-react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
@@ -13,6 +14,7 @@ export function ReviewsPageClient() {
   const stats = trpc.reviews.adminStats.useQuery();
   const trends = trpc.reviews.ratingTrends.useQuery({ days: 30 });
   return (
+    <QueryGuard query={{ isLoading: stats.isLoading }}>
     <ConsolePageShell
       title="Avis clients"
       subtitle="Modération et performance"
@@ -55,5 +57,6 @@ export function ReviewsPageClient() {
       ) : null}
       <AdminReviewModerationTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

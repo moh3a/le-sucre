@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function RecordStockDialog() {
   const [open, setOpen] = React.useState(false);
@@ -49,6 +50,7 @@ export function RecordStockDialog() {
   }
 
   return (
+    <QueryGuard mutation={receive}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -89,5 +91,6 @@ export function RecordStockDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -216,6 +217,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
   const category_options = categoriesTree ? flatten_categories(categoriesTree) : [];
 
   return (
+    <QueryGuard>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
@@ -551,5 +553,6 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
         </Dialog>
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

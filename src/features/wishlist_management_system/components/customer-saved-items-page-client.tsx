@@ -1,20 +1,12 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { SaveForLaterPanel } from "./save-for-later";
-import { Loader2 } from "lucide-react";
 
 export function CustomerSavedItemsPageClient() {
   const { data, isLoading } = trpc.wishlistManagement.saveForLater.list.useQuery({ page: 1, limit: 50 });
   const utils = trpc.useUtils();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   const items = (data?.items ?? []).map((item: any) => ({
     ...item,
@@ -22,6 +14,7 @@ export function CustomerSavedItemsPageClient() {
   }));
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Sauvegardé pour plus tard</h1>
       {(!items || items.length === 0) ? (
@@ -40,5 +33,6 @@ export function CustomerSavedItemsPageClient() {
         />
       )}
     </div>
+    </QueryGuard>
   );
 }

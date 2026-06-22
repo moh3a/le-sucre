@@ -2,16 +2,17 @@
 
 import { AlertTriangle, Box, Package, PackageOpen, TrendingUpDown, Warehouse } from "lucide-react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 
 export function InventoryStats() {
-  const { data, isFetching, isLoading } = trpc.inventory.adminStats.useQuery();
+  const { data, error, isFetching, isLoading } = trpc.inventory.adminStats.useQuery();
 
   return (
-    <StatsGrid
-      loading={isFetching || isLoading}
-      items={[
+    <QueryGuard query={{ isLoading: isFetching || isLoading, error }}>
+      <StatsGrid
+        items={[
         {
           label: "Produits en stock",
           value: data?.total_products ?? 0,
@@ -49,6 +50,7 @@ export function InventoryStats() {
           color: "warning",
         },
       ]}
-    />
+      />
+    </QueryGuard>
   );
 }

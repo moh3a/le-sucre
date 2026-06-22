@@ -7,6 +7,7 @@ import { Check, X } from "lucide-react";
 import { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -36,7 +37,8 @@ export function ProductVariantsPanel({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { data: price_range } = trpc.variants.getPriceRange.useQuery({ product_id });
+  const price_range_query = trpc.variants.getPriceRange.useQuery({ product_id });
+  const { data: price_range } = price_range_query;
 
   const upsert_wholesale = trpc.variants.upsertWholesaleRule.useMutation({
     onSuccess: () => utils.variants.getPriceRange.invalidate({ product_id }),
@@ -61,6 +63,7 @@ export function ProductVariantsPanel({
   );
 
   return (
+    <QueryGuard query={price_range_query}>
     <Card>
       <CardHeader className="flex flex-row flex-wrap justify-between gap-4">
         <div>
@@ -161,5 +164,6 @@ export function ProductVariantsPanel({
         </Tabs>
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

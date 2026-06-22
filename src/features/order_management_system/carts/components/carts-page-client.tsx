@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
@@ -41,6 +42,7 @@ export function CartsPageClient() {
   }, [stats]);
 
   return (
+    <QueryGuard query={{ isLoading: isStatsLoading }}>
     <ConsolePageShell
       title="Paniers"
       subtitle="Suivi des paniers abandonnés et en cours"
@@ -49,5 +51,6 @@ export function CartsPageClient() {
     >
       <CartsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

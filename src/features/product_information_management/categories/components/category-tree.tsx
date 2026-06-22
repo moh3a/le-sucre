@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { cn } from "@/lib/utils";
 import type { CategoryTreeNode } from "../types";
 
@@ -21,13 +22,16 @@ function Node({ node, depth }: { node: CategoryTreeNode; depth: number }) {
 }
 
 export function CategoryTree() {
-  const { data } = trpc.categories.tree.useQuery();
+  const query = trpc.categories.tree.useQuery();
+  const { data } = query;
   if (!data?.length) return <p className="text-muted-foreground text-sm">…</p>;
   return (
+    <QueryGuard query={query}>
     <ul className="space-y-1 text-sm">
       {data.map((n) => (
         <Node key={n.id} node={n} depth={0} />
       ))}
     </ul>
+    </QueryGuard>
   );
 }

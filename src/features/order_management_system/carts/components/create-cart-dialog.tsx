@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function CreateCartDialog() {
   const [open, setOpen] = React.useState(false);
@@ -47,6 +48,7 @@ export function CreateCartDialog() {
   }
 
   return (
+    <QueryGuard mutation={add}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -87,5 +89,6 @@ export function CreateCartDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

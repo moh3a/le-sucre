@@ -2,16 +2,20 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { format_currency } from "@/lib/format";
 
 export function AnalyticsCategoriesBrands({ from, to }: { from: string; to: string }) {
   const { data, isLoading } = trpc.analytics.products.useQuery({ from, to });
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">Chargement…</p>;
   if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+    >
+      <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle>Top Catégories</CardTitle>
@@ -108,6 +112,7 @@ export function AnalyticsCategoriesBrands({ from, to }: { from: string; to: stri
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </QueryGuard>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 
 const STATUS_CLASS: Record<string, string> = {
@@ -14,17 +15,15 @@ const STATUS_CLASS: Record<string, string> = {
 
 export function ProductTable() {
   const t = useTranslations("products");
-  const { data, isLoading } = trpc.products.list.useQuery({ page: 1, limit: 50 });
-
-  if (isLoading) {
-    return <p className="text-sm text-muted-foreground">{t("loading")}</p>;
-  }
+  const query = trpc.products.list.useQuery({ page: 1, limit: 50 });
+  const { data, isLoading } = query;
 
   if (!data?.items.length) {
     return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   }
 
   return (
+    <QueryGuard query={query} loadingFallback={<p className="text-sm text-muted-foreground">{t("loading")}</p>}>
     <div className="overflow-x-auto rounded-lg border">
       <table className="w-full text-sm">
         <thead className="bg-muted/50 text-left">
@@ -59,5 +58,6 @@ export function ProductTable() {
         </tbody>
       </table>
     </div>
+    </QueryGuard>
   );
 }

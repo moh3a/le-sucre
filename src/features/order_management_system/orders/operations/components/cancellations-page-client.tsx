@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -19,6 +20,7 @@ export function CancellationsPageClient() {
   const rejected = items.filter((r) => r.status === "rejected").length;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Demandes d'annulation"
       subtitle="Gérer les demandes d'annulation de commandes"
@@ -36,5 +38,6 @@ export function CancellationsPageClient() {
     >
       <CancellationsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function CreateWarrantyClaimDialog() {
   const [open, setOpen] = useState(false);
@@ -78,6 +79,7 @@ export function CreateWarrantyClaimDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -192,5 +194,6 @@ export function CreateWarrantyClaimDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

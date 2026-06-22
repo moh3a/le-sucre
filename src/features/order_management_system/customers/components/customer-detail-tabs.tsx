@@ -24,6 +24,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { StatsGrid } from "@/components/console/stats-grid";
 import type { StatItem } from "@/components/console/stats-grid";
@@ -467,19 +468,6 @@ function PromoRedemptionCard({ redemption }: { redemption: Record<string, unknow
 export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
   const { data, isLoading } = trpc.customers.adminGetFullDetail.useQuery({ user_id });
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[88px] rounded-lg" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -491,7 +479,8 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
 
   const { customer, carts, orders, reviews, return_requests, promo_redemptions } = data;
 
-  return ( 
+  return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<div className="space-y-4"><Skeleton className="h-8 w-64" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => (<Skeleton key={i} className="h-[88px] rounded-lg" />))}</div></div>}>
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
@@ -682,5 +671,6 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
         </TabsContent>
       </Tabs>
     </div>
+    </QueryGuard>
   );
 }

@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/client";
+import { QueryGuard } from "@/components/query-guard";
 
 export function AdminTopbar() {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending, error } = authClient.useSession();
 
   const userInitials = session?.user?.name
     ? session.user.name
@@ -28,6 +29,7 @@ export function AdminTopbar() {
     : "AD";
 
   return (
+    <QueryGuard session={{ isPending, error }}>
     <header className="bg-background flex h-16 items-center justify-between border-b px-6">
       {/* Search */}
       <div className="relative w-64">
@@ -70,5 +72,6 @@ export function AdminTopbar() {
         </DropdownMenu>
       </div>
     </header>
+    </QueryGuard>
   );
 }

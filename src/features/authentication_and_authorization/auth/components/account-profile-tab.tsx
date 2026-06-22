@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Camera } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -26,7 +27,7 @@ type ProfileFormValues = z.infer<typeof profile_form_schema>;
 
 export function AccountProfileTab() {
   const utils = trpc.useUtils();
-  const { data, isLoading } = trpc.auth.me.useQuery();
+  const { data, isLoading, error } = trpc.auth.me.useQuery();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profile_form_schema),
@@ -46,8 +47,18 @@ export function AccountProfileTab() {
     });
   }
 
-  if (isLoading) {
-    return (
+  const image_value = form.watch("image");
+
+  function handle_image_select(media: MediaDTO) {
+    form.setValue("image", media.url, { shouldDirty: true });
+  }
+
+  function handle_image_clear() {
+    form.setValue("image", null, { shouldDirty: true });
+  }
+
+  return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -61,20 +72,7 @@ export function AccountProfileTab() {
           </CardContent>
         </Card>
       </div>
-    );
-  }
-
-  const image_value = form.watch("image");
-
-  function handle_image_select(media: MediaDTO) {
-    form.setValue("image", media.url, { shouldDirty: true });
-  }
-
-  function handle_image_clear() {
-    form.setValue("image", null, { shouldDirty: true });
-  }
-
-  return (
+    }>
     <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -164,5 +162,6 @@ export function AccountProfileTab() {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

@@ -6,6 +6,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Download, MoreHorizontal, Pencil, Play, Square, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -319,10 +320,8 @@ export function PromotionsTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={10} rowCount={10} filterCount={2} />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={10} rowCount={10} filterCount={2} />}>
     <>
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
@@ -389,5 +388,6 @@ export function PromotionsTable() {
         )}
       </DataTable>
     </>
+    </QueryGuard>
   );
 }

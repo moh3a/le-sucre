@@ -1,6 +1,7 @@
 "use client";
 
 import { Banknote, CheckCircle2, Clock, RefreshCcw, Wallet, XCircle } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
@@ -11,6 +12,7 @@ export function PayoutsPageClient() {
   const { data: stats, isFetching: statsLoading } = trpc.payments.adminPayoutStats.useQuery();
 
   return (
+    <QueryGuard query={{ isLoading: statsLoading }}>
     <ConsolePageShell
       title="Paiements fournisseurs"
       subtitle="Gestion des paiements aux vendeurs et fournisseurs"
@@ -70,5 +72,6 @@ export function PayoutsPageClient() {
     >
       <PayoutsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

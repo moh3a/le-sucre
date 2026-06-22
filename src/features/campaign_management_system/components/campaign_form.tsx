@@ -21,6 +21,7 @@ import {
 } from "@/features/campaign_management_system/constants/campaign_types";
 import { slugify } from "@/lib/utils";
 import { full_campaign_dto } from "../models/campaign.dto";
+import { QueryGuard } from "@/components/query-guard";
 import { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 import type { MediaDTO } from "@/features/media_library/types";
 
@@ -295,6 +296,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
   const isPending = create_mutation.isPending || update_mutation.isPending;
 
   return (
+    <QueryGuard>
     <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
         {/* Left Column: General properties */}
@@ -863,5 +865,6 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
         </Button>
       </div>
     </form>
+    </QueryGuard>
   );
 }

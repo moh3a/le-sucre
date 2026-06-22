@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "../ui/badge";
 import { authClient } from "@/lib/auth/client";
+import { QueryGuard } from "@/components/query-guard";
 import { RoleName } from "@/features/authentication_and_authorization/authorization/constants/roles";
 
 export function NavUser({

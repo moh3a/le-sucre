@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -16,6 +17,7 @@ export function EscalationsPageClient() {
   const resolved = items.filter((e) => e.status === "resolved").length;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Escalades"
       subtitle="Gestion des escalades de commandes"
@@ -34,5 +36,6 @@ export function EscalationsPageClient() {
     >
       <EscalationsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

@@ -3,6 +3,7 @@
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
   });
 
   return (
+    <QueryGuard query={{ isLoading: !invoices_data }} mutation={{ isPending: generate_invoice.isPending }}>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <CardTitle>Factures liées</CardTitle>
@@ -156,5 +158,6 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
         )}
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

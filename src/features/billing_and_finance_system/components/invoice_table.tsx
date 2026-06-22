@@ -14,6 +14,7 @@ import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
@@ -64,7 +65,7 @@ export function InvoiceTable() {
   const [from, setFrom] = useQueryState("invFrom", parseAsString);
   const [to, setTo] = useQueryState("invTo", parseAsString);
 
-  const { data, isLoading } = trpc.invoices.list_invoices.useQuery({
+  const { data, isLoading, error } = trpc.invoices.list_invoices.useQuery({
     page,
     limit: per_page,
     status: (status ?? undefined) as InvoiceStatus | undefined,
@@ -200,9 +201,8 @@ export function InvoiceTable() {
     { label: "Note de crédit", value: "credit_note" },
   ];
 
-  if (isLoading && !data) return <DataTableSkeleton columnCount={7} rowCount={10} />;
-
   return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} />}>
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
@@ -229,5 +229,6 @@ export function InvoiceTable() {
         <DataTableSortList table={table} />
       </DataTableAdvancedToolbar>
     </DataTable>
+    </QueryGuard>
   );
 }

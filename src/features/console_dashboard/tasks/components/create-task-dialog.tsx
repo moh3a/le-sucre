@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -78,7 +79,8 @@ export function CreateTaskDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <QueryGuard mutation={{ isPending: mutation.isPending, error: mutation.error }}>
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 size-4" />
@@ -198,6 +200,7 @@ export function CreateTaskDialog() {
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </QueryGuard>
   );
 }

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { PERMISSIONS } from "../constants/permissions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,7 +26,7 @@ import {
 
 export function AuthorizationRoleEditor() {
   const utils = trpc.useUtils();
-  const { data: roles = [] } = trpc.authorization.listRoles.useQuery();
+  const { data: roles = [], isLoading, error } = trpc.authorization.listRoles.useQuery();
   const [selected_role, setSelectedRole] = useState<string>("moderator");
   const [draft_permissions, setDraftPermissions] = useState<string[]>([]);
 
@@ -54,6 +55,7 @@ export function AuthorizationRoleEditor() {
   };
 
   return (
+    <QueryGuard query={{ isLoading, error }}>
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
         <Button>Modifier les permissions</Button>
@@ -103,5 +105,6 @@ export function AuthorizationRoleEditor() {
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
+    </QueryGuard>
   );
 }

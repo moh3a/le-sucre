@@ -4,15 +4,19 @@ import { Search } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function AnalyticsSearches({ from, to }: { from: string; to: string }) {
   const { data, isLoading } = trpc.analytics.searchAnalytics.useQuery({ from, to });
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">Chargement…</p>;
   if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
 
   return (
-    <Card>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+    >
+      <Card>
       <CardHeader>
         <CardTitle>Recherches Populaires</CardTitle>
         <CardDescription>Mots-clés recherchés par vos clients</CardDescription>
@@ -54,6 +58,7 @@ export function AnalyticsSearches({ from, to }: { from: string; to: string }) {
           </table>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </QueryGuard>
   );
 }

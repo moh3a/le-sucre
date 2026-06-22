@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -111,6 +112,7 @@ export function OrderOperationsTab({ order_id, order_status }: OrderOpsTabProps)
   const active_hold = holds?.find((h) => h.is_active);
 
   return (
+    <QueryGuard query={{ isLoading: !holds && !escalations && !cancellations }} mutation={{ isPending: place_hold.isPending || release_hold.isPending || escalate.isPending }}>
     <div className="space-y-6">
       {/* ── Holds ─────────────────────────────────────── */}
       <Card>
@@ -358,5 +360,6 @@ export function OrderOperationsTab({ order_id, order_status }: OrderOpsTabProps)
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

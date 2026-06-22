@@ -5,6 +5,7 @@ import { Ban, Check, Truck, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,6 +62,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
   const [refund_amount, set_refund_amount] = useState(request.refund_amount ?? "");
 
   return (
+    <QueryGuard mutation={review_mutation}>
     <Card className="border-l-4 border-l-primary">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -259,5 +261,6 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
         )}
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

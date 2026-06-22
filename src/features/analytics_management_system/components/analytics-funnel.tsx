@@ -4,11 +4,11 @@ import { BarChart, ArrowRight, Eye, ShoppingCart, CreditCard, ShoppingBag } from
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function AnalyticsFunnel({ from, to }: { from: string; to: string }) {
   const { data, isLoading } = trpc.analytics.overview.useQuery({ from, to });
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">Chargement…</p>;
   if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
 
   // Convert raw funnel steps into presentable array
@@ -28,7 +28,11 @@ export function AnalyticsFunnel({ from, to }: { from: string; to: string }) {
   }));
 
   return (
-    <Card>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+    >
+      <Card>
       <CardHeader>
         <CardTitle>Entonnoir de Conversion</CardTitle>
         <CardDescription>Parcours client et taux d&apos;abandon des sessions</CardDescription>
@@ -80,6 +84,7 @@ export function AnalyticsFunnel({ from, to }: { from: string; to: string }) {
           )}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </QueryGuard>
   );
 }

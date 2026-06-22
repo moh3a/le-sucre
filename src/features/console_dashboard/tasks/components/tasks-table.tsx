@@ -19,6 +19,7 @@ import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -332,11 +333,16 @@ export function TasksTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />;
-
   return (
-    <DataTable table={table}>
+    <QueryGuard
+      query={{ isLoading }}
+      mutation={{
+        isPending: startMutation.isPending || completeMutation.isPending || cancelMutation.isPending,
+        error: startMutation.error ?? completeMutation.error ?? cancelMutation.error,
+      }}
+      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}
+    >
+      <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
           title="Statut"
@@ -365,5 +371,6 @@ export function TasksTable() {
         </div>
       )}
     </DataTable>
+    </QueryGuard>
   );
 }

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -102,6 +103,7 @@ export function InventoryWarehouseDialog({ warehouse, open, onOpenChange }: Prop
   };
 
   return (
+    <QueryGuard mutation={create}>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -154,5 +156,6 @@ export function InventoryWarehouseDialog({ warehouse, open, onOpenChange }: Prop
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

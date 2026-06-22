@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Banknote } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function RecordPartialPaymentDialog() {
   const [open, setOpen] = useState(false);
@@ -77,6 +78,7 @@ export function RecordPartialPaymentDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
@@ -188,5 +190,6 @@ export function RecordPartialPaymentDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

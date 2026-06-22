@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -331,10 +332,8 @@ export function SupportCasesTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}>
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
@@ -364,5 +363,6 @@ export function SupportCasesTable() {
         </div>
       )}
     </DataTable>
+    </QueryGuard>
   );
 }

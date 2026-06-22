@@ -1,8 +1,9 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { WishlistShareDialog } from "./wishlist-share-dialog";
-import { Loader2, ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -21,17 +22,7 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
     utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!wishlist) {
-    return <div className="text-center py-20 text-muted-foreground">Liste introuvable</div>;
-  }
+  if (!wishlist) return null;
 
   const priorityColors: Record<WishlistPriority, string> = {
     low: "bg-gray-100 text-gray-600",
@@ -41,6 +32,7 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
   };
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6">
       <Button variant="ghost" className="mb-4" asChild>
         <a href="/account/wishlists">
@@ -113,5 +105,6 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
         )}
       </div>
     </div>
+    </QueryGuard>
   );
 }

@@ -4,6 +4,7 @@ import { CheckCircle2, FolderTree, Layers, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Stat, StatDescription, StatIndicator, StatLabel, StatValue } from "@/components/ui/stat";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -11,17 +12,8 @@ import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carouse
 export function CategoryStats() {
   const t = useTranslations("categories");
 
-  const { data: statsData, isLoading } = trpc.categories.stats.useQuery();
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[88px] rounded-lg" />
-        ))}
-      </div>
-    );
-  }
+  const query = trpc.categories.stats.useQuery();
+  const { data: statsData, isLoading } = query;
 
   const stats = [
     {
@@ -55,6 +47,13 @@ export function CategoryStats() {
   ];
 
   return (
+    <QueryGuard query={query} loadingFallback={
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-[88px] rounded-lg" />
+        ))}
+      </div>
+    }>
     <Carousel>
       <CarouselContent>
         {stats.map((stat) => (
@@ -71,5 +70,6 @@ export function CategoryStats() {
         ))}
       </CarouselContent>
     </Carousel>
+    </QueryGuard>
   );
 }

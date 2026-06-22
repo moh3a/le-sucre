@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,6 +68,7 @@ export function PaymentsTab({
   }
 
   return (
+    <QueryGuard mutation={update_payment}>
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -152,5 +154,6 @@ export function PaymentsTab({
         </Card>
       )}
     </>
+    </QueryGuard>
   );
 }

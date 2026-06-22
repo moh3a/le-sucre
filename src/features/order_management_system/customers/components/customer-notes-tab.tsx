@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,9 +47,8 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
     onError: (err) => toast.error(`Erreur: ${err.message}`),
   });
 
-  if (isLoading) return <Skeleton className="h-48 w-full" />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<Skeleton className="h-48 w-full" />}>
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -154,5 +154,6 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
         </div>
       )}
     </div>
+    </QueryGuard>
   );
 }

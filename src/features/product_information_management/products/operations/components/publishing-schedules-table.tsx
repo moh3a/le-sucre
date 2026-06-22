@@ -9,6 +9,7 @@ import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
@@ -246,11 +247,12 @@ export function PublishingSchedulesTable() {
     [cancelMutation],
   );
 
-  const { data, isLoading } = trpc.operations.productListScheduledActions.useQuery({
+  const query = trpc.operations.productListScheduledActions.useQuery({
     page,
     limit: per_page,
     status: status || undefined,
   });
+  const { data, isLoading } = query;
 
   const items = (data?.items ?? []) as unknown as ScheduleRow[];
   const page_count = data?.meta.total_pages ?? 0;
@@ -264,10 +266,8 @@ export function PublishingSchedulesTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />;
-
   return (
+    <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}>
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
@@ -297,5 +297,6 @@ export function PublishingSchedulesTable() {
         </div>
       )}
     </DataTable>
+    </QueryGuard>
   );
 }

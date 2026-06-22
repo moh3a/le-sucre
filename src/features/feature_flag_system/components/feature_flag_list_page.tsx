@@ -48,6 +48,7 @@ import { Switch } from "@/components/ui/switch";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { formatDate } from "@/lib/format";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 
 type FeatureFlagRow = {
@@ -425,8 +426,8 @@ export function FeatureFlagListPage() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return (
+  return (
+    <QueryGuard query={{ isLoading }} loadingFallback={
       <ConsolePageShell
         title="Feature Flags"
         subtitle="Gérez les fonctionnalités activées ou désactivées de la plateforme"
@@ -439,9 +440,7 @@ export function FeatureFlagListPage() {
       >
         <DataTableSkeleton columnCount={5} rowCount={10} filterCount={1} />
       </ConsolePageShell>
-    );
-
-  return (
+    }>
     <>
       <ConsolePageShell
         title="Feature Flags"
@@ -506,5 +505,6 @@ export function FeatureFlagListPage() {
         </DialogContent>
       </Dialog>
     </>
+    </QueryGuard>
   );
 }

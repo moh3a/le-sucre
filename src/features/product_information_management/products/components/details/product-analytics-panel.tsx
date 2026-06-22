@@ -12,6 +12,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import {
   Stat,
   StatLabel,
@@ -37,7 +38,7 @@ export function ProductAnalyticsPanel({ product_id }: { product_id: string }) {
     };
   }, []);
 
-  const { data, isLoading } = trpc.analytics.productDetail.useQuery(
+  const query = trpc.analytics.productDetail.useQuery(
     {
       product_id,
       ...range,
@@ -46,11 +47,12 @@ export function ProductAnalyticsPanel({ product_id }: { product_id: string }) {
       enabled: !!range.to && !!range.from,
     },
   );
+  const { data, isLoading } = query;
 
-  if (isLoading) return <p>Chargement…</p>;
   if (!data) return <p>Aucune donnée</p>;
 
   return (
+    <QueryGuard query={query} loadingFallback={<p>Chargement…</p>}>
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4"> 
       <Stat>
         <StatLabel>Revenu (30j)</StatLabel>
@@ -129,5 +131,6 @@ export function ProductAnalyticsPanel({ product_id }: { product_id: string }) {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

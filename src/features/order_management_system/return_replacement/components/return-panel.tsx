@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/components/providers/app-providers";
 import { CreateRequestDialog } from "./create-request-dialog";
@@ -37,6 +38,7 @@ export function ReturnPanel({ order_id, items, order_status, on_update }: Return
     (!requests || requests.every((r) => r.status !== "pending"));
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <CardTitle>Retours & remplacements</CardTitle>
@@ -97,5 +99,6 @@ export function ReturnPanel({ order_id, items, order_status, on_update }: Return
         ))}
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

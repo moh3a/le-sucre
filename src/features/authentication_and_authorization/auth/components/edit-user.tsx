@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,6 +106,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
   };
 
   return (
+    <QueryGuard mutation={{ isPending: update_user.isPending || assign_role.isPending, error: update_user.error ?? assign_role.error }}>
     <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogTrigger asChild>
         <Button variant="outline" size="sm">
@@ -222,5 +224,6 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
+    </QueryGuard>
   );
 }

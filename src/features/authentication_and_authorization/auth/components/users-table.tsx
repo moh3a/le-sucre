@@ -9,6 +9,7 @@ import { DataTableColumnHeader } from "@/features/data-table/components/data-tab
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { EditUser } from "./edit-user";
@@ -103,7 +104,7 @@ export function UsersTable() {
   const [page] = useQueryState("usersPage", parseAsInteger.withDefault(1));
   const [perPage] = useQueryState("usersPerPage", parseAsInteger.withDefault(20));
 
-  const { data, isLoading } = trpc.adminAuth.listUsers.useQuery({
+  const { data, isLoading, error } = trpc.adminAuth.listUsers.useQuery({
     page,
     limit: perPage,
   });
@@ -119,9 +120,9 @@ export function UsersTable() {
     getRowId: (row) => row.id,
   });
 
-  if (isLoading && !data) {
-    return <DataTableSkeleton columnCount={6} rowCount={10} />;
-  }
-
-  return <DataTable table={table} />;
+  return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={6} rowCount={10} />}>
+      <DataTable table={table} />
+    </QueryGuard>
+  );
 }

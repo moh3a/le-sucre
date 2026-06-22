@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -181,6 +182,7 @@ export function ProductDetailGeneralTab({
   }
 
   return (
+    <QueryGuard mutation={update}>
     <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
       <Card>
         <CardHeader>
@@ -483,5 +485,6 @@ export function ProductDetailGeneralTab({
         </CardContent>
       </Card>
     </form>
+    </QueryGuard>
   );
 }

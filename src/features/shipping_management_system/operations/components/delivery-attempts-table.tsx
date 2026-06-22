@@ -13,6 +13,7 @@ import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -278,7 +279,7 @@ export function DeliveryAttemptsTable() {
     [retryMutation, rtoMutation],
   );
 
-  const { data, isLoading } = trpc.operations.deliveryListAttempts.useQuery({
+  const { data, isLoading, error } = trpc.operations.deliveryListAttempts.useQuery({
     page,
     limit: per_page,
     status: status || undefined,
@@ -296,10 +297,8 @@ export function DeliveryAttemptsTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />;
-
   return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}>
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
@@ -329,5 +328,6 @@ export function DeliveryAttemptsTable() {
         </div>
       )}
     </DataTable>
+    </QueryGuard>
   );
 }

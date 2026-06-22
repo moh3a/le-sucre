@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,6 +81,7 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
   });
 
   return (
+    <QueryGuard query={{isLoading: operators_loading}}>
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
@@ -236,5 +238,6 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
 
       <NotesCard order_id={order.id} initial_notes={order.notes ?? ""} on_saved={on_update} />
     </div>
+    </QueryGuard>
   );
 }

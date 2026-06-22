@@ -19,6 +19,7 @@ import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { DataTableViewOptions } from "@/features/data-table/components/data-table-view-options";
 import { useDataTable } from "@/features/data-table/use-data-table";
@@ -426,12 +427,13 @@ export function VariantsTable() {
   const [stock_max, setStockMax] = useQueryState("stock_max", parseAsInteger);
 
   const utils = trpc.useUtils();
-  const { data, isLoading } = trpc.variants.adminList.useQuery({
+  const query = trpc.variants.adminList.useQuery({
     page,
     limit: per_page,
     status: status ?? undefined,
     search: search?.trim() || undefined,
   });
+  const { data, isLoading } = query;
 
   const bulkUpdate = trpc.variants.bulkUpdateSku.useMutation({
     onSuccess: () => {
@@ -475,11 +477,8 @@ export function VariantsTable() {
     }
   }
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />;
-
   return (
-    <>
+    <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />}>
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
@@ -544,6 +543,6 @@ export function VariantsTable() {
           </div>
         )}
       </DataTable>
-    </>
+    </QueryGuard>
   );
 }

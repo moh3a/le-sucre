@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -72,7 +73,7 @@ export function AccountActivityTab() {
     [],
   );
 
-  const { data, isLoading } = trpc.auth.myActivity.useQuery({
+  const { data, isLoading, error } = trpc.auth.myActivity.useQuery({
     page: 1,
     limit: 20,
   });
@@ -86,9 +87,8 @@ export function AccountActivityTab() {
     getRowId: (row) => row.id,
   });
 
-  if (isLoading) return <DataTableSkeleton columnCount={4} rowCount={10} />;
-
   return (
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={4} rowCount={10} />}>
     <Card>
       <CardHeader>
         <CardTitle>Activité récente</CardTitle>
@@ -100,5 +100,6 @@ export function AccountActivityTab() {
         <DataTable table={table} />
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

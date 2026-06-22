@@ -22,6 +22,7 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -386,11 +387,8 @@ export function AdminReviewModerationTable() {
     });
   }
 
-  if (isListLoading && !responseData)
-    return <DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />;
-
   return (
-    <>
+    <QueryGuard query={{ isLoading: isListLoading }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />}>
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
@@ -496,6 +494,6 @@ export function AdminReviewModerationTable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </QueryGuard>
   );
 }

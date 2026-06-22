@@ -9,6 +9,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { CatalogSearchBar } from "./catalog-search-bar";
 import { CatalogSortSelect } from "./catalog-sort-select";
 import { CatalogFilterSidebar } from "./catalog-filter-sidebar";
@@ -77,8 +78,8 @@ export function CatalogSearchPageClient({
   };
 
   // TRPC queries
-  const { data: searchResult, isLoading: isSearchLoading } =
-    trpc.catalog.search.useQuery(searchInput);
+  const search_query = trpc.catalog.search.useQuery(searchInput);
+  const { data: searchResult, isLoading: isSearchLoading } = search_query;
   const { data: facetsResult } = trpc.catalog.facets.useQuery(facetInput);
 
   const handlePropertyChange = (code: string, values: string[]) => {
@@ -95,6 +96,7 @@ export function CatalogSearchPageClient({
   };
 
   return (
+    <QueryGuard query={search_query}>
     <div className="font-moya mx-auto min-h-screen max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
       <div className="flex flex-col gap-4 border-b border-[#4d4c20]/15 pb-6 md:flex-row md:items-center md:justify-between">
@@ -155,5 +157,6 @@ export function CatalogSearchPageClient({
         </div>
       </div>
     </div>
+    </QueryGuard>
   );
 }

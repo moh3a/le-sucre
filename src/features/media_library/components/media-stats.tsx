@@ -2,6 +2,7 @@
 
 import { Image, FileVideo, HardDrive } from "lucide-react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Stat, StatLabel, StatValue, StatIndicator } from "@/components/ui/stat";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,17 +17,14 @@ function format_bytes(bytes: number) {
 export function MediaStats() {
   const { data: stats, isLoading } = trpc.media.stats.useQuery();
 
-  if (isLoading) {
-    return (
+  return (
+    <QueryGuard query={{ isLoading }} loadingFallback={
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-24 rounded-lg" />
         ))}
       </div>
-    );
-  }
-
-  return (
+    }>
     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
       <Stat>
         <StatLabel>Total des fichiers</StatLabel>
@@ -57,5 +55,6 @@ export function MediaStats() {
         </StatIndicator>
       </Stat>
     </div>
+    </QueryGuard>
   );
 }

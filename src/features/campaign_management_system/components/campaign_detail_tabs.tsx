@@ -1,10 +1,11 @@
 "use client";
 
-import { Megaphone, Calendar, ArrowLeft, Loader2 } from "lucide-react";
+import { Megaphone, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -23,41 +24,15 @@ type DetailTabsProps = {
 export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps) {
   const { data: campaign, isLoading, error } = trpc.campaigns.byId.useQuery({ id: campaign_id });
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c8d152]" />
-          <p className="text-muted-foreground text-sm">Chargement de la campagne...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !campaign) {
-    return (
-      <div className="space-y-4 p-8 text-center">
-        <h2 className="text-destructive text-xl font-bold">Erreur</h2>
-        <p className="text-muted-foreground">
-          {error?.message || "La campagne demandée est introuvable."}
-        </p>
-        <Link
-          href="/console/campaigns"
-          className="flex items-center justify-center gap-2 text-[#c8d152] hover:underline"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour aux campagnes
-        </Link>
-      </div>
-    );
-  }
-
   const format_date = (d?: string | null) => {
     if (!d) return "indéfinie";
     return format(new Date(d), "dd MMM yyyy HH:mm", { locale: fr });
   };
 
+  if (!campaign) return null;
+
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="space-y-6 p-6">
       {/* Back button and Header */}
       <div className="space-y-4">
@@ -132,5 +107,6 @@ export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps
         </TabsContent>
       </Tabs>
     </div>
+    </QueryGuard>
   );
 }

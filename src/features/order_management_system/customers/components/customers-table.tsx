@@ -6,6 +6,7 @@ import { User } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -151,9 +152,8 @@ export function CustomersTable() {
     getRowId: (row) => row.user_id,
   });
 
-  if (isLoading && !data) return <DataTableSkeleton columnCount={7} rowCount={10} />;
-
   return (
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} />}>
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <Input
@@ -165,5 +165,6 @@ export function CustomersTable() {
         <DataTableSortList table={table} />
       </DataTableAdvancedToolbar>
     </DataTable>
+    </QueryGuard>
   );
 }

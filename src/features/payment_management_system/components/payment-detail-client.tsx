@@ -16,6 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { formatDate } from "@/lib/utils";
 
@@ -53,14 +54,6 @@ export function PaymentDetailClient({ paymentId }: { paymentId: string }) {
     onSuccess: () => utils.payments.adminGet.invalidate(),
   });
 
-  if (isFetching) {
-    return (
-      <ConsolePageShell title="Chargement...">
-        <Skeleton className="h-96 w-full" />
-      </ConsolePageShell>
-    );
-  }
-
   if (!payment) {
     return (
       <ConsolePageShell title="Paiement introuvable">
@@ -70,8 +63,9 @@ export function PaymentDetailClient({ paymentId }: { paymentId: string }) {
   }
 
   return (
-    <ConsolePageShell
-      title={`Paiement ${payment.id.slice(0, 12)}...`}
+    <QueryGuard query={{ isLoading: isFetching }} loadingFallback={<ConsolePageShell title="Chargement..."><Skeleton className="h-96 w-full" /></ConsolePageShell>}>
+      <ConsolePageShell
+        title={`Paiement ${payment.id.slice(0, 12)}...`}
       subtitle={`Transaction ${payment.provider_transaction_id ?? "N/A"}`}
       back_href="/console/payments"
       actions={
@@ -286,5 +280,6 @@ export function PaymentDetailClient({ paymentId }: { paymentId: string }) {
         </Card>
       )}
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

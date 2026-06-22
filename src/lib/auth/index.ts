@@ -10,6 +10,7 @@ import {
 } from "@/features/authentication_and_authorization/authorization/constants/roles";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { db } from "../db";
+import { RoleName } from "@/features/authentication_and_authorization/authorization/constants/roles";
 
 const auth_options = {
   database: drizzleAdapter(db, {
@@ -53,7 +54,7 @@ const auth_options = {
       return {
         user,
         session,
-        userRole: rows[0]?.roleName ?? null,
+        userRole: (rows[0]?.roleName as RoleName) ?? null,
       };
     }),
   ],

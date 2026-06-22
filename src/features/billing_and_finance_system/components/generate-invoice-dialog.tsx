@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 export function GenerateInvoiceDialog() {
   const [open, setOpen] = React.useState(false);
@@ -39,6 +40,7 @@ export function GenerateInvoiceDialog() {
   }
 
   return (
+    <QueryGuard mutation={generate}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -65,5 +67,6 @@ export function GenerateInvoiceDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

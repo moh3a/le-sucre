@@ -5,6 +5,7 @@ import { Plus, Trash, ShieldCheck, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,6 +94,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
   };
 
   return (
+    <QueryGuard>
     <Card className="border shadow-md">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
@@ -271,5 +273,6 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
         </div>
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }

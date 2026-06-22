@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -54,6 +55,7 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
   const is_low = row.quantity_on_hand > 0 && row.quantity_on_hand <= 5;
 
   return (
+    <QueryGuard mutation={receive}>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
@@ -144,5 +146,6 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

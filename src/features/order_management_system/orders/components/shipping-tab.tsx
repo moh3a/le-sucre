@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -62,6 +63,7 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
   }
 
   return (
+    <QueryGuard mutation={update_shipping}>
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -160,5 +162,6 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
 
       <ShipmentPanel order_id={order_id} />
     </>
+    </QueryGuard>
   );
 }

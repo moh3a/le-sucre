@@ -4,6 +4,7 @@ import * as React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -79,10 +80,12 @@ export function AnalyticsProductsTable() {
     getRowId: (row) => row.product_id,
   });
 
-  if (isLoading) return <DataTableSkeleton columnCount={4} rowCount={10} />;
-
   return (
-    <Card>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={4} rowCount={10} />}
+    >
+      <Card>
       <CardHeader>
         <CardTitle>Meilleures ventes</CardTitle>
         <CardDescription>Meilleures ventes sur les 30 derniers jours</CardDescription>
@@ -90,6 +93,7 @@ export function AnalyticsProductsTable() {
       <CardContent>
         <DataTable table={table} />
       </CardContent>
-    </Card>
+      </Card>
+    </QueryGuard>
   );
 }

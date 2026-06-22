@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -34,7 +35,8 @@ function flatten_categories(
 export function CategoryForm({ mode, category_id, default_values, onSuccess }: CategoryFormProps) {
   const t = useTranslations("categories");
   const utils = trpc.useUtils();
-  const { data: tree } = trpc.categories.tree.useQuery();
+  const tree_query = trpc.categories.tree.useQuery();
+  const { data: tree } = tree_query;
 
   const create_mutation = trpc.categories.create.useMutation({
     onSuccess: async () => {
@@ -95,6 +97,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
   }
 
   return (
+    <QueryGuard query={tree_query}>
     <form className="space-y-6" onSubmit={form.handleSubmit(on_submit)}>
       <FieldGroup>
         <Controller
@@ -197,5 +200,6 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
         </Button>
       </FieldGroup>
     </form>
+    </QueryGuard>
   );
 }

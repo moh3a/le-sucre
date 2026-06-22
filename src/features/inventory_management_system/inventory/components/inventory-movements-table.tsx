@@ -6,6 +6,7 @@ import { ToggleLeft } from "lucide-react";
 import * as React from "react";
 
 import { DataTable } from "@/features/data-table/components/data-table";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
@@ -130,10 +131,9 @@ export function InventoryMovementsTable() {
     label: MOVEMENT_LABELS[key],
   }));
 
-  if (isLoading && !data) return <DataTableSkeleton columnCount={7} rowCount={10} />;
-
   return (
-    <DataTable table={table}>
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} />}>
+      <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
           title="Type"
@@ -152,5 +152,6 @@ export function InventoryMovementsTable() {
         <DataTableSortList table={table} />
       </DataTableAdvancedToolbar>
     </DataTable>
+    </QueryGuard>
   );
 }

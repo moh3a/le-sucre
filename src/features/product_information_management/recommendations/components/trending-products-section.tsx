@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
 
 export function TrendingProductsSection({
@@ -12,17 +13,20 @@ export function TrendingProductsSection({
   period?: "day" | "week";
   limit?: number;
 }) {
-  const { data, isLoading } = trpc.recommendations.trending.useQuery({
+  const query = trpc.recommendations.trending.useQuery({
     locale,
     period,
     limit,
   });
+  const { data, isLoading } = query;
 
   return (
+    <QueryGuard query={query}>
     <ProductRecommendationCarousel
       title={locale === "fr" ? "Tendances du moment" : "Trending Products"}
       items={data ?? []}
       isLoading={isLoading}
     />
+    </QueryGuard>
   );
 }

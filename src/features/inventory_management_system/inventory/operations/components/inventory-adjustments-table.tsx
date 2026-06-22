@@ -5,6 +5,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import { CheckCircle2, Download, MoreHorizontal, XCircle } from "lucide-react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -271,11 +272,12 @@ export function InventoryAdjustmentsTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={8} rowCount={10} filterCount={1} />;
-
   return (
-    <DataTable table={table}>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={1} />}
+    >
+      <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
           title="Statut"
@@ -304,5 +306,6 @@ export function InventoryAdjustmentsTable() {
         </div>
       )}
     </DataTable>
+    </QueryGuard>
   );
 }

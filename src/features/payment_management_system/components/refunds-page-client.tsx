@@ -1,6 +1,7 @@
 "use client";
 
 import { Banknote, CheckCircle2, Clock, Wallet, XCircle } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
@@ -8,10 +9,11 @@ import { RefundsTable } from "./refunds-table";
 import { CreateRefundDialog } from "./create-refund-dialog";
 
 export function RefundsPageClient() {
-  const { data: stats, isFetching: statsLoading } = trpc.payments.adminRefundStats.useQuery();
+  const { data: stats, isLoading: statsLoading } = trpc.payments.adminRefundStats.useQuery();
 
   return (
-    <ConsolePageShell
+    <QueryGuard query={{ isLoading: statsLoading }}>
+      <ConsolePageShell
       title="Remboursements"
       subtitle="Gestion des remboursements"
       actions={<CreateRefundDialog />}
@@ -64,5 +66,6 @@ export function RefundsPageClient() {
     >
       <RefundsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

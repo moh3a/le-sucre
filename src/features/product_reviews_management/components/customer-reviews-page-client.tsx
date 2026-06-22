@@ -1,6 +1,7 @@
 "use client";
 
 import { Star, Clock, CheckCircle2, FileText } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
@@ -9,26 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function CustomerReviewsPageClient() {
   const { data, isLoading } = trpc.reviews.myReviews.useQuery({ page: 1, limit: 20 });
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="pb-2">
-              <div className="h-6 w-2/3 bg-muted rounded" />
-            </CardHeader>
-            <CardContent>
-              <div className="h-20 bg-muted rounded" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  const reviews = data ?? [];
+  const reviews = data?.items ?? [];
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Mes avis</h2>
@@ -107,5 +92,6 @@ export function CustomerReviewsPageClient() {
         </div>
       )}
     </div>
+    </QueryGuard>
   );
 }

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Plus, Trash2, Search } from "lucide-react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,6 +191,7 @@ export function CreateOrderDialog() {
   };
 
   return (
+    <QueryGuard mutation={create_mutation}>
     <Dialog open={open} onOpenChange={set_open}>
       <DialogTrigger asChild>
         <Button>
@@ -526,5 +528,6 @@ export function CreateOrderDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

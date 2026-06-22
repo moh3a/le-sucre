@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -36,10 +37,11 @@ export function CategoryFormDialog({
   const open = open_prop ?? open_internal;
   const on_open_change = on_open_change_prop ?? set_open_internal;
 
-  const { data: category, isLoading } = trpc.categories.byId.useQuery(
+  const category_query = trpc.categories.byId.useQuery(
     { id: category_id! },
     { enabled: mode === "edit" && !!category_id && open },
   );
+  const { data: category, isLoading } = category_query;
 
   const title = mode === "create" ? t("new") : t("edit");
   const description = mode === "create" ? t("new_description") : t("edit_description");
@@ -57,13 +59,13 @@ export function CategoryFormDialog({
           <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        {mode === "edit" && isLoading ? (
+        <QueryGuard query={category_query} loadingFallback={
           <div className="space-y-4 py-4">
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
           </div>
-        ) : (
+        }>
           <CategoryForm
             key={mode === "edit" ? category_id : "create"}
             mode={mode}
@@ -82,7 +84,7 @@ export function CategoryFormDialog({
             }
             onSuccess={handle_success}
           />
-        )}
+        </QueryGuard>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

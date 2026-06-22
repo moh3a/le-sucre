@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -152,6 +153,7 @@ export function CreatePromotionDialog() {
   };
 
   return (
+    <QueryGuard mutation={create_mutation}>
     <Dialog open={open} onOpenChange={set_open}>
       <DialogTrigger asChild>
         <Button>
@@ -413,5 +415,6 @@ export function CreatePromotionDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

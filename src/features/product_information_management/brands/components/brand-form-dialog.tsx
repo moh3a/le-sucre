@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -36,10 +37,11 @@ export function BrandFormDialog({
   const open = open_prop ?? open_internal;
   const on_open_change = on_open_change_prop ?? set_open_internal;
 
-  const { data: brand, isLoading } = trpc.brands.byId.useQuery(
+  const brand_query = trpc.brands.byId.useQuery(
     { id: brand_id! },
     { enabled: mode === "edit" && !!brand_id && open },
   );
+  const { data: brand, isLoading } = brand_query;
 
   const title = mode === "create" ? t("new") : t("edit");
   const description = mode === "create" ? t("new_description") : t("edit_description");
@@ -57,14 +59,14 @@ export function BrandFormDialog({
           <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        {mode === "edit" && isLoading ? (
+        <QueryGuard query={brand_query} loadingFallback={
           <div className="space-y-4 py-4">
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
           </div>
-        ) : (
+        }>
           <BrandForm
             key={mode === "edit" ? brand_id : "create"}
             mode={mode}
@@ -83,7 +85,7 @@ export function BrandFormDialog({
             }
             onSuccess={handle_success}
           />
-        )}
+        </QueryGuard>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

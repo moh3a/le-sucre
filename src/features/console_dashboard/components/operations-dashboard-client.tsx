@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -34,15 +35,19 @@ export function OperationsDashboardClient() {
   const loading =
     escalations.isLoading && cancellations.isLoading && tasks.isLoading;
 
-  if (loading)
-    return (
-      <ConsolePageShell title="Opérations" subtitle="Tableau de bord des opérations quotidiennes">
-        <Skeleton className="h-96 w-full" />
-      </ConsolePageShell>
-    );
-
   return (
-    <ConsolePageShell
+    <QueryGuard
+      isLoading={loading}
+      loadingFallback={
+        <ConsolePageShell title="Opérations" subtitle="Tableau de bord des opérations quotidiennes">
+          <Skeleton className="h-96 w-full" />
+        </ConsolePageShell>
+      }
+      query={{
+        error: escalations.error ?? cancellations.error ?? tasks.error ?? pendingPayments.error ?? overdueFollowups.error,
+      }}
+    >
+      <ConsolePageShell
       title="Opérations"
       subtitle="Tableau de bord des opérations quotidiennes"
     >
@@ -121,6 +126,7 @@ export function OperationsDashboardClient() {
           },
         ]}
       />
-    </ConsolePageShell>
+      </ConsolePageShell>
+    </QueryGuard>
   );
 }

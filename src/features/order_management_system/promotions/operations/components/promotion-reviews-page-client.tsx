@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -10,6 +11,7 @@ export function PromotionReviewsPageClient() {
   const { data: stats, isLoading } = trpc.operations.promotionGetReviewStats.useQuery();
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Validations de promotions"
       subtitle="Examiner et approuver ou rejeter les demandes de promotion"
@@ -27,5 +29,6 @@ export function PromotionReviewsPageClient() {
     >
       <PromotionReviewsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

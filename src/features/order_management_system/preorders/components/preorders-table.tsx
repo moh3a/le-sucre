@@ -7,6 +7,7 @@ import { Calendar, Download, ExternalLink, MoreHorizontal, XCircle } from "lucid
 import Link from "next/link";
 import * as React from "react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -339,10 +340,8 @@ export function PreordersTable() {
     });
   }
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />;
-
   return (
+    <QueryGuard query={{ isLoading }} mutation={updateEtaMutation} loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}>
     <>
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
@@ -420,5 +419,6 @@ export function PreordersTable() {
         </DialogContent>
       </Dialog>
     </>
+    </QueryGuard>
   );
 }

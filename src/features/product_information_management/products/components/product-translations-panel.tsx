@@ -5,6 +5,7 @@ import { useState } from "react";
 import z from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export function ProductTranslationsPanel({
   );
 
   return (
+    <QueryGuard mutation={upsert}>
     <div className="space-y-6">
       {forms.map((form, index) => (
         <FieldGroup key={form.locale} className="rounded-lg border p-4">
@@ -91,5 +93,6 @@ export function ProductTranslationsPanel({
         </FieldGroup>
       ))}
     </div>
+    </QueryGuard>
   );
 }

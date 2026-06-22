@@ -1,11 +1,12 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart } from "recharts";
 
 export function OrderCharts() {
-  const { data } = trpc.orders.adminCharts.useQuery();
+  const { data, isLoading } = trpc.orders.adminCharts.useQuery();
 
   if (!data) return null;
 
@@ -21,6 +22,7 @@ export function OrderCharts() {
   }));
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="grid gap-4 md:grid-cols-2 mb-6">
       <Card>
         <CardHeader>
@@ -61,5 +63,6 @@ export function OrderCharts() {
         </CardContent>
       </Card>
     </div>
+    </QueryGuard>
   );
 }

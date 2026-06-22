@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 
 const PROVIDERS = ["yalidine", "dhl", "fedex", "ups", "ems"] as const;
 
@@ -57,6 +58,7 @@ export function CreateShipmentDialog() {
   }
 
   return (
+    <QueryGuard mutation={create}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -109,5 +111,6 @@ export function CreateShipmentDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

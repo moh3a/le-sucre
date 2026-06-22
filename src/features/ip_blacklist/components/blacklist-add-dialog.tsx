@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import {
   add_to_blacklist_schema,
   type AddToBlacklistInput,
@@ -56,6 +57,7 @@ export function BlacklistAddDialog({ open, on_open_change, on_added }: Blacklist
   });
 
   return (
+    <QueryGuard mutation={add_mutation}>
     <Dialog open={open} onOpenChange={on_open_change}>
       <DialogContent>
         <DialogHeader>
@@ -113,5 +115,6 @@ export function BlacklistAddDialog({ open, on_open_change, on_added }: Blacklist
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

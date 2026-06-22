@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { QueryGuard } from "@/components/query-guard";
 
 export function RequestAdjustmentDialog() {
   const [open, setOpen] = useState(false);
@@ -75,6 +76,7 @@ export function RequestAdjustmentDialog() {
   }
 
   return (
+    <QueryGuard mutation={mutation}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
@@ -180,5 +182,6 @@ export function RequestAdjustmentDialog() {
         </form>
       </DialogContent>
     </Dialog>
+    </QueryGuard>
   );
 }

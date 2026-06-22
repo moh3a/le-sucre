@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import * as React from "react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { useDataTable } from "@/features/data-table/use-data-table";
@@ -85,7 +86,9 @@ export function InventoryAlertsTable() {
     getRowId: (row) => row.id,
   });
 
-  if (isLoading) return null;
-
-  return <DataTable table={table} />;
+  return (
+    <QueryGuard query={{ isLoading }}>
+      <DataTable table={table} />
+    </QueryGuard>
+  );
 }

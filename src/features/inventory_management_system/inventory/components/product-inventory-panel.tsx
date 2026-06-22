@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Package, Truck } from "lucide-react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -48,14 +49,14 @@ export function ProductInventoryPanel({ product_id }: ProductInventoryPanelProps
     return drafts[sku_id] ?? { set_qty: "", receive_qty: "" };
   }
 
-  if (isLoading) {
-    return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
-  }
-
   const items = data?.items ?? [];
 
   return (
-    <Card>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}
+    >
+      <Card>
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
         <CardDescription>{t("subtitle")}</CardDescription>
@@ -195,6 +196,7 @@ export function ProductInventoryPanel({ product_id }: ProductInventoryPanelProps
         )}
       </CardContent>
     </Card>
+    </QueryGuard>
   );
 }
 

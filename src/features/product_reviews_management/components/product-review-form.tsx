@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,6 +70,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
   };
 
   return (
+    <QueryGuard mutation={createMutation}>
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="font-moya space-y-6 rounded-2xl border border-[#4d4c20]/15 bg-white p-6 shadow-sm"
@@ -134,6 +136,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
         {createMutation.isPending ? "Soumission..." : "Soumettre l'avis"}
       </Button>
     </form>
+    </QueryGuard>
   );
 }
 export default ProductReviewForm;

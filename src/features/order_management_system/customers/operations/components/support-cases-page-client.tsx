@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -19,6 +20,7 @@ export function SupportCasesPageClient() {
   const closed = items.filter((c) => c.status === "closed").length;
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
       title="Cas de support"
       subtitle="Gestion des cas de support client"
@@ -37,5 +39,6 @@ export function SupportCasesPageClient() {
     >
       <SupportCasesTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

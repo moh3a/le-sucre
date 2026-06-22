@@ -7,6 +7,7 @@ import Link from "next/link";
 import * as React from "react";
 
 import { DataTable } from "@/features/data-table/components/data-table";
+import { QueryGuard } from "@/components/query-guard";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
@@ -138,10 +139,8 @@ export function InventoryStockTable() {
     { label: "Stock faible", value: "low" },
   ];
 
-  if (isLoading && !data) return <DataTableSkeleton columnCount={7} rowCount={10} />;
-
   return (
-    <>
+    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} />}>
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <div className="relative">
@@ -173,6 +172,6 @@ export function InventoryStockTable() {
           }}
         />
       )}
-    </>
+    </QueryGuard>
   );
 }

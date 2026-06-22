@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AlertTriangle, CheckCircle2, Clock, ListTodo } from "lucide-react";
@@ -11,7 +12,8 @@ export function TasksPageClient() {
   const { data: dashboard, isLoading } = trpc.operations.adminTaskDashboard.useQuery();
 
   return (
-    <ConsolePageShell
+    <QueryGuard query={{ isLoading }}>
+      <ConsolePageShell
       title="Tâches"
       subtitle="Gestion des tâches internes"
       actions={<CreateTaskDialog />}
@@ -28,6 +30,7 @@ export function TasksPageClient() {
       }
     >
       <TasksTable />
-    </ConsolePageShell>
+      </ConsolePageShell>
+    </QueryGuard>
   );
 }

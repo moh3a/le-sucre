@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 
+import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -290,11 +291,12 @@ export function ForecastTable() {
     enableRowSelection: true,
   });
 
-  if (isLoading && !data)
-    return <DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />;
-
   return (
-    <DataTable table={table}>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />}
+    >
+      <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <Input
           placeholder="Rechercher par produit ou SKU…"
@@ -318,5 +320,6 @@ export function ForecastTable() {
         <DataTableSortList table={table} />
       </DataTableAdvancedToolbar>
     </DataTable>
+    </QueryGuard>
   );
 }

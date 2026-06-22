@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -14,6 +15,7 @@ export function FollowUpsPageClient() {
   const total = data?.meta?.total_records ?? 0;
 
   return (
+    <QueryGuard query={{ isLoading: isLoading || overdueLoading }}>
     <ConsolePageShell
       title="Relances et suivis"
       subtitle="Gestion des rappels et suivis clients"
@@ -30,5 +32,6 @@ export function FollowUpsPageClient() {
     >
       <FollowUpsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

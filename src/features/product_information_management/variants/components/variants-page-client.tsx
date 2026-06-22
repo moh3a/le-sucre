@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
@@ -8,7 +9,8 @@ import { Layers, Activity, AlertTriangle, ShoppingCart } from "lucide-react";
 import { VariantsTable } from "./variants-table";
 
 export function VariantsPageClient() {
-  const { data: stats, isLoading: isStatsLoading } = trpc.variants.adminStats.useQuery();
+  const stats_query = trpc.variants.adminStats.useQuery();
+  const { data: stats, isLoading: isStatsLoading } = stats_query;
 
   const statsItems = React.useMemo(() => {
     return [
@@ -40,6 +42,7 @@ export function VariantsPageClient() {
   }, [stats]);
 
   return (
+    <QueryGuard query={stats_query}>
     <ConsolePageShell
       title="Variantes"
       subtitle="Gestion des variantes et des SKUs"
@@ -47,5 +50,6 @@ export function VariantsPageClient() {
     >
       <VariantsTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

@@ -67,15 +67,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NavUser } from "./nav-user";
 import { authClient } from "@/lib/auth/client";
+import { QueryGuard } from "@/components/query-guard";
 import { TooltipProvider } from "../ui/tooltip";
-import { trpc } from "../providers/app-providers";
 
 export function AppSidebar() {
-  const { data } = authClient.useSession();
-  const { data: me } = trpc.auth.me.useQuery(undefined, {
-    enabled: Boolean(data?.user),
-  });
-  const primary_role = me?.roles?.[0];
+  const { data, isPending, error } = authClient.useSession();
   const { state } = useSidebar();
   const is_collapsed = state === "collapsed";
 
@@ -186,6 +182,7 @@ export function AppSidebar() {
   ];
 
   return (
+    <QueryGuard session={{ isPending, error }}>
     <TooltipProvider>
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
@@ -287,12 +284,13 @@ export function AppSidebar() {
               name: data?.user.name ?? "",
               email: data?.user.email ?? "",
               avatar: data?.user.image ?? "",
-              role: primary_role ?? null,
+              role: data?.userRole ?? null,
             }}
           />
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
     </TooltipProvider>
+    </QueryGuard>
   );
 }

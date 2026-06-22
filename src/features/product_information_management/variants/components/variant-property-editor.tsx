@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/color-picker";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -120,13 +121,10 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
     });
   }
 
-  if (isLoading) {
-    return <p className="text-muted-foreground text-sm">{t("loading")}</p>;
-  }
-
   const properties = data?.properties ?? [];
 
   return (
+    <QueryGuard isLoading={isLoading} loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}>
     <div className="space-y-6">
       <div className="flex items-center gap-1">
         <div className="flex items-center gap-1">
@@ -355,5 +353,6 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
         </ul>
       )}
     </div>
+    </QueryGuard>
   );
 }

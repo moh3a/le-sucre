@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
 import { AnalyticsKpiCards } from "./analytics-kpi-cards";
 import { default_range } from "../helpers/default-range";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +11,14 @@ export function AnalyticsDashboardClient() {
   const { from, to } = default_range();
   const { data, isLoading } = trpc.analytics.overview.useQuery({ from, to });
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">Chargement…</p>;
   if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
 
   return (
-    <Card>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+    >
+      <Card>
       <CardHeader>
         <CardTitle>Vue d&apos;ensemble</CardTitle>
       </CardHeader>
@@ -31,6 +35,7 @@ export function AnalyticsDashboardClient() {
           y_key="revenue"
         />
       </CardContent>
-    </Card>
+      </Card>
+    </QueryGuard>
   );
 }

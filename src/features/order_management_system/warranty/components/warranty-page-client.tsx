@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -11,6 +12,7 @@ export function WarrantyPageClient() {
   const stats = trpc.operations.warrantyStats.useQuery();
 
   return (
+    <QueryGuard query={{ isLoading: stats.isLoading }}>
     <ConsolePageShell
       title="Garanties"
       subtitle="Gestion des demandes de garantie"
@@ -27,5 +29,6 @@ export function WarrantyPageClient() {
     >
       <WarrantyTable />
     </ConsolePageShell>
+    </QueryGuard>
   );
 }

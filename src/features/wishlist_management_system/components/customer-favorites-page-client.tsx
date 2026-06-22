@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
-import { Heart, Trash2, Loader2 } from "lucide-react";
+import { Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -19,6 +20,7 @@ export function CustomerFavoritesPageClient() {
   }
 
   return (
+    <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Mes favoris</h1>
 
@@ -30,11 +32,7 @@ export function CustomerFavoritesPageClient() {
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : !data?.items?.length ? (
+          {!data?.items?.length ? (
             <div className="text-center py-16 text-muted-foreground">
               <Heart className="h-12 w-12 mx-auto mb-3 opacity-20" />
               <p>Aucun favori</p>
@@ -67,5 +65,6 @@ export function CustomerFavoritesPageClient() {
         </TabsContent>
       </Tabs>
     </div>
+    </QueryGuard>
   );
 }
