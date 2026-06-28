@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -24,14 +25,15 @@ const profile_form_schema = update_profile_schema.extend({
 type ProfileFormValues = z.infer<typeof profile_form_schema>;
 
 export function ProfileSection() {
+  const t = useTranslations("profile");
   const utils = trpc.useUtils();
   const { data, isLoading, error } = trpc.auth.me.useQuery();
   const initProfile = trpc.profile.initialize.useMutation({
-    onSuccess: () => { utils.auth.me.invalidate(); toast.success("Profil initialisé"); },
+    onSuccess: () => { utils.auth.me.invalidate(); toast.success(t("profile_initialized")); },
     onError: (err) => { toast.error(err.message); },
   });
   const updateProfile = trpc.profile.update.useMutation({
-    onSuccess: () => { utils.auth.me.invalidate(); toast.success("Profil mis à jour"); },
+    onSuccess: () => { utils.auth.me.invalidate(); toast.success(t("profile_updated")); },
     onError: (err) => { toast.error(err.message); },
   });
   const updateUser = trpc.auth.updateProfile.useMutation({
@@ -92,69 +94,69 @@ export function ProfileSection() {
   }
 
   if (error) {
-    return <p className="text-destructive">Erreur: {error.message}</p>;
+    return <p className="text-destructive">{t("error_prefix")}: {error.message}</p>;
   }
 
   return (
     <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Identité</CardTitle>
-          <CardDescription>Prénom, nom et coordonnées</CardDescription>
+          <CardTitle>{t("identity_title")}</CardTitle>
+          <CardDescription>{t("identity_description")}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Field>
-            <FieldLabel>Nom complet</FieldLabel>
+            <FieldLabel>{t("full_name")}</FieldLabel>
             <Input {...form.register("name")} />
             <FieldError>{form.formState.errors.name?.message}</FieldError>
           </Field>
 
           <Field>
-            <FieldLabel>Email</FieldLabel>
+            <FieldLabel>{t("email")}</FieldLabel>
             <Input value={data?.user.email ?? ""} disabled className="text-muted-foreground" />
           </Field>
 
           <Field>
-            <FieldLabel>Prénom</FieldLabel>
+            <FieldLabel>{t("first_name")}</FieldLabel>
             <Input {...form.register("first_name")} />
             <FieldError>{form.formState.errors.first_name?.message}</FieldError>
           </Field>
 
           <Field>
-            <FieldLabel>Nom de famille</FieldLabel>
+            <FieldLabel>{t("last_name")}</FieldLabel>
             <Input {...form.register("last_name")} />
             <FieldError>{form.formState.errors.last_name?.message}</FieldError>
           </Field>
 
           <Field>
-            <FieldLabel>Téléphone (connexion)</FieldLabel>
+            <FieldLabel>{t("phone_login")}</FieldLabel>
             <Input value={(data?.user as { phone?: string })?.phone ?? ""} disabled className="text-muted-foreground" />
-            <p className="text-muted-foreground text-xs">Le téléphone sert d&apos;identifiant de connexion.</p>
+            <p className="text-muted-foreground text-xs">{t("phone_login_hint")}</p>
           </Field>
 
           <Field>
-            <FieldLabel>Téléphone secondaire</FieldLabel>
-            <Input {...form.register("phone_secondary")} placeholder="+213 6XX XX XX XX" />
+            <FieldLabel>{t("phone_secondary")}</FieldLabel>
+            <Input {...form.register("phone_secondary")} placeholder={t("phone_placeholder")} />
           </Field>
 
           <Field>
-            <FieldLabel>Date de naissance</FieldLabel>
+            <FieldLabel>{t("date_of_birth")}</FieldLabel>
             <Input {...form.register("date_of_birth")} type="date" />
           </Field>
 
           <Field>
-            <FieldLabel>Genre</FieldLabel>
+            <FieldLabel>{t("gender")}</FieldLabel>
             <Select
               value={form.watch("gender") ?? ""}
               onValueChange={(v) => form.setValue("gender", v as ProfileFormValues["gender"])}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Non spécifié" />
+                <SelectValue placeholder={t("not_specified")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Masculin</SelectItem>
-                <SelectItem value="female">Féminin</SelectItem>
-                <SelectItem value="other">Autre</SelectItem>
+                <SelectItem value="male">{t("male")}</SelectItem>
+                <SelectItem value="female">{t("female")}</SelectItem>
+                <SelectItem value="other">{t("other")}</SelectItem>
               </SelectContent>
             </Select>
           </Field>
@@ -163,22 +165,22 @@ export function ProfileSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Informations professionnelles</CardTitle>
-          <CardDescription>Entreprise et informations fiscales</CardDescription>
+          <CardTitle>{t("professional_info_title")}</CardTitle>
+          <CardDescription>{t("professional_info_description")}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Field>
-            <FieldLabel>Entreprise</FieldLabel>
+            <FieldLabel>{t("company")}</FieldLabel>
             <Input {...form.register("company")} />
           </Field>
 
           <Field>
-            <FieldLabel>N° de TVA</FieldLabel>
+            <FieldLabel>{t("vat_number")}</FieldLabel>
             <Input {...form.register("vat_number")} />
           </Field>
 
           <Field>
-            <FieldLabel>N° fiscal</FieldLabel>
+            <FieldLabel>{t("tax_id")}</FieldLabel>
             <Input {...form.register("tax_id")} />
           </Field>
         </CardContent>
@@ -186,8 +188,8 @@ export function ProfileSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Bio</CardTitle>
-          <CardDescription>Quelques mots sur vous</CardDescription>
+          <CardTitle>{t("bio_title")}</CardTitle>
+          <CardDescription>{t("bio_description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Textarea {...form.register("bio")} rows={3} />
@@ -196,13 +198,13 @@ export function ProfileSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Préférences</CardTitle>
-          <CardDescription>Langue, devise et notifications</CardDescription>
+          <CardTitle>{t("preferences_title")}</CardTitle>
+          <CardDescription>{t("preferences_description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field>
-              <FieldLabel>Langue préférée</FieldLabel>
+              <FieldLabel>{t("preferred_language")}</FieldLabel>
               <Select
                 value={form.watch("preferred_language")}
                 onValueChange={(v) => form.setValue("preferred_language", v as ProfileFormValues["preferred_language"])}
@@ -211,15 +213,15 @@ export function ProfileSection() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="ar">العربية</SelectItem>
+                  <SelectItem value="fr">{t("french")}</SelectItem>
+                  <SelectItem value="en">{t("english")}</SelectItem>
+                  <SelectItem value="ar">{t("arabic")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
 
             <Field>
-              <FieldLabel>Devise préférée</FieldLabel>
+              <FieldLabel>{t("preferred_currency")}</FieldLabel>
               <Input {...form.register("preferred_currency")} />
             </Field>
           </div>
@@ -227,8 +229,8 @@ export function ProfileSection() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Newsletter</p>
-                <p className="text-muted-foreground text-xs">Recevoir nos offres par email</p>
+                <p className="text-sm font-medium">{t("newsletter")}</p>
+                <p className="text-muted-foreground text-xs">{t("newsletter_description")}</p>
               </div>
               <Switch
                 checked={form.watch("newsletter_opt_in") ?? false}
@@ -238,8 +240,8 @@ export function ProfileSection() {
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Marketing</p>
-                <p className="text-muted-foreground text-xs">Recevoir des offres personnalisées</p>
+                <p className="text-sm font-medium">{t("marketing")}</p>
+                <p className="text-muted-foreground text-xs">{t("marketing_description")}</p>
               </div>
               <Switch
                 checked={form.watch("marketing_opt_in") ?? false}
@@ -249,8 +251,8 @@ export function ProfileSection() {
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Notifications SMS</p>
-                <p className="text-muted-foreground text-xs">Suivi de commandes par SMS</p>
+                <p className="text-sm font-medium">{t("sms_notifications")}</p>
+                <p className="text-muted-foreground text-xs">{t("sms_notifications_description")}</p>
               </div>
               <Switch
                 checked={form.watch("sms_notifications") ?? false}
@@ -260,8 +262,8 @@ export function ProfileSection() {
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Notifications push</p>
-                <p className="text-muted-foreground text-xs">Notifications dans le navigateur</p>
+                <p className="text-sm font-medium">{t("push_notifications")}</p>
+                <p className="text-muted-foreground text-xs">{t("push_notifications_description")}</p>
               </div>
               <Switch
                 checked={form.watch("push_notifications") ?? true}
@@ -274,7 +276,7 @@ export function ProfileSection() {
 
       <div className="flex justify-end gap-4">
         <Button type="submit" disabled={is_saving || !form.formState.isDirty}>
-          {is_saving ? "Enregistrement…" : "Enregistrer les modifications"}
+          {is_saving ? t("saving") : t("save_changes")}
         </Button>
       </div>
     </form>

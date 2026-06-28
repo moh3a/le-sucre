@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,26 +27,27 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/constants";
 
-const navItems = [
-  { href: "/console", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-  { href: "/console/orders", label: "Commandes", icon: ShoppingCart },
-  { href: "/console/products", label: "Produits", icon: Box },
-  { href: "/console/categories", label: "Catégories", icon: Grid3X3 },
-  { href: "/console/customers", label: "Clients", icon: Users },
-  { href: "/console/inventory", label: "Inventaire", icon: Package },
-  { href: "/console/promotions", label: "Promotions", icon: Tag },
-  { href: "/console/analytics", label: "Analytiques", icon: BarChart3 },
-  { href: "/console/authorization", label: "Rôles", icon: Shield },
-  { href: "/console/audit-logs", label: "Journal d'audit", icon: ClipboardList },
-  { href: "/console/blacklist", label: "Liste noire IP", icon: Ban },
-];
-
-const bottomItems = [
-  { href: "/", label: "Voir la boutique", icon: Home },
-];
-
 export function AdminSidebar() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
+
+  const navItems = [
+    { href: "/console", label: t("dashboard"), icon: LayoutDashboard, exact: true },
+    { href: "/console/orders", label: t("orders"), icon: ShoppingCart },
+    { href: "/console/products", label: t("products"), icon: Box },
+    { href: "/console/categories", label: t("categories"), icon: Grid3X3 },
+    { href: "/console/customers", label: t("customers"), icon: Users },
+    { href: "/console/inventory", label: t("inventory"), icon: Package },
+    { href: "/console/promotions", label: t("promotions"), icon: Tag },
+    { href: "/console/analytics", label: t("analytics"), icon: BarChart3 },
+    { href: "/console/authorization", label: t("authorizations"), icon: Shield },
+    { href: "/console/audit-logs", label: t("audit"), icon: ClipboardList },
+    { href: "/console/blacklist", label: t("ip_blacklist"), icon: Ban },
+  ];
+
+  const bottomItems = [
+    { href: "/", label: t("view_shop"), icon: Home },
+  ];
   const [collapsed, setCollapsed] = useState(false);
 
   const isActive = (href: string, exact = false) =>

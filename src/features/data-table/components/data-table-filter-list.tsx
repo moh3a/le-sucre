@@ -9,6 +9,7 @@ import {
   ListFilter,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
@@ -81,6 +82,7 @@ export function DataTableFilterList<TData>({
   disabled,
   ...props
 }: DataTableFilterListProps<TData>) {
+  const t = useTranslations("data_table");
   const id = React.useId();
   const labelId = React.useId();
   const descriptionId = React.useId();
@@ -205,7 +207,7 @@ export function DataTableFilterList<TData>({
             disabled={disabled}
           >
             <ListFilter className="text-muted-foreground" />
-            Filter
+            {t("filter_button")}
             {filters.length > 0 && (
               <Badge
                 variant="secondary"
@@ -224,15 +226,15 @@ export function DataTableFilterList<TData>({
         >
           <div className="flex flex-col gap-1">
             <h4 id={labelId} className="leading-none font-medium">
-              {filters.length > 0 ? "Filters" : "No filters applied"}
+              {filters.length > 0 ? t("filters_heading") : t("no_filters_applied")}
             </h4>
             <p
               id={descriptionId}
               className={cn("text-muted-foreground text-sm", filters.length > 0 && "sr-only")}
             >
               {filters.length > 0
-                ? "Modify filters to refine your rows."
-                : "Add filters to refine your rows."}
+                ? t("modify_filters")
+                : t("add_filters")}
             </p>
           </div>
           {filters.length > 0 ? (
@@ -256,11 +258,11 @@ export function DataTableFilterList<TData>({
           ) : null}
           <div className="flex w-full items-center gap-2">
             <Button size="sm" className="rounded" ref={addButtonRef} onClick={onFilterAdd}>
-              Add filter
+              {t("add_filter")}
             </Button>
             {filters.length > 0 ? (
               <Button variant="outline" size="sm" className="rounded" onClick={onFiltersReset}>
-                Reset filters
+                {t("reset_all_filters")}
               </Button>
             ) : null}
           </div>
@@ -304,6 +306,8 @@ function DataTableFilterItem<TData>({
   onFilterUpdate,
   onFilterRemove,
 }: DataTableFilterItemProps<TData>) {
+  const t = useTranslations("data_table");
+
   const [showFieldSelector, setShowFieldSelector] = React.useState(false);
   const [showOperatorSelector, setShowOperatorSelector] = React.useState(false);
   const [showValueSelector, setShowValueSelector] = React.useState(false);
@@ -349,14 +353,14 @@ function DataTableFilterItem<TData>({
       >
         <div className="min-w-[72px] text-center">
           {index === 0 ? (
-            <span className="text-muted-foreground text-sm">Where</span>
+            <span className="text-muted-foreground text-sm">{t("where")}</span>
           ) : index === 1 ? (
             <Select
               value={joinOperator}
               onValueChange={(value: JoinOperator) => setJoinOperator(value)}
             >
               <SelectTrigger
-                aria-label="Select join operator"
+                aria-label={t("select_join_operator")}
                 aria-controls={joinOperatorListboxId}
                 size="sm"
                 className="rounded lowercase"
@@ -389,16 +393,16 @@ function DataTableFilterItem<TData>({
             >
               <span className="truncate">
                 {columns.find((column) => column.id === filter.id)?.columnDef.meta?.label ??
-                  "Select field"}
+                  t("select_field")}
               </span>
               <ChevronsUpDown className="opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent id={fieldListboxId} align="start" className="w-40 p-0">
             <Command>
-              <CommandInput placeholder="Search fields..." />
+              <CommandInput placeholder={t("search_fields")} />
               <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
+                <CommandEmpty>{t("no_fields_found")}</CommandEmpty>
                 <CommandGroup>
                   {columns.map((column) => (
                     <CommandItem
@@ -460,7 +464,7 @@ function DataTableFilterItem<TData>({
           </SelectContent>
         </Select>
         <div className="max-w-60 min-w-36 flex-1">
-          {onFilterInputRender({
+            {onFilterInputRender({
             filter,
             inputId,
             column,
@@ -468,6 +472,7 @@ function DataTableFilterItem<TData>({
             onFilterUpdate,
             showValueSelector,
             setShowValueSelector,
+            t,
           })}
         </div>
         <Button
@@ -497,6 +502,7 @@ function onFilterInputRender<TData>({
   onFilterUpdate,
   showValueSelector,
   setShowValueSelector,
+  t,
 }: {
   filter: ExtendedColumnFilter<TData>;
   inputId: string;
@@ -508,15 +514,16 @@ function onFilterInputRender<TData>({
   ) => void;
   showValueSelector: boolean;
   setShowValueSelector: (value: boolean) => void;
+  t: ReturnType<typeof useTranslations>;
 }) {
   if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {
     return (
       <div
         id={inputId}
         role="status"
-        aria-label={`${columnMeta?.label} filter is ${
-          filter.operator === "isEmpty" ? "empty" : "not empty"
-        }`}
+        aria-label={t(filter.operator === "isEmpty" ? "filter_empty" : "filter_not_empty", {
+          label: columnMeta?.label ?? "",
+        })}
         aria-live="polite"
         className="dark:bg-input/30 h-8 w-full rounded border bg-transparent"
       />
@@ -547,10 +554,10 @@ function onFilterInputRender<TData>({
         <Input
           id={inputId}
           type={isNumber ? "number" : filter.variant}
-          aria-label={`${columnMeta?.label} filter value`}
+          aria-label={t("filter_value", { label: columnMeta?.label ?? "" })}
           aria-describedby={`${inputId}-description`}
           inputMode={isNumber ? "numeric" : undefined}
-          placeholder={columnMeta?.placeholder ?? "Enter a value..."}
+          placeholder={columnMeta?.placeholder ?? t("enter_value")}
           className="h-8 w-full rounded"
           defaultValue={typeof filter.value === "string" ? filter.value : undefined}
           onChange={(event) =>
@@ -581,15 +588,15 @@ function onFilterInputRender<TData>({
           <SelectTrigger
             id={inputId}
             aria-controls={inputListboxId}
-            aria-label={`${columnMeta?.label} boolean filter`}
+            aria-label={t("boolean_filter", { label: columnMeta?.label ?? "" })}
             size="sm"
             className="w-full rounded"
           >
-            <SelectValue placeholder={filter.value ? "True" : "False"} />
+            <SelectValue placeholder={filter.value ? t("true") : t("false")} />
           </SelectTrigger>
           <SelectContent id={inputListboxId}>
-            <SelectItem value="true">True</SelectItem>
-            <SelectItem value="false">False</SelectItem>
+            <SelectItem value="true">{t("true")}</SelectItem>
+            <SelectItem value="false">{t("false")}</SelectItem>
           </SelectContent>
         </Select>
       );
@@ -624,24 +631,24 @@ function onFilterInputRender<TData>({
             <Button
               id={inputId}
               aria-controls={inputListboxId}
-              aria-label={`${columnMeta?.label} filter value${multiple ? "s" : ""}`}
+              aria-label={t("select_options", { label: columnMeta?.label ?? "", s: multiple ? "s" : "" })}
               variant="outline"
               size="sm"
               className="w-full rounded font-normal"
             >
               <FacetedBadgeList
                 options={columnMeta?.options}
-                placeholder={columnMeta?.placeholder ?? `Select option${multiple ? "s" : ""}...`}
+                placeholder={columnMeta?.placeholder ?? t("select_options", { s: multiple ? "s" : "" })}
               />
             </Button>
           </FacetedTrigger>
           <FacetedContent id={inputListboxId} className="w-[200px]">
             <FacetedInput
-              aria-label={`Search ${columnMeta?.label} options`}
-              placeholder={columnMeta?.placeholder ?? "Search options..."}
+              aria-label={t("search_options", { label: columnMeta?.label ?? "" })}
+              placeholder={columnMeta?.placeholder ?? t("search_options")}
             />
             <FacetedList>
-              <FacetedEmpty>No options found.</FacetedEmpty>
+              <FacetedEmpty>{t("no_options_found")}</FacetedEmpty>
               <FacetedGroup>
                 {columnMeta?.options?.map((option) => (
                   <FacetedItem key={option.value} value={option.value}>
@@ -678,7 +685,7 @@ function onFilterInputRender<TData>({
           ? `${formatDate(startDate, { month: "short" })} - ${formatDate(endDate, { month: "short" })}`
           : startDate
             ? formatDate(startDate, { month: "short" })
-            : "Pick a date";
+            : t("pick_date");
 
       return (
         <Popover open={showValueSelector} onOpenChange={setShowValueSelector}>
@@ -686,7 +693,7 @@ function onFilterInputRender<TData>({
             <Button
               id={inputId}
               aria-controls={inputListboxId}
-              aria-label={`${columnMeta?.label} date filter`}
+              aria-label={t("date_filter", { label: columnMeta?.label ?? "" })}
               variant="outline"
               size="sm"
               className={cn(
@@ -701,7 +708,7 @@ function onFilterInputRender<TData>({
           <PopoverContent id={inputListboxId} align="start" className="w-auto p-0">
             {filter.operator === "isBetween" ? (
               <Calendar
-                aria-label={`Select ${columnMeta?.label} date range`}
+                aria-label={t("date_range", { label: columnMeta?.label ?? "" })}
                 autoFocus
                 captionLayout="dropdown"
                 mode="range"
@@ -729,7 +736,7 @@ function onFilterInputRender<TData>({
               />
             ) : (
               <Calendar
-                aria-label={`Select ${columnMeta?.label} date`}
+                aria-label={t("select_date", { label: columnMeta?.label ?? "" })}
                 autoFocus
                 captionLayout="dropdown"
                 mode="single"

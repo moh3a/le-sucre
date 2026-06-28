@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -35,44 +36,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  open: "Ouvert",
-  assigned: "Assigné",
-  in_progress: "En cours",
-  resolved: "Résolu",
-  closed: "Fermé",
-  reopened: "Réouvert",
-};
 
-const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  open: "destructive",
-  assigned: "secondary",
-  in_progress: "secondary",
-  resolved: "default",
-  closed: "outline",
-  reopened: "destructive",
-};
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-const PRIORITY_LABELS: Record<string, string> = {
-  low: "Basse",
-  normal: "Normale",
-  high: "Haute",
-  urgent: "Urgente",
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  general: "Général",
-  shipping: "Livraison",
-  payment: "Paiement",
-  product: "Produit",
-  return: "Retour",
-  complaint: "Réclamation",
-};
 
 type SupportCaseRow = {
   id: string;
@@ -158,15 +122,51 @@ function FacetedFilter({
 }
 
 export function SupportCasesTable() {
+  const t = useTranslations("support");
   const [page] = useQueryState("scPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("scPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("scStatus", parseAsString);
+
+  const STATUS_LABELS: Record<string, string> = {
+    open: t("open"),
+    assigned: t("assigned"),
+    in_progress: t("in_progress"),
+    resolved: t("resolved"),
+    closed: t("closed"),
+    reopened: t("reopened"),
+  };
+  const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({ label, value }));
+
+  const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    open: "destructive",
+    assigned: "secondary",
+    in_progress: "secondary",
+    resolved: "default",
+    closed: "outline",
+    reopened: "destructive",
+  };
+
+  const PRIORITY_LABELS: Record<string, string> = {
+    low: t("priority_low"),
+    normal: t("priority_normal"),
+    high: t("priority_high"),
+    urgent: t("priority_urgent"),
+  };
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    general: t("general"),
+    shipping: t("shipping"),
+    payment: t("payment"),
+    product: t("product"),
+    return: t("return"),
+    complaint: t("complaint"),
+  };
 
   const utils = trpc.useUtils();
 
   const resolveMutation = trpc.operations.customerResolveCase.useMutation({
     onSuccess: () => {
-      toast.success("Cas résolu");
+      toast.success(t("case_resolved"));
       utils.operations.customerListCases.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -174,7 +174,7 @@ export function SupportCasesTable() {
 
   const closeMutation = trpc.operations.customerCloseCase.useMutation({
     onSuccess: () => {
-      toast.success("Cas fermé");
+      toast.success(t("case_closed"));
       utils.operations.customerListCases.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -182,7 +182,7 @@ export function SupportCasesTable() {
 
   const reopenMutation = trpc.operations.customerReopenCase.useMutation({
     onSuccess: () => {
-      toast.success("Cas réouvert");
+      toast.success(t("case_reopened"));
       utils.operations.customerListCases.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -198,7 +198,7 @@ export function SupportCasesTable() {
       {
         id: "subject",
         accessorKey: "subject",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Sujet" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("subject")} />,
         cell: ({ row }) => (
           <span className="max-w-[240px] truncate font-medium text-sm">{row.original.subject}</span>
         ),
@@ -206,7 +206,7 @@ export function SupportCasesTable() {
       {
         id: "category",
         accessorKey: "category",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Catégorie" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("category")} />,
         cell: ({ row }) => (
           <span className="text-sm">{CATEGORY_LABELS[row.original.category] ?? row.original.category}</span>
         ),
@@ -214,7 +214,7 @@ export function SupportCasesTable() {
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Priorité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority")} />,
         cell: ({ row }) => (
           <span className="capitalize text-sm">{PRIORITY_LABELS[row.original.priority] ?? row.original.priority}</span>
         ),
@@ -222,7 +222,7 @@ export function SupportCasesTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order")} />,
         cell: ({ row }) =>
           row.original.order_id ? (
             <Link href={`/console/orders/${row.original.order_id}`} className="font-mono text-xs hover:underline">
@@ -235,7 +235,7 @@ export function SupportCasesTable() {
       {
         id: "assigned_to_user_id",
         accessorKey: "assigned_to_user_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Assigné à" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("assigned_to")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.assigned_to_user_id
@@ -247,7 +247,7 @@ export function SupportCasesTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -257,7 +257,7 @@ export function SupportCasesTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -272,10 +272,10 @@ export function SupportCasesTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                 {r.order_id && (
                   <DropdownMenuItem asChild>
-                    <Link href={`/console/orders/${r.order_id}`}>Voir commande</Link>
+                    <Link href={`/console/orders/${r.order_id}`}>{t("view_order")}</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -283,26 +283,26 @@ export function SupportCasesTable() {
                   <>
                     <DropdownMenuItem
                       onClick={() =>
-                        resolveMutation.mutate({ case_id: r.id, resolution: "Résolu par l'opérateur" })
+                        resolveMutation.mutate({ case_id: r.id, resolution: t("resolved_by_operator") })
                       }
                     >
                       <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                      Résoudre
+                      {t("resolve")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => closeMutation.mutate({ case_id: r.id })}>
                       <XCircle className="mr-2 size-4" />
-                      Fermer
+                      {t("close")}
                     </DropdownMenuItem>
                   </>
                 )}
                 {(r.status === "resolved" || r.status === "closed") && (
                   <DropdownMenuItem
                     onClick={() =>
-                      reopenMutation.mutate({ case_id: r.id, reason: "Réouverture manuelle" })
+                      reopenMutation.mutate({ case_id: r.id, reason: t("manual_reopening") })
                     }
                   >
                     <RotateCcw className="mr-2 size-4" />
-                    Réouvrir
+                    {t("reopen")}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -337,7 +337,7 @@ export function SupportCasesTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -347,7 +347,7 @@ export function SupportCasesTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -357,7 +357,7 @@ export function SupportCasesTable() {
               download="support-cases.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

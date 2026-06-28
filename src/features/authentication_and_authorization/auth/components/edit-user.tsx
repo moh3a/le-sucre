@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -39,6 +40,7 @@ type EditUserProps = {
 };
 
 export function EditUser({ userId, name, email, is_active, banned, role }: EditUserProps) {
+  const t = useTranslations("users");
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [form_name, setFormName] = useState(name ?? "");
@@ -51,7 +53,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
 
   const update_user = trpc.adminAuth.updateUser.useMutation({
     onSuccess: () => {
-      toast.success("Utilisateur mis à jour");
+      toast.success(t("user_updated"));
       void utils.adminAuth.listUsers.invalidate();
       setOpen(false);
     },
@@ -60,7 +62,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
 
   const assign_role = trpc.adminAuth.assignRole.useMutation({
     onSuccess: () => {
-      toast.success("Rôle mis à jour");
+      toast.success(t("role_updated"));
       void utils.adminAuth.listUsers.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -68,7 +70,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
 
   const on_save = async () => {
     if (form_password && form_password !== form_confirm_password) {
-      toast.error("Les mots de passe ne correspondent pas");
+      toast.error(t("passwords_dont_match"));
       return;
     }
 
@@ -110,18 +112,18 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
     <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogTrigger asChild>
         <Button variant="outline" size="sm">
-          Gérer
+          {t("manage")}
         </Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Gérer l&apos;utilisateur</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>{t("manage_user_title")}</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>{email}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
         <div className="max-h-[60vh] space-y-4 overflow-y-auto">
           <div className="space-y-2">
-            <Label htmlFor={`name-${userId}`}>Nom</Label>
+            <Label htmlFor={`name-${userId}`}>{t("name")}</Label>
             <Input
               id={`name-${userId}`}
               value={form_name}
@@ -130,7 +132,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
           </div>
 
           <div className="space-y-2">
-            <Label>Rôle</Label>
+            <Label>{t("role")}</Label>
             <Select value={form_role} onValueChange={setFormRole}>
               <SelectTrigger>
                 <SelectValue />
@@ -146,7 +148,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor={`active-${userId}`}>Compte actif</Label>
+            <Label htmlFor={`active-${userId}`}>{t("active_account")}</Label>
             <Switch id={`active-${userId}`} checked={form_active} onCheckedChange={setFormActive} />
           </div>
 
@@ -155,9 +157,9 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <Label>Compte banni</Label>
+                <Label>{t("banned_account")}</Label>
                 <p className="text-muted-foreground text-xs">
-                  {banned ? "Actuellement banni" : "Non banni"}
+                  {banned ? t("currently_banned") : t("not_banned")}
                 </p>
               </div>
               <Switch checked={form_banned} onCheckedChange={setFormBanned} />
@@ -165,12 +167,12 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
 
             {form_banned && (
               <div className="space-y-2">
-                <Label htmlFor={`ban-reason-${userId}`}>Raison du bannissement</Label>
+                <Label htmlFor={`ban-reason-${userId}`}>{t("ban_reason")}</Label>
                 <Input
                   id={`ban-reason-${userId}`}
                   value={form_ban_reason}
                   onChange={(e) => setFormBanReason(e.target.value)}
-                  placeholder="Optionnelle"
+                  placeholder={t("optional_placeholder")}
                 />
               </div>
             )}
@@ -179,19 +181,19 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
           <Separator />
 
           <div className="space-y-2">
-            <Label htmlFor={`password-${userId}`}>Nouveau mot de passe</Label>
+            <Label htmlFor={`password-${userId}`}>{t("new_password")}</Label>
             <Input
               id={`password-${userId}`}
               type="password"
               value={form_password}
               onChange={(e) => setFormPassword(e.target.value)}
-              placeholder="Laisser vide pour conserver"
+              placeholder={t("leave_blank_placeholder")}
             />
           </div>
 
           {form_password && (
             <div className="space-y-2">
-              <Label htmlFor={`confirm-password-${userId}`}>Confirmer le mot de passe</Label>
+              <Label htmlFor={`confirm-password-${userId}`}>{t("confirm_password")}</Label>
               <Input
                 id={`confirm-password-${userId}`}
                 type="password"
@@ -203,14 +205,14 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
 
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div className="space-y-0.5">
-              <p className="text-sm font-medium">État actuel</p>
+              <p className="text-sm font-medium">{t("current_status")}</p>
               <p className="text-muted-foreground text-xs">{email}</p>
             </div>
             <div className="flex gap-2">
               <Badge variant={is_active ? "default" : "secondary"}>
-                {is_active ? "Actif" : "Inactif"}
+                {is_active ? t("active") : t("inactive")}
               </Badge>
-              {banned && <Badge variant="destructive">Banni</Badge>}
+              {banned && <Badge variant="destructive">{t("banned")}</Badge>}
             </div>
           </div>
 
@@ -219,7 +221,7 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
             disabled={update_user.isPending || assign_role.isPending}
             onClick={() => void on_save()}
           >
-            {update_user.isPending ? "Enregistrement..." : "Enregistrer"}
+            {update_user.isPending ? t("saving") : t("save")}
           </Button>
         </div>
       </ResponsiveDialogContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { AlertTriangle } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function EscalateOrderDialog() {
+  const t = useTranslations("escalations");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [reason, setReason] = useState("");
@@ -74,32 +76,32 @@ export function EscalateOrderDialog() {
       <DialogTrigger asChild>
         <Button variant="destructive">
           <AlertTriangle className="mr-2 size-4" />
-          Escalader une commande
+          {t("escalate")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Escalader une commande</DialogTitle>
+          <DialogTitle>{t("escalate_title")}</DialogTitle>
           <DialogDescription>
-            Signaler un problème nécessitant une intervention supérieure.
+            {t("escalate_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="esc_order_id">Commande *</Label>
+            <Label htmlFor="esc_order_id">{t("order")} *</Label>
             <Input
               id="esc_order_id"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
-              placeholder="ID de la commande"
+              placeholder={t("order_id_placeholder")}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="esc_reason">Motif *</Label>
+            <Label htmlFor="esc_reason">{t("reason")} *</Label>
             <Select value={reason} onValueChange={setReason} required>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un motif" />
+                <SelectValue placeholder={t("select_reason_placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="payment_dispute">Litige paiement</SelectItem>
@@ -111,17 +113,17 @@ export function EscalateOrderDialog() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="esc_description">Description</Label>
+            <Label htmlFor="esc_description">{t("description")}</Label>
             <Textarea
               id="esc_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Détails du problème"
+              placeholder={t("details_placeholder")}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="esc_priority">Priorité</Label>
+              <Label htmlFor="esc_priority">{t("priority")}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
@@ -135,21 +137,21 @@ export function EscalateOrderDialog() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="esc_assigned_to">Assigné à</Label>
+              <Label htmlFor="esc_assigned_to">{t("assigned_to")}</Label>
               <Input
                 id="esc_assigned_to"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                placeholder="ID utilisateur"
+                placeholder={t("user_id_placeholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Escalade..." : "Escalader"}
+              {mutation.isPending ? t("escalating") : t("escalate")}
             </Button>
           </DialogFooter>
         </form>

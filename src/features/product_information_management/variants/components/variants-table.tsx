@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -251,6 +252,7 @@ function RangeFilter({
 }
 
 export function VariantsTable() {
+  const t = useTranslations("variants");
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
   const handleCopy = (id: string) => {
@@ -269,7 +271,7 @@ export function VariantsTable() {
       {
         id: "sku_code",
         accessorKey: "sku_code",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Code SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_code")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5 font-mono text-xs">
             <span>{row.original.sku_code}</span>
@@ -291,13 +293,13 @@ export function VariantsTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product")} />,
         cell: ({ row }) => (
           <div>
             <p className="text-sm font-semibold">{row.original.product_name ?? "—"}</p>
             {row.original.barcode && (
               <p className="text-muted-foreground font-mono text-[10px]">
-                Code-barres: {row.original.barcode}
+                {t("barcode")}: {row.original.barcode}
               </p>
             )}
           </div>
@@ -305,7 +307,7 @@ export function VariantsTable() {
       },
       {
         id: "options",
-        header: () => <span>Variations</span>,
+        header: () => <span>{t("variations")}</span>,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
             {row.original.options.length === 0 ? (
@@ -338,7 +340,7 @@ export function VariantsTable() {
       },
       {
         id: "price",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Prix" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("price")} />,
         cell: ({ row }) => {
           const base = row.original.base_price;
           const offer = row.original.offer_price;
@@ -369,11 +371,11 @@ export function VariantsTable() {
       {
         id: "stock",
         accessorKey: "stock_available",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Stock" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("stock_column")} />,
         cell: ({ row }) => {
           const stock = row.original.stock_available;
           if (stock <= 0) {
-            return <Badge variant="destructive">Rupture</Badge>;
+            return <Badge variant="destructive">{t("out_of_stock_badge")}</Badge>;
           }
           return (
             <span
@@ -389,10 +391,10 @@ export function VariantsTable() {
       {
         id: "is_active",
         accessorKey: "is_active",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? "outline" : "secondary"}>
-            {row.original.is_active ? "Actif" : "Inactif"}
+            {row.original.is_active ? t("active") : t("inactive")}
           </Badge>
         ),
       },
@@ -408,7 +410,7 @@ export function VariantsTable() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link href={`/console/products/${row.original.product_id}?tab=variants`}>
-                  Gérer
+                  {t("manage")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -463,8 +465,8 @@ export function VariantsTable() {
   });
 
   const statusOptions = [
-    { label: "Actif", value: "active" },
-    { label: "Inactif", value: "inactive" },
+    { label: t("active"), value: "active" },
+    { label: t("inactive"), value: "inactive" },
   ];
 
   function runBulk(action: "activate" | "deactivate" | "delete") {
@@ -482,7 +484,7 @@ export function VariantsTable() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher par SKU, produit, code-barres…"
+            placeholder={t("search_sku_placeholder")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -491,14 +493,14 @@ export function VariantsTable() {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Statut"
+            title={t("status_title")}
             options={statusOptions}
             icon={Tag}
             value={status ?? undefined}
             onChange={(val) => setStatus(val)}
           />
           <RangeFilter
-            title="Stock"
+            title={t("stock_title")}
             min={0}
             max={10000}
             minValue={stock_min}
@@ -512,19 +514,19 @@ export function VariantsTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {table.getFilteredSelectedRowModel().rows.length} {t("selected_count")}
             </Badge>
             <Button variant="secondary" size="sm" onClick={() => runBulk("activate")}>
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              Activer
+              {t("activate")}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => runBulk("deactivate")}>
               <Archive className="mr-1 h-4 w-4" />
-              Désactiver
+              {t("deactivate")}
             </Button>
             <Button variant="destructive" size="sm" onClick={() => runBulk("delete")}>
               <Archive className="mr-1 h-4 w-4" />
-              Supprimer
+              {t("delete")}
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <a
@@ -537,7 +539,7 @@ export function VariantsTable() {
                 download="variants.csv"
               >
                 <Download className="mr-1 h-4 w-4" />
-                Exporter
+                {t("export")}
               </a>
             </Button>
           </div>

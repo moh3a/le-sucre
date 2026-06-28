@@ -4,7 +4,7 @@ import "@/app/globals.css";
 import { cn } from "@/lib/utils";
 import { NextIntlClientProvider } from "next-intl";
 import { AppProviders } from "@/components/providers/app-providers";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { APP_NAME } from "@/constants";
 
 const notoSerifHeading = Noto_Serif({
@@ -16,7 +16,7 @@ const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
-  description: "Votre plateforme e-commerce de confiance.",
+  description: "Votre plateforme e-commerce de confiance.", // kept static
 };
 
 export default async function RootLayout({
@@ -26,6 +26,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const t = await getTranslations("common");
 
   return (
     <html

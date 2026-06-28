@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FolderTree, Package, ReceiptCent } from "lucide-react";
 import { format, subDays } from "date-fns";
 
@@ -10,6 +11,7 @@ import { QueryGuard } from "@/components/query-guard";
 import { OrderTable } from "@/features/order_management_system/orders/components/order-table";
 
 export function DashboardPageClient() {
+  const t = useTranslations("dashboard");
   const analytics = trpc.analytics.overview.useQuery({
     from: format(subDays(new Date(), 7), "yyyy-MM-dd"),
     to: format(new Date(), "yyyy-MM-dd"),
@@ -29,37 +31,37 @@ export function DashboardPageClient() {
       }}
     >
       <ConsolePageShell
-      title="Tableau de bord"
-      subtitle="Vue d'ensemble de la boutique"
+      title={t("title")}
+      subtitle={t("subtitle")}
       stats={
         <StatsGrid
           loading={loading}
           items={[
             {
-              label: "Revenus (7 j)",
+              label: t("revenue_7_days"),
               value: analytics.data?.totals?.revenue ?? "—",
-              description: "Chiffre d'affaires",
+              description: t("revenue_desc"),
               icon: ReceiptCent,
               color: "success",
             },
             {
-              label: "Commandes",
+              label: t("orders_title"),
               value: orders.data?.meta.total_records ?? 0,
-              description: "Total commandes",
+              description: t("orders_desc"),
               icon: ReceiptCent,
               color: "info",
             },
             {
-              label: "Produits publiés",
+              label: t("published_products"),
               value: products.data?.meta.total_records ?? 0,
-              description: "Catalogue actif",
+              description: t("products_desc"),
               icon: Package,
               color: "default",
             },
             {
-              label: "Catégories",
+              label: t("categories_title"),
               value: categories.data?.meta.total_records ?? 0,
-              description: "Arborescence catalogue",
+              description: t("categories_desc"),
               icon: FolderTree,
               color: "warning",
             },
@@ -68,7 +70,7 @@ export function DashboardPageClient() {
       }
     >
       <section className="space-y-3">
-        <h2 className="text-sm font-medium">Dernières commandes</h2>
+        <h2 className="text-sm font-medium">{t("recent_orders")}</h2>
         <OrderTable compact />
       </section>
       </ConsolePageShell>

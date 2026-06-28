@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/table";
 
 export function AdminWishlistAnalyticsPageClient() {
+  const t = useTranslations("wishlist");
   const [period, setPeriod] = useState("30d");
   const { data: summary, isLoading, refetch } = trpc.wishlistManagement.admin.summary.useQuery({
     period: period as "7d" | "30d" | "90d" | "1y",
@@ -46,10 +48,10 @@ export function AdminWishlistAnalyticsPageClient() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Heart className="h-6 w-6 text-red-500" />
-            Analyse des listes de souhaits
+            {t("analytics_title")}
           </h1>
           <p className="text-muted-foreground">
-            Tableau de bord des performances
+            {t("analytics_subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -58,10 +60,10 @@ export function AdminWishlistAnalyticsPageClient() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">7 jours</SelectItem>
-              <SelectItem value="30d">30 jours</SelectItem>
-              <SelectItem value="90d">90 jours</SelectItem>
-              <SelectItem value="1y">1 an</SelectItem>
+              <SelectItem value="7d">{t("days_7")}</SelectItem>
+              <SelectItem value="30d">{t("days_30")}</SelectItem>
+              <SelectItem value="90d">{t("days_90")}</SelectItem>
+              <SelectItem value="1y">{t("year_1")}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon" onClick={() => refetch()}>
@@ -83,7 +85,7 @@ export function AdminWishlistAnalyticsPageClient() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Heart className="h-4 w-4" />
-                  Listes de souhaits
+                  {t("wishlists")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -94,7 +96,7 @@ export function AdminWishlistAnalyticsPageClient() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
-                  Listes actives
+                  {t("active_lists")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -105,7 +107,7 @@ export function AdminWishlistAnalyticsPageClient() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Produits sauvegardés
+                  {t("saved_products")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -116,7 +118,7 @@ export function AdminWishlistAnalyticsPageClient() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4" />
-                  Taux de conversion
+                  {t("conversion_rate")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -128,14 +130,14 @@ export function AdminWishlistAnalyticsPageClient() {
           {summary && summary.most_wished_products.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Produits les plus souhaités</CardTitle>
+                <CardTitle className="text-lg">{t("most_wished_products")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Produit</TableHead>
-                      <TableHead className="text-right">Ajouts</TableHead>
+                      <TableHead>{t("product")}</TableHead>
+                      <TableHead className="text-right">{t("adds")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -160,7 +162,7 @@ export function AdminWishlistAnalyticsPageClient() {
             {trending && trending.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Tendances (7 jours)</CardTitle>
+                  <CardTitle className="text-lg">{t("trending_7d")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -189,7 +191,7 @@ export function AdminWishlistAnalyticsPageClient() {
             {abandoned && abandoned.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Produits abandonnés</CardTitle>
+                  <CardTitle className="text-lg">{t("abandoned_products")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -215,7 +217,7 @@ export function AdminWishlistAnalyticsPageClient() {
             {highConverting && highConverting.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Forte conversion</CardTitle>
+                  <CardTitle className="text-lg">{t("high_conversion")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -245,7 +247,7 @@ export function AdminWishlistAnalyticsPageClient() {
             {topFavorited && topFavorited.products.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Produits les plus favoris</CardTitle>
+                  <CardTitle className="text-lg">{t("top_favorited")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>

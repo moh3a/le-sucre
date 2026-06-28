@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { Plus } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreateWarrantyClaimDialog() {
+  const t = useTranslations("warranty");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [orderItemId, setOrderItemId] = useState("");
@@ -84,85 +86,85 @@ export function CreateWarrantyClaimDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 size-4" />
-          Nouvelle garantie
+          {t("new_warranty")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Créer une demande de garantie</DialogTitle>
+          <DialogTitle>{t("create_title")}</DialogTitle>
           <DialogDescription>
-            Enregistrer une nouvelle demande de garantie pour un produit.
+            {t("create_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="wc_order_id">Commande *</Label>
+              <Label htmlFor="wc_order_id">{t("order")} *</Label>
               <Input
                 id="wc_order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande"
+                placeholder={t("order_id_placeholder")}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="wc_order_item_id">Article commande</Label>
+              <Label htmlFor="wc_order_item_id">{t("order_item")}</Label>
               <Input
                 id="wc_order_item_id"
                 value={orderItemId}
                 onChange={(e) => setOrderItemId(e.target.value)}
-                placeholder="ID de l'article (optionnel)"
+                placeholder={t("item_id_placeholder")}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="wc_product_id">Produit *</Label>
+              <Label htmlFor="wc_product_id">{t("product")} *</Label>
               <Input
                 id="wc_product_id"
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
-                placeholder="ID du produit"
+                placeholder={t("product_id_placeholder")}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="wc_sku_id">SKU *</Label>
+              <Label htmlFor="wc_sku_id">{t("sku")} *</Label>
               <Input
                 id="wc_sku_id"
                 value={skuId}
                 onChange={(e) => setSkuId(e.target.value)}
-                placeholder="ID du SKU"
+                placeholder={t("sku_id_placeholder")}
                 required
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="wc_user_id">Client</Label>
+              <Label htmlFor="wc_user_id">{t("client")}</Label>
               <Input
                 id="wc_user_id"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
-                placeholder="ID du client (optionnel)"
+                placeholder={t("client_id_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="wc_technician">Technicien</Label>
+              <Label htmlFor="wc_technician">{t("technician")}</Label>
               <Input
                 id="wc_technician"
                 value={technicianUserId}
                 onChange={(e) => setTechnicianUserId(e.target.value)}
-                placeholder="ID du technicien (optionnel)"
+                placeholder={t("technician_id_placeholder")}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="wc_issue_type">Type de problème *</Label>
+            <Label htmlFor="wc_issue_type">{t("issue_type")} *</Label>
             <Select value={issueType} onValueChange={setIssueType} required>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un type" />
+                <SelectValue placeholder={t("select_type_placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="defect">Défaut de fabrication</SelectItem>
@@ -174,21 +176,21 @@ export function CreateWarrantyClaimDialog() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="wc_description">Description *</Label>
+            <Label htmlFor="wc_description">{t("description")} *</Label>
             <Textarea
               id="wc_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description détaillée du problème"
+              placeholder={t("description_placeholder")}
               required
             />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Créer la garantie"}
+              {mutation.isPending ? t("creating") : t("create_warranty")}
             </Button>
           </DialogFooter>
         </form>

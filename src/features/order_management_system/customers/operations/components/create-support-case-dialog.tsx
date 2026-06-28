@@ -23,10 +23,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreateSupportCaseDialog() {
+  const t = useTranslations("support");
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [orderId, setOrderId] = useState("");
@@ -39,12 +41,12 @@ export function CreateSupportCaseDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.customerCreateCase.useMutation({
     onSuccess: () => {
-      toast.success("Cas de support créé");
+      toast.success(t("case_created"));
       setOpen(false);
       reset();
       utils.operations.customerListCases.invalidate();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   function reset() {
@@ -60,7 +62,7 @@ export function CreateSupportCaseDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!subject || !description) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required_fields"));
       return;
     }
     mutation.mutate({
@@ -80,104 +82,104 @@ export function CreateSupportCaseDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 size-4" />
-          Nouveau cas
+          {t("new_case")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Créer un cas de support</DialogTitle>
+          <DialogTitle>{t("create_case_title")}</DialogTitle>
           <DialogDescription>
-            Ouvrir un nouveau cas de support client.
+            {t("create_case_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="sc_subject">Sujet *</Label>
+            <Label htmlFor="sc_subject">{t("subject")} *</Label>
             <Input
               id="sc_subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="Objet du cas"
+              placeholder={t("object_placeholder")}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sc_description">Description *</Label>
+            <Label htmlFor="sc_description">{t("description")} *</Label>
             <Textarea
               id="sc_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description détaillée"
+              placeholder={t("description_placeholder")}
               required
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sc_category">Catégorie</Label>
+              <Label htmlFor="sc_category">{t("category")}</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="general">Général</SelectItem>
-                  <SelectItem value="shipping">Livraison</SelectItem>
-                  <SelectItem value="payment">Paiement</SelectItem>
-                  <SelectItem value="product">Produit</SelectItem>
-                  <SelectItem value="return">Retour</SelectItem>
-                  <SelectItem value="complaint">Réclamation</SelectItem>
+                  <SelectItem value="general">{t("general")}</SelectItem>
+                  <SelectItem value="shipping">{t("shipping")}</SelectItem>
+                  <SelectItem value="payment">{t("payment")}</SelectItem>
+                  <SelectItem value="product">{t("product")}</SelectItem>
+                  <SelectItem value="return">{t("return")}</SelectItem>
+                  <SelectItem value="complaint">{t("complaint")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sc_priority">Priorité</Label>
+              <Label htmlFor="sc_priority">{t("priority")}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Basse</SelectItem>
-                  <SelectItem value="normal">Normale</SelectItem>
-                  <SelectItem value="high">Haute</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
+                  <SelectItem value="low">{t("priority_low")}</SelectItem>
+                  <SelectItem value="normal">{t("priority_normal")}</SelectItem>
+                  <SelectItem value="high">{t("priority_high")}</SelectItem>
+                  <SelectItem value="urgent">{t("priority_urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sc_assigned_to">Assigné à</Label>
+              <Label htmlFor="sc_assigned_to">{t("assigned_to")}</Label>
               <Input
                 id="sc_assigned_to"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                placeholder="ID utilisateur"
+                placeholder={t("user_id_placeholder")}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sc_user_id">Client</Label>
+              <Label htmlFor="sc_user_id">{t("client")}</Label>
               <Input
                 id="sc_user_id"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
-                placeholder="ID du client (optionnel)"
+                placeholder={t("client_id_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sc_order_id">Commande</Label>
+              <Label htmlFor="sc_order_id">{t("order")}</Label>
               <Input
                 id="sc_order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande (optionnel)"
+                placeholder={t("order_id_placeholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Créer le cas"}
+              {mutation.isPending ? t("creating") : t("create_case")}
             </Button>
           </DialogFooter>
         </form>

@@ -1,4 +1,7 @@
+"use client";
+
 import { flexRender, type Table as TanstackTable } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 import type * as React from "react";
 
 import { DataTablePagination } from "@/features/data-table/components/data-table-pagination";
@@ -25,6 +28,8 @@ export function DataTable<TData>({
   className,
   ...props
 }: DataTableProps<TData>) {
+  const t = useTranslations("data_table");
+
   return (
     <div className={cn("flex max-w-full flex-col gap-2.5", className)} {...props}>
       {children}
@@ -68,7 +73,7 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
-                  No results.
+                  {t("no_results")}
                 </TableCell>
               </TableRow>
             )}

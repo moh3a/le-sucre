@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Plus, Bookmark, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export function WishlistCollectionPicker({
   collections,
   children,
 }: WishlistCollectionPickerProps) {
+  const t = useTranslations("wishlist");
   const [open, setOpen] = useState(false);
   const [wishlistId, setWishlistId] = useState("");
   const [collectionId, setCollectionId] = useState("");
@@ -84,20 +86,20 @@ export function WishlistCollectionPicker({
         {children ?? (
           <Button variant="outline" size="sm">
             <Bookmark className="h-4 w-4 mr-2" />
-            Sauvegarder
+            {t("save")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ajouter à une liste</DialogTitle>
+          <DialogTitle>{t("add_to_list")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Liste de souhaits</label>
+            <label className="text-sm font-medium">{t("wishlist")}</label>
             <Select value={wishlistId} onValueChange={setWishlistId}>
               <SelectTrigger>
-                <SelectValue placeholder="Choisir une liste" />
+                <SelectValue placeholder={t("choose_list")} />
               </SelectTrigger>
               <SelectContent>
                 {wishlists.map((wl) => (
@@ -113,15 +115,15 @@ export function WishlistCollectionPicker({
               disabled={!wishlistId || isAdding}
             >
               {isAdding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-              Ajouter
+              {t("add")}
             </Button>
           </div>
 
           <div className="border-t pt-4">
-            <p className="text-sm font-medium mb-2">Ou créer une nouvelle liste</p>
+            <p className="text-sm font-medium mb-2">{t("or_create_new")}</p>
             <div className="flex gap-2">
               <Input
-                placeholder="Nom de la liste"
+                placeholder={t("list_name")}
                 value={newWishlistName}
                 onChange={(e) => setNewWishlistName(e.target.value)}
               />
@@ -132,10 +134,10 @@ export function WishlistCollectionPicker({
           </div>
 
           <div className="border-t pt-4 space-y-2">
-            <label className="text-sm font-medium">Collection</label>
+            <label className="text-sm font-medium">{t("collection")}</label>
             <Select value={collectionId} onValueChange={setCollectionId}>
               <SelectTrigger>
-                <SelectValue placeholder="Choisir une collection" />
+                <SelectValue placeholder={t("choose_collection")} />
               </SelectTrigger>
               <SelectContent>
                 {collections.map((col) => (
@@ -150,7 +152,7 @@ export function WishlistCollectionPicker({
               onClick={handleAddToCollection}
               disabled={!collectionId || isAdding}
             >
-              Ajouter à la collection
+              {t("add_to_collection")}
             </Button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import {
@@ -169,6 +170,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function AdminReviewModerationTable() {
+  const t = useTranslations("reviews");
   const [page, setPage] = useQueryState("revPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("revPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("revSearch", parseAsString);
@@ -202,7 +204,7 @@ export function AdminReviewModerationTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/products/${row.original.product_id}`}
@@ -215,7 +217,7 @@ export function AdminReviewModerationTable() {
       },
       {
         id: "author",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Auteur" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("author_column")} />,
         cell: ({ row }) => (
           <div className="text-sm">
             <p className="font-medium">{row.original.author_name ?? "—"}</p>
@@ -228,7 +230,7 @@ export function AdminReviewModerationTable() {
       {
         id: "rating",
         accessorKey: "rating",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Note" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("rating_column")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-1">
             <span className="text-sm font-semibold">{row.original.rating}</span>
@@ -238,7 +240,7 @@ export function AdminReviewModerationTable() {
       },
       {
         id: "content",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Avis" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_column")} />,
         cell: ({ row }) => (
           <div className="max-w-xs space-y-1">
             {row.original.title && (
@@ -247,7 +249,7 @@ export function AdminReviewModerationTable() {
             <p className="text-muted-foreground line-clamp-2 text-xs">{row.original.body}</p>
             {row.original.is_verified_purchase && (
               <Badge variant="outline" className="text-[10px] text-emerald-600">
-                Achat vérifié
+                {t("verified_purchase")}
               </Badge>
             )}
           </div>
@@ -256,7 +258,7 @@ export function AdminReviewModerationTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE_VARIANTS[row.original.status] ?? "default"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -266,7 +268,7 @@ export function AdminReviewModerationTable() {
       {
         id: "reports",
         accessorKey: "report_count",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Signalements" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reports_column")} />,
         cell: ({ row }) =>
           row.original.report_count > 0 ? (
             <Badge
@@ -283,7 +285,7 @@ export function AdminReviewModerationTable() {
       {
         id: "helpful",
         accessorKey: "helpful_count",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Utile" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("helpful_column")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-1 text-sm">
             <MessageSquare className="size-3.5 text-muted-foreground" />
@@ -294,7 +296,7 @@ export function AdminReviewModerationTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -310,7 +312,7 @@ export function AdminReviewModerationTable() {
               <DropdownMenuItem asChild>
                 <Link href={`/console/products/${row.original.product_id}`}>
                   <ExternalLink className="mr-2 size-4" />
-                  Voir le produit
+                  {t("view_product")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -321,7 +323,7 @@ export function AdminReviewModerationTable() {
                 }}
               >
                 <Check className="mr-2 size-4 text-emerald-600" />
-                Approuver
+                {t("approve")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={row.original.status === "rejected" || moderate.isPending}
@@ -331,7 +333,7 @@ export function AdminReviewModerationTable() {
                 }}
               >
                 <X className="mr-2 size-4 text-red-600" />
-                Rejeter
+                {t("reject")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -392,7 +394,7 @@ export function AdminReviewModerationTable() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher par produit, auteur ou contenu…"
+            placeholder={t("search_reviews_placeholder")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -401,7 +403,7 @@ export function AdminReviewModerationTable() {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Statut"
+            title={t("status_title")}
             options={STATUS_OPTIONS}
             icon={XCircle}
             value={status ?? undefined}
@@ -411,7 +413,7 @@ export function AdminReviewModerationTable() {
             }}
           />
           <FacetedFilter
-            title="Note"
+            title={t("rating_title")}
             options={RATING_OPTIONS}
             icon={Star}
             value={rating ?? undefined}
@@ -425,7 +427,7 @@ export function AdminReviewModerationTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {table.getFilteredSelectedRowModel().rows.length}{" "}{t("selected")}
             </Badge>
             <Button
               variant="secondary"
@@ -434,7 +436,7 @@ export function AdminReviewModerationTable() {
               disabled={moderate.isPending}
             >
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              Approuver
+              {t("approve")}
             </Button>
             <Button
               variant="destructive"
@@ -443,7 +445,7 @@ export function AdminReviewModerationTable() {
               disabled={moderate.isPending}
             >
               <XCircle className="mr-1 h-4 w-4" />
-              Rejeter
+              {t("reject")}
             </Button>
           </div>
         )}
@@ -458,19 +460,19 @@ export function AdminReviewModerationTable() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {moderateDialog?.action === "approved" ? "Approuver l'avis" : "Rejeter l'avis"}
+              {moderateDialog?.action === "approved" ? t("approve_review") : t("reject_review")}
             </DialogTitle>
             <DialogDescription>
               {moderateDialog?.action === "approved"
-                ? "Cet avis sera visible sur la fiche produit."
-                : "Cet avis sera masqué de la fiche produit."}
+                ? t("approve_description")
+                : t("reject_description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <Label htmlFor="moderation-note">Note interne (optionnelle)</Label>
+            <Label htmlFor="moderation-note">{t("moderation_note")}</Label>
             <Textarea
               id="moderation-note"
-              placeholder="Commentaire interne pour la modération…"
+              placeholder={t("moderation_note_placeholder")}
               value={moderationNote}
               onChange={(e) => setModerationNote(e.target.value)}
               rows={3}
@@ -478,7 +480,7 @@ export function AdminReviewModerationTable() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setModerateDialog(null)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button
               variant={moderateDialog?.action === "approved" ? "default" : "destructive"}
@@ -486,10 +488,10 @@ export function AdminReviewModerationTable() {
               disabled={moderate.isPending}
             >
               {moderate.isPending
-                ? "Modération…"
+                ? t("moderating")
                 : moderateDialog?.action === "approved"
-                  ? "Approuver"
-                  : "Rejeter"}
+                ? t("approve")
+                : t("reject")}
             </Button>
           </DialogFooter>
         </DialogContent>

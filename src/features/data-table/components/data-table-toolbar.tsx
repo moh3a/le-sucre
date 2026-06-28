@@ -2,6 +2,7 @@
 
 import type { Column, Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 import { DataTableDateFilter } from "@/features/data-table/components/data-table-date-filter";
@@ -22,6 +23,8 @@ export function DataTableToolbar<TData>({
   className,
   ...props
 }: DataTableToolbarProps<TData>) {
+  const t = useTranslations("data_table");
+
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const columns = React.useMemo(
@@ -46,14 +49,14 @@ export function DataTableToolbar<TData>({
         ))}
         {isFiltered && (
           <Button
-            aria-label="Reset filters"
+            aria-label={t("reset_filters")}
             variant="outline"
             size="sm"
             className="border-dashed"
             onClick={onReset}
           >
             <X />
-            Reset
+            {t("reset")}
           </Button>
         )}
       </div>

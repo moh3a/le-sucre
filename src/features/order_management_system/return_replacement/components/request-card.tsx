@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Ban, Check, Truck, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,36 +27,37 @@ type RequestCardProps = {
 };
 
 export function RequestCard({ request, on_update }: RequestCardProps) {
+  const t = useTranslations("orders");
   const review_mutation = trpc.returns.adminReview.useMutation({
     onSuccess: () => {
-      toast.success("Demande mise à jour");
+      toast.success(t("request_updated"));
       on_update();
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const receive_mutation = trpc.returns.adminReceive.useMutation({
     onSuccess: () => {
-      toast.success("Réception enregistrée");
+      toast.success(t("reception_recorded"));
       on_update();
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const complete_mutation = trpc.returns.adminComplete.useMutation({
     onSuccess: () => {
-      toast.success("Retour terminé");
+      toast.success(t("return_completed"));
       on_update();
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const cancel_mutation = trpc.returns.adminCancel.useMutation({
     onSuccess: () => {
-      toast.success("Demande annulée");
+      toast.success(t("request_cancelled"));
       on_update();
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const [review_note, set_review_note] = useState("");
@@ -70,10 +72,10 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
             {get_type_icon(request.type)}
             <CardTitle>
               {request.type === "return"
-                ? "Retour"
+                ? t("return")
                 : request.type === "replacement"
-                  ? "Remplacement"
-                  : "Livraison échouée"}
+                  ? t("replacement")
+                  : t("failed_delivery")}
             </CardTitle>
           </div>
           <Badge variant={RETURN_REQUEST_STATUS_BADGE[request.status] ?? "outline"}>
@@ -84,7 +86,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
       <CardContent className="space-y-3">
         {request.reason && (
           <div className="text-sm">
-            <span className="text-muted-foreground text-xs font-medium">Motif :</span>
+            <span className="text-muted-foreground text-xs font-medium">{t("reason_colon")}</span>
             <p className="mt-0.5">{request.reason}</p>
           </div>
         )}
@@ -94,10 +96,10 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
             <table className="w-full text-xs">
               <thead className="border-b text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">Produit</th>
-                  <th className="px-3 py-2 text-left font-medium">SKU</th>
-                  <th className="px-3 py-2 text-right font-medium">Qté</th>
-                  <th className="px-3 py-2 text-right font-medium">Prix</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("product")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("sku")}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t("qty")}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t("price")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -118,14 +120,14 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
 
         {request.admin_note && (
           <div className="text-sm">
-            <span className="text-muted-foreground text-xs font-medium">Note interne :</span>
+            <span className="text-muted-foreground text-xs font-medium">{t("note_colon")}</span>
             <p className="mt-0.5">{request.admin_note}</p>
           </div>
         )}
 
         {request.refund_amount && request.status !== "cancelled" && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Remboursement :</span>
+            <span className="text-muted-foreground">{t("refund_colon")}</span>
             <span className="font-semibold">
               {Number(request.refund_amount).toLocaleString("fr-FR")} DZD
             </span>
@@ -133,7 +135,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
         )}
 
         <div className="text-muted-foreground text-xs">
-          Créée le{" "}
+          {t("created_on")}{" "}
           {formatDate(request.created_at, {
             month: "short",
             day: "numeric",
@@ -148,7 +150,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
         {request.status === "pending" && (
           <div className="space-y-2">
             <Textarea
-              placeholder="Note d'approbation ou de rejet..."
+              placeholder={t("approval_note_placeholder")}
               value={review_note}
               onChange={(e) => set_review_note(e.target.value)}
               className="min-h-[60px] text-sm"
@@ -158,7 +160,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
                 type="number"
                 min={0}
                 step="0.01"
-                placeholder="Montant remboursement"
+                placeholder={t("refund_amount_placeholder")}
                 value={refund_amount}
                 onChange={(e) => set_refund_amount(e.target.value)}
                 className="h-8 w-48 text-xs"
@@ -180,7 +182,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
                 }
               >
                 <Check className="h-3 w-3" />
-                Approuver
+                {t("approve")}
               </Button>
               <Button
                 size="sm"
@@ -196,7 +198,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
                 }
               >
                 <X className="h-3 w-3" />
-                Rejeter
+                {t("reject")}
               </Button>
             </div>
           </div>
@@ -212,19 +214,19 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
               onClick={() => receive_mutation.mutate({ id: request.id })}
             >
               <Truck className="h-3 w-3" />
-              Marquer reçu
+              {t("mark_received")}
             </Button>
             <Button
               size="sm"
               variant="outline"
               className="gap-1"
               disabled={cancel_mutation.isPending}
-              onClick={() =>
-                cancel_mutation.mutate({ id: request.id, reason: "Annulé manuellement" })
-              }
-            >
-              <Ban className="h-3 w-3" />
-              Annuler
+                onClick={() =>
+                  cancel_mutation.mutate({ id: request.id, reason: t("cancelled_manually") })
+                }
+              >
+                <Ban className="mr-2 size-4" />
+                {t("cancel")}
             </Button>
           </div>
         )}
@@ -235,7 +237,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
               type="number"
               min={0}
               step="0.01"
-              placeholder="Montant remboursement final"
+              placeholder={t("final_refund_amount_placeholder")}
               value={refund_amount}
               onChange={(e) => set_refund_amount(e.target.value)}
               className="h-8 w-48 text-xs"
@@ -254,7 +256,7 @@ export function RequestCard({ request, on_update }: RequestCardProps) {
                 }
               >
                 <Check className="h-3 w-3" />
-                Terminer
+                {t("complete")}
               </Button>
             </div>
           </div>

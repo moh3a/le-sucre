@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Star } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -27,6 +28,7 @@ interface ProductReviewFormProps {
 }
 
 export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormProps) {
+  const t = useTranslations("reviews");
   const [rating, setRating] = React.useState(5);
   const [hoverRating, setHoverRating] = React.useState<number | null>(null);
 
@@ -47,7 +49,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
   const utils = trpc.useUtils();
   const createMutation = trpc.reviews.create.useMutation({
     onSuccess: () => {
-      toast.success("Votre avis a été soumis pour modération.");
+      toast.success(t("submitted_for_moderation"));
       reset();
       setRating(5);
       utils.reviews.summaryByProduct.invalidate({ product_id });
@@ -55,7 +57,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
       if (onSuccess) onSuccess();
     },
     onError: (err) => {
-      toast.error(err.message || "Impossible de soumettre l'avis.");
+      toast.error(err.message || t("submit_error"));
     },
   });
 
@@ -75,11 +77,11 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
       onSubmit={handleSubmit(onSubmit)}
       className="font-moya space-y-6 rounded-2xl border border-[#4d4c20]/15 bg-white p-6 shadow-sm"
     >
-      <h3 className="font-orla text-lg text-[#4d4c20]">Écrire un avis</h3>
+      <h3 className="font-orla text-lg text-[#4d4c20]">{t("heading")}</h3>
 
       {/* Star Picker */}
       <div className="space-y-2">
-        <Label className="text-secondary text-sm font-semibold">Note globale</Label>
+        <Label className="text-secondary text-sm font-semibold">{t("overall_rating")}</Label>
         <div className="flex items-center gap-1.5">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -103,11 +105,11 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title" className="text-secondary text-sm font-semibold">
-          Titre de l&apos;avis (optionnel)
+          {t("review_title_optional")}
         </Label>
         <Input
           id="title"
-          placeholder="Ex: Excellent gâteau, je recommande !"
+          placeholder={t("review_title_placeholder")}
           className="text-secondary border-[#4d4c20]/30 focus-visible:ring-[#700145]"
           {...register("title")}
         />
@@ -117,11 +119,11 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
       {/* Body */}
       <div className="space-y-2">
         <Label htmlFor="body" className="text-secondary text-sm font-semibold">
-          Votre commentaire
+          {t("your_comment")}
         </Label>
         <Textarea
           id="body"
-          placeholder="Dites-nous ce que vous avez aimé ou amélioré..."
+          placeholder={t("comment_placeholder")}
           className="text-secondary min-h-32 border-[#4d4c20]/30 focus-visible:ring-[#700145]"
           {...register("body")}
         />
@@ -133,7 +135,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
         disabled={createMutation.isPending}
         className="w-full rounded-xl bg-[#700145] text-white hover:bg-[#700145]/90"
       >
-        {createMutation.isPending ? "Soumission..." : "Soumettre l'avis"}
+        {createMutation.isPending ? t("submitting") : t("submit_review")}
       </Button>
     </form>
     </QueryGuard>

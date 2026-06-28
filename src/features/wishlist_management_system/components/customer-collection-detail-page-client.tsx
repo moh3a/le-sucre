@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function CustomerCollectionDetailPageClient({ collectionId }: { collectionId: string }) {
+  const t = useTranslations("wishlist");
   const { data: collection, isLoading } = trpc.wishlistManagement.collections.byId.useQuery({ id: collectionId });
   const { data: itemsData } = trpc.wishlistManagement.collections.listItems.useQuery(
     { collection_id: collectionId, page: 1, limit: 100 },
@@ -26,7 +28,7 @@ export function CustomerCollectionDetailPageClient({ collectionId }: { collectio
       <Button variant="ghost" className="mb-4" asChild>
         <a href="/account/collections">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
+          {t("back")}
         </a>
       </Button>
 
@@ -38,7 +40,7 @@ export function CustomerCollectionDetailPageClient({ collectionId }: { collectio
       <div className="space-y-2">
         {(!itemsData?.items || itemsData.items.length === 0) ? (
           <div className="text-center py-16 text-muted-foreground">
-            <p className="text-lg">Cette collection est vide</p>
+            <p className="text-lg">{t("empty_collection")}</p>
           </div>
         ) : (
           itemsData.items.map((item: any) => (

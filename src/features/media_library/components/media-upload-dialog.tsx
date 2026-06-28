@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { CloudUpload, X, Crop, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
 import { toast } from "sonner";
@@ -95,6 +96,7 @@ export function MediaUploadDialog({
   field,
   is_primary: is_primary_prop,
 }: MediaUploadDialogProps) {
+  const t = useTranslations("media");
   const [open_internal, set_open_internal] = React.useState(false);
   const open = open_prop ?? open_internal;
   const on_open_change = on_open_change_prop ?? set_open_internal;
@@ -157,14 +159,14 @@ export function MediaUploadDialog({
       }
 
       const result = await res.json();
-      toast.success("Fichier importé avec succès");
+      toast.success(t("upload_success"));
       onSuccess?.(result.data);
       utils.media.list.invalidate();
       utils.media.stats.invalidate();
       reset();
       on_open_change(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Échec de l'importation");
+      toast.error(error instanceof Error ? error.message : t("upload_failed"));
     } finally {
       set_uploading(false);
     }
@@ -188,7 +190,7 @@ export function MediaUploadDialog({
       const blob = await crop_image(selected_file, crop_area);
       await handle_upload(blob);
     } catch (error) {
-      toast.error("Échec du recadrage");
+      toast.error(t("crop_failed"));
     }
   }
 
@@ -197,9 +199,9 @@ export function MediaUploadDialog({
       {trigger ? <ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger> : null}
       <ResponsiveDialogContent className={is_mobile ? "" : "sm:max-w-2xl"}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Importer un fichier</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>{t("upload_title")}</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Importez une image, une vidéo ou un document dans la médiathèque.
+            {t("upload_description")}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -222,10 +224,10 @@ export function MediaUploadDialog({
           >
             <FileUploadDropzone className="border-dotted text-center">
               <CloudUpload className="mx-auto size-8" />
-              <p className="text-sm">Glissez-déposez un fichier ou</p>
+              <p className="text-sm">{t("drag_drop_or")}</p>
               <FileUploadTrigger asChild>
                 <Button variant="link" size="sm" className="p-0">
-                  choisissez un fichier
+                  {t("choose_file")}
                 </Button>
               </FileUploadTrigger>
             </FileUploadDropzone>
@@ -237,7 +239,7 @@ export function MediaUploadDialog({
                   <FileUploadItemDelete asChild>
                     <Button variant="ghost" size="icon" className="size-7">
                       <X />
-                      <span className="sr-only">Supprimer</span>
+                      <span className="sr-only">{t("delete")}</span>
                     </Button>
                   </FileUploadItemDelete>
                 </FileUploadItem>
@@ -250,10 +252,10 @@ export function MediaUploadDialog({
               <TabsList className="w-full">
                 <TabsTrigger value="crop" className="flex-1">
                   <Crop />
-                  Recadrer
+                  {t("crop_tab")}
                 </TabsTrigger>
                 <TabsTrigger value="upload" className="flex-1">
-                  Original
+                  {t("original_tab")}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="crop" className="space-y-4">
@@ -291,7 +293,7 @@ export function MediaUploadDialog({
                   </div>
                   <Button variant="outline" size="sm" onClick={() => set_rotation((r) => r + 90)}>
                     <RotateCw />
-                    Rotation
+                    {t("rotation")}
                   </Button>
                 </div>
               </TabsContent>
@@ -300,28 +302,28 @@ export function MediaUploadDialog({
 
           <div className="space-y-3">
             <div>
-              <Label htmlFor="alt">Texte alternatif (Alt)</Label>
+              <Label htmlFor="alt">{t("alt_label")}</Label>
               <Input
                 id="alt"
                 value={alt}
                 onChange={(e) => set_alt(e.target.value)}
-                placeholder="Description de l'image"
+                placeholder={t("image_description_placeholder")}
               />
             </div>
             <div>
-              <Label htmlFor="caption">Légende</Label>
+              <Label htmlFor="caption">{t("caption_label")}</Label>
               <Textarea
                 id="caption"
                 value={caption}
                 onChange={(e) => set_caption(e.target.value)}
-                placeholder="Légende optionnelle"
+                placeholder={t("optional_caption_placeholder")}
                 rows={2}
               />
             </div>
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2">
                 <Checkbox checked={is_public} onCheckedChange={(v) => set_is_public(v === true)} />
-                <span className="text-sm">Public</span>
+                <span className="text-sm">{t("public_label")}</span>
               </label>
               {(entity_type || is_primary_prop) && (
                 <label className="flex items-center gap-2">
@@ -329,7 +331,7 @@ export function MediaUploadDialog({
                     checked={is_primary}
                     onCheckedChange={(v) => set_is_primary(v === true)}
                   />
-                  <span className="text-sm">Image principale</span>
+                  <span className="text-sm">{t("primary_label")}</span>
                 </label>
               )}
             </div>
@@ -338,13 +340,13 @@ export function MediaUploadDialog({
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={() => on_open_change(false)} disabled={uploading}>
-            Annuler
+            {t("cancel")}
           </Button>
           <Button
             onClick={tab === "crop" && crop_area ? handle_crop_and_upload : () => handle_upload()}
             disabled={!selected_file || uploading}
           >
-            {uploading ? "Importation..." : "Importer"}
+            {uploading ? t("importing") : t("import_button")}
           </Button>
         </div>
       </ResponsiveDialogContent>

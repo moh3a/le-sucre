@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Check, Star, ThumbsUp, AlertTriangle } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
@@ -23,6 +24,7 @@ interface ProductReviewsListProps {
 }
 
 export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
+  const t = useTranslations("reviews");
   const [sort, setSort] = React.useState<ReviewStatus>("newest");
   const [page, setPage] = React.useState(1);
 
@@ -62,7 +64,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>
-          Avis des gourmets <Badge>{meta?.total_records ?? 0}</Badge>
+          {t("reviews_title")} <Badge>{meta?.total_records ?? 0}</Badge>
         </CardTitle>
         <Select
           value={sort}
@@ -72,20 +74,20 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
           }}
         >
           <SelectTrigger className="text-secondary w-[200px] rounded-xl border-[#4d4c20]/30 focus:ring-[#700145]">
-            <SelectValue placeholder="Trier par" />
+            <SelectValue placeholder={t("sort_placeholder")} />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="newest">Plus récent</SelectItem>
-            <SelectItem value="most_helpful">Plus utile</SelectItem>
-            <SelectItem value="highest_rating">Note la plus haute</SelectItem>
-            <SelectItem value="lowest_rating">Note la plus basse</SelectItem>
+            <SelectItem value="newest">{t("sort_newest_alt")}</SelectItem>
+            <SelectItem value="most_helpful">{t("sort_most_helpful")}</SelectItem>
+            <SelectItem value="highest_rating">{t("sort_highest_rating")}</SelectItem>
+            <SelectItem value="lowest_rating">{t("sort_lowest_rating")}</SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
       <CardContent>
         {reviews.length === 0 ? (
           <p className="text-secondary/60 py-10 text-center">
-            Aucun avis publié pour le moment. Soyez le premier à donner votre avis !
+            {t("no_reviews_yet")}
           </p>
         ) : (
           <div className="space-y-6 divide-y divide-[#4d4c20]/10">
@@ -109,7 +111,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
                         variant="secondary"
                         className="flex items-center gap-1 border-green-200 bg-green-50 px-2 py-0 text-xs font-semibold text-green-700 hover:bg-green-50"
                       >
-                        <Check className="size-3" /> Achat vérifié
+                        <Check className="size-3" /> {t("verified_purchase_badge")}
                       </Badge>
                     )}
                   </div>
@@ -141,7 +143,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
                       className="text-secondary/50 flex items-center gap-1 transition-colors hover:text-[#700145] focus:outline-none"
                     >
                       <ThumbsUp className="size-3.5" />
-                      <span>Utile ({review.helpful_count})</span>
+                      <span>{t("helpful_text", { count: review.helpful_count })}</span>
                     </button>
 
                     <button
@@ -152,7 +154,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
                       className="text-secondary/35 flex items-center gap-1 transition-colors hover:text-red-600 focus:outline-none"
                     >
                       <AlertTriangle className="size-3.5" />
-                      <span>Signaler</span>
+                      <span>{t("report_text")}</span>
                     </button>
                   </div>
                 </div>

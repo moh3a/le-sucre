@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -77,18 +78,19 @@ const form_schema = z.object({
 type FormValues = z.infer<typeof form_schema>;
 
 export function CreatePromotionDialog() {
+  const t = useTranslations("promotions");
   const [open, set_open] = useState(false);
   const utils = trpc.useUtils();
 
   const create_mutation = trpc.promotions.create.useMutation({
     onSuccess: () => {
-      toast.success("Promotion créée avec succès");
+      toast.success(t("promotion_created"));
       utils.promotions.adminList.invalidate();
       set_open(false);
       form.reset();
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la création");
+      toast.error(err.message || t("creation_error"));
     },
   });
 
@@ -158,14 +160,14 @@ export function CreatePromotionDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Créer une promotion
+          {t("create_promotion")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nouvelle promotion</DialogTitle>
+          <DialogTitle>{t("new_promotion")}</DialogTitle>
           <DialogDescription>
-            Créez une nouvelle campagne de remise, code promo, vente flash ou offre groupée.
+            {t("promotion_description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,8 +178,8 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field data-invalid={!!formState.errors.name}>
-                  <FieldLabel>Nom</FieldLabel>
-                  <Input {...field} placeholder="Ex: Soldes été 2026" />
+                  <FieldLabel>{t("name")}</FieldLabel>
+                  <Input {...field} placeholder={t("name_placeholder")} />
                   {formState.errors.name && <FieldError errors={[formState.errors.name]} />}
                 </Field>
               )}
@@ -188,8 +190,8 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field data-invalid={!!formState.errors.slug}>
-                  <FieldLabel>Slug</FieldLabel>
-                  <Input {...field} placeholder="soldes-ete-2026" />
+                  <FieldLabel>{t("slug")}</FieldLabel>
+                  <Input {...field} placeholder={t("slug_placeholder")} />
                   {formState.errors.slug && <FieldError errors={[formState.errors.slug]} />}
                 </Field>
               )}
@@ -201,11 +203,11 @@ export function CreatePromotionDialog() {
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>Description</FieldLabel>
+                <FieldLabel>{t("description")}</FieldLabel>
                 <Textarea
                   {...field}
                   value={field.value ?? ""}
-                  placeholder="Description interne…"
+                  placeholder={t("description_placeholder")}
                   rows={3}
                 />
               </Field>
@@ -218,13 +220,13 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Type de promotion</FieldLabel>
+                  <FieldLabel>{t("promotion_type_label")}</FieldLabel>
                   <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                    <option value={PROMOTION_TYPE.promo_code}>Code promo</option>
-                    <option value={PROMOTION_TYPE.automatic}>Remise automatique</option>
-                    <option value={PROMOTION_TYPE.flash_sale}>Vente flash</option>
-                    <option value={PROMOTION_TYPE.bundle}>Offre groupée</option>
-                    <option value={PROMOTION_TYPE.customer}>Client ciblé</option>
+                    <option value={PROMOTION_TYPE.promo_code}>{t("type_promo_code")}</option>
+                    <option value={PROMOTION_TYPE.automatic}>{t("type_automatic")}</option>
+                    <option value={PROMOTION_TYPE.flash_sale}>{t("type_flash_sale")}</option>
+                    <option value={PROMOTION_TYPE.bundle}>{t("type_bundle")}</option>
+                    <option value={PROMOTION_TYPE.customer}>{t("type_customer")}</option>
                   </select>
                 </Field>
               )}
@@ -235,12 +237,12 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Statut</FieldLabel>
+                  <FieldLabel>{t("status")}</FieldLabel>
                   <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                    <option value={PROMOTION_STATUS.draft}>Brouillon</option>
-                    <option value={PROMOTION_STATUS.scheduled}>Planifiée</option>
-                    <option value={PROMOTION_STATUS.active}>Active</option>
-                    <option value={PROMOTION_STATUS.paused}>En pause</option>
+                    <option value={PROMOTION_STATUS.draft}>{t("status_draft")}</option>
+                    <option value={PROMOTION_STATUS.scheduled}>{t("status_scheduled")}</option>
+                    <option value={PROMOTION_STATUS.active}>{t("status_active")}</option>
+                    <option value={PROMOTION_STATUS.paused}>{t("status_paused")}</option>
                   </select>
                 </Field>
               )}
@@ -251,7 +253,7 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field data-invalid={!!formState.errors.priority}>
-                  <FieldLabel>Priorité</FieldLabel>
+                  <FieldLabel>{t("priority")}</FieldLabel>
                   <Input
                     type="number"
                     {...field}
@@ -272,7 +274,7 @@ export function CreatePromotionDialog() {
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel>Cumulable avec d&apos;autres promotions</FieldLabel>
+                <FieldLabel>{t("stackable_label")}</FieldLabel>
               </Field>
             )}
           />
@@ -283,7 +285,7 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Date de début</FieldLabel>
+                  <FieldLabel>{t("start_date")}</FieldLabel>
                   <Input type="datetime-local" {...field} />
                 </Field>
               )}
@@ -294,7 +296,7 @@ export function CreatePromotionDialog() {
               control={control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Date de fin</FieldLabel>
+                  <FieldLabel>{t("end_date")}</FieldLabel>
                   <Input type="datetime-local" {...field} />
                 </Field>
               )}
@@ -302,21 +304,21 @@ export function CreatePromotionDialog() {
           </div>
 
           <div className="border-t pt-4">
-            <h4 className="mb-3 text-sm font-semibold">Règle de remise</h4>
+            <h4 className="mb-3 text-sm font-semibold">{t("discount_rule_title")}</h4>
             <div className="grid gap-4 md:grid-cols-2">
               <Controller
                 name="rule_scope_type"
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Applicable sur</FieldLabel>
+                    <FieldLabel>{t("scope_label")}</FieldLabel>
                     <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                      <option value={DISCOUNT_SCOPE.cart}>Panier entier</option>
-                      <option value={DISCOUNT_SCOPE.category}>Catégorie</option>
-                      <option value={DISCOUNT_SCOPE.product}>Produit</option>
-                      <option value={DISCOUNT_SCOPE.sku}>SKU</option>
-                      <option value={DISCOUNT_SCOPE.customer}>Client</option>
-                      <option value={DISCOUNT_SCOPE.shipping}>Livraison</option>
+                      <option value={DISCOUNT_SCOPE.cart}>{t("scope_cart")}</option>
+                      <option value={DISCOUNT_SCOPE.category}>{t("scope_category")}</option>
+                      <option value={DISCOUNT_SCOPE.product}>{t("scope_product")}</option>
+                      <option value={DISCOUNT_SCOPE.sku}>{t("scope_sku")}</option>
+                      <option value={DISCOUNT_SCOPE.customer}>{t("scope_customer")}</option>
+                      <option value={DISCOUNT_SCOPE.shipping}>{t("scope_shipping")}</option>
                     </select>
                   </Field>
                 )}
@@ -327,12 +329,12 @@ export function CreatePromotionDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Type de remise</FieldLabel>
+                    <FieldLabel>{t("discount_type_label")}</FieldLabel>
                     <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                      <option value={DISCOUNT_TYPE.percent}>Pourcentage</option>
-                      <option value={DISCOUNT_TYPE.fixed}>Montant fixe</option>
-                      <option value={DISCOUNT_TYPE.free_shipping}>Livraison gratuite</option>
-                      <option value={DISCOUNT_TYPE.buy_x_get_y}>Achetez X obtenez Y</option>
+                      <option value={DISCOUNT_TYPE.percent}>{t("discount_percent")}</option>
+                      <option value={DISCOUNT_TYPE.fixed}>{t("discount_fixed")}</option>
+                      <option value={DISCOUNT_TYPE.free_shipping}>{t("discount_free_shipping")}</option>
+                      <option value={DISCOUNT_TYPE.buy_x_get_y}>{t("discount_buy_x_get_y")}</option>
                     </select>
                   </Field>
                 )}
@@ -343,7 +345,7 @@ export function CreatePromotionDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field data-invalid={!!formState.errors.rule_discount_value}>
-                    <FieldLabel>Valeur de la remise</FieldLabel>
+                    <FieldLabel>{t("discount_value_label")}</FieldLabel>
                     <Input
                       type="number"
                       min={0}
@@ -362,14 +364,14 @@ export function CreatePromotionDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Panier minimum</FieldLabel>
+                    <FieldLabel>{t("min_cart_label")}</FieldLabel>
                     <Input
                       type="number"
                       min={0}
                       {...field}
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(e.target.value)}
-                      placeholder="Facultatif"
+                      placeholder={t("optional_placeholder")}
                     />
                   </Field>
                 )}
@@ -380,18 +382,19 @@ export function CreatePromotionDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Montant max. de remise</FieldLabel>
+                    <FieldLabel>{t("max_discount_label")}</FieldLabel>
                     <Input
                       type="number"
                       min={0}
                       {...field}
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(e.target.value)}
-                      placeholder="Facultatif"
+                      placeholder={t("optional_placeholder")}
                     />
                   </Field>
                 )}
               />
+
             </div>
           </div>
 
@@ -402,14 +405,14 @@ export function CreatePromotionDialog() {
               onClick={() => { set_open(false); form.reset(); }}
               disabled={is_pending}
             >
-              Annuler
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
               className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
               disabled={is_pending}
             >
-              {is_pending ? "Création…" : "Créer la promotion"}
+              {is_pending ? t("creating") : t("create")}
             </Button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,7 @@ import { Calendar } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function SchedulePublishingDialog() {
+  const t = useTranslations("publishing");
   const [open, setOpen] = useState(false);
   const [productId, setProductId] = useState("");
   const [action, setAction] = useState<"publish" | "unpublish">("publish");
@@ -34,7 +36,7 @@ export function SchedulePublishingDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.productSchedulePublish.useMutation({
     onSuccess: () => {
-      toast.success("Publication programmée");
+      toast.success(t("scheduled_success"));
       setOpen(false);
       reset();
       utils.operations.productListScheduledActions.invalidate();
@@ -52,7 +54,7 @@ export function SchedulePublishingDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!productId || !scheduledAt) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -68,29 +70,29 @@ export function SchedulePublishingDialog() {
       <DialogTrigger asChild>
         <Button>
           <Calendar className="mr-2 size-4" />
-          Programmer
+          {t("schedule")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
-          <DialogTitle>Programmer une publication</DialogTitle>
+          <DialogTitle>{t("dialog_title")}</DialogTitle>
           <DialogDescription>
-            Planifier la publication ou la dépublication d&apos;un produit.
+            {t("dialog_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ps_product_id">Produit *</Label>
+            <Label htmlFor="ps_product_id">{t("product_label")}</Label>
             <Input
               id="ps_product_id"
               value={productId}
               onChange={(e) => setProductId(e.target.value)}
-              placeholder="ID du produit"
+              placeholder={t("product_id_placeholder")}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ps_action">Action *</Label>
+            <Label htmlFor="ps_action">{t("action_label")}</Label>
             <Select
               value={action}
               onValueChange={(v) => setAction(v as "publish" | "unpublish")}
@@ -100,13 +102,13 @@ export function SchedulePublishingDialog() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="publish">Publication</SelectItem>
-                <SelectItem value="unpublish">Dépublication</SelectItem>
+                <SelectItem value="publish">{t("publish")}</SelectItem>
+                <SelectItem value="unpublish">{t("unpublish")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ps_scheduled_at">Programmé le *</Label>
+            <Label htmlFor="ps_scheduled_at">{t("scheduled_at_label")}</Label>
             <Input
               id="ps_scheduled_at"
               type="datetime-local"
@@ -117,10 +119,10 @@ export function SchedulePublishingDialog() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Programmation..." : "Programmer"}
+              {mutation.isPending ? t("scheduling") : t("schedule")}
             </Button>
           </DialogFooter>
         </form>

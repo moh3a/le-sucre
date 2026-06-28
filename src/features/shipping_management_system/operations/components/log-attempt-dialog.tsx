@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Truck } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
@@ -32,6 +33,7 @@ type LogAttemptDialogProps = {
 };
 
 export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProps) {
+  const t = useTranslations("delivery_attempts");
   const [open, setOpen] = useState(false);
   const [shipmentId, setShipmentId] = useState(shipment_id ?? "");
   const [orderId, setOrderId] = useState(order_id ?? "");
@@ -80,66 +82,66 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
       <DialogTrigger asChild>
         <Button>
           <Truck className="mr-2 size-4" />
-          Enregistrer une tentative
+          {t("log_attempt")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Enregistrer une tentative de livraison</DialogTitle>
+          <DialogTitle>{t("log_delivery_attempt")}</DialogTitle>
           <DialogDescription>
-            Saisissez les informations de la tentative de livraison.
+            {t("log_delivery_attempt_desc")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="shipment_id">Expédition *</Label>
+              <Label htmlFor="shipment_id">{t("shipment")} *</Label>
               <Input
                 id="shipment_id"
                 value={shipmentId}
                 onChange={(e) => setShipmentId(e.target.value)}
-                placeholder="ID de l'expédition"
+                placeholder={t("shipment_id_placeholder")}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="order_id">Commande *</Label>
+              <Label htmlFor="order_id">{t("order")} *</Label>
               <Input
                 id="order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande"
+                placeholder={t("order_id_placeholder")}
                 required
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="status">Statut *</Label>
+            <Label htmlFor="status">{t("status")} *</Label>
             <Select value={status} onValueChange={setStatus} required>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un statut" />
+                <SelectValue placeholder={t("select_status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="successful">Livré</SelectItem>
-                <SelectItem value="failed">Échoué</SelectItem>
-                <SelectItem value="customer_unavailable">Client absent</SelectItem>
-                <SelectItem value="wrong_address">Mauvaise adresse</SelectItem>
-                <SelectItem value="refused">Refusé</SelectItem>
-                <SelectItem value="cancelled">Annulé</SelectItem>
+                <SelectItem value="successful">{t("delivered")}</SelectItem>
+                <SelectItem value="failed">{t("failed")}</SelectItem>
+                <SelectItem value="customer_unavailable">{t("customer_unavailable")}</SelectItem>
+                <SelectItem value="wrong_address">{t("wrong_address")}</SelectItem>
+                <SelectItem value="refused">{t("refused")}</SelectItem>
+                <SelectItem value="cancelled">{t("cancelled")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("description")}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Détails de la tentative (optionnel)"
+              placeholder={t("description_placeholder")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="next_attempt_at">Prochaine tentative</Label>
+            <Label htmlFor="next_attempt_at">{t("next_attempt")}</Label>
             <Input
               id="next_attempt_at"
               type="datetime-local"
@@ -149,10 +151,10 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("annuler")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Enregistrement..." : "Enregistrer"}
+              {mutation.isPending ? t("saving") : t("save")}
             </Button>
           </DialogFooter>
         </form>

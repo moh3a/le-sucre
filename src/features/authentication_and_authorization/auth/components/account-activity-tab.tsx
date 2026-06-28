@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -25,32 +25,31 @@ type ActivityRow = {
   created_at: string;
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  "profile.updated": "Profil mis à jour",
-  "password.changed": "Mot de passe changé",
-  "auth.login.success": "Connexion réussie",
-  "auth.login.failure": "Échec de connexion",
-  "auth.logout": "Déconnexion",
-};
-
-function action_label(action: string): string {
-  return ACTION_LABELS[action] ?? action;
-}
-
 export function AccountActivityTab() {
   const t = useTranslations("products");
+
+  const action_label = useCallback((action: string): string => {
+    const labels: Record<string, string> = {
+      "profile.updated": t("activity_profile_updated"),
+      "password.changed": t("activity_password_changed"),
+      "auth.login.success": t("activity_login_success"),
+      "auth.login.failure": t("activity_login_failure"),
+      "auth.logout": t("activity_logout"),
+    };
+    return labels[action] ?? action;
+  }, [t]);
 
   const columns = useMemo<ColumnDef<ActivityRow>[]>(
     () => [
       {
         id: "action",
         accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Action" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_action_column")} />,
         cell: ({ row }) => <span className="font-medium">{action_label(row.original.action)}</span>,
       },
       {
         id: "resource",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Ressource" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_resource_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">
             {row.original.resource_type ? `${row.original.resource_type}#${row.original.resource_id?.slice(0, 8)}` : "—"}
@@ -60,17 +59,17 @@ export function AccountActivityTab() {
       {
         id: "ip_address",
         accessorKey: "ip_address",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Adresse IP" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_ip_column")} />,
         cell: ({ row }) => row.original.ip_address ?? "—",
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at),
       },
     ],
-    [],
+    [t, action_label],
   );
 
   const { data, isLoading, error } = trpc.auth.myActivity.useQuery({
@@ -91,9 +90,9 @@ export function AccountActivityTab() {
     <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={4} rowCount={10} />}>
     <Card>
       <CardHeader>
-        <CardTitle>Activité récente</CardTitle>
+        <CardTitle>{t("activity_recent_title")}</CardTitle>
         <CardDescription>
-          {data?.meta.total_records ?? 0} entrée(s) d&apos;activité
+          {t("activity_entries_count", { count: data?.meta.total_records ?? 0 })}
         </CardDescription>
       </CardHeader>
       <CardContent>

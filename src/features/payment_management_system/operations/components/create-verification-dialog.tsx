@@ -18,8 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { useTranslations } from "next-intl";
 
 export function CreateVerificationDialog() {
+  const t = useTranslations("payments");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [amount, setAmount] = useState("");
@@ -89,7 +91,7 @@ export function CreateVerificationDialog() {
                 id="pv_order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande"
+                placeholder={t("order_id_placeholder")}
                 required
               />
             </div>
@@ -113,7 +115,7 @@ export function CreateVerificationDialog() {
                 id="pv_currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                placeholder="DZD"
+                placeholder={t("currency_placeholder")}
               />
             </div>
             <div className="space-y-2">
@@ -122,7 +124,7 @@ export function CreateVerificationDialog() {
                 id="pv_reference"
                 value={referenceNumber}
                 onChange={(e) => setReferenceNumber(e.target.value)}
-                placeholder="Numéro de référence"
+                placeholder={t("reference_placeholder")}
               />
             </div>
           </div>
@@ -132,7 +134,7 @@ export function CreateVerificationDialog() {
               id="pv_proof"
               value={proofUrl}
               onChange={(e) => setProofUrl(e.target.value)}
-              placeholder="https://..."
+              placeholder={t("url_placeholder")}
             />
           </div>
           <div className="space-y-2">
@@ -141,7 +143,7 @@ export function CreateVerificationDialog() {
               id="pv_notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes additionnelles"
+              placeholder={t("notes_placeholder")}
             />
           </div>
           <DialogFooter>
@@ -149,7 +151,7 @@ export function CreateVerificationDialog() {
               Annuler
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Créer"}
+              {mutation.isPending ? t("creating") : t("create")}
             </Button>
           </DialogFooter>
         </form>

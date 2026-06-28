@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/responsive-dialog";
 
 export function AuthorizationRoleEditor() {
+  const t = useTranslations("users");
   const utils = trpc.useUtils();
   const { data: roles = [], isLoading, error } = trpc.authorization.listRoles.useQuery();
   const [selected_role, setSelectedRole] = useState<string>("moderator");
@@ -40,7 +42,7 @@ export function AuthorizationRoleEditor() {
 
   const update_permissions = trpc.authorization.updateRolePermissions.useMutation({
     onSuccess: () => {
-      toast.success("Permissions mises à jour");
+      toast.success(t("permissions_updated"));
       setDraftPermissions([]);
       void utils.authorization.listRoles.invalidate();
     },
@@ -58,17 +60,17 @@ export function AuthorizationRoleEditor() {
     <QueryGuard query={{ isLoading, error }}>
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
-        <Button>Modifier les permissions</Button>
+        <Button>{t("edit_permissions")}</Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Modifier les permissions d&apos;un rôle</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>Réservé aux administrateurs.</ResponsiveDialogDescription>
+          <ResponsiveDialogTitle>{t("edit_role_permissions_title")}</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>{t("admin_only")}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <div className="space-y-4">
           <Select value={selected_role} onValueChange={setSelectedRole}>
             <SelectTrigger className="max-w-sm capitalize">
-              <SelectValue placeholder="Choisir un rôle" />
+              <SelectValue placeholder={t("select_role_placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {roles.map((role) => (
@@ -100,7 +102,7 @@ export function AuthorizationRoleEditor() {
               })
             }
           >
-            Enregistrer les permissions
+            {t("save_permissions")}
           </Button>
         </div>
       </ResponsiveDialogContent>

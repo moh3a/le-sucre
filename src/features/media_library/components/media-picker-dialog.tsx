@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import * as React from "react";
 import Image from "next/image";
 import { Search, Upload, Check, FileVideo, FileText } from "lucide-react";
@@ -49,6 +50,7 @@ export function MediaPickerDialog({
   allowed_types,
   selected_ids = [],
 }: MediaPickerDialogProps) {
+  const t = useTranslations("media");
   const [open_internal, set_open_internal] = React.useState(false);
   const open = open_prop ?? open_internal;
   const on_open_change = on_open_change_prop ?? set_open_internal;
@@ -108,12 +110,10 @@ export function MediaPickerDialog({
       <ResponsiveDialogContent className="sm:max-w-3xl">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
-            {show_upload ? "Importer un fichier" : "Sélectionner un média"}
+            {show_upload ? t("upload_title") : t("select_media_title")}
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            {show_upload
-              ? "Importez un nouveau fichier dans la médiathèque."
-              : "Choisissez un fichier depuis la médiathèque."}
+            {show_upload ? t("import_file_description") : t("select_media_description")}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
@@ -128,7 +128,7 @@ export function MediaPickerDialog({
               field={field}
             />
             <Button variant="outline" onClick={() => set_show_upload(false)}>
-              Retour à la médiathèque
+              {t("back_to_media")}
             </Button>
           </div>
         ) : (
@@ -137,7 +137,7 @@ export function MediaPickerDialog({
               <div className="relative flex-1">
                 <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <Input
-                  placeholder="Rechercher..."
+                  placeholder={t("search_dots")}
                   className="pl-9"
                   value={search}
                   onChange={(e) => {
@@ -148,7 +148,7 @@ export function MediaPickerDialog({
               </div>
               <Button variant="outline" onClick={() => set_show_upload(true)}>
                 <Upload />
-                Importer
+                {t("import")}
               </Button>
             </div>
 
@@ -160,7 +160,7 @@ export function MediaPickerDialog({
               </div>
             ) : !data || data.items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground">Aucun fichier trouvé</p>
+                <p className="text-muted-foreground">{t("no_files_found")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6">
@@ -221,7 +221,7 @@ export function MediaPickerDialog({
                   onClick={() => set_page((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                 >
-                  Précédent
+                  {t("previous")}
                 </Button>
                 <span className="text-muted-foreground text-xs">
                   {page} / {data.meta.total_pages}
@@ -232,7 +232,7 @@ export function MediaPickerDialog({
                   onClick={() => set_page((p) => p + 1)}
                   disabled={!data.meta.has_more}
                 >
-                  Suivant
+                  {t("next")}
                 </Button>
               </div>
             )}
@@ -240,10 +240,10 @@ export function MediaPickerDialog({
             {selected.length > 0 && (
               <div className="flex justify-end gap-2 border-t pt-4">
                 <Button variant="outline" onClick={() => set_selected([])}>
-                  Effacer
+                  {t("clear_selection")}
                 </Button>
                 <Button onClick={handle_confirm}>
-                  {multiple ? `Confirmer (${selected.length})` : "Confirmer"}
+                  {multiple ? `${t("confirm")} (${selected.length})` : t("confirm")}
                 </Button>
               </div>
             )}

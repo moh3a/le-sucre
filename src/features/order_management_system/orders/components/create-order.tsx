@@ -7,6 +7,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Plus, Trash2, Search } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -54,6 +56,7 @@ type CartLineItem = {
 };
 
 export function CreateOrderDialog() {
+  const t = useTranslations("orders");
   const [open, set_open] = useState(false);
   const [cart_items, set_cart_items] = useState<CartLineItem[]>([]);
   const [search_query, set_search_query] = useState("");
@@ -196,14 +199,14 @@ export function CreateOrderDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Nouvelle commande
+          {t("new_order")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Nouvelle commande</DialogTitle>
+          <DialogTitle>{t("new_order")}</DialogTitle>
           <DialogDescription>
-            Créez une commande manuellement pour un client.
+            {t("create_order_desc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -211,7 +214,7 @@ export function CreateOrderDialog() {
           {/* Customer selection */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Client</CardTitle>
+              <CardTitle className="text-base">{t("client")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Controller
@@ -219,7 +222,7 @@ export function CreateOrderDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field data-invalid={!!formState.errors.user_id}>
-                    <FieldLabel>Sélectionner un client</FieldLabel>
+                    <FieldLabel>{t("select_client")}</FieldLabel>
                     <Select
                       value={field.value}
                       onValueChange={(val) => {
@@ -231,7 +234,7 @@ export function CreateOrderDialog() {
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Choisir un client…" />
+                        <SelectValue placeholder={t("choose_client")} />
                       </SelectTrigger>
                       <SelectContent>
                         {users_data?.items?.map((u) => (
@@ -258,17 +261,17 @@ export function CreateOrderDialog() {
           {/* Product search and add */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Articles</CardTitle>
+              <CardTitle className="text-base">{t("articles")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-end gap-2">
                 <div className="flex-1">
-                  <FieldLabel>Rechercher un produit / SKU</FieldLabel>
+                  <FieldLabel>{t("search_product_sku")}</FieldLabel>
                   <div className="relative">
                     <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
                     <Input
                       className="pl-8"
-                      placeholder="Nom du produit ou code SKU…"
+                      placeholder={t("product_sku_placeholder")}
                       value={search_query}
                       onChange={(e) => {
                         set_search_query(e.target.value);
@@ -282,7 +285,7 @@ export function CreateOrderDialog() {
               {search_query && (
                 <div className="space-y-2">
                   {filtered_sku_options.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">Aucun résultat.</p>
+                    <p className="text-muted-foreground text-sm">{t("no_results")}</p>
                   ) : (
                     <div className="max-h-[200px] space-y-1 overflow-y-auto rounded-md border p-2">
                       {filtered_sku_options.slice(0, 10).map((sku) => (
@@ -328,7 +331,7 @@ export function CreateOrderDialog() {
                       </div>
                       <Button type="button" size="sm" onClick={add_to_cart}>
                         <Plus className="mr-1 h-3 w-3" />
-                        Ajouter
+                        {t("ajouter")}
                       </Button>
                     </div>
                   )}
@@ -339,7 +342,7 @@ export function CreateOrderDialog() {
               {cart_items.length > 0 && (
                 <div className="space-y-2 border-t pt-4">
                   <p className="text-sm font-medium">
-                    Panier ({cart_items.length} article{cart_items.length > 1 ? "s" : ""})
+                    {t("panier")} ({cart_items.length} {t(cart_items.length > 1 ? "articles" : "article")})
                   </p>
                   <div className="divide-y rounded-md border">
                     {cart_items.map((item) => (
@@ -371,7 +374,7 @@ export function CreateOrderDialog() {
                       </div>
                     ))}
                     <div className="flex items-center justify-between border-t px-3 py-2 text-sm font-medium">
-                      <span>Sous-total</span>
+                      <span>{t("sous_total")}</span>
                       <span className="font-mono tabular-nums">
                         {cart_subtotal.toLocaleString("fr-DZ")} DZD
                       </span>
@@ -385,7 +388,7 @@ export function CreateOrderDialog() {
           {/* Shipping address */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Adresse de livraison</CardTitle>
+              <CardTitle className="text-base">{t("adresse_livraison")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -394,8 +397,8 @@ export function CreateOrderDialog() {
                   control={control}
                   render={({ field }) => (
                     <Field data-invalid={!!formState.errors.shipping_full_name}>
-                      <FieldLabel>Nom complet</FieldLabel>
-                      <Input {...field} placeholder="Nom du destinataire" />
+                      <FieldLabel>{t("nom_complet")}</FieldLabel>
+                      <Input {...field} placeholder={t("shipping_name_placeholder")} />
                       {formState.errors.shipping_full_name && (
                         <FieldError errors={[formState.errors.shipping_full_name]} />
                       )}
@@ -407,8 +410,8 @@ export function CreateOrderDialog() {
                   control={control}
                   render={({ field }) => (
                     <Field data-invalid={!!formState.errors.shipping_phone}>
-                      <FieldLabel>Téléphone</FieldLabel>
-                      <Input {...field} placeholder="05XX XX XX XX" />
+                      <FieldLabel>{t("telephone")}</FieldLabel>
+                      <Input {...field} placeholder={t("phone_placeholder")} />
                       {formState.errors.shipping_phone && (
                         <FieldError errors={[formState.errors.shipping_phone]} />
                       )}
@@ -422,8 +425,8 @@ export function CreateOrderDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field data-invalid={!!formState.errors.shipping_line1}>
-                    <FieldLabel>Adresse</FieldLabel>
-                    <Input {...field} placeholder="Rue, numéro, résidence…" />
+                    <FieldLabel>{t("adresse")}</FieldLabel>
+                    <Input {...field} placeholder={t("address_placeholder")} />
                     {formState.errors.shipping_line1 && (
                       <FieldError errors={[formState.errors.shipping_line1]} />
                     )}
@@ -436,8 +439,8 @@ export function CreateOrderDialog() {
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Complément d&apos;adresse</FieldLabel>
-                    <Input {...field} value={field.value ?? ""} placeholder="Appartement, étage…" />
+                    <FieldLabel>{t("complement_adresse")}</FieldLabel>
+                    <Input {...field} value={field.value ?? ""} placeholder={t("address_line2_placeholder")} />
                   </Field>
                 )}
               />
@@ -448,8 +451,8 @@ export function CreateOrderDialog() {
                   control={control}
                   render={({ field }) => (
                     <Field data-invalid={!!formState.errors.shipping_city}>
-                      <FieldLabel>Ville</FieldLabel>
-                      <Input {...field} placeholder="Alger" />
+                      <FieldLabel>{t("ville")}</FieldLabel>
+                      <Input {...field} placeholder={t("city_placeholder")} />
                       {formState.errors.shipping_city && (
                         <FieldError errors={[formState.errors.shipping_city]} />
                       )}
@@ -461,8 +464,8 @@ export function CreateOrderDialog() {
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Wilaya / État</FieldLabel>
-                      <Input {...field} value={field.value ?? ""} placeholder="Alger" />
+                      <FieldLabel>{t("wilaya_etat")}</FieldLabel>
+                      <Input {...field} value={field.value ?? ""} placeholder={t("state_placeholder")} />
                     </Field>
                   )}
                 />
@@ -471,8 +474,8 @@ export function CreateOrderDialog() {
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Code postal</FieldLabel>
-                      <Input {...field} value={field.value ?? ""} placeholder="16000" />
+                      <FieldLabel>{t("code_postal")}</FieldLabel>
+                      <Input {...field} value={field.value ?? ""} placeholder={t("postal_placeholder")} />
                     </Field>
                   )}
                 />
@@ -483,7 +486,7 @@ export function CreateOrderDialog() {
           {/* Notes */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Notes internes</CardTitle>
+              <CardTitle className="text-base">{t("notes_internes")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Controller
@@ -494,7 +497,7 @@ export function CreateOrderDialog() {
                     <Textarea
                       {...field}
                       value={field.value ?? ""}
-                      placeholder="Notes pour le traitement de la commande…"
+                      placeholder={t("notes_placeholder")}
                       rows={3}
                     />
                   </Field>
@@ -515,14 +518,14 @@ export function CreateOrderDialog() {
               }}
               disabled={is_pending}
             >
-              Annuler
+              {t("annuler")}
             </Button>
             <Button
               type="submit"
               className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
               disabled={is_pending || cart_items.length === 0}
             >
-              {is_pending ? "Création en cours…" : "Créer la commande"}
+              {is_pending ? t("creating") : t("create_order")}
             </Button>
           </div>
         </form>

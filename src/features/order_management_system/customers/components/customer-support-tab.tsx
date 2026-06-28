@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { QueryGuard } from "@/components/query-guard";
@@ -10,15 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
 import { HeadphonesIcon, Plus, RefreshCw, XCircle } from "lucide-react";
-
-const STATUS_LABELS: Record<string, string> = {
-  open: "Ouvert",
-  assigned: "Assigné",
-  in_progress: "En cours",
-  resolved: "Résolu",
-  closed: "Fermé",
-  reopened: "Réouvert",
-};
 
 const STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "outline"> = {
   open: "destructive",
@@ -32,6 +24,15 @@ const STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "o
 type CustomerSupportTabProps = { user_id: string };
 
 export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
+  const t = useTranslations("support");
+  const STATUS_LABELS: Record<string, string> = {
+    open: t("open"),
+    assigned: t("assigned"),
+    in_progress: t("in_progress"),
+    resolved: t("resolved"),
+    closed: t("closed"),
+    reopened: t("reopened"),
+  };
   const { data: cases, isLoading, refetch } = trpc.operations.customerGetCasesByUser.useQuery({ user_id });
   const [show_form, set_show_form] = useState(false);
   const [subject, set_subject] = useState("");
@@ -69,10 +70,10 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
     <QueryGuard query={{ isLoading }} loadingFallback={<Skeleton className="h-48 w-full" />}>
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Cas de support</h3>
+        <h3 className="text-lg font-medium">{t("title")}</h3>
         <Button size="sm" onClick={() => set_show_form(!show_form)}>
           <Plus className="mr-1 h-3 w-3" />
-          Nouveau cas
+          {t("new_case")}
         </Button>
       </div>
 
@@ -80,17 +81,17 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
         <Card className="border-blue-200">
           <CardContent className="space-y-3 pt-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium">Sujet</label>
+              <label className="text-xs font-medium">{t("subject")}</label>
               <input
                 className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                 value={subject}
                 onChange={(e) => set_subject(e.target.value)}
-                placeholder="Sujet du cas..."
+                placeholder={t("subject_placeholder")}
               />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-medium">Catégorie</label>
+                <label className="text-xs font-medium">{t("category")}</label>
                 <select
                   className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                   value={category}
@@ -106,18 +107,18 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium">Description</label>
+              <label className="text-xs font-medium">{t("description")}</label>
               <textarea
                 className="border-input bg-background ring-offset-background flex w-full rounded-md border px-3 py-2 text-sm"
                 rows={4}
                 value={description}
                 onChange={(e) => set_description(e.target.value)}
-                placeholder="Décrire le problème..."
+                placeholder={t("problem_placeholder")}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_show_form(false)}>
-                Annuler
+                {t("cancel")}
               </Button>
               <Button
                 size="sm"
@@ -126,7 +127,7 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
                 }
                 disabled={!subject.trim() || !description.trim() || create_case.isPending}
               >
-                Créer le cas
+                {t("create_case")}
               </Button>
             </div>
           </CardContent>
@@ -134,7 +135,7 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
       )}
 
       {(cases?.length ?? 0) === 0 ? (
-        <p className="text-muted-foreground py-8 text-center text-sm">Aucun cas de support</p>
+        <p className="text-muted-foreground py-8 text-center text-sm">{t("no_cases")}</p>
       ) : (
         <div className="space-y-2">
           {cases?.map((c) => (
@@ -159,7 +160,7 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
                         disabled={resolve.isPending}
                       >
                         <RefreshCw className="mr-1 h-3 w-3" />
-                        Résoudre
+                        {t("resolve")}
                       </Button>
                       <Button
                         size="sm"
@@ -169,7 +170,7 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
                         disabled={close.isPending}
                       >
                         <XCircle className="mr-1 h-3 w-3" />
-                        Fermer
+                        {t("close")}
                       </Button>
                     </>
                   )}

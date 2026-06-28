@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -65,6 +66,7 @@ type SectionFormState = {
 };
 
 export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps) {
+  const t = useTranslations("campaigns");
   const utils = trpc.useUtils();
   const [selectedSection, setSelectedSection] = useState<SectionRow | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -221,9 +223,9 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
-          <CardTitle>Sections Dynamiques</CardTitle>
+          <CardTitle>{t("sections_title")}</CardTitle>
           <p className="text-muted-foreground text-sm">
-            Composants de mise en page dynamiques injectés sur la page de la campagne.
+            {t("sections_subtitle")}
           </p>
         </div>
         <Button
@@ -231,20 +233,19 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
           className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Ajouter une section
+          {t("add_section")}
         </Button>
       </CardHeader>
       <CardContent>
         {sections.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
             <LayoutGrid className="text-muted-foreground mb-4 h-10 w-10" />
-            <p className="text-muted-foreground font-semibold">Aucune section configurée</p>
+            <p className="text-muted-foreground font-semibold">{t("no_sections")}</p>
             <p className="text-muted-foreground mt-1 max-w-sm text-xs">
-              Les sections définissent le contenu structurel (ex: grille de produits, compte à
-              rebours, showcases).
+              {t("no_sections_description")}
             </p>
             <Button variant="outline" className="mt-4" onClick={handleOpenNew}>
-              Créer la première section
+              {t("create_first_section")}
             </Button>
           </div>
         ) : (

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { ExternalLink, Plus, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +25,7 @@ import { formatDate } from "@/lib/format";
 const PROVIDERS = ["yalidine", "dhl", "fedex", "ups", "ems"] as const;
 
 export function ShipmentPanel({ order_id }: { order_id: string }) {
+  const t = useTranslations("shipping");
   const [provider, setProvider] = useState<(typeof PROVIDERS)[number]>("yalidine");
   const [weight_kg, setWeightKg] = useState("1");
 
@@ -51,12 +54,12 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
     return (
       <Card className="mt-4">
         <CardHeader>
-          <CardTitle>Créer une expédition</CardTitle>
+          <CardTitle>{t("create_shipment")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Select value={provider} onValueChange={(v) => setProvider(v as typeof provider)}>
             <SelectTrigger>
-              <SelectValue placeholder="Transporteur" />
+              <SelectValue placeholder={t("carrier")} />
             </SelectTrigger>
             <SelectContent>
               {PROVIDERS.map((p) => (
@@ -72,7 +75,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
             step="0.1"
             value={weight_kg}
             onChange={(e) => setWeightKg(e.target.value)}
-            placeholder="Poids (kg)"
+            placeholder={t("weight_placeholder")}
           />
           <Button
             disabled={create_mutation.isPending}
@@ -85,7 +88,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
             }
           >
             <Plus className="size-4" />
-            Créer l&apos;expédition
+            {t("create_shipment_btn")}
           </Button>
         </CardContent>
       </Card>
@@ -98,10 +101,10 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
     <QueryGuard query={{ isLoading }}>
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Expédition</CardTitle>
+        <CardTitle>{t("shipment")}</CardTitle>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/console/shipping/${shipment.id}`}>Voir détail</Link>
+            <Link href={`/console/shipping/${shipment.id}`}>{t("view_detail")}</Link>
           </Button>
           {shipment.tracking_url ? (
             <Button variant="outline" size="sm" asChild>
@@ -125,7 +128,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
           <Badge>{shipment.status}</Badge>
           <Badge variant="secondary">{shipment.delivery_status}</Badge>
         </div>
-        <p className="font-mono text-xs">{shipment.tracking_number ?? "Sans numéro de suivi"}</p>
+        <p className="font-mono text-xs">{shipment.tracking_number ?? t("no_tracking_number")}</p>
         {tracking_events.slice(0, 3).map((event) => (
           <div key={event.id} className="text-muted-foreground border-l pl-3">
             <p className="text-foreground font-medium">{event.status}</p>

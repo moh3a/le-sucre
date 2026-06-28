@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ import { AddressesSection } from "@/features/authentication_and_authorization/pr
 const tab_schema = z.enum(["profile", "security", "activity", "addresses"]);
 
 export function AccountPageClient() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -31,13 +33,13 @@ export function AccountPageClient() {
   );
 
   return (
-    <ConsolePageShell title="Mon compte" subtitle="Gérez votre profil et vos paramètres de sécurité">
+    <ConsolePageShell title={t("account_title")} subtitle={t("account_subtitle")}>
       <Tabs value={active_tab} onValueChange={on_tab_change}>
         <TabsList className="flex flex-wrap">
-          <TabsTrigger value="profile">Profil</TabsTrigger>
-          <TabsTrigger value="addresses">Adresses</TabsTrigger>
-          <TabsTrigger value="security">Sécurité</TabsTrigger>
-          <TabsTrigger value="activity">Activité</TabsTrigger>
+          <TabsTrigger value="profile">{t("tab_profile")}</TabsTrigger>
+          <TabsTrigger value="addresses">{t("tab_addresses")}</TabsTrigger>
+          <TabsTrigger value="security">{t("tab_security")}</TabsTrigger>
+          <TabsTrigger value="activity">{t("tab_activity")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">

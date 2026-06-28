@@ -63,7 +63,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
   const add_edge = trpc.recommendations.admin.addEdge.useMutation({
     onSuccess: () => {
       utils.recommendations.admin.edges.invalidate({ source_product_id: product_id });
-      toast.success("Recommandation ajoutée");
+      toast.success(t("recommendation_added"));
       set_search_query("");
       set_selected_target(null);
     },
@@ -73,13 +73,13 @@ export function ProductRecommendationsTab({ product_id }: Props) {
   const remove_edge = trpc.recommendations.admin.removeEdge.useMutation({
     onSuccess: () => {
       utils.recommendations.admin.edges.invalidate({ source_product_id: product_id });
-      toast.success("Recommandation supprimée");
+      toast.success(t("recommendation_removed"));
     },
     onError: (err) => toast.error(err.message),
   });
 
   const reindex = trpc.recommendations.admin.reindex.useMutation({
-    onSuccess: () => toast.success("Réindexation planifiée"),
+    onSuccess: () =>       toast.success(t("reindex_scheduled")),
     onError: (err) => toast.error(err.message),
   });
 
@@ -87,7 +87,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
   const update = trpc.products.update.useMutation({
     onSuccess: () => {
       utils.products.byId.invalidate({ id: product_id });
-      toast.success("Produit mis à jour");
+      toast.success(t("product_updated"));
     },
   });
 
@@ -143,9 +143,9 @@ export function ProductRecommendationsTab({ product_id }: Props) {
       {/* ─── Catalog Discovery Section ─── */}
       <Card>
         <CardHeader>
-          <CardTitle>Découverte catalogue</CardTitle>
+          <CardTitle>{t("catalog_discovery")}</CardTitle>
           <CardDescription>
-            Contrôlez la visibilité de ce produit dans le catalogue et les recherches.
+            {t("catalog_discovery_description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -156,9 +156,9 @@ export function ProductRecommendationsTab({ product_id }: Props) {
               disabled={update.isPending}
             />
             <div>
-              <p className="text-sm font-medium">Produit mis en avant</p>
+              <p className="text-sm font-medium">{t("featured_product")}</p>
               <p className="text-muted-foreground text-xs">
-                Les produits mis en avant apparaissent en priorité dans le catalogue.
+                {t("featured_product_description")}
               </p>
             </div>
           </div>
@@ -169,9 +169,9 @@ export function ProductRecommendationsTab({ product_id }: Props) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Recommandations</CardTitle>
+            <CardTitle>{t("recommendations")}</CardTitle>
             <CardDescription>
-              Gérez les produits recommandés associés à ce produit.
+              {t("recommendations_description")}
             </CardDescription>
           </div>
           <Button
@@ -183,7 +183,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
             <RefreshCw
               className={`mr-2 size-4 ${reindex.isPending ? "animate-spin" : ""}`}
             />
-            Réindexer
+            {t("reindex")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -195,8 +195,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
             </div>
           ) : edges.length === 0 ? (
             <p className="text-muted-foreground py-4 text-center text-sm">
-              Aucune recommandation pour ce produit. Cliquez sur &quot;Réindexer&quot; pour générer
-              automatiquement des recommandations ou ajoutez-en manuellement ci-dessous.
+              {t("no_recommendations")}
             </p>
           ) : (
             <div className="space-y-6">
@@ -205,16 +204,16 @@ export function ProductRecommendationsTab({ product_id }: Props) {
                   <div className="mb-2 flex items-center gap-2">
                     <Badge variant="secondary">{type_labels[type] ?? type}</Badge>
                     <span className="text-muted-foreground text-xs">
-                      {type_edges.length} produit{type_edges.length > 1 ? "s" : ""}
+                      {type_edges.length} {t("product_count")}
                     </span>
                   </div>
                   <div className="rounded-md border">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-12">Rang</TableHead>
-                          <TableHead>Produit</TableHead>
-                          <TableHead className="w-24 text-right">Score</TableHead>
+                          <TableHead className="w-12">{t("rank")}</TableHead>
+                          <TableHead>{t("product")}</TableHead>
+                          <TableHead className="w-24 text-right">{t("score")}</TableHead>
                           <TableHead className="w-20" />
                         </TableRow>
                       </TableHeader>
@@ -253,20 +252,20 @@ export function ProductRecommendationsTab({ product_id }: Props) {
 
           {/* ─── Add Manual Edge ─── */}
           <div className="rounded-lg border p-4">
-            <h4 className="mb-3 text-sm font-medium">Ajouter une recommandation manuelle</h4>
+            <h4 className="mb-3 text-sm font-medium">{t("add_manual_recommendation")}</h4>
             <div className="flex flex-wrap items-end gap-3">
               <div className="min-w-[160px] flex-1">
                 <Field>
-                  <FieldLabel className="text-xs">Type</FieldLabel>
+                  <FieldLabel className="text-xs">{t("type")}</FieldLabel>
                   <Select value={new_edge_type} onValueChange={set_new_edge_type}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={RECOMMENDATION_TYPE.similar}>Similaire</SelectItem>
-                      <SelectItem value={RECOMMENDATION_TYPE.related}>Associé</SelectItem>
+                      <SelectItem value={RECOMMENDATION_TYPE.similar}>{t("type_similar")}</SelectItem>
+                      <SelectItem value={RECOMMENDATION_TYPE.related}>{t("type_related")}</SelectItem>
                       <SelectItem value={RECOMMENDATION_TYPE.fbt}>
-                        Souvent achetés ensemble
+                        {t("type_fbt")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -275,7 +274,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
 
               <div className="min-w-[200px] flex-1">
                 <Field>
-                  <FieldLabel className="text-xs">Produit cible</FieldLabel>
+                  <FieldLabel className="text-xs">{t("target_product")}</FieldLabel>
                   <Combobox
                     value={selected_target?.id ?? ""}
                     onValueChange={(val) => {
@@ -290,7 +289,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
                     }}
                   >
                     <ComboboxInput
-                      placeholder="Rechercher un produit..."
+                      placeholder={t("search_product_placeholder")}
                       value={search_query}
                       onChange={(e) => set_search_query(e.target.value)}
                     />
@@ -324,11 +323,11 @@ export function ProductRecommendationsTab({ product_id }: Props) {
                             ))
                         ) : search_query.length >= 2 ? (
                           <p className="text-muted-foreground p-4 text-center text-sm">
-                            Aucun résultat
+                            {t("no_results")}
                           </p>
                         ) : (
                           <p className="text-muted-foreground p-4 text-center text-sm">
-                            Tapez au moins 2 caractères
+                            {t("type_at_least")}
                           </p>
                         )}
                       </ComboboxList>
@@ -363,7 +362,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
                 className="mb-0.5"
               >
                 <Plus className="mr-1 size-4" />
-                Ajouter
+                {t("add")}
               </Button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   Heart,
@@ -89,6 +90,7 @@ export function WishlistPanel({
   onRemoveItem,
   isLoading,
 }: WishlistPanelProps) {
+  const t = useTranslations("wishlist");
   const [newName, setNewName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -119,26 +121,26 @@ export function WishlistPanel({
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Heart className="h-5 w-5 text-red-500" />
-              Mes listes
+              {t("my_lists")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
               <div className="p-2 bg-muted rounded">
                 <p className="font-bold">{stats.total_wishlists}</p>
-                <p className="text-xs text-muted-foreground">Listes</p>
+                <p className="text-xs text-muted-foreground">{t("lists")}</p>
               </div>
               <div className="p-2 bg-muted rounded">
                 <p className="font-bold">{stats.total_items}</p>
-                <p className="text-xs text-muted-foreground">Articles</p>
+                <p className="text-xs text-muted-foreground">{t("items")}</p>
               </div>
               <div className="p-2 bg-muted rounded">
                 <p className="font-bold">{stats.total_purchased}</p>
-                <p className="text-xs text-muted-foreground">Achetés</p>
+                <p className="text-xs text-muted-foreground">{t("purchased")}</p>
               </div>
               <div className="p-2 bg-muted rounded">
                 <p className="font-bold">{stats.conversion_rate}%</p>
-                <p className="text-xs text-muted-foreground">Conversion</p>
+                <p className="text-xs text-muted-foreground">{t("conversion")}</p>
               </div>
             </div>
 
@@ -159,7 +161,7 @@ export function WishlistPanel({
                     <span className="truncate">{wl.name}</span>
                     {wl.is_default && (
                       <Badge variant="secondary" className="text-[10px] px-1 py-0">
-                        Default
+                        {t("default")}
                       </Badge>
                     )}
                   </div>
@@ -173,7 +175,7 @@ export function WishlistPanel({
 
             <div className="flex gap-2 mt-4">
               <Input
-                placeholder="Nouvelle liste..."
+                placeholder={t("new_list_placeholder")}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -207,7 +209,7 @@ export function WishlistPanel({
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onDeleteWishlist(selected.id)} className="text-destructive">
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Supprimer
+                        {t("delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -226,7 +228,7 @@ export function WishlistPanel({
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Package className="h-5 w-5" />
-              {selected?.name ?? "Articles"} ({items?.length ?? 0})
+              {selected?.name ?? t("items")} ({items?.length ?? 0})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -237,8 +239,8 @@ export function WishlistPanel({
             ) : !items || items.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Heart className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                <p>Aucun article dans cette liste</p>
-                <p className="text-sm">Parcourez les produits et ajoutez-les à vos listes</p>
+                <p>{t("empty_list_message")}</p>
+                <p className="text-sm">{t("empty_list_hint")}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -270,7 +272,7 @@ export function WishlistPanel({
                         </Badge>
                         {item.is_purchased && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-600">
-                            Acheté
+                            {t("purchased")}
                           </Badge>
                         )}
                         <span className="text-xs text-muted-foreground">Qté: {item.quantity}</span>
@@ -285,7 +287,7 @@ export function WishlistPanel({
                       )}
                       {item.saved_price && item.current_price && item.saved_price !== item.current_price && (
                         <p className="text-xs text-green-600">
-                          {Number(item.current_price) < Number(item.saved_price) ? "↓" : "↑"} Évolution
+                          {Number(item.current_price) < Number(item.saved_price) ? "↓" : "↑"} {t("price_change")}
                         </p>
                       )}
                     </div>

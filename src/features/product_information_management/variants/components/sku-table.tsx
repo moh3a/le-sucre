@@ -359,7 +359,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             }
             onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
             className="rounded border-gray-300 text-[#c8d152]"
-            aria-label="Select all"
+            aria-label={t("select_all_label")}
           />
         ),
         cell: ({ row }) => (
@@ -368,7 +368,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             checked={row.getIsSelected()}
             onChange={(e) => row.toggleSelected(!!e.target.checked)}
             className="rounded border-gray-300 text-[#c8d152]"
-            aria-label="Select row"
+            aria-label={t("select_row_label")}
           />
         ),
         enableSorting: false,
@@ -420,7 +420,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 const item = items.find((r) => r.sku_id === sku_id);
                 start_inline_edit(sku_id, "base_price", item?.base_price ?? "");
               }}
-              title="Cliquer pour modifier"
+              title={t("click_to_edit_title")}
             >
               {row.original.base_price ?? "—"} {row.original.currency ?? currency}
             </span>
@@ -466,7 +466,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 const item = items.find((r) => r.sku_id === sku_id);
                 start_inline_edit(sku_id, "offer_price", item?.offer_price ?? "");
               }}
-              title="Cliquer pour modifier"
+              title={t("click_to_edit_title")}
             >
               {row.original.offer_price ?? "—"}
             </span>
@@ -511,7 +511,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               onClick={() =>
                 start_inline_edit(sku_id, "stock_available", row.original.stock_available)
               }
-              title="Cliquer pour modifier"
+              title={t("click_to_edit_title")}
             >
               {row.original.stock_available}
             </span>
@@ -632,7 +632,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   }
 
   async function on_bulk_delete() {
-    if (!window.confirm("Voulez-vous vraiment supprimer les variantes sélectionnées ?")) return;
+    if (!window.confirm(t("confirm_bulk_delete"))) return;
     await bulk_delete.mutateAsync({ ids: selected_ids });
   }
 
@@ -641,7 +641,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       selected_ids.length > 0 ? (
         <div className="flex items-center gap-1.5">
           <span className="text-muted-foreground text-xs font-semibold">
-            {selected_ids.length} sélectionné(s) :
+            {selected_ids.length} {t("selected_count")}:
           </span>
           <Button
             variant="outline"
@@ -650,7 +650,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             onClick={() => bulk_toggle_active(true)}
             disabled={bulk_update.isPending}
           >
-            Activer
+            {t("activate")}
           </Button>
           <Button
             variant="outline"
@@ -659,7 +659,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             onClick={() => bulk_toggle_active(false)}
             disabled={bulk_update.isPending}
           >
-            Désactiver
+            {t("deactivate")}
           </Button>
           <Button
             variant="outline"
@@ -671,7 +671,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             }}
             disabled={bulk_update.isPending}
           >
-            Prix
+            {t("price")}
           </Button>
           <Button
             variant="outline"
@@ -683,7 +683,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             }}
             disabled={bulk_update.isPending}
           >
-            Stock
+            {t("stock")}
           </Button>
           <Button
             variant="destructive"
@@ -692,7 +692,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             onClick={on_bulk_delete}
             disabled={bulk_delete.isPending}
           >
-            Supprimer
+            {t("delete")}
           </Button>
         </div>
       ) : null,
@@ -711,7 +711,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       <div className="flex items-center justify-between gap-4">
         <div className="flex max-w-sm flex-1 items-center gap-2">
           <Input
-            placeholder="Rechercher par SKU..."
+            placeholder={t("search_sku_short")}
             value={(table.getColumn("sku_code")?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn("sku_code")?.setFilterValue(event.target.value)}
             className="h-9"
@@ -830,10 +830,9 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       <Dialog open={bulk_price_dialog_open} onOpenChange={set_bulk_price_dialog_open}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Modifier les prix en masse</DialogTitle>
+            <DialogTitle>{t("bulk_edit_price_title")}</DialogTitle>
             <DialogDescription>
-              Entrez les nouveaux prix pour les variantes sélectionnées. Laissez vide pour ne pas
-              modifier.
+              {t("bulk_edit_price_description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -866,10 +865,10 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               variant="outline"
               onClick={() => set_bulk_price_dialog_open(false)}
             >
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="button" onClick={on_save_bulk_price} disabled={bulk_update.isPending}>
-              Mettre à jour
+              {t("update")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -878,9 +877,9 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       <Dialog open={bulk_stock_dialog_open} onOpenChange={set_bulk_stock_dialog_open}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Définir le stock en masse</DialogTitle>
+            <DialogTitle>{t("bulk_set_stock_title")}</DialogTitle>
             <DialogDescription>
-              Définit la quantité en stock pour toutes les variantes sélectionnées.
+              {t("bulk_set_stock_description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -890,8 +889,8 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               control={bulk_stock_form.control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Quantité en stock</FieldLabel>
-                  <Input type="number" min={0} step="1" {...field} placeholder="Nouveau stock" />
+                  <FieldLabel>{t("stock_quantity")}</FieldLabel>
+                  <Input type="number" min={0} step="1" {...field} placeholder={t("new_stock_placeholder")} />
                 </Field>
               )}
             />
@@ -903,14 +902,14 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               variant="outline"
               onClick={() => set_bulk_stock_dialog_open(false)}
             >
-              Annuler
+              {t("cancel")}
             </Button>
             <Button
               type="button"
               onClick={on_save_bulk_stock}
               disabled={bulk_update.isPending || !bulk_stock_form.watch("stock")}
             >
-              Définir
+              {t("set_stock")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -27,6 +28,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 export function CreateTaskDialog() {
+  const t = useTranslations("tasks");
   const [open, setOpen] = useState(false);
   const [taskType, setTaskType] = useState("general");
   const [title, setTitle] = useState("");
@@ -40,7 +42,7 @@ export function CreateTaskDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.adminTaskCreate.useMutation({
     onSuccess: () => {
-      toast.success("Tâche créée");
+      toast.success(t("task_created"));
       setOpen(false);
       reset();
       utils.operations.adminTaskListAll.invalidate();
@@ -63,7 +65,7 @@ export function CreateTaskDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title) {
-      toast.error("Veuillez saisir un titre");
+      toast.error(t("title_required"));
       return;
     }
     mutation.mutate({
@@ -84,95 +86,95 @@ export function CreateTaskDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 size-4" />
-          Nouvelle tâche
+          {t("new_task")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Créer une tâche</DialogTitle>
+          <DialogTitle>{t("create_task_title")}</DialogTitle>
           <DialogDescription>
-            Ajouter une nouvelle tâche interne.
+            {t("create_task_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tk_title">Titre *</Label>
+            <Label htmlFor="tk_title">{t("title_label")}</Label>
             <Input
               id="tk_title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Objet de la tâche"
+              placeholder={t("subject_placeholder")}
               required
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tk_type">Type</Label>
+              <Label htmlFor="tk_type">{t("type_label")}</Label>
               <Select value={taskType} onValueChange={setTaskType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="order_follow_up">Suivi commande</SelectItem>
-                  <SelectItem value="customer_follow_up">Suivi client</SelectItem>
-                  <SelectItem value="inventory_review">Révision inventaire</SelectItem>
-                  <SelectItem value="campaign_review">Révision campagne</SelectItem>
-                  <SelectItem value="general">Général</SelectItem>
+                  <SelectItem value="order_follow_up">{t("type_order_follow_up")}</SelectItem>
+                  <SelectItem value="customer_follow_up">{t("type_customer_follow_up")}</SelectItem>
+                  <SelectItem value="inventory_review">{t("type_inventory_review")}</SelectItem>
+                  <SelectItem value="campaign_review">{t("type_campaign_review")}</SelectItem>
+                  <SelectItem value="general">{t("type_general")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tk_priority">Priorité</Label>
+              <Label htmlFor="tk_priority">{t("priority_label")}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Basse</SelectItem>
-                  <SelectItem value="normal">Normale</SelectItem>
-                  <SelectItem value="high">Haute</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
+                  <SelectItem value="low">{t("priority_low")}</SelectItem>
+                  <SelectItem value="normal">{t("priority_normal")}</SelectItem>
+                  <SelectItem value="high">{t("priority_high")}</SelectItem>
+                  <SelectItem value="urgent">{t("priority_urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tk_description">Description</Label>
+            <Label htmlFor="tk_description">{t("description_label")}</Label>
             <Textarea
               id="tk_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description détaillée"
+              placeholder={t("description_placeholder")}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tk_ref_type">Type de référence</Label>
+              <Label htmlFor="tk_ref_type">{t("reference_type_label")}</Label>
               <Select value={referenceType} onValueChange={setReferenceType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Aucun" />
+                  <SelectValue placeholder={t("none_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="order">Commande</SelectItem>
-                  <SelectItem value="campaign">Campagne</SelectItem>
-                  <SelectItem value="product">Produit</SelectItem>
-                  <SelectItem value="customer">Client</SelectItem>
+                  <SelectItem value="order">{t("ref_type_order")}</SelectItem>
+                  <SelectItem value="campaign">{t("ref_type_campaign")}</SelectItem>
+                  <SelectItem value="product">{t("ref_type_product")}</SelectItem>
+                  <SelectItem value="customer">{t("ref_type_customer")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tk_ref_id">ID de référence</Label>
+              <Label htmlFor="tk_ref_id">{t("reference_id_label")}</Label>
               <Input
                 id="tk_ref_id"
                 value={referenceId}
                 onChange={(e) => setReferenceId(e.target.value)}
-                placeholder="ID correspondant"
+                placeholder={t("reference_id_placeholder")}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tk_due_at">Échéance</Label>
+              <Label htmlFor="tk_due_at">{t("due_date_label")}</Label>
               <Input
                 id="tk_due_at"
                 type="datetime-local"
@@ -181,21 +183,21 @@ export function CreateTaskDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tk_assigned_to">Assigné à</Label>
+              <Label htmlFor="tk_assigned_to">{t("assigned_to_label")}</Label>
               <Input
                 id="tk_assigned_to"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                placeholder="ID utilisateur"
+                placeholder={t("user_id_placeholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel_button")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Créer la tâche"}
+              {mutation.isPending ? t("creating_button") : t("create_button")}
             </Button>
           </DialogFooter>
         </form>

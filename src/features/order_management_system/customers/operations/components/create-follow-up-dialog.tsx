@@ -22,11 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Phone } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreateFollowUpDialog() {
+  const t = useTranslations("followups");
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [orderId, setOrderId] = useState("");
@@ -40,13 +42,13 @@ export function CreateFollowUpDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.customerCreateFollowUp.useMutation({
     onSuccess: () => {
-      toast.success("Relance créée");
+      toast.success(t("follow_up_created"));
       setOpen(false);
       reset();
       utils.operations.customerListMyFollowUps.invalidate();
       utils.operations.customerGetOverdueFollowUps.invalidate();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   function reset() {
@@ -63,7 +65,7 @@ export function CreateFollowUpDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title || !scheduledAt) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required_fields"));
       return;
     }
     mutation.mutate({
@@ -84,88 +86,88 @@ export function CreateFollowUpDialog() {
       <DialogTrigger asChild>
         <Button>
           <Phone className="mr-2 size-4" />
-          Nouvelle relance
+          {t("new_follow_up")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Créer une relance / suivi</DialogTitle>
+          <DialogTitle>{t("create_follow_up_title")}</DialogTitle>
           <DialogDescription>
-            Planifier un rappel ou un suivi client.
+            {t("create_follow_up_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fu_title">Titre *</Label>
+            <Label htmlFor="fu_title">{t("title")} *</Label>
             <Input
               id="fu_title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Objet de la relance"
+              placeholder={t("subject_placeholder")}
               required
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fu_type">Type</Label>
+              <Label htmlFor="fu_type">{t("type")}</Label>
               <Select value={followUpType} onValueChange={setFollowUpType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="callback">Rappel</SelectItem>
-                  <SelectItem value="follow_up">Suivi</SelectItem>
-                  <SelectItem value="reminder">Rappel automatique</SelectItem>
+                  <SelectItem value="callback">{t("callback")}</SelectItem>
+                  <SelectItem value="follow_up">{t("follow_up")}</SelectItem>
+                  <SelectItem value="reminder">{t("reminder_auto")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fu_priority">Priorité</Label>
+              <Label htmlFor="fu_priority">{t("priority")}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Basse</SelectItem>
-                  <SelectItem value="normal">Normale</SelectItem>
-                  <SelectItem value="high">Haute</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
+                  <SelectItem value="low">{t("priority_low")}</SelectItem>
+                  <SelectItem value="normal">{t("priority_normal")}</SelectItem>
+                  <SelectItem value="high">{t("priority_high")}</SelectItem>
+                  <SelectItem value="urgent">{t("priority_urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fu_user_id">Client</Label>
+              <Label htmlFor="fu_user_id">{t("client")}</Label>
               <Input
                 id="fu_user_id"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
-                placeholder="ID du client (optionnel)"
+                placeholder={t("client_id_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fu_order_id">Commande</Label>
+              <Label htmlFor="fu_order_id">{t("order")}</Label>
               <Input
                 id="fu_order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande (optionnel)"
+                placeholder={t("order_id_placeholder")}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="fu_description">Description</Label>
+            <Label htmlFor="fu_description">{t("description")}</Label>
             <Textarea
               id="fu_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Notes supplémentaires"
+              placeholder={t("notes_placeholder")}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fu_scheduled_at">Programmé le *</Label>
+              <Label htmlFor="fu_scheduled_at">{t("scheduled_at")} *</Label>
               <Input
                 id="fu_scheduled_at"
                 type="datetime-local"
@@ -175,21 +177,21 @@ export function CreateFollowUpDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fu_assigned_to">Assigné à</Label>
+              <Label htmlFor="fu_assigned_to">{t("assigned_to")}</Label>
               <Input
                 id="fu_assigned_to"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
-                placeholder="ID utilisateur"
+                placeholder={t("user_id_placeholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Créer la relance"}
+              {mutation.isPending ? t("creating") : t("create_follow_up")}
             </Button>
           </DialogFooter>
         </form>

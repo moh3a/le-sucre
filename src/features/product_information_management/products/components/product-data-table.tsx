@@ -277,7 +277,7 @@ export function ProductDataTable() {
       {
         id: "Image",
         accessorKey: "image_url",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Image" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("image_column")} />,
         cell: ({ row }) =>
           row.original.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -307,7 +307,7 @@ export function ProductDataTable() {
       {
         id: "featured",
         accessorKey: "is_featured",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="À la une" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("featured_column")} />,
         cell: ({ row }) =>
           row.original.is_featured ? (
             <Star className="size-4 fill-yellow-400 text-yellow-400" />
@@ -322,17 +322,17 @@ export function ProductDataTable() {
       {
         id: "Category",
         accessorKey: "category_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Category" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("category_column")} />,
       },
       {
         id: "Brand",
         accessorKey: "brand_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Brand" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("brand_column")} />,
       },
       {
         id: "stock",
         accessorKey: "current_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Stock" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("stock_column")} />,
         cell: ({ row }) => (
           <Badge
             variant={
@@ -350,18 +350,18 @@ export function ProductDataTable() {
       {
         id: "Units sold",
         accessorKey: "units_sold",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Sales" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sales_column")} />,
       },
       {
         id: "Revenue",
         accessorKey: "revenue",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Revenue" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("revenue_column")} />,
         cell: ({ row }) => `${Number(row.original.revenue).toFixed(2)} DZD`,
       },
       {
         id: "Rating",
         accessorKey: "average_rating",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Rating" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("rating_column")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <span>{row.original.average_rating}</span>
@@ -372,7 +372,7 @@ export function ProductDataTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Créé le" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -394,7 +394,7 @@ export function ProductDataTable() {
               <DropdownMenuItem asChild>
                 <Link href={`/console/products/${row.original.id}?tab=recommendations`}>
                   <Star className="mr-2 size-4" />
-                  Recommandations
+                  {t("recommendations")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -463,9 +463,9 @@ export function ProductDataTable() {
   const brandOptions = brandsData?.map((b) => ({ label: b.name, value: b.id })) ?? [];
   const categoryOptions = categoriesData?.map((c) => ({ label: c.name, value: c.id })) ?? [];
   const stockOptions = [
-    { label: "En stock", value: "in_stock" },
-    { label: "Stock faible", value: "low_stock" },
-    { label: "Rupture de stock", value: "out_of_stock" },
+    { label: t("in_stock"), value: "in_stock" },
+    { label: t("low_stock"), value: "low_stock" },
+    { label: t("out_of_stock"), value: "out_of_stock" },
   ];
 
   function runBulk(action: "activate" | "deactivate" | "delete" | "assign_category") {
@@ -490,34 +490,34 @@ export function ProductDataTable() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher un produit…"
+            placeholder={t("search_product_placeholder")}
             value={search || ""}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Marque"
+            title={t("brand_title")}
             options={brandOptions}
             icon={Tag}
             value={brand_id ?? undefined}
             onChange={setBrandId}
           />
           <FacetedFilter
-            title="Catégorie"
+            title={t("category_title")}
             options={categoryOptions}
             icon={Folder}
             value={category_id ?? undefined}
             onChange={setCategoryId}
           />
           <FacetedFilter
-            title="Stock"
+            title={t("stock_title")}
             options={stockOptions}
             icon={Tag}
             value={stock_status ?? undefined}
             onChange={setStockStatus}
           />
           <RangeFilter
-            title="Prix"
+            title={t("price_title")}
             min={0}
             max={100000}
             minValue={price_min}
@@ -527,7 +527,7 @@ export function ProductDataTable() {
             unit="DZD"
           />
           <RangeFilter
-            title="Note"
+            title={t("rating_title")}
             min={0}
             max={5}
             minValue={rating_min}
@@ -540,23 +540,23 @@ export function ProductDataTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {table.getFilteredSelectedRowModel().rows.length} {t("selected_count")}
             </Badge>
             <Button variant="secondary" size="sm" onClick={() => runBulk("activate")}>
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              Activer
+              {t("activate")}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => runBulk("deactivate")}>
               <Archive className="mr-1 h-4 w-4" />
-              Désactiver
+              {t("deactivate")}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => runBulk("assign_category")}>
               <Folder className="mr-1 h-4 w-4" />
-              Assigner catégorie
+              {t("assign_category")}
             </Button>
             <Button variant="destructive" size="sm" onClick={() => runBulk("delete")}>
               <Archive className="mr-1 h-4 w-4" />
-              Supprimer
+              {t("delete")}
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <a
@@ -574,7 +574,7 @@ export function ProductDataTable() {
                 download="products.csv"
               >
                 <Download className="mr-1 h-4 w-4" />
-                Exporter
+                {t("export")}
               </a>
             </Button>
           </div>
@@ -584,14 +584,14 @@ export function ProductDataTable() {
       <Dialog open={assignCategoryOpen} onOpenChange={setAssignCategoryOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assigner une catégorie</DialogTitle>
+            <DialogTitle>{t("assign_category_title")}</DialogTitle>
             <DialogDescription>
-              Sélectionnez une catégorie à assigner aux produits sélectionnés.
+              {t("assign_category_description")}
             </DialogDescription>
           </DialogHeader>
           <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
             <SelectTrigger>
-              <SelectValue placeholder="Sélectionner une catégorie" />
+              <SelectValue placeholder={t("select_category_filter")} />
             </SelectTrigger>
             <SelectContent>
               {categoryOptions.map((c) => (
@@ -603,9 +603,9 @@ export function ProductDataTable() {
           </Select>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setAssignCategoryOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
-            <Button onClick={handleAssignCategory}>Assigner</Button>
+            <Button onClick={handleAssignCategory}>{t("assign")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

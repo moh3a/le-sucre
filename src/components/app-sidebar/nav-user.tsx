@@ -2,6 +2,7 @@
 
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,6 +35,7 @@ export function NavUser({
     role: RoleName | null;
   };
 }) {
+  const t = useTranslations("nav_user");
   const { isMobile } = useSidebar();
 
   return (
@@ -85,14 +87,14 @@ export function NavUser({
               <Link href="/console/account">
                 <DropdownMenuItem>
                   <BadgeCheck />
-                  Account
+                  {t("account")}
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => authClient.signOut()}>
               <LogOut />
-              Log out
+              {t("log_out")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

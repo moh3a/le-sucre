@@ -6,6 +6,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Download, MoreHorizontal, Pencil, Play, Square, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -48,37 +49,7 @@ interface Option {
   value: string;
 }
 
-const TYPE_OPTIONS: Option[] = [
-  { label: "Code Promo", value: "promo_code" },
-  { label: "Automatique", value: "automatic" },
-  { label: "Vente Flash", value: "flash_sale" },
-  { label: "Bundle", value: "bundle" },
-  { label: "Client Spécifique", value: "customer" },
-];
 
-const STATUS_OPTIONS: Option[] = [
-  { label: "Actif", value: "active" },
-  { label: "Brouillon", value: "draft" },
-  { label: "Planifié", value: "scheduled" },
-  { label: "En Pause", value: "paused" },
-  { label: "Expiré", value: "expired" },
-];
-
-const STATUS_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  draft: { label: "Brouillon", variant: "secondary" },
-  scheduled: { label: "Planifié", variant: "outline" },
-  active: { label: "Actif", variant: "default" },
-  paused: { label: "En Pause", variant: "destructive" },
-  expired: { label: "Expiré", variant: "secondary" },
-};
-
-const TYPE_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-  promo_code: { label: "Code Promo", variant: "default" },
-  automatic: { label: "Automatique", variant: "secondary" },
-  flash_sale: { label: "Vente Flash", variant: "outline" },
-  bundle: { label: "Bundle", variant: "outline" },
-  customer: { label: "Client Spécifique", variant: "secondary" },
-};
 
 function FacetedFilter({
   title,
@@ -146,11 +117,44 @@ function FacetedFilter({
 }
 
 export function PromotionsTable() {
+  const t = useTranslations("promotions");
   const [page, setPage] = useQueryState("pmPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("pmPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("pmSearch", parseAsString);
   const [status, setStatus] = useQueryState("pmStatus", parseAsString);
   const [promotion_type, setPromotionType] = useQueryState("pmType", parseAsString);
+
+  const TYPE_OPTIONS: Option[] = [
+    { label: t("type_promo_code"), value: "promo_code" },
+    { label: t("type_automatic"), value: "automatic" },
+    { label: t("type_flash_sale"), value: "flash_sale" },
+    { label: t("type_bundle"), value: "bundle" },
+    { label: t("type_customer"), value: "customer" },
+  ];
+
+  const STATUS_OPTIONS: Option[] = [
+    { label: t("status_active"), value: "active" },
+    { label: t("status_draft"), value: "draft" },
+    { label: t("status_scheduled"), value: "scheduled" },
+    { label: t("status_paused"), value: "paused" },
+    { label: t("status_expired"), value: "expired" },
+  ];
+
+  const STATUS_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    draft: { label: t("status_draft"), variant: "secondary" },
+    scheduled: { label: t("status_scheduled"), variant: "outline" },
+    active: { label: t("status_active"), variant: "default" },
+    paused: { label: t("status_paused"), variant: "destructive" },
+    expired: { label: t("status_expired"), variant: "secondary" },
+  };
+
+  const TYPE_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
+    promo_code: { label: t("type_promo_code"), variant: "default" },
+    automatic: { label: t("type_automatic"), variant: "secondary" },
+    flash_sale: { label: t("type_flash_sale"), variant: "outline" },
+    bundle: { label: t("type_bundle"), variant: "outline" },
+    customer: { label: t("type_customer"), variant: "secondary" },
+  };
 
   const utils = trpc.useUtils();
   const { data, isLoading } = trpc.promotions.adminList.useQuery({
@@ -171,7 +175,7 @@ export function PromotionsTable() {
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Nom" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("name_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <Link
@@ -187,7 +191,7 @@ export function PromotionsTable() {
       {
         id: "promotion_type",
         accessorKey: "promotion_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => {
           const cfg = TYPE_BADGES[row.original.promotion_type] ?? {
             label: row.original.promotion_type,
@@ -211,7 +215,7 @@ export function PromotionsTable() {
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Priorité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-sm">{row.original.priority}</span>
         ),
@@ -219,7 +223,7 @@ export function PromotionsTable() {
       {
         id: "usage_count",
         accessorKey: "usage_count",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Utilisations" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("usage_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-sm">{row.original.usage_count}</span>
         ),
@@ -227,7 +231,7 @@ export function PromotionsTable() {
       {
         id: "total_discount",
         accessorKey: "total_discount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Remise Totale" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("total_discount_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-sm">
             {Number(row.original.total_discount).toLocaleString("fr-FR", {
@@ -240,20 +244,20 @@ export function PromotionsTable() {
       {
         id: "is_stackable",
         accessorKey: "is_stackable",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Cumulable" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("stackable_column")} />,
         cell: ({ row }) => (
           <Badge variant={row.original.is_stackable ? "default" : "secondary"}>
-            {row.original.is_stackable ? "Oui" : "Non"}
+            {row.original.is_stackable ? t("yes") : t("no")}
           </Badge>
         ),
       },
       {
         id: "dates",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Validité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("validity_column")} />,
         cell: ({ row }) => {
           const start = row.original.starts_at;
           const end = row.original.ends_at;
-          if (!start && !end) return <span className="text-muted-foreground text-xs">Illimitée</span>;
+          if (!start && !end) return <span className="text-muted-foreground text-xs">{t("unlimited")}</span>;
           return (
             <span className="text-xs">
               {start ? formatDate(start, { month: "short" }) : "∞"} →{" "}
@@ -265,7 +269,7 @@ export function PromotionsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Créé le" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -281,24 +285,24 @@ export function PromotionsTable() {
               <DropdownMenuItem asChild>
                 <Link href={`/console/promotions/${row.original.id}`}>
                   <Pencil className="mr-2 size-4" />
-                  Modifier
+                  {t("edit")}
                 </Link>
               </DropdownMenuItem>
               {row.original.status !== "active" && (
                 <DropdownMenuItem>
                   <Play className="mr-2 size-4 text-emerald-600" />
-                  Activer
+                  {t("activate")}
                 </DropdownMenuItem>
               )}
               {row.original.status === "active" && (
                 <DropdownMenuItem>
                   <Square className="mr-2 size-4 text-amber-600" />
-                  Mettre en pause
+                  {t("pause")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem className="text-destructive">
                 <Trash2 className="mr-2 size-4" />
-                Supprimer
+                {t("delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -326,7 +330,7 @@ export function PromotionsTable() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher par nom ou slug…"
+            placeholder={t("search_placeholder")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -335,7 +339,7 @@ export function PromotionsTable() {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Type"
+            title={t("type_title")}
             options={TYPE_OPTIONS}
             value={promotion_type ?? undefined}
             onChange={(val) => {
@@ -344,7 +348,7 @@ export function PromotionsTable() {
             }}
           />
           <FacetedFilter
-            title="Statut"
+            title={t("status_title")}
             options={STATUS_OPTIONS}
             value={status ?? undefined}
             onChange={(val) => {
@@ -357,19 +361,19 @@ export function PromotionsTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
             </Badge>
             <Button variant="secondary" size="sm">
               <Play className="mr-1 h-4 w-4" />
-              Activer
+              {t("activate")}
             </Button>
             <Button variant="secondary" size="sm">
               <Square className="mr-1 h-4 w-4" />
-              Mettre en pause
+              {t("pause")}
             </Button>
             <Button variant="destructive" size="sm">
               <Trash2 className="mr-1 h-4 w-4" />
-              Supprimer
+              {t("delete")}
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <a
@@ -381,7 +385,7 @@ export function PromotionsTable() {
                 download="promotions.csv"
               >
                 <Download className="mr-1 h-4 w-4" />
-                Exporter
+                {t("export")}
               </a>
             </Button>
           </div>

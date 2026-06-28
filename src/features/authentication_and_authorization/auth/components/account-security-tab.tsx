@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,20 +13,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-const password_form_schema = z
-  .object({
-    current_password: z.string().min(1, "Mot de passe actuel requis"),
-    new_password: z.string().min(8, "Minimum 8 caractères").max(128),
-    confirm_password: z.string().min(1, "Confirmation requise"),
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirm_password"],
-  });
+function get_password_form_schema(t: ReturnType<typeof useTranslations<"profile">>) {
+  return z
+    .object({
+      current_password: z.string().min(1, t("current_password_required")),
+      new_password: z.string().min(8, t("password_min_length")).max(128),
+      confirm_password: z.string().min(1, t("confirmation_required")),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t("passwords_dont_match"),
+      path: ["confirm_password"],
+    });
+}
 
-type PasswordFormValues = z.infer<typeof password_form_schema>;
+type PasswordFormValues = z.infer<ReturnType<typeof get_password_form_schema>>;
 
 export function AccountSecurityTab() {
+  const t = useTranslations("profile");
+
+  const password_form_schema = useMemo(() => get_password_form_schema(t), [t]);
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(password_form_schema),
     defaultValues: {
@@ -52,16 +59,16 @@ export function AccountSecurityTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Changer le mot de passe</CardTitle>
+          <CardTitle>{t("change_password_title")}</CardTitle>
           <CardDescription>
-            Utilisez un mot de passe fort et unique pour protéger votre compte.
+            {t("change_password_description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
             <FieldGroup>
               <Field>
-                <FieldLabel>Mot de passe actuel</FieldLabel>
+                <FieldLabel>{t("current_password")}</FieldLabel>
                 <Input type="password" {...form.register("current_password")} />
                 {form.formState.errors.current_password && (
                   <FieldError>{form.formState.errors.current_password.message}</FieldError>
@@ -69,7 +76,7 @@ export function AccountSecurityTab() {
               </Field>
 
               <Field>
-                <FieldLabel>Nouveau mot de passe</FieldLabel>
+                <FieldLabel>{t("new_password")}</FieldLabel>
                 <Input type="password" {...form.register("new_password")} />
                 {form.formState.errors.new_password && (
                   <FieldError>{form.formState.errors.new_password.message}</FieldError>
@@ -77,7 +84,7 @@ export function AccountSecurityTab() {
               </Field>
 
               <Field>
-                <FieldLabel>Confirmer le mot de passe</FieldLabel>
+                <FieldLabel>{t("confirm_password")}</FieldLabel>
                 <Input type="password" {...form.register("confirm_password")} />
                 {form.formState.errors.confirm_password && (
                   <FieldError>{form.formState.errors.confirm_password.message}</FieldError>
@@ -86,17 +93,17 @@ export function AccountSecurityTab() {
             </FieldGroup>
 
             {change.isSuccess && (
-              <p className="text-sm text-green-600">Mot de passe mis à jour avec succès.</p>
+              <p className="text-sm text-green-600">{t("password_updated_success")}</p>
             )}
 
             {change.isError && (
               <p className="text-sm text-destructive">
-                {change.error.message ?? "Une erreur est survenue."}
+                {change.error.message ?? t("error_occurred")}
               </p>
             )}
 
             <Button type="submit" disabled={change.isPending}>
-              {change.isPending ? "Mise à jour…" : "Mettre à jour"}
+              {change.isPending ? t("updating") : t("update")}
             </Button>
           </form>
         </CardContent>

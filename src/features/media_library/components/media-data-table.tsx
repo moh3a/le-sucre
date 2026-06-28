@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import Image from "next/image";
 import { Trash2, LinkIcon, Check, Download, FileVideo, FileText } from "lucide-react";
@@ -51,6 +52,7 @@ type MediaDataTableProps = {
 };
 
 export function MediaDataTable({ search }: MediaDataTableProps) {
+  const t = useTranslations("media");
   const [page, set_page] = useState(1);
   const [copied_id, set_copied_id] = useState<string | null>(null);
   const utils = trpc.useUtils();
@@ -84,14 +86,14 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">Aperçu</TableHead>
-              <TableHead>Nom</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Taille</TableHead>
-              <TableHead>Dimensions</TableHead>
-              <TableHead>Utilisations</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-20">Actions</TableHead>
+              <TableHead className="w-12">{t("preview_column")}</TableHead>
+              <TableHead>{t("name_column")}</TableHead>
+              <TableHead>{t("type_column")}</TableHead>
+              <TableHead>{t("size_column")}</TableHead>
+              <TableHead>{t("dimensions_column")}</TableHead>
+              <TableHead>{t("usage_column")}</TableHead>
+              <TableHead>{t("date_column")}</TableHead>
+              <TableHead className="w-20">{t("actions_column")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -143,10 +145,10 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
                       onClick={() => {
                         navigator.clipboard.writeText(item.url);
                         set_copied_id(item.id);
-                        toast.success("URL copiée");
+                        toast.success(t("url_copied"));
                         setTimeout(() => set_copied_id(null), 2000);
                       }}
-                      title="Copier l'URL"
+                      title={t("download_title")}
                     >
                       {copied_id === item.id ? <Check /> : <LinkIcon />}
                     </Button>
@@ -155,7 +157,7 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
                       size="icon"
                       className="size-7"
                       asChild
-                      title="Télécharger"
+                      title={t("download_title")}
                     >
                       <a
                         href={item.url}
@@ -172,26 +174,25 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
                           variant="ghost"
                           size="icon"
                           className="text-destructive size-7"
-                          title="Supprimer"
+                          title={t("delete_title")}
                         >
                           <Trash2 />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Supprimer ce fichier ?</AlertDialogTitle>
+                          <AlertDialogTitle>{t("delete_confirm_title")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Êtes-vous sûr de vouloir supprimer "{item.original_name}" ? Cette action
-                            est irréversible.
+                            {t("delete_confirm_description", { name: item.original_name })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => delete_media.mutate({ id: item.id })}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Supprimer
+                            {t("delete_file")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -210,10 +211,10 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
           onClick={() => set_page((p) => Math.max(1, p - 1))}
           disabled={page <= 1}
         >
-          Précédent
+          {t("previous")}
         </Button>
         <span className="text-muted-foreground text-sm">
-          Page {page} / {data.meta.total_pages}
+          {t("page_info", { page, total: data.meta.total_pages })}
         </span>
         <Button
           variant="outline"
@@ -221,7 +222,7 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
           onClick={() => set_page((p) => p + 1)}
           disabled={!data.meta.has_more}
         >
-          Suivant
+          {t("next")}
         </Button>
       </div>
     </div>

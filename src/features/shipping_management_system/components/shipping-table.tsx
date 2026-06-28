@@ -7,6 +7,8 @@ import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -55,11 +57,12 @@ const DELIVERY_BADGE: Record<string, "default" | "secondary" | "destructive" | "
 };
 
 export function ShippingTable({ compact = false }: { compact?: boolean }) {
+  const t = useTranslations("shipping");
   const utils = trpc.useUtils();
 
   const sync_mutation = trpc.shipping.sync.useMutation({
     onSuccess: () => {
-      toast.success("Suivi synchronisé");
+      toast.success(t("sync_success"));
       void utils.shipping.adminList.invalidate();
       void utils.shipping.adminStats.invalidate();
     },
@@ -71,7 +74,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "tracking_number",
         accessorKey: "tracking_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="N° suivi" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("tracking_number")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/shipping/${row.original.id}`}
@@ -84,7 +87,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "order_number",
         accessorKey: "order_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -97,13 +100,13 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "provider",
         accessorKey: "provider",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Transporteur" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("provider")} />,
         cell: ({ row }) => <Badge variant="outline">{row.original.provider}</Badge>,
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE[row.original.status] ?? "secondary"}>
             {row.original.status}
@@ -113,7 +116,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "delivery_status",
         accessorKey: "delivery_status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Livraison" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("delivery")} />,
         cell: ({ row }) => (
           <Badge variant={DELIVERY_BADGE[row.original.delivery_status] ?? "outline"}>
             {row.original.delivery_status}
@@ -122,7 +125,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       },
       {
         id: "recipient",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Destinataire" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("recipient")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-medium">{row.original.recipient_name}</span>
@@ -133,7 +136,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "city",
         accessorKey: "city",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Ville" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("city")} />,
         cell: ({ row }) => (
           <span className="text-sm">
             {row.original.city}, {row.original.country_code}
@@ -143,13 +146,13 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Créée le" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
         meta: { label: "Date", icon: Truck },
       },
       {
         id: "actions",
-        header: "Actions",
+        header: t("actions"),
         cell: ({ row }) => (
           <div className="flex items-center gap-1">
             {row.original.tracking_url ? (
@@ -200,11 +203,11 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
   });
 
   const statusOptions = [
-    { label: "Brouillon", value: "draft" },
-    { label: "Expédié", value: "dispatched" },
-    { label: "En transit", value: "in_transit" },
-    { label: "Livré", value: "delivered" },
-    { label: "Échec", value: "failed" },
+    { label: t("draft"), value: "draft" },
+    { label: t("dispatched"), value: "dispatched" },
+    { label: t("in_transit"), value: "in_transit" },
+    { label: t("delivered"), value: "delivered" },
+    { label: t("failed"), value: "failed" },
   ];
 
   return (
@@ -213,7 +216,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {!compact ? (
         <DataTableAdvancedToolbar table={table}>
           <FacetedFilter
-            title="Statut"
+            title={t("status")}
             options={statusOptions}
             icon={ToggleLeft}
             value={status_filter || null}

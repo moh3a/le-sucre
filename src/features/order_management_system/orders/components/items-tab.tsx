@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +44,7 @@ type ItemsTabProps = {
 };
 
 export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabProps) {
+  const t = useTranslations("orders");
   const update_items = trpc.orders.adminUpdateItems.useMutation({
     onSuccess: () => {
       on_update();
@@ -143,10 +146,10 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>Articles de la commande</CardTitle>
+          <CardTitle>{t("articles_commande")}</CardTitle>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={init_items_form}>
-              Modifier les articles
+              {t("modifier_articles")}
             </Button>
           </div>
         </CardHeader>
@@ -154,12 +157,12 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
           <table className="w-full text-sm">
             <thead className="border-b">
               <tr className="text-muted-foreground">
-                <th className="px-4 py-3 text-left font-medium">Produit</th>
-                <th className="px-4 py-3 text-left font-medium">SKU</th>
-                <th className="px-4 py-3 text-right font-medium">Qté</th>
-                <th className="px-4 py-3 text-right font-medium">Prix unit.</th>
-                <th className="px-4 py-3 text-right font-medium">Total ligne</th>
-                <th className="px-4 py-3 text-left font-medium">Livraison</th>
+                <th className="px-4 py-3 text-left font-medium">{t("produit")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("sku")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t("qte")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t("prix_unitaire")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t("total_ligne")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("livraison")}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -189,7 +192,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
       {edit_items.length > 0 && (
         <Card className="mt-4 border-blue-200">
           <CardHeader>
-            <CardTitle>Édition des articles</CardTitle>
+            <CardTitle>{t("edition_articles")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="divide-y rounded-md border">
@@ -224,19 +227,19 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
                 </div>
               ))}
               <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
-                <span>Total</span>
+                <span>{t("total")}</span>
                 <span>{edit_items_total.toLocaleString("fr-FR")} DZD</span>
               </div>
             </div>
 
             <div className="rounded-md border p-3">
-              <p className="mb-2 text-xs font-medium">Ajouter un article</p>
+              <p className="mb-2 text-xs font-medium">{t("ajouter_article")}</p>
               <div className="flex flex-wrap items-end gap-2">
                 <div className="relative min-w-[200px] flex-1">
                   <Search className="text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2" />
                   <Input
                     className="h-8 pl-7 text-xs"
-                    placeholder="Rechercher un SKU..."
+                    placeholder={t("search_sku")}
                     value={search_query}
                     onChange={(e) => {
                       set_search_query(e.target.value);
@@ -247,7 +250,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
                 {search_query && (
                   <div className="max-h-[120px] w-full overflow-y-auto rounded border text-xs">
                     {sku_options.length === 0 ? (
-                      <p className="text-muted-foreground p-2">Aucun résultat</p>
+                      <p className="text-muted-foreground p-2">{t("no_results")}</p>
                     ) : (
                       sku_options.slice(0, 6).map((sku) => (
                         <label
@@ -282,7 +285,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
                       value={add_qty}
                       onChange={(e) => set_add_qty(Math.max(1, Number(e.target.value)))}
                       className="h-8 w-16 text-xs"
-                      placeholder="Qté"
+                      placeholder={t("qty_placeholder")}
                     />
                     <Input
                       type="number"
@@ -291,11 +294,11 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
                       value={add_price}
                       onChange={(e) => set_add_price(e.target.value)}
                       className="h-8 w-24 text-xs"
-                      placeholder="Prix unit."
+                      placeholder={t("unit_price_placeholder")}
                     />
                     <Button type="button" size="sm" className="h-8 text-xs" onClick={add_item_to_list}>
                       <Plus className="mr-1 h-3 w-3" />
-                      Ajouter
+                      {t("ajouter")}
                     </Button>
                   </>
                 )}
@@ -304,14 +307,14 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
 
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_edit_items([])}>
-                Annuler
+                {t("annuler")}
               </Button>
               <Button
                 size="sm"
                 onClick={on_save_items}
                 disabled={update_items.isPending || edit_items.length === 0}
               >
-                {update_items.isPending ? "Enregistrement..." : "Enregistrer les modifications"}
+                {update_items.isPending ? t("saving") : t("save_modifications")}
               </Button>
             </div>
           </CardContent>
@@ -321,7 +324,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
       {adjustments.length > 0 && (
         <Card className="mt-4">
           <CardHeader>
-            <CardTitle>Ajustements</CardTitle>
+            <CardTitle>{t("ajustements")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
             {adjustments.map((adj) => (

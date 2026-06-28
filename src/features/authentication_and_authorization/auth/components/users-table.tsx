@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -30,12 +31,13 @@ type UserRow = {
 };
 
 export function UsersTable() {
+  const t = useTranslations("users");
   const columns = React.useMemo<ColumnDef<UserRow>[]>(
     () => [
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Nom" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("name_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-medium">{row.original.name ?? "—"}</span>
@@ -46,7 +48,7 @@ export function UsersTable() {
       {
         id: "phone",
         accessorKey: "phone",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Téléphone" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("phone_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">{row.original.phone ?? "—"}</span>
         ),
@@ -54,38 +56,38 @@ export function UsersTable() {
       {
         id: "email_verified",
         accessorKey: "email_verified",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Vérifié" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("verified_column")} />,
         cell: ({ row }) => (
           <Badge variant={row.original.email_verified ? "default" : "outline"}>
-            {row.original.email_verified ? "Oui" : "Non"}
+            {row.original.email_verified ? t("yes") : t("no")}
           </Badge>
         ),
       },
       {
         id: "is_active",
         accessorKey: "is_active",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Actif" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("active_column")} />,
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? "default" : "destructive"}>
-            {row.original.is_active ? "Actif" : "Inactif"}
+            {row.original.is_active ? t("active") : t("inactive")}
           </Badge>
         ),
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Inscription" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("registered_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
         id: "role",
         accessorKey: "role",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Rôle" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("role_column")} />,
         cell: ({ row }) => <Badge variant="outline">{row.original.role}</Badge>,
       },
       {
         id: "actions",
-        header: "Actions",
+        header: t("actions"),
         cell: ({ row }) => (
           <EditUser
             userId={row.original.id}
@@ -98,7 +100,7 @@ export function UsersTable() {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const [page] = useQueryState("usersPage", parseAsInteger.withDefault(1));

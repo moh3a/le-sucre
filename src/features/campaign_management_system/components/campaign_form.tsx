@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,6 +72,8 @@ type CampaignFormProps = {
 };
 
 export function CampaignForm({ mode, campaign_id, default_values }: CampaignFormProps) {
+  const t = useTranslations("campaigns");
+  const tc = useTranslations("common");
   const router = useRouter();
   const utils = trpc.useUtils();
 
@@ -303,7 +306,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
         <div className="space-y-6 md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Configuration de base</CardTitle>
+              <CardTitle>Général</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -312,8 +315,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field data-invalid={!!errors.name}>
-                      <FieldLabel>Nom de la campagne</FieldLabel>
-                      <Input {...field} placeholder="Ex: Soldes d'été 2026" />
+                      <FieldLabel>{tc("name")}</FieldLabel>
+                      <Input {...field} placeholder={t("name_placeholder")} />
                       {errors.name && <FieldError errors={[errors.name]} />}
                     </Field>
                   )}

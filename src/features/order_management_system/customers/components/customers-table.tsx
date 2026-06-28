@@ -13,6 +13,8 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -32,12 +34,13 @@ type CustomerRow = {
 };
 
 export function CustomersTable() {
+  const t = useTranslations("customers");
   const columns = React.useMemo<ColumnDef<CustomerRow>[]>(
     () => [
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Nom" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("nom")} />,
         cell: ({ row }) => {
           return (
             <Link
@@ -67,7 +70,7 @@ export function CustomersTable() {
       {
         id: "segment",
         accessorKey: "segment",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Segment" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("segment")} />,
         cell: ({ row }) => (
           <Badge
             variant={
@@ -79,22 +82,22 @@ export function CustomersTable() {
             }
           >
             {row.original.segment === "vip"
-              ? "VIP"
+              ? t("vip")
               : row.original.segment === "repeat"
-                ? "Répétitif"
-                : "Nouveau"}
+                ? t("repetitif")
+                : t("nouveau")}
           </Badge>
         ),
       },
       {
         id: "total_orders",
         accessorKey: "total_orders",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commandes" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("commandes")} />,
       },
       {
         id: "total_spent",
         accessorKey: "total_spent",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Total dépensé" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("total_depense")} />,
         cell: ({ row }) =>
           Number(row.original.total_spent).toLocaleString("fr-FR", {
             style: "currency",
@@ -105,7 +108,7 @@ export function CustomersTable() {
       {
         id: "average_order_value",
         accessorKey: "average_order_value",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Panier moyen" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("panier_moyen")} />,
         cell: ({ row }) =>
           Number(row.original.average_order_value).toLocaleString("fr-FR", {
             style: "currency",
@@ -116,7 +119,7 @@ export function CustomersTable() {
       {
         id: "last_order_at",
         accessorKey: "last_order_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Dernière commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("derniere_commande")} />,
         cell: ({ row }) =>
           row.original.last_order_at
             ? formatDate(row.original.last_order_at, { month: "short" })
@@ -125,7 +128,7 @@ export function CustomersTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Inscription" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("inscription")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
     ],
@@ -157,7 +160,7 @@ export function CustomersTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <Input
-          placeholder="Rechercher un client…"
+          placeholder={t("search_placeholder")}
           value={search ?? ""}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"

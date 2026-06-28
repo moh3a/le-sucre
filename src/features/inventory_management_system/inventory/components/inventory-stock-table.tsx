@@ -6,6 +6,7 @@ import { Search, ToggleLeft } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
+import { useTranslations } from "next-intl";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -23,6 +24,7 @@ import { InventoryStockDialog } from "./inventory-stock-dialog";
 const LOW_STOCK_THRESHOLD = 5;
 
 export function InventoryStockTable() {
+  const t = useTranslations("inventory");
   const [page] = useQueryState("stkPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("stkPerPage", parseAsInteger.withDefault(10));
   const [search, setSearch] = useQueryState("stkSearch", parseAsString);
@@ -34,7 +36,7 @@ export function InventoryStockTable() {
       {
         id: "sku_code",
         accessorKey: "sku_code",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/products/${row.original.product_id}`}
@@ -47,7 +49,7 @@ export function InventoryStockTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
         cell: ({ row }) => (
           <span className="text-sm">{row.original.product_name ?? "—"}</span>
         ),
@@ -55,7 +57,7 @@ export function InventoryStockTable() {
       {
         id: "warehouse_id",
         accessorKey: "warehouse_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Entrepôt" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("warehouse_column")} />,
         cell: ({ row }) => (
           <Badge variant="outline" className="font-mono text-xs">
             {row.original.warehouse_id}
@@ -65,7 +67,7 @@ export function InventoryStockTable() {
       {
         id: "quantity_on_hand",
         accessorKey: "quantity_on_hand",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="En stock" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("in_stock_column")} />,
         cell: ({ row }) => {
           const qty = row.original.quantity_on_hand;
           const is_low = qty > 0 && qty <= LOW_STOCK_THRESHOLD;
@@ -79,7 +81,7 @@ export function InventoryStockTable() {
       {
         id: "quantity_reserved",
         accessorKey: "quantity_reserved",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Réservé" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reserved_column")} />,
         cell: ({ row }) => (
           <span className="text-sm">{row.original.quantity_reserved}</span>
         ),
@@ -87,7 +89,7 @@ export function InventoryStockTable() {
       {
         id: "stock_available",
         accessorKey: "stock_available",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Disponible" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("available_column")} />,
         cell: ({ row }) => {
           const available = row.original.stock_available;
           return (
@@ -99,14 +101,14 @@ export function InventoryStockTable() {
       },
       {
         id: "actions",
-        header: "Actions",
+        header: t("actions"),
         cell: ({ row }) => (
           <button
             type="button"
             onClick={() => set_selected_sku(row.original)}
             className="text-sm text-primary hover:underline"
           >
-            Ajuster
+            {t("set_quantity")}
           </button>
         ),
       },
@@ -135,8 +137,8 @@ export function InventoryStockTable() {
   });
 
   const stockFilterOptions = [
-    { label: "Rupture de stock", value: "out" },
-    { label: "Stock faible", value: "low" },
+    { label: t("out_of_stock"), value: "out" },
+    { label: t("low_stock"), value: "low" },
   ];
 
   return (
@@ -146,14 +148,14 @@ export function InventoryStockTable() {
           <div className="relative">
             <Search className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2" />
             <Input
-              placeholder="Rechercher par SKU ou produit..."
+              placeholder={t("search_placeholder")}
               value={search ?? ""}
               onChange={(e) => setSearch(e.target.value || null)}
               className="max-w-xs pl-8"
             />
           </div>
           <FacetedFilter
-            title="Filtrer"
+            title={t("filter_title")}
             options={stockFilterOptions}
             icon={ToggleLeft}
             value={stock_filter}

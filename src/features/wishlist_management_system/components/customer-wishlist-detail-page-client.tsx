@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { WishlistShareDialog } from "./wishlist-share-dialog";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 import type { WishlistPriority } from "../types";
 
 export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: string }) {
+  const t = useTranslations("wishlist");
   const { data: wishlist, isLoading } = trpc.wishlistManagement.wishlists.byId.useQuery({ id: wishlistId });
   const { data: itemsData } = trpc.wishlistManagement.wishlists.listItems.useQuery(
     { wishlist_id: wishlistId, page: 1, limit: 100 },
@@ -37,7 +39,7 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
       <Button variant="ghost" className="mb-4" asChild>
         <a href="/account/wishlists">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
+          {t("back")}
         </a>
       </Button>
 
@@ -54,8 +56,8 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
       <div className="space-y-2">
         {(!itemsData?.items || itemsData.items.length === 0) ? (
           <div className="text-center py-16 text-muted-foreground">
-            <p className="text-lg">Cette liste est vide</p>
-            <p className="text-sm">Ajoutez des produits depuis la boutique</p>
+            <p className="text-lg">{t("empty_list_message")}</p>
+            <p className="text-sm">{t("empty_list_hint")}</p>
           </div>
         ) : (
           itemsData.items.map((item: any) => (
@@ -81,7 +83,7 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
                   >
                     {item.priority}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">Qté: {item.quantity}</span>
+                  <span className="text-sm text-muted-foreground">{t("qty", { count: item.quantity })}</span>
                 </div>
                 {item.notes && (
                   <p className="text-sm text-muted-foreground mt-1">{item.notes}</p>

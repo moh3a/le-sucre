@@ -2,6 +2,7 @@
 
 ## TODO
 
+- track log attempts and stop abuse
 - fix analytics
 - continue Prompt 16 — Campaign Management System
 - continue Prompt 19 - Operational Workflows Audit & Business Process Completion

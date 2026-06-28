@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Plus, Trash, ShieldCheck, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ type TargetingTabProps = {
 };
 
 export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
+  const t = useTranslations("campaigns");
   const utils = trpc.useUtils();
   const [rules, setRules] = useState<TargetRule[]>(campaign.targets ?? []);
 
@@ -98,9 +100,9 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
     <Card className="border shadow-md">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
-          <CardTitle>Règles de Ciblage Client</CardTitle>
+          <CardTitle>{t("targeting_title")}</CardTitle>
           <p className="text-muted-foreground text-sm">
-            Configurez qui voit cette campagne sur la boutique (pays, langues, typologie client).
+            {t("targeting_subtitle")}
           </p>
         </div>
         <Button onClick={handleAddRule} variant="outline" className="border-dashed">
@@ -112,13 +114,12 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
         {rules.length === 0 ? (
           <div className="bg-muted/10 flex flex-col items-center justify-center rounded-lg border border-dashed p-8">
             <HelpCircle className="text-muted-foreground mb-3 h-10 w-10" />
-            <p className="text-sm font-semibold">Tout le monde (aucun ciblage restreint)</p>
+            <p className="text-sm font-semibold">{t("no_targeting")}</p>
             <p className="text-muted-foreground mt-1 max-w-sm text-center text-xs">
-              Par défaut, la campagne s&apos;affiche pour tous les utilisateurs si aucune
-              restriction n&apos;est configurée.
+              {t("no_targeting_description")}
             </p>
-            <Button className="mt-4" onClick={handleAddRule}>
-              Ajouter une règle de ciblage
+          <Button className="mt-4" onClick={handleAddRule}>
+              {t("add_targeting_rule")}
             </Button>
           </div>
         ) : (
@@ -268,7 +269,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
             className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
             disabled={update_campaign.isPending}
           >
-            {update_campaign.isPending ? "Enregistrement..." : "Enregistrer les cibles"}
+            {update_campaign.isPending ? t("saving") : t("save_targets")}
           </Button>
         </div>
       </CardContent>

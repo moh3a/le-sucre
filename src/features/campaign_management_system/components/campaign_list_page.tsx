@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import {
@@ -156,6 +157,7 @@ function FacetedFilter({
 }
 
 export function CampaignListPage() {
+  const t = useTranslations("campaigns");
   const [page, setPage] = useQueryState("cmpPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("cmpPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("cmpSearch", parseAsString);
@@ -187,7 +189,7 @@ export function CampaignListPage() {
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Campagne" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("campaign_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <Link
@@ -203,7 +205,7 @@ export function CampaignListPage() {
       {
         id: "campaign_type",
         accessorKey: "campaign_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => (
           <Badge variant="outline" className="text-xs">
             {TYPE_BADGE_LABELS[row.original.campaign_type] ?? row.original.campaign_type}
@@ -213,19 +215,19 @@ export function CampaignListPage() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => <CampaignStatusBadge status={row.original.status} />,
       },
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Priorité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority_column")} />,
         cell: ({ row }) => <span className="font-mono text-sm">{row.original.priority}</span>,
       },
       {
         id: "starts_at",
         accessorKey: "starts_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Début" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("start_column")} />,
         cell: ({ row }) =>
           row.original.starts_at
             ? formatDate(row.original.starts_at, { month: "short" })
@@ -234,7 +236,7 @@ export function CampaignListPage() {
       {
         id: "ends_at",
         accessorKey: "ends_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Fin" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("end_column")} />,
         cell: ({ row }) =>
           row.original.ends_at
             ? formatDate(row.original.ends_at, { month: "short" })
@@ -259,19 +261,19 @@ export function CampaignListPage() {
               <DropdownMenuItem asChild>
                 <Link href={`/console/campaigns/${row.original.id}`}>
                   <Pencil className="mr-2 size-4" />
-                  Modifier
+                  {t("edit")}
                 </Link>
               </DropdownMenuItem>
               {row.original.status !== "active" && (
                 <DropdownMenuItem>
                   <Play className="mr-2 size-4 text-emerald-600" />
-                  Activer
+                  {t("activate")}
                 </DropdownMenuItem>
               )}
               {row.original.status === "active" && (
                 <DropdownMenuItem>
                   <Square className="mr-2 size-4 text-amber-600" />
-                  Mettre en pause
+                  {t("pause")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -297,13 +299,13 @@ export function CampaignListPage() {
   return (
     <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />}>
     <ConsolePageShell
-      title="Campagnes"
-      subtitle="Gérez vos campagnes marketing et bannières"
+      title={t("title")}
+      subtitle={t("subtitle")}
       actions={
         <Button asChild>
           <Link href="/console/campaigns/new">
             <Megaphone className="mr-2 h-4 w-4" />
-            Nouvelle campagne
+            {t("new_campaign")}
           </Link>
         </Button>
       }
@@ -323,7 +325,7 @@ export function CampaignListPage() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher une campagne…"
+            placeholder={t("search_placeholder")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -332,7 +334,7 @@ export function CampaignListPage() {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Statut"
+            title={t("status_title")}
             options={STATUS_OPTIONS}
             value={status ?? undefined}
             onChange={(val) => {
@@ -341,7 +343,7 @@ export function CampaignListPage() {
             }}
           />
           <FacetedFilter
-            title="Type"
+            title={t("type_title")}
             options={TYPE_OPTIONS}
             value={campaign_type ?? undefined}
             onChange={(val) => {
@@ -354,7 +356,7 @@ export function CampaignListPage() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {table.getFilteredSelectedRowModel().rows.length}{" "}{t("selected")}
             </Badge>
             <Button variant="secondary" size="sm">
               <Play className="mr-1 h-4 w-4" />
@@ -374,7 +376,7 @@ export function CampaignListPage() {
                 download="campaigns.csv"
               >
                 <Download className="mr-1 h-4 w-4" />
-                Exporter
+                {t("export")}
               </a>
             </Button>
           </div>

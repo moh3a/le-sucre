@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
@@ -16,6 +18,7 @@ type NotesCardProps = {
 };
 
 export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
+  const t = useTranslations("orders");
   const [draft, set_draft] = useState(initial_notes);
   const update_notes = trpc.orders.adminUpdateNotes.useMutation({
     onSuccess: () => {
@@ -29,13 +32,13 @@ export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps)
     <QueryGuard mutation={update_notes}>
     <Card>
       <CardHeader>
-        <CardTitle>Notes internes</CardTitle>
+        <CardTitle>{t("notes_internes")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <Textarea
           id="order-notes"
           rows={5}
-          placeholder="Ajouter une note interne visible uniquement par l'équipe…"
+          placeholder={t("notes_placeholder")}
           value={draft}
           onChange={(e) => set_draft(e.target.value)}
           className="resize-none text-sm"
@@ -46,7 +49,7 @@ export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps)
             disabled={update_notes.isPending}
             onClick={() => update_notes.mutate({ order_id, notes: draft || null })}
           >
-            Sauvegarder
+            {t("save")}
           </Button>
           {draft && (
             <Button
@@ -58,7 +61,7 @@ export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps)
                 update_notes.mutate({ order_id, notes: null });
               }}
             >
-              Effacer
+              {t("effacer")}
             </Button>
           )}
         </div>

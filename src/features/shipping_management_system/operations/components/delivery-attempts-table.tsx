@@ -6,6 +6,8 @@ import * as React from "react";
 import { Download, MoreHorizontal, RotateCcw, Warehouse, XCircle } from "lucide-react";
 import Link from "next/link";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -131,6 +133,7 @@ function FacetedFilter({
 }
 
 export function DeliveryAttemptsTable() {
+  const t = useTranslations("delivery_attempts");
   const [page] = useQueryState("dvPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("dvPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("dvStatus", parseAsString);
@@ -165,7 +168,7 @@ export function DeliveryAttemptsTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -178,7 +181,7 @@ export function DeliveryAttemptsTable() {
       {
         id: "attempt_number",
         accessorKey: "attempt_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Tentative" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("attempt")} />,
         cell: ({ row }) => (
           <span className="text-sm">#{row.original.attempt_number}</span>
         ),
@@ -186,7 +189,7 @@ export function DeliveryAttemptsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -196,7 +199,7 @@ export function DeliveryAttemptsTable() {
       {
         id: "description",
         accessorKey: "description",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Description" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("description")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[180px] truncate text-xs">
             {row.original.description ?? "—"}
@@ -206,7 +209,7 @@ export function DeliveryAttemptsTable() {
       {
         id: "delivery_person_id",
         accessorKey: "delivery_person_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Livreur" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("delivery_person")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.delivery_person_id
@@ -218,13 +221,13 @@ export function DeliveryAttemptsTable() {
       {
         id: "attempted_at",
         accessorKey: "attempted_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date tentative" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("attempt_date")} />,
         cell: ({ row }) => formatDate(row.original.attempted_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
       },
       {
         id: "next_attempt_at",
         accessorKey: "next_attempt_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Prochaine tentative" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("next_attempt")} />,
         cell: ({ row }) =>
           row.original.next_attempt_at
             ? formatDate(row.original.next_attempt_at, { month: "short", day: "numeric", hour: "2-digit" })
@@ -242,9 +245,9 @@ export function DeliveryAttemptsTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
-                  <Link href={`/console/orders/${r.order_id}`}>Voir commande</Link>
+                  <Link href={`/console/orders/${r.order_id}`}>{t("view_order")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {r.status !== "successful" && r.status !== "cancelled" && (
@@ -257,7 +260,7 @@ export function DeliveryAttemptsTable() {
                     }
                   >
                     <RotateCcw className="mr-2 size-4" />
-                    Reprogrammer
+                    {t("reschedule")}
                   </DropdownMenuItem>
                 )}
                 {r.status !== "successful" && r.status !== "cancelled" && (
@@ -267,7 +270,7 @@ export function DeliveryAttemptsTable() {
                     }
                   >
                     <Warehouse className="mr-2 size-4" />
-                    Retour entrepôt
+                    {t("return_warehouse")}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -302,7 +305,7 @@ export function DeliveryAttemptsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -312,7 +315,7 @@ export function DeliveryAttemptsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -322,7 +325,7 @@ export function DeliveryAttemptsTable() {
               download="delivery-attempts.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
@@ -29,6 +30,7 @@ import { ROLE_LABELS } from "@/features/authentication_and_authorization/authori
 const ROLE_OPTIONS = ["admin", "moderator", "operator", "delivery_person", "customer"] as const;
 
 export function CreateUserDialog() {
+  const t = useTranslations("users");
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -38,7 +40,7 @@ export function CreateUserDialog() {
 
   const create_user = trpc.adminAuth.createUser.useMutation({
     onSuccess: () => {
-      toast.success("Utilisateur créé");
+      toast.success(t("user_created"));
       setOpen(false);
       setName("");
       setPhone("");
@@ -66,55 +68,55 @@ export function CreateUserDialog() {
       <ResponsiveDialogTrigger asChild>
         <Button>
           <Plus />
-          Créer un utilisateur
+          {t("create_user_button")}
         </Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Créer un utilisateur</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>{t("create_user_title")}</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Ajouter un nouvel utilisateur à la plateforme
+            {t("create_user_description")}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
         <form onSubmit={on_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="create-name">Nom</Label>
+            <Label htmlFor="create-name">{t("name")}</Label>
             <Input
               id="create-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nom complet"
+              placeholder={t("full_name_placeholder")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="create-phone">Téléphone</Label>
+            <Label htmlFor="create-phone">{t("phone")}</Label>
             <Input
               id="create-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+213 5XX XX XX XX"
+              placeholder={t("phone_placeholder")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="create-password">Mot de passe</Label>
+            <Label htmlFor="create-password">{t("password")}</Label>
             <Input
               id="create-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimum 8 caractères"
+              placeholder={t("password_min_placeholder")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="create-role">Rôle</Label>
+            <Label htmlFor="create-role">{t("role")}</Label>
             <Select value={role} onValueChange={setRole}>
               <SelectTrigger id="create-role">
                 <SelectValue />
@@ -134,7 +136,7 @@ export function CreateUserDialog() {
             className="w-full"
             disabled={create_user.isPending}
           >
-            {create_user.isPending ? "Création..." : "Créer l'utilisateur"}
+            {create_user.isPending ? t("creating") : t("create_user_submit")}
           </Button>
         </form>
       </ResponsiveDialogContent>

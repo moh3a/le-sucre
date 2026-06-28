@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,7 @@ interface BlacklistAddDialogProps {
 }
 
 export function BlacklistAddDialog({ open, on_open_change, on_added }: BlacklistAddDialogProps) {
+  const t = useTranslations("blacklist");
   const [error, set_error] = useState<string | null>(null);
   const add_mutation = trpc.blacklist.add.useMutation({
     onSuccess: () => {
@@ -61,21 +63,21 @@ export function BlacklistAddDialog({ open, on_open_change, on_added }: Blacklist
     <Dialog open={open} onOpenChange={on_open_change}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Bloquer une adresse IP</DialogTitle>
+          <DialogTitle>{t("block_ip")}</DialogTitle>
           <DialogDescription>
-            Ajoutez une adresse IP à la liste noire. Elle sera immédiatement bloquée.
+            {t("add_ip_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ip_address">Adresse IP *</Label>
-            <Input id="ip_address" placeholder="192.168.1.1" {...form.register("ip_address")} />
+            <Label htmlFor="ip_address">{t("ip_address_label")}</Label>
+            <Input id="ip_address" placeholder={t("ip_placeholder")} {...form.register("ip_address")} />
             {form.formState.errors.ip_address && (
               <p className="text-destructive text-sm">{form.formState.errors.ip_address.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reason_fr">Motif (français)</Label>
+            <Label htmlFor="reason_fr">{t("reason_fr_label")}</Label>
             <Textarea
               id="reason_fr"
               placeholder="Tentatives de connexion suspectes"
@@ -83,7 +85,7 @@ export function BlacklistAddDialog({ open, on_open_change, on_added }: Blacklist
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reason">Motif (anglais)</Label>
+            <Label htmlFor="reason">{t("reason_en_label")}</Label>
             <Textarea
               id="reason"
               placeholder="Suspicious login attempts"
@@ -91,7 +93,7 @@ export function BlacklistAddDialog({ open, on_open_change, on_added }: Blacklist
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reason_ar">Motif (arabe)</Label>
+            <Label htmlFor="reason_ar">{t("reason_ar_label")}</Label>
             <Textarea
               id="reason_ar"
               placeholder="محاولات تسجيل دخول مشبوهة"
@@ -99,17 +101,17 @@ export function BlacklistAddDialog({ open, on_open_change, on_added }: Blacklist
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="expires_at">Expiration (optionnelle)</Label>
+            <Label htmlFor="expires_at">{t("expiration_label")}</Label>
             <Input id="expires_at" type="datetime-local" {...form.register("expires_at")} />
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => on_open_change(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={add_mutation.isPending}>
               {add_mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Bloquer
+              {t("block_button")}
             </Button>
           </DialogFooter>
         </form>

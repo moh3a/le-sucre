@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { AnalyticsKpiCards } from "./analytics-kpi-cards";
@@ -8,25 +9,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart } from "@/components/ui/line-chart";
 
 export function AnalyticsDashboardClient() {
+  const t = useTranslations("analytics");
   const { from, to } = default_range();
   const { data, isLoading } = trpc.analytics.overview.useQuery({ from, to });
 
-  if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
+  if (!data) return <p className="text-muted-foreground text-sm">{t("no_data")}</p>;
 
   return (
     <QueryGuard
       query={{ isLoading }}
-      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+      loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}
     >
       <Card>
       <CardHeader>
-        <CardTitle>Vue d&apos;ensemble</CardTitle>
+        <CardTitle>{t("overview_title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <AnalyticsKpiCards totals={data.totals} repeat={data.repeat} />
         <LineChart
-          title="Revenus (30 jours)"
-          description="Revenus générés par les produits"
+          title={t("revenue_30_days")}
+          description={t("revenue_description")}
           data={data.series.map((r) => ({
             day_key: r.day_key,
             revenue: Number(r.revenue),

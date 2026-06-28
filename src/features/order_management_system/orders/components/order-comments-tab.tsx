@@ -7,6 +7,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/format";
 import { MessageSquare, Send, Lock, Globe } from "lucide-react";
 
@@ -15,6 +16,7 @@ type OrderCommentsTabProps = {
 };
 
 export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
+  const t = useTranslations("orders");
   const { data: comments, refetch } = trpc.operations.orderGetComments.useQuery({
     order_id,
     include_private: true,
@@ -26,9 +28,9 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
     onSuccess: () => {
       refetch();
       set_content("");
-      toast.success("Commentaire ajouté");
+      toast.success(t("comment_added"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   return (
@@ -38,7 +40,7 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
-            Ajouter un commentaire
+            {t("add_comment")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -46,7 +48,7 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
             value={content}
             onChange={(e) => set_content(e.target.value)}
             rows={3}
-            placeholder="Écrire un commentaire..."
+            placeholder={t("comment_placeholder")}
           />
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -59,12 +61,12 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
               {is_private ? (
                 <>
                   <Lock className="h-3 w-3" />
-                  Interne (visible par l&apos;équipe uniquement)
+                  {t("internal_comment")}
                 </>
               ) : (
                 <>
                   <Globe className="h-3 w-3" />
-                  Visible par le client
+                  {t("public_comment")}
                 </>
               )}
             </label>
@@ -76,7 +78,7 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
               }
             >
               <Send className="mr-1 h-3 w-3" />
-              Envoyer
+              {t("send")}
             </Button>
           </div>
         </CardContent>
@@ -87,7 +89,7 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
-              Commentaires ({comments?.length})
+              {t("comments")} ({comments?.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">

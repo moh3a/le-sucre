@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Upload, LayoutGrid, List, Search } from "lucide-react";
 
@@ -12,6 +13,7 @@ import { MediaDataTable } from "./media-data-table";
 import { MediaUploadDialog } from "./media-upload-dialog";
 
 export function MediaLibraryPageClient() {
+  const t = useTranslations("media");
   const [view, set_view] = useState<"grid" | "table">("grid");
   const [search, set_search] = useState("");
 
@@ -19,16 +21,14 @@ export function MediaLibraryPageClient() {
     <div className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-semibold">Médiathèque</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Gérez tous vos fichiers médias : images, vidéos, documents.
-          </p>
+          <h1 className="font-heading text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1 text-sm">{t("subtitle")}</p>
         </div>
         <MediaUploadDialog
           trigger={
             <Button>
               <Upload />
-              Importer
+              {t("import")}
             </Button>
           }
         />
@@ -40,7 +40,7 @@ export function MediaLibraryPageClient() {
         <div className="relative w-full max-w-sm">
           <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
-            placeholder="Rechercher des fichiers..."
+            placeholder={t("search_placeholder")}
             className="pl-9"
             value={search}
             onChange={(e) => set_search(e.target.value)}
@@ -50,11 +50,11 @@ export function MediaLibraryPageClient() {
           <TabsList>
             <TabsTrigger value="grid">
               <LayoutGrid />
-              Grille
+              {t("grid_view")}
             </TabsTrigger>
             <TabsTrigger value="table">
               <List />
-              Liste
+              {t("list_view")}
             </TabsTrigger>
           </TabsList>
         </Tabs>

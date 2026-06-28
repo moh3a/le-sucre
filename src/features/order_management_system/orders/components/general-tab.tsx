@@ -8,6 +8,7 @@ import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,7 @@ import {
 } from "../constants/order-status";
 import { NotesCard } from "./notes-card";
 
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS_FIXED = [
   { value: "pending_payment", label: "En attente de paiement" },
   { value: "paid", label: "Payé" },
   { value: "processing", label: "En cours" },
@@ -56,7 +57,12 @@ type GeneralTabProps = {
 };
 
 export function GeneralTab({ order, on_update }: GeneralTabProps) {
+  const t = useTranslations("orders");
   const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => on_update() });
+  const STATUS_OPTIONS = STATUS_OPTIONS_FIXED.map((o) => ({
+    ...o,
+    label: o.value === "processing" ? t("processing") : o.label,
+  }));
   const [next_status, set_next_status] = useState<string>("");
 
   const { data: operators_data, isLoading: operators_loading } =
@@ -156,7 +162,7 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
         <CardContent className="flex gap-2">
           <Select onValueChange={set_next_status} value={next_status}>
             <SelectTrigger className="w-60">
-              <SelectValue placeholder="Sélectionner un statut" />
+              <SelectValue placeholder={t("select_status_placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.filter((s) => s.value !== order.status).map((s) => (
@@ -194,7 +200,7 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
                 disabled={operators_loading || assign_operator.isPending}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sélectionner un opérateur" />
+                  <SelectValue placeholder={t("select_operator_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Non assigné</SelectItem>
@@ -220,7 +226,7 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
                 disabled={deliverers_loading || assign_delivery.isPending}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sélectionner un livreur" />
+                  <SelectValue placeholder={t("select_delivery_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Non assigné</SelectItem>

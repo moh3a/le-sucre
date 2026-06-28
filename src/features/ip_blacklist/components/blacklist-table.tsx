@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -33,6 +34,7 @@ interface BlacklistTableProps {
 }
 
 export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTableProps) {
+  const t = useTranslations("blacklist");
   const [removing_id, set_removing_id] = useState<string | null>(null);
 
   return (
@@ -40,12 +42,12 @@ export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTable
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Adresse IP</TableHead>
-            <TableHead>Motif</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Expire le</TableHead>
-            <TableHead>Créé le</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("ip_address")}</TableHead>
+            <TableHead>{t("reason")}</TableHead>
+            <TableHead>{t("status")}</TableHead>
+            <TableHead>{t("expires_at")}</TableHead>
+            <TableHead>{t("created_at")}</TableHead>
+            <TableHead className="text-right">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -57,7 +59,7 @@ export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTable
               </TableCell>
               <TableCell>
                 <Badge variant={entry.is_active ? "default" : "secondary"}>
-                  {entry.is_active ? "Actif" : "Inactif"}
+                  {entry.is_active ? t("active") : t("inactive")}
                 </Badge>
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
@@ -74,7 +76,7 @@ export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTable
                     variant="ghost"
                     size="icon"
                     onClick={() => on_toggle(entry.id)}
-                    title={entry.is_active ? "Désactiver" : "Activer"}
+                    title={entry.is_active ? t("deactivate") : t("activate")}
                   >
                     {entry.is_active ? (
                       <ToggleRight className="h-4 w-4" />
@@ -86,7 +88,7 @@ export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTable
                     variant="ghost"
                     size="icon"
                     onClick={() => set_removing_id(entry.id)}
-                    title="Supprimer"
+                    title={t("delete_title")}
                   >
                     <Trash2 className="text-destructive h-4 w-4" />
                   </Button>
@@ -100,14 +102,13 @@ export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTable
       <AlertDialog open={!!removing_id} onOpenChange={() => set_removing_id(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle>{t("confirm_delete_title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action retirera l&apos;adresse IP de la liste noire. Elle pourra de nouveau
-              accéder à l&apos;API.
+              {t("confirm_delete_description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 if (removing_id) {
@@ -116,7 +117,7 @@ export function BlacklistTable({ entries, on_toggle, on_remove }: BlacklistTable
                 }
               }}
             >
-              Supprimer
+              {t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

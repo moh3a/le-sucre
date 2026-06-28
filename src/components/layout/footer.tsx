@@ -1,48 +1,50 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/constants";
 
-const footerLinks = {
-  boutique: {
-    title: "Boutique",
-    links: [
-      { href: "/boutique", label: "Tous les produits" },
-      { href: "/categories", label: "Catégories" },
-      { href: "/promotions", label: "Promotions" },
-      { href: "/nouveautes", label: "Nouveautés" },
-    ],
-  },
-  compte: {
-    title: "Mon compte",
-    links: [
-      { href: "/compte", label: "Mon profil" },
-      { href: "/commandes", label: "Mes commandes" },
-      { href: "/liste-souhaits", label: "Liste de souhaits" },
-      { href: "/adresses", label: "Mes adresses" },
-    ],
-  },
-  aide: {
-    title: "Aide",
-    links: [
-      { href: "/faq", label: "FAQ" },
-      { href: "/livraison", label: "Livraison" },
-      { href: "/retours", label: "Retours & échanges" },
-      { href: "/contact", label: "Nous contacter" },
-    ],
-  },
-  legal: {
-    title: "Légal",
-    links: [
-      { href: "/cgv", label: "CGV" },
-      { href: "/confidentialite", label: "Confidentialité" },
-      { href: "/mentions-legales", label: "Mentions légales" },
-      { href: "/cookies", label: "Cookies" },
-    ],
-  },
-};
+export async function Footer() {
+  const t = await getTranslations("layout");
 
-export function Footer() {
+  const footerLinks = {
+    boutique: {
+      title: t("boutique_title"),
+      links: [
+        { href: "/boutique", label: t("all_products") },
+        { href: "/categories", label: t("categories") },
+        { href: "/promotions", label: t("promotions") },
+        { href: "/nouveautes", label: t("new_arrivals") },
+      ],
+    },
+    compte: {
+      title: t("my_account_title"),
+      links: [
+        { href: "/compte", label: t("my_profile") },
+        { href: "/commandes", label: t("my_orders") },
+        { href: "/liste-souhaits", label: t("wishlist") },
+        { href: "/adresses", label: t("my_addresses") },
+      ],
+    },
+    aide: {
+      title: t("help_title"),
+      links: [
+        { href: "/faq", label: t("faq") },
+        { href: "/livraison", label: t("shipping") },
+        { href: "/retours", label: t("returns_exchanges") },
+        { href: "/contact", label: t("contact_us") },
+      ],
+    },
+    legal: {
+      title: t("legal_title"),
+      links: [
+        { href: "/cgv", label: t("terms") },
+        { href: "/confidentialite", label: t("privacy") },
+        { href: "/mentions-legales", label: t("legal_notices") },
+        { href: "/cookies", label: t("cookies") },
+      ],
+    },
+  };
   return (
     <footer className="bg-brand-olive-leaf text-brand-lemon-chiffon border-t">
       <div className="container mx-auto px-4 py-12">
@@ -73,7 +75,7 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="font-heading text-brand-lemon-lime text-lg font-bold">{siteConfig.name}</p>
           <p className="text-brand-lemon-chiffon/60 text-sm">
-            © {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.
+            © {new Date().getFullYear()} {siteConfig.name}. {t("all_rights_reserved")}
           </p>
         </div>
       </div>

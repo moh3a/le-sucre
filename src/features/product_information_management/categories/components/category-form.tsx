@@ -118,7 +118,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>{t("slug")}</FieldLabel>
-              <Input {...field} placeholder="auto" />
+              <Input {...field} placeholder={t("auto_slug_placeholder")} />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -188,7 +188,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
                   onChange={(e) => field.onChange(e.target.value === "true")}
                 >
                   <option value="true">{t("active")}</option>
-                  <option value="false">Inactive</option>
+                  <option value="false">{t("inactive")}</option>
                 </select>
               </Field>
             )}

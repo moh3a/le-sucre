@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { QueryGuard } from "@/components/query-guard";
@@ -18,21 +19,20 @@ const CONTACT_TYPE_ICONS: Record<string, React.ElementType> = {
   email: Mail,
 };
 
-const CONTACT_TYPE_LABELS: Record<string, string> = {
-  phone_call: "Appel téléphonique",
-  whatsapp: "WhatsApp",
-  sms: "SMS",
-  email: "Email",
-};
-
-const DIRECTION_LABELS: Record<string, string> = {
-  inbound: "Entrant",
-  outbound: "Sortant",
-};
-
 type CustomerContactsTabProps = { user_id: string };
 
 export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
+  const t = useTranslations("contacts");
+  const CONTACT_TYPE_LABELS: Record<string, string> = {
+    phone_call: t("phone_call"),
+    whatsapp: t("whatsapp"),
+    sms: t("sms"),
+    email: t("email"),
+  };
+  const DIRECTION_LABELS: Record<string, string> = {
+    inbound: t("inbound"),
+    outbound: t("outbound"),
+  };
   const [page, setPage] = useState(1);
   const { data, isLoading, refetch } = trpc.operations.customerGetContacts.useQuery({ user_id, page, limit: 20 });
   const [show_form, set_show_form] = useState(false);
@@ -56,10 +56,10 @@ export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
     <QueryGuard query={{ isLoading }} loadingFallback={<Skeleton className="h-48 w-full" />}>
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Historique des contacts</h3>
+        <h3 className="text-lg font-medium">{t("title")}</h3>
         <Button size="sm" onClick={() => set_show_form(!show_form)}>
           <Plus className="mr-1 h-3 w-3" />
-          Nouveau contact
+          {t("new_contact")}
         </Button>
       </div>
 
@@ -68,7 +68,7 @@ export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
           <CardContent className="space-y-3 pt-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-medium">Type</label>
+                <label className="text-xs font-medium">{t("type")}</label>
                 <select
                   className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                   value={contact_type}
@@ -81,7 +81,7 @@ export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium">Sens</label>
+                <label className="text-xs font-medium">{t("direction")}</label>
                 <select
                   className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                   value={direction}
@@ -93,27 +93,27 @@ export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium">Sujet</label>
+              <label className="text-xs font-medium">{t("subject")}</label>
               <input
                 className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                 value={subject}
                 onChange={(e) => set_subject(e.target.value)}
-                placeholder="Objet du contact..."
+                placeholder={t("subject_placeholder")}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium">Résumé</label>
+              <label className="text-xs font-medium">{t("summary")}</label>
               <textarea
                 className="border-input bg-background ring-offset-background flex w-full rounded-md border px-3 py-2 text-sm"
                 rows={3}
                 value={summary}
                 onChange={(e) => set_summary(e.target.value)}
-                placeholder="Détails du contact..."
+                placeholder={t("details_placeholder")}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_show_form(false)}>
-                Annuler
+                {t("cancel")}
               </Button>
               <Button
                 size="sm"
@@ -128,7 +128,7 @@ export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
                 }
                 disabled={log_contact.isPending}
               >
-                Enregistrer
+                {t("save")}
               </Button>
             </div>
           </CardContent>

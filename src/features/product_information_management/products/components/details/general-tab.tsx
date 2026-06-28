@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -81,6 +82,7 @@ export function ProductDetailGeneralTab({
   product: z.infer<typeof product_details_dto>;
   translations: Array<z.infer<typeof upsert_translation_dto>>;
 }) {
+  const t = useTranslations("products");
   const utils = trpc.useUtils();
 
   const { data: tree } = trpc.categories.tree.useQuery();
@@ -186,8 +188,8 @@ export function ProductDetailGeneralTab({
     <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Général</CardTitle>
-          <CardDescription>Gérer les informations principales du produit.</CardDescription>
+          <CardTitle>{t("general")}</CardTitle>
+          <CardDescription>{t("general_description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <FieldGroup>
@@ -196,7 +198,7 @@ export function ProductDetailGeneralTab({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Nom (FR)</FieldLabel>
+                  <FieldLabel>{t("name_fr")}</FieldLabel>
                   <Input {...field} />
                   <FieldError errors={[fieldState.error]} />
                 </Field>
@@ -208,7 +210,7 @@ export function ProductDetailGeneralTab({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Description (FR)</FieldLabel>
+                  <FieldLabel>{t("description_fr")}</FieldLabel>
                   <Textarea
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value || null)}
@@ -222,7 +224,7 @@ export function ProductDetailGeneralTab({
               <CollapsibleTrigger asChild>
                 <Button type="button" variant="ghost" size="sm" className="flex items-center gap-2">
                   <ChevronRight className="size-4" />
-                  Anglais (EN)
+                  {t("english")}
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -232,7 +234,7 @@ export function ProductDetailGeneralTab({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Nom (EN)</FieldLabel>
+                        <FieldLabel>{t("name_en")}</FieldLabel>
                         <Input {...field} />
                         <FieldError errors={[fieldState.error]} />
                       </Field>
@@ -243,7 +245,7 @@ export function ProductDetailGeneralTab({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Description (EN)</FieldLabel>
+                        <FieldLabel>{t("description_en")}</FieldLabel>
                         <Textarea
                           value={field.value ?? ""}
                           onChange={(e) => field.onChange(e.target.value || null)}
@@ -260,7 +262,7 @@ export function ProductDetailGeneralTab({
               <CollapsibleTrigger asChild>
                 <Button type="button" variant="ghost" size="sm" className="flex items-center gap-2">
                   <ChevronRight className="size-4" />
-                  Arabe (AR)
+                  {t("arabic")}
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -270,7 +272,7 @@ export function ProductDetailGeneralTab({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Nom (AR)</FieldLabel>
+                        <FieldLabel>{t("name_ar")}</FieldLabel>
                         <Input {...field} dir="rtl" />
                         <FieldError errors={[fieldState.error]} />
                       </Field>
@@ -281,7 +283,7 @@ export function ProductDetailGeneralTab({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Description (AR)</FieldLabel>
+                        <FieldLabel>{t("description_ar")}</FieldLabel>
                         <Textarea
                           value={field.value ?? ""}
                           onChange={(e) => field.onChange(e.target.value || null)}
@@ -302,16 +304,16 @@ export function ProductDetailGeneralTab({
                 const tags = field.value ?? [];
                 return (
                   <Field>
-                    <FieldLabel className="sr-only">Mots-clés</FieldLabel>
+                    <FieldLabel className="sr-only">{t("keywords")}</FieldLabel>
                     <TagsInput value={tags} onValueChange={field.onChange} className="w-full">
-                      <TagsInputLabel>Mots-clés</TagsInputLabel>
+                      <TagsInputLabel>{t("keywords")}</TagsInputLabel>
                       <TagsInputList>
                         {tags.map((tag) => (
                           <TagsInputItem key={tag} value={tag}>
                             {tag}
                           </TagsInputItem>
                         ))}
-                        <TagsInputInput placeholder="Ajouter un mot-clé..." />
+                        <TagsInputInput placeholder={t("add_keyword_placeholder")} />
                       </TagsInputList>
                     </TagsInput>
                   </Field>
@@ -324,7 +326,7 @@ export function ProductDetailGeneralTab({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Slug</FieldLabel>
+                  <FieldLabel>{t("slug")}</FieldLabel>
                   <Input {...field} />
                   <FieldError errors={[fieldState.error]} />
                 </Field>
@@ -336,15 +338,15 @@ export function ProductDetailGeneralTab({
               control={form.control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Statut</FieldLabel>
+                  <FieldLabel>{t("status")}</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Brouillon</SelectItem>
-                      <SelectItem value="published">Publié</SelectItem>
-                      <SelectItem value="archived">Archivé</SelectItem>
+                      <SelectItem value="draft">{t("draft")}</SelectItem>
+                      <SelectItem value="published">{t("published")}</SelectItem>
+                      <SelectItem value="archived">{t("archived")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -357,7 +359,7 @@ export function ProductDetailGeneralTab({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Prix de base</FieldLabel>
+                    <FieldLabel>{t("base_price")}</FieldLabel>
                     <Input
                       type="number"
                       step="0.01"
@@ -377,7 +379,7 @@ export function ProductDetailGeneralTab({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Prix promo</FieldLabel>
+                    <FieldLabel>{t("offer_price")}</FieldLabel>
                     <Input
                       type="number"
                       step="0.01"
@@ -388,7 +390,7 @@ export function ProductDetailGeneralTab({
                           e.target.value === "" ? null : parseFloat(e.target.value) || 0,
                         )
                       }
-                      placeholder="—"
+                      placeholder={t("none_placeholder")}
                     />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -402,10 +404,10 @@ export function ProductDetailGeneralTab({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Catégorie</FieldLabel>
+                    <FieldLabel>{t("category")}</FieldLabel>
                     {data_ready ? (
                       <Combobox value={field.value} onValueChange={field.onChange}>
-                        <ComboboxInput placeholder="Rechercher une catégorie..." showClear />
+                        <ComboboxInput placeholder={t("search_category_placeholder")} showClear />
                         <ComboboxContent>
                           <ComboboxList>
                             {category_options.map((cat) => (
@@ -429,7 +431,7 @@ export function ProductDetailGeneralTab({
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Sous-catégorie</FieldLabel>
+                    <FieldLabel>{t("subcategory")}</FieldLabel>
                     {data_ready ? (
                       <Combobox
                         value={field.value ?? ""}
@@ -438,8 +440,8 @@ export function ProductDetailGeneralTab({
                         <ComboboxInput
                           placeholder={
                             watched_category_id
-                              ? "Rechercher une sous-catégorie..."
-                              : "Sélectionnez d'abord une catégorie"
+                              ? t("search_subcategory_placeholder")
+                              : t("select_category_first")
                           }
                           showClear
                           disabled={!watched_category_id}
@@ -467,7 +469,7 @@ export function ProductDetailGeneralTab({
               control={form.control}
               render={({ field }) => (
                 <Field>
-                  <FieldLabel>Marque</FieldLabel>
+                  <FieldLabel>{t("brand")}</FieldLabel>
                   <BrandCombobox
                     value={field.value ?? ""}
                     onValueChange={(val) => field.onChange(val ?? null)}
@@ -478,7 +480,7 @@ export function ProductDetailGeneralTab({
 
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={pending}>
-                {pending ? "Enregistrement…" : "Enregistrer"}
+                {pending ? t("saving") : t("save")}
               </Button>
             </div>
           </FieldGroup>

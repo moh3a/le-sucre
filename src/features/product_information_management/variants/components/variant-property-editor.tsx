@@ -128,7 +128,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
     <div className="space-y-6">
       <div className="flex items-center gap-1">
         <div className="flex items-center gap-1">
-          <span className="font-heading text-2xl font-semibold">Liste des proprietes</span>
+          <span className="font-heading text-2xl font-semibold">{t("property_list")}</span>
           <Badge variant="secondary">{properties.length}</Badge>
         </div>
         <Dialog>
@@ -143,11 +143,11 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
               <FieldGroup>
                 <Field>
                   <FieldLabel>{t("property_code")}</FieldLabel>
-                  <Input placeholder="size" {...property_form.register("code")} />
+                  <Input placeholder={t("property_code_placeholder")} {...property_form.register("code")} />
                 </Field>
                 <Field>
                   <FieldLabel>{t("property_name")}</FieldLabel>
-                  <Input placeholder="Taille" {...property_form.register("name")} />
+                  <Input placeholder={t("property_name_placeholder")} {...property_form.register("name")} />
                 </Field>
                 <Field>
                   <FieldLabel>{t("property_sort")}</FieldLabel>
@@ -243,7 +243,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           <Input
                             value={get_value_defaults(property.id).code}
                             onChange={(e) => set_value_field(property.id, "code", e.target.value)}
-                            placeholder="xl"
+                            placeholder={t("value_code_placeholder")}
                           />
                         </Field>
                         <Field>
@@ -251,11 +251,11 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           <Input
                             value={get_value_defaults(property.id).label}
                             onChange={(e) => set_value_field(property.id, "label", e.target.value)}
-                            placeholder="XL"
+                            placeholder={t("value_label_placeholder")}
                           />
                         </Field>
                         <Field>
-                          <FieldLabel>Image</FieldLabel>
+                          <FieldLabel>{t("image_field")}</FieldLabel>
                           <div className="flex items-center gap-2">
                             {get_value_defaults(property.id).thumbnail_image ? (
                               <div className="group relative inline-flex overflow-hidden rounded-lg border">
@@ -289,15 +289,15 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                                 >
                                   <ImagePlus className="size-4" />
                                   {get_value_defaults(property.id).thumbnail_image
-                                    ? "Changer"
-                                    : "Choisir"}
+                    ? t("change_image")
+                    : t("choose_image")}
                                 </Button>
                               }
                             />
                           </div>
                         </Field>
                         <Field>
-                          <FieldLabel>Couleur</FieldLabel>
+                          <FieldLabel>{t("color_field")}</FieldLabel>
                           <ColorPicker
                             value={get_value_defaults(property.id).color_hex ?? undefined}
                             onValueChange={(value) =>
@@ -313,7 +313,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                             <ColorPickerTrigger asChild>
                               <Button variant="outline" className="flex items-center gap-2 px-3">
                                 <ColorPickerSwatch className="size-4" />
-                                {get_value_defaults(property.id).color_hex ?? "Choisir une couleur"}
+                                {get_value_defaults(property.id).color_hex ?? t("choose_color")}
                               </Button>
                             </ColorPickerTrigger>
                             <ColorPickerContent>

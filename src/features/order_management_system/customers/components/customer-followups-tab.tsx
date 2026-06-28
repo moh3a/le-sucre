@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { QueryGuard } from "@/components/query-guard";
@@ -11,13 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
 import { Phone, Plus, CheckCircle2 } from "lucide-react";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  completed: "Terminé",
-  cancelled: "Annulé",
-  rescheduled: "Reporté",
-};
-
 const STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "outline"> = {
   pending: "outline",
   completed: "default",
@@ -28,6 +22,13 @@ const STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "o
 type CustomerFollowupsTabProps = { user_id: string };
 
 export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
+  const t = useTranslations("followups");
+  const STATUS_LABELS: Record<string, string> = {
+    pending: t("pending"),
+    completed: t("completed"),
+    cancelled: t("cancelled"),
+    rescheduled: t("rescheduled"),
+  };
   const { data: follow_ups, isLoading, refetch } = trpc.operations.customerGetFollowUpsByUser.useQuery({ user_id });
   const [show_form, set_show_form] = useState(false);
   const [fu_type, set_fu_type] = useState("follow_up");
@@ -57,10 +58,10 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
     <QueryGuard query={{ isLoading }} loadingFallback={<Skeleton className="h-48 w-full" />}>
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Relances et suivis</h3>
+        <h3 className="text-lg font-medium">{t("title")}</h3>
         <Button size="sm" onClick={() => set_show_form(!show_form)}>
           <Plus className="mr-1 h-3 w-3" />
-          Planifier une relance
+          {t("schedule")}
         </Button>
       </div>
 
@@ -68,7 +69,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
         <Card className="border-blue-200">
           <CardContent className="space-y-3 pt-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium">Type</label>
+              <label className="text-xs font-medium">{t("type")}</label>
               <select
                 className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                 value={fu_type}
@@ -80,16 +81,16 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium">Titre</label>
+              <label className="text-xs font-medium">{t("title_field")}</label>
               <input
                 className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                 value={title}
                 onChange={(e) => set_title(e.target.value)}
-                placeholder="Objet de la relance..."
+                placeholder={t("subject_placeholder")}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium">Date programmée</label>
+              <label className="text-xs font-medium">{t("scheduled_date")}</label>
               <input
                 type="datetime-local"
                 className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
@@ -99,7 +100,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
             </div>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_show_form(false)}>
-                Annuler
+                {t("cancel")}
               </Button>
               <Button
                 size="sm"
@@ -113,7 +114,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
                 }
                 disabled={!title.trim() || !scheduled_at || create.isPending}
               >
-                Planifier
+                {t("schedule_button")}
               </Button>
             </div>
           </CardContent>
@@ -121,7 +122,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
       )}
 
       {(follow_ups?.length ?? 0) === 0 ? (
-        <p className="text-muted-foreground py-8 text-center text-sm">Aucune relance planifiée</p>
+        <p className="text-muted-foreground py-8 text-center text-sm">{t("no_followups")}</p>
       ) : (
         <div className="space-y-2">
           {(follow_ups ?? []).map((fu) => (
@@ -143,7 +144,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
                     disabled={complete.isPending}
                   >
                     <CheckCircle2 className="mr-1 h-3 w-3" />
-                    Terminer
+                    {t("complete")}
                   </Button>
                 )}
               </div>

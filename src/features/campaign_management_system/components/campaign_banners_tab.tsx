@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Plus,
   Trash,
@@ -66,6 +67,7 @@ type BannerFormState = {
 };
 
 export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
+  const t = useTranslations("campaigns");
   const utils = trpc.useUtils();
   const [selectedBanner, setSelectedBanner] = useState<BannerRow | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -193,9 +195,9 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
-          <CardTitle>Bannières Marketing</CardTitle>
+          <CardTitle>{t("banners_title")}</CardTitle>
           <p className="text-muted-foreground text-sm">
-            Bannières visuelles affichées sur les pages storefront de la campagne.
+            {t("banners_subtitle")}
           </p>
         </div>
         <Button
@@ -203,20 +205,19 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
           className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Ajouter une bannière
+          {t("add_banner")}
         </Button>
       </CardHeader>
       <CardContent>
         {banners.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
             <ImageIcon className="text-muted-foreground mb-4 h-10 w-10" />
-            <p className="text-muted-foreground font-semibold">Aucune bannière configurée</p>
+            <p className="text-muted-foreground font-semibold">{t("no_banners")}</p>
             <p className="text-muted-foreground mt-1 max-w-sm text-xs">
-              Les bannières affichent des images promotionnelles accrocheuses, des messages et des
-              boutons CTA.
+              {t("no_banners_description")}
             </p>
             <Button variant="outline" className="mt-4" onClick={handleOpenNew}>
-              Créer la première bannière
+              {t("create_first_banner")}
             </Button>
           </div>
         ) : (
@@ -299,7 +300,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
           <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedBanner ? "Modifier la bannière" : "Ajouter une bannière"}
+                {selectedBanner ? t("edit_banner") : t("add_banner")}
               </DialogTitle>
             </DialogHeader>
 
@@ -577,10 +578,10 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
               <DialogFooter className="border-t pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                  Annuler
+                  {t("cancel")}
                 </Button>
                 <Button type="submit" className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90">
-                  {selectedBanner ? "Sauvegarder" : "Créer"}
+                  {selectedBanner ? t("save") : t("create")}
                 </Button>
               </DialogFooter>
             </form>

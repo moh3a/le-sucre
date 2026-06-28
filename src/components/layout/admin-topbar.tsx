@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { authClient } from "@/lib/auth/client";
 import { QueryGuard } from "@/components/query-guard";
 
 export function AdminTopbar() {
+  const t = useTranslations("layout");
   const { data: session, isPending, error } = authClient.useSession();
 
   const userInitials = session?.user?.name
@@ -34,7 +36,7 @@ export function AdminTopbar() {
       {/* Search */}
       <div className="relative w-64">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-        <Input placeholder="Rechercher…" className="h-9 pl-9" />
+        <Input placeholder={t("search_placeholder")} className="h-9 pl-9" />
       </div>
 
       {/* Right actions */}
@@ -53,7 +55,7 @@ export function AdminTopbar() {
                 <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium sm:block">
-                {session?.user?.name ?? "Administrateur"}
+                {session?.user?.name ?? t("administrator")}
               </span>
             </Button>
           </DropdownMenuTrigger>
@@ -62,11 +64,11 @@ export function AdminTopbar() {
               {session?.user?.email}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Mon profil</DropdownMenuItem>
-            <DropdownMenuItem>Paramètres</DropdownMenuItem>
+            <DropdownMenuItem>{t("my_profile_short")}</DropdownMenuItem>
+            <DropdownMenuItem>{t("settings")}</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={() => authClient.signOut()}>
-              Se déconnecter
+              {t("sign_out")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

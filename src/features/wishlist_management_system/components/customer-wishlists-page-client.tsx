@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { WishlistPanel } from "./wishlist-panel";
 
 export function CustomerWishlistsPageClient() {
+  const t = useTranslations("wishlist");
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const { data: wishlists, isLoading: wlLoading } = trpc.wishlistManagement.wishlists.list.useQuery({ page: 1, limit: 50 });
   const { data: stats } = trpc.wishlistManagement.wishlists.stats.useQuery();
@@ -50,7 +52,7 @@ export function CustomerWishlistsPageClient() {
   return (
     <QueryGuard query={{ isLoading: wlLoading }}>
     <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">Mes listes de souhaits</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("my_lists")}</h1>
       <WishlistPanel
         wishlists={wishlists?.items ?? []}
         items={selectedId ? items?.items : (allItems?.items ?? [])}

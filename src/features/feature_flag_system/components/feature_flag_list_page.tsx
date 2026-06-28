@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import {
@@ -68,6 +69,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 };
 
 function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const t = useTranslations("feature_flags");
   const utils = trpc.useUtils();
   const [key, setKey] = React.useState("");
   const [fr_name, setFrName] = React.useState("");
@@ -116,27 +118,27 @@ function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Nouveau feature flag</DialogTitle>
+          <DialogTitle>{t("new_flag_title")}</DialogTitle>
           <DialogDescription>
-            Créez un nouveau feature flag pour contrôler les fonctionnalités de la plateforme.
+            {t("new_flag_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="key">Clé technique</Label>
+            <Label htmlFor="key">{t("key_label")}</Label>
             <Input
               id="key"
-              placeholder="ex: new_checkout_flow"
+              placeholder={t("key_placeholder")}
               value={key}
               onChange={(e) => setKey(e.target.value)}
               required
             />
             <p className="text-muted-foreground text-xs">
-              Identifiant unique utilisé dans le code. Ex: ai_recommendations, express_shipping
+              {t("key_description")}
             </p>
           </div>
           <Separator />
-          <p className="text-sm font-medium">Nom (multilingue)</p>
+          <p className="text-sm font-medium">{t("name_multilingual")}</p>
           <div className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="fr_name">Français *</Label>
@@ -152,7 +154,7 @@ function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
             </div>
           </div>
           <Separator />
-          <p className="text-sm font-medium">Description (optionnelle)</p>
+          <p className="text-sm font-medium">{t("description_optional")}</p>
           <div className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="fr_desc">Français</Label>
@@ -169,7 +171,7 @@ function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           </div>
           <DialogFooter>
             <Button type="submit" disabled={create.isPending}>
-              {create.isPending ? "Création..." : "Créer"}
+              {create.isPending ? t("creating") : t("create")}
             </Button>
           </DialogFooter>
         </form>
@@ -187,6 +189,7 @@ function EditFlagDialog({
   onOpenChange: (v: boolean) => void;
   flag: FeatureFlagRow | null;
 }) {
+  const t = useTranslations("feature_flags");
   const utils = trpc.useUtils();
   const [fr_name, setFrName] = React.useState("");
   const [en_name, setEnName] = React.useState("");
@@ -230,13 +233,13 @@ function EditFlagDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Modifier le feature flag</DialogTitle>
+          <DialogTitle>{t("edit_flag_title")}</DialogTitle>
           <DialogDescription>
-            Mettez à jour les informations du feature flag <strong>{flag?.key}</strong>.
+            {t("edit_flag_description", { key: flag?.key })}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <p className="text-sm font-medium">Nom (multilingue)</p>
+          <p className="text-sm font-medium">{t("name_multilingual")}</p>
           <div className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="edit_fr_name">Français *</Label>
@@ -252,7 +255,7 @@ function EditFlagDialog({
             </div>
           </div>
           <Separator />
-          <p className="text-sm font-medium">Description (optionnelle)</p>
+          <p className="text-sm font-medium">{t("description_optional")}</p>
           <div className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="edit_fr_desc">Français</Label>
@@ -269,7 +272,7 @@ function EditFlagDialog({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={update.isPending}>
-              {update.isPending ? "Mise à jour..." : "Enregistrer"}
+              {update.isPending ? t("updating") : t("save")}
             </Button>
           </DialogFooter>
         </form>
@@ -279,6 +282,7 @@ function EditFlagDialog({
 }
 
 export function FeatureFlagListPage() {
+  const t = useTranslations("feature_flags");
   const [page, setPage] = useQueryState("ffPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("ffPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("ffSearch", parseAsString);
@@ -326,7 +330,7 @@ export function FeatureFlagListPage() {
       {
         id: "key",
         accessorKey: "key",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Clé" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("key_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-mono text-sm font-medium">{row.original.key}</span>
@@ -337,7 +341,7 @@ export function FeatureFlagListPage() {
       {
         id: "enabled",
         accessorKey: "enabled",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <Switch
@@ -345,7 +349,7 @@ export function FeatureFlagListPage() {
               onCheckedChange={(checked) => toggle.mutate({ id: row.original.id, enabled: checked })}
             />
             <Badge variant={row.original.enabled ? "default" : "secondary"} className="text-xs">
-              {row.original.enabled ? "Activé" : "Désactivé"}
+              {row.original.enabled ? t("enabled_badge") : t("disabled_badge")}
             </Badge>
           </div>
         ),
@@ -353,7 +357,7 @@ export function FeatureFlagListPage() {
       {
         id: "description",
         accessorKey: "description",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Description" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("description_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground line-clamp-1 max-w-xs text-sm">
             {row.original.description?.fr || "—"}
@@ -363,7 +367,7 @@ export function FeatureFlagListPage() {
       {
         id: "updated_at",
         accessorKey: "updated_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Mis à jour" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("updated_column")} />,
         cell: ({ row }) =>
           row.original.updated_at
             ? formatDate(row.original.updated_at, { month: "short" })
@@ -381,7 +385,7 @@ export function FeatureFlagListPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setEditFlag(row.original)}>
                 <Pencil className="mr-2 size-4" />
-                Modifier
+                {t("edit_button")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => toggle.mutate({ id: row.original.id, enabled: !row.original.enabled })}
@@ -389,12 +393,12 @@ export function FeatureFlagListPage() {
                 {row.original.enabled ? (
                   <>
                     <PowerOff className="mr-2 size-4 text-amber-500" />
-                    Désactiver
+                    {t("deactivate_button")}
                   </>
                 ) : (
                   <>
                     <Power className="mr-2 size-4 text-emerald-500" />
-                    Activer
+                    {t("activate_button")}
                   </>
                 )}
               </DropdownMenuItem>
@@ -404,7 +408,7 @@ export function FeatureFlagListPage() {
                 onClick={() => setDeleteFlag(row.original)}
               >
                 <Trash2 className="mr-2 size-4" />
-                Supprimer
+                {t("delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -429,12 +433,12 @@ export function FeatureFlagListPage() {
   return (
     <QueryGuard query={{ isLoading }} loadingFallback={
       <ConsolePageShell
-        title="Feature Flags"
-        subtitle="Gérez les fonctionnalités activées ou désactivées de la plateforme"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nouveau flag
+            {t("create")}
           </Button>
         }
       >
@@ -443,21 +447,21 @@ export function FeatureFlagListPage() {
     }>
     <>
       <ConsolePageShell
-        title="Feature Flags"
-        subtitle="Gérez les fonctionnalités activées ou désactivées de la plateforme"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nouveau flag
+            {t("create")}
           </Button>
         }
         stats={
           <StatsGrid
             loading={statsLoading}
             items={[
-              { label: "Total", value: stats?.total ?? 0, icon: Flag, color: "info" },
-              { label: "Activés", value: stats?.enabled ?? 0, icon: CheckCircle2, color: "success" },
-              { label: "Désactivés", value: stats?.disabled ?? 0, icon: XCircle, color: "default" },
+              { label: t("total_label"), value: stats?.total ?? 0, icon: Flag, color: "info" },
+              { label: t("enabled_label"), value: stats?.enabled ?? 0, icon: CheckCircle2, color: "success" },
+              { label: t("disabled_label"), value: stats?.disabled ?? 0, icon: XCircle, color: "default" },
             ]}
           />
         }
@@ -465,7 +469,7 @@ export function FeatureFlagListPage() {
         <DataTable table={table}>
           <DataTableAdvancedToolbar table={table}>
             <Input
-              placeholder="Rechercher un feature flag…"
+              placeholder={t("search_placeholder")}
               value={search || ""}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -484,22 +488,21 @@ export function FeatureFlagListPage() {
       <Dialog open={!!delete_flag} onOpenChange={(v) => { if (!v) setDeleteFlag(null); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogTitle>{t("confirm_delete_title")}</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer le feature flag{" "}
-              <strong>{delete_flag?.key}</strong> ? Cette action est irréversible.
+              {t("confirm_delete_description", { key: delete_flag?.key })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteFlag(null)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => delete_flag && remove.mutate(delete_flag.id)}
               disabled={remove.isPending}
             >
-              {remove.isPending ? "Suppression..." : "Supprimer"}
+              {remove.isPending ? t("deleting") : t("delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

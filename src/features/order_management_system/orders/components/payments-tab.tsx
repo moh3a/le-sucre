@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +42,7 @@ export function PaymentsTab({
   grand_total,
   on_update,
 }: PaymentsTabProps) {
+  const t = useTranslations("payments");
   const update_payment = trpc.orders.adminUpdatePayment.useMutation({
     onSuccess: () => {
       on_update();
@@ -72,28 +75,28 @@ export function PaymentsTab({
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>Informations de paiement</CardTitle>
+          <CardTitle>{t("informations_paiement")}</CardTitle>
           <Button size="sm" variant="outline" onClick={init_payment_form}>
-            Modifier le paiement
+            {t("modifier_paiement")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center gap-3">
-            <span className="text-muted-foreground w-36">Statut</span>
+            <span className="text-muted-foreground w-36">{t("statut")}</span>
             <Badge variant={PAYMENT_BADGE[payment_status] ?? "outline"}>
               {PAYMENT_LABELS[payment_status] ?? payment_status}
             </Badge>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-muted-foreground w-36">Prestataire</span>
+            <span className="text-muted-foreground w-36">{t("prestataire")}</span>
             <span>{payment_provider ?? "—"}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-muted-foreground w-36">Référence</span>
+            <span className="text-muted-foreground w-36">{t("reference")}</span>
             <span className="font-mono text-xs">{payment_reference ?? "—"}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-muted-foreground w-36">Montant total</span>
+            <span className="text-muted-foreground w-36">{t("montant_total")}</span>
             <span className="font-semibold">
               {Number(grand_total).toLocaleString("fr-FR")} DZD
             </span>
@@ -104,11 +107,11 @@ export function PaymentsTab({
       {pay_status && (
         <Card className="mt-4 border-blue-200">
           <CardHeader>
-            <CardTitle>Modifier le paiement</CardTitle>
+            <CardTitle>{t("modifier_paiement")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Field>
-              <FieldLabel>Statut</FieldLabel>
+              <FieldLabel>{t("statut")}</FieldLabel>
               <Select value={pay_status} onValueChange={set_pay_status}>
                 <SelectTrigger>
                   <SelectValue />
@@ -123,31 +126,31 @@ export function PaymentsTab({
               </Select>
             </Field>
             <Field>
-              <FieldLabel>Prestataire</FieldLabel>
+              <FieldLabel>{t("prestataire")}</FieldLabel>
               <Input
                 value={pay_provider}
                 onChange={(e) => set_pay_provider(e.target.value)}
-                placeholder="ex: Stripe, PayPal, CIB..."
+                placeholder={t("provider_placeholder")}
               />
             </Field>
             <Field>
-              <FieldLabel>Référence</FieldLabel>
+              <FieldLabel>{t("reference")}</FieldLabel>
               <Input
                 value={pay_reference}
                 onChange={(e) => set_pay_reference(e.target.value)}
-                placeholder="ID de transaction"
+                placeholder={t("transaction_id_placeholder")}
               />
             </Field>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_pay_status("")}>
-                Annuler
+                {t("annuler")}
               </Button>
               <Button
                 size="sm"
                 onClick={on_save_payment}
                 disabled={update_payment.isPending}
               >
-                {update_payment.isPending ? "Enregistrement..." : "Enregistrer"}
+                {update_payment.isPending ? t("saving") : t("save")}
               </Button>
             </div>
           </CardContent>

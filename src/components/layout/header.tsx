@@ -4,6 +4,7 @@ import { Menu, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,15 +22,16 @@ import { authClient } from "@/lib/auth/client";
 import { QueryGuard } from "@/components/query-guard";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
-  { href: "/", label: "Accueil" },
-  { href: "/boutique", label: "Boutique" },
-  { href: "/categories", label: "Catégories" },
-  { href: "/promotions", label: "Promotions" },
-];
-
 export function Header() {
+  const t = useTranslations("layout");
   const pathname = usePathname();
+
+  const navLinks = [
+    { href: "/", label: t("home") },
+    { href: "/boutique", label: t("boutique_title") },
+    { href: "/categories", label: t("categories") },
+    { href: "/promotions", label: t("promotions") },
+  ];
   const { data: session, isPending, error } = authClient.useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -91,16 +93,16 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
-                  <Link href="/compte">Mon compte</Link>
+                  <Link href="/compte">{t("my_account")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/commandes">Mes commandes</Link>
+                  <Link href="/commandes">{t("my_orders")}</Link>
                 </DropdownMenuItem>
                 {session.user?.role === "admin" && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/admin">Administration</Link>
+                      <Link href="/admin">{t("administration")}</Link>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -109,7 +111,7 @@ export function Header() {
                   className="text-destructive"
                   onClick={() => authClient.signOut()}
                 >
-                  Se déconnecter
+                  {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -117,7 +119,7 @@ export function Header() {
             <Button size="sm" asChild>
               <Link href="/login">
                 <User className="h-4 w-4" />
-                Connexion
+                {t("login")}
               </Link>
             </Button>
           )}

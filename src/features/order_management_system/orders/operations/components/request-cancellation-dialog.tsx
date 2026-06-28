@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { Ban } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function RequestCancellationDialog() {
+  const t = useTranslations("cancellations");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [reason, setReason] = useState("");
@@ -68,32 +70,32 @@ export function RequestCancellationDialog() {
       <DialogTrigger asChild>
         <Button variant="destructive">
           <Ban className="mr-2 size-4" />
-          Demander une annulation
+          {t("request_cancellation")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Demander une annulation de commande</DialogTitle>
+          <DialogTitle>{t("request_title")}</DialogTitle>
           <DialogDescription>
-            Soumettre une demande d&apos;annulation pour approbation.
+            {t("request_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cn_order_id">Commande *</Label>
+            <Label htmlFor="cn_order_id">{t("order")} *</Label>
             <Input
               id="cn_order_id"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
-              placeholder="ID de la commande"
+              placeholder={t("order_id_placeholder")}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cn_reason">Motif *</Label>
+            <Label htmlFor="cn_reason">{t("reason")} *</Label>
             <Select value={reason} onValueChange={setReason} required>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un motif" />
+                <SelectValue placeholder={t("select_reason_placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="customer_request">Demande client</SelectItem>
@@ -106,20 +108,20 @@ export function RequestCancellationDialog() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cn_description">Description</Label>
+            <Label htmlFor="cn_description">{t("description")}</Label>
             <Textarea
               id="cn_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Détails (optionnel)"
+              placeholder={t("details_placeholder")}
             />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Envoi..." : "Soumettre"}
+              {mutation.isPending ? t("sending") : t("submit")}
             </Button>
           </DialogFooter>
         </form>

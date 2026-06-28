@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   Eye,
@@ -31,6 +32,7 @@ type AnalyticsTabProps = {
 };
 
 export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
+  const t = useTranslations("campaigns");
   const [rangeDays, setRangeDays] = useState(30);
 
   const toStr = format(new Date(), "yyyy-MM-dd");
@@ -61,44 +63,44 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
 
   const kpis = [
     {
-      title: "Impressions",
+      title: t("impressions"),
       value: summary.total_impressions.toLocaleString(),
-      desc: "Nombre total de vues",
+      desc: t("impressions_desc"),
       icon: Eye,
       color: "text-blue-500 bg-blue-500/10",
     },
     {
-      title: "Clics",
+      title: t("clicks"),
       value: clickCount.toLocaleString(),
-      desc: `Bannière: ${summary.total_banner_clicks} | Autres: ${summary.total_clicks}`,
+      desc: `${t("banner")}: ${summary.total_banner_clicks} | ${t("other")}: ${summary.total_clicks}`,
       icon: MousePointerClick,
       color: "text-amber-500 bg-amber-500/10",
     },
     {
-      title: "Taux de Clics (CTR)",
+      title: t("ctr"),
       value: `${ctr.toFixed(2)} %`,
-      desc: "Clics divisés par Impressions",
+      desc: t("ctr_desc"),
       icon: Percent,
       color: "text-emerald-500 bg-emerald-500/10",
     },
     {
-      title: "Ajouts au Panier",
+      title: t("add_to_cart"),
       value: summary.total_add_to_cart.toLocaleString(),
-      desc: "Ajouts de produits suivis",
+      desc: t("add_to_cart_desc"),
       icon: ShoppingCart,
       color: "text-indigo-500 bg-indigo-500/10",
     },
     {
-      title: "Conversions (Commandes)",
+      title: t("conversions"),
       value: summary.total_conversions.toLocaleString(),
-      desc: `Taux Conv: ${cr.toFixed(2)}%`,
+      desc: `${t("conv_rate")}: ${cr.toFixed(2)}%`,
       icon: TrendingUp,
       color: "text-purple-500 bg-purple-500/10",
     },
     {
-      title: "Revenus",
+      title: t("revenue"),
       value: `${Number(summary.total_revenue).toLocaleString()} DZD`,
-      desc: "Chiffre d'affaires généré",
+      desc: t("revenue_desc"),
       icon: Coins,
       color: "text-[#c8d152] bg-[#c8d152]/10",
     },
@@ -154,12 +156,12 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
       {/* Daily analytics details list */}
       <Card>
         <CardHeader>
-          <CardTitle>Historique quotidien (Détails)</CardTitle>
+          <CardTitle>{t("daily_history_title")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {timeseries.length === 0 ? (
             <div className="text-muted-foreground py-12 text-center text-sm">
-              Aucune donnée analytique enregistrée sur cette période.
+              {t("no_analytics_data")}
             </div>
           ) : (
             <Table>

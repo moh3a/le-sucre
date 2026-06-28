@@ -7,6 +7,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import type { ColumnDef, PaginationState } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import {
@@ -38,6 +39,8 @@ export function SimpleDataTable<TData>({
   data,
   pageCount,
 }: SimpleDataTableProps<TData>) {
+  const t = useTranslations("common");
+
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -85,7 +88,7 @@ export function SimpleDataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Aucun résultat
+                  {t("no_results")}
                 </TableCell>
               </TableRow>
             )}
@@ -95,7 +98,7 @@ export function SimpleDataTable<TData>({
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          Lignes par page
+          {t("rows_per_page")}
           <Select
             value={String(pageSize)}
             onValueChange={(v) => {
@@ -124,7 +127,7 @@ export function SimpleDataTable<TData>({
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {pageIndex + 1} / {table.getPageCount()}
+            {t("page")} {pageIndex + 1} / {table.getPageCount()}
           </span>
           <Button
             variant="outline"

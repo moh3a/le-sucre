@@ -125,7 +125,7 @@ export function BrandForm({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>{t("slug")}</FieldLabel>
-              <Input {...field} placeholder="auto" />
+              <Input {...field} placeholder={t("auto_slug_placeholder")} />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -155,7 +155,7 @@ export function BrandForm({
                 <Input
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value || null)}
-                  placeholder="https://"
+                  placeholder={t("website_url_placeholder")}
                 />
               </Field>
             )}

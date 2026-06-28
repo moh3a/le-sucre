@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 export function OperationsDashboardClient() {
+  const t = useTranslations("operations");
   const escalations = trpc.operations.orderListEscalations.useQuery({
     page: 1,
     limit: 1,
@@ -39,7 +41,7 @@ export function OperationsDashboardClient() {
     <QueryGuard
       isLoading={loading}
       loadingFallback={
-        <ConsolePageShell title="Opérations" subtitle="Tableau de bord des opérations quotidiennes">
+        <ConsolePageShell title={t("title")} subtitle={t("subtitle")}>
           <Skeleton className="h-96 w-full" />
         </ConsolePageShell>
       }
@@ -48,77 +50,77 @@ export function OperationsDashboardClient() {
       }}
     >
       <ConsolePageShell
-      title="Opérations"
-      subtitle="Tableau de bord des opérations quotidiennes"
+      title={t("title")}
+      subtitle={t("subtitle")}
     >
       <StatsGrid
         loading={false}
         items={[
           {
-            label: "Escalades ouvertes",
+            label: t("open_escalations"),
             value: escalations.data?.meta?.total_records ?? 0,
             icon: AlertCircle,
             color: "error",
             link: "/console/operations/escalations",
           },
           {
-            label: "Annulations en attente",
+            label: t("pending_cancellations"),
             value: cancellations.data?.meta?.total_records ?? 0,
             icon: Ban,
             color: "error",
             link: "/console/operations/cancellations",
           },
           {
-            label: "Tâches en attente",
+            label: t("pending_tasks"),
             value: tasks.data?.pending ?? 0,
             icon: ListTodo,
             color: "info",
             link: "/console/operations/tasks",
           },
           {
-            label: "Tâches en retard",
+            label: t("overdue_tasks"),
             value: tasks.data?.overdue ?? 0,
             icon: AlertCircle,
             color: "error",
             link: "/console/operations/tasks",
           },
           {
-            label: "Paiements en attente",
+            label: t("pending_payments"),
             value: pendingPayments.data ?? 0,
             icon: Banknote,
             color: "warning",
             link: "/console/operations/payment-verifications",
           },
           {
-            label: "Relances en retard",
+            label: t("overdue_followups"),
             value: overdueFollowups.data?.length ?? 0,
             icon: Phone,
             color: "error",
             link: "/console/operations/follow-ups",
           },
           {
-            label: "Garanties",
+            label: t("warranty_title"),
             value: "—",
             icon: Wrench,
             color: "default",
             link: "/console/operations/warranty",
           },
           {
-            label: "Remboursements",
+            label: t("refunds_title"),
             value: "—",
             icon: RefreshCw,
             color: "default",
             link: "/console/operations/refunds",
           },
           {
-            label: "Cas de support",
+            label: t("support_cases"),
             value: "—",
             icon: HeadphonesIcon,
             color: "default",
             link: "/console/operations/support-cases",
           },
           {
-            label: "Ajustements stock",
+            label: t("stock_adjustments"),
             value: "—",
             icon: Warehouse,
             color: "default",

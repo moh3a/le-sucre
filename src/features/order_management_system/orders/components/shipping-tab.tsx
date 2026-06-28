@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,7 @@ type ShippingTabProps = {
 };
 
 export function ShippingTab({ order_id, shipping_address, on_update }: ShippingTabProps) {
+  const t = useTranslations("shipping");
   const update_shipping = trpc.orders.adminUpdateShipping.useMutation({
     onSuccess: () => {
       on_update();
@@ -67,9 +70,9 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>Adresse de livraison</CardTitle>
+          <CardTitle>{t("adresse_livraison")}</CardTitle>
           <Button size="sm" variant="outline" onClick={init_shipping_form}>
-            Modifier l&apos;adresse
+            {t("modifier_adresse")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
@@ -88,19 +91,19 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
       {ship_full_name !== "" && (
         <Card className="mt-4 border-blue-200">
           <CardHeader>
-            <CardTitle>Modifier l&apos;adresse</CardTitle>
+            <CardTitle>{t("modifier_adresse")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid gap-3 md:grid-cols-2">
               <Field>
-                <FieldLabel>Nom complet</FieldLabel>
+                <FieldLabel>{t("nom_complet")}</FieldLabel>
                 <Input
                   value={ship_full_name}
                   onChange={(e) => set_ship_full_name(e.target.value)}
                 />
               </Field>
               <Field>
-                <FieldLabel>Téléphone</FieldLabel>
+                <FieldLabel>{t("telephone")}</FieldLabel>
                 <Input
                   value={ship_phone}
                   onChange={(e) => set_ship_phone(e.target.value)}
@@ -108,14 +111,14 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
               </Field>
             </div>
             <Field>
-              <FieldLabel>Adresse</FieldLabel>
+              <FieldLabel>{t("adresse")}</FieldLabel>
               <Input
                 value={ship_line1}
                 onChange={(e) => set_ship_line1(e.target.value)}
               />
             </Field>
             <Field>
-              <FieldLabel>Complément d&apos;adresse</FieldLabel>
+              <FieldLabel>{t("complement_adresse")}</FieldLabel>
               <Input
                 value={ship_line2}
                 onChange={(e) => set_ship_line2(e.target.value)}
@@ -123,21 +126,21 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
             </Field>
             <div className="grid gap-3 md:grid-cols-3">
               <Field>
-                <FieldLabel>Ville</FieldLabel>
+                <FieldLabel>{t("ville")}</FieldLabel>
                 <Input
                   value={ship_city}
                   onChange={(e) => set_ship_city(e.target.value)}
                 />
               </Field>
               <Field>
-                <FieldLabel>Wilaya / État</FieldLabel>
+                <FieldLabel>{t("wilaya_etat")}</FieldLabel>
                 <Input
                   value={ship_state}
                   onChange={(e) => set_ship_state(e.target.value)}
                 />
               </Field>
               <Field>
-                <FieldLabel>Code postal</FieldLabel>
+                <FieldLabel>{t("code_postal")}</FieldLabel>
                 <Input
                   value={ship_postal}
                   onChange={(e) => set_ship_postal(e.target.value)}
@@ -146,14 +149,14 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
             </div>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_ship_full_name("")}>
-                Annuler
+                {t("annuler")}
               </Button>
               <Button
                 size="sm"
                 onClick={on_save_shipping}
                 disabled={update_shipping.isPending}
               >
-                {update_shipping.isPending ? "Enregistrement..." : "Enregistrer"}
+                {update_shipping.isPending ? t("saving") : t("save")}
               </Button>
             </div>
           </CardContent>

@@ -18,8 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { useTranslations } from "next-intl";
 
 export function RequestRefundDialog() {
+  const t = useTranslations("payments");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [amount, setAmount] = useState("");
@@ -82,7 +84,7 @@ export function RequestRefundDialog() {
                 id="rf_order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande"
+                placeholder={t("order_id_placeholder")}
                 required
               />
             </div>
@@ -105,7 +107,7 @@ export function RequestRefundDialog() {
               id="rf_reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Raison du remboursement"
+              placeholder={t("refund_reason_placeholder")}
               required
             />
           </div>
@@ -115,7 +117,7 @@ export function RequestRefundDialog() {
               id="rf_cancellation_id"
               value={cancellationRequestId}
               onChange={(e) => setCancellationRequestId(e.target.value)}
-              placeholder="Optionnel, si lié à une annulation"
+              placeholder={t("cancellation_link_placeholder")}
             />
           </div>
           <DialogFooter>

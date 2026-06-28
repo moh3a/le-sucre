@@ -35,6 +35,7 @@ import { CustomerSupportTab } from "./customer-support-tab";
 import { CustomerFollowupsTab } from "./customer-followups-tab";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
 
@@ -154,6 +155,7 @@ function CartCard({
     }>;
   };
 }) {
+  const t = useTranslations("orders");
   const [open, setOpen] = useState(false);
   const total = cart.items.reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
 
@@ -166,7 +168,7 @@ function CartCard({
               {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               <div>
                 <CardTitle className="text-sm font-medium">
-                  Panier{" "}
+                  {t("cart")}{" "}
                   <code className="bg-muted rounded px-1.5 py-0.5 text-xs">
                     {cart.id.slice(0, 16)}…
                   </code>
@@ -177,18 +179,18 @@ function CartCard({
             <div className="flex items-center gap-3">
               <Badge variant={STATUS_BADGE_VARIANTS[cart.status] ?? "outline"}>
                 {cart.status === "active"
-                  ? "Actif"
+                  ? t("active")
                   : cart.status === "converted"
-                    ? "Converti"
+                    ? t("converted")
                     : cart.status === "merged"
-                      ? "Fusionné"
+                      ? t("merged")
                       : cart.status}
               </Badge>
               <span className="text-sm font-medium tabular-nums">
                 {total.toLocaleString("fr-FR")} {cart.currency}
               </span>
               <Badge variant="outline">
-                {cart.items.length} article{cart.items.length > 1 ? "s" : ""}
+                {cart.items.length} {cart.items.length > 1 ? t("items") : t("item")}
               </Badge>
             </div>
           </div>
@@ -197,7 +199,7 @@ function CartCard({
       {open && (
         <CardContent className="space-y-2 pt-0 pb-4">
           {cart.items.length === 0 ? (
-            <p className="text-muted-foreground py-2 text-center text-sm">Panier vide</p>
+            <p className="text-muted-foreground py-2 text-center text-sm">{t("empty_cart")}</p>
           ) : (
             cart.items.map((item) => <CartItemRow key={item.id} item={item} />)
           )}
@@ -262,6 +264,7 @@ function OrderCard({
     }>;
   };
 }) {
+  const t = useTranslations("orders");
   const [open, setOpen] = useState(false);
   const addr = order.shipping_address as Record<string, string | undefined>;
 
@@ -274,13 +277,13 @@ function OrderCard({
               {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               <div>
                 <CardTitle className="text-sm font-medium">
-                  Commande <span className="font-mono">{order.order_number}</span>
+                  {t("order")} <span className="font-mono">{order.order_number}</span>
                   <Link
                     href={`/console/orders/${order.id}`}
                     className="ml-2 inline-flex items-center text-xs text-blue-600 hover:underline"
                   >
                     <ExternalLink className="mr-0.5 h-3 w-3" />
-                    Détails
+                    {t("details")}
                   </Link>
                 </CardTitle>
                 <p className="text-muted-foreground text-xs">
@@ -297,7 +300,7 @@ function OrderCard({
                 {Number(order.grand_total).toLocaleString("fr-FR")} {order.currency}
               </span>
               <Badge variant="outline">
-                {order.items.length} article{order.items.length > 1 ? "s" : ""}
+                {order.items.length} {order.items.length > 1 ? t("items") : t("item")}
               </Badge>
             </div>
           </div>
@@ -306,7 +309,7 @@ function OrderCard({
       {open && (
         <CardContent className="space-y-3 pt-0 pb-4">
           {order.items.length === 0 ? (
-            <p className="text-muted-foreground py-2 text-center text-sm">Aucun article</p>
+            <p className="text-muted-foreground py-2 text-center text-sm">{t("no_items")}</p>
           ) : (
             <div className="space-y-1.5">
               {order.items.map((item) => (
@@ -330,6 +333,7 @@ function OrderCard({
 }
 
 function ReviewCard({ review }: { review: Record<string, unknown> }) {
+  const t = useTranslations("orders");
   const r = review as { rating: number; status: string; is_verified_purchase: boolean; title?: string; body: string; created_at: string };
   return (
     <Card>
@@ -348,7 +352,7 @@ function ReviewCard({ review }: { review: Record<string, unknown> }) {
               {REVIEW_STATUS_LABELS[r.status] ?? r.status}
             </Badge>
             {r.is_verified_purchase && (
-              <Badge variant="outline" className="text-[10px]">Achat vérifié</Badge>
+              <Badge variant="outline" className="text-[10px]">{t("verified_purchase")}</Badge>
             )}
           </div>
           <p className="text-muted-foreground text-xs">{formatDate(r.created_at)}</p>
@@ -363,6 +367,7 @@ function ReviewCard({ review }: { review: Record<string, unknown> }) {
 }
 
 function ReturnRequestCard({ request }: { request: Record<string, unknown> }) {
+  const t = useTranslations("orders");
   const [open, setOpen] = useState(false);
   const r = request as {
     id: string; type: string; status: string; reason?: string; customer_note?: string;
@@ -408,13 +413,13 @@ function ReturnRequestCard({ request }: { request: Record<string, unknown> }) {
         <CardContent className="space-y-2 pt-0 pb-4">
           {r.reason && (
             <p className="text-sm">
-              <span className="text-muted-foreground">Motif : </span>
+              <span className="text-muted-foreground">{t("reason_colon")} </span>
               {r.reason}
             </p>
           )}
           {r.customer_note && (
             <p className="text-muted-foreground text-sm">
-              Note : {r.customer_note}
+              {t("note_colon")} {r.customer_note}
             </p>
           )}
           {items && items.length > 0 && (
@@ -434,6 +439,7 @@ function ReturnRequestCard({ request }: { request: Record<string, unknown> }) {
 }
 
 function PromoRedemptionCard({ redemption }: { redemption: Record<string, unknown> }) {
+  const t = useTranslations("orders");
   const r = redemption as {
     promotion_name?: string; promotion_type?: string; code?: string; discount_amount: string; created_at: string;
   };
@@ -445,7 +451,7 @@ function PromoRedemptionCard({ redemption }: { redemption: Record<string, unknow
             <Gift className="text-muted-foreground h-4 w-4" />
             <div>
               <CardTitle className="text-sm font-medium">
-                {r.promotion_name ?? "Promotion"}
+                {r.promotion_name ?? t("promotion")}
               </CardTitle>
               <p className="text-muted-foreground text-xs">
                 {r.code
@@ -466,13 +472,14 @@ function PromoRedemptionCard({ redemption }: { redemption: Record<string, unknow
 }
 
 export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
+  const t = useTranslations("orders");
   const { data, isLoading } = trpc.customers.adminGetFullDetail.useQuery({ user_id });
 
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <User className="text-muted-foreground mb-4 h-12 w-12" />
-        <p className="text-muted-foreground text-lg">Client introuvable</p>
+        <p className="text-muted-foreground text-lg">{t("customer_not_found")}</p>
       </div>
     );
   }
@@ -507,10 +514,10 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
             className="text-sm"
           >
             {customer.segment === "vip"
-              ? "VIP"
+              ? t("vip")
               : customer.segment === "repeat"
-                ? "Répétitif"
-                : "Nouveau"}
+                ? t("repeat")
+                : t("new")}
           </Badge>
         </div>
       </div>
@@ -519,22 +526,22 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
         items={
           [
             {
-              label: "Total commandes",
+              label: t("total_orders"),
               value: customer.total_orders,
               icon: ShoppingCart,
             },
             {
-              label: "Total dépensé",
+              label: t("total_spent"),
               value: `${Number(customer.total_spent).toLocaleString("fr-FR")} DZD`,
               icon: CreditCard,
             },
             {
-              label: "Panier moyen",
+              label: t("avg_order_value"),
               value: `${Number(customer.average_order_value).toLocaleString("fr-FR")} DZD`,
               icon: TrendingUp,
             },
             {
-              label: "Valeur à vie (LTV)",
+              label: t("lifetime_value"),
               value: `${Number(customer.lifetime_value).toLocaleString("fr-FR")} DZD`,
               icon: Package,
             },
@@ -545,12 +552,12 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
       <div className="text-muted-foreground flex items-center gap-4 text-sm">
         <div className="flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5" />
-          Inscrit le {formatDate(customer.created_at)}
+          {t("registered_on")} {formatDate(customer.created_at)}
         </div>
         {customer.last_order_at && (
           <div className="flex items-center gap-1.5">
             <ShoppingCart className="h-3.5 w-3.5" />
-            Dernière commande le {formatDate(customer.last_order_at)}
+            {t("last_order_on")} {formatDate(customer.last_order_at)}
           </div>
         )}
       </div>
@@ -559,39 +566,39 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
         <TabsList>
           <TabsTrigger value="orders" className="gap-2">
             <Package className="h-4 w-4" />
-            Commandes ({orders.length})
+            {t("orders_tab")} ({orders.length})
           </TabsTrigger>
           <TabsTrigger value="carts" className="gap-2">
             <ShoppingCart className="h-4 w-4" />
-            Paniers ({carts.length})
+            {t("carts_tab")} ({carts.length})
           </TabsTrigger>
           <TabsTrigger value="reviews" className="gap-2">
             <Star className="h-4 w-4" />
-            Avis ({reviews.length})
+            {t("reviews_tab")} ({reviews.length})
           </TabsTrigger>
           <TabsTrigger value="returns" className="gap-2">
             <RotateCcw className="h-4 w-4" />
-            Retours ({return_requests.length})
+            {t("returns_tab")} ({return_requests.length})
           </TabsTrigger>
           <TabsTrigger value="promos" className="gap-2">
             <Gift className="h-4 w-4" />
-            Promos ({promo_redemptions.length})
+            {t("promos_tab")} ({promo_redemptions.length})
           </TabsTrigger>
           <TabsTrigger value="contacts" className="gap-2">
             <Phone className="h-4 w-4" />
-            Contacts
+            {t("contacts_tab")}
           </TabsTrigger>
           <TabsTrigger value="notes" className="gap-2">
             <StickyNote className="h-4 w-4" />
-            Notes
+            {t("notes_tab")}
           </TabsTrigger>
           <TabsTrigger value="support" className="gap-2">
             <HeadphonesIcon className="h-4 w-4" />
-            Support
+            {t("support_tab")}
           </TabsTrigger>
           <TabsTrigger value="followups" className="gap-2">
             <Bell className="h-4 w-4" />
-            Relances
+            {t("followups_tab")}
           </TabsTrigger>
         </TabsList>
 
@@ -599,7 +606,7 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
           {orders.length === 0 ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
               <Package className="mb-2 h-10 w-10" />
-              <p>Aucune commande</p>
+              <p>{t("no_orders")}</p>
             </div>
           ) : (
             orders.map((order) => <OrderCard key={order.id} order={order} />)
@@ -610,7 +617,7 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
           {carts.length === 0 ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
               <ShoppingCart className="mb-2 h-10 w-10" />
-              <p>Aucun panier</p>
+              <p>{t("no_carts")}</p>
             </div>
           ) : (
             carts.map((cart) => <CartCard key={cart.id} cart={cart} />)
@@ -621,7 +628,7 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
           {reviews.length === 0 ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
               <MessageSquare className="mb-2 h-10 w-10" />
-              <p>Aucun avis</p>
+              <p>{t("no_reviews")}</p>
             </div>
           ) : (
             reviews.map((review) => <ReviewCard key={review.id as string} review={review as unknown as Record<string, unknown>} />)
@@ -632,7 +639,7 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
           {return_requests.length === 0 ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
               <RotateCcw className="mb-2 h-10 w-10" />
-              <p>Aucune demande de retour</p>
+              <p>{t("no_return_requests")}</p>
             </div>
           ) : (
             return_requests.map((req) => (
@@ -645,7 +652,7 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
           {promo_redemptions.length === 0 ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
               <Gift className="mb-2 h-10 w-10" />
-              <p>Aucune promotion utilisée</p>
+              <p>{t("no_promotions_used")}</p>
             </div>
           ) : (
             promo_redemptions.map((red) => (

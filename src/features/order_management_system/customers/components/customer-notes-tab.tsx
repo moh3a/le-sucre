@@ -9,13 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
+import { useTranslations } from "next-intl";
 import { StickyNote, Plus, Pin, PinOff } from "lucide-react";
-
-const NOTE_TYPE_LABELS: Record<string, string> = {
-  private: "Privée",
-  operator: "Opérateur",
-  follow_up: "Suivi",
-};
 
 const NOTE_TYPE_BADGES: Record<string, "destructive" | "secondary" | "default" | "outline"> = {
   private: "outline",
@@ -26,6 +21,12 @@ const NOTE_TYPE_BADGES: Record<string, "destructive" | "secondary" | "default" |
 type CustomerNotesTabProps = { user_id: string };
 
 export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
+  const t = useTranslations("orders");
+  const NOTE_TYPE_LABELS: Record<string, string> = {
+    private: t("private_note"),
+    operator: t("operator_note"),
+    follow_up: t("follow_up_note"),
+  };
   const [filter, set_filter] = useState<string | undefined>(undefined);
   const { data: notes, isLoading, refetch } = trpc.operations.customerGetNotes.useQuery({ user_id, note_type: filter });
   const [show_form, set_show_form] = useState(false);
@@ -52,21 +53,21 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-medium">Notes internes</h3>
+          <h3 className="text-lg font-medium">{t("internal_notes")}</h3>
           <select
             className="border-input bg-background ring-offset-background h-8 rounded-md border px-2 text-xs"
             value={filter ?? ""}
             onChange={(e) => set_filter(e.target.value || undefined)}
           >
-            <option value="">Toutes</option>
-            <option value="private">Privées</option>
-            <option value="operator">Opérateur</option>
-            <option value="follow_up">Suivi</option>
+            <option value="">{t("all")}</option>
+            <option value="private">{t("private")}</option>
+            <option value="operator">{t("operator")}</option>
+            <option value="follow_up">{t("follow_up")}</option>
           </select>
         </div>
         <Button size="sm" onClick={() => set_show_form(!show_form)}>
           <Plus className="mr-1 h-3 w-3" />
-          Ajouter une note
+          {t("add_note")}
         </Button>
       </div>
 
@@ -74,30 +75,30 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
         <Card className="border-blue-200">
           <CardContent className="space-y-3 pt-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium">Type</label>
+              <label className="text-xs font-medium">{t("type")}</label>
               <select
                 className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                 value={note_type}
                 onChange={(e) => set_note_type(e.target.value)}
               >
-                <option value="private">Privée</option>
-                <option value="operator">Opérateur</option>
-                <option value="follow_up">Suivi</option>
+                <option value="private">{t("private_note")}</option>
+                <option value="operator">{t("operator_note")}</option>
+                <option value="follow_up">{t("follow_up_note")}</option>
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium">Contenu</label>
+              <label className="text-xs font-medium">{t("content")}</label>
               <textarea
                 className="border-input bg-background ring-offset-background flex w-full rounded-md border px-3 py-2 text-sm"
                 rows={4}
                 value={content}
                 onChange={(e) => set_content(e.target.value)}
-                placeholder="Écrire une note..."
+                placeholder={t("note_placeholder")}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => set_show_form(false)}>
-                Annuler
+                {t("cancel")}
               </Button>
               <Button
                 size="sm"
@@ -110,7 +111,7 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
                 }
                 disabled={!content.trim() || add_note.isPending}
               >
-                Enregistrer
+                {t("save")}
               </Button>
             </div>
           </CardContent>
@@ -118,7 +119,7 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
       )}
 
       {(notes?.length ?? 0) === 0 ? (
-        <p className="text-muted-foreground py-8 text-center text-sm">Aucune note</p>
+        <p className="text-muted-foreground py-8 text-center text-sm">{t("no_notes")}</p>
       ) : (
         <div className="space-y-2">
           {notes?.map((n) => (

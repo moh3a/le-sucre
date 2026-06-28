@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { default_range } from "../helpers/default-range";
@@ -10,17 +11,18 @@ import { AnalyticsCategoriesBrands } from "./analytics-categories-and-brands";
 import { AnalyticsSearches } from "./analytics-searches";
 
 export function AnalyticsPageClient() {
+  const t = useTranslations("analytics");
   const { from, to } = default_range();
 
   return (
-    <ConsolePageShell title="Analytique" subtitle="Performance boutique et produits">
+    <ConsolePageShell title={t("title")} subtitle={t("subtitle")}>
       <Tabs defaultValue="overview">
         <TabsList className="mb-4">
-          <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
-          <TabsTrigger value="products">Produits</TabsTrigger>
-          <TabsTrigger value="categories_brands">Catégories & Marques</TabsTrigger>
-          <TabsTrigger value="funnel">Entonnoir</TabsTrigger>
-          <TabsTrigger value="searches">Recherches</TabsTrigger>
+          <TabsTrigger value="overview">{t("tab_overview")}</TabsTrigger>
+          <TabsTrigger value="products">{t("tab_products")}</TabsTrigger>
+          <TabsTrigger value="categories_brands">{t("tab_categories_brands")}</TabsTrigger>
+          <TabsTrigger value="funnel">{t("tab_funnel")}</TabsTrigger>
+          <TabsTrigger value="searches">{t("tab_searches")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">

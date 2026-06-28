@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -35,21 +36,22 @@ function AddressFormCard({
   onSaved: () => void;
   onDeleted: () => void;
 }) {
+  const t = useTranslations("addresses");
   const [open, setOpen] = useState(false);
   const createAddress = trpc.profile.createAddress.useMutation({
-    onSuccess: () => { toast.success("Adresse ajoutée"); onSaved(); setOpen(false); },
+    onSuccess: () => { toast.success(t("address_added")); onSaved(); setOpen(false); },
     onError: (err) => toast.error(err.message),
   });
   const updateAddress = trpc.profile.updateAddress.useMutation({
-    onSuccess: () => { toast.success("Adresse mise à jour"); onSaved(); setOpen(false); },
+    onSuccess: () => { toast.success(t("address_updated")); onSaved(); setOpen(false); },
     onError: (err) => toast.error(err.message),
   });
   const deleteAddress = trpc.profile.deleteAddress.useMutation({
-    onSuccess: () => { toast.success("Adresse supprimée"); onDeleted(); setOpen(false); },
+    onSuccess: () => { toast.success(t("address_deleted")); onDeleted(); setOpen(false); },
     onError: (err) => toast.error(err.message),
   });
   const setDefault = trpc.profile.setDefaultAddress.useMutation({
-    onSuccess: () => { onSaved(); toast.success("Adresse par défaut mise à jour"); },
+    onSuccess: () => { onSaved(); toast.success(t("default_address_updated")); },
     onError: (err) => toast.error(err.message),
   });
 
@@ -97,34 +99,34 @@ function AddressFormCard({
         {address ? (
           <Button variant="outline" size="sm">
             <Pencil className="mr-1 size-3" />
-            Modifier
+            {t("edit")}
           </Button>
         ) : (
           <Button>
             <Plus className="mr-2 size-4" />
-            Ajouter une adresse
+            {t("add_address")}
           </Button>
         )}
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
-            {address ? "Modifier l'adresse" : "Nouvelle adresse"}
+            {address ? t("edit_address_title") : t("new_address_title")}
           </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            {address ? "Modifiez les détails de votre adresse" : "Ajoutez une nouvelle adresse"}
+            {address ? t("edit_address_description") : t("new_address_description")}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="max-h-[60vh] space-y-4 overflow-y-auto">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field>
-              <FieldLabel>Libellé</FieldLabel>
-              <Input {...form.register("label")} placeholder="Domicile, Bureau..." />
+              <FieldLabel>{t("label")}</FieldLabel>
+              <Input {...form.register("label")} placeholder={t("label_placeholder")} />
             </Field>
 
             <Field>
-              <FieldLabel>Type</FieldLabel>
+              <FieldLabel>{t("type")}</FieldLabel>
               <Select
                 value={form.watch("type")}
                 onValueChange={(v) => form.setValue("type", v as "shipping" | "billing" | "both")}
@@ -133,70 +135,70 @@ function AddressFormCard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="both">Livraison et facturation</SelectItem>
-                  <SelectItem value="shipping">Livraison</SelectItem>
-                  <SelectItem value="billing">Facturation</SelectItem>
+                  <SelectItem value="both">{t("delivery_billing")}</SelectItem>
+                  <SelectItem value="shipping">{t("delivery")}</SelectItem>
+                  <SelectItem value="billing">{t("billing")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
 
             <Field>
-              <FieldLabel>Prénom</FieldLabel>
+              <FieldLabel>{t("first_name")}</FieldLabel>
               <Input {...form.register("first_name")} />
             </Field>
 
             <Field>
-              <FieldLabel>Nom</FieldLabel>
+              <FieldLabel>{t("last_name")}</FieldLabel>
               <Input {...form.register("last_name")} />
             </Field>
 
             <Field>
-              <FieldLabel>Entreprise</FieldLabel>
+              <FieldLabel>{t("company")}</FieldLabel>
               <Input {...form.register("company")} />
             </Field>
 
             <Field>
-              <FieldLabel>Téléphone</FieldLabel>
-              <Input {...form.register("phone")} placeholder="+213 5XX XX XX XX" />
+              <FieldLabel>{t("phone")}</FieldLabel>
+              <Input {...form.register("phone")} placeholder={t("phone_placeholder")} />
             </Field>
           </div>
 
           <Field>
-            <FieldLabel>Adresse ligne 1</FieldLabel>
+            <FieldLabel>{t("address_line_1")}</FieldLabel>
             <Input {...form.register("address_line_1")} />
             <FieldError>{form.formState.errors.address_line_1?.message}</FieldError>
           </Field>
 
           <Field>
-            <FieldLabel>Adresse ligne 2</FieldLabel>
+            <FieldLabel>{t("address_line_2")}</FieldLabel>
             <Input {...form.register("address_line_2")} />
           </Field>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <Field className="md:col-span-2">
-              <FieldLabel>Ville</FieldLabel>
+              <FieldLabel>{t("city")}</FieldLabel>
               <Input {...form.register("city")} />
               <FieldError>{form.formState.errors.city?.message}</FieldError>
             </Field>
 
             <Field>
-              <FieldLabel>Wilaya</FieldLabel>
+              <FieldLabel>{t("state")}</FieldLabel>
               <Input {...form.register("state")} />
             </Field>
 
             <Field>
-              <FieldLabel>Code postal</FieldLabel>
+              <FieldLabel>{t("postal_code")}</FieldLabel>
               <Input {...form.register("postal_code")} />
             </Field>
           </div>
 
           <Field>
-            <FieldLabel>Pays</FieldLabel>
+            <FieldLabel>{t("country")}</FieldLabel>
             <Input {...form.register("country")} />
           </Field>
 
           <Field>
-            <FieldLabel>Instructions de livraison</FieldLabel>
+            <FieldLabel>{t("delivery_instructions")}</FieldLabel>
             <Textarea {...form.register("instructions")} rows={2} />
           </Field>
 
@@ -208,7 +210,7 @@ function AddressFormCard({
                 onChange={(e) => form.setValue("is_default", e.target.checked)}
                 className="size-4"
               />
-              Adresse par défaut
+              {t("default_address")}
             </label>
           </div>
 
@@ -221,11 +223,11 @@ function AddressFormCard({
                 disabled={is_saving}
               >
                 <Trash2 className="mr-2 size-4" />
-                Supprimer
+                {t("delete")}
               </Button>
             )}
             <Button type="submit" disabled={is_saving || !form.formState.isDirty} className="ml-auto">
-              {is_saving ? "Enregistrement…" : address ? "Mettre à jour" : "Ajouter"}
+              {is_saving ? t("saving") : address ? t("update") : t("add")}
             </Button>
           </div>
         </form>
@@ -235,6 +237,7 @@ function AddressFormCard({
 }
 
 export function AddressesSection() {
+  const t = useTranslations("addresses");
   const { data, isLoading, error } = trpc.profile.get.useQuery();
   const utils = trpc.useUtils();
 
@@ -243,7 +246,7 @@ export function AddressesSection() {
   const refresh = () => { utils.profile.get.invalidate(); };
 
   const setDefault = trpc.profile.setDefaultAddress.useMutation({
-    onSuccess: () => { refresh(); toast.success("Adresse par défaut mise à jour"); },
+    onSuccess: () => { refresh(); toast.success(t("default_address_updated")); },
     onError: (err) => toast.error(err.message),
   });
 
@@ -260,17 +263,17 @@ export function AddressesSection() {
     );
   }
 
-  if (error) return <p className="text-destructive">Erreur: {error.message}</p>;
+  if (error) return <p className="text-destructive">{t("error_prefix")}: {error.message}</p>;
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Mes adresses</CardTitle>
+          <CardTitle>{t("my_addresses")}</CardTitle>
           <CardDescription>
             {addresses.length > 0
-              ? `${addresses.length} adresse${addresses.length > 1 ? "s" : ""} enregistrée${addresses.length > 1 ? "s" : ""}`
-              : "Aucune adresse enregistrée"}
+              ? t("addresses_count", { count: addresses.length })
+              : t("no_addresses")}
           </CardDescription>
         </div>
         {addresses.length < 10 && <AddressFormCard onSaved={refresh} onDeleted={refresh} />}
@@ -280,7 +283,7 @@ export function AddressesSection() {
         {addresses.length === 0 && (
           <div className="text-muted-foreground flex flex-col items-center gap-2 py-8 text-sm">
             <MapPin className="size-8" />
-            <p>Aucune adresse pour le moment</p>
+            <p>{t("no_addresses_yet")}</p>
           </div>
         )}
 
@@ -294,7 +297,7 @@ export function AddressesSection() {
                 {addr.is_default && <Star className="size-4 fill-yellow-400 text-yellow-400" />}
                 {addr.label && <span className="font-medium">{addr.label}</span>}
                 <Badge variant="outline" className="text-xs">
-                  {addr.type === "both" ? "Livraison & Facturation" : addr.type === "shipping" ? "Livraison" : "Facturation"}
+                  {addr.type === "both" ? t("delivery_billing") : addr.type === "shipping" ? t("delivery") : t("billing")}
                 </Badge>
               </div>
               <p className="text-sm">
@@ -320,7 +323,7 @@ export function AddressesSection() {
                     size="sm"
                     onClick={() => setDefault.mutate({ address_id: addr.id, type: "shipping" })}
                   >
-                    Définir par défaut
+                    {t("set_default")}
                   </Button>
                 )}
                 <AddressFormCard address={addr as UserAddress} onSaved={refresh} onDeleted={refresh} />

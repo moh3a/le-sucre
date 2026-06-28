@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function CustomerFavoritesPageClient() {
+  const t = useTranslations("wishlist");
   const [tab, setTab] = useState("products");
   const type = tab === "products" ? "product" : tab === "brands" ? "brand" : "category";
   const { data, isLoading } = trpc.wishlistManagement.favorites.list.useQuery({ page: 1, limit: 50, type: type as any });
@@ -22,20 +24,20 @@ export function CustomerFavoritesPageClient() {
   return (
     <QueryGuard query={{ isLoading }}>
     <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">Mes favoris</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("my_favorites")}</h1>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="products">Produits</TabsTrigger>
-          <TabsTrigger value="brands">Marques</TabsTrigger>
-          <TabsTrigger value="categories">Catégories</TabsTrigger>
+          <TabsTrigger value="products">{t("products")}</TabsTrigger>
+          <TabsTrigger value="brands">{t("brands")}</TabsTrigger>
+          <TabsTrigger value="categories">{t("categories")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">
           {!data?.items?.length ? (
             <div className="text-center py-16 text-muted-foreground">
               <Heart className="h-12 w-12 mx-auto mb-3 opacity-20" />
-              <p>Aucun favori</p>
+              <p>{t("no_favorites")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

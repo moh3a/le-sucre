@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Share2, Copy, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ interface WishlistShareDialogProps {
 }
 
 export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareDialogProps) {
+  const t = useTranslations("wishlist");
   const [open, setOpen] = useState(false);
   const [permission, setPermission] = useState<"read" | "collaborate">("read");
   const [expiresIn, setExpiresIn] = useState("");
@@ -62,12 +64,12 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Share2 className="h-4 w-4 mr-2" />
-          Partager
+          {t("share")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Partager &ldquo;{wishlistName}&rdquo;</DialogTitle>
+          <DialogTitle>{t("share_title", { name: wishlistName })}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <div className="flex gap-2">
@@ -76,23 +78,23 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="read">Lecture seule</SelectItem>
-                <SelectItem value="collaborate">Collaboration</SelectItem>
+                <SelectItem value="read">{t("read_only")}</SelectItem>
+                <SelectItem value="collaborate">{t("collaboration")}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={expiresIn} onValueChange={setExpiresIn}>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="Expiration" />
+                <SelectValue placeholder={t("expiration")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Jamais</SelectItem>
-                <SelectItem value="7">7 jours</SelectItem>
-                <SelectItem value="30">30 jours</SelectItem>
-                <SelectItem value="90">90 jours</SelectItem>
+                <SelectItem value="">{t("never")}</SelectItem>
+                <SelectItem value="7">{t("days_7")}</SelectItem>
+                <SelectItem value="30">{t("days_30")}</SelectItem>
+                <SelectItem value="90">{t("days_90")}</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={handleGenerateLink} disabled={isCreating}>
-              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Générer"}
+              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : t("generate")}
             </Button>
           </div>
 
@@ -107,7 +109,7 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
 
           {links.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium">Liens actifs</p>
+              <p className="text-sm font-medium">{t("active_links")}</p>
               {links.map((link) => (
                 <div key={link.id} className="flex items-center justify-between text-sm p-2 bg-muted rounded">
                   <span className="truncate flex-1">{link.url}</span>

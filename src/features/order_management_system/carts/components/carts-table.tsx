@@ -7,6 +7,8 @@ import { Download, Eye, Loader2, MoreHorizontal, User, XCircle } from "lucide-re
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { useTranslations } from "next-intl";
+
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -139,6 +141,8 @@ function FacetedFilter({
 }
 
 export function CartsTable() {
+  const t = useTranslations("carts");
+  const tc = useTranslations("common");
   const [page] = useQueryState("cartPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("cartPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("cartSearch", parseAsString);
@@ -156,14 +160,14 @@ export function CartsTable() {
       {
         id: "id",
         accessorKey: "id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Panier ID" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("cart_id_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.id}</span>
         ),
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Client" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_column")} />,
         cell: ({ row }) => {
           const name = row.original.customer_name;
           const email = row.original.customer_email;
@@ -189,7 +193,7 @@ export function CartsTable() {
                 <User className="text-muted-foreground h-4 w-4" />
               </div>
               <div>
-                <p className="text-sm font-medium">Visiteur</p>
+                <p className="text-sm font-medium">{t("guest")}</p>
                 {guestToken && (
                   <p className="font-mono text-[10px]">Guest: {guestToken.slice(0, 8)}...</p>
                 )}
@@ -201,13 +205,13 @@ export function CartsTable() {
       {
         id: "item_count",
         accessorKey: "item_count",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Articles" />,
-        cell: ({ row }) => <span className="font-semibold">{row.original.item_count} art.</span>,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("items_column")} />,
+        cell: ({ row }) => <span className="font-semibold">{t("items_count", { count: row.original.item_count })}</span>,
       },
       {
         id: "total_price",
         accessorKey: "total_price",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Total" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("total_column")} />,
         cell: ({ row }) => (
           <span className="font-mono font-semibold">
             {Number(row.original.total_price).toLocaleString("fr-FR")} {row.original.currency}
@@ -217,7 +221,7 @@ export function CartsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => {
           const displayStatus = getCartStatus(row.original);
           const cfg = CART_STATUS_CONFIG[displayStatus] ?? {
@@ -230,7 +234,7 @@ export function CartsTable() {
       {
         id: "updated_at",
         accessorKey: "updated_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Activité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_column")} />,
         cell: ({ row }) =>
           format(new Date(row.original.updated_at), "dd MMM yyyy HH:mm", { locale: fr }),
       },
@@ -246,7 +250,7 @@ export function CartsTable() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setSelectedCartId(row.original.id)}>
                 <Eye className="mr-2 h-4 w-4" />
-                Voir les articles
+                {t("view_items")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -281,7 +285,7 @@ export function CartsTable() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher par ID, client, guest token…"
+            placeholder={t("search_placeholder")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -289,7 +293,7 @@ export function CartsTable() {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Statut"
+            title={t("status_title")}
             options={STATUS_OPTIONS}
             value={status ?? undefined}
             onChange={(val) => setStatus(val)}
@@ -299,7 +303,7 @@ export function CartsTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
             </Badge>
             <Button variant="ghost" size="sm" asChild>
               <a
@@ -310,7 +314,7 @@ export function CartsTable() {
                 download="carts.csv"
               >
                 <Download className="mr-1 h-4 w-4" />
-                Exporter
+                {t("export")}
               </a>
             </Button>
           </div>
@@ -334,6 +338,7 @@ interface CartItemsDialogProps {
 }
 
 function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
+  const t = useTranslations("carts");
   const { data, isLoading } = trpc.cart.adminGetById.useQuery(
     { cart_id: cartId },
     { enabled: open && !!cartId },
@@ -343,7 +348,7 @@ function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Articles du Panier</DialogTitle>
+          <DialogTitle>{t("cart_items_title")}</DialogTitle>
           <DialogDescription className="font-mono text-xs select-all">
             ID: {cartId}
           </DialogDescription>
@@ -354,7 +359,7 @@ function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
             <Loader2 className="h-8 w-8 animate-spin text-[#c8d152]" />
           </div>
         ) : !data || data.items.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center text-sm">Ce panier est vide.</div>
+          <div className="text-muted-foreground py-8 text-center text-sm">{t("cart_empty")}</div>
         ) : (
           <div className="space-y-4 pt-2">
             <div className="max-h-[280px] divide-y overflow-y-auto pr-1">
@@ -375,7 +380,7 @@ function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
             </div>
 
             <div className="flex justify-between border-t pt-4 text-base font-bold">
-              <span>Sous-total</span>
+              <span>{t("subtotal")}</span>
               <span className="font-mono">
                 {Number(data.subtotal).toLocaleString("fr-FR")} {data.currency}
               </span>

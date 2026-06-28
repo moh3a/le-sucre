@@ -10,6 +10,7 @@ import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { useTranslations } from "next-intl";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { QueryGuard } from "@/components/query-guard";
@@ -44,12 +45,13 @@ import {
 } from "../constants/order-status";
 
 export function OrderTable({ compact = false }: { compact?: boolean }) {
+  const t = useTranslations("orders");
   const columns = React.useMemo<ColumnDef<OrderRow>[]>(
     () => [
       {
         id: "order_number",
         accessorKey: "order_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="N° commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_number")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.id}`}
@@ -61,7 +63,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Client" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_column")} />,
         cell: ({ row }) => {
           const name = row.original.customer_name;
           const phone = row.original.customer_phone ?? row.original.guest_phone;
@@ -76,7 +78,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "customer_phone",
         accessorKey: "customer_phone",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Téléphone" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_phone")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">
             {row.original.customer_phone ?? "—"}
@@ -86,7 +88,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE[row.original.status] ?? "secondary"}>
             {ORDER_LABELS[row.original.status] ?? row.original.status}
@@ -96,7 +98,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "fulfillment_status",
         accessorKey: "fulfillment_status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Expédition" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("shipping_column")} />,
         cell: ({ row }) => (
           <Badge variant={FULFILLMENT_BADGE[row.original.fulfillment_status] ?? "outline"}>
             {FULFILLMENT_LABELS[row.original.fulfillment_status] ?? row.original.fulfillment_status}
@@ -106,7 +108,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "payment_status",
         accessorKey: "payment_status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Paiement" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("payment_column")} />,
         cell: ({ row }) => (
           <Badge variant={PAYMENT_BADGE[row.original.payment_status] ?? "outline"}>
             {PAYMENT_LABELS[row.original.payment_status] ?? row.original.payment_status}
@@ -116,7 +118,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "operator_name",
         accessorKey: "operator_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Opérateur" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("assigned_operator")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">{row.original.operator_name ?? "—"}</span>
         ),
@@ -124,7 +126,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "delivery_name",
         accessorKey: "delivery_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Livreur" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("assigned_delivery")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">{row.original.delivery_name ?? "—"}</span>
         ),
@@ -132,7 +134,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "grand_total",
         accessorKey: "grand_total",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Total" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("total_column")} />,
         cell: ({ row }) =>
           Number(row.original.grand_total).toLocaleString("fr-FR", {
             style: "currency",
@@ -143,9 +145,9 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
-        meta: { label: "Date", icon: ReceiptCent },
+        meta: { label: t("date_column"), icon: ReceiptCent },
       },
     ],
     [],
@@ -189,7 +191,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
   const statusOptions = [
     { label: "En attente de paiement", value: "pending_payment" },
     { label: "Payé", value: "paid" },
-    { label: "En cours", value: "processing" },
+    { label: t("processing"), value: "processing" },
     { label: "Livré", value: "fulfilled" },
     { label: "Annulé", value: "cancelled" },
   ];
@@ -210,28 +212,28 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       {!compact ? (
         <DataTableAdvancedToolbar table={table}>
           <FacetedFilter
-            title="Statut"
+            title={t("status_column")}
             options={statusOptions}
             icon={ToggleLeft}
             value={status}
             onChange={(newStatus) => setStatusFilter(newStatus ? [newStatus] : null)}
           />
           <FacetedFilter
-            title="Paiement"
+            title={t("payment_column")}
             options={paymentOptions}
             icon={ToggleLeft}
             value={payment_status}
             onChange={setPaymentStatus}
           />
           <FacetedFilter
-            title="Expédition"
+            title={t("shipping_column")}
             options={fulfillmentOptions}
             icon={ToggleLeft}
             value={fulfillment_status}
             onChange={setFulfillmentStatus}
           />
           <DateRangeFilter
-            title="Date"
+            title={t("date_column")}
             from={from}
             to={to}
             onFromChange={setFrom}

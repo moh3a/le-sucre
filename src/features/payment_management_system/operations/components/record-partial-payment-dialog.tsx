@@ -25,8 +25,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Banknote } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { useTranslations } from "next-intl";
 
 export function RecordPartialPaymentDialog() {
+  const t = useTranslations("payments");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [paymentNumber, setPaymentNumber] = useState("1");
@@ -101,7 +103,7 @@ export function RecordPartialPaymentDialog() {
                 id="pp_order_id"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="ID de la commande"
+                placeholder={t("order_id_placeholder")}
                 required
               />
             </div>
@@ -158,7 +160,7 @@ export function RecordPartialPaymentDialog() {
                 id="pp_method"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                placeholder="Ex: CIB, Espèces"
+                placeholder={t("payment_method_placeholder")}
               />
             </div>
             <div className="space-y-2">
@@ -176,7 +178,7 @@ export function RecordPartialPaymentDialog() {
               id="pp_notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes supplémentaires"
+              placeholder={t("notes_placeholder")}
             />
           </div>
           <DialogFooter>
@@ -184,7 +186,7 @@ export function RecordPartialPaymentDialog() {
               Annuler
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Enregistrement..." : "Enregistrer"}
+              {mutation.isPending ? t("saving") : t("save")}
             </Button>
           </DialogFooter>
         </form>

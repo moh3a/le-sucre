@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import {
@@ -49,6 +50,7 @@ export function DataTable<TData, TValue>({
   enableColumnFilters = true,
   enableFilters = true,
 }: DataTableProps<TData, TValue>) {
+  const t = useTranslations("data_table");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -84,7 +86,7 @@ export function DataTable<TData, TValue>({
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
                   <SlidersHorizontal className="size-5" />
-                  <span>View</span>
+                  <span>{t("view")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -133,7 +135,7 @@ export function DataTable<TData, TValue>({
                     {column.id !== "actions" && (
                       <>
                         <Input
-                          placeholder="Filter..."
+                          placeholder={t("filter_button")}
                           value={(table.getColumn(column.id)?.getFilterValue() as string) ?? ""}
                           onChange={(event) =>
                             table.getColumn(column.id)?.setFilterValue(event.target.value)
@@ -161,7 +163,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell colSpan={columns.length}>
                   <div className="text-muted-foreground text-center font-mono text-sm select-none">
-                    No results.
+                    {t("no_results")}
                   </div>
                 </TableCell>
               </TableRow>

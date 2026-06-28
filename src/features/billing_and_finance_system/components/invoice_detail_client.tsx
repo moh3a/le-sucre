@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -41,20 +42,6 @@ const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "ou
   void: "destructive",
   refunded: "secondary",
   partially_refunded: "secondary",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  paid: "Payée",
-  unpaid: "Impayée",
-  void: "Annulée",
-  refunded: "Remboursée",
-  partially_refunded: "Partiellement remboursée",
-};
-
-const TYPE_LABEL: Record<string, string> = {
-  order_invoice: "Facture",
-  refund_invoice: "Remboursement",
-  credit_note: "Note de crédit",
 };
 
 type InvoiceItem = {
@@ -101,20 +88,35 @@ type Invoice = {
 };
 
 export function InvoiceDetailClient({ id }: { id: string }) {
+  const t = useTranslations("invoices");
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
+
+  const STATUS_LABEL: Record<string, string> = {
+    paid: t("status_paid"),
+    unpaid: t("status_unpaid"),
+    void: t("status_void"),
+    refunded: t("status_refunded"),
+    partially_refunded: t("status_partially_refunded"),
+  };
+
+  const TYPE_LABEL: Record<string, string> = {
+    order_invoice: t("type_order_invoice"),
+    refund_invoice: t("type_refund_invoice"),
+    credit_note: t("type_credit_note"),
+  };
 
   const { data, isLoading, error } = trpc.invoices.get_invoice.useQuery({ id });
   const mark_paid_mutation = trpc.invoices.mark_as_paid.useMutation({
     onSuccess: () => {
-      toast.success("Facture marquée comme payée");
+      toast.success(t("mark_paid"));
       router.refresh();
     },
     onError: (e) => toast.error(e.message),
   });
   const void_mutation = trpc.invoices.void_invoice.useMutation({
     onSuccess: () => {
-      toast.success("Facture annulée");
+      toast.success(t("void"));
       router.refresh();
     },
     onError: (e) => toast.error(e.message),
@@ -127,7 +129,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
     setDownloading(true);
     try {
       const res = await fetch(`/api/admin/invoices/${id}/download`);
-      if (!res.ok) throw new Error("Téléchargement échoué");
+      if (!res.ok) throw new Error(t("download_failed"));
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -136,7 +138,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Impossible de télécharger la facture");
+      toast.error(t("download_error"));
     } finally {
       setDownloading(false);
     }
@@ -173,6 +175,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
               {TYPE_LABEL[invoice.type] ?? invoice.type} ·{" "}
               {formatDate(invoice.created_at, { month: "long" })}
             </p>
+            {t("loading")}
           </div>
           <Badge variant={STATUS_BADGE[invoice.status] ?? "outline"}>
             {STATUS_LABEL[invoice.status] ?? invoice.status}
@@ -187,7 +190,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
               disabled={mark_paid_mutation.isPending}
             >
               <CheckCircle2 className="mr-2 size-4" />
-              Marquer payée
+              {t("mark_paid")}
             </Button>
           )}
           {invoice.status !== "void" && (
@@ -195,23 +198,23 @@ export function InvoiceDetailClient({ id }: { id: string }) {
               <AlertDialogTrigger asChild>
                 <Button size="sm" variant="outline" className="text-destructive">
                   <XCircle className="mr-2 size-4" />
-                  Annuler
+                  {t("void")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Annuler la facture ?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("void_confirm_title")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Cette action est irréversible. La facture sera marquée comme annulée.
+                    {t("void_confirm_description")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogCancel>                  {t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => void_mutation.mutate({ id })}
                     className="bg-destructive text-destructive-foreground"
                   >
-                    Confirmer
+                    {t("confirm")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -219,7 +222,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
           )}
           <Button size="sm" onClick={handleDownload} disabled={downloading}>
             <Download className="mr-2 size-4" />
-            {downloading ? "Chargement…" : "Télécharger PDF"}
+            {downloading ? t("loading") : t("download_pdf")}
           </Button>
         </div>
       </div>
@@ -232,7 +235,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                 <Package className="size-4" />
-                Articles
+                {t("items")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -240,12 +243,12 @@ export function InvoiceDetailClient({ id }: { id: string }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-muted-foreground border-b text-left text-xs">
-                      <th className="pb-2 pr-4 font-medium">Référence</th>
-                      <th className="pb-2 pr-4 font-medium">Produit</th>
-                      <th className="pb-2 pr-4 text-right font-medium">Qté</th>
-                      <th className="pb-2 pr-4 text-right font-medium">Prix unitaire</th>
-                      <th className="pb-2 pr-4 text-right font-medium">TVA</th>
-                      <th className="pb-2 text-right font-medium">Total</th>
+                      <th className="pb-2 pr-4 font-medium">{t("reference")}</th>
+                      <th className="pb-2 pr-4 font-medium">{t("product")}</th>
+                      <th className="pb-2 pr-4 text-right font-medium">{t("qty")}</th>
+                      <th className="pb-2 pr-4 text-right font-medium">{t("unit_price")}</th>
+                      <th className="pb-2 pr-4 text-right font-medium">{t("vat")}</th>
+                      <th className="pb-2 text-right font-medium">{t("total")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -268,28 +271,28 @@ export function InvoiceDetailClient({ id }: { id: string }) {
               {/* Totals */}
               <div className="mt-4 space-y-1.5 border-t pt-4">
                 <div className="text-muted-foreground flex justify-between text-sm">
-                  <span>Sous-total HT</span>
+                  <span>{t("subtotal")}</span>
                   <span>{fmt(invoice.subtotal)}</span>
                 </div>
                 {Number(invoice.discount_total) > 0 && (
                   <div className="flex justify-between text-sm text-red-500">
-                    <span>Remise</span>
+                    <span>{t("discount")}</span>
                     <span>-{fmt(invoice.discount_total)}</span>
                   </div>
                 )}
                 <div className="text-muted-foreground flex justify-between text-sm">
-                  <span>TVA</span>
+                  <span>{t("vat")}</span>
                   <span>{fmt(invoice.tax_total)}</span>
                 </div>
                 {Number(invoice.shipping_total) > 0 && (
                   <div className="text-muted-foreground flex justify-between text-sm">
-                    <span>Frais de livraison</span>
+                    <span>{t("shipping_fee")}</span>
                     <span>{fmt(invoice.shipping_total)}</span>
                   </div>
                 )}
                 <Separator />
                 <div className="flex justify-between font-bold">
-                  <span>Total TTC</span>
+                  <span>{t("total_ttc")}</span>
                   <span className="text-lg">{fmt(invoice.grand_total)}</span>
                 </div>
               </div>
@@ -304,7 +307,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                 <User className="size-4" />
-                Client
+                {t("client")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
@@ -323,7 +326,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                 <CreditCard className="size-4" />
-                Adresse de facturation
+                {t("billing_address")}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground space-y-0.5 text-sm">
@@ -342,7 +345,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                 <MapPin className="size-4" />
-                Adresse de livraison
+                {t("shipping_address")}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground space-y-0.5 text-sm">
@@ -361,23 +364,23 @@ export function InvoiceDetailClient({ id }: { id: string }) {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold">
                 <RefreshCcw className="size-4" />
-                Dates
+                {t("dates")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Émission</span>
+                <span className="text-muted-foreground">{t("issue_date")}</span>
                 <span>{formatDate(invoice.created_at, { month: "short" })}</span>
               </div>
               {invoice.due_at && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Échéance</span>
+                  <span className="text-muted-foreground">{t("due_date")}</span>
                   <span>{formatDate(invoice.due_at, { month: "short" })}</span>
                 </div>
               )}
               {invoice.paid_at && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payée le</span>
+                  <span className="text-muted-foreground">{t("paid_on")}</span>
                   <span className="text-green-600">{formatDate(invoice.paid_at, { month: "short" })}</span>
                 </div>
               )}

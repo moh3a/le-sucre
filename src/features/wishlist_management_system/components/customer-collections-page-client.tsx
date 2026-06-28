@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function CustomerCollectionsPageClient() {
+  const t = useTranslations("wishlist");
   const [newName, setNewName] = useState("");
   const { data, isLoading } = trpc.wishlistManagement.collections.list.useQuery({ page: 1, limit: 50 });
   const createMut = trpc.wishlistManagement.collections.create.useMutation();
@@ -34,7 +36,7 @@ export function CustomerCollectionsPageClient() {
 
       <div className="flex gap-2 mb-6">
         <Input
-          placeholder="Nouvelle collection..."
+          placeholder={t("new_collection_placeholder")}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}

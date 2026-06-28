@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import * as React from "react";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -23,17 +24,17 @@ type ForecastRow = {
   reserved_stock: number | null;
 };
 
-const RISK_BADGES: Record<
-  string,
-  { label: string; variant: "destructive" | "warning" | "secondary" | "default" }
-> = {
-  critical: { label: "Critique", variant: "destructive" },
-  high: { label: "Élevé", variant: "warning" },
-  normal: { label: "Normal", variant: "default" },
-  low: { label: "Faible", variant: "secondary" },
-};
-
 export function InventoryForecastTable() {
+  const t = useTranslations("forecast");
+  const RISK_BADGES: Record<
+    string,
+    { label: string; variant: "destructive" | "warning" | "secondary" | "default" }
+  > = {
+    critical: { label: t("critical"), variant: "destructive" },
+    high: { label: t("high"), variant: "warning" },
+    normal: { label: t("normal"), variant: "default" },
+    low: { label: t("low"), variant: "secondary" },
+  };
   const columns = React.useMemo<ColumnDef<ForecastRow>[]>(
     () => [
       {

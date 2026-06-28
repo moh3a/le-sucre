@@ -26,35 +26,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvé",
-  processing: "En cours",
-  completed: "Terminé",
-  failed: "Échoué",
-  rejected: "Rejeté",
-};
-
-const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "outline",
-  approved: "secondary",
-  processing: "secondary",
-  completed: "default",
-  failed: "destructive",
-  rejected: "destructive",
-};
-
-const STATUS_OPTIONS = [
-  { label: "En attente", value: "pending" },
-  { label: "Approuvé", value: "approved" },
-  { label: "En cours", value: "processing" },
-  { label: "Terminé", value: "completed" },
-  { label: "Échoué", value: "failed" },
-  { label: "Rejeté", value: "rejected" },
-];
 
 type RefundRequestRow = {
   id: string;
@@ -139,6 +113,32 @@ function FacetedFilter({
 }
 
 export function RefundsTable() {
+  const t = useTranslations("refunds");
+  const STATUS_LABELS: Record<string, string> = {
+    pending: t("pending"),
+    approved: t("approved"),
+    processing: t("processing"),
+    completed: t("completed"),
+    failed: t("failed"),
+    rejected: t("rejected"),
+  };
+  const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    pending: "outline",
+    approved: "secondary",
+    processing: "secondary",
+    completed: "default",
+    failed: "destructive",
+    rejected: "destructive",
+  };
+  const STATUS_OPTIONS = [
+    { label: t("pending"), value: "pending" },
+    { label: t("approved"), value: "approved" },
+    { label: t("processing"), value: "processing" },
+    { label: t("completed"), value: "completed" },
+    { label: t("failed"), value: "failed" },
+    { label: t("rejected"), value: "rejected" },
+  ];
+
   const [page] = useQueryState("rrPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("rrPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("rrStatus", parseAsString);
@@ -171,7 +171,7 @@ export function RefundsTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -184,7 +184,7 @@ export function RefundsTable() {
       {
         id: "amount",
         accessorKey: "amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Montant" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("amount_column")} />,
         cell: ({ row }) => (
           <span className="font-mono font-medium">
             {Number(row.original.amount).toLocaleString("fr-DZ", {
@@ -197,7 +197,7 @@ export function RefundsTable() {
       {
         id: "reason",
         accessorKey: "reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Motif" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason_column")} />,
         cell: ({ row }) => (
           <span className="max-w-[200px] truncate text-sm">{row.original.reason}</span>
         ),
@@ -205,7 +205,7 @@ export function RefundsTable() {
       {
         id: "refund_method",
         accessorKey: "refund_method",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Méthode" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("method_column")} />,
         cell: ({ row }) => (
           <span className="capitalize text-sm">{row.original.refund_method ?? "—"}</span>
         ),
@@ -213,7 +213,7 @@ export function RefundsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -223,7 +223,7 @@ export function RefundsTable() {
       {
         id: "rejection_reason",
         accessorKey: "rejection_reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Rejet" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("rejection_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[160px] truncate text-xs">
             {row.original.rejection_reason ?? "—"}
@@ -233,7 +233,7 @@ export function RefundsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -246,10 +246,10 @@ export function RefundsTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/console/orders/${row.original.order_id}`}>
-                  Voir commande
+                  {t("view_order")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -260,7 +260,7 @@ export function RefundsTable() {
                   }
                 >
                   <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                  Approuver
+                  {t("approve")}
                 </DropdownMenuItem>
               )}
               {row.original.status === "approved" && (
@@ -270,7 +270,7 @@ export function RefundsTable() {
                   }
                 >
                   <RefreshCcw className="mr-2 size-4" />
-                  Traiter
+                  {t("process")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -304,7 +304,7 @@ export function RefundsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -314,7 +314,7 @@ export function RefundsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -324,7 +324,7 @@ export function RefundsTable() {
               download="refund-requests.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

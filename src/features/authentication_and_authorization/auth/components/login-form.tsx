@@ -1,7 +1,7 @@
 "use client";
 
 import z from "zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Controller, useForm } from "react-hook-form";
@@ -22,12 +22,7 @@ import { authClient } from "@/lib/auth/client";
 
 const phone_regex = /^\+?[\d\s\-()]{7,20}$/;
 
-const login_form_schema = z.object({
-  phone: z.string().regex(phone_regex, "Numéro de téléphone invalide"),
-  password: z.string().min(8, "Mot de passe trop court").max(128),
-});
-
-type LoginFormValues = z.infer<typeof login_form_schema>;
+type LoginFormValues = z.infer<ReturnType<typeof get_login_form_schema>>;
 
 /** Resolves phone → auto-generated email for Better Auth client auth. */
 async function resolve_phone_to_email(phone: string): Promise<string | null> {
@@ -46,8 +41,16 @@ async function resolve_phone_to_email(phone: string): Promise<string | null> {
   }
 }
 
+function get_login_form_schema(t: ReturnType<typeof useTranslations<"auth">>) {
+  return z.object({
+    phone: z.string().regex(phone_regex, t("invalid_phone")),
+    password: z.string().min(8, t("password_too_short")).max(128),
+  });
+}
+
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const t = useTranslations("auth");
+  const login_form_schema = useMemo(() => get_login_form_schema(t), [t]);
 
   const router = useRouter();
   const search_params = useSearchParams();
@@ -115,13 +118,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="login-phone">Téléphone</FieldLabel>
+              <FieldLabel htmlFor="login-phone">{t("phone")}</FieldLabel>
               <Input
                 {...field}
                 id="login-phone"
                 type="tel"
                 autoComplete="tel"
-                placeholder="+213 5XX XX XX XX"
+                placeholder={t("phone_placeholder")}
                 aria-invalid={fieldState.invalid}
               />
               <FieldError errors={[fieldState.error]} />
@@ -148,12 +151,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         />
 
         <Button type="submit" className="w-full" disabled={is_submitting}>
-          {is_submitting ? "…" : t("submit")}
+          {is_submitting ? t("loading_ellipsis") : t("submit")}
         </Button>
         <FieldSeparator></FieldSeparator>
 
         <FieldDescription className="text-muted-foreground text-center text-xs">
-          Accès réservé au personnel autorisé.
+          {t("description")}
         </FieldDescription>
       </FieldGroup>
     </form>

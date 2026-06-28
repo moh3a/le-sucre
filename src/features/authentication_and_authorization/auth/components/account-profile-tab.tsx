@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,15 +20,20 @@ import { MediaPickerDialog } from "@/features/media_library/components/media-pic
 import { formatDate } from "@/lib/format";
 import type { MediaDTO } from "@/features/media_library/types";
 
-const profile_form_schema = z.object({
-  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(255),
-  image: z.string().max(2048).nullable().optional(),
-});
+function get_profile_form_schema(t: ReturnType<typeof useTranslations<"profile">>) {
+  return z.object({
+    name: z.string().min(2, t("name_min_length")).max(255),
+    image: z.string().max(2048).nullable().optional(),
+  });
+}
 
-type ProfileFormValues = z.infer<typeof profile_form_schema>;
+type ProfileFormValues = z.infer<ReturnType<typeof get_profile_form_schema>>;
 
 export function AccountProfileTab() {
+  const t = useTranslations("profile");
   const utils = trpc.useUtils();
+
+  const profile_form_schema = useMemo(() => get_profile_form_schema(t), [t]);
   const { data, isLoading, error } = trpc.auth.me.useQuery();
 
   const form = useForm<ProfileFormValues>({
@@ -76,8 +83,8 @@ export function AccountProfileTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Photo de profil</CardTitle>
-          <CardDescription>Choisissez une photo depuis la médiathèque</CardDescription>
+          <CardTitle>{t("profile_photo_title")}</CardTitle>
+          <CardDescription>{t("profile_photo_description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <MediaPickerDialog
@@ -87,7 +94,7 @@ export function AccountProfileTab() {
                 {image_value ? (
                   <Image
                     src={image_value}
-                    alt="Avatar"
+                    alt={t("avatar_alt")}
                     width={96}
                     height={96}
                     className="size-24 object-cover transition-opacity group-hover:opacity-75"
@@ -100,7 +107,7 @@ export function AccountProfileTab() {
                 )}
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/20">
                   <span className="text-white text-xs opacity-0 transition-opacity group-hover:opacity-100">
-                    Changer
+                    {t("change_photo")}
                   </span>
                 </div>
               </div>
@@ -108,7 +115,7 @@ export function AccountProfileTab() {
           />
           {image_value && (
             <Button type="button" variant="ghost" size="sm" className="mt-2" onClick={handle_image_clear}>
-              Supprimer la photo
+              {t("delete_photo")}
             </Button>
           )}
         </CardContent>
@@ -116,14 +123,14 @@ export function AccountProfileTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Informations personnelles</CardTitle>
-          <CardDescription>Modifiez les informations de votre profil</CardDescription>
+          <CardTitle>{t("personal_info_title")}</CardTitle>
+          <CardDescription>{t("personal_info_description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
             <FieldGroup>
               <Field>
-                <FieldLabel>Nom complet</FieldLabel>
+                <FieldLabel>{t("full_name")}</FieldLabel>
                 <Input {...form.register("name")} />
                 {form.formState.errors.name && (
                   <FieldError>{form.formState.errors.name.message}</FieldError>
@@ -131,13 +138,13 @@ export function AccountProfileTab() {
               </Field>
 
               <Field>
-                <FieldLabel>Email</FieldLabel>
+                <FieldLabel>{t("email")}</FieldLabel>
                 <Input value={data?.user.email ?? ""} disabled className="text-muted-foreground" />
-                <p className="text-muted-foreground text-xs">L&apos;email ne peut pas être modifié.</p>
+                <p className="text-muted-foreground text-xs">{t("email_cannot_change")}</p>
               </Field>
 
               <Field>
-                <FieldLabel>Rôles</FieldLabel>
+                <FieldLabel>{t("roles")}</FieldLabel>
                 <div className="flex flex-wrap gap-2">
                   {data?.roles.map((role) => (
                     <Badge key={role} variant="outline">
@@ -148,7 +155,7 @@ export function AccountProfileTab() {
               </Field>
 
               <Field>
-                <FieldLabel>Membre depuis</FieldLabel>
+                <FieldLabel>{t("member_since")}</FieldLabel>
                 <p className="text-sm text-muted-foreground">
                   {formatDate(data?.user.createdAt)}
                 </p>
@@ -156,7 +163,7 @@ export function AccountProfileTab() {
             </FieldGroup>
 
             <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
-              {update.isPending ? "Enregistrement…" : "Enregistrer"}
+              {update.isPending ? t("saving") : t("save")}
             </Button>
           </form>
         </CardContent>

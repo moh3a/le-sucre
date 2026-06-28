@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -21,12 +22,13 @@ type AuditLogRow = {
 };
 
 export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
+  const t = useTranslations("audit");
   const columns = React.useMemo<ColumnDef<AuditLogRow>[]>(
     () => [
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) =>
           new Date(row.original.created_at).toLocaleString("fr-FR", {
             month: "short",
@@ -38,14 +40,14 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
       },
       {
         id: "actor",
-        header: "Utilisateur",
+        header: t("user_column"),
         cell: ({ row }) => {
           const { actor_name, actor_email } = row.original;
           if (!actor_name && !actor_email)
-            return <span className="text-muted-foreground">Système</span>;
+            return <span className="text-muted-foreground">{t("system")}</span>;
           return (
             <div className="flex flex-col">
-              <span className="text-xs font-medium">{actor_name || "Sans nom"}</span>
+              <span className="text-xs font-medium">{actor_name || t("no_name")}</span>
               <span className="text-muted-foreground text-[10px]">{actor_email}</span>
             </div>
           );
@@ -54,7 +56,7 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
       {
         id: "action",
         accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Action" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("action_column")} />,
         cell: ({ row }) => (
           <Badge
             variant="outline"
@@ -66,7 +68,7 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
       },
       {
         id: "resource",
-        header: "Ressource",
+        header: t("resource_column"),
         cell: ({ row }) => {
           const { resource_type, resource_id } = row.original;
           if (!resource_type) return "—";
@@ -85,7 +87,7 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
       {
         id: "ip_address",
         accessorKey: "ip_address",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Adresse IP" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("ip_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.ip_address ?? "—"}</span>
         ),
@@ -93,7 +95,7 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
       {
         id: "metadata",
         accessorKey: "metadata",
-        header: "Métadonnées",
+        header: t("metadata_column"),
         cell: ({ row }) => {
           const metaStr = row.original.metadata;
           if (!metaStr) return "—";
@@ -110,7 +112,7 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
         },
       },
     ],
-    [],
+    [t],
   );
 
   const { table } = useDataTable({

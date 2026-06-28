@@ -40,7 +40,7 @@ import {
 
 type OrderDetailTabsProps = { order_id: string };
 
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS_FIXED = [
   { value: "pending_payment", label: "En attente de paiement" },
   { value: "paid", label: "Payé" },
   { value: "processing", label: "En cours" },
@@ -64,6 +64,10 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const t = useTranslations("orders");
   const { data, isLoading, refetch } = trpc.orders.adminGet.useQuery({ order_id });
   const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => refetch() });
+  const STATUS_OPTIONS = STATUS_OPTIONS_FIXED.map((o) => ({
+    ...o,
+    label: o.value === "processing" ? t("processing") : o.label,
+  }));
   const [next_status, set_next_status] = useState<string>("");
 
   const { data: operators_data, isLoading: operators_loading } =
@@ -176,7 +180,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     [edit_items],
   );
 
-  if (!data) return <p className="text-muted-foreground">Commande introuvable.</p>;
+  if (!data) return <p className="text-muted-foreground">{t("order_not_found")}</p>;
 
   const { order, items, adjustments, status_events } = data;
   const shipping_addr = order.shipping_address as Record<string, string>;
@@ -303,15 +307,15 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     <QueryGuard query={{ isLoading }} loadingFallback={<div className="space-y-4">{Array.from({ length: 3 }).map((_, i) => (<div key={i} className="bg-muted h-24 animate-pulse rounded-lg" />))}</div>}>
     <Tabs defaultValue="general">
       <TabsList className="mb-4">
-        <TabsTrigger value="general">Général</TabsTrigger>
-        <TabsTrigger value="items">Articles ({items.length})</TabsTrigger>
-        <TabsTrigger value="shipping">Expédition</TabsTrigger>
-        <TabsTrigger value="payments">Paiements</TabsTrigger>
+        <TabsTrigger value="general">{t("general_tab")}</TabsTrigger>
+        <TabsTrigger value="items">{t("items_tab")} ({items.length})</TabsTrigger>
+        <TabsTrigger value="shipping">{t("shipping_tab")}</TabsTrigger>
+        <TabsTrigger value="payments">{t("payments_tab")}</TabsTrigger>
         <TabsTrigger value="invoices">Factures</TabsTrigger>
         <TabsTrigger value="returns">Retours</TabsTrigger>
         <TabsTrigger value="operations">Opérations</TabsTrigger>
         <TabsTrigger value="comments">Commentaires</TabsTrigger>
-        <TabsTrigger value="timeline">Chronologie</TabsTrigger>
+        <TabsTrigger value="timeline">{t("timeline_tab")}</TabsTrigger>
       </TabsList>
 
       {/* ── General ─────────────────────────────────── */}
@@ -319,7 +323,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>Statut commande</CardTitle>
+              <CardTitle>{t("status_column")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={STATUS_BADGE[order.status] ?? "secondary"}>
@@ -329,7 +333,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>Paiement</CardTitle>
+              <CardTitle>{t("payment_column")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
@@ -339,7 +343,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>Expédition</CardTitle>
+              <CardTitle>{t("shipping_column")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={FULFILLMENT_BADGE[order.fulfillment_status] ?? "outline"}>
@@ -389,7 +393,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
           <CardContent className="flex gap-2">
             <Select onValueChange={set_next_status} value={next_status}>
               <SelectTrigger className="w-60">
-                <SelectValue placeholder="Sélectionner un statut" />
+                <SelectValue placeholder={t("select_status_placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.filter((s) => s.value !== order.status).map((s) => (
@@ -427,7 +431,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                   disabled={operators_loading || assign_operator.isPending}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionner un opérateur" />
+                    <SelectValue placeholder={t("select_operator_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="unassigned">Non assigné</SelectItem>
@@ -453,7 +457,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                   disabled={deliverers_loading || assign_delivery.isPending}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionner un livreur" />
+                    <SelectValue placeholder={t("select_delivery_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="unassigned">Non assigné</SelectItem>
@@ -571,7 +575,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                     <Search className="text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2" />
                     <Input
                       className="h-8 pl-7 text-xs"
-                      placeholder="Rechercher un SKU..."
+                      placeholder={t("search_sku_placeholder")}
                       value={search_query}
                       onChange={(e) => {
                         set_search_query(e.target.value);
@@ -617,7 +621,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                         value={add_qty}
                         onChange={(e) => set_add_qty(Math.max(1, Number(e.target.value)))}
                         className="h-8 w-16 text-xs"
-                        placeholder="Qté"
+                        placeholder={t("qty_placeholder")}
                       />
                       <Input
                         type="number"
@@ -626,7 +630,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                         value={add_price}
                         onChange={(e) => set_add_price(e.target.value)}
                         className="h-8 w-24 text-xs"
-                        placeholder="Prix unit."
+                        placeholder={t("unit_price_placeholder")}
                       />
                       <Button
                         type="button"
@@ -817,7 +821,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                 <Input
                   value={pay_provider}
                   onChange={(e) => set_pay_provider(e.target.value)}
-                  placeholder="ex: Stripe, PayPal, CIB..."
+                  placeholder={t("payment_method_placeholder")}
                 />
               </Field>
               <Field>
@@ -825,7 +829,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                 <Input
                   value={pay_reference}
                   onChange={(e) => set_pay_reference(e.target.value)}
-                  placeholder="ID de transaction"
+                  placeholder={t("transaction_id_placeholder")}
                 />
               </Field>
               <div className="flex justify-end gap-2">
@@ -1026,7 +1030,7 @@ function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
         <Textarea
           id="order-notes"
           rows={5}
-          placeholder="Ajouter une note interne visible uniquement par l'équipe…"
+          placeholder={t("internal_note_placeholder")}
           value={draft}
           onChange={(e) => set_draft(e.target.value)}
           className="resize-none text-sm"

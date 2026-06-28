@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString } from "nuqs";
 import { useQueryState } from "nuqs";
@@ -43,21 +44,22 @@ const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "ou
   partially_refunded: "secondary",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  paid: "Payée",
-  unpaid: "Impayée",
-  void: "Annulée",
-  refunded: "Remboursée",
-  partially_refunded: "Partiellement remboursée",
-};
-
-const TYPE_LABEL: Record<string, string> = {
-  order_invoice: "Facture",
-  refund_invoice: "Remboursement",
-  credit_note: "Note de crédit",
-};
-
 export function InvoiceTable() {
+  const t = useTranslations("invoices");
+
+  const STATUS_LABEL: Record<string, string> = {
+    paid: t("status_paid"),
+    unpaid: t("status_unpaid"),
+    void: t("status_void"),
+    refunded: t("status_refunded"),
+    partially_refunded: t("status_partially_refunded"),
+  };
+
+  const TYPE_LABEL: Record<string, string> = {
+    order_invoice: t("type_order_invoice"),
+    refund_invoice: t("type_refund_invoice"),
+    credit_note: t("type_credit_note"),
+  };
   const [page] = useQueryState("invPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("invPerPage", parseAsInteger.withDefault(10));
   const [status, setStatus] = useQueryState("invStatus", parseAsString);
@@ -77,7 +79,7 @@ export function InvoiceTable() {
   const handleDownload = async (id: string, invoice_number: string) => {
     try {
       const res = await fetch(`/api/admin/invoices/${id}/download`);
-      if (!res.ok) throw new Error("Téléchargement échoué");
+      if (!res.ok) throw new Error(t("download_failed"));
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -86,7 +88,7 @@ export function InvoiceTable() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Impossible de télécharger la facture");
+      toast.error(t("download_error"));
     }
   };
 
@@ -95,7 +97,7 @@ export function InvoiceTable() {
       {
         id: "invoice_number",
         accessorKey: "invoice_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="N° Facture" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("invoice_number_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/invoices/${row.original.id}`}
@@ -108,7 +110,7 @@ export function InvoiceTable() {
       {
         id: "type",
         accessorKey: "type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
             <FileText className="text-muted-foreground size-3.5" />
@@ -118,7 +120,7 @@ export function InvoiceTable() {
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Client" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("client_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-medium">{row.original.customer_name ?? "—"}</span>
@@ -131,7 +133,7 @@ export function InvoiceTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE[row.original.status] ?? "outline"}>
             {STATUS_LABEL[row.original.status] ?? row.original.status}
@@ -141,7 +143,7 @@ export function InvoiceTable() {
       {
         id: "grand_total",
         accessorKey: "grand_total",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Total" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("total_column")} />,
         cell: ({ row }) =>
           Number(row.original.grand_total).toLocaleString("fr-FR", {
             style: "currency",
@@ -152,7 +154,7 @@ export function InvoiceTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -189,16 +191,16 @@ export function InvoiceTable() {
   });
 
   const statusOptions = [
-    { label: "Payée", value: "paid" },
-    { label: "Impayée", value: "unpaid" },
-    { label: "Annulée", value: "void" },
-    { label: "Remboursée", value: "refunded" },
+    { label: t("status_paid"), value: "paid" },
+    { label: t("status_unpaid"), value: "unpaid" },
+    { label: t("status_void"), value: "void" },
+    { label: t("status_refunded"), value: "refunded" },
   ];
 
   const typeOptions = [
-    { label: "Facture", value: "order_invoice" },
-    { label: "Remboursement", value: "refund_invoice" },
-    { label: "Note de crédit", value: "credit_note" },
+    { label: t("type_order_invoice"), value: "order_invoice" },
+    { label: t("type_refund_invoice"), value: "refund_invoice" },
+    { label: t("type_credit_note"), value: "credit_note" },
   ];
 
   return (
@@ -206,21 +208,21 @@ export function InvoiceTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={statusOptions}
           icon={ToggleLeft}
           value={status}
           onChange={setStatus}
         />
         <FacetedFilter
-          title="Type"
+          title={t("type_title")}
           options={typeOptions}
           icon={ToggleLeft}
           value={type}
           onChange={setType}
         />
         <DateRangeFilter
-          title="Date"
+          title={t("date_title")}
           from={from}
           to={to}
           onFromChange={setFrom}

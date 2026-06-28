@@ -7,6 +7,7 @@ import { Calendar, Download, ExternalLink, MoreHorizontal, XCircle } from "lucid
 import Link from "next/link";
 import * as React from "react";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -59,19 +60,7 @@ interface Option {
   value: string;
 }
 
-const STATUS_OPTIONS: Option[] = [
-  { label: "En Attente", value: "pending" },
-  { label: "Confirmé", value: "confirmed" },
-  { label: "Fini", value: "fulfilled" },
-  { label: "Annulé", value: "cancelled" },
-];
 
-const STATUS_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  pending: { label: "En Attente", variant: "outline" },
-  confirmed: { label: "Confirmé", variant: "secondary" },
-  fulfilled: { label: "Fini", variant: "default" },
-  cancelled: { label: "Annulé", variant: "destructive" },
-};
 
 function FacetedFilter({
   title,
@@ -139,10 +128,25 @@ function FacetedFilter({
 }
 
 export function PreordersTable() {
+  const t = useTranslations("preorders");
   const [page, setPage] = useQueryState("poPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("poPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("poSearch", parseAsString);
   const [status, setStatus] = useQueryState("poStatus", parseAsString);
+
+  const STATUS_OPTIONS: Option[] = [
+    { label: t("pending"), value: "pending" },
+    { label: t("confirmed"), value: "confirmed" },
+    { label: t("fulfilled"), value: "fulfilled" },
+    { label: t("cancelled"), value: "cancelled" },
+  ];
+
+  const STATUS_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    pending: { label: t("pending"), variant: "outline" },
+    confirmed: { label: t("confirmed"), variant: "secondary" },
+    fulfilled: { label: t("fulfilled"), variant: "default" },
+    cancelled: { label: t("cancelled"), variant: "destructive" },
+  };
 
   const [etaDialog, setEtaDialog] = React.useState<{
     allocation_id: string;
@@ -175,12 +179,12 @@ export function PreordersTable() {
       {
         id: "id",
         accessorKey: "id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="ID Allocation" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("allocation_id_column")} />,
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.id}</span>,
       },
       {
         id: "product",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-sm font-medium">{row.original.product_name ?? "—"}</span>
@@ -193,7 +197,7 @@ export function PreordersTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => {
           const oid = row.original.order_id;
           if (!oid) return <span className="text-muted-foreground text-xs">—</span>;
@@ -211,7 +215,7 @@ export function PreordersTable() {
       {
         id: "quantity",
         accessorKey: "quantity",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Qté" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("qty_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-sm">{row.original.quantity}</span>
         ),
@@ -219,7 +223,7 @@ export function PreordersTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => {
           const cfg = STATUS_BADGES[row.original.status] ?? {
             label: row.original.status,
@@ -232,7 +236,7 @@ export function PreordersTable() {
         id: "estimated_available_at",
         accessorKey: "estimated_available_at",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="ETA" />
+          <DataTableColumnHeader column={column} label={t("eta_column")} />
         ),
         cell: ({ row }) => {
           const eta = row.original.estimated_available_at;
@@ -271,7 +275,7 @@ export function PreordersTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Créé le" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -288,7 +292,7 @@ export function PreordersTable() {
                 <DropdownMenuItem asChild>
                   <Link href={`/console/orders/${row.original.order_id}`}>
                     <ExternalLink className="mr-2 size-4" />
-                    Voir la commande
+                    {t("view_order")}
                   </Link>
                 </DropdownMenuItem>
               )}
@@ -307,7 +311,7 @@ export function PreordersTable() {
                   }}
                 >
                   <Calendar className="mr-2 size-4" />
-                  Modifier l&apos;ETA
+                  {t("edit_eta")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -346,7 +350,7 @@ export function PreordersTable() {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher par ID, SKU ou produit…"
+            placeholder={t("search_placeholder")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -355,7 +359,7 @@ export function PreordersTable() {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Statut"
+            title={t("status_title")}
             options={STATUS_OPTIONS}
             value={status ?? undefined}
             onChange={(val) => {
@@ -368,7 +372,7 @@ export function PreordersTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
             </Badge>
             <Button variant="ghost" size="sm" asChild>
               <a
@@ -379,7 +383,7 @@ export function PreordersTable() {
                 download="preorders.csv"
               >
                 <Download className="mr-1 h-4 w-4" />
-                Exporter
+                {t("export")}
               </a>
             </Button>
           </div>
@@ -394,13 +398,13 @@ export function PreordersTable() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Modifier la date de disponibilité</DialogTitle>
+            <DialogTitle>{t("edit_eta_title")}</DialogTitle>
             <DialogDescription>
-              Mettez à jour la date estimée de disponibilité pour cette allocation.
+              {t("edit_eta_description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <Label htmlFor="eta-date">Date de disponibilité</Label>
+            <Label htmlFor="eta-date">{t("availability_date")}</Label>
             <Input
               id="eta-date"
               type="date"
@@ -410,10 +414,10 @@ export function PreordersTable() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setEtaDialog(null)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button onClick={handleUpdateEta} disabled={!etaDate || updateEtaMutation.isPending}>
-              {updateEtaMutation.isPending ? "Mise à jour…" : "Enregistrer"}
+              {updateEtaMutation.isPending ? t("updating") : t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>

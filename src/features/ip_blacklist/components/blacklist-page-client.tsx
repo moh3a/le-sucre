@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useCallback } from "react";
 import { Plus, ShieldBan } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
@@ -11,6 +12,7 @@ import { BlacklistTable } from "./blacklist-table";
 import { BlacklistAddDialog } from "./blacklist-add-dialog";
 
 export function BlacklistPageClient() {
+  const t = useTranslations("blacklist");
   const [page, setPage] = useState(1);
   const [dialog_open, set_dialog_open] = useState(false);
   const { data, isLoading, refetch } = trpc.blacklist.list.useQuery({ page, limit: 20 });
@@ -41,12 +43,12 @@ export function BlacklistPageClient() {
   return (
     <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
-      title="Liste noire IP"
-      subtitle="Gérez les adresses IP bloquées pour sécuriser votre plateforme"
+      title={t("title")}
+      subtitle={t("subtitle")}
       actions={
         <Button onClick={() => set_dialog_open(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Bloquer une IP
+          {t("block_ip_button")}
         </Button>
       }
     >
@@ -59,19 +61,18 @@ export function BlacklistPageClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShieldBan className="h-5 w-5" />
-            Adresses IP bloquées
+            {t("blocked_ips_title")}
           </CardTitle>
           <CardDescription>
-            Les adresses IP listées ci-dessous se verront refuser l&apos;accès à l&apos;ensemble de
-            l&apos;API.
+            {t("blocked_ips_description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-muted-foreground py-4 text-sm">Chargement de la liste noire…</p>
+            <p className="text-muted-foreground py-4 text-sm">{t("loading_blacklist")}</p>
           ) : !data?.entries || data.entries.length === 0 ? (
             <p className="text-muted-foreground py-4 text-sm">
-              Aucune adresse IP bloquée pour le moment.
+              {t("no_blocked_ips")}
             </p>
           ) : (
             <>
@@ -82,9 +83,9 @@ export function BlacklistPageClient() {
               />
               {data.total_pages > 1 && (
                 <div className="mt-4 flex items-center justify-between">
-                  <p className="text-muted-foreground text-sm">
-                    Page {data.page} / {data.total_pages} ({data.total} entrées)
-                  </p>
+                    <p className="text-muted-foreground text-sm">
+                      {t("page_info", { page: data.page, total: data.total_pages, count: data.total })}
+                    </p>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -92,7 +93,7 @@ export function BlacklistPageClient() {
                       disabled={page <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
-                      Précédent
+                      {t("previous")}
                     </Button>
                     <Button
                       variant="outline"
@@ -100,7 +101,7 @@ export function BlacklistPageClient() {
                       disabled={page >= data.total_pages}
                       onClick={() => setPage((p) => p + 1)}
                     >
-                      Suivant
+                      {t("next")}
                     </Button>
                   </div>
                 </div>

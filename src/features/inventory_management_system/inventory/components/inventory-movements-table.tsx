@@ -5,6 +5,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { ToggleLeft } from "lucide-react";
 import * as React from "react";
 
+import { useTranslations } from "next-intl";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -31,6 +32,7 @@ const MOVEMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "
 };
 
 export function InventoryMovementsTable() {
+  const t = useTranslations("inventory");
   const [page] = useQueryState("movPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("movPerPage", parseAsInteger.withDefault(10));
   const [movement_type, set_movement_type] = useQueryState("movType", parseAsString);
@@ -42,13 +44,13 @@ export function InventoryMovementsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
         id: "movement_type",
         accessorKey: "movement_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type")} />,
         cell: ({ row }) => (
           <Badge variant={MOVEMENT_BADGE[row.original.movement_type] ?? "outline"}>
             {MOVEMENT_LABELS[row.original.movement_type] ?? row.original.movement_type}
@@ -58,7 +60,7 @@ export function InventoryMovementsTable() {
       {
         id: "sku_code",
         accessorKey: "sku_code",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku")} />,
         cell: ({ row }) => (
           <span className="font-mono text-sm">{row.original.sku_code ?? "—"}</span>
         ),
@@ -66,13 +68,13 @@ export function InventoryMovementsTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
         cell: ({ row }) => <span className="text-sm">{row.original.product_name ?? "—"}</span>,
       },
       {
         id: "quantity_delta",
         accessorKey: "quantity_delta",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Quantité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("quantity")} />,
         cell: ({ row }) => {
           const delta = row.original.quantity_delta;
           return (
@@ -88,7 +90,7 @@ export function InventoryMovementsTable() {
       {
         id: "warehouse_id",
         accessorKey: "warehouse_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Entrepôt" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("warehouse")} />,
         cell: ({ row }) => (
           <Badge variant="outline" className="font-mono text-xs">
             {row.original.warehouse_id}
@@ -98,7 +100,7 @@ export function InventoryMovementsTable() {
       {
         id: "reference_type",
         accessorKey: "reference_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Réf. type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("ref_type")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-xs">
             {row.original.reference_type ?? "—"}
@@ -136,14 +138,14 @@ export function InventoryMovementsTable() {
       <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Type"
+          title={t("type")}
           options={movementTypeOptions}
           icon={ToggleLeft}
           value={movement_type}
           onChange={set_movement_type}
         />
         <DateRangeFilter
-          title="Date"
+          title={t("date")}
           from={from}
           to={to}
           onFromChange={setFrom}

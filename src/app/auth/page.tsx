@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { getTranslations } from "next-intl/server";
 import { GalleryVerticalEnd } from "lucide-react";
 
 import { LoginForm } from "@/features/authentication_and_authorization/auth/components/login-form";
@@ -6,7 +7,8 @@ import { APP_NAME } from "@/constants";
 
 export const metadata = { title: "Connexion" };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations("auth");
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -28,7 +30,7 @@ export default function LoginPage() {
         <div className="bg-muted relative h-full w-full rounded-xl">
           <img
             src="/window.svg"
-            alt="Image"
+            alt={t("login_image_alt")}
             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
           />
         </div>

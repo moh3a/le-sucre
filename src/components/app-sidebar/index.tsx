@@ -85,98 +85,98 @@ export function AppSidebar() {
       items: [
         { title: t("products"), url: "/console/products", icon: Package },
         { title: t("categories"), url: "/console/categories", icon: FolderTree },
-        { title: "Marques", url: "/console/brands", icon: Building2 },
-        { title: "Variantes", url: "/console/variants", icon: Blend },
-        { title: "Avis", url: "/console/reviews", icon: MessageCircleCheck },
-        { title: "Médiathèque", url: "/console/media", icon: ImageIcon },
+        { title: t("brands"), url: "/console/brands", icon: Building2 },
+        { title: t("variants"), url: "/console/variants", icon: Blend },
+        { title: t("reviews"), url: "/console/reviews", icon: MessageCircleCheck },
+        { title: t("media_library"), url: "/console/media", icon: ImageIcon },
       ],
     },
     {
-      title: "Commandes",
+      title: t("orders"),
       icon: ReceiptCent,
       items: [
-        { title: "Commandes", url: "/console/orders", icon: ReceiptCent },
-        { title: "Précommandes", url: "/console/preorders", icon: ClipboardList },
-        { title: "Paniers", url: "/console/carts", icon: ShoppingCart },
-        { title: "Clients", url: "/console/customers", icon: Handshake },
+        { title: t("orders"), url: "/console/orders", icon: ReceiptCent },
+        { title: t("preorders"), url: "/console/preorders", icon: ClipboardList },
+        { title: t("carts"), url: "/console/carts", icon: ShoppingCart },
+        { title: t("customers"), url: "/console/customers", icon: Handshake },
       ],
     },
     {
-      title: "Expéditions",
+      title: t("shipments"),
       icon: Truck,
-      items: [{ title: "Livraisons", url: "/console/shipping", icon: Truck }],
+      items: [{ title: t("deliveries"), url: "/console/shipping", icon: Truck }],
     },
     {
-      title: "Paiements & Factures",
+      title: t("payments_invoices"),
       icon: CreditCard,
       items: [
-        { title: "Paiements", url: "/console/payments", icon: CreditCard },
-        { title: "Factures", url: "/console/invoices", icon: FileText },
-        { title: "Remboursements", url: "/console/refunds", icon: RefreshCw },
-        { title: "Paiements fournisseurs", url: "/console/payouts", icon: Wallet },
+        { title: t("payments"), url: "/console/payments", icon: CreditCard },
+        { title: t("invoices"), url: "/console/invoices", icon: FileText },
+        { title: t("refunds"), url: "/console/refunds", icon: RefreshCw },
+        { title: t("supplier_payments"), url: "/console/payouts", icon: Wallet },
       ],
     },
     {
-      title: "Marketing",
+      title: t("marketing"),
       icon: Megaphone,
       items: [
-        { title: "Promotions", url: "/console/promotions", icon: TicketPercent },
-        { title: "Campagnes", url: "/console/campaigns", icon: Megaphone },
+        { title: t("promotions"), url: "/console/promotions", icon: TicketPercent },
+        { title: t("campaigns"), url: "/console/campaigns", icon: Megaphone },
       ],
     },
     {
-      title: "Stock",
+      title: t("stock"),
       icon: Warehouse,
       items: [
-        { title: "Inventaire", url: "/console/inventory", icon: Warehouse },
-        { title: "Alertes", url: "/console/inventory/alerts", icon: TriangleAlert },
-        { title: "Prévisions", url: "/console/inventory/forecast", icon: TrendingUpDown },
+        { title: t("inventory"), url: "/console/inventory", icon: Warehouse },
+        { title: t("alerts"), url: "/console/inventory/alerts", icon: TriangleAlert },
+        { title: t("forecast"), url: "/console/inventory/forecast", icon: TrendingUpDown },
       ],
     },
     {
-      title: "Opérations",
+      title: t("operations"),
       icon: Gauge,
       items: [
-        { title: "Dashboard", url: "/console/operations", icon: Gauge },
-        { title: "Livraisons", url: "/console/operations/delivery", icon: Truck },
-        { title: "Remboursements", url: "/console/operations/refunds", icon: RefreshCw },
-        { title: "Annulations", url: "/console/operations/cancellations", icon: Ban },
+        { title: t("dashboard"), url: "/console/operations", icon: Gauge },
+        { title: t("deliveries"), url: "/console/operations/delivery", icon: Truck },
+        { title: t("returns_ops"), url: "/console/operations/refunds", icon: RefreshCw },
+        { title: t("cancellations"), url: "/console/operations/cancellations", icon: Ban },
         {
-          title: "Vérifications",
+          title: t("verifications"),
           url: "/console/operations/payment-verifications",
           icon: Banknote,
         },
-        { title: "Garanties", url: "/console/operations/warranty", icon: Wrench },
+        { title: t("warranty"), url: "/console/operations/warranty", icon: Wrench },
         {
-          title: "Validations promo",
+          title: t("promo_validations"),
           url: "/console/operations/promotion-reviews",
           icon: TicketPercent,
         },
-        { title: "Tâches", url: "/console/operations/tasks", icon: ListTodo },
-        { title: "Relances", url: "/console/operations/follow-ups", icon: Phone },
-        { title: "Support", url: "/console/operations/support-cases", icon: HeadphonesIcon },
+        { title: t("tasks"), url: "/console/operations/tasks", icon: ListTodo },
+        { title: t("follow_ups"), url: "/console/operations/follow-ups", icon: Phone },
+        { title: t("support"), url: "/console/operations/support-cases", icon: HeadphonesIcon },
         {
-          title: "Ajust. stock",
+          title: t("stock_adjustments"),
           url: "/console/operations/inventory-adjustments",
           icon: Warehouse,
         },
         {
-          title: "Publications",
+          title: t("publications"),
           url: "/console/operations/publishing-schedules",
           icon: CalendarClock,
         },
-        { title: "Escalades", url: "/console/operations/escalations", icon: TriangleAlert },
+        { title: t("escalations"), url: "/console/operations/escalations", icon: TriangleAlert },
       ],
     },
     {
-      title: "Administration",
+      title: t("administration"),
       icon: ShieldCog,
       items: [
-        { title: "Utilisateurs", url: "/console/users", icon: UsersRound },
-        { title: "Autorisations", url: "/console/authorization", icon: ShieldCog },
-        { title: "Audit", url: "/console/audit-logs", icon: ScrollText },
-        { title: "Feature Flags", url: "/console/feature-flags", icon: Flag },
-        { title: "Liste noire IP", url: "/console/blacklist", icon: Ban },
+        { title: t("users"), url: "/console/users", icon: UsersRound },
+        { title: t("authorizations"), url: "/console/authorization", icon: ShieldCog },
+        { title: t("audit"), url: "/console/audit-logs", icon: ScrollText },
+        { title: t("feature_flags"), url: "/console/feature-flags", icon: Flag },
+        { title: t("ip_blacklist"), url: "/console/blacklist", icon: Ban },
       ],
     },
   ];
@@ -186,25 +186,25 @@ export function AppSidebar() {
     <TooltipProvider>
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
-          <h2 className="font-heading px-2 text-lg font-semibold">Le Sucré</h2>
+          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupLabel>{t("navigation")}</SidebarGroupLabel>
             <SidebarMenu>
               <Link href="/console">
-                <SidebarMenuButton tooltip="Tableau de bord" isActive={pathname === "/console"}>
+                <SidebarMenuButton tooltip={t("dashboard")} isActive={pathname === "/console"}>
                   <Gauge className="size-4" />
-                  <span>Tableau de bord</span>
+                  <span>{t("dashboard")}</span>
                 </SidebarMenuButton>
               </Link>
               <Link href="/console/analytics">
                 <SidebarMenuButton
-                  tooltip="Analytics"
+                  tooltip={t("analytics")}
                   isActive={pathname.startsWith("/console/analytics")}
                 >
                   <ChartArea className="size-4" />
-                  <span>Analytics</span>
+                  <span>{t("analytics")}</span>
                 </SidebarMenuButton>
               </Link>
               {nav.map(({ icon: Icon, ...section }) =>
@@ -268,11 +268,11 @@ export function AppSidebar() {
               )}
               <Link href="/console/settings">
                 <SidebarMenuButton
-                  tooltip="Settings"
+                  tooltip={t("settings")}
                   isActive={pathname.startsWith("/console/settings")}
                 >
                   <Cog className="size-4" />
-                  <span>Settings</span>
+                  <span>{t("settings")}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenu>

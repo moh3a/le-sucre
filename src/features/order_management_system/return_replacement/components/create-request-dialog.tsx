@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowLeftRight, PackageX, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,9 +18,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  RETURN_REQUEST_TYPE_LABELS,
-} from "../constants/status";
 import type { OrderItemInfo } from "./types";
 
 type CreateRequestDialogProps = {
@@ -35,24 +33,23 @@ export function CreateRequestDialog({
   type,
   on_created,
 }: CreateRequestDialogProps) {
+  const t = useTranslations("orders");
   const [open, set_open] = useState(false);
   const [reason, set_reason] = useState("");
   const [note, set_note] = useState("");
 
   const create_mutation = trpc.returns.adminCreate.useMutation({
     onSuccess: () => {
-      toast.success("Demande créée avec succès");
+      toast.success(t("request_created"));
       set_open(false);
       on_created();
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
-
-  const type_label = RETURN_REQUEST_TYPE_LABELS[type] ?? type;
 
   function handle_submit() {
     if (!reason.trim()) {
-      toast.error("Veuillez saisir un motif");
+      toast.error(t("please_enter_reason"));
       return;
     }
     create_mutation.mutate({
@@ -70,12 +67,7 @@ export function CreateRequestDialog({
     });
   }
 
-  const button_label =
-    type === "failed_delivery"
-      ? "Livraison échouée"
-      : type === "return"
-        ? "Retour"
-        : "Remplacement";
+  const button_label = type === "failed_delivery" ? t("failed_delivery") : type === "return" ? t("return") : t("replacement");
 
   const button_icon =
     type === "failed_delivery"
@@ -99,13 +91,19 @@ export function CreateRequestDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nouvelle demande de {type_label.toLowerCase()}</DialogTitle>
+          <DialogTitle>
+            {type === "return"
+              ? t("new_return_request")
+              : type === "replacement"
+                ? t("new_replacement_request")
+                : t("new_failed_delivery_request")}
+          </DialogTitle>
           <DialogDescription>
             {type === "return"
-              ? "Créez une demande de retour pour les articles sélectionnés."
+              ? t("return_description")
               : type === "replacement"
-                ? "Créez une demande de remplacement pour les articles défectueux ou incorrects."
-                : "Marquez la livraison comme échouée et créez une demande de traitement."}
+                ? t("replacement_description")
+                : t("failed_delivery_description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -114,10 +112,10 @@ export function CreateRequestDialog({
             <table className="w-full text-xs">
               <thead className="border-b text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">Produit</th>
-                  <th className="px-3 py-2 text-left font-medium">SKU</th>
-                  <th className="px-3 py-2 text-right font-medium">Qté</th>
-                  <th className="px-3 py-2 text-right font-medium">Prix</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("product")}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t("sku")}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t("qty")}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t("price")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -136,9 +134,9 @@ export function CreateRequestDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Motif *</label>
+            <label className="text-sm font-medium">{t("reason")} *</label>
             <Textarea
-              placeholder="Décrivez le motif de la demande..."
+              placeholder={t("return_reason_placeholder")}
               value={reason}
               onChange={(e) => set_reason(e.target.value)}
               className="min-h-[80px]"
@@ -146,9 +144,9 @@ export function CreateRequestDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Note interne (optionnelle)</label>
+            <label className="text-sm font-medium">{t("internal_note_optional")}</label>
             <Textarea
-              placeholder="Note pour l'équipe..."
+              placeholder={t("team_note_placeholder")}
               value={note}
               onChange={(e) => set_note(e.target.value)}
               className="min-h-[60px]"
@@ -158,13 +156,13 @@ export function CreateRequestDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => set_open(false)}>
-            Annuler
+            {t("cancel")}
           </Button>
           <Button
             onClick={handle_submit}
             disabled={create_mutation.isPending || !reason.trim()}
           >
-            {create_mutation.isPending ? "Création..." : "Créer la demande"}
+            {create_mutation.isPending ? t("creating") : t("create_request")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { useTranslations } from "next-intl";
+
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
@@ -36,40 +38,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
-
-const STATUS_STYLES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  pending: { label: "En attente", variant: "outline" },
-  processing: { label: "En cours", variant: "secondary" },
-  captured: { label: "Capturé", variant: "default" },
-  completed: { label: "Terminé", variant: "default" },
-  failed: { label: "Échoué", variant: "destructive" },
-  refunded: { label: "Remboursé", variant: "secondary" },
-  partially_refunded: { label: "Remb. partiel", variant: "secondary" },
-  cancelled: { label: "Annulé", variant: "destructive" },
-  expired: { label: "Expiré", variant: "outline" },
-  on_hold: { label: "En attente", variant: "outline" },
-};
-
-const STATUS_OPTIONS = [
-  { label: "En attente", value: "pending" },
-  { label: "En cours", value: "processing" },
-  { label: "Capturé", value: "captured" },
-  { label: "Terminé", value: "completed" },
-  { label: "Échoué", value: "failed" },
-  { label: "Remboursé", value: "refunded" },
-  { label: "Remb. partiel", value: "partially_refunded" },
-  { label: "Annulé", value: "cancelled" },
-  { label: "Expiré", value: "expired" },
-  { label: "En attente", value: "on_hold" },
-];
-
-const TYPE_OPTIONS = [
-  { label: "Complet", value: "full" },
-  { label: "Acompte", value: "deposit" },
-  { label: "Versement", value: "installment" },
-  { label: "Partiel", value: "partial" },
-  { label: "Fractionné", value: "split" },
-];
 
 type PaymentRow = {
   id: string;
@@ -157,6 +125,39 @@ function FacetedFilter({
 }
 
 export function PaymentsTable() {
+  const t = useTranslations("payments");
+  const STATUS_STYLES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    pending: { label: t("pending"), variant: "outline" },
+    processing: { label: t("processing"), variant: "secondary" },
+    captured: { label: t("captured"), variant: "default" },
+    completed: { label: t("completed"), variant: "default" },
+    failed: { label: t("failed"), variant: "destructive" },
+    refunded: { label: t("refunded"), variant: "secondary" },
+    partially_refunded: { label: t("partially_refunded"), variant: "secondary" },
+    cancelled: { label: t("cancelled"), variant: "destructive" },
+    expired: { label: t("expired"), variant: "outline" },
+    on_hold: { label: t("on_hold"), variant: "outline" },
+  };
+  const STATUS_OPTIONS = [
+    { label: t("pending"), value: "pending" },
+    { label: t("processing"), value: "processing" },
+    { label: t("captured"), value: "captured" },
+    { label: t("completed"), value: "completed" },
+    { label: t("failed"), value: "failed" },
+    { label: t("refunded"), value: "refunded" },
+    { label: t("partially_refunded"), value: "partially_refunded" },
+    { label: t("cancelled"), value: "cancelled" },
+    { label: t("expired"), value: "expired" },
+    { label: t("on_hold"), value: "on_hold" },
+  ];
+  const TYPE_OPTIONS = [
+    { label: t("full"), value: "full" },
+    { label: t("deposit"), value: "deposit" },
+    { label: t("installment"), value: "installment" },
+    { label: t("partial"), value: "partial" },
+    { label: t("split"), value: "split" },
+  ];
+
   const [page] = useQueryState("pmPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("pmPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("pmSearch", parseAsString);
@@ -193,7 +194,7 @@ export function PaymentsTable() {
       {
         id: "id",
         accessorKey: "id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="ID" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("id_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/payments/${row.original.id}`}
@@ -205,7 +206,7 @@ export function PaymentsTable() {
       },
       {
         id: "order",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => {
           const on = row.original.order_number;
           return on ? (
@@ -222,7 +223,7 @@ export function PaymentsTable() {
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Client" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_column")} />,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-sm">{row.original.user_name ?? "—"}</span>
@@ -235,7 +236,7 @@ export function PaymentsTable() {
       {
         id: "provider",
         accessorKey: "provider",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Fournisseur" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("provider_column")} />,
         cell: ({ row }) => (
           <Badge variant="outline" className="capitalize">
             {row.original.provider}
@@ -245,7 +246,7 @@ export function PaymentsTable() {
       {
         id: "amount",
         accessorKey: "amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Montant" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("amount_column")} />,
         cell: ({ row }) => (
           <span className="font-mono font-medium">
             {Number(row.original.amount).toLocaleString("fr-FR", {
@@ -258,7 +259,7 @@ export function PaymentsTable() {
       {
         id: "fee",
         accessorKey: "fee",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Frais" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("fee_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-muted-foreground text-xs">
             {Number(row.original.fee).toLocaleString("fr-FR", {
@@ -271,13 +272,13 @@ export function PaymentsTable() {
       {
         id: "type",
         accessorKey: "type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => <span className="capitalize text-sm">{row.original.type}</span>,
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => {
           const cfg = STATUS_STYLES[row.original.status] ?? {
             label: row.original.status,
@@ -289,7 +290,7 @@ export function PaymentsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -302,11 +303,11 @@ export function PaymentsTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/console/payments/${row.original.id}`}>
                   <CreditCard className="mr-2 size-4" />
-                  Voir détails
+                  {t("view_details")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -315,7 +316,7 @@ export function PaymentsTable() {
                   onClick={() => retryMutation.mutate({ transaction_id: row.original.id })}
                 >
                   <RefreshCcw className="mr-2 size-4" />
-                  Réessayer
+                  {t("retry")}
                 </DropdownMenuItem>
               )}
               {(row.original.status === "pending" || row.original.status === "on_hold") && (
@@ -323,7 +324,7 @@ export function PaymentsTable() {
                   onClick={() => cancelMutation.mutate({ transaction_id: row.original.id })}
                 >
                   <XCircle className="mr-2 size-4" />
-                  Annuler
+                  {t("cancel")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -359,7 +360,7 @@ export function PaymentsTable() {
       <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <Input
-          placeholder="Rechercher par ID, client, commande…"
+          placeholder={t("search_placeholder")}
           value={search || ""}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -367,14 +368,14 @@ export function PaymentsTable() {
           className="max-w-sm"
         />
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={STATUS_OPTIONS}
           icon={Banknote}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
         />
         <FacetedFilter
-          title="Type"
+          title={t("type_title")}
           options={TYPE_OPTIONS}
           icon={CreditCard}
           value={type ?? undefined}
@@ -385,7 +386,7 @@ export function PaymentsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -397,7 +398,7 @@ export function PaymentsTable() {
               download="payments.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>
