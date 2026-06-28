@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountProfileTab } from "./account-profile-tab";
 import { AccountSecurityTab } from "./account-security-tab";
 import { AccountActivityTab } from "./account-activity-tab";
+import { ProfileSection } from "@/features/authentication_and_authorization/profile/components/profile-section";
+import { AddressesSection } from "@/features/authentication_and_authorization/profile/components/addresses-section";
 
-const tab_schema = z.enum(["profile", "security", "activity"]);
+const tab_schema = z.enum(["profile", "security", "activity", "addresses"]);
 
 export function AccountPageClient() {
   const router = useRouter();
@@ -33,12 +35,17 @@ export function AccountPageClient() {
       <Tabs value={active_tab} onValueChange={on_tab_change}>
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="profile">Profil</TabsTrigger>
+          <TabsTrigger value="addresses">Adresses</TabsTrigger>
           <TabsTrigger value="security">Sécurité</TabsTrigger>
           <TabsTrigger value="activity">Activité</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
-          <AccountProfileTab />
+          <ProfileSection />
+        </TabsContent>
+
+        <TabsContent value="addresses" className="space-y-4">
+          <AddressesSection />
         </TabsContent>
 
         <TabsContent value="security" className="space-y-4">

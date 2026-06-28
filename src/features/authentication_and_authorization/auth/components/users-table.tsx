@@ -25,7 +25,7 @@ type UserRow = {
   is_active: boolean;
   banned: boolean | null;
   ban_reason: string | null;
-  ban_expires: string | null;
+  ban_expires: Date | null;
   created_at: string;
 };
 

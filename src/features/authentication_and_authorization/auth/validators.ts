@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { ValidationError } from "@/lib/error_handling";
 
 import { assign_role_dto, login_dto, register_dto } from "./models/auth.dto";
+import { normalize_phone } from "./services/phone-auth.service";
 
 function zod_field_errors(error: z.ZodError): Record<string, unknown> {
   return { fields: error.flatten().fieldErrors };
@@ -13,7 +14,7 @@ export function validate_login(input: unknown) {
   if (!result.success) {
     throw new ValidationError("Validation échouée", zod_field_errors(result.error));
   }
-  return result.data;
+  return { ...result.data, phone: normalize_phone(result.data.phone) };
 }
 
 export function validate_register(input: unknown) {
@@ -21,7 +22,7 @@ export function validate_register(input: unknown) {
   if (!result.success) {
     throw new ValidationError("Validation échouée", zod_field_errors(result.error));
   }
-  return result.data;
+  return { ...result.data, phone: normalize_phone(result.data.phone) };
 }
 
 export function validate_assign_role(input: unknown) {

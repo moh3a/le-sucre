@@ -1,13 +1,17 @@
 import { z } from "zod";
 
+const phone_regex = /^\+?[\d\s\-()]{7,20}$/;
+const phone_error = "Numéro de téléphone invalide / Invalid phone number";
+
 export const login_dto = z.object({
-  email: z.email(),
+  phone: z.string().regex(phone_regex, phone_error),
   password: z.string().min(8).max(128),
+  remember_me: z.boolean().default(false).optional(),
 });
 
 export const register_dto = z.object({
   name: z.string().min(2).max(255),
-  email: z.email(),
+  phone: z.string().regex(phone_regex, phone_error),
   password: z.string().min(8).max(128),
 });
 
@@ -18,7 +22,7 @@ export const assign_role_dto = z.object({
 
 export const create_user_dto = z.object({
   name: z.string().min(2).max(255),
-  email: z.email(),
+  phone: z.string().regex(phone_regex, phone_error),
   password: z.string().min(8).max(128),
   role: z.enum(["admin", "moderator", "operator", "delivery_person", "customer"]).default("customer"),
 });

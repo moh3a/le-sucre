@@ -1,4 +1,4 @@
-import { create_trpc_router } from "@/lib/trpc/router";
+import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import {
   permission_procedure,
   protected_procedure,
@@ -12,14 +12,61 @@ import {
   assign_role_dto,
   create_user_dto,
 } from "@/features/authentication_and_authorization/auth/models/auth.dto";
+import { login_dto, register_dto } from "@/features/authentication_and_authorization/auth/models/auth.dto";
 import z from "zod";
 import { auth } from "@/lib/auth";
 import { user_repository } from "./repositories/user.repository";
+import { profile_repository } from "@/features/authentication_and_authorization/profile/repositories/profile.repository";
+import { phone_auth_service } from "./services/phone-auth.service";
 
 export const auth_router = create_trpc_router({
+  // ─── Phone-based authentication ──────────────────────────────
+  signUp: public_procedure
+    .input(register_dto)
+    .mutation(async ({ ctx, input }) => {
+      const result = await phone_auth_service.sign_up({
+        name: input.name,
+        phone: input.phone,
+        password: input.password,
+      });
+      await audit_service.log({
+        actor_user_id: result.user.id,
+        action: "auth.register",
+        resource_type: "user",
+        resource_id: result.user.id,
+        metadata: { phone: input.phone },
+      });
+      return result;
+    }),
+
+  signIn: public_procedure
+    .input(login_dto)
+    .mutation(async ({ ctx, input }) => {
+      const result = await phone_auth_service.sign_in({
+        phone: input.phone,
+        password: input.password,
+        remember_me: input.remember_me,
+      });
+      await audit_service.log({
+        actor_user_id: result.user.id,
+        action: "auth.login",
+        resource_type: "user",
+        resource_id: result.user.id,
+        metadata: { phone: input.phone },
+      });
+      return result;
+    }),
+
+  resolvePhone: public_procedure
+    .input(z.object({ phone: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      return phone_auth_service.find_by_phone(input.phone);
+    }),
+
   me: protected_procedure.query(async ({ ctx }) => {
     const rbac = await authorizationService.get_auth_context(ctx.user.id);
-    return { user: ctx.user, ...rbac };
+    const profile = await profile_repository.find_by_user_id(ctx.user.id);
+    return { user: ctx.user, ...rbac, profile };
   }),
 
   updateProfile: protected_procedure
@@ -102,6 +149,7 @@ export const admin_auth_router = create_trpc_router({
       z.object({
         user_id: z.string().min(1),
         name: z.string().min(2).max(255).optional(),
+        phone: z.string().optional(),
         is_active: z.boolean().optional(),
         password: z.string().min(8).max(128).optional(),
         banned: z.boolean().optional(),
@@ -110,12 +158,16 @@ export const admin_auth_router = create_trpc_router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { user_id, password, banned, ban_reason, ban_expires, ...profile_patch } = input;
+      const { user_id, password, banned, ban_reason, ban_expires, phone, ...profile_patch } = input;
 
       const update_data: Parameters<typeof user_repository.update_profile>[1] = {
         name: profile_patch.name,
         is_active: profile_patch.is_active,
       };
+
+      if (phone) {
+        update_data.phone = phone;
+      }
 
       if (banned !== undefined) {
         update_data.banned = banned;
@@ -148,25 +200,25 @@ export const admin_auth_router = create_trpc_router({
   createUser: permission_procedure(PERMISSIONS.users_write)
     .input(create_user_dto)
     .mutation(async ({ ctx, input }) => {
-      const result = await auth.api.signUpEmail({
-        body: {
-          email: input.email,
-          password: input.password,
-          name: input.name,
-          rememberMe: false,
-        },
+      const result = await phone_auth_service.sign_up({
+        name: input.name,
+        phone: input.phone,
+        password: input.password,
       });
 
       const user_id = result.user.id;
 
-      await role_repository.assign_role(user_id, input.role);
+      // Override default customer role with the one specified by admin
+      if (input.role !== "customer") {
+        await role_repository.assign_role(user_id, input.role);
+      }
 
       await audit_service.log({
         actor_user_id: ctx.user.id,
         action: "user.created",
         resource_type: "user",
         resource_id: user_id,
-        metadata: { email: input.email, role: input.role },
+        metadata: { phone: input.phone, role: input.role },
       });
 
       return { user_id };

@@ -77,6 +77,7 @@ const auth_options = {
       emailVerified: "email_verified",
       createdAt: "created_at",
       updatedAt: "updated_at",
+      phone: "phone",
     },
   },
   session: {

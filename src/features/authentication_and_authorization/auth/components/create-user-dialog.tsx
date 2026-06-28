@@ -32,7 +32,7 @@ export function CreateUserDialog() {
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<string>("customer");
 
@@ -41,7 +41,7 @@ export function CreateUserDialog() {
       toast.success("Utilisateur créé");
       setOpen(false);
       setName("");
-      setEmail("");
+      setPhone("");
       setPassword("");
       setRole("customer");
       void utils.adminAuth.listUsers.invalidate();
@@ -54,7 +54,7 @@ export function CreateUserDialog() {
     e.preventDefault();
     create_user.mutate({
       name,
-      email,
+      phone,
       password,
       role: role as (typeof ROLE_OPTIONS)[number],
     });
@@ -90,13 +90,13 @@ export function CreateUserDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="create-email">Email</Label>
+            <Label htmlFor="create-phone">Téléphone</Label>
             <Input
-              id="create-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@exemple.com"
+              id="create-phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+213 5XX XX XX XX"
               required
             />
           </div>

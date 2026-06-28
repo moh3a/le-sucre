@@ -14,7 +14,6 @@ import { generate_id } from "@/lib/utils";
 // ==========================================
 // 1. USERS TABLE
 // ==========================================
-// TODO add user phone number
 export const users = mysqlTable(
   "users",
   {
@@ -24,6 +23,7 @@ export const users = mysqlTable(
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     email_verified: boolean("email_verified").default(false).notNull(),
+    phone: varchar("phone", { length: 50 }).notNull(),
     image: varchar("image", { length: 2048 }),
     is_active: boolean("is_active").default(true).notNull(),
     role: text("role"),
@@ -35,6 +35,7 @@ export const users = mysqlTable(
   },
   (table) => [
     uniqueIndex("email_uidx").on(table.email),
+    uniqueIndex("phone_uidx").on(table.phone),
     index("users_created_at_idx").on(table.created_at),
   ],
 );

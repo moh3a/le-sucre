@@ -28,7 +28,7 @@ import { QueryGuard } from "@/components/query-guard";
 export function CreateCustomerDialog() {
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
+  const [phone, setPhone] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [role, setRole] = React.useState("customer");
 
@@ -39,7 +39,7 @@ export function CreateCustomerDialog() {
       toast.success("Client créé avec succès");
       setOpen(false);
       setName("");
-      setEmail("");
+      setPhone("");
       setPassword("");
       setRole("customer");
       void utils.customers.adminList.invalidate();
@@ -50,7 +50,7 @@ export function CreateCustomerDialog() {
 
   function handle_submit(e: React.FormEvent) {
     e.preventDefault();
-    create.mutate({ name, email, password, role: role as "admin" | "moderator" | "operator" | "delivery_person" | "customer" });
+    create.mutate({ name, phone, password, role: role as "admin" | "moderator" | "operator" | "delivery_person" | "customer" });
   }
 
   return (
@@ -75,8 +75,8 @@ export function CreateCustomerDialog() {
             <Input value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Label>Téléphone</Label>
+            <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label>Mot de passe</Label>

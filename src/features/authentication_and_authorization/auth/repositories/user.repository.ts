@@ -4,12 +4,46 @@ import { count, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { users, user_roles, roles } from "@/features/authentication_and_authorization/auth/schema";
+import { user_profiles } from "@/features/authentication_and_authorization/profile/db/schema";
 import { format, subDays } from "date-fns";
 
 export class UserRepository {
   async find_by_id(id: string) {
     const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return user ?? null;
+  }
+
+  async find_by_phone(phone: string) {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone)).limit(1);
+    return user ?? null;
+  }
+
+  async find_with_profile_by_id(id: string) {
+    const [row] = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        email_verified: users.email_verified,
+        image: users.image,
+        is_active: users.is_active,
+        banned: users.banned,
+        ban_reason: users.ban_reason,
+        ban_expires: users.ban_expires,
+        created_at: users.created_at,
+        updated_at: users.updated_at,
+        first_name: user_profiles.first_name,
+        last_name: user_profiles.last_name,
+        phone_secondary: user_profiles.phone_secondary,
+        preferred_language: user_profiles.preferred_language,
+        preferred_currency: user_profiles.preferred_currency,
+      })
+      .from(users)
+      .leftJoin(user_profiles, eq(user_profiles.user_id, users.id))
+      .where(eq(users.id, id))
+      .limit(1);
+    return row ?? null;
   }
 
   async find_by_email(email: string) {
@@ -31,15 +65,16 @@ export class UserRepository {
           id: users.id,
           name: users.name,
           email: users.email,
+          phone: users.phone,
           email_verified: users.email_verified,
           is_active: users.is_active,
           banned: users.banned,
           ban_reason: users.ban_reason,
           ban_expires: users.ban_expires,
           created_at: users.created_at,
-          roles:
+          role:
             sql<string>`GROUP_CONCAT(DISTINCT ${roles.name} ORDER BY ${roles.name} SEPARATOR ', ')`.as(
-              "roles",
+              "role",
             ),
         })
         .from(users)
@@ -49,6 +84,7 @@ export class UserRepository {
           users.id,
           users.name,
           users.email,
+          users.phone,
           users.email_verified,
           users.is_active,
           users.banned,
@@ -68,8 +104,8 @@ export class UserRepository {
     return {
       items: items.map((item) => ({
         ...item,
-        role: item.roles?.split(", ")[0] ?? "—",
-        phone: "—",
+        roles: item.role,
+        role: item.role?.split(", ")[0] ?? "—",
       })),
       meta: {
         page,
@@ -81,47 +117,12 @@ export class UserRepository {
     };
   }
 
-  // async list_paginated(page = 1, limit = 20) {
-  //   const safe_limit = Math.min(Math.max(limit, 1), 100);
-  //   const offset = (Math.max(page, 1) - 1) * safe_limit;
-
-  //   const [items, total_row] = await Promise.all([
-  //     db
-  //       .select({
-  //         id: users.id,
-  //         name: users.name,
-  //         email: users.email,
-  //         email_verified: users.email_verified,
-  //         is_active: users.is_active,
-  //         created_at: users.created_at,
-  //       })
-  //       .from(users)
-  //       .orderBy(desc(users.created_at))
-  //       .limit(safe_limit)
-  //       .offset(offset),
-  //     db.select({ total: count() }).from(users),
-  //   ]);
-
-  //   const total_records = Number(total_row[0]?.total ?? 0);
-  //   const total_pages = Math.ceil(total_records / safe_limit) || 1;
-
-  //   return {
-  //     items,
-  //     meta: {
-  //       page,
-  //       limit: safe_limit,
-  //       total_records,
-  //       total_pages,
-  //       has_more: page < total_pages,
-  //     },
-  //   };
-  // }
-
   async update_profile(
     id: string,
     patch: {
       name?: string;
       image?: string | null;
+      phone?: string;
       is_active?: boolean;
       banned?: boolean | null;
       ban_reason?: string | null;
@@ -170,6 +171,7 @@ export class UserRepository {
         id: users.id,
         name: users.name,
         email: users.email,
+        phone: users.phone,
       })
       .from(users)
       .innerJoin(user_roles, eq(user_roles.user_id, users.id))

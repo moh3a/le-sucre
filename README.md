@@ -3,7 +3,6 @@
 ## TODO
 
 - fix analytics
-- remove all hard coded text
 - continue Prompt 16 — Campaign Management System
 - continue Prompt 19 - Operational Workflows Audit & Business Process Completion
 - Storefront: use https://www.abui.io/components/label-selector for variant selection

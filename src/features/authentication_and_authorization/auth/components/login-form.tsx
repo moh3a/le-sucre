@@ -18,11 +18,33 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { login_dto } from "@/features/authentication_and_authorization/auth/models/auth.dto";
 import { authClient } from "@/lib/auth/client";
-import { QueryGuard } from "@/components/query-guard";
 
-type LoginFormValues = z.infer<typeof login_dto>;
+const phone_regex = /^\+?[\d\s\-()]{7,20}$/;
+
+const login_form_schema = z.object({
+  phone: z.string().regex(phone_regex, "Numéro de téléphone invalide"),
+  password: z.string().min(8, "Mot de passe trop court").max(128),
+});
+
+type LoginFormValues = z.infer<typeof login_form_schema>;
+
+/** Resolves phone → auto-generated email for Better Auth client auth. */
+async function resolve_phone_to_email(phone: string): Promise<string | null> {
+  try {
+    const res = await fetch("/api/auth/phone/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone }),
+      credentials: "include",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.email ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const t = useTranslations("auth");
@@ -32,16 +54,24 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
   const [root_error, set_root_error] = useState<string | null>(null);
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(login_dto),
-    defaultValues: { email: "", password: "" },
+    resolver: zodResolver(login_form_schema),
+    defaultValues: { phone: "", password: "" },
   });
 
   const is_submitting = form.formState.isSubmitting;
 
   async function on_submit(values: LoginFormValues) {
     set_root_error(null);
+
+    // Resolve phone to auto-generated email
+    const email = await resolve_phone_to_email(values.phone);
+    if (!email) {
+      set_root_error(t("error_invalid"));
+      return;
+    }
+
     const result = await authClient.signIn.email({
-      email: values.email,
+      email,
       password: values.password,
     });
     if (result.error) {
@@ -81,16 +111,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         {root_error && <FieldError role="alert">{root_error}</FieldError>}
 
         <Controller
-          name="email"
+          name="phone"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="login-email">{t("email")}</FieldLabel>
+              <FieldLabel htmlFor="login-phone">Téléphone</FieldLabel>
               <Input
                 {...field}
-                id="login-email"
-                type="email"
-                autoComplete="email"
+                id="login-phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="+213 5XX XX XX XX"
                 aria-invalid={fieldState.invalid}
               />
               <FieldError errors={[fieldState.error]} />
