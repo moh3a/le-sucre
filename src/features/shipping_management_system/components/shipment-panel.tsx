@@ -36,7 +36,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
 
   const create_mutation = trpc.shipping.create.useMutation({
     onSuccess: () => {
-      toast.success("Expédition créée");
+      toast.success(t("shipment_created"));
       void refetch();
     },
     onError: (err) => toast.error(err.message),
@@ -44,7 +44,7 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
 
   const sync_mutation = trpc.shipping.sync.useMutation({
     onSuccess: () => {
-      toast.success("Suivi synchronisé");
+      toast.success(t("tracking_synced"));
       void refetch();
     },
     onError: (err) => toast.error(err.message),

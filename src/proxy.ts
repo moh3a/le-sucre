@@ -17,9 +17,37 @@ function get_cors_origin(origin: string | null): string {
   return envOrigins.includes(origin) ? origin : "";
 }
 
+function generate_csp_header(): string {
+  const policies = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https: http:",
+    "font-src 'self' data:",
+    "connect-src 'self' https: http://localhost:* ws://localhost:",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "media-src 'self' https:",
+    "manifest-src 'self'",
+  ];
+  if (process.env.NODE_ENV === "production") {
+    policies.push("upgrade-insecure-requests");
+  }
+  return policies.join("; ");
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
+
+  const request_id = crypto.randomUUID();
+  response.headers.set("x-request-id", request_id);
+
+  // Generate a CSP nonce for each request
+  const csp_nonce = crypto.getRandomValues(new Uint8Array(16)).reduce((acc, b) => acc + b.toString(36).padStart(2, "0"), "").slice(0, 24);
+  response.headers.set("x-csp-nonce", csp_nonce);
 
   const client_ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
@@ -38,6 +66,7 @@ export async function proxy(request: NextRequest) {
         lazyConnect: true,
         maxRetriesPerRequest: 1,
         connectTimeout: 1000,
+        password: process.env.REDIS_PASSWORD || undefined,
       });
       const cached = await redis.get(`blacklist:ip:${client_ip}`);
       if (cached === "1") {
@@ -46,8 +75,9 @@ export async function proxy(request: NextRequest) {
           JSON.stringify({
             success: false,
             error: { code: "IP_BLOCKED", message: "Accès refusé" },
+            meta: { request_id },
           }),
-          { status: 403, headers: { "Content-Type": "application/json" } },
+          { status: 403, headers: { "Content-Type": "application/json", "x-request-id": request_id } },
         );
       }
       await redis.quit();
@@ -63,10 +93,22 @@ export async function proxy(request: NextRequest) {
   if (allowed) {
     response.headers.set("Access-Control-Allow-Origin", allowed);
     response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-csrf-token, x-request-id");
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-csrf-token, x-request-id, x-idempotency-key");
     response.headers.set("Access-Control-Expose-Headers", "x-request-id");
     response.headers.set("Access-Control-Allow-Credentials", "true");
     response.headers.set("Access-Control-Max-Age", "7200");
+  }
+
+  // Block requests with disallowed origins for state-changing methods
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method) && origin && origin !== allowed) {
+    return new NextResponse(
+      JSON.stringify({
+        success: false,
+        error: { code: "CORS_ORIGIN_DENIED", message: "Origin not allowed" },
+        meta: { request_id },
+      }),
+      { status: 403, headers: { "Content-Type": "application/json", "x-request-id": request_id } },
+    );
   }
 
   if (request.method === "OPTIONS") {
@@ -74,11 +116,12 @@ export async function proxy(request: NextRequest) {
   }
 
   if (pathname.startsWith("/console") || pathname.startsWith("/api/admin")) {
-    if (!request.cookies.has(CSRF_COOKIE)) {
+    const existing = request.cookies.get(CSRF_COOKIE);
+    if (!existing) {
       const token = crypto.randomUUID();
       response.cookies.set(CSRF_COOKIE, token, {
         httpOnly: false,
-        sameSite: "lax",
+        sameSite: "strict",
         secure: process.env.NODE_ENV === "production",
         path: "/",
       });
@@ -97,6 +140,7 @@ export async function proxy(request: NextRequest) {
   response.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
+  response.headers.set("Content-Security-Policy", generate_csp_header());
 
   return response;
 }

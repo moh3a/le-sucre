@@ -21,7 +21,7 @@ import { QueryGuard } from "@/components/query-guard";
 import { useTranslations } from "next-intl";
 
 export function CreateVerificationDialog() {
-  const t = useTranslations("payments");
+  const t = useTranslations("verifications");
   const [open, setOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [amount, setAmount] = useState("");
@@ -33,7 +33,7 @@ export function CreateVerificationDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.paymentCreateVerification.useMutation({
     onSuccess: () => {
-      toast.success("Vérification de paiement créée");
+      toast.success(t("verification_created"));
       setOpen(false);
       reset();
       utils.operations.paymentListVerifications.invalidate();
@@ -54,7 +54,7 @@ export function CreateVerificationDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId || !amount) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -73,20 +73,20 @@ export function CreateVerificationDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 size-4" />
-          Nouvelle vérification
+          {t("new_verification")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Créer une vérification de paiement</DialogTitle>
+          <DialogTitle>{t("create_title")}</DialogTitle>
           <DialogDescription>
-            Ajouter une vérification manuelle de paiement.
+            {t("create_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="pv_order_id">Commande *</Label>
+              <Label htmlFor="pv_order_id">{t("order")} *</Label>
               <Input
                 id="pv_order_id"
                 value={orderId}
@@ -96,7 +96,7 @@ export function CreateVerificationDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pv_amount">Montant *</Label>
+              <Label htmlFor="pv_amount">{t("amount")} *</Label>
               <Input
                 id="pv_amount"
                 type="number"
@@ -110,7 +110,7 @@ export function CreateVerificationDialog() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="pv_currency">Devise</Label>
+              <Label htmlFor="pv_currency">{t("currency")}</Label>
               <Input
                 id="pv_currency"
                 value={currency}
@@ -119,7 +119,7 @@ export function CreateVerificationDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pv_reference">Référence</Label>
+              <Label htmlFor="pv_reference">{t("reference")}</Label>
               <Input
                 id="pv_reference"
                 value={referenceNumber}
@@ -129,7 +129,7 @@ export function CreateVerificationDialog() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pv_proof">Preuve de paiement (URL)</Label>
+            <Label htmlFor="pv_proof">{t("proof_url_label")}</Label>
             <Input
               id="pv_proof"
               value={proofUrl}
@@ -138,7 +138,7 @@ export function CreateVerificationDialog() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pv_notes">Notes</Label>
+            <Label htmlFor="pv_notes">{t("notes")}</Label>
             <Textarea
               id="pv_notes"
               value={notes}
@@ -148,7 +148,7 @@ export function CreateVerificationDialog() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? t("creating") : t("create")}

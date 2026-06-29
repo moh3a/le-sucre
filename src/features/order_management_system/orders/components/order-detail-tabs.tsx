@@ -40,15 +40,15 @@ import {
 
 type OrderDetailTabsProps = { order_id: string };
 
-const STATUS_OPTIONS_FIXED = [
-  { value: "pending_payment", label: "En attente de paiement" },
-  { value: "paid", label: "Payé" },
-  { value: "processing", label: "En cours" },
-  { value: "shipped", label: "Expédiée" },
-  { value: "delivered", label: "Livrée" },
-  { value: "failed_delivery", label: "Livraison échouée" },
-  { value: "cancelled", label: "Annulée" },
-  { value: "refunded", label: "Remboursée" },
+const STATUS_OPTIONS_VALUES = [
+  "pending_payment",
+  "paid",
+  "processing",
+  "shipped",
+  "delivered",
+  "failed_delivery",
+  "cancelled",
+  "refunded",
 ] as const;
 
 type EditableItem = {
@@ -64,9 +64,9 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const t = useTranslations("orders");
   const { data, isLoading, refetch } = trpc.orders.adminGet.useQuery({ order_id });
   const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => refetch() });
-  const STATUS_OPTIONS = STATUS_OPTIONS_FIXED.map((o) => ({
-    ...o,
-    label: o.value === "processing" ? t("processing") : o.label,
+  const STATUS_OPTIONS = STATUS_OPTIONS_VALUES.map((value) => ({
+    value,
+    label: t(`status_${value}`),
   }));
   const [next_status, set_next_status] = useState<string>("");
 
@@ -78,17 +78,17 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const assign_operator = trpc.orders.adminAssignOperator.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Opérateur assigné avec succès");
+      toast.success(t("operator_assigned"));
     },
-    onError: (err) => toast.error(`Erreur d'affectation: ${err.message}`),
+    onError: (err) => toast.error(t("assign_error", { message: err.message })),
   });
 
   const assign_delivery = trpc.orders.adminAssignDeliveryPerson.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Livreur assigné avec succès");
+      toast.success(t("delivery_assigned"));
     },
-    onError: (err) => toast.error(`Erreur d'affectation: ${err.message}`),
+    onError: (err) => toast.error(t("assign_error", { message: err.message })),
   });
 
   // ── Payment editing ──
@@ -99,18 +99,18 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const update_payment = trpc.orders.adminUpdatePayment.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Paiement mis à jour");
+      toast.success(t("payment_updated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   // ── Items editing ──
   const update_items = trpc.orders.adminUpdateItems.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Articles mis à jour");
+      toast.success(t("items_updated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   // ── Shipping editing ──
@@ -126,9 +126,9 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const update_shipping = trpc.orders.adminUpdateShipping.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Adresse de livraison mise à jour");
+      toast.success(t("shipping_updated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   // ── Invoice operations ──
@@ -141,25 +141,25 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     onSuccess: () => {
       refetch();
       refetch_invoices();
-      toast.success("Facture générée avec succès");
+      toast.success(t("invoice_generated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const mark_invoice_paid = trpc.invoices.mark_as_paid.useMutation({
     onSuccess: () => {
       refetch_invoices();
-      toast.success("Facture marquée comme payée");
+      toast.success(t("invoice_marked_paid"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const void_invoice = trpc.invoices.void_invoice.useMutation({
     onSuccess: () => {
       refetch_invoices();
-      toast.success("Facture annulée");
+      toast.success(t("invoice_voided"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   // ── Add item to order ──
@@ -230,7 +230,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     const sku = skus_data?.items?.find((s) => s.id === selected_sku_id);
     if (!sku) return;
     if (edit_items.some((i) => i.sku_id === sku.id)) {
-      toast.error("Ce SKU est déjà dans la commande");
+      toast.error(t("sku_already_in_order"));
       return;
     }
     set_edit_items((prev) => [
@@ -252,7 +252,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
   function on_save_items() {
     if (edit_items.length === 0) {
-      toast.error("La commande doit avoir au moins un article");
+      toast.error(t("order_must_have_items"));
       return;
     }
     update_items.mutate({
@@ -311,10 +311,10 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         <TabsTrigger value="items">{t("items_tab")} ({items.length})</TabsTrigger>
         <TabsTrigger value="shipping">{t("shipping_tab")}</TabsTrigger>
         <TabsTrigger value="payments">{t("payments_tab")}</TabsTrigger>
-        <TabsTrigger value="invoices">Factures</TabsTrigger>
-        <TabsTrigger value="returns">Retours</TabsTrigger>
-        <TabsTrigger value="operations">Opérations</TabsTrigger>
-        <TabsTrigger value="comments">Commentaires</TabsTrigger>
+        <TabsTrigger value="invoices">{t("invoices_tab")}</TabsTrigger>
+        <TabsTrigger value="returns">{t("returns_tab")}</TabsTrigger>
+        <TabsTrigger value="operations">{t("operations_tab")}</TabsTrigger>
+        <TabsTrigger value="comments">{t("comments_tab")}</TabsTrigger>
         <TabsTrigger value="timeline">{t("timeline_tab")}</TabsTrigger>
       </TabsList>
 
@@ -355,32 +355,32 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Récapitulatif financier</CardTitle>
+            <CardTitle>{t("financial_summary")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Sous-total</span>
+              <span className="text-muted-foreground">{t("subtotal")}</span>
               <span>{Number(order.subtotal).toLocaleString("fr-FR")} DZD</span>
             </div>
             {Number(order.discount_total) > 0 && (
               <div className="flex justify-between text-red-500">
-                <span>Réduction</span>
+                <span>{t("discount")}</span>
                 <span>−{Number(order.discount_total).toLocaleString("fr-FR")} DZD</span>
               </div>
             )}
             {Number(order.tax_total) > 0 && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Taxes</span>
+                <span className="text-muted-foreground">{t("taxes")}</span>
                 <span>{Number(order.tax_total).toLocaleString("fr-FR")} DZD</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Livraison</span>
+              <span className="text-muted-foreground">{t("shipping")}</span>
               <span>{Number(order.shipping_total).toLocaleString("fr-FR")} DZD</span>
             </div>
             <Separator />
             <div className="flex justify-between font-semibold">
-              <span>Total</span>
+              <span>{t("total")}</span>
               <span>{Number(order.grand_total).toLocaleString("fr-FR")} DZD</span>
             </div>
           </CardContent>
@@ -388,7 +388,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Changer le statut</CardTitle>
+            <CardTitle>{t("change_status")}</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-2">
             <Select onValueChange={set_next_status} value={next_status}>
@@ -407,19 +407,19 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               disabled={!next_status || transition.isPending}
               onClick={() => transition.mutate({ order_id: order.id, status: next_status })}
             >
-              Appliquer
+              {t("apply")}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Affectation du personnel</CardTitle>
+            <CardTitle>{t("staff_assignment")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-1.5">
-                <label className="text-muted-foreground text-xs font-medium">Opérateur</label>
+                <label className="text-muted-foreground text-xs font-medium">{t("operator_label")}</label>
                 <Select
                   value={order.assigned_operator_id ?? "unassigned"}
                   onValueChange={(val) =>
@@ -434,7 +434,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                     <SelectValue placeholder={t("select_operator_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unassigned">Non assigné</SelectItem>
+                    <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
                     {operators_data?.map((op) => (
                       <SelectItem key={op.id} value={op.id}>
                         {op.name} ({op.email})
@@ -445,7 +445,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               </div>
 
               <div className="flex-1 space-y-1.5">
-                <label className="text-muted-foreground text-xs font-medium">Livreur</label>
+                <label className="text-muted-foreground text-xs font-medium">{t("delivery_person_label")}</label>
                 <Select
                   value={order.assigned_delivery_person_id ?? "unassigned"}
                   onValueChange={(val) =>
@@ -460,7 +460,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                     <SelectValue placeholder={t("select_delivery_placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unassigned">Non assigné</SelectItem>
+                    <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
                     {deliverers_data?.map((del) => (
                       <SelectItem key={del.id} value={del.id}>
                         {del.name} ({del.email})
@@ -480,10 +480,10 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="items">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>Articles de la commande</CardTitle>
+            <CardTitle>{t("articles_commande")}</CardTitle>
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={init_items_form}>
-                Modifier les articles
+                {t("modifier_articles")}
               </Button>
             </div>
           </CardHeader>
@@ -491,12 +491,12 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
             <table className="w-full text-sm">
               <thead className="border-b">
                 <tr className="text-muted-foreground">
-                  <th className="px-4 py-3 text-left font-medium">Produit</th>
-                  <th className="px-4 py-3 text-left font-medium">SKU</th>
-                  <th className="px-4 py-3 text-right font-medium">Qté</th>
-                  <th className="px-4 py-3 text-right font-medium">Prix unit.</th>
-                  <th className="px-4 py-3 text-right font-medium">Total ligne</th>
-                  <th className="px-4 py-3 text-left font-medium">Livraison</th>
+                  <th className="px-4 py-3 text-left font-medium">{t("produit")}</th>
+                  <th className="px-4 py-3 text-left font-medium">{t("sku")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("qte")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("prix_unitaire")}</th>
+                  <th className="px-4 py-3 text-right font-medium">{t("total_ligne")}</th>
+                  <th className="px-4 py-3 text-left font-medium">{t("livraison")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -527,7 +527,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {edit_items.length > 0 && (
           <Card className="mt-4 border-blue-200">
             <CardHeader>
-              <CardTitle>Édition des articles</CardTitle>
+              <CardTitle>{t("edition_articles")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="divide-y rounded-md border">
@@ -562,14 +562,14 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                   </div>
                 ))}
                 <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
-                  <span>Total</span>
+                  <span>{t("total")}</span>
                   <span>{edit_items_total.toLocaleString("fr-FR")} DZD</span>
                 </div>
               </div>
 
               {/* Add item to order */}
               <div className="rounded-md border p-3">
-                <p className="mb-2 text-xs font-medium">Ajouter un article</p>
+                <p className="mb-2 text-xs font-medium">{t("ajouter_article")}</p>
                 <div className="flex flex-wrap items-end gap-2">
                   <div className="relative min-w-[200px] flex-1">
                     <Search className="text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2" />
@@ -586,7 +586,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                   {search_query && (
                     <div className="max-h-[120px] w-full overflow-y-auto rounded border text-xs">
                       {sku_options.length === 0 ? (
-                        <p className="text-muted-foreground p-2">Aucun résultat</p>
+                        <p className="text-muted-foreground p-2">{t("no_results")}</p>
                       ) : (
                         sku_options.slice(0, 6).map((sku) => (
                           <label
@@ -639,7 +639,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                         onClick={add_item_to_list}
                       >
                         <Plus className="mr-1 h-3 w-3" />
-                        Ajouter
+                        {t("ajouter")}
                       </Button>
                     </>
                   )}
@@ -648,14 +648,14 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
               <div className="flex justify-end gap-2">
                 <Button size="sm" variant="outline" onClick={() => set_edit_items([])}>
-                  Annuler
+                  {t("annuler")}
                 </Button>
                 <Button
                   size="sm"
                   onClick={on_save_items}
                   disabled={update_items.isPending || edit_items.length === 0}
                 >
-                  {update_items.isPending ? "Enregistrement..." : "Enregistrer les modifications"}
+                  {update_items.isPending ? t("saving") : t("save_modifications")}
                 </Button>
               </div>
             </CardContent>
@@ -665,7 +665,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {adjustments.length > 0 && (
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle>Ajustements</CardTitle>
+              <CardTitle>{t("ajustements")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
               {adjustments.map((adj) => (
@@ -686,9 +686,9 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="shipping">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>Adresse de livraison</CardTitle>
+            <CardTitle>{t("shipping_address_label")}</CardTitle>
             <Button size="sm" variant="outline" onClick={init_shipping_form}>
-              Modifier l&apos;adresse
+              {t("modify_address")}
             </Button>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
@@ -708,50 +708,50 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {ship_full_name !== "" && (
           <Card className="mt-4 border-blue-200">
             <CardHeader>
-              <CardTitle>Modifier l&apos;adresse</CardTitle>
+              <CardTitle>{t("edit_address_label")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <Field>
-                  <FieldLabel>Nom complet</FieldLabel>
+                  <FieldLabel>{t("full_name")}</FieldLabel>
                   <Input
                     value={ship_full_name}
                     onChange={(e) => set_ship_full_name(e.target.value)}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel>Téléphone</FieldLabel>
+                  <FieldLabel>{t("telephone")}</FieldLabel>
                   <Input value={ship_phone} onChange={(e) => set_ship_phone(e.target.value)} />
                 </Field>
               </div>
               <Field>
-                <FieldLabel>Adresse</FieldLabel>
+                <FieldLabel>{t("adresse")}</FieldLabel>
                 <Input value={ship_line1} onChange={(e) => set_ship_line1(e.target.value)} />
               </Field>
               <Field>
-                <FieldLabel>Complément d&apos;adresse</FieldLabel>
+                <FieldLabel>{t("complement_adresse")}</FieldLabel>
                 <Input value={ship_line2} onChange={(e) => set_ship_line2(e.target.value)} />
               </Field>
               <div className="grid gap-3 md:grid-cols-3">
                 <Field>
-                  <FieldLabel>Ville</FieldLabel>
+                  <FieldLabel>{t("ville")}</FieldLabel>
                   <Input value={ship_city} onChange={(e) => set_ship_city(e.target.value)} />
                 </Field>
                 <Field>
-                  <FieldLabel>Wilaya / État</FieldLabel>
+                  <FieldLabel>{t("wilaya_etat")}</FieldLabel>
                   <Input value={ship_state} onChange={(e) => set_ship_state(e.target.value)} />
                 </Field>
                 <Field>
-                  <FieldLabel>Code postal</FieldLabel>
+                  <FieldLabel>{t("code_postal")}</FieldLabel>
                   <Input value={ship_postal} onChange={(e) => set_ship_postal(e.target.value)} />
                 </Field>
               </div>
               <div className="flex justify-end gap-2">
                 <Button size="sm" variant="outline" onClick={() => set_ship_full_name("")}>
-                  Annuler
+                  {t("annuler")}
                 </Button>
                 <Button size="sm" onClick={on_save_shipping} disabled={update_shipping.isPending}>
-                  {update_shipping.isPending ? "Enregistrement..." : "Enregistrer"}
+                  {update_shipping.isPending ? t("saving") : t("enregistrer")}
                 </Button>
               </div>
             </CardContent>
@@ -765,28 +765,28 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="payments">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>Informations de paiement</CardTitle>
+            <CardTitle>{t("payment_info")}</CardTitle>
             <Button size="sm" variant="outline" onClick={init_payment_form}>
-              Modifier le paiement
+              {t("modify_payment")}
             </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">Statut</span>
+              <span className="text-muted-foreground w-36">{t("statut")}</span>
               <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
                 {PAYMENT_LABELS[order.payment_status] ?? order.payment_status}
               </Badge>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">Prestataire</span>
+              <span className="text-muted-foreground w-36">{t("prestataire")}</span>
               <span>{order.payment_provider ?? "—"}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">Référence</span>
+              <span className="text-muted-foreground w-36">{t("reference")}</span>
               <span className="font-mono text-xs">{order.payment_reference ?? "—"}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">Montant total</span>
+              <span className="text-muted-foreground w-36">{t("montant_total")}</span>
               <span className="font-semibold">
                 {Number(order.grand_total).toLocaleString("fr-FR")} DZD
               </span>
@@ -798,11 +798,11 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
         {pay_status && (
           <Card className="mt-4 border-blue-200">
             <CardHeader>
-              <CardTitle>Modifier le paiement</CardTitle>
+              <CardTitle>{t("edit_payment_label")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Field>
-                <FieldLabel>Statut</FieldLabel>
+                <FieldLabel>{t("statut")}</FieldLabel>
                 <Select value={pay_status} onValueChange={set_pay_status}>
                   <SelectTrigger>
                     <SelectValue />
@@ -817,7 +817,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                 </Select>
               </Field>
               <Field>
-                <FieldLabel>Prestataire</FieldLabel>
+                <FieldLabel>{t("prestataire")}</FieldLabel>
                 <Input
                   value={pay_provider}
                   onChange={(e) => set_pay_provider(e.target.value)}
@@ -825,7 +825,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                 />
               </Field>
               <Field>
-                <FieldLabel>Référence</FieldLabel>
+                <FieldLabel>{t("reference")}</FieldLabel>
                 <Input
                   value={pay_reference}
                   onChange={(e) => set_pay_reference(e.target.value)}
@@ -834,10 +834,10 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               </Field>
               <div className="flex justify-end gap-2">
                 <Button size="sm" variant="outline" onClick={() => set_pay_status("")}>
-                  Annuler
+                  {t("annuler")}
                 </Button>
                 <Button size="sm" onClick={on_save_payment} disabled={update_payment.isPending}>
-                  {update_payment.isPending ? "Enregistrement..." : "Enregistrer"}
+                  {update_payment.isPending ? t("saving") : t("enregistrer")}
                 </Button>
               </div>
             </CardContent>
@@ -849,7 +849,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="invoices" className="space-y-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>Factures liées</CardTitle>
+            <CardTitle>{t("invoices_liees")}</CardTitle>
             <Button
               size="sm"
               variant="outline"
@@ -857,44 +857,44 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               disabled={generate_invoice.isPending}
             >
               <FileText className="mr-1 h-3 w-3" />
-              Générer une facture
+              {t("generer_facture")}
             </Button>
           </CardHeader>
           <CardContent className="p-0">
             {!invoices_data || invoices_data.length === 0 ? (
               <p className="text-muted-foreground p-4 text-sm">
-                Aucune facture pour cette commande.
+                {t("no_invoices")}
               </p>
             ) : (
               <table className="w-full text-sm">
                 <thead className="border-b">
                   <tr className="text-muted-foreground">
-                    <th className="px-4 py-3 text-left font-medium">N° Facture</th>
-                    <th className="px-4 py-3 text-left font-medium">Type</th>
-                    <th className="px-4 py-3 text-left font-medium">Statut</th>
-                    <th className="px-4 py-3 text-right font-medium">Montant</th>
-                    <th className="px-4 py-3 text-left font-medium">Créée le</th>
-                    <th className="px-4 py-3 text-center font-medium">Actions</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("invoice_number_col")}</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("type_col")}</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("statut_col")}</th>
+                    <th className="px-4 py-3 text-right font-medium">{t("montant_col")}</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("created_on_col")}</th>
+                    <th className="px-4 py-3 text-center font-medium">{t("actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {invoices_data.map((inv) => {
                     const type_label =
                       inv.type === "order_invoice"
-                        ? "Facture"
+                        ? t("invoice_type_order")
                         : inv.type === "refund_invoice"
-                          ? "Remboursement"
-                          : "Avoir";
+                          ? t("invoice_type_refund")
+                          : t("invoice_type_credit");
                     const status_label =
                       inv.status === "unpaid"
-                        ? "Impayée"
+                        ? t("invoice_status_unpaid")
                         : inv.status === "paid"
-                          ? "Payée"
+                          ? t("invoice_status_paid")
                           : inv.status === "void"
-                            ? "Annulée"
+                            ? t("invoice_status_void")
                             : inv.status === "refunded"
-                              ? "Remboursée"
-                              : "Partiellement remboursée";
+                              ? t("invoice_status_refunded")
+                              : t("invoice_status_partially_refunded");
                     const status_variant: Record<
                       string,
                       "default" | "secondary" | "destructive" | "outline"
@@ -937,7 +937,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                                 window.open(`/api/admin/invoices/${inv.id}/download`, "_blank")
                               }
                             >
-                              Voir
+                              {t("voir")}
                             </Button>
                             {inv.status === "unpaid" && (
                               <Button
@@ -947,7 +947,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                                 onClick={() => mark_invoice_paid.mutate({ id: inv.id })}
                                 disabled={mark_invoice_paid.isPending}
                               >
-                                Marquer payée
+                                {t("mark_paid")}
                               </Button>
                             )}
                             {(inv.status === "unpaid" || inv.status === "paid") && (
@@ -958,7 +958,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                                 onClick={() => void_invoice.mutate({ id: inv.id })}
                                 disabled={void_invoice.isPending}
                               >
-                                Annuler
+                                {t("annuler")}
                               </Button>
                             )}
                           </div>
@@ -1012,19 +1012,20 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 type NotesCardProps = { order_id: string; initial_notes: string; on_saved: () => void };
 
 function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
+  const t = useTranslations("orders");
   const [draft, set_draft] = useState(initial_notes);
   const update_notes = trpc.orders.adminUpdateNotes.useMutation({
     onSuccess: () => {
       on_saved();
-      toast.success("Notes sauvegardées");
+      toast.success(t("notes_saved"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Notes internes</CardTitle>
+        <CardTitle>{t("internal_notes_title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <Textarea
@@ -1041,7 +1042,7 @@ function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
             disabled={update_notes.isPending}
             onClick={() => update_notes.mutate({ order_id, notes: draft || null })}
           >
-            Sauvegarder
+            {t("sauvegarder")}
           </Button>
           {draft && (
             <Button
@@ -1053,7 +1054,7 @@ function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps) {
                 update_notes.mutate({ order_id, notes: null });
               }}
             >
-              Effacer
+              {t("effacer")}
             </Button>
           )}
         </div>

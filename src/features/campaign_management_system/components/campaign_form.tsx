@@ -84,23 +84,23 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
 
   const create_mutation = trpc.campaigns.create.useMutation({
     onSuccess: (newCampaign) => {
-      toast.success("Campagne créée avec succès");
+      toast.success(t("created_success"));
       utils.campaigns.adminList.invalidate();
       if (newCampaign?.id) router.push(`/console/campaigns/${newCampaign.id}`);
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la création");
+      toast.error(err.message || t("creation_error"));
     },
   });
 
   const update_mutation = trpc.campaigns.update.useMutation({
     onSuccess: () => {
-      toast.success("Campagne mise à jour");
+      toast.success(t("updated_success"));
       utils.campaigns.adminList.invalidate();
       utils.campaigns.byId.invalidate({ id: campaign_id! });
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la mise à jour");
+      toast.error(err.message || t("error_updating"));
     },
   });
 
@@ -306,7 +306,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
         <div className="space-y-6 md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Général</CardTitle>
+              <CardTitle>{t("general")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -327,8 +327,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field data-invalid={!!errors.slug}>
-                      <FieldLabel>Slug</FieldLabel>
-                      <Input {...field} placeholder="auto" />
+                      <FieldLabel>{tc("slug")}</FieldLabel>
+                      <Input {...field} placeholder={t("auto_slug_placeholder")} />
                       {errors.slug && <FieldError errors={[errors.slug]} />}
                     </Field>
                   )}
@@ -340,11 +340,11 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Description</FieldLabel>
+                    <FieldLabel>{tc("description")}</FieldLabel>
                     <Textarea
                       {...field}
                       value={field.value ?? ""}
-                      placeholder="Description interne de la campagne..."
+                      placeholder={t("description_placeholder")}
                       rows={3}
                     />
                   </Field>
@@ -357,19 +357,19 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Type de campagne</FieldLabel>
+                      <FieldLabel>{t("campaign_type")}</FieldLabel>
                       <select
                         className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                         {...field}
                       >
-                        <option value={CAMPAIGN_TYPE.homepage}>Page d&apos;accueil</option>
-                        <option value={CAMPAIGN_TYPE.seasonal}>Saisonnière</option>
-                        <option value={CAMPAIGN_TYPE.flash_sale}>Vente flash</option>
-                        <option value={CAMPAIGN_TYPE.targeted}>Ciblée</option>
-                        <option value={CAMPAIGN_TYPE.banner}>Bannière simple</option>
-                        <option value={CAMPAIGN_TYPE.category}>Catégorie</option>
-                        <option value={CAMPAIGN_TYPE.brand}>Marque</option>
-                        <option value={CAMPAIGN_TYPE.landing_page}>Landing Page</option>
+                        <option value={CAMPAIGN_TYPE.homepage}>{t("type_homepage")}</option>
+                        <option value={CAMPAIGN_TYPE.seasonal}>{t("type_seasonal")}</option>
+                        <option value={CAMPAIGN_TYPE.flash_sale}>{t("type_flash_sale")}</option>
+                        <option value={CAMPAIGN_TYPE.targeted}>{t("type_targeted")}</option>
+                        <option value={CAMPAIGN_TYPE.banner}>{t("type_banner")}</option>
+                        <option value={CAMPAIGN_TYPE.category}>{t("type_category")}</option>
+                        <option value={CAMPAIGN_TYPE.brand}>{t("type_brand")}</option>
+                        <option value={CAMPAIGN_TYPE.landing_page}>{t("type_landing_page")}</option>
                       </select>
                     </Field>
                   )}
@@ -380,17 +380,17 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Statut</FieldLabel>
+                      <FieldLabel>{tc("status")}</FieldLabel>
                       <select
                         className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                         {...field}
                       >
-                        <option value={CAMPAIGN_STATUS.draft}>Brouillon</option>
-                        <option value={CAMPAIGN_STATUS.scheduled}>Planifiée</option>
-                        <option value={CAMPAIGN_STATUS.active}>Active</option>
-                        <option value={CAMPAIGN_STATUS.paused}>En pause</option>
-                        <option value={CAMPAIGN_STATUS.ended}>Terminée</option>
-                        <option value={CAMPAIGN_STATUS.cancelled}>Annulée</option>
+                        <option value={CAMPAIGN_STATUS.draft}>{t("status_draft")}</option>
+                        <option value={CAMPAIGN_STATUS.scheduled}>{t("status_scheduled")}</option>
+                        <option value={CAMPAIGN_STATUS.active}>{t("status_active")}</option>
+                        <option value={CAMPAIGN_STATUS.paused}>{t("status_paused")}</option>
+                        <option value={CAMPAIGN_STATUS.ended}>{t("status_ended")}</option>
+                        <option value={CAMPAIGN_STATUS.cancelled}>{t("status_cancelled")}</option>
                       </select>
                     </Field>
                   )}
@@ -401,7 +401,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field data-invalid={!!errors.priority}>
-                      <FieldLabel>Priorité</FieldLabel>
+                      <FieldLabel>{t("priority_label")}</FieldLabel>
                       <Input
                         type="number"
                         {...field}
@@ -419,7 +419,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Date de début</FieldLabel>
+                      <FieldLabel>{t("start_date")}</FieldLabel>
                       <Input type="datetime-local" {...field} />
                     </Field>
                   )}
@@ -430,7 +430,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Date de fin</FieldLabel>
+                      <FieldLabel>{t("end_date")}</FieldLabel>
                       <Input type="datetime-local" {...field} />
                     </Field>
                   )}
@@ -442,14 +442,14 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           {/* Localization translations */}
           <Card>
             <CardHeader>
-              <CardTitle>Textes & Traduction Storefront</CardTitle>
+              <CardTitle>{t("storefront_translations")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="fr" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="fr">Français</TabsTrigger>
-                  <TabsTrigger value="en">English</TabsTrigger>
-                  <TabsTrigger value="ar">العربية (Arabic)</TabsTrigger>
+                  <TabsTrigger value="fr">{t("french")}</TabsTrigger>
+                  <TabsTrigger value="en">{t("english")}</TabsTrigger>
+                  <TabsTrigger value="ar">{t("arabic")}</TabsTrigger>
                 </TabsList>
 
                 {["fr", "en", "ar"].map((lang, index) => (
@@ -460,8 +460,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                         control={form.control}
                         render={({ field }) => (
                           <Field>
-                            <FieldLabel>Titre affiché ({lang.toUpperCase()})</FieldLabel>
-                            <Input {...field} placeholder="Ex: Super Ventes de l'été !" />
+                            <FieldLabel>{t("display_title", { lang: lang.toUpperCase() })}</FieldLabel>
+                            <Input {...field} placeholder={t("display_title_placeholder")} />
                           </Field>
                         )}
                       />
@@ -471,8 +471,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                         control={form.control}
                         render={({ field }) => (
                           <Field>
-                            <FieldLabel>Sous-titre ({lang.toUpperCase()})</FieldLabel>
-                            <Input {...field} placeholder="Ex: Profitez de 50% de réduction..." />
+                            <FieldLabel>{t("display_subtitle", { lang: lang.toUpperCase() })}</FieldLabel>
+                            <Input {...field} placeholder={t("cta_description_placeholder")} />
                           </Field>
                         )}
                       />
@@ -484,8 +484,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                         control={form.control}
                         render={({ field }) => (
                           <Field>
-                            <FieldLabel>Libellé du Bouton (CTA)</FieldLabel>
-                            <Input {...field} placeholder="Ex: Acheter maintenant" />
+                            <FieldLabel>{t("cta_label")}</FieldLabel>
+                            <Input {...field} placeholder={t("cta_button_placeholder")} />
                           </Field>
                         )}
                       />
@@ -495,7 +495,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                         control={form.control}
                         render={({ field }) => (
                           <Field>
-                            <FieldLabel>URL d&apos;action (CTA)</FieldLabel>
+                            <FieldLabel>{t("cta_url")}</FieldLabel>
                             <Input {...field} placeholder="/storefront/categories/promotions" />
                           </Field>
                         )}
@@ -504,7 +504,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
 
                     <div className="border-t pt-4">
                       <h4 className="mb-3 text-sm font-semibold">
-                        Référencement SEO ({lang.toUpperCase()})
+                        {t("seo_heading", { lang: lang.toUpperCase() })}
                       </h4>
                       <div className="space-y-4">
                         <Controller
@@ -512,8 +512,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                           control={form.control}
                           render={({ field }) => (
                             <Field>
-                              <FieldLabel>Titre SEO</FieldLabel>
-                              <Input {...field} placeholder="Titre pour les moteurs de recherche" />
+                              <FieldLabel>{t("seo_title_label")}</FieldLabel>
+                              <Input {...field} placeholder={t("seo_title_placeholder")} />
                             </Field>
                           )}
                         />
@@ -523,8 +523,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                           control={form.control}
                           render={({ field }) => (
                             <Field>
-                              <FieldLabel>Description SEO</FieldLabel>
-                              <Textarea {...field} placeholder="Méta description" rows={2} />
+                              <FieldLabel>{t("seo_description_label")}</FieldLabel>
+                              <Textarea {...field} placeholder={t("seo_description_placeholder")} rows={2} />
                             </Field>
                           )}
                         />
@@ -542,7 +542,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           {/* Design visual theme config */}
           <Card>
             <CardHeader>
-              <CardTitle>Thème Visuel</CardTitle>
+              <CardTitle>{t("visual_theme")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -551,7 +551,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Arrière-plan</FieldLabel>
+                      <FieldLabel>{t("bg_color")}</FieldLabel>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -570,7 +570,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Texte</FieldLabel>
+                      <FieldLabel>{t("text_color")}</FieldLabel>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -590,7 +590,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Couleur d&apos;accent</FieldLabel>
+                    <FieldLabel>{t("accent_color")}</FieldLabel>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
@@ -610,7 +610,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Opacité Overlay (0-1)</FieldLabel>
+                      <FieldLabel>{t("overlay_opacity")}</FieldLabel>
                       <Input
                         type="number"
                         step="0.1"
@@ -629,15 +629,15 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Mise en page</FieldLabel>
+                      <FieldLabel>{t("layout")}</FieldLabel>
                       <select
                         className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                         {...field}
                       >
-                        <option value="full_width">Pleine largeur</option>
-                        <option value="split">Divisée (Split)</option>
-                        <option value="card_grid">Grille de cartes</option>
-                        <option value="carousel">Carrousel</option>
+                        <option value="full_width">{t("layout_full_width")}</option>
+                        <option value="split">{t("layout_split")}</option>
+                        <option value="card_grid">{t("layout_card_grid")}</option>
+                        <option value="carousel">{t("layout_carousel")}</option>
                       </select>
                     </Field>
                   )}
@@ -649,7 +649,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Image de fond</FieldLabel>
+                    <FieldLabel>{t("bg_image")}</FieldLabel>
                     <div className="flex items-center gap-3">
                       <MediaPickerDialog
                         onSelect={(media) => field.onChange(media.url)}
@@ -659,18 +659,18 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={field.value}
-                                alt="Fond"
+                                alt={t("background_alt")}
                                 className="h-20 w-32 object-cover transition-opacity group-hover:opacity-75"
                               />
                               <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/20">
                                 <span className="text-white text-xs opacity-0 transition-opacity group-hover:opacity-100">
-                                  Changer
+                                  {t("change")}
                                 </span>
                               </div>
                             </div>
                           ) : (
                             <Button type="button" variant="outline" className="h-20 w-32">
-                              <span className="text-xs">Choisir</span>
+                              <span className="text-xs">{t("choose")}</span>
                             </Button>
                           )
                         }
@@ -681,9 +681,9 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                           variant="ghost"
                           size="sm"
                           onClick={() => field.onChange(null)}
-                        >
-                          Effacer
-                        </Button>
+                          >
+                            {t("clear")}
+                          </Button>
                       )}
                     </div>
                   </Field>
@@ -695,7 +695,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           {/* Linking promotions, categories, and brands */}
           <Card>
             <CardHeader>
-              <CardTitle>Liens de Campagne</CardTitle>
+              <CardTitle>{t("campaign_links")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Controller
@@ -703,13 +703,13 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Promotion Liée</FieldLabel>
+                    <FieldLabel>{t("linked_promotion")}</FieldLabel>
                     <select
                       className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(e.target.value || null)}
                     >
-                      <option value="">Aucune promotion</option>
+                      <option value="">{t("no_promotion")}</option>
                       {promotions?.items?.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name} (
@@ -730,12 +730,12 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Catégories Associées</FieldLabel>
+                    <FieldLabel>{t("linked_categories")}</FieldLabel>
                     <div className="bg-background max-h-[140px] space-y-1 overflow-y-auto rounded-md border p-2">
                       {category_options.length === 0 ? (
-                        <p className="text-muted-foreground p-1 text-xs">
-                          Aucune catégorie disponible
-                        </p>
+                          <p className="text-muted-foreground p-1 text-xs">
+                            {t("no_category")}
+                          </p>
                       ) : (
                         category_options.map((opt) => {
                           const checked = field.value.includes(opt.id);
@@ -772,12 +772,12 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Marques Associées</FieldLabel>
+                    <FieldLabel>{t("linked_brands")}</FieldLabel>
                     <div className="bg-background max-h-[140px] space-y-1 overflow-y-auto rounded-md border p-2">
                       {!activeBrands || activeBrands.length === 0 ? (
-                        <p className="text-muted-foreground p-1 text-xs">
-                          Aucune marque disponible
-                        </p>
+                          <p className="text-muted-foreground p-1 text-xs">
+                            {t("no_brand")}
+                          </p>
                       ) : (
                         activeBrands.map((brand) => {
                           const checked = field.value.includes(brand.id);
@@ -813,7 +813,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           {/* A/B Testing details */}
           <Card>
             <CardHeader>
-              <CardTitle>Test A/B</CardTitle>
+              <CardTitle>{t("ab_test")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -822,8 +822,8 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Groupe de test</FieldLabel>
-                      <Input {...field} value={field.value ?? ""} placeholder="Ex: test_ete_2026" />
+                      <FieldLabel>{t("test_group")}</FieldLabel>
+                      <Input {...field} value={field.value ?? ""} placeholder={t("test_slug_placeholder")} />
                     </Field>
                   )}
                 />
@@ -833,7 +833,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   control={form.control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Split de trafic (%)</FieldLabel>
+                      <FieldLabel>{t("traffic_split")}</FieldLabel>
                       <Input
                         type="number"
                         min="0"
@@ -856,15 +856,15 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           variant="outline"
           onClick={() => router.push("/console/campaigns")}
           disabled={isPending}
-        >
-          Annuler
-        </Button>
+          >
+            {tc("cancel")}
+          </Button>
         <Button
           type="submit"
           className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
           disabled={isPending}
         >
-          {isPending ? "Enregistrement..." : "Enregistrer la campagne"}
+          {isPending ? tc("saving") : t("save_campaign")}
         </Button>
       </div>
     </form>

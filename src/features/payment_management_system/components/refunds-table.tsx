@@ -151,7 +151,7 @@ export function RefundsTable() {
 
   const approveMutation = trpc.payments.adminApproveRefund.useMutation({
     onSuccess: () => {
-      toast.success("Remboursement approuvé");
+      toast.success(t("approve_success"));
       utils.payments.adminListRefunds.invalidate();
       utils.payments.adminRefundStats.invalidate();
     },
@@ -160,7 +160,7 @@ export function RefundsTable() {
 
   const rejectMutation = trpc.payments.adminRejectRefund.useMutation({
     onSuccess: () => {
-      toast.success("Remboursement rejeté");
+      toast.success(t("reject_success"));
       utils.payments.adminListRefunds.invalidate();
       utils.payments.adminRefundStats.invalidate();
     },
@@ -169,7 +169,7 @@ export function RefundsTable() {
 
   const processMutation = trpc.payments.adminProcessRefund.useMutation({
     onSuccess: () => {
-      toast.success("Remboursement traité");
+      toast.success(t("process_success"));
       utils.payments.adminListRefunds.invalidate();
       utils.payments.adminRefundStats.invalidate();
     },

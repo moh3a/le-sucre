@@ -50,23 +50,6 @@ type CartRow = {
   total_price: string;
 };
 
-const CART_STATUS_CONFIG: Record<
-  string,
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
-> = {
-  active: { label: "Actif", variant: "outline" },
-  converted: { label: "Converti", variant: "default" },
-  merged: { label: "Fusionné", variant: "secondary" },
-  abandoned: { label: "Abandonné", variant: "destructive" },
-};
-
-const STATUS_OPTIONS = [
-  { label: "Actif", value: "active" },
-  { label: "Abandonné", value: "abandoned" },
-  { label: "Converti", value: "converted" },
-  { label: "Fusionné", value: "merged" },
-];
-
 function getCartStatus(row: CartRow): string {
   if (row.status === "active") {
     const isOld = new Date(row.updated_at).getTime() < Date.now() - 24 * 60 * 60 * 1000;
@@ -142,13 +125,29 @@ function FacetedFilter({
 
 export function CartsTable() {
   const t = useTranslations("carts");
-  const tc = useTranslations("common");
   const [page] = useQueryState("cartPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("cartPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("cartSearch", parseAsString);
   const [status, setStatus] = useQueryState("cartStatus", parseAsString);
 
   const [selectedCartId, setSelectedCartId] = React.useState<string | null>(null);
+
+  const CART_STATUS_CONFIG: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = {
+    active: { label: t("status_active"), variant: "outline" },
+    converted: { label: t("status_converted"), variant: "default" },
+    merged: { label: t("status_merged"), variant: "secondary" },
+    abandoned: { label: t("status_abandoned"), variant: "destructive" },
+  };
+
+  const STATUS_OPTIONS = [
+    { label: t("status_active"), value: "active" },
+    { label: t("status_abandoned"), value: "abandoned" },
+    { label: t("status_converted"), value: "converted" },
+    { label: t("status_merged"), value: "merged" },
+  ];
 
   const columns = React.useMemo<ColumnDef<CartRow>[]>(
     () => [

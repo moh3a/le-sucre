@@ -7,6 +7,10 @@ import { audit_service } from "@/features/authentication_and_authorization/autho
 import { campaign_repository } from "../repositories/campaign.repository";
 import { campaign_scheduler_service } from "./campaign_scheduler.service";
 import { campaign_cache } from "./campaign_cache.service";
+import { campaign_webhooks_service } from "./campaign_webhooks.service";
+import { campaign_automation_service } from "./campaign_automation.service";
+import type { AutomationTrigger } from "./campaign_automation.service";
+import type { CampaignWebhookEvent } from "./campaign_webhooks.service";
 import { CAMPAIGN_STATUS } from "../constants/campaign_types";
 import type {
   create_campaign_dto,
@@ -75,6 +79,14 @@ export class CampaignService {
       resource_id: campaign?.id,
     });
 
+    if (campaign) {
+      void campaign_webhooks_service.dispatch_async("campaign.created", campaign);
+      void campaign_automation_service.process_trigger(
+        "campaign.activated" as AutomationTrigger,
+        campaign,
+      );
+    }
+
     return campaign;
   }
 
@@ -133,6 +145,12 @@ export class CampaignService {
       resource_id: input.id,
     });
 
+    if (updated) {
+      void campaign_webhooks_service.dispatch_async("campaign.updated", updated, {
+        changes: Object.keys(input),
+      });
+    }
+
     return updated;
   }
 
@@ -152,6 +170,30 @@ export class CampaignService {
       resource_type: "campaign_id",
       resource_id: input.id,
     });
+
+    if (updated) {
+      const event_map: Record<string, CampaignWebhookEvent> = {
+        [CAMPAIGN_STATUS.active]: "campaign.activated",
+        [CAMPAIGN_STATUS.paused]: "campaign.paused",
+        [CAMPAIGN_STATUS.ended]: "campaign.ended",
+        [CAMPAIGN_STATUS.cancelled]: "campaign.cancelled",
+        [CAMPAIGN_STATUS.scheduled]: "campaign.scheduled",
+      };
+      const webhook_event = event_map[input.status];
+      if (webhook_event) {
+        void campaign_webhooks_service.dispatch_async(webhook_event, updated);
+      }
+
+      const trigger_map: Record<string, AutomationTrigger> = {
+        [CAMPAIGN_STATUS.active]: "campaign.activated",
+        [CAMPAIGN_STATUS.ended]: "campaign.ended",
+        [CAMPAIGN_STATUS.paused]: "campaign.paused",
+      };
+      const auto_trigger = trigger_map[input.status];
+      if (auto_trigger) {
+        void campaign_automation_service.process_trigger(auto_trigger, updated);
+      }
+    }
 
     return updated;
   }
@@ -282,6 +324,17 @@ export class CampaignService {
       campaign_repository.get_analytics_summary(campaign_id),
     ]);
     return { timeseries, summary };
+  }
+
+  async list_ab_test_groups(): Promise<string[]> {
+    const { db } = await import("@/lib/db");
+    const { campaigns } = await import("../schema");
+    const { sql } = await import("drizzle-orm");
+    const rows = await db
+      .select({ group: sql<string>`DISTINCT ${campaigns.ab_test_group}` })
+      .from(campaigns)
+      .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`);
+    return rows.map((r) => r.group).filter(Boolean);
   }
 }
 

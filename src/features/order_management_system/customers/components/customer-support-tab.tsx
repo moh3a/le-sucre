@@ -45,25 +45,25 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
       set_show_form(false);
       set_subject("");
       set_description("");
-      toast.success("Cas de support créé");
+      toast.success(t("case_created"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const resolve = trpc.operations.customerResolveCase.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Cas résolu");
+      toast.success(t("case_resolved"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const close = trpc.operations.customerCloseCase.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Cas fermé");
+      toast.success(t("case_closed"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   return (
@@ -97,12 +97,12 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
                   value={category}
                   onChange={(e) => set_category(e.target.value)}
                 >
-                  <option value="general">Général</option>
-                  <option value="order">Commande</option>
-                  <option value="delivery">Livraison</option>
-                  <option value="product">Produit</option>
-                  <option value="payment">Paiement</option>
-                  <option value="technical">Technique</option>
+                  <option value="general">{t("general")}</option>
+                  <option value="order">{t("order")}</option>
+                  <option value="delivery">{t("delivery")}</option>
+                  <option value="product">{t("product")}</option>
+                  <option value="payment">{t("payment")}</option>
+                  <option value="technical">{t("technical")}</option>
                 </select>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
                         size="sm"
                         variant="ghost"
                         className="h-7 text-xs"
-                        onClick={() => resolve.mutate({ case_id: c.id, resolution: "Résolu" })}
+                        onClick={() => resolve.mutate({ case_id: c.id, resolution: t("resolved") })}
                         disabled={resolve.isPending}
                       >
                         <RefreshCw className="mr-1 h-3 w-3" />
@@ -179,7 +179,7 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
               <p className="mt-1 text-muted-foreground">{c.description}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {formatDate(c.created_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                {c.assigned_to_user_id && ` · Assigné à: ${c.assigned_to_user_id}`}
+                {c.assigned_to_user_id && ` · ${t("assigned_to")}: ${c.assigned_to_user_id}`}
               </p>
             </div>
           ))}

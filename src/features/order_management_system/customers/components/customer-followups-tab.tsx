@@ -41,17 +41,17 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
       set_show_form(false);
       set_title("");
       set_scheduled_at("");
-      toast.success("Relance créée");
+      toast.success(t("follow_up_created"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const complete = trpc.operations.customerCompleteFollowUp.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Relance terminée");
+      toast.success(t("follow_up_completed"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   return (
@@ -75,9 +75,9 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
                 value={fu_type}
                 onChange={(e) => set_fu_type(e.target.value)}
               >
-                <option value="callback">Rappel</option>
-                <option value="follow_up">Suivi</option>
-                <option value="reminder">Rappel automatique</option>
+                <option value="callback">{t("callback")}</option>
+                <option value="follow_up">{t("follow_up")}</option>
+                <option value="reminder">{t("reminder_auto")}</option>
               </select>
             </div>
             <div className="space-y-1">
@@ -140,7 +140,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
                     size="sm"
                     variant="ghost"
                     className="h-7 text-xs"
-                    onClick={() => complete.mutate({ id: fu.id, result_notes: "Terminé" })}
+                    onClick={() => complete.mutate({ id: fu.id, result_notes: t("completed") })}
                     disabled={complete.isPending}
                   >
                     <CheckCircle2 className="mr-1 h-3 w-3" />
@@ -150,7 +150,7 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
               </div>
               {fu.description && <p className="mt-1 text-muted-foreground">{fu.description}</p>}
               <p className="mt-1 text-xs text-muted-foreground">
-                Prévue le {formatDate(fu.scheduled_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                {t("scheduled_for")} {formatDate(fu.scheduled_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
               </p>
             </div>
           ))}

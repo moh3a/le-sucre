@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { parseAsInteger, useQueryState } from "nuqs";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, MapPin, Phone, Mail, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ import { InventoryWarehouseDialog } from "./inventory-warehouse-dialog";
 import type { WarehouseRow } from "../../warehouses/types";
 
 export function InventoryWarehousesSection() {
+  const t = useTranslations("warehouses");
   const [page] = useQueryState("whPage", parseAsInteger.withDefault(1));
   const [dialog_open, set_dialog_open] = useState(false);
   const [editing_warehouse, set_editing_warehouse] = useState<WarehouseRow | null>(null);
@@ -24,7 +26,7 @@ export function InventoryWarehousesSection() {
 
   const toggle_active = trpc.warehouses.update.useMutation({
     onSuccess: async () => {
-      toast.success("Statut mis à jour");
+      toast.success(t("status_updated"));
       await utils.warehouses.list.invalidate();
       await utils.warehouses.listAllActive.invalidate();
     },
@@ -51,21 +53,21 @@ export function InventoryWarehousesSection() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground text-sm">
-              {data?.meta.total_records ?? 0} entrepôt(s) configuré(s)
+              {t("title")} ({data?.meta.total_records ?? 0})
             </p>
             <Button onClick={() => { set_editing_warehouse(null); set_dialog_open(true); }}>
               <Plus className="mr-2 h-4 w-4" />
-              Nouvel entrepôt
+              {t("new_warehouse")}
             </Button>
           </div>
 
           {warehouses.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground mb-4">Aucun entrepôt configuré</p>
+                <p className="text-muted-foreground mb-4">{t("empty")}</p>
                 <Button onClick={() => { set_editing_warehouse(null); set_dialog_open(true); }}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Créer un entrepôt
+                  {t("create_warehouse")}
                 </Button>
               </CardContent>
             </Card>
@@ -123,7 +125,7 @@ export function InventoryWarehousesSection() {
                       </div>
                     )}
                     <p className="text-muted-foreground pt-2 text-xs">
-                      Créé le {formatDate(wh.created_at)}
+                      {t("created_at")} {formatDate(wh.created_at)}
                     </p>
                   </CardContent>
                 </Card>

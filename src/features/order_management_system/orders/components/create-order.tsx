@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,21 +32,6 @@ import {
 import { Field, FieldLabel, FieldError, FieldDescription } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const form_schema = z.object({
-  user_id: z.string().min(1, "Veuillez sélectionner un client"),
-  shipping_full_name: z.string().min(2, "Le nom est requis").max(255),
-  shipping_phone: z.string().min(6, "Le téléphone est requis").max(32),
-  shipping_line1: z.string().min(3, "L'adresse est requise").max(255),
-  shipping_line2: z.string().max(255).optional(),
-  shipping_city: z.string().min(2, "La ville est requise").max(128),
-  shipping_state: z.string().max(128).optional(),
-  shipping_postal_code: z.string().max(32).optional(),
-  shipping_country_code: z.string().length(2).default("DZ"),
-  notes: z.string().max(4096).optional(),
-});
-
-type FormValues = z.infer<typeof form_schema>;
-
 type CartLineItem = {
   sku_id: string;
   product_name: string;
@@ -57,6 +42,37 @@ type CartLineItem = {
 
 export function CreateOrderDialog() {
   const t = useTranslations("orders");
+
+  type FormValues = {
+    user_id: string;
+    shipping_full_name: string;
+    shipping_phone: string;
+    shipping_line1: string;
+    shipping_line2?: string;
+    shipping_city: string;
+    shipping_state?: string;
+    shipping_postal_code?: string;
+    shipping_country_code: string;
+    notes?: string;
+  };
+
+  const form_schema = useMemo(
+    () =>
+      z.object({
+        user_id: z.string().min(1, t("select_client_validation")),
+        shipping_full_name: z.string().min(2, t("shipping_name_validation")).max(255),
+        shipping_phone: z.string().min(6, t("shipping_phone_validation")).max(32),
+        shipping_line1: z.string().min(3, t("shipping_address_validation")).max(255),
+        shipping_line2: z.string().max(255).optional(),
+        shipping_city: z.string().min(2, t("shipping_city_validation")).max(128),
+        shipping_state: z.string().max(128).optional(),
+        shipping_postal_code: z.string().max(32).optional(),
+        shipping_country_code: z.string().length(2).default("DZ"),
+        notes: z.string().max(4096).optional(),
+      }),
+    [t],
+  );
+
   const [open, set_open] = useState(false);
   const [cart_items, set_cart_items] = useState<CartLineItem[]>([]);
   const [search_query, set_search_query] = useState("");
@@ -77,7 +93,7 @@ export function CreateOrderDialog() {
       const order_number = typeof order === "object" && order !== null && "order" in order
         ? (order as { order: { order_number: string } }).order.order_number
         : "";
-      toast.success(`Commande ${order_number} créée avec succès`);
+      toast.success(t("order_created_success", { number: order_number }));
       utils.orders.adminList.invalidate();
       utils.orders.adminStats.invalidate();
       utils.orders.adminCharts.invalidate();
@@ -87,7 +103,7 @@ export function CreateOrderDialog() {
       set_search_query("");
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la création de la commande");
+      toast.error(err.message || t("create_order_error"));
     },
   });
 
@@ -170,7 +186,7 @@ export function CreateOrderDialog() {
 
   const on_submit = async (values: FormValues) => {
     if (cart_items.length === 0) {
-      toast.error("Ajoutez au moins un article à la commande");
+      toast.error(t("order_must_have_items"));
       return;
     }
 

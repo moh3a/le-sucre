@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { FileVideo, FileText, Trash2, Download, Link as LinkIcon, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,6 +44,7 @@ type MediaCardProps = {
 };
 
 export function MediaCard({ item, onDelete }: MediaCardProps) {
+  const t = useTranslations("media");
   const [copied, set_copied] = useState(false);
   const utils = trpc.useUtils();
   const delete_media = trpc.media.delete.useMutation({
@@ -56,7 +58,7 @@ export function MediaCard({ item, onDelete }: MediaCardProps) {
   function copy_url() {
     navigator.clipboard.writeText(item.url);
     set_copied(true);
-    toast.success("URL copiée");
+    toast.success(t("url_copied"));
     setTimeout(() => set_copied(false), 2000);
   }
 
@@ -100,12 +102,12 @@ export function MediaCard({ item, onDelete }: MediaCardProps) {
       </CardContent>
       <CardFooter className="flex justify-between p-2 pt-0">
         <span className="text-muted-foreground text-xs">
-          {item.usage_count != null ? `${item.usage_count} utilisation(s)` : ""}
+          {item.usage_count != null ? t("usage_count", { count: item.usage_count }) : ""}
         </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="size-7">
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{t("actions_sr")}</span>
               <svg
                 width="15"
                 height="15"
@@ -123,12 +125,12 @@ export function MediaCard({ item, onDelete }: MediaCardProps) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={copy_url}>
               {copied ? <Check /> : <LinkIcon />}
-              Copier l'URL
+              {t("copy_url")}
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href={item.url} download={item.original_name} target="_blank" rel="noreferrer">
                 <Download />
-                Télécharger
+                {t("download_title")}
               </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -136,24 +138,23 @@ export function MediaCard({ item, onDelete }: MediaCardProps) {
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
                   <Trash2 />
-                  Supprimer
+                  {t("delete_file")}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Supprimer ce fichier ?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("delete_confirm_title")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir supprimer "{item.original_name}" ? Cette action est
-                    irréversible.
+                    {t("delete_confirm_description", { name: item.original_name })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => delete_media.mutate({ id: item.id })}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Supprimer
+                    {t("confirm_delete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

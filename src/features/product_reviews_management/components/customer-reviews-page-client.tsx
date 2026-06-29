@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Star, Clock, CheckCircle2, FileText } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -8,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function CustomerReviewsPageClient() {
+  const t = useTranslations("reviews");
   const { data, isLoading } = trpc.reviews.myReviews.useQuery({ page: 1, limit: 20 });
 
   const reviews = data?.items ?? [];
@@ -16,16 +18,16 @@ export function CustomerReviewsPageClient() {
     <QueryGuard query={{ isLoading }}>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Mes avis</h2>
-        <Badge variant="outline">{reviews.length} avis</Badge>
+        <h2 className="text-2xl font-bold">{t("page_title")}</h2>
+        <Badge variant="outline">{t("page_review_count", { count: reviews.length })}</Badge>
       </div>
 
       {reviews.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center">
             <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Aucun avis pour le moment</h3>
-            <p className="text-muted-foreground">Partagez votre expérience avec nos produits !</p>
+            <h3 className="text-lg font-medium mb-2">{t("no_reviews_customer")}</h3>
+            <p className="text-muted-foreground">{t("share_experience")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -61,10 +63,10 @@ export function CustomerReviewsPageClient() {
                     }
                   >
                     {review.status === "approved"
-                      ? "Approuvé"
+                      ? t("approved_badge")
                       : review.status === "pending"
-                        ? "En attente"
-                        : "Rejeté"}
+                        ? t("pending_badge")
+                        : t("rejected_badge")}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -79,7 +81,7 @@ export function CustomerReviewsPageClient() {
                   {review.is_verified_purchase && (
                     <span className="flex items-center gap-1 text-green-600">
                       <CheckCircle2 className="h-3 w-3" />
-                      Achat vérifié
+                      {t("verified_purchase_badge")}
                     </span>
                   )}
                 </div>

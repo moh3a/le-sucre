@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, ShoppingBag } from "lucide-react";
 
@@ -19,6 +20,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreateCartDialog() {
+  const t = useTranslations("carts");
   const [open, setOpen] = React.useState(false);
   const [cart_id, setCartId] = React.useState("");
   const [sku_id, setSkuId] = React.useState("");
@@ -28,7 +30,7 @@ export function CreateCartDialog() {
 
   const add = trpc.cart.addItem.useMutation({
     onSuccess: () => {
-      toast.success("Article ajouté au panier");
+      toast.success(t("item_added"));
       setOpen(false);
       setCartId("");
       setSkuId("");
@@ -53,27 +55,27 @@ export function CreateCartDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Nouveau panier
+          {t("new_cart_button")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer un panier</DialogTitle>
+          <DialogTitle>{t("create_cart_title")}</DialogTitle>
           <DialogDescription>
-            Ajouter un article à un panier.
+            {t("create_cart_desc")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Panier</Label>
+            <Label>{t("cart_id")}</Label>
             <Input value={cart_id} onChange={(e) => setCartId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>SKU ID</Label>
+            <Label>{t("sku_id")}</Label>
             <Input value={sku_id} onChange={(e) => setSkuId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Quantité</Label>
+            <Label>{t("quantity")}</Label>
             <Input
               type="number"
               min="1"
@@ -84,7 +86,7 @@ export function CreateCartDialog() {
           </div>
           <Button type="submit" className="w-full" disabled={add.isPending}>
             <ShoppingBag />
-            Ajouter au panier
+            {t("add_to_cart_button")}
           </Button>
         </form>
       </DialogContent>

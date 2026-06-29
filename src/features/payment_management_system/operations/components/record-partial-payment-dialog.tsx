@@ -42,7 +42,7 @@ export function RecordPartialPaymentDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.paymentRecordPartial.useMutation({
     onSuccess: () => {
-      toast.success("Paiement partiel enregistré");
+      toast.success(t("partial_payment_recorded"));
       setOpen(false);
       reset();
       utils.operations.paymentGetPartialPayments.invalidate();
@@ -64,7 +64,7 @@ export function RecordPartialPaymentDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId || !amount) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -85,20 +85,20 @@ export function RecordPartialPaymentDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Banknote className="mr-2 size-4" />
-          Paiement partiel
+          {t("partial_payment_button")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Enregistrer un paiement partiel</DialogTitle>
+          <DialogTitle>{t("record_partial_title")}</DialogTitle>
           <DialogDescription>
-            Ajouter un acompte, versement ou solde pour une commande.
+            {t("record_partial_desc")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="pp_order_id">Commande *</Label>
+              <Label htmlFor="pp_order_id">{t("order")} *</Label>
               <Input
                 id="pp_order_id"
                 value={orderId}
@@ -108,7 +108,7 @@ export function RecordPartialPaymentDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pp_amount">Montant *</Label>
+              <Label htmlFor="pp_amount">{t("amount")} *</Label>
               <Input
                 id="pp_amount"
                 type="number"
@@ -122,20 +122,20 @@ export function RecordPartialPaymentDialog() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="pp_type">Type</Label>
+              <Label htmlFor="pp_type">{t("type")}</Label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="deposit">Acompte</SelectItem>
-                  <SelectItem value="installment">Versement</SelectItem>
-                  <SelectItem value="balance">Solde</SelectItem>
+                  <SelectItem value="deposit">{t("type_deposit")}</SelectItem>
+                  <SelectItem value="installment">{t("type_installment")}</SelectItem>
+                  <SelectItem value="balance">{t("type_balance")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pp_payment_number">N° paiement</Label>
+              <Label htmlFor="pp_payment_number">{t("payment_number")}</Label>
               <Input
                 id="pp_payment_number"
                 type="number"
@@ -147,7 +147,7 @@ export function RecordPartialPaymentDialog() {
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="pp_currency">Devise</Label>
+              <Label htmlFor="pp_currency">{t("currency")}</Label>
               <Input
                 id="pp_currency"
                 value={currency}
@@ -155,7 +155,7 @@ export function RecordPartialPaymentDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pp_method">Méthode</Label>
+              <Label htmlFor="pp_method">{t("method")}</Label>
               <Input
                 id="pp_method"
                 value={paymentMethod}
@@ -164,7 +164,7 @@ export function RecordPartialPaymentDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pp_reference">Référence</Label>
+              <Label htmlFor="pp_reference">{t("reference")}</Label>
               <Input
                 id="pp_reference"
                 value={paymentReference}
@@ -173,7 +173,7 @@ export function RecordPartialPaymentDialog() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pp_notes">Notes</Label>
+            <Label htmlFor="pp_notes">{t("notes")}</Label>
             <Textarea
               id="pp_notes"
               value={notes}
@@ -183,7 +183,7 @@ export function RecordPartialPaymentDialog() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? t("saving") : t("save")}

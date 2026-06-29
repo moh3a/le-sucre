@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import Image from "next/image";
-import { Trash2, LinkIcon, Check, Download, FileVideo, FileText } from "lucide-react";
+import { Trash2, LinkIcon, Check, Download, FileVideo, FileText, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
@@ -31,6 +31,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { MediaDTO, MediaListItem } from "../types";
+import { MediaOperationsDialog } from "./admin-media-operations";
 
 function format_bytes(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -138,6 +139,14 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <MediaOperationsDialog
+                      media_id={item.id}
+                      trigger={
+                        <Button variant="ghost" size="icon" className="size-7" title="Opérations">
+                          <Settings2 />
+                        </Button>
+                      }
+                    />
                     <Button
                       variant="ghost"
                       size="icon"

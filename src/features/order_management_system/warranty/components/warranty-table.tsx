@@ -1,6 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import {
@@ -36,18 +37,6 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  under_review: "En révision",
-  approved: "Approuvé",
-  rejected: "Rejeté",
-  in_repair: "En réparation",
-  repaired: "Réparé",
-  replaced: "Remplacé",
-  completed: "Terminé",
-  cancelled: "Annulé",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
   under_review: "secondary",
@@ -58,19 +47,6 @@ const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "o
   replaced: "default",
   completed: "default",
   cancelled: "destructive",
-};
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-const ISSUE_LABELS: Record<string, string> = {
-  defect: "Défaut de fabrication",
-  damage: "Dommage",
-  malfunction: "Dysfonctionnement",
-  cosmetic: "Défaut esthétique",
-  other: "Autre",
 };
 
 type WarrantyRow = {
@@ -158,15 +134,41 @@ function FacetedFilter({
 }
 
 export function WarrantyTable() {
+  const t = useTranslations("warranty");
   const [page] = useQueryState("wrPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("wrPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("wrStatus", parseAsString);
+
+  const STATUS_LABELS: Record<string, string> = {
+    pending: t("status_pending"),
+    under_review: t("status_under_review"),
+    approved: t("status_approved"),
+    rejected: t("status_rejected"),
+    in_repair: t("status_in_repair"),
+    repaired: t("status_repaired"),
+    replaced: t("status_replaced"),
+    completed: t("status_completed"),
+    cancelled: t("status_cancelled"),
+  };
+
+  const ISSUE_LABELS: Record<string, string> = {
+    defect: t("issue_defect"),
+    damage: t("issue_damage"),
+    malfunction: t("issue_malfunction"),
+    cosmetic: t("issue_cosmetic"),
+    other: t("issue_other"),
+  };
+
+  const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
+    label,
+    value,
+  }));
 
   const utils = trpc.useUtils();
 
   const reviewMutation = trpc.operations.warrantyReview.useMutation({
     onSuccess: () => {
-      toast.success("Demande mise à jour");
+      toast.success(t("request_updated"));
       utils.operations.warrantyList.invalidate();
       utils.operations.warrantyStats.invalidate();
     },
@@ -175,7 +177,7 @@ export function WarrantyTable() {
 
   const resolveMutation = trpc.operations.warrantyResolve.useMutation({
     onSuccess: () => {
-      toast.success("Résolution enregistrée");
+      toast.success(t("resolution_saved"));
       utils.operations.warrantyList.invalidate();
       utils.operations.warrantyStats.invalidate();
     },
@@ -192,7 +194,7 @@ export function WarrantyTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -205,7 +207,7 @@ export function WarrantyTable() {
       {
         id: "issue_type",
         accessorKey: "issue_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Problème" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("issue_column")} />,
         cell: ({ row }) => (
           <span className="text-sm">{ISSUE_LABELS[row.original.issue_type] ?? row.original.issue_type}</span>
         ),
@@ -213,7 +215,7 @@ export function WarrantyTable() {
       {
         id: "description",
         accessorKey: "description",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Description" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("description")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[200px] truncate text-xs">
             {row.original.description}
@@ -223,7 +225,7 @@ export function WarrantyTable() {
       {
         id: "resolution_type",
         accessorKey: "resolution_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Résolution" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("resolution_column")} />,
         cell: ({ row }) => (
           <span className="capitalize text-sm">{row.original.resolution_type ?? "—"}</span>
         ),
@@ -231,7 +233,7 @@ export function WarrantyTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_title")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -241,7 +243,7 @@ export function WarrantyTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -256,9 +258,9 @@ export function WarrantyTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
-                  <Link href={`/console/orders/${r.order_id}`}>Voir commande</Link>
+                  <Link href={`/console/orders/${r.order_id}`}>{t("view_order")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {r.status === "pending" && (
@@ -267,19 +269,19 @@ export function WarrantyTable() {
                       onClick={() => reviewMutation.mutate({ id: r.id, status: "under_review" })}
                     >
                       <RotateCcw className="mr-2 size-4" />
-                      Mettre en révision
+                      {t("review_action")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => reviewMutation.mutate({ id: r.id, status: "approved" })}
                     >
                       <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                      Approuver
+                      {t("approve_action")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => reviewMutation.mutate({ id: r.id, status: "rejected" })}
                     >
                       <XCircle className="mr-2 size-4 text-red-600" />
-                      Rejeter
+                      {t("reject_action")}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -289,19 +291,19 @@ export function WarrantyTable() {
                       onClick={() => resolveMutation.mutate({ id: r.id, resolution_type: "repair" })}
                     >
                       <Hammer className="mr-2 size-4" />
-                      Réparation
+                      {t("repair_action")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => resolveMutation.mutate({ id: r.id, resolution_type: "replace" })}
                     >
                       <RotateCcw className="mr-2 size-4" />
-                      Remplacement
+                      {t("replace_action")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => resolveMutation.mutate({ id: r.id, resolution_type: "refund" })}
                     >
                       <RotateCcw className="mr-2 size-4" />
-                      Remboursement
+                      {t("refund_action")}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -311,7 +313,7 @@ export function WarrantyTable() {
         },
       },
     ],
-    [reviewMutation, resolveMutation],
+    [reviewMutation, resolveMutation, t],
   );
 
   const { data, isLoading } = trpc.operations.warrantyList.useQuery({
@@ -337,7 +339,7 @@ export function WarrantyTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -347,7 +349,7 @@ export function WarrantyTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -357,7 +359,7 @@ export function WarrantyTable() {
               download="warranty.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

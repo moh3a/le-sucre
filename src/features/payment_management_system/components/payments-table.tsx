@@ -168,7 +168,7 @@ export function PaymentsTable() {
 
   const retryMutation = trpc.payments.adminRetry.useMutation({
     onSuccess: () => {
-      toast.success("Paiement réessayé");
+      toast.success(t("retry_success"));
       utils.payments.adminList.invalidate();
       utils.payments.adminStats.invalidate();
     },
@@ -177,7 +177,7 @@ export function PaymentsTable() {
 
   const cancelMutation = trpc.payments.adminCancel.useMutation({
     onSuccess: () => {
-      toast.success("Paiement annulé");
+      toast.success(t("cancel_success"));
       utils.payments.adminList.invalidate();
       utils.payments.adminStats.invalidate();
     },

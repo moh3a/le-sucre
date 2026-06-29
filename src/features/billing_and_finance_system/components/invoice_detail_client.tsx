@@ -13,6 +13,7 @@ import {
   User,
   MapPin,
   Package,
+  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { formatDate } from "@/lib/format";
+import { InvoiceExtrasDialog } from "./invoice-extras-dialog";
 
 const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   paid: "default",
@@ -66,6 +68,7 @@ type BillingAddress = {
 
 type Invoice = {
   id: string;
+  order_id: string;
   invoice_number: string;
   type: string;
   status: string;
@@ -220,6 +223,15 @@ export function InvoiceDetailClient({ id }: { id: string }) {
               </AlertDialogContent>
             </AlertDialog>
           )}
+          <InvoiceExtrasDialog
+            invoice={{ id, order_id: invoice.order_id }}
+            trigger={
+              <Button size="sm" variant="outline">
+                <MoreHorizontal className="mr-2 size-4" />
+                Actions
+              </Button>
+            }
+          />
           <Button size="sm" onClick={handleDownload} disabled={downloading}>
             <Download className="mr-2 size-4" />
             {downloading ? t("loading") : t("download_pdf")}

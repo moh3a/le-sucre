@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Plus, RotateCcw } from "lucide-react";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,6 +28,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreateRefundDialog() {
+  const t = useTranslations("refunds");
   const [open, setOpen] = React.useState(false);
   const [transaction_id, setTransactionId] = React.useState("");
   const [type, setType] = React.useState("full");
@@ -37,7 +39,7 @@ export function CreateRefundDialog() {
 
   const create = trpc.payments.adminCreateRefund.useMutation({
     onSuccess: () => {
-      toast.success("Remboursement créé avec succès");
+      toast.success(t("create_success"));
       setOpen(false);
       setTransactionId("");
       setType("full");
@@ -66,36 +68,36 @@ export function CreateRefundDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Nouveau remboursement
+          {t("create_button")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer un remboursement</DialogTitle>
+          <DialogTitle>{t("create_title")}</DialogTitle>
           <DialogDescription>
-            Initier un remboursement pour une transaction.
+            {t("create_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Transaction</Label>
+            <Label>{t("transaction_id_label")}</Label>
             <Input value={transaction_id} onChange={(e) => setTransactionId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Type</Label>
+            <Label>{t("type_label")}</Label>
             <Select value={type} onValueChange={setType}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="full">Remboursement total</SelectItem>
-                <SelectItem value="partial">Remboursement partiel</SelectItem>
+                <SelectItem value="full">{t("type_full_refund")}</SelectItem>
+                <SelectItem value="partial">{t("type_partial_refund")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {type !== "full" && (
             <div className="space-y-2">
-              <Label>Montant (DZD)</Label>
+              <Label>{t("amount_dzd_label")}</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -107,7 +109,7 @@ export function CreateRefundDialog() {
             </div>
           )}
           <div className="space-y-2">
-            <Label>Raison (optionnelle)</Label>
+            <Label>{t("reason_optional_label")}</Label>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -116,7 +118,7 @@ export function CreateRefundDialog() {
           </div>
           <Button type="submit" className="w-full" disabled={create.isPending}>
             <RotateCcw />
-            Créer le remboursement
+            {t("create_submit")}
           </Button>
         </form>
       </DialogContent>

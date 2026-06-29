@@ -135,20 +135,20 @@ export function PayoutsTable() {
 
   const processMutation = trpc.payments.adminProcessPayout.useMutation({
     onSuccess: () => {
-      toast.success("Paiement traité");
+      toast.success(t("payout_processed"));
       utils.payments.adminListPayouts.invalidate();
       utils.payments.adminPayoutStats.invalidate();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const completeMutation = trpc.payments.adminCompletePayout.useMutation({
     onSuccess: () => {
-      toast.success("Paiement marqué comme payé");
+      toast.success(t("payout_marked_paid"));
       utils.payments.adminListPayouts.invalidate();
       utils.payments.adminPayoutStats.invalidate();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const columns = React.useMemo<ColumnDef<PayoutRow>[]>(

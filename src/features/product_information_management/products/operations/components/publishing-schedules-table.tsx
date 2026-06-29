@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
@@ -28,28 +29,11 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Planifiée",
-  executed: "Exécutée",
-  failed: "Échouée",
-  cancelled: "Annulée",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
   executed: "default",
   failed: "destructive",
   cancelled: "outline",
-};
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-const ACTION_LABELS: Record<string, string> = {
-  publish: "Publication",
-  unpublish: "Dépublication",
 };
 
 type ScheduleRow = {
@@ -131,6 +115,7 @@ function FacetedFilter({
 }
 
 export function PublishingSchedulesTable() {
+  const t = useTranslations("publishing");
   const [page] = useQueryState("psPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("psPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("psStatus", parseAsString);
@@ -139,7 +124,7 @@ export function PublishingSchedulesTable() {
 
   const cancelMutation = trpc.operations.productCancelSchedule.useMutation({
     onSuccess: () => {
-      toast.success("Planification annulée");
+      toast.success(t("cancel_success"));
       utils.operations.productListScheduledActions.invalidate();
       utils.operations.productGetScheduleStats.invalidate();
     },
@@ -156,7 +141,7 @@ export function PublishingSchedulesTable() {
       {
         id: "product_id",
         accessorKey: "product_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.product_id.slice(0, 12)}…</span>
         ),
@@ -164,33 +149,33 @@ export function PublishingSchedulesTable() {
       {
         id: "action",
         accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Action" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("action_column")} />,
         cell: ({ row }) => (
           <Badge variant={row.original.action === "publish" ? "default" : "secondary"}>
-            {ACTION_LABELS[row.original.action] ?? row.original.action}
+            {row.original.action === "publish" ? t("action_publish") : t("action_unpublish")}
           </Badge>
         ),
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {t(`status_${row.original.status}`)}
           </Badge>
         ),
       },
       {
         id: "scheduled_at",
         accessorKey: "scheduled_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Programmée" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("scheduled_at_column")} />,
         cell: ({ row }) => formatDate(row.original.scheduled_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
       },
       {
         id: "executed_at",
         accessorKey: "executed_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Exécutée" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("executed_at_column")} />,
         cell: ({ row }) =>
           row.original.executed_at
             ? formatDate(row.original.executed_at, { month: "short", day: "numeric", hour: "2-digit" })
@@ -199,7 +184,7 @@ export function PublishingSchedulesTable() {
       {
         id: "cancel_reason",
         accessorKey: "cancel_reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Motif annulation" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("cancel_reason_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[160px] truncate text-xs">
             {row.original.cancel_reason ?? "—"}
@@ -209,7 +194,7 @@ export function PublishingSchedulesTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Créée" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -224,18 +209,18 @@ export function PublishingSchedulesTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("actions_column")}</DropdownMenuLabel>
                 {r.status === "pending" && (
                   <DropdownMenuItem
                     onClick={() =>
                       cancelMutation.mutate({
                         schedule_id: r.id,
-                        reason: "Annulé par opérateur",
+                        reason: t("cancel_reason_default"),
                       })
                     }
                   >
                     <Ban className="mr-2 size-4 text-red-600" />
-                    Annuler
+                    {t("cancel_schedule")}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -271,8 +256,8 @@ export function PublishingSchedulesTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
-          options={STATUS_OPTIONS}
+          title={t("filter_status")}
+          options={Object.entries({ pending: t("status_pending"), executed: t("status_executed"), failed: t("status_failed"), cancelled: t("status_cancelled") }).map(([value, label]) => ({ label, value }))}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
         />
@@ -281,7 +266,7 @@ export function PublishingSchedulesTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -291,7 +276,7 @@ export function PublishingSchedulesTable() {
               download="publishing-schedules.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

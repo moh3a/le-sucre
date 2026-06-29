@@ -4,6 +4,8 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Plus, Banknote } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +21,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreatePayoutDialog() {
+  const t = useTranslations("payouts");
   const [open, setOpen] = React.useState(false);
   const [vendor_id, setVendorId] = React.useState("");
   const [amount, setAmount] = React.useState("");
@@ -29,7 +32,7 @@ export function CreatePayoutDialog() {
 
   const create = trpc.payments.adminCreatePayout.useMutation({
     onSuccess: () => {
-      toast.success("Paiement fournisseur créé avec succès");
+      toast.success(t("create_payout_success"));
       setOpen(false);
       setVendorId("");
       setAmount("");
@@ -38,7 +41,7 @@ export function CreatePayoutDialog() {
       void utils.payments.adminListPayouts.invalidate();
       void utils.payments.adminPayoutStats.invalidate();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   function handle_submit(e: React.FormEvent) {
@@ -57,23 +60,23 @@ export function CreatePayoutDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Nouveau paiement fournisseur
+          {t("new_payout_button")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer un paiement fournisseur</DialogTitle>
+          <DialogTitle>{t("create_payout_title")}</DialogTitle>
           <DialogDescription>
-            Enregistrer un nouveau paiement pour un vendeur ou fournisseur.
+            {t("create_payout_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Fournisseur</Label>
+            <Label>{t("vendor_id_label")}</Label>
             <Input value={vendor_id} onChange={(e) => setVendorId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Montant (DZD)</Label>
+            <Label>{t("amount_label")}</Label>
             <Input
               type="number"
               step="0.01"
@@ -84,7 +87,7 @@ export function CreatePayoutDialog() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Taux de commission (%)</Label>
+            <Label>{t("commission_rate_label")}</Label>
             <Input
               type="number"
               step="0.1"
@@ -95,12 +98,12 @@ export function CreatePayoutDialog() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Description (optionnelle)</Label>
+            <Label>{t("description_label")}</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" disabled={create.isPending}>
             <Banknote />
-            Créer le paiement
+            {t("create_payout_button")}
           </Button>
         </form>
       </DialogContent>

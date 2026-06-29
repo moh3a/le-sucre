@@ -24,9 +24,9 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
   const update_shipping = trpc.orders.adminUpdateShipping.useMutation({
     onSuccess: () => {
       on_update();
-      toast.success("Adresse de livraison mise à jour");
+      toast.success(t("shipping_updated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const [ship_full_name, set_ship_full_name] = useState("");

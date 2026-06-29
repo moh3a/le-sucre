@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Check, Eye, MoreHorizontal } from "lucide-react";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -44,24 +45,6 @@ interface Option {
   label: string;
   value: string;
 }
-
-const SEVERITY_OPTIONS: Option[] = [
-  { label: "Critique", value: "critical" },
-  { label: "Avertissement", value: "warning" },
-  { label: "Info", value: "info" },
-];
-
-const ALERT_TYPE_OPTIONS: Option[] = [
-  { label: "Stock faible", value: "low_stock" },
-  { label: "Rupture prévue", value: "stockout_predicted" },
-  { label: "Réapprovisionnement", value: "reorder" },
-];
-
-const SEVERITY_BADGES: Record<string, { label: string; variant: "destructive" | "secondary" | "default" | "outline" }> = {
-  critical: { label: "Critique", variant: "destructive" },
-  warning: { label: "Avertissement", variant: "secondary" },
-  info: { label: "Info", variant: "default" },
-};
 
 function FacetedFilter({
   title,
@@ -129,6 +112,7 @@ function FacetedFilter({
 }
 
 export function AlertsTable({ status }: { status?: string }) {
+  const t = useTranslations("forecast");
   const [page, setPage] = useQueryState("alPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("alPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("alSearch", parseAsString);
@@ -151,6 +135,24 @@ export function AlertsTable({ status }: { status?: string }) {
     },
   });
 
+  const severityOptions: Option[] = [
+    { label: t("alert_severity_critical"), value: "critical" },
+    { label: t("alert_severity_warning"), value: "warning" },
+    { label: t("alert_severity_info"), value: "info" },
+  ];
+
+  const alertTypeOptions: Option[] = [
+    { label: t("alert_type_low_stock"), value: "low_stock" },
+    { label: t("alert_type_stockout_predicted"), value: "stockout_predicted" },
+    { label: t("alert_type_reorder"), value: "reorder" },
+  ];
+
+  const severityBadges: Record<string, { label: string; variant: "destructive" | "secondary" | "default" | "outline" }> = {
+    critical: { label: t("alert_severity_critical"), variant: "destructive" },
+    warning: { label: t("alert_severity_warning"), variant: "secondary" },
+    info: { label: t("alert_severity_info"), variant: "default" },
+  };
+
   const columns = React.useMemo<ColumnDef<AlertRow>[]>(
     () => [
       {
@@ -161,7 +163,7 @@ export function AlertsTable({ status }: { status?: string }) {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_product_column")} />,
         cell: ({ row }) => (
           <span className="text-sm font-medium">{row.original.product_name ?? "—"}</span>
         ),
@@ -169,22 +171,22 @@ export function AlertsTable({ status }: { status?: string }) {
       {
         id: "sku_id",
         accessorKey: "sku_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Code SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_sku_column")} />,
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.sku_id}</span>,
       },
       {
         id: "severity",
         accessorKey: "severity",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Sévérité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_severity_column")} />,
         cell: ({ row }) => {
-          const cfg = SEVERITY_BADGES[row.original.severity] ?? { label: row.original.severity, variant: "outline" as const };
+          const cfg = severityBadges[row.original.severity] ?? { label: row.original.severity, variant: "outline" as const };
           return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
         },
       },
       {
         id: "alert_type",
         accessorKey: "alert_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_type_column")} />,
         cell: ({ row }) => (
           <span className="text-sm capitalize">
             {row.original.alert_type.replace(/_/g, " ")}
@@ -194,13 +196,13 @@ export function AlertsTable({ status }: { status?: string }) {
       {
         id: "message",
         accessorKey: "message",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Message" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_message_column")} />,
         cell: ({ row }) => <span className="max-w-xs truncate text-sm">{row.original.message}</span>,
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Détecté le" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_detected_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -210,7 +212,7 @@ export function AlertsTable({ status }: { status?: string }) {
           if (alert.status === "resolved") {
             return (
               <span className="text-muted-foreground flex items-center gap-1 text-xs font-medium">
-                <Check className="h-4 w-4 text-emerald-500" /> Résolue
+                <Check className="h-4 w-4 text-emerald-500" /> {t("alert_resolved")}
               </span>
             );
           }
@@ -229,7 +231,7 @@ export function AlertsTable({ status }: { status?: string }) {
                     onClick={() => ackMutation.mutate({ id: alert.id })}
                   >
                     <Eye className="mr-2 size-4" />
-                    Prendre acte
+                    {t("alert_acknowledge")}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
@@ -237,7 +239,7 @@ export function AlertsTable({ status }: { status?: string }) {
                   onClick={() => resolveMutation.mutate({ id: alert.id })}
                 >
                   <Check className="mr-2 size-4 text-emerald-600" />
-                  Résoudre
+                  {t("alert_resolve")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -245,7 +247,7 @@ export function AlertsTable({ status }: { status?: string }) {
         },
       },
     ],
-    [ackMutation, resolveMutation],
+    [ackMutation, resolveMutation, severityBadges, t],
   );
 
   const { data, isLoading } = trpc.forecast.alerts.useQuery({
@@ -297,7 +299,7 @@ export function AlertsTable({ status }: { status?: string }) {
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
-            placeholder="Rechercher par produit, message ou SKU…"
+            placeholder={t("search_placeholder_alerts")}
             value={search || ""}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -306,8 +308,8 @@ export function AlertsTable({ status }: { status?: string }) {
             className="max-w-sm"
           />
           <FacetedFilter
-            title="Sévérité"
-            options={SEVERITY_OPTIONS}
+            title={t("severity_title")}
+            options={severityOptions}
             icon={XCircle}
             value={severity ?? undefined}
             onChange={(val) => {
@@ -316,8 +318,8 @@ export function AlertsTable({ status }: { status?: string }) {
             }}
           />
           <FacetedFilter
-            title="Type d'alerte"
-            options={ALERT_TYPE_OPTIONS}
+            title={t("alert_type_title")}
+            options={alertTypeOptions}
             icon={XCircle}
             value={alert_type ?? undefined}
             onChange={(val) => {
@@ -330,7 +332,7 @@ export function AlertsTable({ status }: { status?: string }) {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+              {table.getFilteredSelectedRowModel().rows.length}
             </Badge>
             <Button
               variant="secondary"
@@ -339,7 +341,7 @@ export function AlertsTable({ status }: { status?: string }) {
               disabled={ackMutation.isPending || resolveMutation.isPending}
             >
               <Eye className="mr-1 h-4 w-4" />
-              Prendre acte
+              {t("alert_acknowledge")}
             </Button>
             <Button
               variant="default"
@@ -348,7 +350,7 @@ export function AlertsTable({ status }: { status?: string }) {
               disabled={ackMutation.isPending || resolveMutation.isPending}
             >
               <Check className="mr-1 h-4 w-4" />
-              Résoudre
+              {t("alert_resolve")}
             </Button>
           </div>
         )}

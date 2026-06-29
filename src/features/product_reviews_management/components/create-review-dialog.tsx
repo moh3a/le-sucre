@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Star } from "lucide-react";
 
@@ -27,6 +28,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function CreateReviewDialog() {
+  const t = useTranslations("reviews");
   const [open, setOpen] = React.useState(false);
   const [product_id, setProductId] = React.useState("");
   const [rating, setRating] = React.useState("5");
@@ -37,7 +39,7 @@ export function CreateReviewDialog() {
 
   const create = trpc.reviews.create.useMutation({
     onSuccess: () => {
-      toast.success("Avis créé avec succès");
+      toast.success(t("admin_review_created"));
       setOpen(false);
       setProductId("");
       setRating("5");
@@ -66,23 +68,23 @@ export function CreateReviewDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Nouvel avis
+          {t("admin_new_review")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer un avis</DialogTitle>
+          <DialogTitle>{t("admin_create_title")}</DialogTitle>
           <DialogDescription>
-            Ajouter un avis client manuellement.
+            {t("admin_create_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Produit</Label>
+            <Label>{t("admin_product_id")}</Label>
             <Input value={product_id} onChange={(e) => setProductId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Note</Label>
+            <Label>{t("admin_rating")}</Label>
             <Select value={rating} onValueChange={setRating}>
               <SelectTrigger>
                 <SelectValue />
@@ -90,18 +92,18 @@ export function CreateReviewDialog() {
               <SelectContent>
                 {[5, 4, 3, 2, 1].map((n) => (
                   <SelectItem key={n} value={String(n)}>
-                    {n} étoile{n > 1 ? "s" : ""}
+                    {t("admin_stars", { count: n })}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Titre (optionnel)</Label>
+            <Label>{t("admin_title_optional")}</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Commentaire</Label>
+            <Label>{t("admin_comment")}</Label>
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
@@ -111,7 +113,7 @@ export function CreateReviewDialog() {
           </div>
           <Button type="submit" className="w-full" disabled={create.isPending}>
             <Star />
-            Publier l&apos;avis
+            {t("admin_publish")}
           </Button>
         </form>
       </DialogContent>

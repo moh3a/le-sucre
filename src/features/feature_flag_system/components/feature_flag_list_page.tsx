@@ -83,7 +83,7 @@ function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     onSuccess: () => {
       utils.featureFlags.list.invalidate();
       utils.featureFlags.stats.invalidate();
-      toast.success("Feature flag créé");
+      toast.success(t("flag_created"));
       onOpenChange(false);
       reset();
     },
@@ -103,7 +103,7 @@ function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!key || !fr_name || !en_name || !ar_name) {
-      toast.error("Veuillez remplir tous les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     create.mutate({
@@ -213,7 +213,7 @@ function EditFlagDialog({
     onSuccess: () => {
       utils.featureFlags.list.invalidate();
       utils.featureFlags.stats.invalidate();
-      toast.success("Feature flag mis à jour");
+      toast.success(t("flag_updated"));
       onOpenChange(false);
     },
     onError: (err) => toast.error(err.message),
@@ -305,7 +305,7 @@ export function FeatureFlagListPage() {
     onSuccess: () => {
       utils.featureFlags.list.invalidate();
       utils.featureFlags.stats.invalidate();
-      toast.success("Statut mis à jour");
+      toast.success(t("flag_status_updated"));
     },
     onError: (err) => toast.error(err.message),
   });
@@ -314,7 +314,7 @@ export function FeatureFlagListPage() {
     onSuccess: () => {
       utils.featureFlags.list.invalidate();
       utils.featureFlags.stats.invalidate();
-      toast.success("Feature flag supprimé");
+      toast.success(t("flag_deleted"));
       setDeleteFlag(null);
     },
     onError: (err) => toast.error(err.message),

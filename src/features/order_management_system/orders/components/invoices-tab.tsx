@@ -3,6 +3,8 @@
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
@@ -15,38 +17,39 @@ type InvoicesTabProps = {
 };
 
 export function InvoicesTab({ order_id }: InvoicesTabProps) {
+  const t = useTranslations("orders");
   const { data: invoices_data, refetch: refetch_invoices } =
     trpc.invoices.list_by_order.useQuery({ order_id }, { enabled: !!order_id });
 
   const generate_invoice = trpc.invoices.generate_invoice.useMutation({
     onSuccess: () => {
       refetch_invoices();
-      toast.success("Facture générée avec succès");
+      toast.success(t("invoice_generated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const mark_invoice_paid = trpc.invoices.mark_as_paid.useMutation({
     onSuccess: () => {
       refetch_invoices();
-      toast.success("Facture marquée comme payée");
+      toast.success(t("invoice_marked_paid"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const void_invoice = trpc.invoices.void_invoice.useMutation({
     onSuccess: () => {
       refetch_invoices();
-      toast.success("Facture annulée");
+      toast.success(t("invoice_voided"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   return (
     <QueryGuard query={{ isLoading: !invoices_data }} mutation={{ isPending: generate_invoice.isPending }}>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
-        <CardTitle>Factures liées</CardTitle>
+        <CardTitle>{t("related_invoices")}</CardTitle>
         <Button
           size="sm"
           variant="outline"
@@ -54,42 +57,42 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
           disabled={generate_invoice.isPending}
         >
           <FileText className="mr-1 h-3 w-3" />
-          Générer une facture
+          {t("generate_invoice")}
         </Button>
       </CardHeader>
       <CardContent className="p-0">
         {!invoices_data || invoices_data.length === 0 ? (
-          <p className="text-muted-foreground p-4 text-sm">Aucune facture pour cette commande.</p>
+          <p className="text-muted-foreground p-4 text-sm">{t("no_invoices")}</p>
         ) : (
           <table className="w-full text-sm">
             <thead className="border-b">
               <tr className="text-muted-foreground">
-                <th className="px-4 py-3 text-left font-medium">N° Facture</th>
-                <th className="px-4 py-3 text-left font-medium">Type</th>
-                <th className="px-4 py-3 text-left font-medium">Statut</th>
-                <th className="px-4 py-3 text-right font-medium">Montant</th>
-                <th className="px-4 py-3 text-left font-medium">Créée le</th>
-                <th className="px-4 py-3 text-center font-medium">Actions</th>
+                <th className="px-4 py-3 text-left font-medium">{t("invoice_number_col")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("type_col")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("statut_col")}</th>
+                <th className="px-4 py-3 text-right font-medium">{t("montant_col")}</th>
+                <th className="px-4 py-3 text-left font-medium">{t("created_on_col")}</th>
+                <th className="px-4 py-3 text-center font-medium">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {invoices_data.map((inv) => {
                 const type_label =
                   inv.type === "order_invoice"
-                    ? "Facture"
+                    ? t("invoice_type_order")
                     : inv.type === "refund_invoice"
-                      ? "Remboursement"
-                      : "Avoir";
+                      ? t("invoice_type_refund")
+                      : t("invoice_type_credit");
                 const status_label =
                   inv.status === "unpaid"
-                    ? "Impayée"
+                    ? t("invoice_status_unpaid")
                     : inv.status === "paid"
-                      ? "Payée"
+                      ? t("invoice_status_paid")
                       : inv.status === "void"
-                        ? "Annulée"
+                        ? t("invoice_status_void")
                         : inv.status === "refunded"
-                          ? "Remboursée"
-                          : "Partiellement remboursée";
+                          ? t("invoice_status_refunded")
+                          : t("invoice_status_partially_refunded");
                 const status_variant: Record<string, "default" | "secondary" | "destructive" | "outline"> =
                   { unpaid: "outline", paid: "default", void: "destructive", refunded: "secondary", partially_refunded: "secondary" };
                 return (
@@ -124,7 +127,7 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
                             window.open(`/api/admin/invoices/${inv.id}/download`, "_blank")
                           }
                         >
-                          Voir
+                          {t("voir")}
                         </Button>
                         {inv.status === "unpaid" && (
                           <Button
@@ -134,7 +137,7 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
                             onClick={() => mark_invoice_paid.mutate({ id: inv.id })}
                             disabled={mark_invoice_paid.isPending}
                           >
-                            Marquer payée
+                            {t("mark_paid")}
                           </Button>
                         )}
                         {(inv.status === "unpaid" || inv.status === "paid") && (
@@ -145,7 +148,7 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
                             onClick={() => void_invoice.mutate({ id: inv.id })}
                             disabled={void_invoice.isPending}
                           >
-                            Annuler
+                            {t("annuler")}
                           </Button>
                         )}
                       </div>

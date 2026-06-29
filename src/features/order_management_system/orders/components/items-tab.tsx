@@ -48,9 +48,9 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
   const update_items = trpc.orders.adminUpdateItems.useMutation({
     onSuccess: () => {
       on_update();
-      toast.success("Articles mis à jour");
+      toast.success(t("items_updated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const [search_query, set_search_query] = useState("");
@@ -96,7 +96,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
     const sku = skus_data?.items?.find((s) => s.id === selected_sku_id);
     if (!sku) return;
     if (edit_items.some((i) => i.sku_id === sku.id)) {
-      toast.error("Ce SKU est déjà dans la commande");
+      toast.error(t("sku_already_in_order"));
       return;
     }
     set_edit_items((prev) => [
@@ -118,7 +118,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
 
   function on_save_items() {
     if (edit_items.length === 0) {
-      toast.error("La commande doit avoir au moins un article");
+      toast.error(t("order_must_have_items"));
       return;
     }
     update_items.mutate({

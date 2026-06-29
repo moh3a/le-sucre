@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
@@ -29,27 +30,10 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvé",
-  rejected: "Rejeté",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
   approved: "default",
   rejected: "destructive",
-};
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-const REVIEW_TYPE_LABELS: Record<string, string> = {
-  approval: "Approbation",
-  modification: "Modification",
-  activation: "Activation",
 };
 
 type PromotionReviewRow = {
@@ -130,15 +114,25 @@ function FacetedFilter({
 }
 
 export function PromotionReviewsTable() {
+  const t = useTranslations("promotions");
   const [page] = useQueryState("prPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("prPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("prStatus", parseAsString);
+
+  const STATUS_OPTIONS = React.useMemo(
+    () => [
+      { label: t("review_status_pending"), value: "pending" },
+      { label: t("review_status_approved"), value: "approved" },
+      { label: t("review_status_rejected"), value: "rejected" },
+    ],
+    [t],
+  );
 
   const utils = trpc.useUtils();
 
   const reviewMutation = trpc.operations.promotionReview.useMutation({
     onSuccess: () => {
-      toast.success("Avis enregistré");
+      toast.success(t("review_updated"));
       utils.operations.promotionListReviews.invalidate();
       utils.operations.promotionGetReviewStats.invalidate();
     },
@@ -155,7 +149,7 @@ export function PromotionReviewsTable() {
       {
         id: "promotion_id",
         accessorKey: "promotion_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Promotion" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_promo_code")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.promotion_id.slice(0, 12)}…</span>
         ),
@@ -163,17 +157,17 @@ export function PromotionReviewsTable() {
       {
         id: "review_type",
         accessorKey: "review_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_type_title")} />,
         cell: ({ row }) => (
           <span className="text-sm">
-            {REVIEW_TYPE_LABELS[row.original.review_type] ?? row.original.review_type}
+            {t(`review_type_${row.original.review_type}`)}
           </span>
         ),
       },
       {
         id: "requested_by_user_id",
         accessorKey: "requested_by_user_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Demandé par" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_requested_by")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.requested_by_user_id.slice(0, 10)}…</span>
         ),
@@ -181,7 +175,7 @@ export function PromotionReviewsTable() {
       {
         id: "reviewer_user_id",
         accessorKey: "reviewer_user_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Validé par" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_reviewed_by")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.reviewer_user_id
@@ -193,17 +187,17 @@ export function PromotionReviewsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_status_title")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {t(`review_status_${row.original.status}`)}
           </Badge>
         ),
       },
       {
         id: "review_note",
         accessorKey: "review_note",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Note" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_note_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[160px] truncate text-xs">
             {row.original.review_note ?? "—"}
@@ -213,7 +207,7 @@ export function PromotionReviewsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
       },
       {
@@ -228,14 +222,14 @@ export function PromotionReviewsTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("review_actions_title")}</DropdownMenuLabel>
                 {r.status === "pending" ? (
                   <>
                     <DropdownMenuItem
                       onClick={() => reviewMutation.mutate({ id: r.id, status: "approved" })}
                     >
                       <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                      Approuver
+                      {t("review_approve")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
@@ -243,12 +237,12 @@ export function PromotionReviewsTable() {
                       }
                     >
                       <XCircle className="mr-2 size-4 text-red-600" />
-                      Rejeter
+                      {t("review_reject")}
                     </DropdownMenuItem>
                   </>
                 ) : (
                   <DropdownMenuItem disabled>
-                    Déjà {STATUS_LABELS[r.status]?.toLowerCase()}
+                    {t("review_already", { status: t(`review_status_${r.status}`) })}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -283,7 +277,7 @@ export function PromotionReviewsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("review_status_title")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -293,7 +287,7 @@ export function PromotionReviewsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("review_rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -303,7 +297,7 @@ export function PromotionReviewsTable() {
               download="promotion-reviews.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("review_export")}
             </a>
           </Button>
         </div>

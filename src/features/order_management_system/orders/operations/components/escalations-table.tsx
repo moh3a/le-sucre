@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
@@ -30,25 +31,11 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  open: "Ouvert",
-  in_review: "En révision",
-  resolved: "Résolu",
-  dismissed: "Rejeté",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   open: "destructive",
   in_review: "secondary",
   resolved: "default",
   dismissed: "outline",
-};
-
-const PRIORITY_LABELS: Record<string, string> = {
-  urgent: "Urgente",
-  high: "Haute",
-  normal: "Normale",
-  low: "Basse",
 };
 
 const PRIORITY_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -57,28 +44,6 @@ const PRIORITY_STYLES: Record<string, "default" | "secondary" | "destructive" | 
   normal: "secondary",
   low: "outline",
 };
-
-const REASON_LABELS: Record<string, string> = {
-  payment_dispute: "Litige paiement",
-  customer_complaint: "Réclamation client",
-  delivery_issue: "Problème livraison",
-  technical: "Technique",
-  other: "Autre",
-};
-
-const STATUS_OPTIONS = [
-  { label: "Ouvert", value: "open" },
-  { label: "En révision", value: "in_review" },
-  { label: "Résolu", value: "resolved" },
-  { label: "Rejeté", value: "dismissed" },
-];
-
-const PRIORITY_OPTIONS = [
-  { label: "Urgente", value: "urgent" },
-  { label: "Haute", value: "high" },
-  { label: "Normale", value: "normal" },
-  { label: "Basse", value: "low" },
-];
 
 type EscalationRow = {
   id: string;
@@ -162,16 +127,37 @@ function FacetedFilter({
 }
 
 export function EscalationsTable() {
+  const t = useTranslations("escalations");
   const [page] = useQueryState("escPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("escPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("escStatus", parseAsString);
   const [priority, setPriority] = useQueryState("escPriority", parseAsString);
 
+  const STATUS_OPTIONS = React.useMemo(
+    () => [
+      { label: t("status_open"), value: "open" },
+      { label: t("status_in_review"), value: "in_review" },
+      { label: t("status_resolved"), value: "resolved" },
+      { label: t("status_dismissed"), value: "dismissed" },
+    ],
+    [t],
+  );
+
+  const PRIORITY_OPTIONS = React.useMemo(
+    () => [
+      { label: t("priority_urgent"), value: "urgent" },
+      { label: t("priority_high"), value: "high" },
+      { label: t("priority_normal"), value: "normal" },
+      { label: t("priority_low"), value: "low" },
+    ],
+    [t],
+  );
+
   const utils = trpc.useUtils();
 
   const resolveMutation = trpc.operations.orderResolveEscalation.useMutation({
     onSuccess: () => {
-      toast.success("Escalade mise à jour");
+      toast.success(t("escalation_updated"));
       utils.operations.orderListEscalations.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -187,7 +173,7 @@ export function EscalationsTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -200,17 +186,17 @@ export function EscalationsTable() {
       {
         id: "reason",
         accessorKey: "reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Motif" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason_column")} />,
         cell: ({ row }) => (
           <span className="text-sm">
-            {REASON_LABELS[row.original.reason] ?? row.original.reason}
+            {t(`reason_${row.original.reason}`)}
           </span>
         ),
       },
       {
         id: "description",
         accessorKey: "description",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Description" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("details_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[240px] truncate text-xs">
             {row.original.description ?? "—"}
@@ -220,27 +206,27 @@ export function EscalationsTable() {
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Priorité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority_title")} />,
         cell: ({ row }) => (
           <Badge variant={PRIORITY_STYLES[row.original.priority] ?? "outline"}>
-            {PRIORITY_LABELS[row.original.priority] ?? row.original.priority}
+            {t(`priority_${row.original.priority}`)}
           </Badge>
         ),
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_title")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {t(`status_${row.original.status}`)}
           </Badge>
         ),
       },
       {
         id: "assigned_to_user_id",
         accessorKey: "assigned_to_user_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Assigné à" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("assigned_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.assigned_to_user_id?.slice(0, 12) ?? "—"}
@@ -250,7 +236,7 @@ export function EscalationsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -263,10 +249,10 @@ export function EscalationsTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actions_title")}</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/console/orders/${row.original.order_id}`}>
-                  Voir commande
+                  {t("view_order")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -282,7 +268,7 @@ export function EscalationsTable() {
                     }
                   >
                     <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                    Résoudre
+                    {t("resolve")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() =>
@@ -294,7 +280,7 @@ export function EscalationsTable() {
                     }
                   >
                     <XCircle className="mr-2 size-4 text-red-600" />
-                    Rejeter
+                    {t("dismiss")}
                   </DropdownMenuItem>
                 </>
               )}
@@ -329,13 +315,13 @@ export function EscalationsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
         />
         <FacetedFilter
-          title="Priorité"
+          title={t("priority_title")}
           options={PRIORITY_OPTIONS}
           value={priority ?? undefined}
           onChange={(val) => setPriority(val)}
@@ -345,7 +331,7 @@ export function EscalationsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -355,7 +341,7 @@ export function EscalationsTable() {
               download="escalations.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

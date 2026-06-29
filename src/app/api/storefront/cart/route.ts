@@ -4,9 +4,21 @@ import {
   CART_COOKIE,
 } from "@/features/order_management_system/carts/cart-context.helper";
 import { cart_service } from "@/features/order_management_system/carts/cart.service";
+import { assert_ip_not_blacklisted } from "@/lib/security/ip-blacklist";
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/rate-limit";
 
 export async function GET(req: Request) {
   try {
+    await assert_ip_not_blacklisted(req);
+
+    const ip = getClientIp(req.headers);
+    const rl = await rateLimit(ip, RATE_LIMITS.api);
+    if (!rl.success) {
+      const { RateLimitError } = await import("@/lib/error_handling");
+      throw new RateLimitError();
+    }
+
     const identity = await get_storefront_identity(req.headers);
     const cart = await cart_service.get_or_create_cart({
       user_id: identity.user_id,

@@ -75,6 +75,13 @@ export const RATE_LIMITS = {
   passwordReset: { action: "password_reset", limit: 3, windowSec: 60 * 15 },
   api: { action: "api", limit: 100, windowSec: 60 },
   adminApi: { action: "admin_api", limit: 200, windowSec: 60 },
+  checkout: { action: "checkout", limit: 10, windowSec: 300 },
+  search: { action: "search", limit: 30, windowSec: 60 },
+  cartAdd: { action: "cart_add", limit: 30, windowSec: 60 },
+  reviewSubmit: { action: "review_submit", limit: 3, windowSec: 3600 },
+  fileUpload: { action: "file_upload", limit: 10, windowSec: 300 },
+  webhook: { action: "webhook", limit: 100, windowSec: 60 },
+  analyticsEvents: { action: "analytics_events", limit: 200, windowSec: 60 },
 } as const satisfies Record<string, RateLimitConfig>;
 
 export function getClientIp(headers: Headers): string {

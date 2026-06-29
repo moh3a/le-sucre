@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Banknote, CheckCircle2, Clock, Wallet, XCircle } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
@@ -9,44 +10,45 @@ import { RefundsTable } from "./refunds-table";
 import { CreateRefundDialog } from "./create-refund-dialog";
 
 export function RefundsPageClient() {
+  const t = useTranslations("refunds");
   const { data: stats, isLoading: statsLoading } = trpc.payments.adminRefundStats.useQuery();
 
   return (
     <QueryGuard query={{ isLoading: statsLoading }}>
       <ConsolePageShell
-      title="Remboursements"
-      subtitle="Gestion des remboursements"
+      title={t("title")}
+      subtitle={t("subtitle")}
       actions={<CreateRefundDialog />}
       stats={
         <StatsGrid
           loading={statsLoading}
           items={[
             {
-              label: "Total remboursements",
+              label: t("stats_total"),
               value: stats?.total_refunds ?? 0,
               icon: Banknote,
               color: "info",
             },
             {
-              label: "Complétés",
+              label: t("stats_completed"),
               value: stats?.completed_refunds ?? 0,
               icon: CheckCircle2,
               color: "success",
             },
             {
-              label: "En attente",
+              label: t("stats_pending"),
               value: stats?.pending_refunds ?? 0,
               icon: Clock,
               color: "warning",
             },
             {
-              label: "Échoués",
+              label: t("stats_failed"),
               value: stats?.failed_refunds ?? 0,
               icon: XCircle,
               color: "error",
             },
             {
-              label: "Montant total remboursé",
+              label: t("stats_total_amount"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",
@@ -55,7 +57,7 @@ export function RefundsPageClient() {
               color: "info",
             },
             {
-              label: "En attente d&apos;approbation",
+              label: t("stats_pending_approval"),
               value: stats?.pending_approval_count ?? 0,
               icon: Clock,
               color: "warning",

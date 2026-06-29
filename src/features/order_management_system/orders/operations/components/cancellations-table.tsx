@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
@@ -29,32 +30,11 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvée",
-  rejected: "Rejetée",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
   approved: "destructive",
   rejected: "default",
 };
-
-const REASON_LABELS: Record<string, string> = {
-  customer_request: "Demande client",
-  payment_issue: "Problème de paiement",
-  out_of_stock: "Rupture de stock",
-  fraud: "Fraude",
-  duplicate: "Doublon",
-  other: "Autre",
-};
-
-const STATUS_OPTIONS = [
-  { label: "En attente", value: "pending" },
-  { label: "Approuvée", value: "approved" },
-  { label: "Rejetée", value: "rejected" },
-];
 
 type CancellationRow = {
   id: string;
@@ -138,15 +118,25 @@ function FacetedFilter({
 }
 
 export function CancellationsTable() {
+  const t = useTranslations("cancellations");
   const [page] = useQueryState("cnPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("cnPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("cnStatus", parseAsString);
+
+  const STATUS_OPTIONS = React.useMemo(
+    () => [
+      { label: t("status_pending"), value: "pending" },
+      { label: t("status_approved"), value: "approved" },
+      { label: t("status_rejected"), value: "rejected" },
+    ],
+    [t],
+  );
 
   const utils = trpc.useUtils();
 
   const reviewMutation = trpc.operations.orderReviewCancellation.useMutation({
     onSuccess: () => {
-      toast.success("Demande d'annulation mise à jour");
+      toast.success(t("cancel_updated"));
       utils.operations.orderListCancellationRequests.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -162,7 +152,7 @@ export function CancellationsTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -175,17 +165,17 @@ export function CancellationsTable() {
       {
         id: "reason",
         accessorKey: "reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Motif" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason_column")} />,
         cell: ({ row }) => (
           <span className="text-sm">
-            {REASON_LABELS[row.original.reason] ?? row.original.reason}
+            {t(`reason_${row.original.reason}`)}
           </span>
         ),
       },
       {
         id: "description",
         accessorKey: "description",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Description" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("details_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[200px] truncate text-xs">
             {row.original.description ?? "—"}
@@ -195,17 +185,17 @@ export function CancellationsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_title")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {t(`status_${row.original.status}`)}
           </Badge>
         ),
       },
       {
         id: "review_note",
         accessorKey: "review_note",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Note" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("notes_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[160px] truncate text-xs">
             {row.original.review_note ?? "—"}
@@ -215,7 +205,7 @@ export function CancellationsTable() {
       {
         id: "refund_amount",
         accessorKey: "refund_amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Remb." />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("refund_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.refund_amount
@@ -230,7 +220,7 @@ export function CancellationsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -243,10 +233,10 @@ export function CancellationsTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actions_title")}</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/console/orders/${row.original.order_id}`}>
-                  Voir commande
+                  {t("view_order")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -261,7 +251,7 @@ export function CancellationsTable() {
                     }
                   >
                     <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                    Approuver
+                    {t("approve")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() =>
@@ -272,7 +262,7 @@ export function CancellationsTable() {
                     }
                   >
                     <XCircle className="mr-2 size-4 text-red-600" />
-                    Rejeter
+                    {t("reject")}
                   </DropdownMenuItem>
                 </>
               )}
@@ -307,7 +297,7 @@ export function CancellationsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -317,7 +307,7 @@ export function CancellationsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -327,7 +317,7 @@ export function CancellationsTable() {
               download="cancellations.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

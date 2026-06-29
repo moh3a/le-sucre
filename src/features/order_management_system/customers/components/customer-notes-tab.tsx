@@ -38,14 +38,14 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
       refetch();
       set_show_form(false);
       set_content("");
-      toast.success("Note ajoutée");
+      toast.success(t("note_added"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   const toggle_pin = trpc.operations.customerTogglePinNote.useMutation({
     onSuccess: () => refetch(),
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
 
   return (

@@ -39,3 +39,25 @@ export {
   is_executable_content,
   is_image_file,
 } from "./upload";
+export { login_protection_service, LoginProtectionService } from "./login-protection";
+export {
+  encode_html,
+  encode_html_attr,
+  encode_js_string,
+  encode_url_param,
+  encode_json_for_html,
+  sanitize_rich_text,
+  RENDER_OUTPUT,
+} from "./output-encoding";
+export { data_serializer, DataSerializer } from "./serializer";
+export {
+  validate_search_complexity,
+  validate_filter_params,
+  SEARCH_SECURITY_LIMITS,
+} from "./search-security";
+export {
+  authorization_audit_service,
+  AuthorizationAuditService,
+} from "./authorization-audit";
+export { validate_session } from "./session-middleware";
+

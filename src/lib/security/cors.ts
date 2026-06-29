@@ -30,12 +30,15 @@ export function get_cors_origin(origin: string | null): string {
 
 export function cors_headers(origin: string | null): Record<string, string> {
   const allowed_origin = get_cors_origin(origin);
-  return {
-    "Access-Control-Allow-Origin": allowed_origin || "null",
+  const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": ALLOWED_METHODS.join(", "),
     "Access-Control-Allow-Headers": ALLOWED_HEADERS.join(", "),
     "Access-Control-Expose-Headers": EXPOSED_HEADERS.join(", "),
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Max-Age": String(MAX_AGE_SEC),
   };
+  if (allowed_origin) {
+    headers["Access-Control-Allow-Origin"] = allowed_origin;
+  }
+  return headers;
 }

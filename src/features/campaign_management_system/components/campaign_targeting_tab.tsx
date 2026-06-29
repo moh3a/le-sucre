@@ -37,11 +37,11 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
 
   const update_campaign = trpc.campaigns.update.useMutation({
     onSuccess: () => {
-      toast.success("Règles de ciblage enregistrées");
+      toast.success(t("targeting_saved"));
       utils.campaigns.byId.invalidate({ id: campaign.id });
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la mise à jour");
+      toast.error(err.message || t("error_updating"));
     },
   });
 
@@ -76,7 +76,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
     // Validate rules
     for (const rule of rules) {
       if (rule.target_type !== "all" && !rule.target_value && !rule.behavior_rule) {
-        toast.error("Veuillez spécifier une valeur ou une règle de comportement");
+        toast.error(t("targeting_value_required"));
         return;
       }
     }
@@ -107,7 +107,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
         </div>
         <Button onClick={handleAddRule} variant="outline" className="border-dashed">
           <Plus className="mr-2 h-4 w-4" />
-          Ajouter une règle
+          {t("add_rule_button")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -131,7 +131,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
               >
                 {/* Inclusive / Exclusive */}
                 <div className="w-[120px]">
-                  <FieldLabel className="text-xs">Action</FieldLabel>
+                  <FieldLabel className="text-xs">{t("action_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
                     value={rule.is_inclusive ? "true" : "false"}
@@ -139,14 +139,14 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                       handleRuleChange(idx, "is_inclusive", e.target.value === "true")
                     }
                   >
-                    <option value="true">Inclure</option>
-                    <option value="false">Exclure</option>
+                    <option value="true">{t("include")}</option>
+                    <option value="false">{t("exclude")}</option>
                   </select>
                 </div>
 
                 {/* Target Type */}
                 <div className="w-[180px]">
-                  <FieldLabel className="text-xs">Type de cible</FieldLabel>
+                  <FieldLabel className="text-xs">{t("target_type_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
                     value={rule.target_type}
@@ -157,13 +157,13 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                       handleRuleChange(idx, "behavior_rule", "");
                     }}
                   >
-                    <option value={TARGET_TYPE.all}>Tous les utilisateurs</option>
-                    <option value={TARGET_TYPE.country}>Pays (Code ISO)</option>
-                    <option value={TARGET_TYPE.language}>Langue (Locale)</option>
-                    <option value={TARGET_TYPE.customer_group}>Groupe de clients</option>
-                    <option value={TARGET_TYPE.new_customer}>Nouveaux clients</option>
-                    <option value={TARGET_TYPE.returning_customer}>Anciens clients (Retour)</option>
-                    <option value={TARGET_TYPE.behavior}>Comportement d&apos;achat</option>
+                    <option value={TARGET_TYPE.all}>{t("target_all")}</option>
+                    <option value={TARGET_TYPE.country}>{t("target_country")}</option>
+                    <option value={TARGET_TYPE.language}>{t("target_language")}</option>
+                    <option value={TARGET_TYPE.customer_group}>{t("target_customer_group")}</option>
+                    <option value={TARGET_TYPE.new_customer}>{t("target_new_customer")}</option>
+                    <option value={TARGET_TYPE.returning_customer}>{t("target_returning_customer")}</option>
+                    <option value={TARGET_TYPE.behavior}>{t("target_behavior")}</option>
                   </select>
                 </div>
 
@@ -171,13 +171,13 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                 <div className="min-w-[200px] flex-1">
                   {rule.target_type === TARGET_TYPE.country && (
                     <Field>
-                      <FieldLabel className="text-xs">Code pays (ex: DZ, FR, US)</FieldLabel>
+                      <FieldLabel className="text-xs">{t("country_code_label")}</FieldLabel>
                       <Input
                         value={rule.target_value ?? ""}
                         onChange={(e) =>
                           handleRuleChange(idx, "target_value", e.target.value.toUpperCase())
                         }
-                        placeholder="Ex: DZ"
+                        placeholder={t("target_country_placeholder")}
                         maxLength={2}
                       />
                     </Field>
@@ -185,16 +185,16 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
 
                   {rule.target_type === TARGET_TYPE.language && (
                     <Field>
-                      <FieldLabel className="text-xs font-semibold">Langue (Locale)</FieldLabel>
+                      <FieldLabel className="text-xs font-semibold">{t("target_language")}</FieldLabel>
                       <select
                         className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
                         value={rule.target_value ?? ""}
                         onChange={(e) => handleRuleChange(idx, "target_value", e.target.value)}
                       >
-                        <option value="">Sélectionner...</option>
-                        <option value="fr">Français</option>
-                        <option value="en">English</option>
-                        <option value="ar">العربية (Arabic)</option>
+                        <option value="">{t("select_placeholder")}</option>
+                        <option value="fr">{t("locale_fr")}</option>
+                        <option value="en">{t("locale_en")}</option>
+                        <option value="ar">{t("locale_ar")}</option>
                       </select>
                     </Field>
                   )}
@@ -202,12 +202,12 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                   {rule.target_type === TARGET_TYPE.customer_group && (
                     <Field>
                       <FieldLabel className="text-xs">
-                        Groupe de clients (VIP, Wholesale, etc.)
+                        {t("customer_group_label")}
                       </FieldLabel>
                       <Input
                         value={rule.target_value ?? ""}
                         onChange={(e) => handleRuleChange(idx, "target_value", e.target.value)}
-                        placeholder="Ex: vip_members"
+                        placeholder={t("target_customer_group_placeholder")}
                       />
                     </Field>
                   )}
@@ -215,26 +215,26 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                   {rule.target_type === TARGET_TYPE.behavior && (
                     <div className="grid grid-cols-2 gap-2">
                       <Field>
-                        <FieldLabel className="text-xs">Règle de comportement</FieldLabel>
+                        <FieldLabel className="text-xs">{t("behavior_rule_label")}</FieldLabel>
                         <select
                           className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
                           value={rule.behavior_rule ?? ""}
                           onChange={(e) => handleRuleChange(idx, "behavior_rule", e.target.value)}
                         >
-                          <option value="">Sélectionner...</option>
-                          <option value="viewed_product">A visité un produit</option>
-                          <option value="purchased_category">A acheté une catégorie</option>
-                          <option value="cart_abandoned">A abandonné son panier</option>
+                          <option value="">{t("select_behavior")}</option>
+                          <option value="viewed_product">{t("behavior_viewed_product")}</option>
+                          <option value="purchased_category">{t("behavior_purchased_category")}</option>
+                          <option value="cart_abandoned">{t("behavior_cart_abandoned")}</option>
                         </select>
                       </Field>
                       <Field>
                         <FieldLabel className="text-xs">
-                          Valeur de la règle (ex: ID catégorie)
+                          {t("rule_value_label")}
                         </FieldLabel>
                         <Input
                           value={rule.target_value ?? ""}
                           onChange={(e) => handleRuleChange(idx, "target_value", e.target.value)}
-                          placeholder="Ex: category_id"
+                          placeholder={t("behavior_value_placeholder")}
                         />
                       </Field>
                     </div>
@@ -244,7 +244,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                     rule.target_type === TARGET_TYPE.new_customer ||
                     rule.target_type === TARGET_TYPE.returning_customer) && (
                     <div className="text-muted-foreground pt-6 text-xs">
-                      Règle automatique ne requérant aucun paramètre additionnel.
+                      {t("auto_rule_description")}
                     </div>
                   )}
                 </div>
@@ -262,7 +262,7 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
         <div className="flex items-center justify-between border-t pt-4">
           <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <ShieldCheck className="h-4 w-4 text-[#c8d152]" />
-            Le moteur de ciblage valide ces règles en temps réel à l&apos;affichage storefront.
+            {t("targeting_engine_note")}
           </span>
           <Button
             onClick={handleSave}

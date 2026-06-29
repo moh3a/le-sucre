@@ -39,7 +39,9 @@ export function DashboardPageClient() {
           items={[
             {
               label: t("revenue_7_days"),
-              value: analytics.data?.totals?.revenue ?? "—",
+              value: analytics.data?.totals?.revenue
+                ? `${Number(analytics.data.totals.revenue).toLocaleString("fr-DZ", { maximumFractionDigits: 0 })} DZD`
+                : "—",
               description: t("revenue_desc"),
               icon: ReceiptCent,
               color: "success",

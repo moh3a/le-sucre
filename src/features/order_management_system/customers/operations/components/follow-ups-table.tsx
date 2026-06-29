@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
@@ -29,29 +30,11 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  completed: "Terminé",
-  cancelled: "Annulé",
-  rescheduled: "Reporté",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
   completed: "default",
   cancelled: "destructive",
   rescheduled: "secondary",
-};
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-const FU_TYPE_LABELS: Record<string, string> = {
-  callback: "Rappel",
-  follow_up: "Suivi",
-  reminder: "Rappel automatique",
 };
 
 const PRIORITY_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -145,15 +128,26 @@ function FacetedFilter({
 }
 
 export function FollowUpsTable() {
+  const t = useTranslations("follow_ups");
   const [page] = useQueryState("fuPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("fuPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("fuStatus", parseAsString);
+
+  const STATUS_OPTIONS = React.useMemo(
+    () => [
+      { label: t("status_pending"), value: "pending" },
+      { label: t("status_completed"), value: "completed" },
+      { label: t("status_cancelled"), value: "cancelled" },
+      { label: t("status_rescheduled"), value: "rescheduled" },
+    ],
+    [t],
+  );
 
   const utils = trpc.useUtils();
 
   const completeMutation = trpc.operations.customerCompleteFollowUp.useMutation({
     onSuccess: () => {
-      toast.success("Relance terminée");
+      toast.success(t("completed_toast"));
       utils.operations.customerListMyFollowUps.invalidate();
       utils.operations.customerGetOverdueFollowUps.invalidate();
     },
@@ -162,7 +156,7 @@ export function FollowUpsTable() {
 
   const cancelMutation = trpc.operations.customerCancelFollowUp.useMutation({
     onSuccess: () => {
-      toast.success("Relance annulée");
+      toast.success(t("cancelled_toast"));
       utils.operations.customerListMyFollowUps.invalidate();
       utils.operations.customerGetOverdueFollowUps.invalidate();
     },
@@ -179,7 +173,7 @@ export function FollowUpsTable() {
       {
         id: "title",
         accessorKey: "title",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Titre" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("title_column")} />,
         cell: ({ row }) => (
           <span className="max-w-[220px] truncate font-medium text-sm">{row.original.title}</span>
         ),
@@ -187,15 +181,15 @@ export function FollowUpsTable() {
       {
         id: "follow_up_type",
         accessorKey: "follow_up_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => (
-          <span className="text-sm">{FU_TYPE_LABELS[row.original.follow_up_type] ?? row.original.follow_up_type}</span>
+          <span className="text-sm">{t(`fu_type_${row.original.follow_up_type}`)}</span>
         ),
       },
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) =>
           row.original.order_id ? (
             <Link href={`/console/orders/${row.original.order_id}`} className="font-mono text-xs hover:underline">
@@ -208,33 +202,33 @@ export function FollowUpsTable() {
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Priorité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority_column")} />,
         cell: ({ row }) => (
           <Badge variant={PRIORITY_STYLES[row.original.priority] ?? "outline"} className="uppercase text-[10px]">
-            {row.original.priority}
+            {t(`priority_${row.original.priority}`)}
           </Badge>
         ),
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {t(`status_${row.original.status}`)}
           </Badge>
         ),
       },
       {
         id: "scheduled_at",
         accessorKey: "scheduled_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Programmé" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("scheduled_column")} />,
         cell: ({ row }) => formatDate(row.original.scheduled_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Créé" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -249,10 +243,10 @@ export function FollowUpsTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("actions_title")}</DropdownMenuLabel>
                 {r.order_id && (
                   <DropdownMenuItem asChild>
-                    <Link href={`/console/orders/${r.order_id}`}>Voir commande</Link>
+                    <Link href={`/console/orders/${r.order_id}`}>{t("view_order")}</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -260,11 +254,11 @@ export function FollowUpsTable() {
                   <>
                     <DropdownMenuItem onClick={() => completeMutation.mutate({ id: r.id })}>
                       <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                      Terminer
+                      {t("complete")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => cancelMutation.mutate({ id: r.id })}>
                       <XCircle className="mr-2 size-4 text-red-600" />
-                      Annuler
+                      {t("cancel_action")}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -302,7 +296,7 @@ export function FollowUpsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_column")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -312,7 +306,7 @@ export function FollowUpsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -322,7 +316,7 @@ export function FollowUpsTable() {
               download="follow-ups.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

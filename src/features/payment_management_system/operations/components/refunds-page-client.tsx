@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
@@ -9,6 +10,7 @@ import { RefundsTable } from "./refunds-table";
 import { RequestRefundDialog } from "./request-refund-dialog";
 
 export function RefundsPageClient() {
+  const t = useTranslations("refunds");
   const { data, isLoading } = trpc.operations.paymentListRefundRequests.useQuery({
     page: 1,
     limit: 100,
@@ -23,17 +25,17 @@ export function RefundsPageClient() {
   return (
     <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
-      title="Remboursements"
-      subtitle="Gestion des demandes de remboursement"
+      title={t("ops_title")}
+      subtitle={t("ops_subtitle")}
       actions={<RequestRefundDialog />}
       stats={
         <StatsGrid
           loading={isLoading}
           items={[
-            { label: "En attente", value: pending, icon: Clock, color: "warning" },
-            { label: "Approuvés", value: approved, icon: CheckCircle2, color: "info" },
-            { label: "Terminés", value: completed, icon: Banknote, color: "success" },
-            { label: "Échoués", value: failed, icon: XCircle, color: "error" },
+            { label: t("stats_pending"), value: pending, icon: Clock, color: "warning" },
+            { label: t("stats_approved"), value: approved, icon: CheckCircle2, color: "info" },
+            { label: t("stats_completed"), value: completed, icon: Banknote, color: "success" },
+            { label: t("stats_failed"), value: failed, icon: XCircle, color: "error" },
           ]}
         />
       }

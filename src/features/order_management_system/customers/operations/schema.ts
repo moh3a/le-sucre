@@ -88,6 +88,7 @@ export const customer_support_cases = mysqlTable(
     subject: varchar("subject", { length: 255 }).notNull(),
     description: text("description").notNull(),
     category: varchar("category", { length: 64 }).notNull().default("general"),
+    source: varchar("source", { length: 32 }).notNull().default("internal"),
     priority: varchar("priority", { length: 16 }).notNull().default("normal"),
     status: varchar("status", { length: 32 }).notNull().default("open"),
     assigned_to_user_id: varchar("assigned_to_user_id", { length: 255 }),

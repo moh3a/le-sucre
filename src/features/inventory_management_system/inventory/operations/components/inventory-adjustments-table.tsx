@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Download, MoreHorizontal, XCircle } from "lucide-react";
 
 import { QueryGuard } from "@/components/query-guard";
@@ -28,31 +29,11 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvé",
-  rejected: "Rejeté",
-  cancelled: "Annulé",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
   approved: "default",
   rejected: "destructive",
   cancelled: "destructive",
-};
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-const ADJ_TYPE_LABELS: Record<string, string> = {
-  increase: "Augmentation",
-  decrease: "Diminution",
-  damage: "Dommage",
-  loss: "Perte",
-  correction: "Correction",
 };
 
 type AdjustmentRow = {
@@ -137,15 +118,36 @@ function FacetedFilter({
 }
 
 export function InventoryAdjustmentsTable() {
+  const t = useTranslations("inventory_adjustments");
   const [page] = useQueryState("iaPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("iaPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("iaStatus", parseAsString);
 
   const utils = trpc.useUtils();
 
+  const statusLabels: Record<string, string> = {
+    pending: t("status_pending"),
+    approved: t("status_approved"),
+    rejected: t("status_rejected"),
+    cancelled: t("status_cancelled"),
+  };
+
+  const statusOptions = Object.entries(statusLabels).map(([value, label]) => ({
+    label,
+    value,
+  }));
+
+  const adjTypeLabels: Record<string, string> = {
+    increase: t("type_increase"),
+    decrease: t("type_decrease"),
+    damage: t("type_damage"),
+    loss: t("type_loss"),
+    correction: t("type_correction"),
+  };
+
   const reviewMutation = trpc.operations.inventoryReviewAdjustment.useMutation({
     onSuccess: () => {
-      toast.success("Ajustement mis à jour");
+      toast.success(t("adjustment_updated"));
       utils.operations.inventoryListAdjustmentRequests.invalidate();
       utils.operations.inventoryAdjustmentStats.invalidate();
     },
@@ -162,7 +164,7 @@ export function InventoryAdjustmentsTable() {
       {
         id: "sku_id",
         accessorKey: "sku_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.sku_id.slice(0, 14)}…</span>
         ),
@@ -170,15 +172,15 @@ export function InventoryAdjustmentsTable() {
       {
         id: "adjustment_type",
         accessorKey: "adjustment_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => (
-          <span className="text-sm">{ADJ_TYPE_LABELS[row.original.adjustment_type] ?? row.original.adjustment_type}</span>
+          <span className="text-sm">{adjTypeLabels[row.original.adjustment_type] ?? row.original.adjustment_type}</span>
         ),
       },
       {
         id: "quantity_delta",
         accessorKey: "quantity_delta",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Quantité" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("quantity_column")} />,
         cell: ({ row }) => {
           const delta = row.original.quantity_delta;
           return (
@@ -191,7 +193,7 @@ export function InventoryAdjustmentsTable() {
       {
         id: "reason",
         accessorKey: "reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Motif" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[200px] truncate text-xs">{row.original.reason}</span>
         ),
@@ -199,17 +201,17 @@ export function InventoryAdjustmentsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {statusLabels[row.original.status] ?? row.original.status}
           </Badge>
         ),
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -224,7 +226,7 @@ export function InventoryAdjustmentsTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                 {r.status === "pending" && (
                   <>
                     <DropdownMenuItem
@@ -233,7 +235,7 @@ export function InventoryAdjustmentsTable() {
                       }
                     >
                       <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                      Approuver
+                      {t("approve")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
@@ -241,7 +243,7 @@ export function InventoryAdjustmentsTable() {
                       }
                     >
                       <XCircle className="mr-2 size-4 text-red-600" />
-                      Rejeter
+                      {t("reject")}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -280,8 +282,8 @@ export function InventoryAdjustmentsTable() {
       <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
-          options={STATUS_OPTIONS}
+          title={t("filter_status")}
+          options={statusOptions}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
         />
@@ -290,7 +292,7 @@ export function InventoryAdjustmentsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -300,7 +302,7 @@ export function InventoryAdjustmentsTable() {
               download="inventory-adjustments.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

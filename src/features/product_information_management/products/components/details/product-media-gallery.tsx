@@ -30,7 +30,7 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
 
   const link_media = trpc.products.addMedia.useMutation({
     onSuccess: () => {
-      toast.success("Média ajouté depuis la bibliothèque");
+      toast.success(t("media_from_library"));
       utils.products.byId.invalidate({ id: product_id });
     },
     onError: (err) => toast.error(err.message),
@@ -54,8 +54,8 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-6">
         <div>
-          <CardTitle>Média</CardTitle>
-          <CardDescription>Gérer le contenu mediatique du produit.</CardDescription>
+          <CardTitle>{t("media_card_title")}</CardTitle>
+          <CardDescription>{t("media_card_description")}</CardDescription>
         </div>
         <div className="flex items-center gap-2">
           <MediaPickerDialog
@@ -66,7 +66,7 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
             trigger={
               <Button disabled={link_media.isPending}>
                 <ImagePlus className="mr-2 size-4" />
-                Ajouter du média
+                {t("add_media_button")}
               </Button>
             }
           />

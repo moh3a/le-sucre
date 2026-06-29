@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ArrowUpDown, BadgeDollarSign, Banknote, CreditCard, TrendingUp, Wallet } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
@@ -9,20 +10,21 @@ import { PaymentsTable } from "./payments-table";
 import { RecordPaymentDialog } from "./record-payment-dialog";
 
 export function PaymentsPageClient() {
+  const t = useTranslations("payments");
   const { data: stats, isLoading: statsLoading } = trpc.payments.adminStats.useQuery();
 
   return (
     <QueryGuard query={{ isLoading: statsLoading }}>
       <ConsolePageShell
-      title="Paiements"
-      subtitle="Gestion des transactions de paiement"
+      title={t("payments_title")}
+      subtitle={t("payments_subtitle")}
       actions={<RecordPaymentDialog />}
       stats={
         <StatsGrid
           loading={statsLoading}
           items={[
             {
-              label: "Revenu total",
+              label: t("stats_total_revenue"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",
@@ -31,25 +33,25 @@ export function PaymentsPageClient() {
               color: "success",
             },
             {
-              label: "Transactions",
+              label: t("stats_transactions"),
               value: stats?.total_transactions ?? 0,
               icon: CreditCard,
               color: "info",
             },
             {
-              label: "Réussi",
+              label: t("stats_successful"),
               value: stats?.successful_transactions ?? 0,
               icon: BadgeDollarSign,
               color: "success",
             },
             {
-              label: "Échoué",
+              label: t("stats_failed"),
               value: stats?.failed_transactions ?? 0,
               icon: Wallet,
               color: "error",
             },
             {
-              label: "Revenu net",
+              label: t("stats_net_revenue"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",
@@ -58,7 +60,7 @@ export function PaymentsPageClient() {
               color: "info",
             },
             {
-              label: "Frais totaux",
+              label: t("stats_total_fees"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",
@@ -67,13 +69,13 @@ export function PaymentsPageClient() {
               color: "warning",
             },
             {
-              label: "En attente",
+              label: t("stats_pending"),
               value: stats?.pending_transactions ?? 0,
               icon: CreditCard,
               color: "warning",
             },
             {
-              label: "Remboursé",
+              label: t("stats_refunded"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",

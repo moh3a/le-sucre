@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Clock, Package, RefreshCcw, Truck, XCircle } from "lucide-react";
 
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -7,6 +8,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function ShippingStats() {
+  const t = useTranslations("shipping");
   const { data, isFetching, isLoading, error } = trpc.shipping.adminStats.useQuery();
 
   return (
@@ -15,37 +17,37 @@ export function ShippingStats() {
       loading={isFetching || isLoading}
       items={[
         {
-          label: "Expéditions totales",
+          label: t("stats_total_shipments"),
           value: data?.total ?? 0,
           icon: Truck,
           color: "info",
         },
         {
-          label: "Brouillons",
+          label: t("stats_draft"),
           value: data?.draft ?? 0,
           icon: Package,
           color: "default",
         },
         {
-          label: "En transit",
+          label: t("stats_in_transit"),
           value: data?.in_transit ?? 0,
           icon: RefreshCcw,
           color: "warning",
         },
         {
-          label: "Livrées",
+          label: t("stats_delivered"),
           value: data?.delivered ?? 0,
           icon: CheckCircle2,
           color: "success",
         },
         {
-          label: "Échecs",
+          label: t("stats_failed"),
           value: data?.failed ?? 0,
           icon: XCircle,
           color: "error",
         },
         {
-          label: "Sync en attente",
+          label: t("stats_pending_sync"),
           value: data?.pending_sync ?? 0,
           icon: Clock,
           color: "warning",

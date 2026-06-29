@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -38,20 +39,6 @@ interface Option {
   label: string;
   value: string;
 }
-
-const RISK_OPTIONS: Option[] = [
-  { label: "Critique", value: "critical" },
-  { label: "Élevé", value: "high" },
-  { label: "Normal", value: "normal" },
-  { label: "Faible", value: "low" },
-];
-
-const RISK_BADGES: Record<string, { label: string; variant: "destructive" | "secondary" | "default" | "outline" }> = {
-  critical: { label: "Critique", variant: "destructive" },
-  high: { label: "Élevé", variant: "secondary" },
-  normal: { label: "Normal", variant: "default" },
-  low: { label: "Faible", variant: "outline" },
-};
 
 const RISK_SORT_ORDER: Record<string, number> = {
   critical: 4,
@@ -126,6 +113,7 @@ function FacetedFilter({
 }
 
 export function ForecastTable() {
+  const t = useTranslations("forecast");
   const [page, setPage] = useQueryState("fcPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("fcPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("fcSearch", parseAsString);
@@ -137,6 +125,20 @@ export function ForecastTable() {
     limit: per_page,
   });
 
+  const riskOptions: Option[] = [
+    { label: t("risk_critical"), value: "critical" },
+    { label: t("risk_high"), value: "high" },
+    { label: t("risk_normal"), value: "normal" },
+    { label: t("risk_low"), value: "low" },
+  ];
+
+  const riskBadges: Record<string, { label: string; variant: "destructive" | "secondary" | "default" | "outline" }> = {
+    critical: { label: t("risk_critical"), variant: "destructive" },
+    high: { label: t("risk_high"), variant: "secondary" },
+    normal: { label: t("risk_normal"), variant: "default" },
+    low: { label: t("risk_low"), variant: "outline" },
+  };
+
   const columns = React.useMemo<ColumnDef<ForecastRow>[]>(
     () => [
       {
@@ -147,7 +149,7 @@ export function ForecastTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Produit" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
         cell: ({ row }) => (
           <span className="text-sm font-medium">{row.original.product_name ?? "—"}</span>
         ),
@@ -155,15 +157,15 @@ export function ForecastTable() {
       {
         id: "sku_code",
         accessorKey: "sku_code",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Code SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_code_column")} />,
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.sku_code}</span>,
       },
       {
         id: "risk_level",
         accessorKey: "risk_level",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Niveau de Risque" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("risk_level_column")} />,
         cell: ({ row }) => {
-          const cfg = RISK_BADGES[row.original.risk_level] ?? {
+          const cfg = riskBadges[row.original.risk_level] ?? {
             label: row.original.risk_level,
             variant: "outline" as const,
           };
@@ -174,14 +176,14 @@ export function ForecastTable() {
         id: "avg_daily_sales",
         accessorKey: "avg_daily_sales",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Ventes Journalières" />
+          <DataTableColumnHeader column={column} label={t("daily_sales_column")} />
         ),
         cell: ({ row }) => Number(row.original.avg_daily_sales).toFixed(2),
       },
       {
         id: "current_stock",
         accessorKey: "current_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Stock Actuel" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("stock_on_hand_column")} />,
         cell: ({ row }) =>
           row.original.current_stock != null ? (
             <Badge
@@ -202,7 +204,7 @@ export function ForecastTable() {
       {
         id: "reserved_stock",
         accessorKey: "reserved_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Réservé" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reserved_column")} />,
         cell: ({ row }) =>
           row.original.reserved_stock != null ? (
             <span className="text-muted-foreground text-sm">{row.original.reserved_stock}</span>
@@ -214,13 +216,13 @@ export function ForecastTable() {
         id: "days_until_stockout",
         accessorKey: "days_until_stockout",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Jours Avant Rupture" />
+          <DataTableColumnHeader column={column} label={t("days_until_stockout_column")} />
         ),
         cell: ({ row }) => {
           const days = row.original.days_until_stockout;
           if (days == null) return "—";
           return days <= 0 ? (
-            <span className="text-destructive font-bold">En rupture</span>
+            <span className="text-destructive font-bold">{t("risk_critical")}</span>
           ) : (
             <span
               className={
@@ -231,7 +233,7 @@ export function ForecastTable() {
                     : ""
               }
             >
-              {days} jours
+              {days} {t("days_remaining_column")}
             </span>
           );
         },
@@ -240,11 +242,11 @@ export function ForecastTable() {
         id: "recommended_reorder_qty",
         accessorKey: "recommended_reorder_qty",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Qte Réappro." />
+          <DataTableColumnHeader column={column} label={t("reorder_qty_column")} />
         ),
         cell: ({ row }) => (
           <span className="font-medium">
-            {row.original.recommended_reorder_qty.toLocaleString("fr-FR")}
+            {row.original.recommended_reorder_qty.toLocaleString()}
           </span>
         ),
       },
@@ -252,18 +254,18 @@ export function ForecastTable() {
         id: "safety_stock",
         accessorKey: "safety_stock",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Stock Sécurité" />
+          <DataTableColumnHeader column={column} label={t("safety_stock_column")} />
         ),
-        cell: ({ row }) => row.original.safety_stock.toLocaleString("fr-FR"),
+        cell: ({ row }) => row.original.safety_stock.toLocaleString(),
       },
       {
         id: "computed_at",
         accessorKey: "computed_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date Calcul" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("calculation_date_column")} />,
         cell: ({ row }) => formatDate(row.original.computed_at, { month: "short" }),
       },
     ],
-    [],
+    [riskBadges, t],
   );
 
   const items = ((data?.items ?? []) as ForecastRow[]).filter((item) => {
@@ -299,7 +301,7 @@ export function ForecastTable() {
       <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <Input
-          placeholder="Rechercher par produit ou SKU…"
+          placeholder={t("search_placeholder")}
           value={search || ""}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -308,8 +310,8 @@ export function ForecastTable() {
           className="max-w-sm"
         />
         <FacetedFilter
-          title="Niveau de Risque"
-          options={RISK_OPTIONS}
+          title={t("risk_level_title")}
+          options={riskOptions}
           icon={XCircle}
           value={risk_level ?? undefined}
           onChange={(val) => {

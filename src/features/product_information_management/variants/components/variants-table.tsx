@@ -38,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { PriceTierManager } from "./price-tier-manager";
 
 type SkuOption = {
   property_code: string;
@@ -413,13 +414,18 @@ export function VariantsTable() {
                   {t("manage")}
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPricingSkuId(row.original.id)}>
+                Tarifs
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
       },
     ],
-    [copiedId],
+    [copiedId, t],
   );
+
+  const [pricingSkuId, setPricingSkuId] = React.useState<string | null>(null);
 
   const [page, setPage] = useQueryState("varPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("varPerPage", parseAsInteger.withDefault(20));
@@ -545,6 +551,11 @@ export function VariantsTable() {
           </div>
         )}
       </DataTable>
+      <PriceTierManager
+        skuId={pricingSkuId ?? ""}
+        open={pricingSkuId !== null}
+        onOpenChange={(open) => { if (!open) setPricingSkuId(null); }}
+      />
     </QueryGuard>
   );
 }

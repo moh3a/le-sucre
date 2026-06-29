@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Banknote, CheckCircle2, Clock, RefreshCcw, Wallet, XCircle } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
@@ -9,26 +10,27 @@ import { PayoutsTable } from "./payouts-table";
 import { CreatePayoutDialog } from "./create-payout-dialog";
 
 export function PayoutsPageClient() {
+  const t = useTranslations("payouts");
   const { data: stats, isFetching: statsLoading } = trpc.payments.adminPayoutStats.useQuery();
 
   return (
     <QueryGuard query={{ isLoading: statsLoading }}>
     <ConsolePageShell
-      title="Paiements fournisseurs"
-      subtitle="Gestion des paiements aux vendeurs et fournisseurs"
+      title={t("title")}
+      subtitle={t("subtitle")}
       actions={<CreatePayoutDialog />}
       stats={
         <StatsGrid
           loading={statsLoading}
           items={[
             {
-              label: "Total paiements",
+              label: t("stats_total"),
               value: stats?.total_payouts ?? 0,
               icon: Banknote,
               color: "info",
             },
             {
-              label: "En attente",
+              label: t("stats_pending"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",
@@ -37,19 +39,19 @@ export function PayoutsPageClient() {
               color: "warning",
             },
             {
-              label: "Complétés",
+              label: t("stats_completed"),
               value: stats?.completed_payouts ?? 0,
               icon: CheckCircle2,
               color: "success",
             },
             {
-              label: "Échoués",
+              label: t("stats_failed"),
               value: stats?.failed_payouts ?? 0,
               icon: XCircle,
               color: "error",
             },
             {
-              label: "Montant brut",
+              label: t("stats_gross"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",
@@ -58,7 +60,7 @@ export function PayoutsPageClient() {
               color: "info",
             },
             {
-              label: "Commission totale",
+              label: t("stats_commission"),
               value: new Intl.NumberFormat("fr-DZ", {
                 style: "currency",
                 currency: "DZD",

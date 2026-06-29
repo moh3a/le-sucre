@@ -1,8 +1,6 @@
 import "server-only";
-
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
-
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
@@ -10,6 +8,9 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { AUTH_ERROR } from "@/features/authentication_and_authorization/auth/constants/error-codes";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { ROLE_NAMES } from "@/features/authentication_and_authorization/authorization/constants/roles";
+import { login_protection_service } from "@/lib/security/login-protection";
+import { logger } from "@/lib/logger";
+
 
 /**
  * Normalizes an Algerian phone number to international format (+213XXXXXXXXX).
@@ -82,6 +83,24 @@ export class PhoneAuthService {
    */
   async sign_in(input: { phone: string; password: string; remember_me?: boolean }) {
     const phone = normalize_phone(input.phone);
+    const ip = "unknown"; // Default if request IP headers are not available during local service call
+
+    // 1. Check login attempts and lockouts
+    const login_check = await login_protection_service.check_attempt(ip, phone);
+    if (!login_check.allowed) {
+      throw_error({
+        ...AUTH_ERROR.ACCOUNT_LOCKED,
+        message: {
+          fr: `Compte verrouillé. Réessayez dans ${login_check.lockoutRemainingSec} secondes.`,
+          en: `Account locked. Retry in ${login_check.lockoutRemainingSec} seconds.`,
+          ar: `الحساب مغلق. أعد المحاولة بعد ${login_check.lockoutRemainingSec} ثانية.`,
+        },
+      });
+    }
+
+    if (login_check.backoffDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, login_check.backoffDelayMs));
+    }
 
     const user = await db
       .select({ id: users.id, email: users.email })
@@ -90,19 +109,31 @@ export class PhoneAuthService {
       .limit(1);
 
     if (user.length === 0) {
+      // Record failed attempt to prevent enum
+      await login_protection_service.record_failure(ip, phone);
       throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
     }
 
-    // Sign in via Better Auth using the user's email (auto-generated from phone)
-    const result = await auth.api.signInEmail({
-      body: {
-        email: user[0].email,
-        password: input.password,
-        rememberMe: input.remember_me ?? false,
-      },
-    });
+    try {
+      // Sign in via Better Auth using the user's email (auto-generated from phone)
+      const result = await auth.api.signInEmail({
+        body: {
+          email: user[0].email,
+          password: input.password,
+          rememberMe: input.remember_me ?? false,
+        },
+      });
 
-    return result;
+      // 2. Reset failures on success
+      await login_protection_service.record_success(ip, phone, user[0].id);
+
+      return result;
+    } catch (e) {
+      logger.warn(`Failed login attempt for user`, { userId: user[0].id, error: e instanceof Error ? e.message : String(e) });
+      // 3. Record failed attempt on credentials mismatch
+      await login_protection_service.record_failure(ip, phone, user[0].id);
+      throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
+    }
   }
 
   /** Resolve phone to user info (for internal lookups). */

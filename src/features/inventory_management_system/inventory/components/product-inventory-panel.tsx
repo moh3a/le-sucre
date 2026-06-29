@@ -66,25 +66,25 @@ export function ProductInventoryPanel({ product_id }: ProductInventoryPanelProps
           loading={isLoading}
           items={[
             {
-              label: "Nombre de SKUs",
+              label: t("sku_count"),
               value: data?.items.length ?? 0,
               icon: Package,
               color: "info",
             },
             {
-              label: "Total disponible",
+              label: t("total_available"),
               value: data?.items.reduce((sum, item) => sum + item.stock_available, 0) ?? 0,
               icon: Package,
               color: "info",
             },
             {
-              label: "Total en stock",
+              label: t("total_on_hand"),
               value: data?.items.reduce((sum, item) => sum + item.quantity_on_hand, 0) ?? 0,
               icon: Package,
               color: "success",
             },
             {
-              label: "Total réservé",
+              label: t("total_reserved"),
               value: data?.items.reduce((sum, item) => sum + item.quantity_reserved, 0) ?? 0,
               icon: Truck,
               color: "default",

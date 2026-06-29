@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -26,13 +27,14 @@ type Props = {
 };
 
 export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
+  const t = useTranslations("inventory");
   const utils = trpc.useUtils();
   const [receive_qty, set_receive_qty] = useState("");
   const [adjust_qty, set_adjust_qty] = useState("");
 
   const receive = trpc.inventory.receiveStock.useMutation({
     onSuccess: async () => {
-      toast.success("Stock réceptionné avec succès");
+      toast.success(t("stock_received"));
       await utils.inventory.adminListStock.invalidate();
       await utils.inventory.adminStats.invalidate();
       await utils.inventory.adminCharts.invalidate();
@@ -43,7 +45,7 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
 
   const adjust = trpc.inventory.adjustStock.useMutation({
     onSuccess: async () => {
-      toast.success("Stock ajusté avec succès");
+      toast.success(t("stock_adjusted"));
       await utils.inventory.adminListStock.invalidate();
       await utils.inventory.adminStats.invalidate();
       await utils.inventory.adminCharts.invalidate();
@@ -59,7 +61,7 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ajuster le stock</DialogTitle>
+          <DialogTitle>{t("adjust_stock_title")}</DialogTitle>
           <DialogDescription>
             SKU: <span className="font-mono font-medium">{row.sku_code}</span>
             {" — "}
@@ -69,18 +71,18 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
 
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Badge variant="default">En stock: {row.quantity_on_hand}</Badge>
-            <Badge variant="secondary">Réservé: {row.quantity_reserved}</Badge>
+            <Badge variant="default">{t("on_hand")}: {row.quantity_on_hand}</Badge>
+            <Badge variant="secondary">{t("reserved")}: {row.quantity_reserved}</Badge>
             <Badge variant={row.stock_available === 0 ? "destructive" : is_low ? "secondary" : "default"}>
-              Disponible: {row.stock_available}
+              {t("available")}: {row.stock_available}
             </Badge>
-            <Badge variant="outline">Entrepôt: {row.warehouse_id}</Badge>
+            <Badge variant="outline">{t("warehouse")}: {row.warehouse_id}</Badge>
           </div>
 
           <div className="grid gap-4 pt-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="receive">Réceptionner</Label>
+                <Label htmlFor="receive">{t("receive_quantity")}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="receive"
@@ -88,7 +90,7 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
                     min={1}
                     value={receive_qty}
                     onChange={(e) => set_receive_qty(e.target.value)}
-                    placeholder="Qté"
+                    placeholder={t("quantity_placeholder")}
                   />
                   <Button
                     type="button"
@@ -102,20 +104,20 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
                       })
                     }
                   >
-                    OK
+                    {t("ok")}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adjust">Ajuster (+/-)</Label>
+                <Label htmlFor="adjust">{t("adjust_stock")} (+/-)</Label>
                 <div className="flex gap-2">
                   <Input
                     id="adjust"
                     type="number"
                     value={adjust_qty}
                     onChange={(e) => set_adjust_qty(e.target.value)}
-                    placeholder="Delta"
+                    placeholder={t("delta_placeholder")}
                   />
                   <Button
                     type="button"
@@ -131,7 +133,7 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
                       })
                     }
                   >
-                    OK
+                    {t("ok")}
                   </Button>
                 </div>
               </div>
@@ -141,7 +143,7 @@ export function InventoryStockDialog({ row, open, onOpenChange }: Props) {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fermer
+            {t("close")}
           </Button>
         </DialogFooter>
       </DialogContent>

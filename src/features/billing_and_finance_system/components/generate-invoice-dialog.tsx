@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Plus, FileText } from "lucide-react";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +20,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function GenerateInvoiceDialog() {
+  const t = useTranslations("invoices");
   const [open, setOpen] = React.useState(false);
   const [order_id, setOrderId] = React.useState("");
 
@@ -26,7 +28,7 @@ export function GenerateInvoiceDialog() {
 
   const generate = trpc.invoices.generate_invoice.useMutation({
     onSuccess: () => {
-      toast.success("Facture générée avec succès");
+      toast.success(t("generate_success"));
       setOpen(false);
       setOrderId("");
       void utils.invoices.list_invoices.invalidate();
@@ -45,24 +47,24 @@ export function GenerateInvoiceDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Générer une facture
+          {t("generate_trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Générer une facture</DialogTitle>
+          <DialogTitle>{t("generate_title")}</DialogTitle>
           <DialogDescription>
-            Générer une facture à partir d&apos;une commande existante.
+            {t("generate_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Commande</Label>
+            <Label>{t("order_id_label")}</Label>
             <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
           </div>
           <Button type="submit" className="w-full" disabled={generate.isPending}>
             <FileText />
-            Générer la facture
+            {t("generate_button")}
           </Button>
         </form>
       </DialogContent>

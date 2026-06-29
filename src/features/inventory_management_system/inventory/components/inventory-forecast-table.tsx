@@ -28,48 +28,48 @@ export function InventoryForecastTable() {
   const t = useTranslations("forecast");
   const RISK_BADGES: Record<
     string,
-    { label: string; variant: "destructive" | "warning" | "secondary" | "default" }
+    { label: string; variant: "destructive" | "outline" | "secondary" | "default" }
   > = {
-    critical: { label: t("critical"), variant: "destructive" },
-    high: { label: t("high"), variant: "warning" },
-    normal: { label: t("normal"), variant: "default" },
-    low: { label: t("low"), variant: "secondary" },
+    critical: { label: t("risk_critical"), variant: "destructive" },
+    high: { label: t("risk_high"), variant: "secondary" },
+    normal: { label: t("risk_normal"), variant: "default" },
+    low: { label: t("risk_low"), variant: "outline" },
   };
   const columns = React.useMemo<ColumnDef<ForecastRow>[]>(
     () => [
       {
         id: "sku_code",
         accessorKey: "sku_code",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Code SKU" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_code_column")} />,
         cell: ({ row }) => <span className="font-mono font-medium">{row.original.sku_code ?? "—"}</span>,
       },
       {
         id: "current_stock",
         accessorKey: "current_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Stock Actuel" />,
-        cell: ({ row }) => (row.original.current_stock ?? 0).toLocaleString("fr-FR"),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("current_stock_column")} />,
+        cell: ({ row }) => (row.original.current_stock ?? 0).toLocaleString(),
       },
       {
         id: "reserved_stock",
         accessorKey: "reserved_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Réservé" />,
-        cell: ({ row }) => (row.original.reserved_stock ?? 0).toLocaleString("fr-FR"),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reserved_column")} />,
+        cell: ({ row }) => (row.original.reserved_stock ?? 0).toLocaleString(),
       },
       {
         id: "avg_daily_sales",
         accessorKey: "avg_daily_sales",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Ventes/j" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sales_per_day_column")} />,
         cell: ({ row }) => Number(row.original.avg_daily_sales || 0).toFixed(2),
       },
       {
         id: "days_until_stockout",
         accessorKey: "days_until_stockout",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Jours restants" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("days_remaining_column")} />,
         cell: ({ row }) => {
           const days = row.original.days_until_stockout;
           if (days === null || days === undefined) return "—";
           return days <= 0 ? (
-            <span className="text-destructive font-bold">En rupture (0)</span>
+            <span className="text-destructive font-bold">{t("risk_critical")} (0)</span>
           ) : (
             <span
               className={
@@ -80,7 +80,7 @@ export function InventoryForecastTable() {
                     : ""
               }
             >
-              {days} jours
+              {days} {t("days_remaining_column")}
             </span>
           );
         },
@@ -88,27 +88,27 @@ export function InventoryForecastTable() {
       {
         id: "recommended_reorder_qty",
         accessorKey: "recommended_reorder_qty",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Réappro." />,
-        cell: ({ row }) => (row.original.recommended_reorder_qty ?? 0).toLocaleString("fr-FR"),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reorder_column")} />,
+        cell: ({ row }) => (row.original.recommended_reorder_qty ?? 0).toLocaleString(),
       },
       {
         id: "risk_level",
         accessorKey: "risk_level",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Risque" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("risk_column")} />,
         cell: ({ row }) => {
           const risk = row.original.risk_level;
           if (!risk) return "—";
           const cfg = RISK_BADGES[risk] ?? {
             label: risk,
-            variant: "outline",
+            variant: "outline" as const,
           };
           return (
-            <Badge variant={cfg.variant === "warning" ? "outline" : cfg.variant}>{cfg.label}</Badge>
+            <Badge variant={cfg.variant}>{cfg.label}</Badge>
           );
         },
       },
     ],
-    [],
+    [RISK_BADGES, t],
   );
 
   const [page] = useQueryState("invPage", parseAsInteger.withDefault(1));

@@ -14,6 +14,7 @@ import { ProductOrdersPanel } from "./product-orders-panel";
 import { ProductDetailGeneralTab } from "./general-tab";
 import { ProductAnalyticsPanel } from "./product-analytics-panel";
 import { ProductRecommendationsTab } from "./product-recommendations-tab";
+import { ProductChangeLog } from "@/features/product_information_management/products/operations/components/product-change-log";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
@@ -26,6 +27,7 @@ const outer_tab_schema = z.enum([
   "reviews",
   "analytics",
   "recommendations",
+  "journal",
 ]);
 
 type Props = {
@@ -74,6 +76,7 @@ export function ProductDetailTabs({ product_id }: Props) {
               <TabsTrigger value="reviews">Avis</TabsTrigger>
               <TabsTrigger value="analytics">Analytique</TabsTrigger>
               <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
+              <TabsTrigger value="journal">Journal</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
@@ -118,6 +121,10 @@ export function ProductDetailTabs({ product_id }: Props) {
 
             <TabsContent value="recommendations" className="space-y-6">
               <ProductRecommendationsTab product_id={product_id} />
+            </TabsContent>
+
+            <TabsContent value="journal" className="space-y-6">
+              <ProductChangeLog product_id={product_id} />
             </TabsContent>
           </Tabs>
         </>

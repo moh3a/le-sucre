@@ -75,7 +75,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
   // Mutations
   const add_banner = trpc.campaigns.addBanner.useMutation({
     onSuccess: () => {
-      toast.success("Bannière ajoutée");
+      toast.success(t("banner_added"));
       utils.campaigns.byId.invalidate({ id: campaign_id });
       setIsOpen(false);
     },
@@ -84,7 +84,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
   const update_banner = trpc.campaigns.updateBanner.useMutation({
     onSuccess: () => {
-      toast.success("Bannière mise à jour");
+      toast.success(t("banner_updated"));
       utils.campaigns.byId.invalidate({ id: campaign_id });
       setIsOpen(false);
     },
@@ -93,7 +93,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
   const delete_banner = trpc.campaigns.deleteBanner.useMutation({
     onSuccess: () => {
-      toast.success("Bannière supprimée");
+      toast.success(t("banner_deleted"));
       utils.campaigns.byId.invalidate({ id: campaign_id });
     },
     onError: (err) => toast.error(err.message),
@@ -165,7 +165,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Voulez-vous vraiment supprimer cette bannière ?")) {
+    if (confirm(t("confirm_delete_banner"))) {
       await delete_banner.mutateAsync({ id });
     }
   };
@@ -173,7 +173,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formState.image_url && !formState.video_url) {
-      toast.error("Veuillez renseigner une image URL ou une vidéo URL");
+      toast.error(t("banner_image_video_required"));
       return;
     }
 
@@ -234,13 +234,13 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={banner.image_url}
-                        alt={banner.alt_text || "Bannière"}
+                        alt={banner.alt_text || t("no_title")}
                         className="h-full w-full object-cover"
                       />
                     ) : (
                       <div className="text-muted-foreground flex flex-col items-center p-4 text-xs">
                         <ShieldAlert className="mb-1 h-6 w-6" />
-                        <span>Pas d&apos;image (vidéo uniquement)</span>
+                        <span>{t("no_image_video")}</span>
                       </div>
                     )}
                     <div className="absolute top-2 right-2 flex gap-1">
@@ -251,22 +251,22 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                         variant={banner.is_active ? "default" : "outline"}
                         className="text-[10px]"
                       >
-                        {banner.is_active ? "Actif" : "Inactif"}
+                        {banner.is_active ? t("status_active_label") : t("status_inactive_label")}
                       </Badge>
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col justify-between space-y-2 p-4">
                     <div>
                       <h4 className="truncate text-sm font-semibold">
-                        {banner.overlay_content?.fr?.headline || banner.alt_text || "Sans titre"}
+                        {banner.overlay_content?.fr?.headline || banner.alt_text || t("no_title")}
                       </h4>
                       <p className="text-muted-foreground mt-1 line-clamp-2 text-xs">
-                        {banner.overlay_content?.fr?.body || "Pas de description."}
+                        {banner.overlay_content?.fr?.body || t("no_description")}
                       </p>
                       <div className="text-muted-foreground mt-3 flex items-center gap-4 border-t pt-3 text-xs">
                         <div className="flex items-center gap-1">
                           <Layers className="h-3 w-3" />
-                          <span>Ordre: {banner.sort_order}</span>
+                          <span>{t("order_label", { order: banner.sort_order })}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           {banner.device_target === "desktop" && <Monitor className="h-3 w-3" />}
@@ -307,23 +307,23 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
             <form onSubmit={handleSave} className="space-y-4 pt-2">
               <div className="grid gap-4 md:grid-cols-2">
                 <Field>
-                  <FieldLabel>Type de bannière</FieldLabel>
+                  <FieldLabel>{t("banner_type_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     value={formState.banner_type}
                     onChange={(e) => setFormState({ ...formState, banner_type: e.target.value })}
                   >
-                    <option value={BANNER_TYPE.hero}>Hero (Grand en-tête)</option>
-                    <option value={BANNER_TYPE.sidebar}>Barre latérale</option>
-                    <option value={BANNER_TYPE.popup}>Pop-up modal</option>
-                    <option value={BANNER_TYPE.inline}>Bannière en ligne</option>
-                    <option value={BANNER_TYPE.countdown_bar}>Barre compte à rebours</option>
-                    <option value={BANNER_TYPE.notification_bar}>Barre de notification</option>
+                    <option value={BANNER_TYPE.hero}>{t("banner_type_hero")}</option>
+                    <option value={BANNER_TYPE.sidebar}>{t("banner_type_sidebar")}</option>
+                    <option value={BANNER_TYPE.popup}>{t("banner_type_popup")}</option>
+                    <option value={BANNER_TYPE.inline}>{t("banner_type_inline")}</option>
+                    <option value={BANNER_TYPE.countdown_bar}>{t("banner_type_countdown_bar")}</option>
+                    <option value={BANNER_TYPE.notification_bar}>{t("banner_type_notification_bar")}</option>
                   </select>
                 </Field>
 
                 <Field>
-                  <FieldLabel>Cible appareil</FieldLabel>
+                  <FieldLabel>{t("device_target_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     value={formState.device_target}
@@ -331,21 +331,21 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                       setFormState({ ...formState, device_target: e.target.value as DeviceTarget })
                     }
                   >
-                    <option value="both">Tous les appareils</option>
-                    <option value="desktop">Ordinateurs uniquement</option>
-                    <option value="mobile">Mobiles uniquement</option>
+                    <option value="both">{t("device_all")}</option>
+                    <option value="desktop">{t("device_desktop")}</option>
+                    <option value="mobile">{t("device_mobile")}</option>
                   </select>
                 </Field>
               </div>
 
               <div className="space-y-3">
                 <Field>
-                  <FieldLabel>Image (Desktop / Principal)</FieldLabel>
+                  <FieldLabel>{t("desktop_image_label")}</FieldLabel>
                   <div className="flex gap-2">
                     <Input
                       value={formState.image_url}
                       onChange={(e) => setFormState({ ...formState, image_url: e.target.value })}
-                      placeholder="https://example.com/images/banner.jpg"
+                      placeholder={t("banner_image_desktop_placeholder")}
                       className="flex-1"
                     />
                     <MediaPickerDialog
@@ -353,7 +353,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                         setFormState({ ...formState, image_url: media.url })
                       }
                       trigger={
-                        <Button type="button" variant="outline" size="icon" title="Choisir depuis la médiathèque">
+                        <Button type="button" variant="outline" size="icon" title={t("choose_from_media")}>
                           <ImagePlus className="size-4" />
                         </Button>
                       }
@@ -362,14 +362,14 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                 </Field>
 
                 <Field>
-                  <FieldLabel>Image (Mobile)</FieldLabel>
+                  <FieldLabel>{t("mobile_image_label")}</FieldLabel>
                   <div className="flex gap-2">
                     <Input
                       value={formState.mobile_image_url}
                       onChange={(e) =>
                         setFormState({ ...formState, mobile_image_url: e.target.value })
                       }
-                      placeholder="https://example.com/banner-mobile.jpg (facultatif)"
+                      placeholder={t("banner_image_mobile_placeholder")}
                       className="flex-1"
                     />
                     <MediaPickerDialog
@@ -377,7 +377,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                         setFormState({ ...formState, mobile_image_url: media.url })
                       }
                       trigger={
-                        <Button type="button" variant="outline" size="icon" title="Choisir depuis la médiathèque">
+                        <Button type="button" variant="outline" size="icon" title={t("choose_from_media")}>
                           <ImagePlus className="size-4" />
                         </Button>
                       }
@@ -386,12 +386,12 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                 </Field>
 
                 <Field>
-                  <FieldLabel>Vidéo</FieldLabel>
+                  <FieldLabel>{t("video_label")}</FieldLabel>
                   <div className="flex gap-2">
                     <Input
                       value={formState.video_url}
                       onChange={(e) => setFormState({ ...formState, video_url: e.target.value })}
-                      placeholder="https://example.com/videos/banner.mp4 (facultatif)"
+                      placeholder={t("banner_video_placeholder")}
                       className="flex-1"
                     />
                     <MediaPickerDialog
@@ -400,7 +400,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                       }
                       allowed_types={["video"]}
                       trigger={
-                        <Button type="button" variant="outline" size="icon" title="Choisir depuis la médiathèque">
+                        <Button type="button" variant="outline" size="icon" title={t("choose_from_media")}>
                           <Video className="size-4" />
                         </Button>
                       }
@@ -411,16 +411,16 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <Field>
-                  <FieldLabel>Texte alternatif (SEO / Accessibilité)</FieldLabel>
+                  <FieldLabel>{t("alt_text_label")}</FieldLabel>
                   <Input
                     value={formState.alt_text}
                     onChange={(e) => setFormState({ ...formState, alt_text: e.target.value })}
-                    placeholder="Ex: Collection été homme"
+                    placeholder={t("banner_alt_text_placeholder")}
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel>Ordre d&apos;affichage</FieldLabel>
+                  <FieldLabel>{t("sort_order_label")}</FieldLabel>
                   <Input
                     type="number"
                     value={formState.sort_order}
@@ -433,16 +433,16 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
               <div className="grid gap-4 md:grid-cols-3">
                 <Field>
-                  <FieldLabel>Lien URL</FieldLabel>
+                  <FieldLabel>{t("link_url_label")}</FieldLabel>
                   <Input
                     value={formState.link_url}
                     onChange={(e) => setFormState({ ...formState, link_url: e.target.value })}
-                    placeholder="/storefront/products/xyz"
+                    placeholder={t("banner_link_url_placeholder")}
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel>Cible du lien</FieldLabel>
+                  <FieldLabel>{t("link_target_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     value={formState.link_target}
@@ -453,13 +453,13 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                       })
                     }
                   >
-                    <option value="_self">Même onglet (_self)</option>
-                    <option value="_blank">Nouvel onglet (_blank)</option>
+                    <option value="_self">{t("link_target_self")}</option>
+                    <option value="_blank">{t("link_target_blank")}</option>
                   </select>
                 </Field>
 
                 <Field>
-                  <FieldLabel>Statut actif</FieldLabel>
+                  <FieldLabel>{t("active_status_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     value={formState.is_active ? "true" : "false"}
@@ -467,15 +467,15 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                       setFormState({ ...formState, is_active: e.target.value === "true" })
                     }
                   >
-                    <option value="true">Actif</option>
-                    <option value="false">Inactif</option>
+                    <option value="true">{t("status_active_label")}</option>
+                    <option value="false">{t("status_inactive_label")}</option>
                   </select>
                 </Field>
               </div>
 
               {/* Placement settings */}
               <Field>
-                <FieldLabel>Emplacement sur le Storefront</FieldLabel>
+                <FieldLabel>{t("banner_placement_label")}</FieldLabel>
                 <div className="bg-background mt-1 flex flex-wrap gap-3 rounded-md border p-2">
                   {CAMPAIGN_PLACEMENT_PAGES.map((page) => {
                     const checked = formState.placement.includes(page);
@@ -505,20 +505,20 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
               {/* Text overlays */}
               <div className="border-t pt-4">
                 <FieldLabel className="text-sm font-bold">
-                  Textes superposés (Overlay Content)
+                  {t("overlay_content_label")}
                 </FieldLabel>
                 <Tabs defaultValue="fr" className="mt-2 w-full">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="fr">Français</TabsTrigger>
-                    <TabsTrigger value="en">English</TabsTrigger>
-                    <TabsTrigger value="ar">العربية</TabsTrigger>
+                    <TabsTrigger value="fr">{t("locale_fr")}</TabsTrigger>
+                    <TabsTrigger value="en">{t("locale_en")}</TabsTrigger>
+                    <TabsTrigger value="ar">{t("locale_ar")}</TabsTrigger>
                   </TabsList>
 
                   {(["fr", "en", "ar"] as const).map((lang) => (
                     <TabsContent key={lang} value={lang} className="space-y-3 pt-2">
                       <div className="grid gap-3 md:grid-cols-2">
                         <Field>
-                          <FieldLabel>Titre Principal ({lang.toUpperCase()})</FieldLabel>
+                          <FieldLabel>{t("overlay_headline", { lang: lang.toUpperCase() })}</FieldLabel>
                           <Input
                             value={formState.overlay_content?.[lang]?.headline ?? ""}
                             onChange={(e) => {
@@ -531,12 +531,12 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                                 },
                               });
                             }}
-                            placeholder="Titre superposé sur la bannière"
+                            placeholder={t("banner_overlay_headline_placeholder")}
                           />
                         </Field>
 
                         <Field>
-                          <FieldLabel>Description / Corps ({lang.toUpperCase()})</FieldLabel>
+                          <FieldLabel>{t("overlay_body", { lang: lang.toUpperCase() })}</FieldLabel>
                           <Input
                             value={formState.overlay_content?.[lang]?.body ?? ""}
                             onChange={(e) => {
@@ -549,13 +549,13 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                                 },
                               });
                             }}
-                            placeholder="Description superposée"
+                            placeholder={t("banner_overlay_body_placeholder")}
                           />
                         </Field>
                       </div>
 
                       <Field>
-                        <FieldLabel>Label Bouton / CTA ({lang.toUpperCase()})</FieldLabel>
+                        <FieldLabel>{t("overlay_cta_label", { lang: lang.toUpperCase() })}</FieldLabel>
                         <Input
                           value={formState.overlay_content?.[lang]?.cta ?? ""}
                           onChange={(e) => {
@@ -568,7 +568,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                               },
                             });
                           }}
-                          placeholder="Ex: Acheter"
+                          placeholder={t("banner_overlay_cta_placeholder")}
                         />
                       </Field>
                     </TabsContent>

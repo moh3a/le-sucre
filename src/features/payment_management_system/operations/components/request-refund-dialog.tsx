@@ -31,7 +31,7 @@ export function RequestRefundDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.paymentRequestRefund.useMutation({
     onSuccess: () => {
-      toast.success("Demande de remboursement créée");
+      toast.success(t("refund_requested"));
       setOpen(false);
       reset();
       utils.operations.paymentListRefundRequests.invalidate();
@@ -49,7 +49,7 @@ export function RequestRefundDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId || !amount || !reason) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -66,20 +66,20 @@ export function RequestRefundDialog() {
       <DialogTrigger asChild>
         <Button variant="destructive">
           <Plus className="mr-2 size-4" />
-          Demander un remboursement
+          {t("request_refund_button")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Demander un remboursement</DialogTitle>
+          <DialogTitle>{t("request_refund_title")}</DialogTitle>
           <DialogDescription>
-            Créer une nouvelle demande de remboursement.
+            {t("request_refund_desc")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="rf_order_id">Commande *</Label>
+              <Label htmlFor="rf_order_id">{t("order")} *</Label>
               <Input
                 id="rf_order_id"
                 value={orderId}
@@ -89,7 +89,7 @@ export function RequestRefundDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rf_amount">Montant *</Label>
+              <Label htmlFor="rf_amount">{t("amount")} *</Label>
               <Input
                 id="rf_amount"
                 type="number"
@@ -102,7 +102,7 @@ export function RequestRefundDialog() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rf_reason">Motif *</Label>
+            <Label htmlFor="rf_reason">{t("reason")} *</Label>
             <Textarea
               id="rf_reason"
               value={reason}
@@ -112,7 +112,7 @@ export function RequestRefundDialog() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rf_cancellation_id">ID demande d'annulation</Label>
+            <Label htmlFor="rf_cancellation_id">{t("cancellation_id")}</Label>
             <Input
               id="rf_cancellation_id"
               value={cancellationRequestId}
@@ -122,10 +122,10 @@ export function RequestRefundDialog() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Demander"}
+              {mutation.isPending ? t("creating") : t("request_refund_submit")}
             </Button>
           </DialogFooter>
         </form>

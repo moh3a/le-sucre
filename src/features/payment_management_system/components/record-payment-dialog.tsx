@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Plus, CreditCard } from "lucide-react";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,27 +26,28 @@ import {
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
-const PROVIDERS = [
-  { value: "stripe", label: "Stripe" },
-  { value: "paypal", label: "PayPal" },
-  { value: "chargily", label: "Chargily" },
-  { value: "satim", label: "SATIM" },
-  { value: "cib", label: "CIB" },
-  { value: "cod", label: "Contre-remboursement" },
-  { value: "bank_transfer", label: "Virement bancaire" },
-] as const;
-
 export function RecordPaymentDialog() {
+  const t = useTranslations("payments");
   const [open, setOpen] = React.useState(false);
   const [order_id, setOrderId] = React.useState("");
   const [provider, setProvider] = React.useState("stripe");
   const [amount, setAmount] = React.useState("");
 
+  const PROVIDERS = [
+    { value: "stripe", label: t("provider_stripe") },
+    { value: "paypal", label: t("provider_paypal") },
+    { value: "chargily", label: t("provider_chargily") },
+    { value: "satim", label: t("provider_satim") },
+    { value: "cib", label: t("provider_cib") },
+    { value: "cod", label: t("provider_cod") },
+    { value: "bank_transfer", label: t("provider_bank_transfer") },
+  ] as const;
+
   const utils = trpc.useUtils();
 
   const process = trpc.payments.adminProcess.useMutation({
     onSuccess: () => {
-      toast.success("Paiement enregistré avec succès");
+      toast.success(t("record_success"));
       setOpen(false);
       setOrderId("");
       setProvider("stripe");
@@ -71,23 +73,23 @@ export function RecordPaymentDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Enregistrer un paiement
+          {t("record_button")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Enregistrer un paiement</DialogTitle>
+          <DialogTitle>{t("record_title")}</DialogTitle>
           <DialogDescription>
-            Enregistrer un paiement manuel pour une commande.
+            {t("record_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Commande</Label>
+            <Label>{t("order_id_label")}</Label>
             <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Montant (DZD)</Label>
+            <Label>{t("amount_dzd_label")}</Label>
             <Input
               type="number"
               step="0.01"
@@ -98,7 +100,7 @@ export function RecordPaymentDialog() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Moyen de paiement</Label>
+            <Label>{t("payment_method_label")}</Label>
             <Select value={provider} onValueChange={setProvider}>
               <SelectTrigger>
                 <SelectValue />
@@ -114,7 +116,7 @@ export function RecordPaymentDialog() {
           </div>
           <Button type="submit" className="w-full" disabled={process.isPending}>
             <CreditCard />
-            Enregistrer le paiement
+            {t("record_submit")}
           </Button>
         </form>
       </DialogContent>

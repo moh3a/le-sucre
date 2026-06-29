@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,7 @@ import { Plus } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 export function RequestAdjustmentDialog() {
+  const t = useTranslations("inventory_adjustments");
   const [open, setOpen] = useState(false);
   const [skuId, setSkuId] = useState("");
   const [warehouseId, setWarehouseId] = useState("default");
@@ -39,7 +41,7 @@ export function RequestAdjustmentDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.inventoryRequestAdjustment.useMutation({
     onSuccess: () => {
-      toast.success("Demande d'ajustement créée");
+      toast.success(t("adjustment_created"));
       setOpen(false);
       reset();
       utils.operations.inventoryListAdjustmentRequests.invalidate();
@@ -61,7 +63,7 @@ export function RequestAdjustmentDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!skuId || !adjustmentType || !quantityDelta || !reason) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -81,102 +83,102 @@ export function RequestAdjustmentDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 size-4" />
-          Demander un ajustement
+          {t("request_adjustment")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Demander un ajustement de stock</DialogTitle>
+          <DialogTitle>{t("request_adjustment_title")}</DialogTitle>
           <DialogDescription>
-            Créer une demande d'ajustement d'inventaire pour approbation.
+            {t("request_adjustment_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="ia_sku">SKU *</Label>
+              <Label htmlFor="ia_sku">{t("sku_label")}</Label>
               <Input
                 id="ia_sku"
                 value={skuId}
                 onChange={(e) => setSkuId(e.target.value)}
-                placeholder="ID du SKU"
+                placeholder={t("sku_id_placeholder")}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ia_warehouse">Entrepôt</Label>
+              <Label htmlFor="ia_warehouse">{t("warehouse_label")}</Label>
               <Input
                 id="ia_warehouse"
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
-                placeholder="default"
+                placeholder={t("default_placeholder")}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ia_type">Type d'ajustement *</Label>
+            <Label htmlFor="ia_type">{t("type_label")}</Label>
             <Select value={adjustmentType} onValueChange={setAdjustmentType} required>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un type" />
+                <SelectValue placeholder={t("select_type_placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="increase">Augmentation</SelectItem>
-                <SelectItem value="decrease">Diminution</SelectItem>
-                <SelectItem value="damage">Dommage</SelectItem>
-                <SelectItem value="loss">Perte</SelectItem>
-                <SelectItem value="correction">Correction</SelectItem>
+                <SelectItem value="increase">{t("type_increase")}</SelectItem>
+                <SelectItem value="decrease">{t("type_decrease")}</SelectItem>
+                <SelectItem value="damage">{t("type_damage")}</SelectItem>
+                <SelectItem value="loss">{t("type_loss")}</SelectItem>
+                <SelectItem value="correction">{t("type_correction")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="ia_quantity">Quantité *</Label>
+              <Label htmlFor="ia_quantity">{t("quantity_label")}</Label>
               <Input
                 id="ia_quantity"
                 type="number"
                 value={quantityDelta}
                 onChange={(e) => setQuantityDelta(e.target.value)}
-                placeholder="Delta"
+                placeholder={t("delta_placeholder")}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ia_current">Stock actuel</Label>
+              <Label htmlFor="ia_current">{t("current_stock_label")}</Label>
               <Input
                 id="ia_current"
                 type="number"
                 value={currentOnHand}
                 onChange={(e) => setCurrentOnHand(e.target.value)}
-                placeholder="0"
+                placeholder={t("current_stock_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ia_expected">Stock attendu</Label>
+              <Label htmlFor="ia_expected">{t("expected_stock_label")}</Label>
               <Input
                 id="ia_expected"
                 type="number"
                 value={expectedOnHand}
                 onChange={(e) => setExpectedOnHand(e.target.value)}
-                placeholder="0"
+                placeholder={t("expected_stock_placeholder")}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ia_reason">Motif *</Label>
+            <Label htmlFor="ia_reason">{t("reason_label")}</Label>
             <Textarea
               id="ia_reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Raison de l'ajustement"
+              placeholder={t("reason_placeholder")}
               required
             />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Création..." : "Demander"}
+              {mutation.isPending ? t("creating") : t("request")}
             </Button>
           </DialogFooter>
         </form>

@@ -8,15 +8,17 @@ export const MOVEMENT_TYPES = {
   preorder_fulfill: "preorder_fulfill",
 } as const;
 
-export const MOVEMENT_LABELS: Record<string, string> = {
-  adjust: "Ajustement",
-  receive: "Réception",
-  sale: "Vente",
-  reserve: "Réservation",
-  release: "Libération",
-  preorder_allocate: "Alloc. préco.",
-  preorder_fulfill: "Préco. servie",
-};
+export function getMovementLabels(t: (key: string) => string): Record<string, string> {
+  return {
+    adjust: t("adjust_stock"),
+    receive: t("receive_quantity"),
+    sale: t("sku_count"),
+    reserve: t("reserved"),
+    release: t("stock_value"),
+    preorder_allocate: t("sku_count"),
+    preorder_fulfill: t("stock_received"),
+  };
+}
 
 export type MovementType = (typeof MOVEMENT_TYPES)[keyof typeof MOVEMENT_TYPES];
 

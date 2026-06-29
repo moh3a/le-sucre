@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ type PromoCodeFormProps = {
 };
 
 export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) {
+  const t = useTranslations("promotions");
   const [code, set_code] = useState("");
   const [discount_type, set_discount_type] = useState<"percent" | "fixed">("percent");
   const [discount_value, set_discount_value] = useState("10");
@@ -43,7 +45,7 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
           ],
         }),
       });
-      if (!res.ok) throw new Error("Échec création promotion");
+      if (!res.ok) throw new Error(t("promo_create_failed"));
 
       const promo = await res.json();
       const promo_id = promo?.data?.id ?? promotion_id;
@@ -59,11 +61,11 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
         }),
       });
 
-      if (!code_res.ok) throw new Error("Échec création code promo");
+      if (!code_res.ok) throw new Error(t("promo_code_create_failed"));
       set_code("");
       on_created?.();
     } catch (err) {
-      set_error(err instanceof Error ? err.message : "Erreur");
+      set_error(err instanceof Error ? err.message : t("promo_code_error_title"));
     } finally {
       set_loading(false);
     }
@@ -71,25 +73,25 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
 
   return (
     <form onSubmit={submit} className="space-y-4 rounded-lg border p-4">
-      <h3 className="font-heading text-lg">Code promo</h3>
+      <h3 className="font-heading text-lg">{t("promo_code_title")}</h3>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label>Code</Label>
+          <Label>{t("promo_code_label")}</Label>
           <Input value={code} onChange={(e) => set_code(e.target.value.toUpperCase())} required />
         </div>
         <div>
-          <Label>Type</Label>
+          <Label>{t("promo_type_label")}</Label>
           <select
             className="w-full rounded-md border px-3 py-2"
             value={discount_type}
             onChange={(e) => set_discount_type(e.target.value as "percent" | "fixed")}
           >
-            <option value="percent">Pourcentage</option>
-            <option value="fixed">Montant fixe</option>
+            <option value="percent">{t("promo_type_percent")}</option>
+            <option value="fixed">{t("promo_type_fixed")}</option>
           </select>
         </div>
         <div>
-          <Label>Valeur</Label>
+          <Label>{t("promo_value_label")}</Label>
           <Input
             type="number"
             min={0}
@@ -98,7 +100,7 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
           />
         </div>
         <div>
-          <Label>Panier minimum</Label>
+          <Label>{t("promo_min_cart_label")}</Label>
           <Input
             type="number"
             min={0}
@@ -107,7 +109,7 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
           />
         </div>
         <div>
-          <Label>Limite globale</Label>
+          <Label>{t("promo_global_limit_label")}</Label>
           <Input
             type="number"
             min={1}
@@ -116,7 +118,7 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
           />
         </div>
         <div>
-          <Label>Limite / client</Label>
+          <Label>{t("promo_per_customer_label")}</Label>
           <Input
             type="number"
             min={1}
@@ -127,7 +129,7 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
       </div>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <Button type="submit" disabled={loading}>
-        {loading ? "Enregistrement…" : "Créer le code promo"}
+        {loading ? t("promo_saving") : t("promo_create_button")}
       </Button>
     </form>
   );

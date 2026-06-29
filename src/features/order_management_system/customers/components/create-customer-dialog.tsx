@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, UserPlus } from "lucide-react";
 
@@ -25,7 +26,10 @@ import {
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
+const ROLES = ["customer", "admin", "moderator", "operator", "delivery_person"] as const;
+
 export function CreateCustomerDialog() {
+  const t = useTranslations("customers");
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [phone, setPhone] = React.useState("");
@@ -36,7 +40,7 @@ export function CreateCustomerDialog() {
 
   const create = trpc.adminAuth.createUser.useMutation({
     onSuccess: () => {
-      toast.success("Client créé avec succès");
+      toast.success(t("customer_created"));
       setOpen(false);
       setName("");
       setPhone("");
@@ -59,47 +63,45 @@ export function CreateCustomerDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Nouveau client
+          {t("new_customer_button")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer un client</DialogTitle>
+          <DialogTitle>{t("create_customer_title")}</DialogTitle>
           <DialogDescription>
-            Ajouter un nouveau client manuellement.
+            {t("create_customer_desc")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Nom</Label>
+            <Label>{t("name")}</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Téléphone</Label>
+            <Label>{t("phone")}</Label>
             <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Mot de passe</Label>
+            <Label>{t("password")}</Label>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Rôle</Label>
+            <Label>{t("role")}</Label>
             <Select value={role} onValueChange={setRole}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="customer">Client</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="moderator">Modérateur</SelectItem>
-                <SelectItem value="operator">Opérateur</SelectItem>
-                <SelectItem value="delivery_person">Livreur</SelectItem>
+                {ROLES.map((r) => (
+                  <SelectItem key={r} value={r}>{t(`role_${r}`)}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <Button type="submit" className="w-full" disabled={create.isPending}>
             <UserPlus />
-            Créer le client
+            {t("create_customer_button")}
           </Button>
         </form>
       </DialogContent>

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ExternalLink, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
@@ -12,13 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
 
 export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
+  const t = useTranslations("shipping");
   const utils = trpc.useUtils();
 
   const { data, isLoading, refetch, error } = trpc.shipping.adminGetDetail.useQuery({ shipment_id });
 
   const sync_mutation = trpc.shipping.sync.useMutation({
     onSuccess: () => {
-      toast.success("Suivi synchronisé");
+      toast.success(t("tracking_synced"));
       void refetch();
       void utils.shipping.adminList.invalidate();
     },
@@ -26,7 +29,7 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
   });
 
   if (!data) {
-    return <p className="text-muted-foreground text-sm">Expédition introuvable.</p>;
+    return <p className="text-muted-foreground text-sm">{t("shipment_not_found")}</p>;
   }
 
   const { shipment, tracking_events } = data;
@@ -36,13 +39,13 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Informations</CardTitle>
+          <CardTitle>{t("information")}</CardTitle>
           <div className="flex gap-2">
             {shipment.tracking_url ? (
               <Button variant="outline" size="sm" asChild>
                 <a href={shipment.tracking_url} target="_blank" rel="noreferrer">
                   <ExternalLink className="size-4" />
-                  Suivi transporteur
+                  {t("carrier_tracking")}
                 </a>
               </Button>
             ) : null}
@@ -52,45 +55,45 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
               onClick={() => sync_mutation.mutate({ shipment_id })}
             >
               <RefreshCcw className="size-4" />
-              Synchroniser
+              {t("sync")}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm md:grid-cols-2">
           <div>
-            <span className="text-muted-foreground">N° suivi</span>
+            <span className="text-muted-foreground">{t("tracking_number_label")}</span>
             <p className="font-mono">{shipment.tracking_number ?? "—"}</p>
           </div>
           <div>
-            <span className="text-muted-foreground">Transporteur</span>
+            <span className="text-muted-foreground">{t("carrier_label")}</span>
             <p>
               <Badge variant="outline">{shipment.provider}</Badge>
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Statut</span>
+            <span className="text-muted-foreground">{t("status_label")}</span>
             <p>{shipment.status}</p>
           </div>
           <div>
-            <span className="text-muted-foreground">Livraison</span>
+            <span className="text-muted-foreground">{t("delivery_label")}</span>
             <p>{shipment.delivery_status}</p>
           </div>
           <div>
-            <span className="text-muted-foreground">Commande</span>
+            <span className="text-muted-foreground">{t("order_label")}</span>
             <p>
               <Link href={`/console/orders/${shipment.order_id}`} className="hover:underline">
-                Voir la commande
+                {t("view_order")}
               </Link>
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Destinataire</span>
+            <span className="text-muted-foreground">{t("recipient_label")}</span>
             <p>
               {shipment.recipient_name} — {shipment.recipient_phone}
             </p>
           </div>
           <div className="md:col-span-2">
-            <span className="text-muted-foreground">Adresse</span>
+            <span className="text-muted-foreground">{t("address_label")}</span>
             <p>
               {shipment.address_line1}
               {shipment.address_line2 ? `, ${shipment.address_line2}` : ""}, {shipment.city},{" "}
@@ -102,11 +105,11 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Historique de suivi</CardTitle>
+          <CardTitle>{t("tracking_history")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {tracking_events.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Aucun événement enregistré.</p>
+            <p className="text-muted-foreground text-sm">{t("no_tracking_events")}</p>
           ) : (
             tracking_events.map((event) => (
               <div key={event.id} className="border-primary/30 border-l-2 pl-4">

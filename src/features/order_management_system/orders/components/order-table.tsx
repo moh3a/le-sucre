@@ -189,21 +189,21 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
   });
 
   const statusOptions = [
-    { label: "En attente de paiement", value: "pending_payment" },
-    { label: "Payé", value: "paid" },
-    { label: t("processing"), value: "processing" },
-    { label: "Livré", value: "fulfilled" },
-    { label: "Annulé", value: "cancelled" },
+    { label: t("status_pending_payment"), value: "pending_payment" },
+    { label: t("status_paid"), value: "paid" },
+    { label: t("status_processing"), value: "processing" },
+    { label: t("filter_fulfilled"), value: "fulfilled" },
+    { label: t("status_cancelled"), value: "cancelled" },
   ];
   const paymentOptions = [
-    { label: "Non payé", value: "unpaid" },
-    { label: "Payé", value: "paid" },
-    { label: "Remboursé", value: "refunded" },
+    { label: t("filter_unpaid"), value: "unpaid" },
+    { label: t("status_paid"), value: "paid" },
+    { label: t("status_refunded"), value: "refunded" },
   ];
   const fulfillmentOptions = [
-    { label: "Non expédié", value: "unfulfilled" },
-    { label: "Partiel", value: "partial" },
-    { label: "Expédié", value: "fulfilled" },
+    { label: t("filter_unfulfilled"), value: "unfulfilled" },
+    { label: t("filter_partial"), value: "partial" },
+    { label: t("status_shipped"), value: "fulfilled" },
   ];
 
   return (

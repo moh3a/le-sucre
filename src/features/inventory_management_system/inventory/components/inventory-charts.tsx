@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { AnalyticsLineChart } from "@/features/analytics_management_system/components/analytics-line-chart";
 import { AnalyticsBarChart } from "@/features/analytics_management_system/components/analytics-bar-chart";
-import { MOVEMENT_LABELS } from "../constants/movement-types";
+import { getMovementLabels } from "../constants/movement-types";
 
 export function InventoryCharts() {
+  const t = useTranslations("inventory");
   const { data, error, isLoading } = trpc.inventory.adminCharts.useQuery();
 
   return (
@@ -14,42 +16,42 @@ export function InventoryCharts() {
       {!data ? null : (
         <div className="mb-6 grid gap-4 md:grid-cols-2">
           <AnalyticsLineChart
-            title="Mouvements de stock (30 jours) - Ajouté"
+            title={t("stock_received")}
             data={data.series.map((item) => ({
               date: item.day_key,
-              ajouté: item.quantity_added,
-              retiré: item.quantity_removed,
+              added: item.quantity_added,
+              removed: item.quantity_removed,
               net: item.net_change,
             }))}
             x_key="date"
-            y_key="ajouté"
+            y_key="added"
           />
           <AnalyticsLineChart
-            title="Mouvements de stock (30 jours) - Retiré"
+            title={t("stock_adjusted")}
             data={data.series.map((item) => ({
               date: item.day_key,
-              ajouté: item.quantity_added,
-              retiré: item.quantity_removed,
+              added: item.quantity_added,
+              removed: item.quantity_removed,
               net: item.net_change,
             }))}
             x_key="date"
-            y_key="retiré"
+            y_key="removed"
           />
           <AnalyticsLineChart
-            title="Variation nette"
+            title={t("stock_value")}
             data={data.series.map((item) => ({
               date: item.day_key,
-              ajouté: item.quantity_added,
-              retiré: item.quantity_removed,
+              added: item.quantity_added,
+              removed: item.quantity_removed,
               net: item.net_change,
             }))}
             x_key="date"
             y_key="net"
           />
           <AnalyticsBarChart
-            title="Répartition des types de mouvement"
+            title={t("movements")}
             data={data.movement_distribution.map((item) => ({
-              type: MOVEMENT_LABELS[item.movement_type],
+              type: getMovementLabels(t)[item.movement_type],
               count: item.count,
             }))}
             x_key="type"

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, PackagePlus } from "lucide-react";
 
@@ -19,6 +20,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 
 export function RecordStockDialog() {
+  const t = useTranslations("inventory");
   const [open, setOpen] = React.useState(false);
   const [sku_id, setSkuId] = React.useState("");
   const [quantity, setQuantity] = React.useState("1");
@@ -28,7 +30,7 @@ export function RecordStockDialog() {
 
   const receive = trpc.inventory.receiveStock.useMutation({
     onSuccess: () => {
-      toast.success("Stock enregistré avec succès");
+      toast.success(t("stock_recorded"));
       setOpen(false);
       setSkuId("");
       setQuantity("1");
@@ -55,23 +57,23 @@ export function RecordStockDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Réceptionner du stock
+          {t("record_stock_title")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Réceptionner du stock</DialogTitle>
+          <DialogTitle>{t("record_stock_title")}</DialogTitle>
           <DialogDescription>
-            Enregistrer une réception de stock pour un SKU.
+            {t("record_stock_description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>SKU ID</Label>
+            <Label>{t("sku_id_label")}</Label>
             <Input value={sku_id} onChange={(e) => setSkuId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Quantité</Label>
+            <Label>{t("quantity_label")}</Label>
             <Input
               type="number"
               min="1"
@@ -81,12 +83,12 @@ export function RecordStockDialog() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Entrepôt (optionnel)</Label>
+            <Label>{t("warehouse_optional")}</Label>
             <Input value={warehouse_id} onChange={(e) => setWarehouseId(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" disabled={receive.isPending}>
             <PackagePlus />
-            Réceptionner
+            {t("receive")}
           </Button>
         </form>
       </DialogContent>

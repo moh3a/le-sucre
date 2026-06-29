@@ -5,6 +5,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import { CheckCircle2, Download, MoreHorizontal, XCircle } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -29,23 +30,11 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  verified: "Vérifié",
-  rejected: "Rejeté",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
   verified: "default",
   rejected: "destructive",
 };
-
-const STATUS_OPTIONS = [
-  { label: "En attente", value: "pending" },
-  { label: "Vérifié", value: "verified" },
-  { label: "Rejeté", value: "rejected" },
-];
 
 type VerificationRow = {
   id: string;
@@ -129,15 +118,28 @@ function FacetedFilter({
 }
 
 export function PaymentVerificationsTable() {
+  const t = useTranslations("verifications");
   const [page] = useQueryState("pvPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("pvPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("pvStatus", parseAsString);
+
+  const STATUS_LABELS: Record<string, string> = {
+    pending: t("status_pending"),
+    verified: t("status_verified"),
+    rejected: t("status_rejected"),
+  };
+
+  const STATUS_OPTIONS = [
+    { label: STATUS_LABELS.pending, value: "pending" },
+    { label: STATUS_LABELS.verified, value: "verified" },
+    { label: STATUS_LABELS.rejected, value: "rejected" },
+  ];
 
   const utils = trpc.useUtils();
 
   const verifyMutation = trpc.operations.paymentVerify.useMutation({
     onSuccess: () => {
-      toast.success("Vérification mise à jour");
+      toast.success(t("verification_updated"));
       utils.operations.paymentListVerifications.invalidate();
       utils.operations.paymentCountPendingVerifications.invalidate();
     },
@@ -154,7 +156,7 @@ export function PaymentVerificationsTable() {
       {
         id: "order_id",
         accessorKey: "order_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Commande" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("order_column")} />,
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
@@ -167,7 +169,7 @@ export function PaymentVerificationsTable() {
       {
         id: "amount",
         accessorKey: "amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Montant" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("amount_column")} />,
         cell: ({ row }) => (
           <span className="font-mono font-medium">
             {Number(row.original.amount).toLocaleString("fr-DZ", {
@@ -180,7 +182,7 @@ export function PaymentVerificationsTable() {
       {
         id: "reference_number",
         accessorKey: "reference_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Référence" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reference_column")} />,
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.reference_number ?? "—"}</span>
         ),
@@ -188,7 +190,7 @@ export function PaymentVerificationsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Statut" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_title")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -198,7 +200,7 @@ export function PaymentVerificationsTable() {
       {
         id: "notes",
         accessorKey: "notes",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Notes" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("notes_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[200px] truncate text-xs">
             {row.original.notes ?? "—"}
@@ -208,7 +210,7 @@ export function PaymentVerificationsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -221,10 +223,10 @@ export function PaymentVerificationsTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/console/orders/${row.original.order_id}`}>
-                  Voir commande
+                  {t("view_order")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -236,7 +238,7 @@ export function PaymentVerificationsTable() {
                     }
                   >
                     <CheckCircle2 className="mr-2 size-4 text-green-600" />
-                    Vérifier
+                    {t("verify_action")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() =>
@@ -244,7 +246,7 @@ export function PaymentVerificationsTable() {
                     }
                   >
                     <XCircle className="mr-2 size-4 text-red-600" />
-                    Rejeter
+                    {t("reject_action")}
                   </DropdownMenuItem>
                 </>
               )}
@@ -253,7 +255,7 @@ export function PaymentVerificationsTable() {
         ),
       },
     ],
-    [verifyMutation],
+    [verifyMutation, t],
   );
 
   const { data, isLoading } = trpc.operations.paymentListVerifications.useQuery({
@@ -279,7 +281,7 @@ export function PaymentVerificationsTable() {
     <DataTable table={table}>
       <DataTableAdvancedToolbar table={table}>
         <FacetedFilter
-          title="Statut"
+          title={t("status_title")}
           options={STATUS_OPTIONS}
           value={status ?? undefined}
           onChange={(val) => setStatus(val)}
@@ -289,7 +291,7 @@ export function PaymentVerificationsTable() {
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="flex items-center gap-2 border-t p-2">
           <Badge variant="outline">
-            {table.getFilteredSelectedRowModel().rows.length} sélectionné(s)
+            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
           </Badge>
           <Button variant="ghost" size="sm" asChild>
             <a
@@ -299,7 +301,7 @@ export function PaymentVerificationsTable() {
               download="payment-verifications.csv"
             >
               <Download className="mr-1 h-4 w-4" />
-              Exporter
+              {t("export")}
             </a>
           </Button>
         </div>

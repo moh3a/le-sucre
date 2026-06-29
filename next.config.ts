@@ -3,6 +3,24 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const with_next_intl = createNextIntlPlugin("./src/i18n/request.ts");
 
+function generate_csp(): string {
+  const policies = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https: http:",
+    "font-src 'self' data:",
+    "connect-src 'self' https: http://localhost:* ws://localhost:",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "media-src 'self' https:",
+    "manifest-src 'self'",
+  ];
+  return policies.join("; ");
+}
+
 const security_headers = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -17,6 +35,8 @@ const security_headers = [
   { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+  { key: "Content-Security-Policy", value: generate_csp() },
+  { key: "X-Content-Security-Policy", value: generate_csp() },
 ];
 
 const nextConfig: NextConfig = {
@@ -35,6 +55,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: "200mb",
+      allowedOrigins: process.env.ALLOWED_ORIGINS?.split(",").map((o) => o.trim()) ?? ["localhost:3000"],
     },
   },
   httpAgentOptions: {

@@ -46,9 +46,9 @@ export function PaymentsTab({
   const update_payment = trpc.orders.adminUpdatePayment.useMutation({
     onSuccess: () => {
       on_update();
-      toast.success("Paiement mis à jour");
+      toast.success(t("payment_updated"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   const [pay_status, set_pay_status] = useState("");

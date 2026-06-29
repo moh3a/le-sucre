@@ -39,7 +39,7 @@ export function EscalateOrderDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.orderEscalate.useMutation({
     onSuccess: () => {
-      toast.success("Commande escaladée");
+      toast.success(t("escalated_toast"));
       setOpen(false);
       reset();
       utils.operations.orderListEscalations.invalidate();
@@ -58,7 +58,7 @@ export function EscalateOrderDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId || !reason) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required_fields"));
       return;
     }
     mutation.mutate({

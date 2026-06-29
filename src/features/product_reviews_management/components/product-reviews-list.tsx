@@ -39,20 +39,20 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
 
   const voteHelpfulMutation = trpc.reviews.voteHelpful.useMutation({
     onSuccess: () => {
-      toast.success("Vote pris en compte !");
+      toast.success(t("vote_recorded"));
       utils.reviews.listByProduct.invalidate({ product_id });
     },
     onError: (err) => {
-      toast.error(err.message || "Impossible de voter.");
+      toast.error(err.message || t("vote_error"));
     },
   });
 
   const reportMutation = trpc.reviews.report.useMutation({
     onSuccess: () => {
-      toast.success("Signalement envoyé. Merci de nous aider à maintenir la qualité des avis.");
+      toast.success(t("report_sent"));
     },
     onError: (err) => {
-      toast.error(err.message || "Impossible de signaler.");
+      toast.error(err.message || t("report_error"));
     },
   });
 

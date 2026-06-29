@@ -44,7 +44,7 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
   const utils = trpc.useUtils();
   const mutation = trpc.operations.deliveryLogAttempt.useMutation({
     onSuccess: () => {
-      toast.success("Tentative de livraison enregistrée");
+      toast.success(t("attempt_logged"));
       setOpen(false);
       reset();
       utils.operations.deliveryListAttempts.invalidate();
@@ -64,7 +64,7 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!shipmentId || !orderId || !status) {
-      toast.error("Veuillez remplir tous les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -151,7 +151,7 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              {t("annuler")}
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? t("saving") : t("save")}

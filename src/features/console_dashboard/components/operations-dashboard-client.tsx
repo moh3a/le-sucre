@@ -59,6 +59,7 @@ export function OperationsDashboardClient() {
           {
             label: t("open_escalations"),
             value: escalations.data?.meta?.total_records ?? 0,
+            description: t("open_escalations_desc"),
             icon: AlertCircle,
             color: "error",
             link: "/console/operations/escalations",
@@ -66,6 +67,7 @@ export function OperationsDashboardClient() {
           {
             label: t("pending_cancellations"),
             value: cancellations.data?.meta?.total_records ?? 0,
+            description: t("pending_cancellations_desc"),
             icon: Ban,
             color: "error",
             link: "/console/operations/cancellations",
@@ -73,6 +75,7 @@ export function OperationsDashboardClient() {
           {
             label: t("pending_tasks"),
             value: tasks.data?.pending ?? 0,
+            description: t("pending_tasks_desc"),
             icon: ListTodo,
             color: "info",
             link: "/console/operations/tasks",
@@ -80,6 +83,7 @@ export function OperationsDashboardClient() {
           {
             label: t("overdue_tasks"),
             value: tasks.data?.overdue ?? 0,
+            description: t("overdue_tasks_desc"),
             icon: AlertCircle,
             color: "error",
             link: "/console/operations/tasks",
@@ -87,6 +91,7 @@ export function OperationsDashboardClient() {
           {
             label: t("pending_payments"),
             value: pendingPayments.data ?? 0,
+            description: t("pending_payments_desc"),
             icon: Banknote,
             color: "warning",
             link: "/console/operations/payment-verifications",
@@ -94,6 +99,7 @@ export function OperationsDashboardClient() {
           {
             label: t("overdue_followups"),
             value: overdueFollowups.data?.length ?? 0,
+            description: t("overdue_followups_desc"),
             icon: Phone,
             color: "error",
             link: "/console/operations/follow-ups",
@@ -101,6 +107,7 @@ export function OperationsDashboardClient() {
           {
             label: t("warranty_title"),
             value: "—",
+            description: t("warranty_desc"),
             icon: Wrench,
             color: "default",
             link: "/console/operations/warranty",
@@ -108,6 +115,7 @@ export function OperationsDashboardClient() {
           {
             label: t("refunds_title"),
             value: "—",
+            description: t("refunds_desc"),
             icon: RefreshCw,
             color: "default",
             link: "/console/operations/refunds",
@@ -115,6 +123,7 @@ export function OperationsDashboardClient() {
           {
             label: t("support_cases"),
             value: "—",
+            description: t("support_cases_desc"),
             icon: HeadphonesIcon,
             color: "default",
             link: "/console/operations/support-cases",
@@ -122,6 +131,7 @@ export function OperationsDashboardClient() {
           {
             label: t("stock_adjustments"),
             value: "—",
+            description: t("stock_adjustments_desc"),
             icon: Warehouse,
             color: "default",
             link: "/console/operations/inventory-adjustments",

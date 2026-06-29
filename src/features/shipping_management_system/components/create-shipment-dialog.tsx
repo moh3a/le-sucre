@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Package } from "lucide-react";
 
@@ -28,6 +29,7 @@ import { QueryGuard } from "@/components/query-guard";
 const PROVIDERS = ["yalidine", "dhl", "fedex", "ups", "ems"] as const;
 
 export function CreateShipmentDialog() {
+  const t = useTranslations("shipping");
   const [open, setOpen] = React.useState(false);
   const [order_id, setOrderId] = React.useState("");
   const [provider, setProvider] = React.useState<string>("yalidine");
@@ -37,7 +39,7 @@ export function CreateShipmentDialog() {
 
   const create = trpc.shipping.create.useMutation({
     onSuccess: () => {
-      toast.success("Expédition créée avec succès");
+      toast.success(t("shipment_created"));
       setOpen(false);
       setOrderId("");
       setProvider("yalidine");
@@ -63,23 +65,23 @@ export function CreateShipmentDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus />
-          Nouvelle expédition
+          {t("new_shipment")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer une expédition</DialogTitle>
+          <DialogTitle>{t("create_shipment_title")}</DialogTitle>
           <DialogDescription>
-            Créer une nouvelle expédition pour une commande.
+            {t("create_shipment_desc")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
-            <Label>ID Commande</Label>
+            <Label>{t("order_id")}</Label>
             <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Transporteur</Label>
+            <Label>{t("provider")}</Label>
             <Select value={provider} onValueChange={setProvider}>
               <SelectTrigger>
                 <SelectValue />
@@ -94,7 +96,7 @@ export function CreateShipmentDialog() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Poids (kg)</Label>
+            <Label>{t("weight_kg")}</Label>
             <Input
               type="number"
               step="0.1"
@@ -106,7 +108,7 @@ export function CreateShipmentDialog() {
           </div>
           <Button type="submit" className="w-full" disabled={create.isPending}>
             <Package />
-            Créer l&apos;expédition
+            {t("create_shipment_button")}
           </Button>
         </form>
       </DialogContent>

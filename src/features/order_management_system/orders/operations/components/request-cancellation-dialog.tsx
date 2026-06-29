@@ -37,7 +37,7 @@ export function RequestCancellationDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.orderRequestCancellation.useMutation({
     onSuccess: () => {
-      toast.success("Demande d'annulation soumise");
+      toast.success(t("cancellation_submitted"));
       setOpen(false);
       reset();
       utils.operations.orderListCancellationRequests.invalidate();
@@ -54,7 +54,7 @@ export function RequestCancellationDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId || !reason) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required_fields"));
       return;
     }
     mutation.mutate({

@@ -23,9 +23,9 @@ export function NotesCard({ order_id, initial_notes, on_saved }: NotesCardProps)
   const update_notes = trpc.orders.adminUpdateNotes.useMutation({
     onSuccess: () => {
       on_saved();
-      toast.success("Notes sauvegardées");
+      toast.success(t("notes_saved"));
     },
-    onError: (err) => toast.error(`Erreur: ${err.message}`),
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
   });
 
   return (

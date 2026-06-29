@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
@@ -10,6 +11,7 @@ import { CreateVerificationDialog } from "./create-verification-dialog";
 import { RecordPartialPaymentDialog } from "./record-partial-payment-dialog";
 
 export function PaymentVerificationsPageClient() {
+  const t = useTranslations("verifications");
   const { data, isLoading } = trpc.operations.paymentListVerifications.useQuery({
     page: 1,
     limit: 100,
@@ -23,8 +25,8 @@ export function PaymentVerificationsPageClient() {
   return (
     <QueryGuard query={{ isLoading }}>
     <ConsolePageShell
-      title="Vérifications de paiement"
-      subtitle="Vérification manuelle des paiements"
+      title={t("title")}
+      subtitle={t("subtitle")}
       actions={
         <div className="flex gap-2">
           <CreateVerificationDialog />
@@ -36,13 +38,13 @@ export function PaymentVerificationsPageClient() {
           loading={isLoading}
           items={[
             {
-              label: "En attente",
+              label: t("stats_pending"),
               value: pendingCount.data ?? 0,
               icon: Clock,
               color: "warning",
             },
-            { label: "Vérifiées", value: verified, icon: CheckCircle2, color: "success" },
-            { label: "Rejetées", value: rejected, icon: XCircle, color: "error" },
+            { label: t("stats_verified"), value: verified, icon: CheckCircle2, color: "success" },
+            { label: t("stats_rejected"), value: rejected, icon: XCircle, color: "error" },
           ]}
         />
       }

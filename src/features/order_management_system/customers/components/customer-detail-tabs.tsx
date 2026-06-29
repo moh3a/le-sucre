@@ -47,53 +47,11 @@ const STATUS_BADGE_VARIANTS: Record<string, "default" | "secondary" | "destructi
   converted: "outline",
 };
 
-const ORDER_STATUS_LABELS: Record<string, string> = {
-  pending_payment: "En attente de paiement",
-  confirmed: "Confirmée",
-  processing: "En cours",
-  shipped: "Expédiée",
-  delivered: "Livrée",
-  failed_delivery: "Livraison échouée",
-  cancelled: "Annulée",
-  refunded: "Remboursée",
-};
-
-const PAYMENT_STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  authorized: "Autorisé",
-  paid: "Payé",
-  failed: "Échoué",
-  refunded: "Remboursé",
-};
-
-const REVIEW_STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvé",
-  rejected: "Rejeté",
-  hidden: "Masqué",
-};
-
 const REVIEW_BADGE_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   approved: "default",
   pending: "secondary",
   rejected: "destructive",
   hidden: "outline",
-};
-
-const RETURN_TYPE_LABELS: Record<string, string> = {
-  return: "Retour",
-  replacement: "Remplacement",
-  failed_delivery: "Livraison échouée",
-};
-
-const RETURN_STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvée",
-  rejected: "Rejetée",
-  in_transit: "En transit",
-  received: "Reçue",
-  completed: "Terminée",
-  cancelled: "Annulée",
 };
 
 const RETURN_STATUS_BADGE_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -292,9 +250,9 @@ function OrderCard({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge>{ORDER_STATUS_LABELS[order.status] ?? order.status}</Badge>
+              <Badge>{t(`status_${order.status}`)}</Badge>
               <Badge variant="secondary">
-                {PAYMENT_STATUS_LABELS[order.payment_status] ?? order.payment_status}
+                {t(`payment_${order.payment_status}`)}
               </Badge>
               <span className="text-sm font-medium tabular-nums">
                 {Number(order.grand_total).toLocaleString("fr-FR")} {order.currency}
@@ -349,7 +307,7 @@ function ReviewCard({ review }: { review: Record<string, unknown> }) {
               ))}
             </div>
             <Badge variant={REVIEW_BADGE_VARIANTS[r.status] ?? "outline"}>
-              {REVIEW_STATUS_LABELS[r.status] ?? r.status}
+              {t(`review_${r.status}`)}
             </Badge>
             {r.is_verified_purchase && (
               <Badge variant="outline" className="text-[10px]">{t("verified_purchase")}</Badge>
@@ -385,7 +343,7 @@ function ReturnRequestCard({ request }: { request: Record<string, unknown> }) {
               {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               <div>
                 <CardTitle className="text-sm font-medium">
-                  {RETURN_TYPE_LABELS[r.type] ?? r.type}
+                  {t(`return_type_${r.type}`)}
                   <span className="text-muted-foreground ml-2 font-mono text-xs">
                     #{r.id}
                   </span>
@@ -395,7 +353,7 @@ function ReturnRequestCard({ request }: { request: Record<string, unknown> }) {
             </div>
             <div className="flex items-center gap-3">
               <Badge variant={RETURN_STATUS_BADGE_VARIANTS[r.status] ?? "outline"}>
-                {RETURN_STATUS_LABELS[r.status] ?? r.status}
+                {t(`return_status_${r.status}`)}
               </Badge>
               <span className="text-sm font-medium tabular-nums">
                 {r.refund_amount
@@ -403,7 +361,7 @@ function ReturnRequestCard({ request }: { request: Record<string, unknown> }) {
                   : ""}
               </span>
               <Badge variant="outline">
-                {items?.length ?? 0} article{items?.length !== 1 ? "s" : ""}
+                {items?.length ?? 0} {items?.length !== 1 ? t("items") : t("item")}
               </Badge>
             </div>
           </div>
@@ -495,7 +453,7 @@ export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
             <User className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold">{customer.name ?? "Client"}</h1>
+            <h1 className="text-2xl font-semibold">{customer.name ?? t("client_fallback")}</h1>
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Mail className="h-3.5 w-3.5" />
               {customer.email}

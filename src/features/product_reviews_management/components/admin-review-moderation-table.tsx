@@ -70,18 +70,18 @@ interface Option {
   value: string;
 }
 
-const STATUS_OPTIONS: Option[] = [
-  { label: "En attente", value: "pending" },
-  { label: "Approuvé", value: "approved" },
-  { label: "Rejeté", value: "rejected" },
+const STATUS_OPTIONS = (t: (key: string) => string): Option[] => [
+  { label: t("pending_badge"), value: "pending" },
+  { label: t("approved_badge"), value: "approved" },
+  { label: t("rejected_badge"), value: "rejected" },
 ];
 
-const RATING_OPTIONS: Option[] = [
-  { label: "5 étoiles", value: "5" },
-  { label: "4 étoiles", value: "4" },
-  { label: "3 étoiles", value: "3" },
-  { label: "2 étoiles", value: "2" },
-  { label: "1 étoile", value: "1" },
+const RATING_OPTIONS = (t: (key: string) => string): Option[] => [
+  { label: t("stars_5"), value: "5" },
+  { label: t("stars_4"), value: "4" },
+  { label: t("stars_3"), value: "3" },
+  { label: t("stars_2"), value: "2" },
+  { label: t("stars_1"), value: "1" },
 ];
 
 function FacetedFilter({
@@ -163,10 +163,10 @@ const STATUS_BADGE_VARIANTS: Record<
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  approved: "Approuvé",
-  rejected: "Rejeté",
-  hidden: "Masqué",
+  pending: "pending_badge",
+  approved: "approved_badge",
+  rejected: "rejected_badge",
+  hidden: "hidden_badge",
 };
 
 export function AdminReviewModerationTable() {
@@ -261,7 +261,7 @@ export function AdminReviewModerationTable() {
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE_VARIANTS[row.original.status] ?? "default"}>
-            {STATUS_LABELS[row.original.status] ?? row.original.status}
+            {t(STATUS_LABELS[row.original.status] ?? row.original.status)}
           </Badge>
         ),
       },
@@ -404,7 +404,7 @@ export function AdminReviewModerationTable() {
           />
           <FacetedFilter
             title={t("status_title")}
-            options={STATUS_OPTIONS}
+            options={STATUS_OPTIONS(t)}
             icon={XCircle}
             value={status ?? undefined}
             onChange={(val) => {
@@ -414,7 +414,7 @@ export function AdminReviewModerationTable() {
           />
           <FacetedFilter
             title={t("rating_title")}
-            options={RATING_OPTIONS}
+            options={RATING_OPTIONS(t)}
             icon={Star}
             value={rating ?? undefined}
             onChange={(val) => {

@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { FacetedFilter } from "@/features/data-table/components/data-table-faceted-filter-simple";
 import type { InventoryMovementRow } from "../repositories/inventory-admin.repository";
-import { MOVEMENT_LABELS } from "../constants/movement-types";
+import { getMovementLabels } from "../constants/movement-types";
 
 const MOVEMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   adjust: "outline",
@@ -33,6 +33,7 @@ const MOVEMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "
 
 export function InventoryMovementsTable() {
   const t = useTranslations("inventory");
+  const ml = getMovementLabels(t);
   const [page] = useQueryState("movPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("movPerPage", parseAsInteger.withDefault(10));
   const [movement_type, set_movement_type] = useQueryState("movType", parseAsString);
@@ -53,7 +54,7 @@ export function InventoryMovementsTable() {
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("type")} />,
         cell: ({ row }) => (
           <Badge variant={MOVEMENT_BADGE[row.original.movement_type] ?? "outline"}>
-            {MOVEMENT_LABELS[row.original.movement_type] ?? row.original.movement_type}
+            {ml[row.original.movement_type] ?? row.original.movement_type}
           </Badge>
         ),
       },
@@ -128,9 +129,9 @@ export function InventoryMovementsTable() {
     getRowId: (row) => row.id,
   });
 
-  const movementTypeOptions = Object.keys(MOVEMENT_LABELS).map((key) => ({
+  const movementTypeOptions = Object.keys(ml).map((key) => ({
     value: key,
-    label: MOVEMENT_LABELS[key],
+    label: ml[key],
   }));
 
   return (

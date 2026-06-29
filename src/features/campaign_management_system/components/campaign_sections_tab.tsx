@@ -78,7 +78,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
   const add_section = trpc.campaigns.addSection.useMutation({
     onSuccess: () => {
-      toast.success("Section ajoutée");
+      toast.success(t("section_added"));
       utils.campaigns.byId.invalidate({ id: campaign_id });
       setIsOpen(false);
     },
@@ -87,7 +87,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
   const update_section = trpc.campaigns.updateSection.useMutation({
     onSuccess: () => {
-      toast.success("Section mise à jour");
+      toast.success(t("section_updated"));
       utils.campaigns.byId.invalidate({ id: campaign_id });
       setIsOpen(false);
     },
@@ -96,7 +96,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
   const delete_section = trpc.campaigns.deleteSection.useMutation({
     onSuccess: () => {
-      toast.success("Section supprimée");
+      toast.success(t("section_deleted"));
       utils.campaigns.byId.invalidate({ id: campaign_id });
     },
     onError: (err) => toast.error(err.message),
@@ -156,7 +156,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Voulez-vous vraiment supprimer cette section ?")) {
+    if (confirm(t("confirm_delete_section"))) {
       await delete_section.mutateAsync({ id });
     }
   };
@@ -263,7 +263,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold">
-                        {section.heading?.fr || "Section sans titre"}
+                        {section.heading?.fr || t("section_untitled")}
                       </h4>
                       <div className="mt-1 flex items-center gap-2">
                         <Badge variant="outline" className="text-[10px]">
@@ -273,13 +273,13 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                           variant="secondary"
                           className="bg-[#f9f7be]/60 text-[10px] text-[#4d4c20]"
                         >
-                          page: {section.page_slug}
+                          {t("page_badge", { slug: section.page_slug })}
                         </Badge>
                         <Badge
                           variant={section.is_active ? "default" : "outline"}
                           className="text-[10px]"
                         >
-                          {section.is_active ? "Actif" : "Inactif"}
+                          {section.is_active ? t("status_active_label") : t("status_inactive_label")}
                         </Badge>
                       </div>
                     </div>
@@ -288,7 +288,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                   <div className="flex items-center gap-4">
                     <div className="text-muted-foreground flex items-center gap-1 text-xs font-medium">
                       <ArrowUpDown className="h-3 w-3" />
-                      Ordre: {section.sort_order}
+                      {t("order_display", { order: section.sort_order })}
                     </div>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(section)}>
@@ -309,51 +309,43 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
           <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedSection ? "Modifier la section" : "Ajouter une section"}
+                {selectedSection ? t("edit_section_dialog") : t("add_section_dialog")}
               </DialogTitle>
             </DialogHeader>
 
             <form onSubmit={handleSave} className="space-y-4 pt-2">
               <div className="grid gap-4 md:grid-cols-3">
                 <Field className="md:col-span-2">
-                  <FieldLabel>Type de section</FieldLabel>
+                  <FieldLabel>{t("section_type_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     value={formState.section_type}
                     onChange={(e) => setFormState({ ...formState, section_type: e.target.value })}
                   >
-                    <option value={SECTION_TYPE.product_grid}>
-                      Grille de produits (Product Grid)
-                    </option>
-                    <option value={SECTION_TYPE.product_carousel}>
-                      Carrousel de produits (Product Carousel)
-                    </option>
-                    <option value={SECTION_TYPE.category_showcase}>
-                      Présentation de catégories (Category Showcase)
-                    </option>
-                    <option value={SECTION_TYPE.brand_showcase}>
-                      Présentation de marques (Brand Showcase)
-                    </option>
-                    <option value={SECTION_TYPE.banner_row}>Ligne de bannières (Banner Row)</option>
-                    <option value={SECTION_TYPE.countdown}>Compte à rebours (Countdown)</option>
-                    <option value={SECTION_TYPE.text_block}>Bloc de texte (Text Block)</option>
-                    <option value={SECTION_TYPE.video}>Section Vidéo (Video Showcase)</option>
+                    <option value={SECTION_TYPE.product_grid}>{t("section_type_product_grid")}</option>
+                    <option value={SECTION_TYPE.product_carousel}>{t("section_type_product_carousel")}</option>
+                    <option value={SECTION_TYPE.category_showcase}>{t("section_type_category_showcase")}</option>
+                    <option value={SECTION_TYPE.brand_showcase}>{t("section_type_brand_showcase")}</option>
+                    <option value={SECTION_TYPE.banner_row}>{t("section_type_banner_row")}</option>
+                    <option value={SECTION_TYPE.countdown}>{t("section_type_countdown")}</option>
+                    <option value={SECTION_TYPE.text_block}>{t("section_type_text_block")}</option>
+                    <option value={SECTION_TYPE.video}>{t("section_type_video")}</option>
                   </select>
                 </Field>
 
                 <Field>
-                  <FieldLabel>Slug de la page</FieldLabel>
+                  <FieldLabel>{t("page_slug_label")}</FieldLabel>
                   <Input
                     value={formState.page_slug}
                     onChange={(e) => setFormState({ ...formState, page_slug: e.target.value })}
-                    placeholder="Ex: home"
+                    placeholder={t("section_page_slug_placeholder")}
                   />
                 </Field>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <Field>
-                  <FieldLabel>Ordre de tri</FieldLabel>
+                  <FieldLabel>{t("sort_order_label")}</FieldLabel>
                   <Input
                     type="number"
                     value={formState.sort_order}
@@ -364,7 +356,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                 </Field>
 
                 <Field>
-                  <FieldLabel>Statut actif</FieldLabel>
+                  <FieldLabel>{t("active_status_label")}</FieldLabel>
                   <select
                     className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                     value={formState.is_active ? "true" : "false"}
@@ -372,8 +364,8 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                       setFormState({ ...formState, is_active: e.target.value === "true" })
                     }
                   >
-                    <option value="true">Actif</option>
-                    <option value="false">Inactif</option>
+                    <option value="true">{t("status_active_label")}</option>
+                    <option value="false">{t("status_inactive_label")}</option>
                   </select>
                 </Field>
               </div>
@@ -381,20 +373,20 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
               {/* Title Input tabs */}
               <div className="space-y-2">
                 <FieldLabel className="text-sm font-semibold">
-                  Titre / En-tête de section (Translations)
+                  {t("section_heading_label")}
                 </FieldLabel>
                 <Tabs defaultValue="fr" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="fr">Français</TabsTrigger>
-                    <TabsTrigger value="en">English</TabsTrigger>
-                    <TabsTrigger value="ar">العربية</TabsTrigger>
+                    <TabsTrigger value="fr">{t("locale_fr")}</TabsTrigger>
+                    <TabsTrigger value="en">{t("locale_en")}</TabsTrigger>
+                    <TabsTrigger value="ar">{t("locale_ar")}</TabsTrigger>
                   </TabsList>
                   {(["fr", "en", "ar"] as const).map((lang) => (
                     <TabsContent key={lang} value={lang} className="pt-2">
                       <Input
                         value={formState.heading?.[lang] ?? ""}
                         onChange={(e) => handleHeadingChange(lang, e.target.value)}
-                        placeholder={`Titre en ${lang}`}
+                        placeholder={t("section_heading_placeholder", { lang })}
                       />
                     </TabsContent>
                   ))}
@@ -404,17 +396,17 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
               {/* Dynamic configurations based on section type */}
               <div className="space-y-4 border-t pt-4">
                 <h4 className="mb-2 text-sm font-semibold">
-                  Paramètres de contenu (Section Config)
+                  {t("section_config_label")}
                 </h4>
 
                 {(formState.section_type === "product_grid" ||
                   formState.section_type === "product_carousel") && (
                   <div className="space-y-4">
                     <Field>
-                      <FieldLabel>Sélectionner des produits</FieldLabel>
+                      <FieldLabel>{t("select_products")}</FieldLabel>
                       <div className="bg-background max-h-[140px] space-y-1 overflow-y-auto rounded-md border p-2">
                         {!products?.items || products.items.length === 0 ? (
-                          <p className="text-muted-foreground p-1 text-xs">Aucun produit trouvé</p>
+                          <p className="text-muted-foreground p-1 text-xs">{t("no_products_found")}</p>
                         ) : (
                           products.items.map((prod) => {
                             const selected =
@@ -446,13 +438,13 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
                     <div className="grid gap-4 md:grid-cols-2">
                       <Field>
-                        <FieldLabel>Filtrer par catégorie (Optionnel)</FieldLabel>
+                        <FieldLabel>{t("filter_by_category")}</FieldLabel>
                         <select
                           className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                           value={formState.config?.category_id ?? ""}
                           onChange={(e) => handleConfigChange("category_id", e.target.value)}
                         >
-                          <option value="">Toutes les catégories</option>
+                          <option value="">{t("all_categories")}</option>
                           {category_options.map((opt) => (
                             <option key={opt.id} value={opt.id}>
                               {opt.label}
@@ -462,7 +454,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                       </Field>
 
                       <Field>
-                        <FieldLabel>Nombre maximum à afficher (Limit)</FieldLabel>
+                        <FieldLabel>{t("max_display_limit")}</FieldLabel>
                         <Input
                           type="number"
                           value={formState.config?.limit ?? 8}
@@ -475,13 +467,13 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
                 {formState.section_type === "category_showcase" && (
                   <Field>
-                    <FieldLabel>Catégorie cible</FieldLabel>
+                    <FieldLabel>{t("target_category")}</FieldLabel>
                     <select
                       className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                       value={formState.config?.category_id ?? ""}
                       onChange={(e) => handleConfigChange("category_id", e.target.value)}
                     >
-                      <option value="">Sélectionner une catégorie</option>
+                      <option value="">{t("select_category")}</option>
                       {category_options.map((opt) => (
                         <option key={opt.id} value={opt.id}>
                           {opt.label}
@@ -493,13 +485,13 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
                 {formState.section_type === "brand_showcase" && (
                   <Field>
-                    <FieldLabel>Marque cible</FieldLabel>
+                    <FieldLabel>{t("target_brand")}</FieldLabel>
                     <select
                       className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
                       value={formState.config?.brand_id ?? ""}
                       onChange={(e) => handleConfigChange("brand_id", e.target.value)}
                     >
-                      <option value="">Sélectionner une marque</option>
+                      <option value="">{t("select_brand")}</option>
                       {activeBrands?.map((brand) => (
                         <option key={brand.id} value={brand.id}>
                           {brand.name}
@@ -511,7 +503,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
                 {formState.section_type === "countdown" && (
                   <Field>
-                    <FieldLabel>Date de fin du compte à rebours</FieldLabel>
+                    <FieldLabel>{t("countdown_end_label")}</FieldLabel>
                     <Input
                       type="datetime-local"
                       value={
@@ -531,11 +523,11 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
                 {formState.section_type === "video" && (
                   <Field>
-                    <FieldLabel>URL de la vidéo</FieldLabel>
+                    <FieldLabel>{t("video_url_label")}</FieldLabel>
                     <Input
                       value={formState.config?.video_url ?? ""}
                       onChange={(e) => handleConfigChange("video_url", e.target.value)}
-                      placeholder="https://example.com/videos/promo.mp4"
+                      placeholder={t("section_video_placeholder")}
                     />
                   </Field>
                 )}
@@ -543,10 +535,10 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
               <DialogFooter className="border-t pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                  Annuler
+                  {t("cancel")}
                 </Button>
                 <Button type="submit" className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90">
-                  {selectedSection ? "Sauvegarder" : "Créer"}
+                  {selectedSection ? t("save") : t("create")}
                 </Button>
               </DialogFooter>
             </form>

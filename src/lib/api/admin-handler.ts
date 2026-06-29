@@ -7,6 +7,7 @@ import { ownership_service } from "@/lib/security/ownership";
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/rate-limit";
 import { assert_ip_not_blacklisted } from "@/lib/security/ip-blacklist";
+import { authorization_audit_service } from "@/lib/security/authorization-audit";
 
 type AdminHandler = (ctx: {
   user: { id: string; email: string; name: string };
@@ -21,8 +22,13 @@ interface OwnershipConfig {
   delivery_field?: string;
 }
 
+function get_request_id(req: Request): string {
+  return req.headers.get("x-request-id") ?? crypto.randomUUID();
+}
+
 export function admin_route(handler: AdminHandler, permission?: string) {
   return async (req: Request) => {
+    const request_id = get_request_id(req);
     try {
       await apply_api_guards(req, "admin");
       await assert_ip_not_blacklisted(req);
@@ -30,26 +36,45 @@ export function admin_route(handler: AdminHandler, permission?: string) {
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.adminApi);
       if (!rl.success) {
-        return json_error(new AppError("Rate limit exceeded", "RATE_LIMIT_EXCEEDED", 429));
+        await authorization_audit_service.log_rate_limit_hit({ identifier: ip, action: "admin_api" });
+        return json_error(new AppError("Rate limit exceeded", "RATE_LIMIT_EXCEEDED", 429), 429, request_id);
       }
 
       const session = await auth.api.getSession({ headers: req.headers });
-      if (!session?.user) return json_error(new AuthenticationError());
+      if (!session?.user) return json_error(new AuthenticationError(), 401, request_id);
 
       const authz = new AuthorizationService();
       await authz.assert_admin_console(session.user.id);
-      if (permission) await authz.assert_permission(session.user.id, permission);
+      if (permission) {
+        try {
+          await authz.assert_permission(session.user.id, permission);
+        } catch {
+          await authorization_audit_service.log_access_attempt({
+            user_id: session.user.id,
+            action: permission,
+            resource_type: "admin",
+            result: "denied",
+            reason: "missing_permission",
+            req,
+          });
+          throw new AppError("Permission denied", "FORBIDDEN_ACCESS", 403);
+        }
+      }
 
       const rbac = await authz.get_auth_context(session.user.id);
       const data = await handler({
-        user: session.user,
+        user: {
+          id: session.user.id,
+          email: session.user.email ?? "",
+          name: session.user.name ?? "",
+        },
         rbac,
         req,
       });
 
-      return json_ok(data);
+      return json_ok(data, 200, request_id);
     } catch (e) {
-      return json_error(e);
+      return json_error(e, undefined, request_id);
     }
   };
 }
@@ -60,16 +85,29 @@ export function ownership_aware_admin_route(
   ownership: OwnershipConfig,
 ) {
   return async (req: Request) => {
+    const request_id = get_request_id(req);
     try {
       await apply_api_guards(req, "admin");
       await assert_ip_not_blacklisted(req);
 
       const session = await auth.api.getSession({ headers: req.headers });
-      if (!session?.user) return json_error(new AuthenticationError());
+      if (!session?.user) return json_error(new AuthenticationError(), 401, request_id);
 
       const authz = new AuthorizationService();
       await authz.assert_admin_console(session.user.id);
-      await authz.assert_permission(session.user.id, permission);
+      try {
+        await authz.assert_permission(session.user.id, permission);
+      } catch {
+        await authorization_audit_service.log_access_attempt({
+          user_id: session.user.id,
+          action: permission,
+          resource_type: ownership.type,
+          result: "denied",
+          reason: "missing_permission",
+          req,
+        });
+        throw new AppError("Permission denied", "FORBIDDEN_ACCESS", 403);
+      }
 
       const rbac = await authz.get_auth_context(session.user.id);
 
@@ -88,10 +126,14 @@ export function ownership_aware_admin_route(
         );
       }
 
-      const data = await handler({ user: session.user, rbac, req });
-      return json_ok(data);
+      const data = await handler({ user: {
+        id: session.user.id,
+        email: session.user.email ?? "",
+        name: session.user.name ?? "",
+      }, rbac, req });
+      return json_ok(data, 200, request_id);
     } catch (e) {
-      return json_error(e);
+      return json_error(e, undefined, request_id);
     }
   };
 }

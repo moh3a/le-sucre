@@ -42,7 +42,7 @@ export function CreateWarrantyClaimDialog() {
   const utils = trpc.useUtils();
   const mutation = trpc.operations.warrantyCreate.useMutation({
     onSuccess: () => {
-      toast.success("Demande de garantie créée");
+      toast.success(t("claim_created"));
       setOpen(false);
       reset();
       utils.operations.warrantyList.invalidate();
@@ -65,7 +65,7 @@ export function CreateWarrantyClaimDialog() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId || !productId || !skuId || !issueType || !description) {
-      toast.error("Veuillez remplir les champs obligatoires");
+      toast.error(t("fill_required"));
       return;
     }
     mutation.mutate({
@@ -167,11 +167,11 @@ export function CreateWarrantyClaimDialog() {
                 <SelectValue placeholder={t("select_type_placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="defect">Défaut de fabrication</SelectItem>
-                <SelectItem value="damage">Dommage</SelectItem>
-                <SelectItem value="malfunction">Dysfonctionnement</SelectItem>
-                <SelectItem value="cosmetic">Défaut esthétique</SelectItem>
-                <SelectItem value="other">Autre</SelectItem>
+                <SelectItem value="defect">{t("issue_defect")}</SelectItem>
+                <SelectItem value="damage">{t("issue_damage")}</SelectItem>
+                <SelectItem value="malfunction">{t("issue_malfunction")}</SelectItem>
+                <SelectItem value="cosmetic">{t("issue_cosmetic")}</SelectItem>
+                <SelectItem value="other">{t("issue_other")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

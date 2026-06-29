@@ -31,15 +31,6 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = {
-  successful: "Livré",
-  failed: "Échoué",
-  customer_unavailable: "Client absent",
-  wrong_address: "Mauvaise adresse",
-  refused: "Refusé",
-  cancelled: "Annulé",
-};
-
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   successful: "default",
   failed: "destructive",
@@ -48,11 +39,6 @@ const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "o
   refused: "destructive",
   cancelled: "outline",
 };
-
-const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
-  label,
-  value,
-}));
 
 type DeliveryAttemptRow = {
   id: string;
@@ -138,11 +124,25 @@ export function DeliveryAttemptsTable() {
   const [per_page] = useQueryState("dvPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("dvStatus", parseAsString);
 
+  const STATUS_LABELS: Record<string, string> = {
+    successful: t("delivered"),
+    failed: t("failed"),
+    customer_unavailable: t("customer_unavailable"),
+    wrong_address: t("wrong_address"),
+    refused: t("refused"),
+    cancelled: t("cancelled"),
+  };
+
+  const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
+    label,
+    value,
+  }));
+
   const utils = trpc.useUtils();
 
   const retryMutation = trpc.operations.deliveryRetry.useMutation({
     onSuccess: () => {
-      toast.success("Nouvelle tentative programmée");
+      toast.success(t("reschedule_scheduled"));
       utils.operations.deliveryListAttempts.invalidate();
       utils.operations.deliveryGetStats.invalidate();
     },
@@ -151,7 +151,7 @@ export function DeliveryAttemptsTable() {
 
   const rtoMutation = trpc.operations.deliveryReturnToWarehouse.useMutation({
     onSuccess: () => {
-      toast.success("Retour entrepôt initié");
+      toast.success(t("rto_initiated"));
       utils.operations.deliveryListAttempts.invalidate();
       utils.operations.deliveryGetStats.invalidate();
     },
@@ -279,7 +279,7 @@ export function DeliveryAttemptsTable() {
         },
       },
     ],
-    [retryMutation, rtoMutation],
+    [retryMutation, rtoMutation, t],
   );
 
   const { data, isLoading, error } = trpc.operations.deliveryListAttempts.useQuery({
