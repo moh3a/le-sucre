@@ -11,6 +11,9 @@ import { review_repository } from "../repositories/review.repository";
 import { product_reviews } from "../schema";
 import { db } from "@/lib/db";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { review_cache_service } from "./review-cache.service";
+
+const REPORT_AUTO_HIDE_THRESHOLD = 5;
 
 export class ReportService {
   async report(user_id: string, input: z.infer<typeof report_review_dto>) {
@@ -34,6 +37,21 @@ export class ReportService {
         .where(eq(product_reviews.id, input.review_id));
     } catch {
       throw_error(REPORT_ERROR.ALREADY_EXISTS);
+    }
+
+    // Auto-hide if report count exceeds threshold
+    const updated = await review_repository.find_by_id(input.review_id);
+    if (updated && updated.report_count >= REPORT_AUTO_HIDE_THRESHOLD && updated.status !== "hidden") {
+      await review_repository.update(updated.id, { status: "hidden" });
+      await review_repository.insert_moderation_event({
+        id: generate_id(),
+        review_id: updated.id,
+        actor_user_id: null,
+        from_status: updated.status,
+        to_status: "hidden",
+        note: "Auto-hide: report threshold exceeded",
+      });
+      await review_cache_service.invalidate_product(updated.product_id);
     }
 
     void audit_service.log({

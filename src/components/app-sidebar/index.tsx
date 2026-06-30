@@ -36,6 +36,7 @@ import {
   Wallet,
   Flag,
   Image as ImageIcon,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -183,114 +184,123 @@ export function AppSidebar() {
 
   return (
     <QueryGuard session={{ isPending, error }}>
-    <TooltipProvider>
-      <Sidebar variant="floating" collapsible="icon">
-        <SidebarHeader>
-          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>{t("navigation")}</SidebarGroupLabel>
-            <SidebarMenu>
-              <Link href="/console">
-                <SidebarMenuButton tooltip={t("dashboard")} isActive={pathname === "/console"}>
-                  <Gauge className="size-4" />
-                  <span>{t("dashboard")}</span>
-                </SidebarMenuButton>
-              </Link>
-              <Link href="/console/analytics">
-                <SidebarMenuButton
-                  tooltip={t("analytics")}
-                  isActive={pathname.startsWith("/console/analytics")}
-                >
-                  <ChartArea className="size-4" />
-                  <span>{t("analytics")}</span>
-                </SidebarMenuButton>
-              </Link>
-              {nav.map(({ icon: Icon, ...section }) =>
-                is_collapsed ? (
-                  <SidebarMenuItem key={section.title}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton tooltip={section.title}>
-                          <Icon />
-                          <span>{section.title}</span>
-                        </SidebarMenuButton>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent side="right" align="start" className="min-w-48">
-                        {section.items.map((item) => (
-                          <DropdownMenuItem key={item.url} asChild>
-                            <Link
-                              href={item.url}
-                              className={cn(
-                                "flex items-center gap-2",
-                                pathname.startsWith(item.url) && "font-medium",
-                              )}
-                            >
-                              <item.icon className="size-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </SidebarMenuItem>
-                ) : (
-                  <Collapsible key={section.title} defaultOpen className="group/collapsible">
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton tooltip={section.title}>
-                          <Icon />
-                          <span>{section.title}</span>
-                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
+      <TooltipProvider>
+        <Sidebar variant="floating" collapsible="icon">
+          <SidebarHeader>
+            <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>{t("navigation")}</SidebarGroupLabel>
+              <SidebarMenu>
+                <Link href="/console">
+                  <SidebarMenuButton tooltip={t("dashboard")} isActive={pathname === "/console"}>
+                    <Gauge className="size-4" />
+                    <span>{t("dashboard")}</span>
+                  </SidebarMenuButton>
+                </Link>
+                <Link href="/console/analytics">
+                  <SidebarMenuButton
+                    tooltip={t("analytics")}
+                    isActive={pathname.startsWith("/console/analytics")}
+                  >
+                    <ChartArea className="size-4" />
+                    <span>{t("analytics")}</span>
+                  </SidebarMenuButton>
+                </Link>
+                {nav.map(({ icon: Icon, ...section }) =>
+                  is_collapsed ? (
+                    <SidebarMenuItem key={section.title}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <SidebarMenuButton tooltip={section.title}>
+                            <Icon />
+                            <span>{section.title}</span>
+                          </SidebarMenuButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="right" align="start" className="min-w-48">
                           {section.items.map((item) => (
-                            <SidebarMenuSubItem key={item.url}>
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={pathname.startsWith(item.url)}
+                            <DropdownMenuItem key={item.url} asChild>
+                              <Link
+                                href={item.url}
+                                className={cn(
+                                  "flex items-center gap-2",
+                                  pathname.startsWith(item.url) && "font-medium",
+                                )}
                               >
-                                <Link href={item.url}>
-                                  <item.icon className="size-4" />
-                                  <span>{item.title}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
+                                <item.icon className="size-4" />
+                                <span>{item.title}</span>
+                              </Link>
+                            </DropdownMenuItem>
                           ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </SidebarMenuItem>
-                  </Collapsible>
-                ),
-              )}
-              <Link href="/console/settings">
-                <SidebarMenuButton
-                  tooltip={t("settings")}
-                  isActive={pathname.startsWith("/console/settings")}
-                >
-                  <Cog className="size-4" />
-                  <span>{t("settings")}</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenu>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <NavUser
-            user={{
-              name: data?.user.name ?? "",
-              email: data?.user.email ?? "",
-              avatar: data?.user.image ?? "",
-              role: data?.userRole ?? null,
-            }}
-          />
-        </SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
-    </TooltipProvider>
+                  ) : (
+                    <Collapsible key={section.title} defaultOpen className="group/collapsible">
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton tooltip={section.title}>
+                            <Icon />
+                            <span>{section.title}</span>
+                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {section.items.map((item) => (
+                              <SidebarMenuSubItem key={item.url}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  isActive={pathname.startsWith(item.url)}
+                                >
+                                  <Link href={item.url}>
+                                    <item.icon className="size-4" />
+                                    <span>{item.title}</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  ),
+                )}
+                <Link href="/console/settings">
+                  <SidebarMenuButton
+                    tooltip={t("settings")}
+                    isActive={pathname.startsWith("/console/settings")}
+                  >
+                    <Cog className="size-4" />
+                    <span>{t("settings")}</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter>
+            <Link href="/">
+              <SidebarMenuButton
+                tooltip="Website"
+                className="bg-primary text-primary-foreground hover:bg-primary/75"
+              >
+                <ExternalLink className="size-4" />
+                <span>Visit website</span>
+              </SidebarMenuButton>
+            </Link>
+            <NavUser
+              user={{
+                name: data?.user.name ?? "",
+                email: data?.user.email ?? "",
+                avatar: data?.user.image ?? "",
+                role: data?.userRole ?? null,
+              }}
+            />
+          </SidebarFooter>
+          <SidebarRail />
+        </Sidebar>
+      </TooltipProvider>
     </QueryGuard>
   );
 }

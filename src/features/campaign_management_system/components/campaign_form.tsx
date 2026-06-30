@@ -496,7 +496,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                         render={({ field }) => (
                           <Field>
                             <FieldLabel>{t("cta_url")}</FieldLabel>
-                            <Input {...field} placeholder="/storefront/categories/promotions" />
+                            <Input {...field} placeholder="/categories/promotions" />
                           </Field>
                         )}
                       />

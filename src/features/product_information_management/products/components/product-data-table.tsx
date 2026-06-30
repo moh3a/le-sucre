@@ -96,6 +96,7 @@ function FacetedFilter({
   onChange: (value: string | null) => void;
 }) {
   const [open, setOpen] = React.useState(false);
+  const common = useTranslations("common");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -104,7 +105,7 @@ function FacetedFilter({
           {value ? (
             <div
               role="button"
-              aria-label={`Clear ${title} filter`}
+              aria-label={common("clear_filter", { title })}
               tabIndex={0}
               className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
               onClick={(e) => {
@@ -170,6 +171,7 @@ function RangeFilter({
   unit?: string;
 }) {
   const [open, setOpen] = React.useState(false);
+  const common = useTranslations("common");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -178,7 +180,7 @@ function RangeFilter({
           {minValue != null || maxValue != null ? (
             <div
               role="button"
-              aria-label={`Clear ${title} filter`}
+              aria-label={common("clear_filter", { title })}
               tabIndex={0}
               className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
               onClick={(e) => {
@@ -212,7 +214,7 @@ function RangeFilter({
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
               <Label htmlFor={`${title}-min`} className="sr-only">
-                Min
+                {common("min")}
               </Label>
               <Input
                 id={`${title}-min`}
@@ -232,7 +234,7 @@ function RangeFilter({
             </div>
             <div className="relative flex-1">
               <Label htmlFor={`${title}-max`} className="sr-only">
-                Max
+                {common("max")}
               </Label>
               <Input
                 id={`${title}-max`}

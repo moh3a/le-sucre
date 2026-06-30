@@ -47,7 +47,7 @@ export function CatalogProductGrid({ products, isLoading }: CatalogProductGridPr
         const has_discount = product.max_price && product.min_price !== product.max_price;
 
         return (
-          <Link href={`/storefront/products/${product.slug}`} key={product.id} className="group">
+          <Link href={`/products/${product.slug}`} key={product.id} className="group">
             <Card className="flex h-full flex-col overflow-hidden border border-[#4d4c20]/15 bg-white transition-all duration-300 hover:border-[#700145]/40 hover:shadow-xl">
               {/* Image and Badge */}
               <div className="relative aspect-square overflow-hidden bg-[#fff3e3]/20">

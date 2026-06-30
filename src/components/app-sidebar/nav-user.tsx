@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "../ui/badge";
 import { authClient } from "@/lib/auth/client";
-import { QueryGuard } from "@/components/query-guard";
 import { RoleName } from "@/features/authentication_and_authorization/authorization/constants/roles";
 
 export function NavUser({
@@ -59,7 +58,6 @@ export function NavUser({
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
-                {user.role ? <Badge>{user.role}</Badge> : null}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -74,7 +72,12 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg uppercase">
+                    {user.name
+                      .split(" ")
+                      .map((w) => w[0])
+                      .join("")}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -84,6 +87,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <Badge className="capitalize">{user.role}</Badge>
+              </DropdownMenuItem>
               <Link href="/console/account">
                 <DropdownMenuItem>
                   <BadgeCheck />

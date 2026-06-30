@@ -13,6 +13,7 @@ import {
   helpful_vote_dto,
   report_review_dto,
 } from "./models/review.dto";
+import { getClientIp } from "@/lib/rate-limit";
 import { review_service } from "./services/review.service";
 import { moderation_service } from "./services/moderation.service";
 import { helpful_service } from "./services/helpful.service";
@@ -29,7 +30,9 @@ export const reviews_router = create_trpc_router({
 
   create: storefront_procedure
     .input(create_review_dto)
-    .mutation(({ ctx, input }) => review_service.create_review(ctx.session!.user.id, input)),
+    .mutation(({ ctx, input }) =>
+      review_service.create_review(ctx.session!.user.id, input, getClientIp(ctx.req.headers)),
+    ),
 
   myReviews: storefront_procedure
     .input(

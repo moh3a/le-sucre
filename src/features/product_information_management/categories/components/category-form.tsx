@@ -196,7 +196,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
         </div>
 
         <Button type="submit" disabled={pending}>
-          {pending ? "…" : t("save")}
+          {pending ? t("saving") : t("save")}
         </Button>
       </FieldGroup>
     </form>

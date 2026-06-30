@@ -27,7 +27,7 @@ type LoginFormValues = z.infer<ReturnType<typeof get_login_form_schema>>;
 /** Resolves phone → auto-generated email for Better Auth client auth. */
 async function resolve_phone_to_email(phone: string): Promise<string | null> {
   try {
-    const res = await fetch("/api/auth/phone/resolve", {
+    const res = await fetch("/api/phone-auth/resolve", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone }),

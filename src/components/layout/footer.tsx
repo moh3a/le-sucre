@@ -11,36 +11,36 @@ export async function Footer() {
     boutique: {
       title: t("boutique_title"),
       links: [
-        { href: "/boutique", label: t("all_products") },
-        { href: "/categories", label: t("categories") },
+        { href: "/search", label: t("all_products") },
+        { href: "/brands", label: t("categories") },
         { href: "/promotions", label: t("promotions") },
-        { href: "/nouveautes", label: t("new_arrivals") },
+        { href: "/new-arrivals", label: t("new_arrivals") },
       ],
     },
     compte: {
       title: t("my_account_title"),
       links: [
-        { href: "/compte", label: t("my_profile") },
-        { href: "/commandes", label: t("my_orders") },
-        { href: "/liste-souhaits", label: t("wishlist") },
-        { href: "/adresses", label: t("my_addresses") },
+        { href: "/account", label: t("my_profile") },
+        { href: "/account/orders", label: t("my_orders") },
+        { href: "/account/wishlists", label: t("wishlist") },
+        { href: "/account/addresses", label: t("my_addresses") },
       ],
     },
     aide: {
       title: t("help_title"),
       links: [
         { href: "/faq", label: t("faq") },
-        { href: "/livraison", label: t("shipping") },
-        { href: "/retours", label: t("returns_exchanges") },
+        { href: "/shipping-returns", label: t("shipping") },
+        { href: "/account/returns", label: t("returns_exchanges") },
         { href: "/contact", label: t("contact_us") },
       ],
     },
     legal: {
       title: t("legal_title"),
       links: [
-        { href: "/cgv", label: t("terms") },
-        { href: "/confidentialite", label: t("privacy") },
-        { href: "/mentions-legales", label: t("legal_notices") },
+        { href: "/terms", label: t("terms") },
+        { href: "/privacy", label: t("privacy") },
+        { href: "/legal-notices", label: t("legal_notices") },
         { href: "/cookies", label: t("cookies") },
       ],
     },

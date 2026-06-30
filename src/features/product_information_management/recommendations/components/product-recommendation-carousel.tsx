@@ -106,7 +106,7 @@ export function ProductRecommendationCarousel({
               key={item.id}
               className="min-w-0 flex-[0_0_85%] sm:flex-[0_0_45%] md:flex-[0_0_22%]"
             >
-              <Link href={`/storefront/products/${item.slug}`} className="group">
+              <Link href={`/products/${item.slug}`} className="group">
                 <Card className="flex h-full flex-col overflow-hidden border border-[#4d4c20]/15 bg-white transition-all duration-300 hover:border-[#700145]/40 hover:shadow-lg">
                   <div className="relative aspect-square overflow-hidden bg-[#fff3e3]/20">
                     {item.image_url ? (

@@ -28,7 +28,7 @@ export function Header() {
 
   const navLinks = [
     { href: "/", label: t("home") },
-    { href: "/boutique", label: t("boutique_title") },
+    { href: "/search", label: t("boutique_title") },
     { href: "/categories", label: t("categories") },
     { href: "/promotions", label: t("promotions") },
   ];
@@ -72,7 +72,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           {/* Cart */}
           <Button variant="ghost" size="icon" asChild className="relative">
-            <Link href="/panier">
+            <Link href="/cart">
               <ShoppingCart className="h-5 w-5" />
               {/* Cart count — wired in cart feature */}
               <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-brand-crimson-violet text-white border-0">
@@ -93,16 +93,16 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
-                  <Link href="/compte">{t("my_account")}</Link>
+                  <Link href="/account">{t("my_account")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/commandes">{t("my_orders")}</Link>
+                  <Link href="/account/orders">{t("my_orders")}</Link>
                 </DropdownMenuItem>
                 {session.user?.role === "admin" && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/admin">{t("administration")}</Link>
+                      <Link href="/console">{t("administration")}</Link>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -117,7 +117,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Button size="sm" asChild>
-              <Link href="/login">
+              <Link href="/auth">
                 <User className="h-4 w-4" />
                 {t("login")}
               </Link>

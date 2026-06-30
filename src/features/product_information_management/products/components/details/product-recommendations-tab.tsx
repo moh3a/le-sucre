@@ -43,11 +43,7 @@ type Props = {
   product_id: string;
 };
 
-const type_labels: Record<string, string> = {
-  similar: "Similaires",
-  related: "Associés",
-  fbt: "Souvent achetés ensemble",
-};
+
 
 export function ProductRecommendationsTab({ product_id }: Props) {
   const t = useTranslations("products");
@@ -202,7 +198,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
               {Object.entries(edges_by_type).map(([type, type_edges]) => (
                 <div key={type}>
                   <div className="mb-2 flex items-center gap-2">
-                    <Badge variant="secondary">{type_labels[type] ?? type}</Badge>
+                    <Badge variant="secondary">{t(`type_${type}`)}</Badge>
                     <span className="text-muted-foreground text-xs">
                       {type_edges.length} {t("product_count")}
                     </span>
