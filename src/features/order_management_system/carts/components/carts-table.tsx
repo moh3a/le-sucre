@@ -175,7 +175,7 @@ export function CartsTable() {
           if (name) {
             return (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#c8d152]/20 text-[#4d4c20]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary-foreground">
                   <User className="h-4 w-4" />
                 </div>
                 <div>
@@ -355,7 +355,7 @@ function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
 
         {isLoading ? (
           <div className="flex h-32 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[#c8d152]" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : !data || data.items.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center text-sm">{t("cart_empty")}</div>

@@ -202,7 +202,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
         </div>
         <Button
           onClick={handleOpenNew}
-          className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="mr-2 h-4 w-4" />
           {t("add_banner")}
@@ -493,7 +493,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                               : [...formState.placement, page];
                             setFormState({ ...formState, placement: newPlacement });
                           }}
-                          className="rounded text-[#c8d152]"
+                          className="rounded text-primary"
                         />
                         <span className="capitalize">{page}</span>
                       </label>
@@ -580,7 +580,7 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                   {t("cancel")}
                 </Button>
-                <Button type="submit" className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90">
+                <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
                   {selectedBanner ? t("save") : t("create")}
                 </Button>
               </DialogFooter>

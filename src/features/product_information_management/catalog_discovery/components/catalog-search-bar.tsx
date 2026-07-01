@@ -2,6 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -14,8 +15,10 @@ interface CatalogSearchBarProps {
 export function CatalogSearchBar({
   value,
   onChange,
-  placeholder = "Rechercher un gâteau, saveur, ingrédient...",
+  placeholder,
 }: CatalogSearchBarProps) {
+  const t = useTranslations("catalog");
+  const resolvedPlaceholder = placeholder ?? t("search_placeholder");
   const [prevValue, setPrevValue] = React.useState(value);
   const [internalValue, setInternalValue] = React.useState(value);
 
@@ -39,8 +42,8 @@ export function CatalogSearchBar({
       </div>
       <Input
         type="text"
-        className="border-secondary/30 text-secondary font-moya placeholder:text-secondary/40 w-full rounded-xl bg-[#fff3e3]/20 py-5 pr-10 pl-10 text-sm transition-all duration-300 focus-visible:ring-[#700145] md:text-base"
-        placeholder={placeholder}
+        className="border-secondary/30 text-secondary font-moya placeholder:text-secondary/40 w-full rounded-xl bg-cream/20 py-5 pr-10 pl-10 text-sm transition-all duration-300 focus-visible:ring-crimson-violet md:text-base"
+        placeholder={resolvedPlaceholder}
         value={internalValue}
         onChange={(e) => setInternalValue(e.target.value)}
       />
@@ -56,7 +59,7 @@ export function CatalogSearchBar({
           className="text-secondary/60 hover:text-secondary absolute inset-y-0 right-1.5 h-full hover:bg-transparent"
         >
           <X className="size-4" />
-          <span className="sr-only">Effacer la recherche</span>
+          <span className="sr-only">{t("clear_search")}</span>
         </Button>
       )}
     </div>

@@ -1,7 +1,13 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -10,11 +16,11 @@ type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const { locale, slug } = await params;
   const t = await getTranslations({ locale, namespace: "brandDetail" });
   return {
-    title: `${t("brand")} : ${slug.replace(/-/g, " ")}`,
+    title: t("meta_title", { brand: t("brand"), name: slug.replace(/-/g, " ") }),
   };
 }
 

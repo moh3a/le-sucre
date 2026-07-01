@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,11 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: "Ventes Flash",
-};
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "flashSales" });
+  return { title: t("activeSales") };
+}
 
 export default async function FlashSalesPage({ params }: Props) {
   const { locale } = await params;
@@ -27,13 +28,13 @@ export default async function FlashSalesPage({ params }: Props) {
         </div>
         <div className="grid gap-6 lg:grid-cols-2">
           {[
-            { name: "Soldes d'été", remaining: "02:14:30" },
-            { name: "Offre éclair weekend", remaining: "00:45:12" },
+            { nameKey: "sale1_name", remaining: "02:14:30" },
+            { nameKey: "sale2_name", remaining: "00:45:12" },
           ].map((sale) => (
             <Card key={sale.name}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>{sale.name}</CardTitle>
+                  <CardTitle>{t(sale.nameKey)}</CardTitle>
                   <Badge variant="outline" className="font-mono text-base">
                     {sale.remaining}
                   </Badge>

@@ -1,74 +1,82 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Package, RotateCcw, Truck, Clock, CheckCircle } from "lucide-react";
+import { Package, RotateCcw, Truck, Clock, CheckCircle, Globe } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: "Livraison et retours",
+type ShippingMethod = {
+  labelKey: string;
+  cost: string;
+  delay: string;
+  badgeKey: string;
 };
 
-const shippingMethods = [
-  { method: "Standard", cost: "500 DZD", delay: "3-5 jours ouvrés", badge: "Économique" },
-  { method: "Express", cost: "1 000 DZD", delay: "24-48h", badge: "Populaire" },
-  { method: "Point relais", cost: "350 DZD", delay: "3-5 jours ouvrés", badge: "Économique" },
-  { method: "Livraison offerte", cost: "Gratuit", delay: "3-5 jours ouvrés", badge: "Dès 5000 DZD" },
-];
+type ReturnStep = {
+  icon: typeof Truck;
+  titleKey: string;
+  descKey: string;
+};
 
-const returnSteps = [
-  { icon: RotateCcw, title: "1. Demande de retour", description: "Contactez notre service client dans les 14 jours suivant la réception." },
-  { icon: Package, title: "2. Emballez le produit", description: "Emballez soigneusement le produit dans son emballage d'origine." },
-  { icon: Truck, title: "3. Expédiez le colis", description: "Déposez le colis chez notre transporteur partenaire." },
-  { icon: CheckCircle, title: "4. Remboursement", description: "Sous 5 à 10 jours ouvrés après réception et vérification." },
-];
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "shippingReturns" });
+  return { title: t("title") };
+}
 
 export default async function ShippingReturnsPage({ params }: Props) {
-  const {} = await params;
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "shippingReturns" });
+
+  const shippingMethods: ShippingMethod[] = [
+    { labelKey: "method_standard", cost: t("cost_standard"), delay: t("delay_standard"), badgeKey: "badge_economical" },
+    { labelKey: "method_express", cost: t("cost_express"), delay: t("delay_express"), badgeKey: "badge_popular" },
+    { labelKey: "method_relay", cost: t("cost_relay"), delay: t("delay_standard"), badgeKey: "badge_economical" },
+    { labelKey: "method_free", cost: t("cost_free"), delay: t("delay_standard"), badgeKey: "badge_from" },
+  ];
+
+  const returnSteps: ReturnStep[] = [
+    { icon: RotateCcw, titleKey: "step1_title", descKey: "step1_desc" },
+    { icon: Package, titleKey: "step2_title", descKey: "step2_desc" },
+    { icon: Truck, titleKey: "step3_title", descKey: "step3_desc" },
+    { icon: CheckCircle, titleKey: "step4_title", descKey: "step4_desc" },
+  ];
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
       <section className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Livraison et retours</h1>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-          Tout savoir sur nos options de livraison et notre politique de retour.
-        </p>
+        <h1 className="mb-4 text-4xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">{t("subtitle")}</p>
       </section>
 
       <Separator />
 
-      {/* SHIPPING INFO */}
       <section>
         <div className="grid gap-6 sm:grid-cols-3">
           <Card>
             <CardHeader>
-              <Globe className="mb-2 size-6 text-[#c8d152]" />
-              <CardTitle className="text-base">Zones de livraison</CardTitle>
-              <CardDescription>
-                Nous livrons dans toutes les wilayas d&apos;Algérie, de Tamanrasset à Alger.
-              </CardDescription>
+              <Globe className="mb-2 size-6 text-primary" />
+              <CardTitle className="text-base">{t("zoneTitle")}</CardTitle>
+              <CardDescription>{t("zoneDesc")}</CardDescription>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
-              <Truck className="mb-2 size-6 text-[#c8d152]" />
-              <CardTitle className="text-base">Transporteurs</CardTitle>
-              <CardDescription>
-                En partenariat avec Yalidine, ZR Express et Algérie Poste pour une livraison fiable.
-              </CardDescription>
+              <Truck className="mb-2 size-6 text-primary" />
+              <CardTitle className="text-base">{t("carrierTitle")}</CardTitle>
+              <CardDescription>{t("carrierDesc")}</CardDescription>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
-              <Clock className="mb-2 size-6 text-[#c8d152]" />
-              <CardTitle className="text-base">Délais estimés</CardTitle>
-              <CardDescription>
-                24-48h pour Alger, 2-5 jours pour le reste du pays.
-              </CardDescription>
+              <Clock className="mb-2 size-6 text-primary" />
+              <CardTitle className="text-base">{t("delayTitle")}</CardTitle>
+              <CardDescription>{t("delayDesc")}</CardDescription>
             </CardHeader>
           </Card>
         </div>
@@ -76,28 +84,27 @@ export default async function ShippingReturnsPage({ params }: Props) {
 
       <Separator />
 
-      {/* SHIPPING METHODS */}
       <section>
-        <h2 className="mb-6 text-2xl font-bold">Méthodes de livraison</h2>
+        <h2 className="mb-6 text-2xl font-bold">{t("methodsTitle")}</h2>
         <Card>
           <CardContent className="p-0">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-muted-foreground p-4 text-left font-medium">Méthode</th>
-                  <th className="text-muted-foreground p-4 text-left font-medium">Coût</th>
-                  <th className="text-muted-foreground p-4 text-left font-medium">Délai</th>
+                  <th className="text-muted-foreground p-4 text-left font-medium">{t("methodHeader")}</th>
+                  <th className="text-muted-foreground p-4 text-left font-medium">{t("costHeader")}</th>
+                  <th className="text-muted-foreground p-4 text-left font-medium">{t("delayHeader")}</th>
                   <th className="text-muted-foreground p-4 text-right font-medium"></th>
                 </tr>
               </thead>
               <tbody>
-                {shippingMethods.map((method) => (
-                  <tr key={method.method} className="border-b last:border-0">
-                    <td className="p-4 font-medium">{method.method}</td>
-                    <td className="p-4">{method.cost}</td>
-                    <td className="p-4">{method.delay}</td>
+                {shippingMethods.map((m) => (
+                  <tr key={m.labelKey} className="border-b last:border-0">
+                    <td className="p-4 font-medium">{t(m.labelKey)}</td>
+                    <td className="p-4">{m.cost}</td>
+                    <td className="p-4">{m.delay}</td>
                     <td className="p-4 text-right">
-                      <Badge variant="secondary">{method.badge}</Badge>
+                      <Badge variant="secondary">{t(m.badgeKey)}</Badge>
                     </td>
                   </tr>
                 ))}
@@ -109,46 +116,33 @@ export default async function ShippingReturnsPage({ params }: Props) {
 
       <Separator />
 
-      {/* RETURN POLICY */}
       <section>
-        <h2 className="mb-6 text-2xl font-bold">Politique de retour</h2>
+        <h2 className="mb-6 text-2xl font-bold">{t("returnPolicyTitle")}</h2>
         <Card>
           <CardHeader>
-            <CardTitle>Conditions de retour</CardTitle>
-            <CardDescription>
-              Vous disposez de 14 jours à compter de la réception de votre commande pour retourner
-              un produit qui ne vous conviendrait pas.
-            </CardDescription>
+            <CardTitle>{t("returnConditionsTitle")}</CardTitle>
+            <CardDescription>{t("returnConditionsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-muted-foreground text-sm">
-              Le produit doit être dans son état d&apos;origine, non ouvert et dans son emballage
-              d&apos;origine. Les produits personnalisés ou périssables ne peuvent être retournés
-              pour des raisons d&apos;hygiène.
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Les frais de retour sont à la charge du client, sauf en cas de produit défectueux ou
-              d&apos;erreur de notre part. Le remboursement est effectué sous 5 à 10 jours ouvrés
-              après réception du colis.
-            </p>
+            <p className="text-muted-foreground text-sm">{t("returnCondition1")}</p>
+            <p className="text-muted-foreground text-sm">{t("returnCondition2")}</p>
           </CardContent>
         </Card>
       </section>
 
       <Separator />
 
-      {/* RETURN PROCESS STEPS */}
       <section>
-        <h2 className="mb-6 text-2xl font-bold">Comment retourner un produit</h2>
+        <h2 className="mb-6 text-2xl font-bold">{t("returnProcessTitle")}</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {returnSteps.map((step) => {
             const Icon = step.icon;
             return (
-              <Card key={step.title}>
+              <Card key={step.titleKey}>
                 <CardHeader>
-                  <Icon className="mb-2 size-8 text-[#c8d152]" />
-                  <CardTitle className="text-base">{step.title}</CardTitle>
-                  <CardDescription>{step.description}</CardDescription>
+                  <Icon className="mb-2 size-8 text-primary" />
+                  <CardTitle className="text-base">{t(step.titleKey)}</CardTitle>
+                  <CardDescription>{t(step.descKey)}</CardDescription>
                 </CardHeader>
               </Card>
             );
@@ -161,40 +155,19 @@ export default async function ShippingReturnsPage({ params }: Props) {
       <section className="text-center">
         <Card className="mx-auto max-w-xl">
           <CardHeader>
-            <CardTitle>Besoin d&apos;aide ?</CardTitle>
-            <CardDescription>
-              Notre équipe du service client est à votre disposition pour vous accompagner.
-            </CardDescription>
+            <CardTitle>{t("helpTitle")}</CardTitle>
+            <CardDescription>{t("helpDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center gap-4">
             <Button asChild>
-              <a href="/contact">Nous contacter</a>
+              <Link href="/contact">{t("helpContact")}</Link>
             </Button>
             <Button variant="outline" asChild>
-              <a href="/faq">Consulter la FAQ</a>
+              <Link href="/faq">{t("helpFaq")}</Link>
             </Button>
           </CardContent>
         </Card>
       </section>
     </div>
-  );
-}
-
-function Globe(props: React.ComponentProps<"svg">) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" x2="22" y1="12" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
   );
 }

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,11 +9,19 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: "Meilleures ventes",
-};
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "bestSellers" });
+  return { title: t("title") };
+}
 
-const CATEGORIES = ["Tous", "Pâtisserie", "Chocolats", "Confiseries", "Sucettes"];
+const CATEGORY_KEYS = [
+  "category_all",
+  "category_pastry",
+  "category_chocolates",
+  "category_candy",
+  "category_lollipops",
+] as const;
 
 export default async function BestSellersPage({ params }: Props) {
   const { locale } = await params;
@@ -42,7 +49,7 @@ export default async function BestSellersPage({ params }: Props) {
           {Array.from({ length: 10 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex-row items-center gap-4">
-                <span className="bg-[#c8d152] flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold text-[#4d4c20]">
+                <span className="bg-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold text-primary-foreground">
                   {i + 1}
                 </span>
                 <div>
@@ -75,16 +82,16 @@ export default async function BestSellersPage({ params }: Props) {
       {/* CATEGORY TOP SELLERS */}
       <section>
         <h2 className="mb-6 text-2xl font-bold">{t("categoryTop")}</h2>
-        <Tabs defaultValue="Tous">
+        <Tabs defaultValue={CATEGORY_KEYS[0]}>
           <TabsList className="mb-6">
-            {CATEGORIES.map((cat) => (
-              <TabsTrigger key={cat} value={cat}>
-                {cat}
+            {CATEGORY_KEYS.map((key) => (
+              <TabsTrigger key={key} value={key}>
+                {t(key)}
               </TabsTrigger>
             ))}
           </TabsList>
-          {CATEGORIES.map((cat) => (
-            <TabsContent key={cat} value={cat}>
+          {CATEGORY_KEYS.map((key) => (
+            <TabsContent key={key} value={key}>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {[1, 2, 3, 4].map((p) => (
                   <Card key={p}>
@@ -93,7 +100,7 @@ export default async function BestSellersPage({ params }: Props) {
                     </CardContent>
                     <CardHeader>
                       <CardTitle className="text-sm">
-                        {t("categoryProduct", { category: cat, index: p })}
+                        {t("categoryProduct", { category: t(key), index: p })}
                       </CardTitle>
                     </CardHeader>
                   </Card>

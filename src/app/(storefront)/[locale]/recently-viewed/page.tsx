@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,11 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: "Récemment consultés",
-};
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "recentlyViewed" });
+  return { title: t("title") };
+}
 
 const hasProducts = false;
 

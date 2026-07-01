@@ -46,6 +46,7 @@ import {
   profile_router,
   admin_profile_router,
 } from "@/features/authentication_and_authorization/profile/routers/profile.router";
+import { health_router } from "@/features/monitoring/health/routers/health.router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -92,6 +93,7 @@ export const app_router = create_trpc_router({
   adminProfile: admin_profile_router,
   blacklist: blacklist_router,
   operationsWorkflows: operations_workflows_router,
+  health: health_router,
 });
 
 export type AppRouter = typeof app_router;

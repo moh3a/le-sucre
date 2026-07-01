@@ -1,23 +1,27 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, XCircle } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export const metadata: Metadata = {
-  title: "Confirmation newsletter",
-};
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "newsletterConfirm" });
+  return { title: t("title") };
+}
 
-export default async function NewsletterConfirmPage({ params }: Props) {
-  const {} = await params;
-  const searchParams = {}; // TODO: Extract status from URL search params
-
-  // Placeholder: pass ?status=success or ?status=error via URL
-  const isSuccess = true;
+export default async function NewsletterConfirmPage({ params, searchParams }: Props) {
+  const { locale } = await params;
+  const sp = await searchParams;
+  const t = await getTranslations({ locale, namespace: "newsletterConfirm" });
+  const status = (Array.isArray(sp.status) ? sp.status[0] : sp.status) ?? "";
+  const isSuccess = status === "success";
 
   return (
     <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-8">
@@ -26,33 +30,27 @@ export default async function NewsletterConfirmPage({ params }: Props) {
           {isSuccess ? (
             <>
               <CheckCircle className="mx-auto mb-4 size-16 text-green-500" />
-              <CardTitle className="text-2xl">Merci de votre inscription !</CardTitle>
-              <CardDescription className="mt-2">
-                Votre abonnement à notre newsletter a bien été confirmé. Vous recevrez
-                désormais nos offres exclusives, nouveautés et actualités.
-              </CardDescription>
+              <CardTitle className="text-2xl">{t("successTitle")}</CardTitle>
+              <CardDescription className="mt-2">{t("successDesc")}</CardDescription>
             </>
           ) : (
             <>
               <XCircle className="mx-auto mb-4 size-16 text-red-500" />
-              <CardTitle className="text-2xl">Erreur de confirmation</CardTitle>
-              <CardDescription className="mt-2">
-                Un problème est survenu lors de la confirmation de votre inscription. Veuillez
-                réessayer ou nous contacter si le problème persiste.
-              </CardDescription>
+              <CardTitle className="text-2xl">{t("errorTitle")}</CardTitle>
+              <CardDescription className="mt-2">{t("errorDesc")}</CardDescription>
             </>
           )}
         </CardHeader>
         <CardContent className="space-y-4">
           {isSuccess ? (
             <Button className="w-full" asChild>
-              <a href="/">Retourner à l&apos;accueil</a>
+              <Link href="/">{t("goHome")}</Link>
             </Button>
           ) : (
             <div className="flex flex-col gap-3">
-              <Button className="w-full">Réessayer</Button>
+              <Button className="w-full">{t("retry")}</Button>
               <Button variant="outline" className="w-full" asChild>
-                <a href="/">Retourner à l&apos;accueil</a>
+                <Link href="/">{t("goHome")}</Link>
               </Button>
             </div>
           )}
@@ -61,27 +59,32 @@ export default async function NewsletterConfirmPage({ params }: Props) {
 
       <Separator className="my-8" />
 
-      {/* SOCIAL FOLLOW */}
       <section className="text-center">
-        <h2 className="mb-4 text-xl font-bold">Suivez-nous sur les réseaux sociaux</h2>
-        <p className="text-muted-foreground mb-6 text-sm">
-          Restez connecté avec nous pour ne rien manquer de nos actualités.
-        </p>
+        <h2 className="mb-4 text-xl font-bold">{t("followTitle")}</h2>
+        <p className="text-muted-foreground mb-6 text-sm">{t("followDesc")}</p>
         <div className="flex justify-center gap-4">
           <Button variant="outline" size="icon" asChild>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
-            </a>
+            <Link href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              </svg>
+            </Link>
           </Button>
           <Button variant="outline" size="icon" asChild>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
-            </a>
+            <Link href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </Link>
           </Button>
           <Button variant="outline" size="icon" asChild>
-            <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" /></svg>
-            </a>
+            <Link href="#" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+              </svg>
+            </Link>
           </Button>
         </div>
       </section>

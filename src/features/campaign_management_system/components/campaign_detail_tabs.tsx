@@ -46,8 +46,8 @@ export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps
 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#c8d152]/20">
-              <Megaphone className="h-6 w-6 text-[#c8d152]" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
+              <Megaphone className="h-6 w-6 text-primary" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">

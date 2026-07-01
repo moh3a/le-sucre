@@ -4,12 +4,13 @@ import * as React from "react";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
+import type { AppLocale } from "@/i18n/config";
 
 export function RecentlyViewedSection({
   locale,
   limit = 10,
 }: {
-  locale: "fr" | "en";
+  locale: AppLocale;
   limit?: number;
 }) {
   const [sessionKey, setSessionKey] = React.useState<string>("");
@@ -37,11 +38,11 @@ export function RecentlyViewedSection({
 
   return (
     <QueryGuard query={query}>
-    <ProductRecommendationCarousel
-      title={locale === "fr" ? "Récemment consultés" : "Recently Viewed"}
-      items={data ?? []}
-      isLoading={isLoading}
-    />
+      <ProductRecommendationCarousel
+        title={locale === "fr" ? "Récemment consultés" : "Recently Viewed"}
+        items={data ?? []}
+        isLoading={isLoading}
+      />
     </QueryGuard>
   );
 }

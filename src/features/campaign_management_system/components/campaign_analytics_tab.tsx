@@ -102,7 +102,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
       value: `${Number(summary.total_revenue).toLocaleString()} DZD`,
       desc: t("revenue_desc"),
       icon: Coins,
-      color: "text-[#c8d152] bg-[#c8d152]/10",
+      color: "text-primary bg-primary/10",
     },
   ];
 
@@ -125,7 +125,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
               variant={rangeDays === d ? "default" : "outline"}
               size="sm"
               onClick={() => setRangeDays(d)}
-              className={rangeDays === d ? "bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90" : ""}
+              className={rangeDays === d ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
             >
               Derniers {d} jours
             </Button>

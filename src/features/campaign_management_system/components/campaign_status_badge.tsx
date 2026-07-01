@@ -13,7 +13,7 @@ const STATUS_CONFIG: Record<string, { labelKey: string; className: string }> = {
   },
   [CAMPAIGN_STATUS.active]: {
     labelKey: "status_active",
-    className: "bg-[#c8d152]/20 text-[#4d4c20] dark:bg-[#c8d152]/10 dark:text-[#c8d152]",
+    className: "bg-primary/20 text-primary-foreground dark:bg-primary/10 dark:text-primary",
   },
   [CAMPAIGN_STATUS.paused]: {
     labelKey: "status_paused",

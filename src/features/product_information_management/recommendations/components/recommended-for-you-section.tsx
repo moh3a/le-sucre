@@ -3,12 +3,13 @@
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
+import type { AppLocale } from "@/i18n/config";
 
 export function RecommendedForYouSection({
   locale,
   limit = 10,
 }: {
-  locale: "fr" | "en";
+  locale: AppLocale;
   limit?: number;
 }) {
   const query = trpc.recommendations.forYou.useQuery(

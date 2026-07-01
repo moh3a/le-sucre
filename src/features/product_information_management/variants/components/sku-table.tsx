@@ -358,7 +358,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               (table.getIsSomePageRowsSelected() ?? "indeterminate")
             }
             onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
-            className="rounded border-gray-300 text-[#c8d152]"
+            className="rounded border-gray-300 text-primary"
             aria-label={t("select_all_label")}
           />
         ),
@@ -367,7 +367,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             type="checkbox"
             checked={row.getIsSelected()}
             onChange={(e) => row.toggleSelected(!!e.target.checked)}
-            className="rounded border-gray-300 text-[#c8d152]"
+            className="rounded border-gray-300 text-primary"
             aria-label={t("select_row_label")}
           />
         ),

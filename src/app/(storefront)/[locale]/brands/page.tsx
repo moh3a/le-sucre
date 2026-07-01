@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -9,9 +8,11 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: "Marques",
-};
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "brands" });
+  return { title: t("title") };
+}
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -52,12 +53,7 @@ export default async function BrandsPage({ params }: Props) {
       {/* ALPHABETICAL INDEX */}
       <section className="flex flex-wrap justify-center gap-1">
         {ALPHABET.map((letter) => (
-          <Button
-            key={letter}
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 font-mono text-xs"
-          >
+          <Button key={letter} variant="ghost" size="sm" className="h-8 w-8 p-0 font-mono text-xs">
             {letter}
           </Button>
         ))}
@@ -68,7 +64,7 @@ export default async function BrandsPage({ params }: Props) {
         <h2 className="mb-4 text-xl font-bold">{t("featured")}</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {MOCK_BRANDS.slice(0, 3).map((brand) => (
-            <Card key={brand.name} className="bg-[#f9f7be]">
+            <Card key={brand.name} className="bg-chiffon">
               <CardHeader>
                 <div className="bg-muted mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full">
                   <span className="text-muted-foreground text-xs">{t("logo")}</span>

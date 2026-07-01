@@ -11,11 +11,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { z } from "zod";
-import { initialize_profile_schema, update_profile_schema } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
+import { update_profile_schema } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
+import type { AppLocale } from "@/i18n/config";
 
 const profile_form_schema = update_profile_schema.extend({
   name: z.string().min(2).max(255),
@@ -29,16 +36,30 @@ export function ProfileSection() {
   const utils = trpc.useUtils();
   const { data, isLoading, error } = trpc.auth.me.useQuery();
   const initProfile = trpc.profile.initialize.useMutation({
-    onSuccess: () => { utils.auth.me.invalidate(); toast.success(t("profile_initialized")); },
-    onError: (err) => { toast.error(err.message); },
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+      toast.success(t("profile_initialized"));
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
   });
   const updateProfile = trpc.profile.update.useMutation({
-    onSuccess: () => { utils.auth.me.invalidate(); toast.success(t("profile_updated")); },
-    onError: (err) => { toast.error(err.message); },
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+      toast.success(t("profile_updated"));
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
   });
   const updateUser = trpc.auth.updateProfile.useMutation({
-    onSuccess: () => { utils.auth.me.invalidate(); },
-    onError: (err) => { toast.error(err.message); },
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
   });
 
   const profile = data?.profile;
@@ -62,7 +83,7 @@ export function ProfileSection() {
       marketing_opt_in: profile?.marketing_opt_in ?? false,
       sms_notifications: profile?.sms_notifications ?? false,
       push_notifications: profile?.push_notifications ?? true,
-      preferred_language: (profile?.preferred_language ?? "fr") as "fr" | "en" | "ar",
+      preferred_language: (profile?.preferred_language ?? "fr") as AppLocale,
       preferred_currency: profile?.preferred_currency ?? "DZD",
       notes: profile?.notes ?? "",
     },
@@ -88,13 +109,22 @@ export function ProfileSection() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Card><CardHeader><Skeleton className="h-6 w-48" /><Skeleton className="h-4 w-64" /></CardHeader></Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-destructive">{t("error_prefix")}: {error.message}</p>;
+    return (
+      <p className="text-destructive">
+        {t("error_prefix")}: {error.message}
+      </p>
+    );
   }
 
   return (
@@ -130,7 +160,11 @@ export function ProfileSection() {
 
           <Field>
             <FieldLabel>{t("phone_login")}</FieldLabel>
-            <Input value={(data?.user as { phone?: string })?.phone ?? ""} disabled className="text-muted-foreground" />
+            <Input
+              value={(data?.user as { phone?: string })?.phone ?? ""}
+              disabled
+              className="text-muted-foreground"
+            />
             <p className="text-muted-foreground text-xs">{t("phone_login_hint")}</p>
           </Field>
 
@@ -207,7 +241,9 @@ export function ProfileSection() {
               <FieldLabel>{t("preferred_language")}</FieldLabel>
               <Select
                 value={form.watch("preferred_language")}
-                onValueChange={(v) => form.setValue("preferred_language", v as ProfileFormValues["preferred_language"])}
+                onValueChange={(v) =>
+                  form.setValue("preferred_language", v as ProfileFormValues["preferred_language"])
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -252,7 +288,9 @@ export function ProfileSection() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{t("sms_notifications")}</p>
-                <p className="text-muted-foreground text-xs">{t("sms_notifications_description")}</p>
+                <p className="text-muted-foreground text-xs">
+                  {t("sms_notifications_description")}
+                </p>
               </div>
               <Switch
                 checked={form.watch("sms_notifications") ?? false}
@@ -263,7 +301,9 @@ export function ProfileSection() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{t("push_notifications")}</p>
-                <p className="text-muted-foreground text-xs">{t("push_notifications_description")}</p>
+                <p className="text-muted-foreground text-xs">
+                  {t("push_notifications_description")}
+                </p>
               </div>
               <Switch
                 checked={form.watch("push_notifications") ?? true}

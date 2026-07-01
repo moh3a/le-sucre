@@ -8,6 +8,7 @@ import {
   parseAsString,
   useQueryStates,
 } from "nuqs";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { CatalogSearchBar } from "./catalog-search-bar";
@@ -18,9 +19,10 @@ import { CatalogPagination } from "./catalog-pagination";
 import type { CatalogSort } from "../types";
 
 import type { CatalogSearchInput, CatalogFacetsInput } from "../models/search.dto";
+import type { AppLocale } from "@/i18n/config";
 
 interface CatalogSearchPageClientProps {
-  locale: "fr" | "en";
+  locale: AppLocale;
   initial?: Partial<CatalogSearchInput>;
   category_id?: string;
   category_name?: string;
@@ -32,6 +34,8 @@ export function CatalogSearchPageClient({
   category_id,
   category_name,
 }: CatalogSearchPageClientProps) {
+  const t = useTranslations("catalog");
+
   // Use nuqs to manage URL-synchronized state
   const [params, setParams] = useQueryStates(
     {
@@ -97,66 +101,66 @@ export function CatalogSearchPageClient({
 
   return (
     <QueryGuard query={search_query}>
-    <div className="font-moya mx-auto min-h-screen max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      {/* Page Header */}
-      <div className="flex flex-col gap-4 border-b border-[#4d4c20]/15 pb-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="font-orla text-3xl text-[#4d4c20]">
-            {category_name ? category_name : "Tous nos délices"}
-          </h1>
-          <p className="text-secondary/60 mt-1 text-sm">
-            {searchResult?.meta.total_records ?? 0} produit(s) trouvé(s)
-          </p>
-        </div>
+      <div className="font-moya mx-auto min-h-screen max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        {/* Page Header */}
+        <div className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="font-orla text-3xl text-primary-foreground">
+              {category_name ? category_name : t("default_heading")}
+            </h1>
+            <p className="text-secondary/60 mt-1 text-sm">
+              {t("results", { count: searchResult?.meta.total_records ?? 0 })}
+            </p>
+          </div>
 
-        {/* Sorting Dropdown */}
-        <CatalogSortSelect
-          value={params.sort as CatalogSort}
-          onChange={(sort) => setParams({ sort, page: 1 })}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
-        {/* Filter Sidebar */}
-        <div className="lg:col-span-1">
-          <CatalogFilterSidebar
-            facets={facetsResult ?? undefined}
-            selectedBrandIds={params.brand}
-            onBrandChange={(brand) => setParams({ brand, page: 1 })}
-            priceRange={[0, params.price_max]}
-            onPriceChange={(range) => setParams({ price_max: range[1], page: 1 })}
-            inStockOnly={params.in_stock}
-            onInStockChange={(in_stock) => setParams({ in_stock, page: 1 })}
-            selectedProperties={selectedProperties}
-            onPropertyChange={handlePropertyChange}
+          {/* Sorting Dropdown */}
+          <CatalogSortSelect
+            value={params.sort as CatalogSort}
+            onChange={(sort) => setParams({ sort, page: 1 })}
           />
         </div>
 
-        {/* Search Results & Pagination */}
-        <div className="space-y-8 lg:col-span-3">
-          {/* Real-time search bar */}
-          <div className="flex items-center justify-between rounded-2xl border border-[#4d4c20]/10 bg-[#fff3e3]/30 p-4">
-            <CatalogSearchBar
-              value={params.q}
-              onChange={(q) => setParams({ q, page: 1 })}
-              placeholder={category_name ? `Rechercher dans ${category_name}...` : undefined}
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
+          {/* Filter Sidebar */}
+          <div className="lg:col-span-1">
+            <CatalogFilterSidebar
+              facets={facetsResult ?? undefined}
+              selectedBrandIds={params.brand}
+              onBrandChange={(brand) => setParams({ brand, page: 1 })}
+              priceRange={[0, params.price_max]}
+              onPriceChange={(range) => setParams({ price_max: range[1], page: 1 })}
+              inStockOnly={params.in_stock}
+              onInStockChange={(in_stock) => setParams({ in_stock, page: 1 })}
+              selectedProperties={selectedProperties}
+              onPropertyChange={handlePropertyChange}
             />
           </div>
 
-          {/* Grid Products */}
-          <CatalogProductGrid products={searchResult?.items ?? []} isLoading={isSearchLoading} />
+          {/* Search Results & Pagination */}
+          <div className="space-y-8 lg:col-span-3">
+            {/* Real-time search bar */}
+            <div className="flex items-center justify-between rounded-2xl border border-border bg-muted p-4">
+              <CatalogSearchBar
+                value={params.q}
+                onChange={(q) => setParams({ q, page: 1 })}
+                placeholder={category_name ? t("search_in_category", { category_name }) : undefined}
+              />
+            </div>
 
-          {/* Pagination */}
-          {searchResult && (
-            <CatalogPagination
-              page={params.page}
-              totalPages={searchResult.meta.total_pages}
-              onChange={(page) => setParams({ page })}
-            />
-          )}
+            {/* Grid Products */}
+            <CatalogProductGrid products={searchResult?.items ?? []} isLoading={isSearchLoading} />
+
+            {/* Pagination */}
+            {searchResult && (
+              <CatalogPagination
+                page={params.page}
+                totalPages={searchResult.meta.total_pages}
+                onChange={(page) => setParams({ page })}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </QueryGuard>
   );
 }

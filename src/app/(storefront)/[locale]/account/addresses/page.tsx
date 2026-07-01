@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,94 +70,88 @@ export default function AddressesPage() {
     <div className="mx-auto max-w-3xl space-y-6 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t("addresses_title", { fallback: "Mes adresses" })}</h1>
-          <p className="text-muted-foreground">
-            {t("addresses_description", { fallback: "Gérez vos adresses de livraison" })}
-          </p>
+          <h1 className="text-2xl font-bold">{t("addresses_title")}</h1>
+          <p className="text-muted-foreground">{t("addresses_description")}</p>
         </div>
 
         {/* ADD ADDRESS BUTTON */}
         <ResponsiveDialog open={open} onOpenChange={setOpen}>
           <ResponsiveDialogTrigger asChild>
-            <Button>{t("add_address", { fallback: "Ajouter une adresse" })}</Button>
+            <Button>{t("add_address")}</Button>
           </ResponsiveDialogTrigger>
           <ResponsiveDialogContent>
             <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>
-                {t("add_address_title", { fallback: "Nouvelle adresse" })}
-              </ResponsiveDialogTitle>
+              <ResponsiveDialogTitle>{t("add_address_title")}</ResponsiveDialogTitle>
               <ResponsiveDialogDescription>
-                {t("add_address_description", { fallback: "Ajoutez une nouvelle adresse de livraison" })}
+                {t("add_address_description")}
               </ResponsiveDialogDescription>
             </ResponsiveDialogHeader>
             {/* ADD/EDIT ADDRESS FORM (placeholder in dialog) */}
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <label htmlFor="addrLabel" className="text-sm font-medium">
-                  {t("address_label", { fallback: "Libellé" })}
+                  {t("address_label")}
                 </label>
-                <Input id="addrLabel" placeholder={t("address_label_placeholder", { fallback: "Domicile, Bureau..." })} />
+                <Input id="addrLabel" placeholder={t("address_label_placeholder")} />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="addrName" className="text-sm font-medium">
-                    {t("address_name", { fallback: "Nom complet" })}
+                    {t("address_name")}
                   </label>
                   <Input id="addrName" />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="addrPhone" className="text-sm font-medium">
-                    {t("address_phone", { fallback: "Téléphone" })}
+                    {t("address_phone")}
                   </label>
                   <Input id="addrPhone" type="tel" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label htmlFor="addrLine1" className="text-sm font-medium">
-                  {t("address_line1", { fallback: "Adresse ligne 1" })}
+                  {t("address_line1")}
                 </label>
                 <Input id="addrLine1" />
               </div>
               <div className="space-y-2">
                 <label htmlFor="addrLine2" className="text-sm font-medium">
-                  {t("address_line2", { fallback: "Adresse ligne 2 (optionnelle)" })}
+                  {t("address_line2")}
                 </label>
                 <Input id="addrLine2" />
               </div>
               <div className="grid gap-4 sm:grid-cols-4">
                 <div className="space-y-2 sm:col-span-2">
                   <label htmlFor="addrCity" className="text-sm font-medium">
-                    {t("address_city", { fallback: "Ville" })}
+                    {t("address_city")}
                   </label>
                   <Input id="addrCity" />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="addrState" className="text-sm font-medium">
-                    {t("address_state", { fallback: "Wilaya" })}
+                    {t("address_state")}
                   </label>
                   <Input id="addrState" />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="addrPostalCode" className="text-sm font-medium">
-                    {t("address_postal", { fallback: "Code postal" })}
+                    {t("address_postal")}
                   </label>
                   <Input id="addrPostalCode" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label htmlFor="addrCountry" className="text-sm font-medium">
-                  {t("address_country", { fallback: "Pays" })}
+                  {t("address_country")}
                 </label>
                 <Input id="addrCountry" />
               </div>
             </div>
             <ResponsiveDialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)}>
-                {t("cancel", { fallback: "Annuler" })}
+                {t("cancel")}
               </Button>
-              <Button onClick={() => setOpen(false)}>
-                {t("save", { fallback: "Enregistrer" })}
-              </Button>
+              <Button onClick={() => setOpen(false)}>{t("save")}</Button>
             </ResponsiveDialogFooter>
           </ResponsiveDialogContent>
         </ResponsiveDialog>
@@ -175,11 +168,7 @@ export default function AddressesPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">{address.label}</CardTitle>
                   {/* DEFAULT BADGE */}
-                  {address.isDefault && (
-                    <Badge variant="secondary">
-                      {t("default_badge", { fallback: "Par défaut" })}
-                    </Badge>
-                  )}
+                  {address.isDefault && <Badge variant="secondary">{t("default_badge")}</Badge>}
                 </div>
                 <CardDescription>{address.name}</CardDescription>
               </CardHeader>
@@ -196,11 +185,11 @@ export default function AddressesPage() {
                 <div className="flex gap-2 pt-3">
                   {/* TODO: Wire up edit and delete actions */}
                   <Button variant="outline" size="sm">
-                    {t("edit", { fallback: "Modifier" })}
+                    {t("edit")}
                   </Button>
                   {!address.isDefault && (
                     <Button variant="ghost" size="sm">
-                      {t("delete", { fallback: "Supprimer" })}
+                      {t("delete")}
                     </Button>
                   )}
                 </div>
@@ -212,15 +201,11 @@ export default function AddressesPage() {
         /* EMPTY STATE */
         <Card>
           <CardHeader>
-            <CardTitle>{t("no_addresses", { fallback: "Aucune adresse enregistrée" })}</CardTitle>
-            <CardDescription>
-              {t("no_addresses_desc", { fallback: "Ajoutez une adresse pour faciliter vos achats" })}
-            </CardDescription>
+            <CardTitle>{t("no_addresses")}</CardTitle>
+            <CardDescription>{t("no_addresses_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setOpen(true)}>
-              {t("add_address", { fallback: "Ajouter une adresse" })}
-            </Button>
+            <Button onClick={() => setOpen(true)}>{t("add_address")}</Button>
           </CardContent>
         </Card>
       )}

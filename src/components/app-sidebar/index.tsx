@@ -35,6 +35,7 @@ import {
   CreditCard,
   Wallet,
   Flag,
+  HeartPulse,
   Image as ImageIcon,
   ExternalLink,
 } from "lucide-react";
@@ -178,6 +179,7 @@ export function AppSidebar() {
         { title: t("audit"), url: "/console/audit-logs", icon: ScrollText },
         { title: t("feature_flags"), url: "/console/feature-flags", icon: Flag },
         { title: t("ip_blacklist"), url: "/console/blacklist", icon: Ban },
+        { title: t("health"), url: "/console/health", icon: HeartPulse },
       ],
     },
   ];

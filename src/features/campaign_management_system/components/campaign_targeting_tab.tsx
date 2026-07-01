@@ -261,12 +261,12 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
 
         <div className="flex items-center justify-between border-t pt-4">
           <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <ShieldCheck className="h-4 w-4 text-[#c8d152]" />
+            <ShieldCheck className="h-4 w-4 text-primary" />
             {t("targeting_engine_note")}
           </span>
           <Button
             onClick={handleSave}
-            className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
             disabled={update_campaign.isPending}
           >
             {update_campaign.isPending ? t("saving") : t("save_targets")}

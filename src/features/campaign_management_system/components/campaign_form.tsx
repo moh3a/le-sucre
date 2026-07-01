@@ -754,7 +754,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                                     field.onChange([...field.value, opt.id]);
                                   }
                                 }}
-                                className="border-input rounded text-[#c8d152]"
+                                className="border-input rounded text-primary"
                               />
                               <span className="truncate">{opt.label}</span>
                             </label>
@@ -796,7 +796,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                                     field.onChange([...field.value, brand.id]);
                                   }
                                 }}
-                                className="border-input rounded text-[#c8d152]"
+                                className="border-input rounded text-primary"
                               />
                               <span>{brand.name}</span>
                             </label>
@@ -861,7 +861,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           </Button>
         <Button
           type="submit"
-          className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
           disabled={isPending}
         >
           {isPending ? tc("saving") : t("save_campaign")}

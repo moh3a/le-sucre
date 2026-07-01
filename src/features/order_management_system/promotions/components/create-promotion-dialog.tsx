@@ -409,7 +409,7 @@ export function CreatePromotionDialog() {
             </Button>
             <Button
               type="submit"
-              className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={is_pending}
             >
               {is_pending ? t("creating") : t("create")}

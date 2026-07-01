@@ -3,17 +3,28 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { siteConfig } from "@/constants";
-
-export const metadata = { title: "Produit" };
 
 type Props = {
   params: Promise<{ locale: string; product_slug: string }>;
 };
 
+const SPECS = [
+  { labelKey: "spec_weight", valueKey: "spec_weight_value" },
+  { labelKey: "spec_dimensions", valueKey: "spec_dimensions_value" },
+  { labelKey: "spec_material", valueKey: "spec_material_value" },
+];
+
+const SIZES = ["S", "M", "L", "XL"];
+
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "product_detail" });
+  return { title: t("title") };
+}
+
 export default async function ProductDetailPage({ params }: Props) {
-  const { locale, product_slug } = await params;
-  const t = await getTranslations({ locale });
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "product_detail" });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -30,26 +41,26 @@ export default async function ProductDetailPage({ params }: Props) {
 
         <div className="space-y-6">
           {/* PRODUCT TITLE */}
-          <h1 className="text-3xl font-bold">{t("product_detail.title") || "Produit exemple — {product_slug}"}</h1>
+          <h1 className="text-3xl font-bold">{t("example_title")}</h1>
 
           {/* PRICE */}
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-primary">12 500 DZD</span>
-            <span className="text-lg text-muted-foreground line-through">15 000 DZD</span>
-            <Badge variant="destructive">-17%</Badge>
+            <span className="text-3xl font-bold text-primary">{t("example_price")}</span>
+            <span className="text-lg text-muted-foreground line-through">{t("example_original_price")}</span>
+            <Badge variant="destructive">{t("example_discount")}</Badge>
           </div>
 
           {/* RATING */}
           <div className="flex items-center gap-2 text-yellow-500">
             {"★".repeat(4)}{"☆".repeat(1)}
-            <span className="text-sm text-muted-foreground">(24 {t("product_detail.reviews") || "avis"})</span>
+            <span className="text-sm text-muted-foreground">({t("reviews_count", { count: 24 })})</span>
           </div>
 
-          {/* VARIANT SELECTOR - TODO: size, color etc */}
+          {/* VARIANT SELECTOR */}
           <div className="space-y-2">
-            <p className="text-sm font-medium">{t("product_detail.variant") || "Variante"}</p>
+            <p className="text-sm font-medium">{t("variant")}</p>
             <div className="flex gap-2">
-              {["S", "M", "L", "XL"].map((size) => (
+              {SIZES.map((size) => (
                 <Button key={size} variant="outline" size="sm">{size}</Button>
               ))}
             </div>
@@ -62,39 +73,39 @@ export default async function ProductDetailPage({ params }: Props) {
               <span className="w-10 text-center">1</span>
               <Button variant="ghost" size="icon">+</Button>
             </div>
-            <Button className="flex-1">{t("product_detail.add_to_cart") || "Ajouter au panier"}</Button>
+            <Button className="flex-1">{t("add_to_cart")}</Button>
           </div>
 
           {/* WISHLIST TOGGLE */}
           <Button variant="outline" className="w-full">
-            ♡ {t("product_detail.add_to_wishlist") || "Ajouter aux favoris"}
+            ♡ {t("add_to_wishlist")}
           </Button>
 
           {/* SHIPPING INFO */}
           <Card className="p-4 text-sm space-y-2">
-            <p>🚚 {t("product_detail.free_shipping") || "Livraison gratuite à partir de 5 000 DZD"}</p>
-            <p>🔄 {t("product_detail.returns") || "Retours sous 14 jours"}</p>
+            <p>🚚 {t("free_shipping")}</p>
+            <p>🔄 {t("returns")}</p>
           </Card>
 
           <Separator />
 
           {/* PRODUCT DESCRIPTION */}
           <div>
-            <h2 className="text-lg font-semibold">{t("product_detail.description") || "Description"}</h2>
-            <p className="mt-2 text-muted-foreground">
-              {t("product_detail.description_placeholder") ||
-                "Description détaillée du produit. Cette section sera alimentée depuis le CMS."}
-            </p>
+            <h2 className="text-lg font-semibold">{t("description")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("description_placeholder")}</p>
           </div>
 
           {/* SPECIFICATIONS TABLE */}
           <div>
-            <h2 className="text-lg font-semibold">{t("product_detail.specifications") || "Caractéristiques"}</h2>
+            <h2 className="text-lg font-semibold">{t("specifications")}</h2>
             <table className="mt-2 w-full text-sm">
               <tbody>
-                <tr className="border-b"><td className="py-2 font-medium">Poids</td><td className="py-2">250 g</td></tr>
-                <tr className="border-b"><td className="py-2 font-medium">Dimensions</td><td className="py-2">20 × 15 × 5 cm</td></tr>
-                <tr className="border-b"><td className="py-2 font-medium">Matière</td><td className="py-2">Coton bio</td></tr>
+                {SPECS.map((spec) => (
+                  <tr key={spec.labelKey} className="border-b">
+                    <td className="py-2 font-medium">{t(spec.labelKey)}</td>
+                    <td className="py-2">{t(spec.valueKey)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -105,17 +116,15 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* REVIEWS SECTION */}
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold">{t("product_detail.reviews_section") || "Avis clients"}</h2>
+        <h2 className="text-2xl font-bold">{t("reviews_section")}</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i} className="p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-medium">Client {i + 1}</span>
+                <span className="font-medium">{t("reviewer_name", { number: i + 1 })}</span>
                 <span className="text-yellow-500 text-sm">{"★".repeat(5)}</span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Ce produit est exactement ce que je recherchais. Qualité au rendez-vous !
-              </p>
+              <p className="text-sm text-muted-foreground">{t("review_text")}</p>
             </Card>
           ))}
         </div>
@@ -125,13 +134,13 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* RELATED PRODUCTS */}
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold">{t("product_detail.related") || "Produits similaires"}</h2>
+        <h2 className="text-2xl font-bold">{t("related")}</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} className="p-4 space-y-2">
               <div className="aspect-square w-full bg-muted rounded-md" />
-              <p className="font-medium text-sm">Produit connexe {i + 1}</p>
-              <p className="text-sm text-muted-foreground">2 500 DZD</p>
+              <p className="font-medium text-sm">{t("related_product_name", { number: i + 1 })}</p>
+              <p className="text-sm text-muted-foreground">{t("related_product_price")}</p>
             </Card>
           ))}
         </div>
@@ -141,8 +150,8 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* RECENTLY VIEWED */}
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold">{t("product_detail.recently_viewed") || "Derniers consultés"}</h2>
-        <p className="text-muted-foreground">{t("product_detail.recently_viewed_empty") || "Aucun produit consulté récemment."}</p>
+        <h2 className="text-2xl font-bold">{t("recently_viewed")}</h2>
+        <p className="text-muted-foreground">{t("recently_viewed_empty")}</p>
       </section>
     </div>
   );

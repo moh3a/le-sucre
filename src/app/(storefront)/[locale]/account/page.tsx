@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -8,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-export const metadata: Metadata = {
-  title: "Mon compte",
-};
-
 type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "account" });
+  return { title: t("title") };
+}
 
 const navCards = [
   { href: "/account/orders", key: "nav_orders", icon: "🛒" },
@@ -23,11 +23,11 @@ const navCards = [
   { href: "/account/support", key: "nav_support", icon: "💬" },
 ];
 
-const recentOrders = [
-  { id: "CMD-001", date: "15 juin 2026", status: "Livré", total: "3 500 DA" },
-  { id: "CMD-002", date: "2 juin 2026", status: "Expédié", total: "2 100 DA" },
-  { id: "CMD-003", date: "28 mai 2026", status: "Confirmé", total: "8 750 DA" },
-];
+const RECENT_ORDERS = [
+  { id: "CMD-001", date: "15 juin 2026", statusKey: "status_delivered", total: "3 500 DA" },
+  { id: "CMD-002", date: "2 juin 2026", statusKey: "status_shipped", total: "2 100 DA" },
+  { id: "CMD-003", date: "28 mai 2026", statusKey: "status_confirmed", total: "8 750 DA" },
+] as const;
 
 export default async function AccountDashboardPage({ params }: Props) {
   const { locale } = await params;
@@ -39,23 +39,21 @@ export default async function AccountDashboardPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("hello", { fallback: "Bonjour" })} {t("name_placeholder", { fallback: "[Nom]" })} 👋</CardTitle>
-            <CardDescription>
-              {t("dashboard_description", { fallback: "Bienvenue sur votre espace personnel. Gérez vos commandes, adresses et préférences." })}
-            </CardDescription>
+            <CardTitle>
+              {t("hello")} {t("name_placeholder")} 👋
+            </CardTitle>
+            <CardDescription>{t("dashboard_description")}</CardDescription>
           </CardHeader>
         </Card>
       </section>
 
       {/* ACCOUNT NAV CARDS */}
       <section>
-        <h2 className="mb-4 text-xl font-semibold">
-          {t("quick_actions", { fallback: "Actions rapides" })}
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold">{t("quick_actions")}</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {navCards.map((card) => (
             <Link key={card.href} href={card.href}>
-              <Card className="cursor-pointer transition-colors hover:border-primary">
+              <Card className="hover:border-primary cursor-pointer transition-colors">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <span>{card.icon}</span>
@@ -72,27 +70,28 @@ export default async function AccountDashboardPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("recent_orders", { fallback: "Dernières commandes" })}</CardTitle>
-            <CardDescription>
-              {t("recent_orders_desc", { fallback: "Récapitulatif de vos 3 dernières commandes" })}
-            </CardDescription>
+            <CardTitle>{t("recent_orders")}</CardTitle>
+            <CardDescription>{t("recent_orders_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="pb-2 font-medium">{t("order", { fallback: "Commande" })}</th>
-                    <th className="pb-2 font-medium">{t("date", { fallback: "Date" })}</th>
-                    <th className="pb-2 font-medium">{t("status", { fallback: "Statut" })}</th>
-                    <th className="pb-2 text-right font-medium">{t("total", { fallback: "Total" })}</th>
+                  <tr className="text-muted-foreground border-b text-left">
+                    <th className="pb-2 font-medium">{t("order")}</th>
+                    <th className="pb-2 font-medium">{t("date")}</th>
+                    <th className="pb-2 font-medium">{t("status")}</th>
+                    <th className="pb-2 text-right font-medium">{t("total")}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map((order) => (
+                  {RECENT_ORDERS.map((order) => (
                     <tr key={order.id} className="border-b last:border-0">
                       <td className="py-3">
-                        <Link href={`/account/orders/${order.id}`} className="text-primary hover:underline">
+                        <Link
+                          href={`/account/orders/${order.id}`}
+                          className="text-primary hover:underline"
+                        >
                           {order.id}
                         </Link>
                       </td>
@@ -100,14 +99,14 @@ export default async function AccountDashboardPage({ params }: Props) {
                       <td className="py-3">
                         <Badge
                           variant={
-                            order.status === "Livré"
+                            order.statusKey === "status_delivered"
                               ? "secondary"
-                              : order.status === "Expédié"
+                              : order.statusKey === "status_shipped"
                                 ? "default"
                                 : "outline"
                           }
                         >
-                          {order.status}
+                          {t(order.statusKey)}
                         </Badge>
                       </td>
                       <td className="py-3 text-right">{order.total}</td>
@@ -118,9 +117,7 @@ export default async function AccountDashboardPage({ params }: Props) {
             </div>
             <div className="mt-4">
               <Button variant="outline" asChild>
-                <Link href="/account/orders">
-                  {t("view_all_orders", { fallback: "Voir toutes les commandes" })}
-                </Link>
+                <Link href="/account/orders">{t("view_all_orders")}</Link>
               </Button>
             </div>
           </CardContent>
@@ -133,16 +130,12 @@ export default async function AccountDashboardPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("saved_items", { fallback: "Articles sauvegardés" })}</CardTitle>
-            <CardDescription>
-              {t("saved_items_desc", { fallback: "Articles mis de côté pour plus tard" })}
-            </CardDescription>
+            <CardTitle>{t("saved_items")}</CardTitle>
+            <CardDescription>{t("saved_items_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">0</p>
-            <p className="text-muted-foreground text-sm">
-              {t("no_saved_items", { fallback: "Aucun article sauvegardé" })}
-            </p>
+            <p className="text-muted-foreground text-sm">{t("no_saved_items")}</p>
           </CardContent>
         </Card>
       </section>
@@ -151,16 +144,12 @@ export default async function AccountDashboardPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("wishlist", { fallback: "Liste de souhaits" })}</CardTitle>
-            <CardDescription>
-              {t("wishlist_desc", { fallback: "Produits dans votre liste de souhaits" })}
-            </CardDescription>
+            <CardTitle>{t("wishlist")}</CardTitle>
+            <CardDescription>{t("wishlist_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">0</p>
-            <p className="text-muted-foreground text-sm">
-              {t("no_wishlist_items", { fallback: "Aucun produit dans votre liste de souhaits" })}
-            </p>
+            <p className="text-muted-foreground text-sm">{t("no_wishlist_items")}</p>
           </CardContent>
         </Card>
       </section>
@@ -171,22 +160,16 @@ export default async function AccountDashboardPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("recent_activity", { fallback: "Activité récente" })}</CardTitle>
-            <CardDescription>
-              {t("recent_activity_desc", { fallback: "Votre historique d'activité récent" })}
-            </CardDescription>
+            <CardTitle>{t("recent_activity")}</CardTitle>
+            <CardDescription>{t("recent_activity_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {/* TODO: Replace with actual activity timeline */}
             <div className="space-y-4">
-              <div className="relative border-l-2 border-muted pl-4">
-                <div className="bg-primary absolute -left-[9px] top-1 size-4 rounded-full" />
-                <p className="text-sm font-medium">
-                  {t("activity_register", { fallback: "Inscription" })}
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  {t("activity_register_desc", { fallback: "Création de votre compte" })}
-                </p>
+              <div className="border-muted relative border-l-2 pl-4">
+                <div className="bg-primary absolute top-1 left-[-9px] size-4 rounded-full" />
+                <p className="text-sm font-medium">{t("activity_register")}</p>
+                <p className="text-muted-foreground text-xs">{t("activity_register_desc")}</p>
               </div>
             </div>
           </CardContent>

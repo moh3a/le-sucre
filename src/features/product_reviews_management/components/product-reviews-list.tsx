@@ -73,10 +73,10 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="text-secondary w-[200px] rounded-xl border-[#4d4c20]/30 focus:ring-[#700145]">
+          <SelectTrigger className="text-secondary w-[200px] rounded-xl border-primary-foreground/30 focus:ring-crimson-violet">
             <SelectValue placeholder={t("sort_placeholder")} />
           </SelectTrigger>
-          <SelectContent className="bg-white">
+          <SelectContent className="bg-background">
             <SelectItem value="newest">{t("sort_newest_alt")}</SelectItem>
             <SelectItem value="most_helpful">{t("sort_most_helpful")}</SelectItem>
             <SelectItem value="highest_rating">{t("sort_highest_rating")}</SelectItem>
@@ -90,7 +90,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
             {t("no_reviews_yet")}
           </p>
         ) : (
-          <div className="space-y-6 divide-y divide-[#4d4c20]/10">
+          <div className="space-y-6 divide-y divide-primary-foreground/10">
             {reviews.map((review, idx) => (
               <div key={review.id} className={`space-y-3 ${idx > 0 ? "pt-6" : ""}`}>
                 {/* Star Rating and Header */}
@@ -140,7 +140,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
                     <button
                       onClick={() => voteHelpfulMutation.mutate({ review_id: review.id })}
                       disabled={voteHelpfulMutation.isPending}
-                      className="text-secondary/50 flex items-center gap-1 transition-colors hover:text-[#700145] focus:outline-none"
+                      className="text-secondary/50 flex items-center gap-1 transition-colors hover:text-crimson-violet focus:outline-none"
                     >
                       <ThumbsUp className="size-3.5" />
                       <span>{t("helpful_text", { count: review.helpful_count })}</span>
@@ -165,13 +165,13 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
 
         {/* Pagination */}
         {meta && meta.total_pages > 1 && (
-          <div className="flex justify-center gap-2 border-t border-[#4d4c20]/10 pt-4">
+          <div className="flex justify-center gap-2 border-t border-primary-foreground/10 pt-4">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="rounded-xl border-[#4d4c20]/20"
+              className="rounded-xl border-primary-foreground/20"
             >
               Précédent
             </Button>
@@ -183,7 +183,7 @@ export function ProductReviewsList({ product_id }: ProductReviewsListProps) {
               size="sm"
               onClick={() => setPage((p) => Math.min(meta.total_pages, p + 1))}
               disabled={page === meta.total_pages}
-              className="rounded-xl border-[#4d4c20]/20"
+              className="rounded-xl border-primary-foreground/20"
             >
               Suivant
             </Button>

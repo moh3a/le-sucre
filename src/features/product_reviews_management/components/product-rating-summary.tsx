@@ -28,7 +28,7 @@ export function ProductRatingSummary({ product_id }: ProductRatingSummaryProps) 
         <div className="flex items-center gap-6">
           {/* Big Number */}
           <div className="text-center">
-            <div className="font-orla text-4xl font-bold text-[#700145]">
+            <div className="font-orla text-4xl font-bold text-crimson-violet">
               {summary.average_rating.toFixed(1)}
             </div>
             <div className="mt-1 flex items-center justify-center gap-0.5 text-yellow-500">

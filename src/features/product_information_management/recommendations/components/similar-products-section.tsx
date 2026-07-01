@@ -3,6 +3,7 @@
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
+import type { AppLocale } from "@/i18n/config";
 
 export function SimilarProductsSection({
   product_id,
@@ -10,7 +11,7 @@ export function SimilarProductsSection({
   limit = 10,
 }: {
   product_id: string;
-  locale: "fr" | "en";
+  locale: AppLocale;
   limit?: number;
 }) {
   const query = trpc.recommendations.byProduct.useQuery({

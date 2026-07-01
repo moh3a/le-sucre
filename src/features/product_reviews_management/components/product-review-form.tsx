@@ -75,9 +75,9 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
     <QueryGuard mutation={createMutation}>
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="font-moya space-y-6 rounded-2xl border border-[#4d4c20]/15 bg-white p-6 shadow-sm"
+      className="font-moya space-y-6 rounded-2xl border border-primary-foreground/15 bg-background p-6 shadow-sm"
     >
-      <h3 className="font-orla text-lg text-[#4d4c20]">{t("heading")}</h3>
+      <h3 className="font-orla text-lg text-primary-foreground">{t("heading")}</h3>
 
       {/* Star Picker */}
       <div className="space-y-2">
@@ -110,7 +110,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
         <Input
           id="title"
           placeholder={t("review_title_placeholder")}
-          className="text-secondary border-[#4d4c20]/30 focus-visible:ring-[#700145]"
+          className="text-secondary border-primary-foreground/30 focus-visible:ring-crimson-violet"
           {...register("title")}
         />
         {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
@@ -124,7 +124,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
         <Textarea
           id="body"
           placeholder={t("comment_placeholder")}
-          className="text-secondary min-h-32 border-[#4d4c20]/30 focus-visible:ring-[#700145]"
+          className="text-secondary min-h-32 border-primary-foreground/30 focus-visible:ring-crimson-violet"
           {...register("body")}
         />
         {errors.body && <p className="text-xs text-red-500">{errors.body.message}</p>}
@@ -133,7 +133,7 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
       <Button
         type="submit"
         disabled={createMutation.isPending}
-        className="w-full rounded-xl bg-[#700145] text-white hover:bg-[#700145]/90"
+        className="w-full rounded-xl bg-crimson-violet text-white hover:bg-crimson-violet/90"
       >
         {createMutation.isPending ? t("submitting") : t("submit_review")}
       </Button>

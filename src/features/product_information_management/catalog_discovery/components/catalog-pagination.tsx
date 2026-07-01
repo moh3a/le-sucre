@@ -51,7 +51,7 @@ export function CatalogPagination({ page, totalPages, onChange }: CatalogPaginat
           onClick={() => onChange(p)}
           className={`size-9 ${
             p === page
-              ? "bg-[#700145] text-white hover:bg-[#700145]/90"
+              ? "bg-crimson-violet text-white hover:bg-crimson-violet/90"
               : "border-secondary/40 text-secondary hover:bg-secondary/10"
           }`}
         >

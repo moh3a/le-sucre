@@ -3,13 +3,14 @@
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
+import type { AppLocale } from "@/i18n/config";
 
 export function TrendingProductsSection({
   locale,
   period = "day",
   limit = 10,
 }: {
-  locale: "fr" | "en";
+  locale: AppLocale;
   period?: "day" | "week";
   limit?: number;
 }) {

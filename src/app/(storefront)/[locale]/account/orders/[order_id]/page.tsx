@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -8,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-export const metadata: Metadata = {
-  title: "Détail de la commande",
-};
-
 type Props = { params: Promise<{ locale: string; order_id: string }> };
+
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "account" });
+  return { title: t("order_title") };
+}
 
 export default async function OrderDetailPage({ params }: Props) {
   const { locale, order_id } = await params;
@@ -24,7 +24,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <Button variant="ghost" asChild>
         <Link href="/account/orders">
           <span className="mr-1">&larr;</span>
-          {t("back_to_orders", { fallback: "Retour aux commandes" })}
+          {t("back_to_orders")}
         </Link>
       </Button>
 
@@ -34,17 +34,15 @@ export default async function OrderDetailPage({ params }: Props) {
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-xl">
-                {t("order_title", { fallback: "Commande" })} {order_id}
+                {t("order_title")} {order_id}
               </CardTitle>
               <CardDescription>
                 {/* TODO: Replace with actual date */}
-                {t("order_date", { fallback: "Date" })}: 15 juin 2026
+                {t("order_date")}: 15 juin 2026
               </CardDescription>
             </div>
             {/* TODO: Replace with dynamic status */}
-            <Badge variant="secondary">
-              {t("status_delivered", { fallback: "Livré" })}
-            </Badge>
+            <Badge variant="secondary">{t("status_delivered")}</Badge>
           </CardHeader>
         </Card>
       </section>
@@ -53,33 +51,31 @@ export default async function OrderDetailPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("order_progress", { fallback: "Suivi de commande" })}</CardTitle>
-            <CardDescription>
-              {t("order_progress_desc", { fallback: "Les différentes étapes de votre commande" })}
-            </CardDescription>
+            <CardTitle>{t("order_progress")}</CardTitle>
+            <CardDescription>{t("order_progress_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {/* TODO: Replace with Stepper component */}
             <div className="flex items-center gap-2">
-              {["Confirmée", "Préparée", "Expédiée", "Livrée"].map((step, index) => (
-                <div key={step} className="flex flex-1 items-center last:flex-none">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`flex size-8 items-center justify-center rounded-full text-sm font-medium ${
-                        index <= 3
-                          ? "bg-primary text-primary-foreground"
-                          : "border-muted-foreground/30 border text-muted-foreground"
-                      }`}
-                    >
-                      {index + 1}
+              {(["step_confirmed", "step_prepared", "step_shipped", "step_delivered"] as const).map(
+                (step, index) => (
+                  <div key={step} className="flex flex-1 items-center last:flex-none">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`flex size-8 items-center justify-center rounded-full text-sm font-medium ${
+                          index <= 3
+                            ? "bg-primary text-primary-foreground"
+                            : "border-muted-foreground/30 text-muted-foreground border"
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                      <span className="mt-1 text-xs">{t(step)}</span>
                     </div>
-                    <span className="mt-1 text-xs">{step}</span>
+                    {index < 3 && <div className="bg-border mx-2 h-px flex-1" />}
                   </div>
-                  {index < 3 && (
-                    <div className="bg-border mx-2 h-px flex-1" />
-                  )}
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -91,18 +87,18 @@ export default async function OrderDetailPage({ params }: Props) {
       <section>
         <Card>
           <CardHeader>
-            <CardTitle>{t("order_items", { fallback: "Articles commandés" })}</CardTitle>
+            <CardTitle>{t("order_items")}</CardTitle>
           </CardHeader>
           <CardContent>
             {/* TODO: Replace with actual order items from API */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="pb-2 font-medium">{t("product", { fallback: "Produit" })}</th>
-                    <th className="pb-2 font-medium">{t("quantity", { fallback: "Qté" })}</th>
-                    <th className="pb-2 text-right font-medium">{t("price", { fallback: "Prix" })}</th>
-                    <th className="pb-2 text-right font-medium">{t("subtotal", { fallback: "Sous-total" })}</th>
+                  <tr className="text-muted-foreground border-b text-left">
+                    <th className="pb-2 font-medium">{t("product")}</th>
+                    <th className="pb-2 font-medium">{t("quantity")}</th>
+                    <th className="pb-2 text-right font-medium">{t("price")}</th>
+                    <th className="pb-2 text-right font-medium">{t("subtotal")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -119,19 +115,17 @@ export default async function OrderDetailPage({ params }: Props) {
                         </div>
                       </td>
                       <td className="py-3">{item.qty}</td>
-                      <td className="py-3 text-right">{item.price.toLocaleString("fr-FR")} DA</td>
-                      <td className="py-3 text-right">{item.subtotal.toLocaleString("fr-FR")} DA</td>
+                      <td className="py-3 text-right">{item.price.toLocaleString(locale)} DA</td>
+                      <td className="py-3 text-right">{item.subtotal.toLocaleString(locale)} DA</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr>
                     <td colSpan={3} className="pt-3 text-right font-medium">
-                      {t("total", { fallback: "Total" })}:
+                      {t("total")}:
                     </td>
-                    <td className="pt-3 text-right font-bold">
-                      4 200 DA
-                    </td>
+                    <td className="pt-3 text-right font-bold">4 200 DA</td>
                   </tr>
                 </tfoot>
               </table>
@@ -146,7 +140,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <section className="grid gap-6 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{t("shipping_info", { fallback: "Adresse de livraison" })}</CardTitle>
+            <CardTitle>{t("shipping_info")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
             {/* TODO: Replace with actual shipping address */}
@@ -159,14 +153,12 @@ export default async function OrderDetailPage({ params }: Props) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{t("shipping_method", { fallback: "Mode de livraison" })}</CardTitle>
+            <CardTitle>{t("shipping_method")}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
             {/* TODO: Replace with actual shipping method */}
-            <p className="font-medium">{t("standard_shipping", { fallback: "Livraison standard" })}</p>
-            <p className="text-muted-foreground">
-              {t("estimated_delivery", { fallback: "Délai estimé" })}: 3-5 jours ouvrés
-            </p>
+            <p className="font-medium">{t("standard_shipping")}</p>
+            <p className="text-muted-foreground">{t("estimated_delivery")}: 3-5 jours ouvrés</p>
           </CardContent>
         </Card>
       </section>
@@ -177,40 +169,38 @@ export default async function OrderDetailPage({ params }: Props) {
       <section className="grid gap-6 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{t("payment_info", { fallback: "Paiement" })}</CardTitle>
+            <CardTitle>{t("payment_info")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {/* TODO: Replace with actual payment details */}
             <div className="flex justify-between">
-              <span>{t("payment_method", { fallback: "Moyen de paiement" })}</span>
+              <span>{t("payment_method")}</span>
               <span className="font-medium">Carte bancaire (CIB)</span>
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span>{t("payment_status", { fallback: "Statut" })}</span>
-              <Badge variant="secondary">
-                {t("payment_paid", { fallback: "Payé" })}
-              </Badge>
+              <span>{t("payment_status")}</span>
+              <Badge variant="secondary">{t("payment_paid")}</Badge>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{t("total_breakdown", { fallback: "Détail des montants" })}</CardTitle>
+            <CardTitle>{t("total_breakdown")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {/* TODO: Replace with actual totals */}
             <div className="flex justify-between">
-              <span>{t("subtotal", { fallback: "Sous-total" })}</span>
+              <span>{t("subtotal")}</span>
               <span>4 200 DA</span>
             </div>
             <div className="flex justify-between">
-              <span>{t("shipping_cost", { fallback: "Livraison" })}</span>
+              <span>{t("shipping_cost")}</span>
               <span>500 DA</span>
             </div>
             <Separator />
             <div className="flex justify-between font-bold">
-              <span>{t("total", { fallback: "Total" })}</span>
+              <span>{t("total")}</span>
               <span>4 700 DA</span>
             </div>
           </CardContent>
@@ -222,13 +212,9 @@ export default async function OrderDetailPage({ params }: Props) {
       {/* ACTIONS */}
       <section className="flex flex-wrap gap-3">
         {/* TODO: Wire up reorder action */}
-        <Button>{t("reorder", { fallback: "Commander à nouveau" })}</Button>
-        <Button variant="outline">
-          {t("request_return", { fallback: "Demander un retour" })}
-        </Button>
-        <Button variant="outline">
-          {t("download_invoice", { fallback: "Télécharger la facture" })}
-        </Button>
+        <Button>{t("reorder")}</Button>
+        <Button variant="outline">{t("request_return")}</Button>
+        <Button variant="outline">{t("download_invoice")}</Button>
       </section>
     </div>
   );

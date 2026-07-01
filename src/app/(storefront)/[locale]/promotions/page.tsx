@@ -34,8 +34,8 @@ export default async function PromotionsPage({ params }: Props) {
           <CarouselContent>
             {[1, 2, 3].map((i) => (
               <CarouselItem key={i}>
-                <div className="flex h-64 items-center justify-center rounded-lg bg-gradient-to-r from-[#c8d152] to-[#f9f7be]">
-                  <p className="text-2xl font-semibold text-[#4d4c20]">
+                <div className="flex h-64 items-center justify-center rounded-lg bg-linear-to-r from-primary to-chiffon">
+                  <p className="text-2xl font-semibold text-primary-foreground">
                     {t("bannerPlaceholder", { index: i })}
                   </p>
                 </div>
@@ -105,7 +105,7 @@ export default async function PromotionsPage({ params }: Props) {
 
       {/* LOYALTY PROGRAM */}
       <section>
-        <Card className="bg-[#fff3e3]">
+        <Card className="bg-cream">
           <CardHeader>
             <CardTitle>{t("loyaltyProgram")}</CardTitle>
             <CardDescription>{t("loyaltyDescription")}</CardDescription>

@@ -57,7 +57,7 @@ export function ProductRecommendationCarousel({
           {Array.from({ length: 4 }).map((_, i) => (
             <Card
               key={i}
-              className="border-secondary/20 animate-pulse overflow-hidden border bg-white"
+              className="border-secondary/20 animate-pulse overflow-hidden border bg-background"
             >
               <div className="bg-muted aspect-square" />
               <CardContent className="space-y-2 p-4">
@@ -76,7 +76,7 @@ export function ProductRecommendationCarousel({
   return (
     <div className="font-moya space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-orla text-2xl text-[#4d4c20]">{title}</h2>
+        <h2 className="font-orla text-2xl text-primary-foreground">{title}</h2>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -107,8 +107,8 @@ export function ProductRecommendationCarousel({
               className="min-w-0 flex-[0_0_85%] sm:flex-[0_0_45%] md:flex-[0_0_22%]"
             >
               <Link href={`/products/${item.slug}`} className="group">
-                <Card className="flex h-full flex-col overflow-hidden border border-[#4d4c20]/15 bg-white transition-all duration-300 hover:border-[#700145]/40 hover:shadow-lg">
-                  <div className="relative aspect-square overflow-hidden bg-[#fff3e3]/20">
+                <Card className="flex h-full flex-col overflow-hidden border border-primary-foreground/15 bg-background transition-all duration-300 hover:border-crimson-violet/40 hover:shadow-lg">
+                  <div className="relative aspect-square overflow-hidden bg-cream/20">
                     {item.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -117,7 +117,7 @@ export function ProductRecommendationCarousel({
                         className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-[#4d4c20]/5 text-xs text-[#4d4c20]/40">
+                      <div className="flex h-full w-full items-center justify-center bg-primary-foreground/5 text-xs text-primary-foreground/40">
                         Aucune image
                       </div>
                     )}
@@ -125,15 +125,15 @@ export function ProductRecommendationCarousel({
                   <CardContent className="flex flex-1 flex-col justify-between p-4">
                     <div className="space-y-1">
                       {item.brand_name && (
-                        <p className="text-[10px] font-semibold tracking-wider text-[#4d4c20]/60 uppercase">
+                        <p className="text-[10px] font-semibold tracking-wider text-primary-foreground/60 uppercase">
                           {item.brand_name}
                         </p>
                       )}
-                      <h3 className="font-orla line-clamp-1 text-sm leading-snug text-[#4d4c20] transition-colors group-hover:text-[#700145]">
+                      <h3 className="font-orla line-clamp-1 text-sm leading-snug text-primary-foreground transition-colors group-hover:text-crimson-violet">
                         {item.name}
                       </h3>
                     </div>
-                    <div className="mt-3 border-t border-[#4d4c20]/5 pt-2 text-sm font-semibold text-[#700145]">
+                    <div className="mt-3 border-t border-primary-foreground/5 pt-2 text-sm font-semibold text-crimson-violet">
                       {item.min_price} {item.currency}
                     </div>
                   </CardContent>

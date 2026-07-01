@@ -316,7 +316,7 @@ export function CreateOrderDialog() {
                             name="sku_select"
                             checked={selected_sku_id === sku.sku_id}
                             onChange={() => set_selected_sku_id(sku.sku_id)}
-                            className="text-[#c8d152]"
+                            className="text-primary"
                           />
                           <div className="flex flex-1 items-center justify-between">
                             <div>
@@ -538,7 +538,7 @@ export function CreateOrderDialog() {
             </Button>
             <Button
               type="submit"
-              className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={is_pending || cart_items.length === 0}
             >
               {is_pending ? t("creating") : t("create_order")}

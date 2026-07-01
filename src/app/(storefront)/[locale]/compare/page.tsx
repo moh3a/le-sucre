@@ -1,18 +1,25 @@
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: "Comparer",
-};
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "compare" });
+  return { title: t("title") };
+}
 
 export default async function ComparePage({ params }: Props) {
   const { locale } = await params;
@@ -46,22 +53,28 @@ export default async function ComparePage({ params }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[t("image"), t("name"), t("price"), t("rating"), t("description"), t("specs"), t("availability")].map(
-                (feature) => (
-                  <TableRow key={feature}>
-                    <TableCell className="font-medium">{feature}</TableCell>
-                    <TableCell>
-                      <div className="bg-muted h-16 w-16 rounded-lg" />
-                    </TableCell>
-                    <TableCell>
-                      <div className="bg-muted h-16 w-16 rounded-lg" />
-                    </TableCell>
-                    <TableCell>
-                      <div className="bg-muted h-16 w-16 rounded-lg" />
-                    </TableCell>
-                  </TableRow>
-                ),
-              )}
+              {[
+                t("image"),
+                t("name"),
+                t("price"),
+                t("rating"),
+                t("description"),
+                t("specs"),
+                t("availability"),
+              ].map((feature) => (
+                <TableRow key={feature}>
+                  <TableCell className="font-medium">{feature}</TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-16 w-16 rounded-lg" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-16 w-16 rounded-lg" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-16 w-16 rounded-lg" />
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </section>

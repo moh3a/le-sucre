@@ -49,15 +49,15 @@ export function CatalogFilterSidebar({
   };
 
   return (
-    <div className="w-full space-y-6 rounded-2xl border border-[#4d4c20]/15 bg-white p-6 shadow-sm">
+    <div className="w-full space-y-6 rounded-2xl border border-primary-foreground/15 bg-background p-6 shadow-sm">
       <div>
-        <h3 className="font-orla mb-4 text-lg text-[#4d4c20]">Filtres</h3>
-        <Separator className="bg-[#4d4c20]/10" />
+        <h3 className="font-orla mb-4 text-lg text-primary-foreground">Filtres</h3>
+        <Separator className="bg-primary-foreground/10" />
       </div>
 
       {/* Disponibilité */}
       <div className="space-y-3">
-        <h4 className="font-orla text-sm tracking-wider text-[#4d4c20]/80 uppercase">
+        <h4 className="font-orla text-sm tracking-wider text-primary-foreground/80 uppercase">
           Disponibilité
         </h4>
         <div className="flex items-center space-x-3">
@@ -65,7 +65,7 @@ export function CatalogFilterSidebar({
             id="in_stock_only"
             checked={inStockOnly}
             onCheckedChange={(checked) => onInStockChange(Boolean(checked))}
-            className="border-[#4d4c20]/30 data-[state=checked]:border-[#700145] data-[state=checked]:bg-[#700145]"
+            className="border-primary-foreground/30 data-[state=checked]:border-crimson-violet data-[state=checked]:bg-crimson-violet"
           />
           <Label
             htmlFor="in_stock_only"
@@ -76,12 +76,12 @@ export function CatalogFilterSidebar({
         </div>
       </div>
 
-      <Separator className="bg-[#4d4c20]/10" />
+      <Separator className="bg-primary-foreground/10" />
 
       {/* Marques / Enseignes */}
       {facets?.brands && facets.brands.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-orla text-sm tracking-wider text-[#4d4c20]/80 uppercase">Marques</h4>
+          <h4 className="font-orla text-sm tracking-wider text-primary-foreground/80 uppercase">Marques</h4>
           <div className="max-h-48 space-y-2 overflow-y-auto pr-2">
             {facets.brands.map((brand) => (
               <div key={brand.id} className="flex items-center space-x-3">
@@ -89,7 +89,7 @@ export function CatalogFilterSidebar({
                   id={`brand_${brand.id}`}
                   checked={selectedBrandIds.includes(brand.id)}
                   onCheckedChange={() => handleBrandToggle(brand.id)}
-                  className="border-[#4d4c20]/30 data-[state=checked]:border-[#700145] data-[state=checked]:bg-[#700145]"
+                  className="border-primary-foreground/30 data-[state=checked]:border-crimson-violet data-[state=checked]:bg-crimson-violet"
                 />
                 <Label
                   htmlFor={`brand_${brand.id}`}
@@ -104,11 +104,11 @@ export function CatalogFilterSidebar({
         </div>
       )}
 
-      {facets?.brands && facets.brands.length > 0 && <Separator className="bg-[#4d4c20]/10" />}
+      {facets?.brands && facets.brands.length > 0 && <Separator className="bg-primary-foreground/10" />}
 
       {/* Prix Slider */}
       <div className="space-y-4">
-        <h4 className="font-orla text-sm tracking-wider text-[#4d4c20]/80 uppercase">
+        <h4 className="font-orla text-sm tracking-wider text-primary-foreground/80 uppercase">
           Prix maximum
         </h4>
         <div className="space-y-2">
@@ -118,11 +118,11 @@ export function CatalogFilterSidebar({
             max={facets?.price?.max ?? 20000}
             value={priceRange[1]}
             onChange={(e) => onPriceChange([priceRange[0], Number(e.target.value)])}
-            className="w-full cursor-pointer accent-[#700145]"
+            className="w-full cursor-pointer accent-crimson-violet"
           />
           <div className="text-secondary font-moya flex items-center justify-between text-xs">
             <span>{facets?.price?.min ?? 0} DZD</span>
-            <span className="font-semibold text-[#700145]">{priceRange[1]} DZD</span>
+            <span className="font-semibold text-crimson-violet">{priceRange[1]} DZD</span>
           </div>
         </div>
       </div>
@@ -132,8 +132,8 @@ export function CatalogFilterSidebar({
         if (prop.values.length === 0) return null;
 
         return (
-          <div key={prop.code} className="space-y-3 border-t border-[#4d4c20]/10 pt-4">
-            <h4 className="font-orla text-sm tracking-wider text-[#4d4c20]/80 uppercase">
+          <div key={prop.code} className="space-y-3 border-t border-primary-foreground/10 pt-4">
+            <h4 className="font-orla text-sm tracking-wider text-primary-foreground/80 uppercase">
               {prop.name}
             </h4>
             <div className="space-y-2">
@@ -146,7 +146,7 @@ export function CatalogFilterSidebar({
                       id={`prop_${prop.code}_${val.code}`}
                       checked={isChecked}
                       onCheckedChange={() => handlePropertyToggle(prop.code, val.code)}
-                      className="border-[#4d4c20]/30 data-[state=checked]:border-[#700145] data-[state=checked]:bg-[#700145]"
+                      className="border-primary-foreground/30 data-[state=checked]:border-crimson-violet data-[state=checked]:bg-crimson-violet"
                     />
                     <Label
                       htmlFor={`prop_${prop.code}_${val.code}`}

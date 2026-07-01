@@ -1,7 +1,10 @@
 "use client";
 
+import { Plus, Trash, Pencil, LayoutGrid, ArrowUpDown } from "lucide-react";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -18,9 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SECTION_TYPE } from "../constants/campaign_types";
-import { Plus, Trash, Pencil, LayoutGrid, ArrowUpDown } from "lucide-react";
-import { toast } from "sonner";
-
+import type { AppLocale } from "@/i18n/config";
 import { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 
 type SectionConfig = {
@@ -186,7 +187,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
     }
   };
 
-  const handleHeadingChange = (lang: "fr" | "en" | "ar", val: string) => {
+  const handleHeadingChange = (lang: AppLocale, val: string) => {
     setFormState({
       ...formState,
       heading: {
@@ -230,7 +231,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
         </div>
         <Button
           onClick={handleOpenNew}
-          className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="mr-2 h-4 w-4" />
           {t("add_section")}
@@ -271,7 +272,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                         </Badge>
                         <Badge
                           variant="secondary"
-                          className="bg-[#f9f7be]/60 text-[10px] text-[#4d4c20]"
+                          className="bg-chiffon/60 text-[10px] text-primary-foreground"
                         >
                           {t("page_badge", { slug: section.page_slug })}
                         </Badge>
@@ -426,7 +427,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                                       : [...curr, prod.id];
                                     handleConfigChange("product_ids", next);
                                   }}
-                                  className="rounded text-[#c8d152]"
+                                  className="rounded text-primary"
                                 />
                                 <span>{prod.name}</span>
                               </label>
@@ -537,7 +538,7 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                   {t("cancel")}
                 </Button>
-                <Button type="submit" className="bg-[#c8d152] text-[#4d4c20] hover:bg-[#c8d152]/90">
+                <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
                   {selectedSection ? t("save") : t("create")}
                 </Button>
               </DialogFooter>
