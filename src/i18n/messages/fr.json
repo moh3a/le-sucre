@@ -187,7 +187,13 @@
   },
   "category": {
     "not_found": "Catégorie non trouvée",
-    "meta_description": "Découvrez nos produits de la catégorie {name}"
+    "meta_description": "Découvrez nos produits de la catégorie {name}",
+    "page_title": "Nos catégories",
+    "page_description": "Parcourez nos catégories pour trouver ce que vous cherchez",
+    "count": "{count} produit(s)",
+    "subcategories": "Sous-catégories",
+    "empty_title": "Aucune catégorie",
+    "empty_description": "Aucune catégorie n'est disponible pour le moment."
   },
   "brandDetail": {
     "brand": "Marque",
@@ -844,7 +850,12 @@
     "search_placeholder": "Rechercher…",
     "administrator": "Administrateur",
     "my_profile_short": "Mon profil",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "toggle_theme": "Changer le thème",
+    "theme_light": "Clair",
+    "theme_dark": "Sombre",
+    "theme_system": "Système",
+    "search": "Rechercher"
   },
   "nav_user": {
     "account": "Account",

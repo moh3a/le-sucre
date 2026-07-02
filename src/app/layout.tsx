@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "./globals.css";
@@ -33,12 +34,20 @@ export default async function RootLayout({
         "font-sans antialiased",
         montserrat.variable,
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full">
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>
-            <AppProviders>{children}</AppProviders>
-            <Toaster />
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <AppProviders>{children}</AppProviders>
+              <Toaster />
+            </ThemeProvider>
           </NuqsAdapter>
         </NextIntlClientProvider>
       </body>

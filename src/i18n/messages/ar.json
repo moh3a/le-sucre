@@ -187,7 +187,13 @@
   },
   "category": {
     "not_found": "التصنيف غير موجود",
-    "meta_description": "اكتشف منتجاتنا في {name}"
+    "meta_description": "اكتشف منتجاتنا في {name}",
+    "page_title": "تصنيفاتنا",
+    "page_description": "تصفح تصنيفاتنا للعثور على ما تبحث عنه",
+    "count": "منتج (منتجات) {count}",
+    "subcategories": "تصنيفات فرعية",
+    "empty_title": "لا توجد تصنيفات",
+    "empty_description": "لا توجد تصنيفات متاحة حالياً."
   },
   "brandDetail": {
     "brand": "العلامة التجارية",
@@ -555,7 +561,12 @@
     "search_placeholder": "بحث…",
     "administrator": "مدير",
     "my_profile_short": "الملف الشخصي",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "toggle_theme": "تغيير المظهر",
+    "theme_light": "فاتح",
+    "theme_dark": "داكن",
+    "theme_system": "النظام",
+    "search": "بحث"
   },
   "nav": {
     "catalog": "الكتالوج",

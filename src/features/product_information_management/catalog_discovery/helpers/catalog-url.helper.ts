@@ -1,4 +1,9 @@
+import { default_locale } from "@/i18n/config";
 import type { CatalogSearchInput } from "../models/search.dto";
+
+function locale_prefix(locale: string): string {
+  return locale === default_locale ? "" : `/${locale}`;
+}
 
 export function build_catalog_search_path(locale: string, params: Partial<CatalogSearchInput>) {
   const sp = new URLSearchParams();
@@ -18,7 +23,7 @@ export function build_catalog_search_path(locale: string, params: Partial<Catalo
   }
 
   const qs = sp.toString();
-  return `/${locale}/search${qs ? `?${qs}` : ""}`;
+  return `${locale_prefix(locale)}/search${qs ? `?${qs}` : ""}`;
 }
 
 export function build_category_catalog_path(
@@ -40,7 +45,7 @@ export function build_category_catalog_path(
     }
   }
   const qs = sp.toString();
-  return `/${locale}/c/${category_slug}${qs ? `?${qs}` : ""}`;
+  return `${locale_prefix(locale)}/c/${category_slug}${qs ? `?${qs}` : ""}`;
 }
 
 /** Parse Next.js searchParams → catalog DTO fields */

@@ -1,18 +1,13 @@
+import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { cookies, headers } from "next/headers";
-import { default_locale, locales, type AppLocale } from "./config";
+import { routing } from "./routing";
 
-export default getRequestConfig(async () => {
-  const header_store = await headers();
-  const pathname = header_store.get("x-pathname") ?? "";
-  const cookie_store = await cookies();
-  const cookie_locale = cookie_store.get("locale")?.value as AppLocale | undefined;
+export default getRequestConfig(async ({ requestLocale }) => {
+  let locale = await requestLocale;
 
-  const locale: AppLocale = pathname.startsWith("/console")
-    ? "fr"
-    : cookie_locale && locales.includes(cookie_locale)
-      ? cookie_locale
-      : default_locale;
+  if (!locale || !hasLocale(routing.locales, locale)) {
+    locale = routing.defaultLocale;
+  }
 
   return {
     locale,

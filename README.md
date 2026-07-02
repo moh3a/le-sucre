@@ -2,8 +2,8 @@
 
 - user preference, cookies consent
 - create anonymous user on first visit
-- top nav should have select locale, select theme, search bar
-- https://nextjs.org/docs/app/guides/internationalization
+- each UI component (product details, cart details, checkout form, preorder dialog..) should have a loading UI state (skeleton), an error UI state, an empty UI state, a success UI state along with the standard component UI
+
 
 ## Features to implement
 
