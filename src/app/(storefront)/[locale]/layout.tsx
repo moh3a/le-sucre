@@ -4,6 +4,7 @@ import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { AnonymousSessionProvider } from "@/features/authentication_and_authorization/auth/components/AnonymousSessionProvider";
 
 type Props = PropsWithChildren<{
   params: Promise<{ locale: string }>;
@@ -18,9 +19,11 @@ export default async function StorefrontLayout({ children, params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
-      <Footer />
+      <AnonymousSessionProvider>
+        <Header />
+        <main className="flex-1 pb-16 md:pb-0">{children}</main>
+        <Footer />
+      </AnonymousSessionProvider>
     </div>
   );
 }

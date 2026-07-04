@@ -1,10 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { AccountNavCard } from "@/components/storefront/account/account-nav-card";
+import { RecentOrdersTable } from "@/components/storefront/account/recent-orders-table";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -48,81 +47,30 @@ export default async function AccountDashboardPage({ params }: Props) {
       </section>
 
       {/* ACCOUNT NAV CARDS */}
-      <section>
-        <h2 className="mb-4 text-xl font-semibold">{t("quick_actions")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {navCards.map((card) => (
-            <Link key={card.href} href={card.href}>
-              <Card className="hover:border-primary cursor-pointer transition-colors">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <span>{card.icon}</span>
-                    <span>{t(card.key)}</span>
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <AccountNavCard
+        title={t("quick_actions")}
+        items={navCards.map((card) => ({
+          href: card.href,
+          label: t(card.key),
+          icon: card.icon,
+        }))}
+      />
 
       {/* RECENT ORDERS SUMMARY */}
-      <section>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("recent_orders")}</CardTitle>
-            <CardDescription>{t("recent_orders_desc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-muted-foreground border-b text-left">
-                    <th className="pb-2 font-medium">{t("order")}</th>
-                    <th className="pb-2 font-medium">{t("date")}</th>
-                    <th className="pb-2 font-medium">{t("status")}</th>
-                    <th className="pb-2 text-right font-medium">{t("total")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RECENT_ORDERS.map((order) => (
-                    <tr key={order.id} className="border-b last:border-0">
-                      <td className="py-3">
-                        <Link
-                          href={`/account/orders/${order.id}`}
-                          className="text-primary hover:underline"
-                        >
-                          {order.id}
-                        </Link>
-                      </td>
-                      <td className="py-3">{order.date}</td>
-                      <td className="py-3">
-                        <Badge
-                          variant={
-                            order.statusKey === "status_delivered"
-                              ? "secondary"
-                              : order.statusKey === "status_shipped"
-                                ? "default"
-                                : "outline"
-                          }
-                        >
-                          {t(order.statusKey)}
-                        </Badge>
-                      </td>
-                      <td className="py-3 text-right">{order.total}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-4">
-              <Button variant="outline" asChild>
-                <Link href="/account/orders">{t("view_all_orders")}</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      <RecentOrdersTable
+        title={t("recent_orders")}
+        description={t("recent_orders_desc")}
+        orders={RECENT_ORDERS.map((o) => ({ ...o }))}
+        statusLabel={(key) => t(key)}
+        viewAllLabel={t("view_all_orders")}
+        viewAllHref="/account/orders"
+        columnLabels={{
+          order: t("order"),
+          date: t("date"),
+          status: t("status"),
+          total: t("total"),
+        }}
+      />
 
       <Separator />
 
@@ -164,7 +112,6 @@ export default async function AccountDashboardPage({ params }: Props) {
             <CardDescription>{t("recent_activity_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* TODO: Replace with actual activity timeline */}
             <div className="space-y-4">
               <div className="border-muted relative border-l-2 pl-4">
                 <div className="bg-primary absolute top-1 left-[-9px] size-4 rounded-full" />

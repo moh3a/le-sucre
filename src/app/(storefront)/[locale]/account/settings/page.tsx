@@ -1,11 +1,12 @@
 import { getTranslations } from "next-intl/server";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileForm } from "@/features/authentication_and_authorization/profile/components/storefront/profile-form";
+import { PasswordForm } from "@/features/authentication_and_authorization/profile/components/storefront/password-form";
+import { LanguageSelector } from "@/features/authentication_and_authorization/profile/components/storefront/language-selector";
+import { NotificationPreferences } from "@/features/authentication_and_authorization/profile/components/storefront/notification-preferences";
+import { DangerZone } from "@/features/authentication_and_authorization/profile/components/storefront/danger-zone";
+import { CookieSettingsSection } from "@/components/cookie-consent/cookie-settings-section";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -26,7 +27,6 @@ export default async function AccountSettingsPage({ params }: Props) {
 
       <Separator />
 
-      {/* SETTINGS NAV */}
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="w-full">
           <TabsTrigger value="profile">{t("tab_profile")}</TabsTrigger>
@@ -35,165 +35,91 @@ export default async function AccountSettingsPage({ params }: Props) {
           <TabsTrigger value="notifications">{t("tab_notifications")}</TabsTrigger>
         </TabsList>
 
-        {/* PROFILE FORM */}
         <TabsContent value="profile" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("profile_title")}</CardTitle>
-              <CardDescription>{t("profile_description")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* TODO: Replace with actual form and validation */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label htmlFor="firstName" className="text-sm font-medium">
-                    {t("first_name")}
-                  </label>
-                  <Input id="firstName" placeholder={t("first_name_placeholder")} />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="lastName" className="text-sm font-medium">
-                    {t("last_name")}
-                  </label>
-                  <Input id="lastName" placeholder={t("last_name_placeholder")} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  {t("email")}
-                </label>
-                <Input id="email" type="email" placeholder="email@exemple.com" />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
-                  {t("phone")}
-                </label>
-                <Input id="phone" type="tel" placeholder="+213 5XX XX XX XX" />
-              </div>
-              <Button>{t("save_changes")}</Button>
-            </CardContent>
-          </Card>
+          <ProfileForm
+            title={t("profile_title")}
+            description={t("profile_description")}
+            fields={[
+              { name: "first_name", label: t("first_name"), placeholder: t("first_name_placeholder") },
+              { name: "last_name", label: t("last_name"), placeholder: t("last_name_placeholder") },
+              { name: "email", label: t("email"), placeholder: "email@exemple.com", type: "email", fullWidth: true },
+              { name: "phone", label: t("phone"), placeholder: "+213 5XX XX XX XX", type: "tel", fullWidth: true },
+            ]}
+            saveLabel={t("save_changes")}
+          />
         </TabsContent>
 
-        {/* CHANGE PASSWORD */}
         <TabsContent value="security" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("change_password_title")}</CardTitle>
-              <CardDescription>{t("change_password_description")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* TODO: Replace with actual password change form */}
-              <div className="space-y-2">
-                <label htmlFor="currentPassword" className="text-sm font-medium">
-                  {t("current_password")}
-                </label>
-                <Input id="currentPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="newPassword" className="text-sm font-medium">
-                  {t("new_password")}
-                </label>
-                <Input id="newPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="text-sm font-medium">
-                  {t("confirm_password")}
-                </label>
-                <Input id="confirmPassword" type="password" />
-              </div>
-              <Button>{t("update_password")}</Button>
-            </CardContent>
-          </Card>
+          <PasswordForm
+            title={t("change_password_title")}
+            description={t("change_password_description")}
+            fields={[
+              { name: "current_password", label: t("current_password") },
+              { name: "new_password", label: t("new_password") },
+              { name: "confirm_password", label: t("confirm_password") },
+            ]}
+            updateLabel={t("update_password")}
+          />
         </TabsContent>
 
-        {/* LANGUAGE PREFERENCE */}
         <TabsContent value="preferences" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("language_title")}</CardTitle>
-              <CardDescription>{t("language_description")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* TODO: Replace with actual language selector */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 rounded-lg border p-3">
-                  <input type="radio" name="language" defaultChecked className="size-4" />
-                  <span className="text-sm font-medium">{t("french")}</span>
-                </label>
-                <label className="flex items-center gap-3 rounded-lg border p-3">
-                  <input type="radio" name="language" className="size-4" />
-                  <span className="text-sm font-medium">{t("english")}</span>
-                </label>
-                <label className="flex items-center gap-3 rounded-lg border p-3">
-                  <input type="radio" name="language" className="size-4" />
-                  <span className="text-sm font-medium">{t("arabic")}</span>
-                </label>
-              </div>
-            </CardContent>
-          </Card>
+          <LanguageSelector
+            title={t("language_title")}
+            description={t("language_description")}
+            languages={[
+              { code: "fr", label: t("french") },
+              { code: "en", label: t("english") },
+              { code: "ar", label: t("arabic") },
+            ]}
+            selected="fr"
+          />
         </TabsContent>
 
-        {/* NOTIFICATION PREFERENCES */}
         <TabsContent value="notifications" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("notifications_title")}</CardTitle>
-              <CardDescription>{t("notifications_description")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* TODO: Replace with actual toggle switches */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{t("notif_order_confirmation")}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {t("notif_order_confirmation_desc")}
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{t("notif_shipping")}</p>
-                  <p className="text-muted-foreground text-xs">{t("notif_shipping_desc")}</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{t("notif_promotions")}</p>
-                  <p className="text-muted-foreground text-xs">{t("notif_promotions_desc")}</p>
-                </div>
-                <Switch />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{t("notif_newsletter")}</p>
-                  <p className="text-muted-foreground text-xs">{t("notif_newsletter_desc")}</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
+          <NotificationPreferences
+            title={t("notifications_title")}
+            description={t("notifications_description")}
+            items={[
+              {
+                key: "order_confirmation",
+                title: t("notif_order_confirmation"),
+                description: t("notif_order_confirmation_desc"),
+                defaultChecked: true,
+              },
+              {
+                key: "shipping",
+                title: t("notif_shipping"),
+                description: t("notif_shipping_desc"),
+                defaultChecked: true,
+              },
+              {
+                key: "promotions",
+                title: t("notif_promotions"),
+                description: t("notif_promotions_desc"),
+                defaultChecked: false,
+              },
+              {
+                key: "newsletter",
+                title: t("notif_newsletter"),
+                description: t("notif_newsletter_desc"),
+                defaultChecked: true,
+              },
+            ]}
+          />
         </TabsContent>
       </Tabs>
 
       <Separator />
 
-      {/* DANGER ZONE */}
-      <Card className="border-destructive/50">
-        <CardHeader>
-          <CardTitle className="text-destructive">{t("danger_zone")}</CardTitle>
-          <CardDescription>{t("danger_zone_description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* TODO: Add confirmation dialog */}
-          <Button variant="destructive">{t("delete_account")}</Button>
-        </CardContent>
-      </Card>
+      <DangerZone
+        title={t("danger_zone")}
+        description={t("danger_zone_description")}
+        actionLabel={t("delete_account")}
+      />
+
+      <Separator />
+
+      <CookieSettingsSection />
     </div>
   );
 }

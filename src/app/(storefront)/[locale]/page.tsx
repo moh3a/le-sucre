@@ -3,6 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionHeader } from "@/components/storefront/section-header";
+import { InfoCard } from "@/components/storefront/info-card";
+import { CategoryCard } from "@/features/product_information_management/categories/components/storefront/category-card";
 
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
@@ -20,7 +23,7 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-16 px-4 py-8">
-      {/* HERO BANNER - campaign carousel */}
+      {/* HERO BANNER */}
       <section className="from-lemon-lime/20 to-lemon-chiffon/40 relative overflow-hidden rounded-2xl bg-linear-to-r p-12 md:p-20">
         <div className="relative z-10 max-w-xl space-y-4">
           <Badge className="bg-crimson-violet text-white">
@@ -39,19 +42,25 @@ export default async function HomePage({ params }: Props) {
 
       {/* FEATURED CATEGORIES */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{t("home.categories")}</h2>
-          <Button variant="link">{t("home.see_all")}</Button>
-        </div>
+        <SectionHeader
+          title={t("home.categories")}
+          actionLabel={t("home.see_all")}
+          actionHref="/categories"
+        />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card
+            <CategoryCard
               key={i}
-              className="group cursor-pointer overflow-hidden p-4 text-center transition-shadow hover:shadow-md"
-            >
-              <div className="bg-muted mx-auto mb-3 h-20 w-20 rounded-full" />
-              <p className="text-sm font-medium">{t("home.category_name", { index: i + 1 })}</p>
-            </Card>
+              category={{
+                id: String(i),
+                name: t("home.category_name", { index: i + 1 }),
+                slug: `category-${i + 1}`,
+                description: null,
+                image_url: null,
+                children: [],
+              }}
+              variant="home"
+            />
           ))}
         </div>
       </section>
@@ -95,10 +104,11 @@ export default async function HomePage({ params }: Props) {
 
       {/* TRENDING PRODUCTS */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{t("home.trending")}</h2>
-          <Button variant="link">{t("home.see_all")}</Button>
-        </div>
+        <SectionHeader
+          title={t("home.trending")}
+          actionLabel={t("home.see_all")}
+          actionHref="/best-sellers"
+        />
         <div className="flex gap-4 overflow-x-auto pb-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Card key={i} className="min-w-[200px] shrink-0 space-y-2 p-3">
@@ -112,10 +122,11 @@ export default async function HomePage({ params }: Props) {
 
       {/* NEW ARRIVALS */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{t("home.new_arrivals")}</h2>
-          <Button variant="link">{t("home.see_all")}</Button>
-        </div>
+        <SectionHeader
+          title={t("home.new_arrivals")}
+          actionLabel={t("home.see_all")}
+          actionHref="/new-arrivals"
+        />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Card key={i} className="space-y-2 p-3">
@@ -130,10 +141,11 @@ export default async function HomePage({ params }: Props) {
 
       {/* BEST SELLERS */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{t("home.best_sellers")}</h2>
-          <Button variant="link">{t("home.see_all")}</Button>
-        </div>
+        <SectionHeader
+          title={t("home.best_sellers")}
+          actionLabel={t("home.see_all")}
+          actionHref="/best-sellers"
+        />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} className="space-y-2 p-3">
@@ -141,8 +153,7 @@ export default async function HomePage({ params }: Props) {
               <p className="text-sm font-medium">{t("home.best_seller_product", { index: i + 1 })}</p>
               <p className="text-muted-foreground text-sm">{(i + 1) * 3000} DZD</p>
               <div className="flex items-center gap-1 text-xs text-yellow-500">
-                {"★".repeat(5 - i)}
-                {"☆".repeat(i)}
+                {"★".repeat(5 - i)}{"☆".repeat(i)}
               </div>
             </Card>
           ))}
@@ -161,29 +172,16 @@ export default async function HomePage({ params }: Props) {
 
       {/* PROMOTIONAL BANNERS */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {[
-          {
-            label: t("home.promo_delivery"),
-            desc: t("home.promo_delivery_desc"),
-          },
-          {
-            label: t("home.promo_return"),
-            desc: t("home.promo_return_desc"),
-          },
-        ].map((banner, i) => (
-          <Card
-            key={i}
-            className="from-lemon-chiffon/30 to-cream/50 flex items-center gap-4 bg-linear-to-br p-6"
-          >
-            <div className="bg-lemon-lime/30 flex h-12 w-12 items-center justify-center rounded-full text-2xl">
-              {i === 0 ? "🚚" : "🔄"}
-            </div>
-            <div>
-              <p className="font-semibold">{banner.label}</p>
-              <p className="text-muted-foreground text-sm">{banner.desc}</p>
-            </div>
-          </Card>
-        ))}
+        <InfoCard
+          icon="🚚"
+          title={t("home.promo_delivery")}
+          description={t("home.promo_delivery_desc")}
+        />
+        <InfoCard
+          icon="🔄"
+          title={t("home.promo_return")}
+          description={t("home.promo_return_desc")}
+        />
       </section>
 
       {/* NEWSLETTER CTA */}
@@ -212,9 +210,7 @@ export default async function HomePage({ params }: Props) {
             <Card key={i} className="space-y-3 p-6 text-center">
               <div className="bg-muted mx-auto h-16 w-16 rounded-full" />
               <p className="text-muted-foreground text-sm italic">
-                &ldquo;
-                {t("home.testimonial_text")}
-                &rdquo;
+                &ldquo;{t("home.testimonial_text")}&rdquo;
               </p>
               <p className="text-sm font-medium">
                 {t("home.testimonial_author_number", { index: i + 1 })}

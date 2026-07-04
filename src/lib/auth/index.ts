@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin, customSession } from "better-auth/plugins";
+import { admin, anonymous, customSession } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import { APP_NAME } from "@/constants";
@@ -36,6 +36,15 @@ const auth_options = {
         session: {
           fields: {
             impersonatedBy: "impersonated_by",
+          },
+        },
+      },
+    }),
+    anonymous({
+      schema: {
+        user: {
+          fields: {
+            isAnonymous: "is_anonymous",
           },
         },
       },

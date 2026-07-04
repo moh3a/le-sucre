@@ -1,8 +1,10 @@
 import { getTranslations } from "next-intl/server";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { SectionHeader } from "@/components/storefront/section-header";
+import { BrandCard } from "@/features/product_information_management/brands/components/storefront/brand-card";
+import type { BrandItem } from "@/components/storefront/types";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -16,19 +18,19 @@ export async function generateMetadata({ params }: Props) {
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const MOCK_BRANDS = [
-  { name: "Lindt", count: 45 },
-  { name: "Milka", count: 32 },
-  { name: "Ferrero", count: 28 },
-  { name: "Nestlé", count: 51 },
-  { name: "Côte d'Or", count: 19 },
-  { name: "Suchard", count: 14 },
-  { name: "Haribo", count: 67 },
-  { name: "Kinder", count: 23 },
-  { name: "Mon Chéri", count: 8 },
-  { name: "Toblerone", count: 12 },
-  { name: "Orion", count: 9 },
-  { name: "Poulain", count: 11 },
+const MOCK_BRANDS: BrandItem[] = [
+  { id: "1", name: "Lindt", slug: "lindt", logo_url: null, product_count: 45 },
+  { id: "2", name: "Milka", slug: "milka", logo_url: null, product_count: 32 },
+  { id: "3", name: "Ferrero", slug: "ferrero", logo_url: null, product_count: 28 },
+  { id: "4", name: "Nestlé", slug: "nestle", logo_url: null, product_count: 51 },
+  { id: "5", name: "Côte d'Or", slug: "cote-dor", logo_url: null, product_count: 19 },
+  { id: "6", name: "Suchard", slug: "suchard", logo_url: null, product_count: 14 },
+  { id: "7", name: "Haribo", slug: "haribo", logo_url: null, product_count: 67 },
+  { id: "8", name: "Kinder", slug: "kinder", logo_url: null, product_count: 23 },
+  { id: "9", name: "Mon Chéri", slug: "mon-cheri", logo_url: null, product_count: 8 },
+  { id: "10", name: "Toblerone", slug: "toblerone", logo_url: null, product_count: 12 },
+  { id: "11", name: "Orion", slug: "orion", logo_url: null, product_count: 9 },
+  { id: "12", name: "Poulain", slug: "poulain", logo_url: null, product_count: 11 },
 ];
 
 export default async function BrandsPage({ params }: Props) {
@@ -61,20 +63,10 @@ export default async function BrandsPage({ params }: Props) {
 
       {/* FEATURED BRANDS */}
       <section>
-        <h2 className="mb-4 text-xl font-bold">{t("featured")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionHeader title={t("featured")} />
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {MOCK_BRANDS.slice(0, 3).map((brand) => (
-            <Card key={brand.name} className="bg-chiffon">
-              <CardHeader>
-                <div className="bg-muted mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full">
-                  <span className="text-muted-foreground text-xs">{t("logo")}</span>
-                </div>
-                <CardTitle className="text-center text-lg">{brand.name}</CardTitle>
-                <CardDescription className="text-center">
-                  {brand.count} {t("products")}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <BrandCard key={brand.id} brand={brand} variant="featured" />
           ))}
         </div>
       </section>
@@ -83,22 +75,10 @@ export default async function BrandsPage({ params }: Props) {
 
       {/* BRAND GRID */}
       <section>
-        <h2 className="mb-4 text-xl font-bold">{t("allBrands")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <SectionHeader title={t("allBrands")} />
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {MOCK_BRANDS.map((brand) => (
-            <Card key={brand.name}>
-              <CardHeader className="flex-row items-center gap-4">
-                <div className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
-                  <span className="text-muted-foreground text-xs">{t("logo")}</span>
-                </div>
-                <div>
-                  <CardTitle className="text-sm">{brand.name}</CardTitle>
-                  <CardDescription>
-                    {brand.count} {t("products")}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-            </Card>
+            <BrandCard key={brand.id} brand={brand} variant="list" />
           ))}
         </div>
       </section>

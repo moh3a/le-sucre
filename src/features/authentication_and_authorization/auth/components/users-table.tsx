@@ -18,7 +18,7 @@ import { EditUser } from "./edit-user";
 type UserRow = {
   id: string;
   name: string | null;
-  phone: string;
+  phone: string | null;
   role: string;
   roles: string | null;
   email: string;

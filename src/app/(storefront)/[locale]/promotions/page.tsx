@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { SectionHeader } from "@/components/storefront/section-header";
+import { PromotionCouponCard } from "@/features/order_management_system/promotions/components/storefront/promotion-coupon-card";
+import { PromotionTieredOffer } from "@/features/order_management_system/promotions/components/storefront/promotion-tiered-offer";
+import { PromotionLoyaltyCard } from "@/features/order_management_system/promotions/components/storefront/promotion-loyalty-card";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -51,23 +46,17 @@ export default async function PromotionsPage({ params }: Props) {
 
       {/* COUPON CODES */}
       <section>
-        <h2 className="mb-6 text-2xl font-bold">{t("couponCodes")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionHeader title={t("couponCodes")} />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {["BIENVENUE10", "LIVRAISON", "SUCRE15"].map((code) => (
-            <Card key={code}>
-              <CardHeader>
-                <CardTitle className="font-mono text-lg">{code}</CardTitle>
-                <CardDescription>
-                  {t("couponDescription", { code })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex items-center gap-2">
-                <Input value={code} readOnly className="font-mono text-sm" />
-                <Button variant="outline" size="sm">
-                  {t("copy")}
-                </Button>
-              </CardContent>
-            </Card>
+            <PromotionCouponCard
+              key={code}
+              coupon={{
+                code,
+                description: t("couponDescription", { code }),
+                discount_label: "",
+              }}
+            />
           ))}
         </div>
       </section>
@@ -75,49 +64,25 @@ export default async function PromotionsPage({ params }: Props) {
       <Separator />
 
       {/* TIERED OFFERS */}
-      <section>
-        <h2 className="mb-6 text-2xl font-bold">{t("tieredOffers")}</h2>
-        <p className="text-muted-foreground mb-4">{t("achetezPlus")}</p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            { min: "50€", label: "Économisez 5%" },
-            { min: "100€", label: "Économisez 10%" },
-            { min: "200€", label: "Économisez 15%" },
-          ].map((tier) => (
-            <Card key={tier.min}>
-              <CardHeader className="text-center">
-                <Badge variant="secondary" className="mb-2 self-center">
-                  {tier.min}
-                </Badge>
-                <CardTitle className="text-xl">{tier.label}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-muted-foreground text-sm">
-                  {t("tierDescription", { min: tier.min })}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+      <PromotionTieredOffer
+        title={t("tieredOffers")}
+        description={t("achetezPlus")}
+        offers={[
+          { threshold: "50€", label: "Économisez 5%", description: t("tierDescription", { min: "50€" }) },
+          { threshold: "100€", label: "Économisez 10%", description: t("tierDescription", { min: "100€" }) },
+          { threshold: "200€", label: "Économisez 15%", description: t("tierDescription", { min: "200€" }) },
+        ]}
+      />
 
       <Separator />
 
       {/* LOYALTY PROGRAM */}
-      <section>
-        <Card className="bg-cream">
-          <CardHeader>
-            <CardTitle>{t("loyaltyProgram")}</CardTitle>
-            <CardDescription>{t("loyaltyDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-4">
-            <Badge variant="outline" className="text-sm">
-              {t("earnPoints")}
-            </Badge>
-            <Button>{t("learnMore")}</Button>
-          </CardContent>
-        </Card>
-      </section>
+      <PromotionLoyaltyCard
+        title={t("loyaltyProgram")}
+        description={t("loyaltyDescription")}
+        pointsLabel={t("earnPoints")}
+        ctaLabel={t("learnMore")}
+      />
 
       <Separator />
 
