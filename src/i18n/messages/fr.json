@@ -15,7 +15,11 @@
     "category_pastry": "Pâtisserie",
     "category_chocolates": "Chocolats",
     "category_candy": "Confiseries",
-    "category_lollipops": "Sucettes"
+    "category_lollipops": "Sucettes",
+    "error_loading": "Impossible de charger les meilleures ventes.",
+    "empty": "Aucun produit trouvé pour le moment.",
+    "empty_category": "Aucun produit dans cette catégorie.",
+    "empty_trending": "Aucune tendance pour le moment."
   },
   "trackOrder": {
     "title": "Suivi de commande",
@@ -90,7 +94,8 @@
     "viewProduct": "Voir le produit",
     "emptyTitle": "Aucun produit consulté",
     "emptyDescription": "Les produits que vous consultez apparaîtront ici.",
-    "shopNow": "Acheter maintenant"
+    "shopNow": "Acheter maintenant",
+    "error_loading": "Impossible de charger les produits consultés récemment."
   },
   "product_detail": {
     "title": "Produit",
@@ -137,7 +142,12 @@
     "saleName": "Vente n°{index}",
     "termine": "Terminé",
     "sale1_name": "Soldes d'été",
-    "sale2_name": "Offre éclair weekend"
+    "sale2_name": "Offre éclair weekend",
+    "error_loading": "Impossible de charger les ventes flash.",
+    "empty_active": "Aucune vente flash active pour le moment.",
+    "empty_active_subtitle": "Revenez bientôt pour découvrir nos offres.",
+    "empty_upcoming": "Aucune vente flash à venir pour le moment.",
+    "empty_ended": "Aucune vente flash terminée récemment."
   },
   "compare": {
     "title": "Comparer des produits",
@@ -215,7 +225,11 @@
     "nouveau": "Nouveau",
     "category": "Catégorie",
     "sort": "Trier",
-    "viewProduct": "Voir le produit"
+    "viewProduct": "Voir le produit",
+    "error_loading": "Impossible de charger les nouveautés.",
+    "empty": "Aucun nouveau produit pour le moment.",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "console": {
     "title": "Console d'administration",
@@ -765,7 +779,14 @@
     "sort_placeholder": "Trier par",
     "default_heading": "Tous nos délices",
     "search_in_category": "Rechercher dans {category_name}...",
-    "clear_search": "Effacer la recherche"
+    "clear_search": "Effacer la recherche",
+    "min_price": "Prix min",
+    "max_price": "Prix max",
+    "filter": "Filtrer",
+    "all_filters": "Tous les filtres",
+    "active_filters": "Filtres actifs",
+    "clear_all": "Tout effacer",
+    "filters_count": "{count} filtre(s) actif(s)"
   },
   "nav": {
     "catalog": "Catalogue",
@@ -934,7 +955,12 @@
     "search_dots": "Rechercher…",
     "clear_filter": "Effacer le filtre {title}",
     "min": "Min",
-    "max": "Max"
+    "max": "Max",
+    "session_expired": "Session expirée",
+    "session_expired_description": "Votre session a expiré ou vous n'êtes pas connecté. Veuillez vous reconnecter.",
+    "unexpected_error": "Une erreur inattendue est survenue",
+    "error": "Erreur",
+    "updating": "Mise à jour…"
   },
   "data_table": {
     "no_results": "Aucun résultat.",
@@ -3348,6 +3374,10 @@
     "nav_wishlists": "Liste de souhaits",
     "nav_settings": "Paramètres",
     "nav_support": "Support",
+    "nav_favorites": "Mes favoris",
+    "nav_collections": "Mes collections",
+    "nav_returns": "Mes retours",
+    "nav_saved": "Sauvegardés",
     "hello": "Bonjour",
     "name_placeholder": "[Nom]",
     "dashboard_description": "Bienvenue sur votre espace personnel. Gérez vos commandes, adresses et préférences.",
@@ -3372,6 +3402,18 @@
     "recent_activity_desc": "Votre historique d'activité récent",
     "activity_register": "Inscription",
     "activity_register_desc": "Création de votre compte",
+    "activity_order_placed": "Commande passée",
+    "activity_order_placed_desc": "Nouvelle commande créée",
+    "activity_profile_updated": "Profil mis à jour",
+    "activity_profile_updated_desc": "Informations du profil mises à jour",
+    "status_pending_payment": "En attente de paiement",
+    "status_paid": "Payée",
+    "status_processing": "En cours",
+    "status_failed_delivery": "Échec de livraison",
+    "status_cancelled": "Annulée",
+    "status_refunded": "Remboursée",
+    "loading": "Chargement…",
+    "error": "Erreur",
     "addresses_title": "Mes adresses",
     "addresses_description": "Gérez vos adresses de livraison",
     "add_address": "Ajouter une adresse",
@@ -3409,6 +3451,11 @@
     "email": "Email",
     "phone": "Téléphone",
     "save_changes": "Enregistrer les modifications",
+    "profile_updated": "Profil mis à jour",
+    "password_updated": "Mot de passe mis à jour",
+    "language_updated": "Langue mise à jour",
+    "notifications_updated": "Préférences mises à jour",
+    "passwords_dont_match": "Les mots de passe ne correspondent pas",
     "change_password_title": "Changer le mot de passe",
     "change_password_description": "Assurez-vous d'utiliser un mot de passe sécurisé",
     "current_password": "Mot de passe actuel",

@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CatalogPaginationProps {
   page: number;
@@ -13,73 +14,84 @@ export function CatalogPagination({ page, totalPages, onChange }: CatalogPaginat
   if (totalPages <= 1) return null;
 
   const pages: number[] = [];
-  const range = 2; // Show 2 pages before and after current page
+  const range = 2;
 
   for (let i = Math.max(1, page - range); i <= Math.min(totalPages, page + range); i++) {
     pages.push(i);
   }
 
   return (
-    <div className="flex items-center justify-center gap-1 py-6">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => onChange(1)}
-        disabled={page === 1}
-        className="border-secondary/40 text-secondary hover:bg-secondary/10 size-9"
-      >
-        <span className="sr-only">Première page</span>
-        <ChevronLeft className="-mr-1 size-4" />
-        <ChevronLeft className="-ml-1 size-4" />
-      </Button>
-
+    <div className="flex items-center justify-center gap-1.5 py-8">
       <Button
         variant="outline"
         size="icon"
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
-        className="border-secondary/40 text-secondary hover:bg-secondary/10 size-9"
+        className="size-9 rounded-lg"
+        aria-label="Previous page"
       >
-        <span className="sr-only">Page précédente</span>
         <ChevronLeft className="size-4" />
       </Button>
+
+      {pages[0] > 1 && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onChange(1)}
+            className="size-9 rounded-lg text-sm"
+          >
+            1
+          </Button>
+          {pages[0] > 2 && (
+            <span className="text-muted-foreground/40 flex size-9 items-center justify-center text-xs">
+              ...
+            </span>
+          )}
+        </>
+      )}
 
       {pages.map((p) => (
         <Button
           key={p}
           variant={p === page ? "default" : "outline"}
           onClick={() => onChange(p)}
-          className={`size-9 ${
-            p === page
-              ? "bg-crimson-violet text-white hover:bg-crimson-violet/90"
-              : "border-secondary/40 text-secondary hover:bg-secondary/10"
-          }`}
+          className={cn(
+            "size-9 rounded-lg text-sm",
+            p === page && "shadow-sm",
+          )}
         >
           {p}
         </Button>
       ))}
+
+      {pages[pages.length - 1] < totalPages && (
+        <>
+          {pages[pages.length - 1] < totalPages - 1 && (
+            <span className="text-muted-foreground/40 flex size-9 items-center justify-center text-xs">
+              ...
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onChange(totalPages)}
+            className="size-9 rounded-lg text-sm"
+          >
+            {totalPages}
+          </Button>
+        </>
+      )}
 
       <Button
         variant="outline"
         size="icon"
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
-        className="border-secondary/40 text-secondary hover:bg-secondary/10 size-9"
+        className="size-9 rounded-lg"
+        aria-label="Next page"
       >
-        <span className="sr-only">Page suivante</span>
         <ChevronRight className="size-4" />
-      </Button>
-
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => onChange(totalPages)}
-        disabled={page === totalPages}
-        className="border-secondary/40 text-secondary hover:bg-secondary/10 size-9"
-      >
-        <span className="sr-only">Dernière page</span>
-        <ChevronRight className="-mr-1 size-4" />
-        <ChevronRight className="-ml-1 size-4" />
       </Button>
     </div>
   );

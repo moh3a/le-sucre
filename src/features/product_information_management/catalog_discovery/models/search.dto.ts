@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const catalog_locale_enum = z.enum(["fr", "en"]);
+export const catalog_locale_enum = z.enum(["fr", "en", "ar"]);
 export const catalog_sort_enum = z.enum([
   "relevance",
   "newest",

@@ -22,6 +22,10 @@ import { invalidate_catalog_cache } from "@/features/product_information_managem
 import { indexing_service } from "../../recommendations/services/indexing.service";
 import { invalidate_recommendations_for_product } from "../../recommendations/helpers/invalidate-recommendations.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { brand_service } from "@/features/product_information_management/brands/services/brand.service";
+import { review_service } from "@/features/product_reviews_management/services/review.service";
+import { variant_service } from "@/features/product_information_management/variants/services/variant.service";
+import { sku_service } from "@/features/product_information_management/variants/services/sku.service";
 
 const DEFAULT_LOCALE = "fr";
 
@@ -95,6 +99,65 @@ export class ProductService {
       (await this.repo.get_translation(product.id, DEFAULT_LOCALE));
     const media = await this.repo.list_media(product.id);
     return { product, translation, media };
+  }
+
+  async get_storefront_by_slug(slug: string, locale = DEFAULT_LOCALE) {
+    const product = await this.repo.find_by_slug(slug);
+    if (!product) throw_error(PRODUCT_ERROR.NOT_FOUND);
+
+    const translation =
+      (await this.repo.get_translation(product.id, locale)) ??
+      (await this.repo.get_translation(product.id, DEFAULT_LOCALE));
+
+    const media = await this.repo.list_media(product.id);
+
+    const parsed = product_details_dto.parse(product);
+
+    let brand = null;
+    if (product.brand_id) {
+      try {
+        const b = await brand_service.get_by_id(product.brand_id);
+        brand = { id: b.id, name: b.name, slug: b.slug, logo_url: b.logo_url };
+      } catch {
+        // brand might have been deleted
+      }
+    }
+
+    let category = null;
+    const cat = await category_service.find_by_id(product.category_id);
+    if (cat) {
+      category = { id: cat.id, name: cat.name, slug: cat.slug };
+    }
+
+    let review_summary = null;
+    try {
+      review_summary = await review_service.get_product_summary(product.id);
+    } catch {
+      // reviews may be empty for new products
+    }
+
+    let variant_config = null;
+    let sku_list = null;
+    try {
+      if (parsed.has_variants) {
+        variant_config = await variant_service.get_variant_config(product.id);
+      }
+      const sku_result = await sku_service.list_by_product(product.id);
+      sku_list = sku_result.items;
+    } catch {
+      // SKU or variant data may be unavailable
+    }
+
+    return {
+      product: parsed,
+      translation,
+      media,
+      brand,
+      category,
+      review_summary,
+      variant_config,
+      sku_list,
+    };
   }
 
   async update(input: z.infer<typeof update_product_dto>) {

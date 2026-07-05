@@ -1,22 +1,15 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { useTranslations } from "next-intl";
-import { CustomerOrderTracking } from "@/features/operations_workflows/components/customer-order-tracking";
+import { CustomerOrdersPageClient } from "@/features/order_management_system/orders/components/customer-orders-page-client";
 
 type Props = { params: Promise<{ locale: string }> };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "layout" });
   return { title: t("my_orders") };
 }
 
 export default function OrdersPage() {
-  const t = useTranslations("layout");
-
-  return (
-    <div className="mx-auto max-w-2xl space-y-6 p-4">
-      <h1 className="text-2xl font-bold">{t("my_orders")}</h1>
-      <CustomerOrderTracking orderId="sample" />
-    </div>
-  );
+  return <CustomerOrdersPageClient />;
 }

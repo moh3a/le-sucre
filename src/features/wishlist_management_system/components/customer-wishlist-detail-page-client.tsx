@@ -4,10 +4,18 @@ import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { WishlistShareDialog } from "./wishlist-share-dialog";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 import type { WishlistPriority } from "../types";
 
 export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: string }) {
@@ -24,7 +32,25 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
     utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
   }
 
-  if (!wishlist) return null;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <Skeleton className="mb-4 h-9 w-24" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-9 w-32 rounded-md" />
+        </div>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const priorityColors: Record<WishlistPriority, string> = {
     low: "bg-gray-100 text-gray-600",
@@ -55,10 +81,15 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
 
       <div className="space-y-2">
         {(!itemsData?.items || itemsData.items.length === 0) ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <p className="text-lg">{t("empty_list_message")}</p>
-            <p className="text-sm">{t("empty_list_hint")}</p>
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Heart className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>{t("empty_list_message")}</EmptyTitle>
+              <EmptyDescription>{t("empty_list_hint")}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           itemsData.items.map((item: any) => (
             <div

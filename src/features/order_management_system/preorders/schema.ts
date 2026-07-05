@@ -39,6 +39,10 @@ export const preorder_allocations = mysqlTable(
     status: varchar("status", { length: 32 }).notNull().default("pending"), // pending|confirmed|fulfilled|cancelled
     estimated_available_at: timestamp("estimated_available_at", { mode: "string" }),
     fulfilled_at: timestamp("fulfilled_at", { mode: "string" }),
+    user_id: varchar("user_id", { length: 255 }),
+    contact_name: varchar("contact_name", { length: 255 }),
+    contact_email: varchar("contact_email", { length: 255 }),
+    contact_phone: varchar("contact_phone", { length: 50 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },

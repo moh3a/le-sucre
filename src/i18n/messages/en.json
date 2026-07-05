@@ -15,7 +15,11 @@
     "category_pastry": "Pastry",
     "category_chocolates": "Chocolates",
     "category_candy": "Candy",
-    "category_lollipops": "Lollipops"
+    "category_lollipops": "Lollipops",
+    "error_loading": "Unable to load best sellers.",
+    "empty": "No products found at the moment.",
+    "empty_category": "No products in this category.",
+    "empty_trending": "No trending products at the moment."
   },
   "trackOrder": {
     "title": "Order tracking",
@@ -90,7 +94,8 @@
     "viewProduct": "View product",
     "emptyTitle": "No recently viewed products",
     "emptyDescription": "Products you view will appear here.",
-    "shopNow": "Shop now"
+    "shopNow": "Shop now",
+    "error_loading": "Unable to load recently viewed products."
   },
   "product_detail": {
     "title": "Product",
@@ -137,7 +142,12 @@
     "saleName": "Sale #{index}",
     "termine": "Ended",
     "sale1_name": "Summer Sale",
-    "sale2_name": "Weekend Flash Offer"
+    "sale2_name": "Weekend Flash Offer",
+    "error_loading": "Unable to load flash sales.",
+    "empty_active": "No active flash sales at the moment.",
+    "empty_active_subtitle": "Come back soon to discover our offers.",
+    "empty_upcoming": "No upcoming flash sales at the moment.",
+    "empty_ended": "No recently ended flash sales."
   },
   "compare": {
     "title": "Compare Products",
@@ -215,7 +225,11 @@
     "nouveau": "New",
     "category": "Category",
     "sort": "Sort",
-    "viewProduct": "View product"
+    "viewProduct": "View product",
+    "error_loading": "Unable to load new arrivals.",
+    "empty": "No new products at the moment.",
+    "previous": "Previous",
+    "next": "Next"
   },
   "console": {
     "title": "Admin console",
@@ -567,7 +581,14 @@
     "sort_placeholder": "Sort by",
     "default_heading": "All our delights",
     "search_in_category": "Search in {category_name}...",
-    "clear_search": "Clear search"
+    "clear_search": "Clear search",
+    "min_price": "Min price",
+    "max_price": "Max price",
+    "filter": "Filter",
+    "all_filters": "All filters",
+    "active_filters": "Active filters",
+    "clear_all": "Clear all",
+    "filters_count": "{count} filter(s) active"
   },
   "layout": {
     "boutique_title": "Shop",
@@ -758,7 +779,12 @@
     "search_dots": "Search…",
     "clear_filter": "Clear {title} filter",
     "min": "Min",
-    "max": "Max"
+    "max": "Max",
+    "session_expired": "Session expired",
+    "session_expired_description": "Your session has expired or you are not logged in. Please log in again.",
+    "unexpected_error": "An unexpected error occurred",
+    "error": "Error",
+    "updating": "Updating…"
   },
   "data_table": {
     "no_results": "No results.",
@@ -3249,6 +3275,10 @@
     "nav_wishlists": "Wishlist",
     "nav_settings": "Settings",
     "nav_support": "Support",
+    "nav_favorites": "My favorites",
+    "nav_collections": "My collections",
+    "nav_returns": "My returns",
+    "nav_saved": "Saved for later",
     "hello": "Hello",
     "name_placeholder": "[Name]",
     "dashboard_description": "Welcome to your account. Manage your orders, addresses, and preferences.",
@@ -3273,6 +3303,18 @@
     "recent_activity_desc": "Your recent activity history",
     "activity_register": "Registration",
     "activity_register_desc": "Account created",
+    "activity_order_placed": "Order placed",
+    "activity_order_placed_desc": "New order created",
+    "activity_profile_updated": "Profile updated",
+    "activity_profile_updated_desc": "Profile information updated",
+    "status_pending_payment": "Pending payment",
+    "status_paid": "Paid",
+    "status_processing": "Processing",
+    "status_failed_delivery": "Failed delivery",
+    "status_cancelled": "Cancelled",
+    "status_refunded": "Refunded",
+    "loading": "Loading…",
+    "error": "Error",
     "addresses_title": "My addresses",
     "addresses_description": "Manage your shipping addresses",
     "add_address": "Add address",
@@ -3310,6 +3352,11 @@
     "email": "Email",
     "phone": "Phone",
     "save_changes": "Save changes",
+    "profile_updated": "Profile updated",
+    "password_updated": "Password updated",
+    "language_updated": "Language updated",
+    "notifications_updated": "Preferences updated",
+    "passwords_dont_match": "Passwords do not match",
     "change_password_title": "Change password",
     "change_password_description": "Make sure to use a secure password",
     "current_password": "Current password",

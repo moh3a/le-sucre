@@ -7,12 +7,19 @@ import { trpc } from "@/components/providers/app-providers";
 import { Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FavoritesPageSkeleton } from "./favorites-page-skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
 export function CustomerFavoritesPageClient() {
   const t = useTranslations("wishlist");
   const [tab, setTab] = useState("products");
   const type = tab === "products" ? "product" : tab === "brands" ? "brand" : "category";
-  const { data, isLoading } = trpc.wishlistManagement.favorites.list.useQuery({ page: 1, limit: 50, type: type as any });
+  const query = trpc.wishlistManagement.favorites.list.useQuery({ page: 1, limit: 50, type: type as any });
   const removeMut = trpc.wishlistManagement.favorites.remove.useMutation();
   const utils = trpc.useUtils();
 
@@ -22,7 +29,10 @@ export function CustomerFavoritesPageClient() {
   }
 
   return (
-    <QueryGuard query={{ isLoading }}>
+    <QueryGuard
+      query={{ isLoading: query.isLoading, error: query.error }}
+      loadingFallback={<FavoritesPageSkeleton />}
+    >
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">{t("my_favorites")}</h1>
 
@@ -34,14 +44,18 @@ export function CustomerFavoritesPageClient() {
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">
-          {!data?.items?.length ? (
-            <div className="text-center py-16 text-muted-foreground">
-              <Heart className="h-12 w-12 mx-auto mb-3 opacity-20" />
-              <p>{t("no_favorites")}</p>
-            </div>
+          {!query.data?.items?.length ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Heart className="size-6" />
+                </EmptyMedia>
+                <EmptyTitle>{t("no_favorites")}</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {data.items.map((fav: any) => (
+              {query.data.items.map((fav: any) => (
                 <div
                   key={fav.id}
                   className="flex items-center justify-between p-3 border rounded-lg"

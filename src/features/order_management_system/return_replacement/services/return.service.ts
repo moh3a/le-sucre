@@ -291,6 +291,10 @@ export class ReturnReplacementService {
     return await return_repository.find_by_order(order_id);
   }
 
+  async customer_list_all(user_id: string) {
+    return return_repository.find_by_user_id(user_id);
+  }
+
   async customer_list_by_order(order_id: string, user_id: string) {
     const order = await order_repository.find_by_id(order_id);
     if (!order) throw_error(RETURN_REPLACEMENT_ERROR.NOT_FOUND);

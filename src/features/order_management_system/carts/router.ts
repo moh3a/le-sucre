@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { create_trpc_router } from "@/lib/trpc/router";
+import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import {
   storefront_procedure,
   permission_procedure,
@@ -10,6 +10,10 @@ import { cart_service } from "./cart.service";
 import { add_cart_item_dto, update_cart_item_dto } from "./models/cart.dto";
 
 export const cart_router = create_trpc_router({
+  getCart: public_procedure
+    .input(z.object({ cart_id: z.string().min(1).max(255), locale: z.string().default("fr") }))
+    .query(({ input }) => cart_service.get_cart_view(input.cart_id, input.locale)),
+
   adminList: permission_procedure(PERMISSIONS.orders_read)
     .input(
       z.object({

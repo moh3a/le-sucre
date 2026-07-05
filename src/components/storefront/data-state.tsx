@@ -2,6 +2,13 @@ import type { ReactNode } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { CircleAlert, PackageOpen } from "lucide-react";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
 interface DataStateProps {
   /** Whether data is currently loading */
@@ -72,11 +79,15 @@ export function DataState({
   if (isEmpty) {
     return (
       emptyState ?? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          {emptyIcon ?? <PackageOpen className="text-muted-foreground/40 mb-3 h-12 w-12" />}
-          <p className="text-lg font-medium">{emptyTitle}</p>
-          <p className="text-muted-foreground mt-1 max-w-sm text-sm">{emptyDescription}</p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              {emptyIcon ?? <PackageOpen className="size-6" />}
+            </EmptyMedia>
+            <EmptyTitle>{emptyTitle}</EmptyTitle>
+            {emptyDescription && <EmptyDescription>{emptyDescription}</EmptyDescription>}
+          </EmptyHeader>
+        </Empty>
       )
     );
   }

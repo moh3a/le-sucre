@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, isLoading, error, variant = "grid" }: CategoryCardProps) {
+  const router = useRouter();
   return (
     <DataState
       isLoading={isLoading}
@@ -53,7 +55,9 @@ export function CategoryCard({ category, isLoading, error, variant = "grid" }: C
                       )}
                       asChild
                     >
-                      <Link href={`/c/${child.slug}`}>{child.name}</Link>
+                      <button type="button" onClick={() => router.push(`/c/${child.slug}`)}>
+                        {child.name}
+                      </button>
                     </Badge>
                   ))}
                   {category.children.length > 6 && (

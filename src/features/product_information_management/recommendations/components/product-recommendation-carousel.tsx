@@ -5,6 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
 import type { RecommendationItem } from "../types";
 
@@ -52,17 +53,17 @@ export function ProductRecommendationCarousel({
   if (isLoading) {
     return (
       <div className="font-moya space-y-4">
-        <div className="bg-muted h-8 w-48 animate-pulse rounded" />
+        <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card
               key={i}
-              className="border-secondary/20 animate-pulse overflow-hidden border bg-background"
+              className="border-secondary/20 overflow-hidden border bg-background"
             >
-              <div className="bg-muted aspect-square" />
+              <Skeleton className="aspect-square w-full rounded-none" />
               <CardContent className="space-y-2 p-4">
-                <div className="bg-muted h-4 w-3/4 rounded" />
-                <div className="bg-muted h-4 w-1/2 rounded" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
               </CardContent>
             </Card>
           ))}

@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
   CardContent,
@@ -31,6 +32,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 import { WishlistShareDialog } from "./wishlist-share-dialog";
 import type { WishlistPriority } from "../types";
 
@@ -233,15 +241,28 @@ export function WishlistPanel({
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="space-y-2 p-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-md" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </div>
+                ))}
               </div>
             ) : !items || items.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Heart className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                <p>{t("empty_list_message")}</p>
-                <p className="text-sm">{t("empty_list_hint")}</p>
-              </div>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Heart className="size-6" />
+                  </EmptyMedia>
+                  <EmptyTitle>{t("empty_list_message")}</EmptyTitle>
+                  <EmptyDescription>{t("empty_list_hint")}</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               <div className="space-y-2">
                 {items.map((item) => (

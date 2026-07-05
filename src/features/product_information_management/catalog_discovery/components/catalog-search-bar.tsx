@@ -30,19 +30,19 @@ export function CatalogSearchBar({
   React.useEffect(() => {
     const timer = setTimeout(() => {
       onChange(internalValue);
-    }, 450); // Debounce search keypresses for premium feel
+    }, 450);
 
     return () => clearTimeout(timer);
   }, [internalValue, onChange]);
 
   return (
     <div className="relative w-full max-w-lg">
-      <div className="text-secondary/60 pointer-events-none absolute inset-y-0 left-3 flex items-center">
+      <div className="text-muted-foreground/60 pointer-events-none absolute inset-y-0 left-3 flex items-center">
         <Search className="size-5" />
       </div>
       <Input
         type="text"
-        className="border-secondary/30 text-secondary font-moya placeholder:text-secondary/40 w-full rounded-xl bg-cream/20 py-5 pr-10 pl-10 text-sm transition-all duration-300 focus-visible:ring-crimson-violet md:text-base"
+        className="w-full rounded-lg bg-background py-5 pr-10 pl-10 text-sm md:text-base"
         placeholder={resolvedPlaceholder}
         value={internalValue}
         onChange={(e) => setInternalValue(e.target.value)}
@@ -56,7 +56,7 @@ export function CatalogSearchBar({
             setInternalValue("");
             onChange("");
           }}
-          className="text-secondary/60 hover:text-secondary absolute inset-y-0 right-1.5 h-full hover:bg-transparent"
+          className="text-muted-foreground/60 hover:text-foreground absolute inset-y-0 right-1.5 h-full hover:bg-transparent"
         >
           <X className="size-4" />
           <span className="sr-only">{t("clear_search")}</span>

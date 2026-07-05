@@ -68,7 +68,8 @@ function ResponsiveDialog({
   open: openProp,
   defaultOpen = false,
   onOpenChange: onOpenChangeProp,
-  ...props
+  children,
+  breakpoint: _breakpoint,
 }: ResponsiveDialogProps) {
   const isMobile = useIsMobile();
 
@@ -129,14 +130,18 @@ function ResponsiveDialog({
   if (isMobile) {
     return (
       <StoreContext.Provider value={store}>
-        <Drawer open={open} onOpenChange={onOpenChange} {...props} />
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          {children}
+        </Drawer>
       </StoreContext.Provider>
     );
   }
 
   return (
     <StoreContext.Provider value={store}>
-      <Dialog open={open} onOpenChange={onOpenChange} {...props} />
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {children}
+      </Dialog>
     </StoreContext.Provider>
   );
 }
@@ -183,17 +188,32 @@ function ResponsiveDialogOverlay({ ...props }: React.ComponentProps<typeof Dialo
 
 function ResponsiveDialogContent({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof DialogContent>) {
   const isMobile = useStore((state) => state.isMobile);
 
   if (isMobile) {
     return (
-      <DrawerContent data-variant="drawer" className={cn("px-4 pb-4", className)} {...props} />
+      <DrawerContent
+        data-variant="drawer"
+        className={cn("p-0", className)}
+        {...props}
+      >
+        <div className="overflow-y-auto px-4 pb-4">{children}</div>
+      </DrawerContent>
     );
   }
 
-  return <DialogContent data-variant="dialog" className={className} {...props} />;
+  return (
+    <DialogContent
+      data-variant="dialog"
+      className={cn("max-h-[75vh] overflow-y-auto sm:max-w-[75vw]", className)}
+      {...props}
+    >
+      {children}
+    </DialogContent>
+  );
 }
 
 function ResponsiveDialogHeader({ ...props }: React.ComponentProps<typeof DialogHeader>) {

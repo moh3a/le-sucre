@@ -5,11 +5,7 @@ import { format } from "date-fns";
 
 import { db, type DbClient } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import {
-  sku_preorder_settings,
-  preorder_allocations,
-  preorder_status_events,
-} from "../schema";
+import { sku_preorder_settings, preorder_allocations, preorder_status_events } from "../schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { PREORDER_ALLOCATION_STATUS } from "../constants/preorder-status";
@@ -24,6 +20,32 @@ export class PreorderRepository {
       .where(eq(sku_preorder_settings.sku_id, sku_id))
       .limit(1)
       .then((r) => r[0] ?? null);
+  }
+
+  async create_allocation(input: {
+    sku_id: string;
+    quantity: number;
+    user_id?: string | null;
+    contact_name: string;
+    contact_email?: string | null;
+    contact_phone?: string | null;
+  }) {
+    const id = generate_id();
+    await db.insert(preorder_allocations).values({
+      id,
+      sku_id: input.sku_id,
+      quantity: input.quantity,
+      status: PREORDER_ALLOCATION_STATUS.pending,
+      user_id: input.user_id ?? null,
+      contact_name: input.contact_name,
+      // contact_email: null,
+      contact_phone: input.contact_phone ?? null,
+      estimated_available_at: format(
+        new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        "yyyy-MM-dd HH:mm:ss",
+      ),
+    });
+    return { id };
   }
 
   async get_settings_for_update(tx: Tx, sku_id: string) {
@@ -175,9 +197,14 @@ export class PreorderRepository {
     const where = clauses.length ? and(...clauses) : undefined;
 
     const [[{ total }], items] = await Promise.all([
-      db.select({ total: count() }).from(preorder_allocations)
+      db
+        .select({ total: count() })
+        .from(preorder_allocations)
         .leftJoin(product_skus, eq(preorder_allocations.sku_id, product_skus.id))
-        .leftJoin(product_translations, eq(product_skus.product_id, product_translations.product_id))
+        .leftJoin(
+          product_translations,
+          eq(product_skus.product_id, product_translations.product_id),
+        )
         .where(where),
       db
         .select({
@@ -198,7 +225,10 @@ export class PreorderRepository {
         })
         .from(preorder_allocations)
         .leftJoin(product_skus, eq(preorder_allocations.sku_id, product_skus.id))
-        .leftJoin(product_translations, eq(product_skus.product_id, product_translations.product_id))
+        .leftJoin(
+          product_translations,
+          eq(product_skus.product_id, product_translations.product_id),
+        )
         .where(where)
         .orderBy(sql`${preorder_allocations.created_at} DESC`)
         .limit(limit)
@@ -214,16 +244,35 @@ export class PreorderRepository {
   async stats() {
     const [total, pending, confirmed, fulfilled, cancelled] = await Promise.all([
       db.select({ count: count() }).from(preorder_allocations),
-      db.select({ count: count() }).from(preorder_allocations).where(eq(preorder_allocations.status, "pending")),
-      db.select({ count: count() }).from(preorder_allocations).where(eq(preorder_allocations.status, "confirmed")),
-      db.select({ count: count() }).from(preorder_allocations).where(eq(preorder_allocations.status, "fulfilled")),
-      db.select({ count: count() }).from(preorder_allocations).where(eq(preorder_allocations.status, "cancelled")),
+      db
+        .select({ count: count() })
+        .from(preorder_allocations)
+        .where(eq(preorder_allocations.status, "pending")),
+      db
+        .select({ count: count() })
+        .from(preorder_allocations)
+        .where(eq(preorder_allocations.status, "confirmed")),
+      db
+        .select({ count: count() })
+        .from(preorder_allocations)
+        .where(eq(preorder_allocations.status, "fulfilled")),
+      db
+        .select({ count: count() })
+        .from(preorder_allocations)
+        .where(eq(preorder_allocations.status, "cancelled")),
     ]);
 
     const [{ total_qty }] = await db
-      .select({ total_qty: sql<number>`COALESCE(SUM(${preorder_allocations.quantity}), 0)`.mapWith(Number) })
+      .select({
+        total_qty: sql<number>`COALESCE(SUM(${preorder_allocations.quantity}), 0)`.mapWith(Number),
+      })
       .from(preorder_allocations)
-      .where(or(eq(preorder_allocations.status, "pending"), eq(preorder_allocations.status, "confirmed")));
+      .where(
+        or(
+          eq(preorder_allocations.status, "pending"),
+          eq(preorder_allocations.status, "confirmed"),
+        ),
+      );
 
     return {
       total: total[0].count,

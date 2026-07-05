@@ -1,10 +1,24 @@
 import { z } from "zod";
 import { create_trpc_router } from "@/lib/trpc/router";
-import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
+import {
+  permission_procedure,
+  storefront_procedure,
+} from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { customer_relations_service } from "../services/customer-relations.service";
 
 export const customer_relations_router = create_trpc_router({
+  // Storefront-facing procedures
+  myCases: storefront_procedure
+    .query(({ ctx }) =>
+      customer_relations_service.get_cases_by_user(ctx.session!.user.id),
+    ),
+
+  myCreateCase: storefront_procedure
+    .input(z.object({ subject: z.string().min(1).max(255), description: z.string().min(1), category: z.string().default("general"), order_id: z.string().optional() }))
+    .mutation(({ ctx, input }) =>
+      customer_relations_service.create_case({ ...input, user_id: ctx.session!.user.id, created_by_user_id: ctx.session!.user.id }),
+    ),
   customerLogContact: permission_procedure(PERMISSIONS.customers_read)
     .input(z.object({ user_id: z.string().nullable().optional(), order_id: z.string().nullable().optional(), contact_type: z.enum(["phone_call", "whatsapp", "sms", "email"]), direction: z.enum(["inbound", "outbound"]), subject: z.string().optional(), summary: z.string().optional(), duration_seconds: z.coerce.number().int().optional() }))
     .mutation(({ ctx, input }) => customer_relations_service.log_contact({ ...input, handled_by_user_id: ctx.session!.user.id })),

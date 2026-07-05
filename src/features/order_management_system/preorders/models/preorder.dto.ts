@@ -23,3 +23,10 @@ export const update_preorder_eta_dto = z.object({
   allocation_id: z.string().min(1).max(255),
   estimated_available_at: z.string().datetime(),
 });
+
+export const create_preorder_allocation_dto = z.object({
+  sku_id: z.string().min(1).max(255),
+  quantity: z.coerce.number().int().min(1).max(99).default(1),
+  contact_name: z.string().min(1, "Veuillez saisir votre nom").max(255),
+  contact_phone: z.string().max(50).optional(),
+});

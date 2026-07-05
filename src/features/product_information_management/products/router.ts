@@ -1,7 +1,7 @@
 import z from "zod";
 // import { zfd } from "zod-form-data";
 
-import { create_trpc_router } from "@/lib/trpc/router";
+import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import {
@@ -20,6 +20,10 @@ import { product_media_service } from "./services/product_media.service";
 import { TRPCError } from "@trpc/server";
 
 export const product_router = create_trpc_router({
+  getBySlug: public_procedure
+    .input(z.object({ slug: z.string(), locale: z.enum(["fr", "en", "ar"]).default("fr") }))
+    .query(({ input }) => product_service.get_storefront_by_slug(input.slug, input.locale)),
+
   list: permission_procedure(PERMISSIONS.products_read)
     .input(list_products_dto)
     .query(({ input }) => product_service.list(input)),

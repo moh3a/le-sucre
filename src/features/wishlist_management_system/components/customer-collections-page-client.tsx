@@ -8,11 +8,18 @@ import { Bookmark, Plus, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollectionsPageSkeleton } from "./collections-page-skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
 export function CustomerCollectionsPageClient() {
   const t = useTranslations("wishlist");
   const [newName, setNewName] = useState("");
-  const { data, isLoading } = trpc.wishlistManagement.collections.list.useQuery({ page: 1, limit: 50 });
+  const { data, isLoading, error } = trpc.wishlistManagement.collections.list.useQuery({ page: 1, limit: 50 });
   const createMut = trpc.wishlistManagement.collections.create.useMutation();
   const deleteMut = trpc.wishlistManagement.collections.delete.useMutation();
   const utils = trpc.useUtils();
@@ -30,7 +37,7 @@ export function CustomerCollectionsPageClient() {
   }
 
   return (
-    <QueryGuard query={{ isLoading }}>
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<CollectionsPageSkeleton />}>
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Mes collections</h1>
 
@@ -51,15 +58,15 @@ export function CustomerCollectionsPageClient() {
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      ) : !data?.items?.length ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <Bookmark className="h-12 w-12 mx-auto mb-3 opacity-20" />
-          <p>Créez votre première collection</p>
-        </div>
+      {!data?.items?.length ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Bookmark className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>Créez votre première collection</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.items.map((col: any) => (

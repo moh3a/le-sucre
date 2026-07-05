@@ -1,6 +1,7 @@
 "use client";
 
 import { CircleAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
@@ -51,15 +52,6 @@ function is_unauthorized(error: unknown): boolean {
   return false;
 }
 
-function get_error_message(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === "object") {
-    const err = error as Record<string, unknown>;
-    if (typeof err.message === "string") return err.message;
-  }
-  return "Une erreur inattendue est survenue";
-}
-
 function QueryGuard({
   children,
   query,
@@ -71,12 +63,9 @@ function QueryGuard({
   showRefetchLoader = false,
   className,
 }: QueryGuardProps) {
+  const t = useTranslations("common");
   const isLoading =
-    isLoadingOverride ??
-    query?.isLoading ??
-    mutation?.isPending ??
-    session?.isPending ??
-    false;
+    isLoadingOverride ?? query?.isLoading ?? mutation?.isPending ?? session?.isPending ?? false;
 
   const isFetching = query?.isFetching ?? false;
   const error = query?.error ?? mutation?.error ?? session?.error ?? null;
@@ -84,14 +73,13 @@ function QueryGuard({
 
   if (isUnauthorized) {
     return (
-      <div className={cn("flex items-start justify-center p-6", className)}>
-        <Alert variant="destructive" className="max-w-md">
+      <div className={cn("p-6", className)}>
+        <Alert variant="destructive" className="w-full">
           <CircleAlert className="mt-0.5 size-4 shrink-0" />
           <div className="flex flex-col gap-1">
-            <AlertTitle>Session expirée</AlertTitle>
+            <AlertTitle>{t("session_expired")}</AlertTitle>
             <AlertDescription>
-              {unauthorizedMessage ??
-                "Votre session a expiré ou vous n'êtes pas connecté. Veuillez vous reconnecter."}
+              {unauthorizedMessage ?? t("session_expired_description")}
             </AlertDescription>
           </div>
         </Alert>
@@ -101,12 +89,18 @@ function QueryGuard({
 
   if (error) {
     return (
-      <div className={cn("flex items-start justify-center p-6", className)}>
-        <Alert variant="destructive" className="max-w-md">
+      <div className={cn("p-6", className)}>
+        <Alert variant="destructive" className="w-full">
           <CircleAlert className="mt-0.5 size-4 shrink-0" />
           <div className="flex flex-col gap-1">
-            <AlertTitle>Erreur</AlertTitle>
-            <AlertDescription>{get_error_message(error)}</AlertDescription>
+            <AlertTitle>{t("error")}</AlertTitle>
+            <AlertDescription>
+              {error instanceof Error
+                ? error.message
+                : error && typeof error === "object"
+                  ? String((error as Record<string, unknown>).message ?? t("unexpected_error"))
+                  : t("unexpected_error")}
+            </AlertDescription>
           </div>
         </Alert>
       </div>
@@ -115,15 +109,8 @@ function QueryGuard({
 
   if (isLoading) {
     return (
-      <div
-        className={cn(
-          "flex items-center justify-center p-12",
-          className,
-        )}
-      >
-        {loadingFallback ?? (
-          <Spinner className="text-muted-foreground size-6" />
-        )}
+      <div className={cn("flex items-center justify-center p-12", className)}>
+        {loadingFallback ?? <Spinner className="text-muted-foreground size-6" />}
       </div>
     );
   }
@@ -132,11 +119,9 @@ function QueryGuard({
     return (
       <>
         {children}
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 shadow-sm">
+        <div className="bg-background fixed top-4 right-4 z-50 flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-sm">
           <Spinner className="text-muted-foreground size-3.5" />
-          <span className="text-muted-foreground text-xs">
-            Mise à jour…
-          </span>
+          <span className="text-muted-foreground text-xs">{t("updating")}</span>
         </div>
       </>
     );

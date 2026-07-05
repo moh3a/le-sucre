@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,8 @@ import { ProductRating } from "@/components/storefront/product/product-rating";
 import { ProductQuantitySelector } from "@/components/storefront/product/product-quantity-selector";
 import type { StorefrontProduct, ProductCardVariant } from "@/components/storefront/types";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Heart, ShoppingCart, Eye } from "lucide-react";
 
 interface ProductCardProps {
   product: StorefrontProduct;
@@ -57,54 +59,129 @@ export function ProductCard({
   href,
   actions,
 }: ProductCardProps) {
-  const hasDiscount = product.max_price && product.min_price !== product.max_price;
+  const router = useRouter();
   const linkHref = href ?? `/p/${product.slug}`;
 
-  const cardContent = (
+  function goToProduct() {
+    router.push(linkHref);
+  }
+
+  const hasBottomOverlay =
+    (variant === "catalog" || variant === "flash-sale") && (onAddToCart || rating !== undefined);
+
+  return (
     <Card
       className={cn(
-        "group flex h-full flex-col overflow-hidden border border-primary-foreground/15 bg-background transition-all duration-300 hover:shadow-xl",
-        variant === "catalog" && "hover:border-crimson-violet/40",
-        variant === "flash-sale" && "border-destructive/30 hover:border-destructive/60",
+        "group bg-background flex h-full flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-md",
+        variant !== "cart-item" && "cursor-pointer",
         variant === "cart-item" && "flex-row",
         className,
       )}
+      onClick={variant !== "cart-item" ? goToProduct : undefined}
+      onKeyDown={
+        variant !== "cart-item"
+          ? (e) => {
+              if (e.key === "Enter") goToProduct();
+            }
+          : undefined
+      }
+      tabIndex={variant !== "cart-item" ? 0 : undefined}
+      role={variant !== "cart-item" ? "link" : undefined}
     >
       {/* Image section */}
       <div
         className={cn(
-          "relative overflow-hidden bg-muted/20",
-          variant === "cart-item" ? "h-24 w-24 shrink-0" : "aspect-square w-full",
+          "bg-muted/20 relative overflow-hidden",
+          variant === "cart-item" ? "h-24 w-24 shrink-0" : "aspect-3/4 w-full",
         )}
       >
         <ProductImage
           src={product.image_url ?? undefined}
           alt={product.name}
           className={cn(
-            "transition-transform duration-500",
+            "transition-all duration-500",
             variant !== "cart-item" && "group-hover:scale-105",
           )}
           fallback={product.name.charAt(0)}
         />
 
-        {/* Badges */}
+        {/* Promo / status badges */}
         {variant !== "cart-item" && (
-          <div className="absolute top-2 left-2 flex flex-col gap-1.5">
-            {!product.in_stock && (
-              <Badge variant="destructive" className="border-0 px-2 py-0.5">
-                Rupture
-              </Badge>
-            )}
-            {product.is_featured && (
-              <Badge className="border-0 bg-crimson-violet px-2 py-0.5 text-white">
-                Coup de cœur
-              </Badge>
-            )}
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
             {discountPercent && (
-              <Badge variant="destructive" className="border-0 px-2 py-0.5">
+              <Badge
+                variant="destructive"
+                className="rounded-full px-2.5 py-0.5 text-xs font-bold shadow"
+              >
                 -{discountPercent}%
               </Badge>
             )}
+            {!product.in_stock && !discountPercent && (
+              <Badge variant="destructive" className="rounded-full px-2.5 py-0.5 text-xs">
+                Rupture
+              </Badge>
+            )}
+            {product.is_featured && !discountPercent && (
+              <Badge className="bg-crimson-violet rounded-full px-2.5 py-0.5 text-xs text-white shadow">
+                Coup de cœur
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Wishlist button */}
+        {variant !== "cart-item" && onToggleWishlist && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-background/80 absolute top-3 right-3 z-10 h-8 w-8 rounded-full shadow backdrop-blur-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWishlist();
+            }}
+          >
+            <Heart
+              className={cn("h-4 w-4", isInWishlist && "fill-crimson-violet text-crimson-violet")}
+            />
+          </Button>
+        )}
+
+        {/* Bottom action overlay: rating + add to cart + view details */}
+        {hasBottomOverlay && (
+          <div
+            className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-2 bg-linear-to-t from-black/50 to-transparent p-3 pt-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {rating !== undefined && (
+              <ProductRating
+                rating={rating}
+                reviewCount={reviewCount}
+                size="sm"
+                showCount={false}
+                className="[&_.star-icon]:text-yellow-400 [&_.star-icon]:drop-shadow-sm"
+              />
+            )}
+            <div className="flex gap-2">
+              {variant === "catalog" && onAddToCart && product.in_stock && (
+                <Button
+                  size="sm"
+                  className="flex-1 gap-2 rounded-full text-xs shadow-lg"
+                  onClick={onAddToCart}
+                >
+                  <ShoppingCart className="h-3.5 w-3.5" />
+                  Ajouter
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="secondary"
+                className="gap-2 rounded-full text-xs shadow-lg"
+                onClick={goToProduct}
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Détail
+              </Button>
+            </div>
           </div>
         )}
 
@@ -113,9 +190,8 @@ export function ProductCard({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-1 right-1 h-6 w-6 text-muted-foreground"
+            className="text-muted-foreground absolute top-1 right-1 h-6 w-6"
             onClick={(e) => {
-              e.preventDefault();
               e.stopPropagation();
               onRemove();
             }}
@@ -125,21 +201,14 @@ export function ProductCard({
         )}
       </div>
 
-      {/* Content */}
-      <CardContent
-        className={cn(
-          "flex flex-1 flex-col",
-          variant === "cart-item" ? "p-4" : "p-4 pt-3",
-        )}
-      >
+      {/* Content: product name + price */}
+      <CardContent className={cn("flex flex-1 flex-col", variant === "cart-item" ? "p-4" : "p-3")}>
         {variant === "cart-item" ? (
           <>
             <div className="flex flex-1 flex-col justify-between">
               <div>
-                <h3 className="text-sm font-medium leading-tight">{product.name}</h3>
-                {variantLabel && (
-                  <p className="text-muted-foreground text-xs">{variantLabel}</p>
-                )}
+                <h3 className="text-sm leading-tight font-medium">{product.name}</h3>
+                {variantLabel && <p className="text-muted-foreground text-xs">{variantLabel}</p>}
               </div>
               <ProductPrice
                 price={product.min_price}
@@ -150,110 +219,49 @@ export function ProductCard({
             </div>
             <div className="flex items-end justify-between gap-2">
               {onQuantityChange && (
-                <ProductQuantitySelector
-                  value={quantity}
-                  onChange={onQuantityChange}
-                />
+                <ProductQuantitySelector value={quantity} onChange={onQuantityChange} />
               )}
             </div>
           </>
         ) : (
-          <>
-            <div className="flex-1 space-y-1">
-              {product.brand_name && (
-                <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                  {product.brand_name}
-                </p>
-              )}
-              <h3
-                className={cn(
-                  "line-clamp-2 leading-snug transition-colors",
-                  variant === "flash-sale"
-                    ? "text-destructive group-hover:text-destructive/80"
-                    : "group-hover:text-crimson-violet",
-                  variant === "catalog" ? "font-orla text-base" : "text-sm font-medium",
-                )}
-              >
-                {product.name}
-              </h3>
-            </div>
-
-            {rating !== undefined && (
-              <ProductRating rating={rating} reviewCount={reviewCount} className="mt-1" />
+          <div className="flex flex-1 flex-col justify-end gap-0.5">
+            {product.brand_name && (
+              <p className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
+                {product.brand_name}
+              </p>
             )}
-
+            <h3 className="line-clamp-2 text-sm leading-tight font-medium">{product.name}</h3>
             <ProductPrice
               price={product.min_price}
               originalPrice={product.max_price}
               currency={product.currency}
-              size={variant === "flash-sale" ? "lg" : "md"}
-              className="mt-2 border-t border-primary-foreground/5 pt-2"
+              size="sm"
             />
-
-            {actions ? (
-              <div className="mt-3">{actions}</div>
-            ) : (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {variant === "catalog" && onAddToCart && product.in_stock && (
-                  <Button size="sm" className="flex-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(); }}>
-                    Add to cart
-                  </Button>
-                )}
-                {onToggleWishlist && (
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-8 w-8"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleWishlist(); }}
-                  >
-                    {isInWishlist ? "♥" : "♡"}
-                  </Button>
-                )}
-                {onAddToCompare && (
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-8 w-8"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCompare(); }}
-                  >
-                    {isInCompare ? "⊟" : "⊞"}
-                  </Button>
-                )}
-              </div>
-            )}
-          </>
+          </div>
         )}
       </CardContent>
     </Card>
   );
-
-  if (variant === "cart-item") {
-    return cardContent;
-  }
-
-  return <Link href={linkHref}>{cardContent}</Link>;
 }
 
 export function ProductCardSkeleton({ variant = "catalog" }: { variant?: ProductCardVariant }) {
   return (
-    <Card className="animate-pulse border border-primary-foreground/15 bg-background">
-      {variant !== "cart-item" && (
-        <div className="bg-muted aspect-square w-full" />
-      )}
-      <CardContent className={cn("space-y-3", variant === "cart-item" ? "flex gap-4 p-4" : "p-4")}>
+    <Card className="bg-background overflow-hidden rounded-2xl border">
+      {variant !== "cart-item" && <Skeleton className="aspect-3/4 w-full rounded-none" />}
+      <CardContent className={cn(variant === "cart-item" ? "flex gap-4 p-4" : "space-y-2 p-3")}>
         {variant === "cart-item" ? (
           <>
-            <div className="bg-muted h-16 w-16 shrink-0 rounded-md" />
+            <Skeleton className="h-16 w-16 shrink-0 rounded-md" />
             <div className="flex-1 space-y-2">
-              <div className="bg-muted h-4 w-2/3 rounded" />
-              <div className="bg-muted h-3 w-1/2 rounded" />
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
             </div>
           </>
         ) : (
           <>
-            <div className="bg-muted h-3 w-1/4 rounded" />
-            <div className="bg-muted h-4 w-3/4 rounded" />
-            <div className="bg-muted h-4 w-1/2 rounded" />
+            <Skeleton className="h-3 w-1/4" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/3" />
           </>
         )}
       </CardContent>

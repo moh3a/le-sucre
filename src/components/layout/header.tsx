@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LocaleSelector } from "@/components/ui/locale-selector";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { siteConfig } from "@/constants";
 import { authClient } from "@/lib/auth/client";
@@ -59,7 +60,45 @@ export function Header() {
   ] as const;
 
   return (
-    <QueryGuard session={{ isPending, error }}>
+    <QueryGuard
+      session={{ isPending, error }}
+      loadingFallback={
+        <>
+          {/* Desktop header skeleton */}
+          <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
+            <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
+              <div className="flex flex-1 items-center gap-6">
+                <Skeleton className="h-7 w-28" />
+                <nav className="hidden items-center gap-6 md:flex">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-20" />
+                </nav>
+                <Skeleton className="hidden h-9 w-full max-w-md rounded-md md:block" />
+              </div>
+              <div className="flex items-center gap-1">
+                <Skeleton className="hidden h-8 w-8 rounded-md md:block" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="hidden items-center gap-1 md:flex">
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-[70px] rounded-md" />
+                </div>
+              </div>
+            </div>
+          </header>
+          {/* Mobile bottom nav skeleton */}
+          <nav className="bg-background/95 supports-backdrop-filter:bg-background/60 fixed right-0 bottom-0 left-0 z-50 border-t backdrop-blur md:hidden">
+            <div className="flex h-16 items-center justify-around px-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex flex-col items-center gap-0.5 px-3 py-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-3 w-10" />
+                </div>
+              ))}
+            </div>
+          </nav>
+        </>
+      }
+    >
       {/* Desktop header */}
       <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
         <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">

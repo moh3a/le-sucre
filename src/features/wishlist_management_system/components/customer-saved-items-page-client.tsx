@@ -1,13 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Save } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { SaveForLaterPanel } from "./save-for-later";
+import { SavedItemsPageSkeleton } from "./saved-items-page-skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
 export function CustomerSavedItemsPageClient() {
   const t = useTranslations("wishlist");
-  const { data, isLoading } = trpc.wishlistManagement.saveForLater.list.useQuery({ page: 1, limit: 50 });
+  const { data, isLoading, error } = trpc.wishlistManagement.saveForLater.list.useQuery({ page: 1, limit: 50 });
   const utils = trpc.useUtils();
 
   const items = (data?.items ?? []).map((item: any) => ({
@@ -16,16 +25,21 @@ export function CustomerSavedItemsPageClient() {
   }));
 
   return (
-    <QueryGuard query={{ isLoading }}>
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<SavedItemsPageSkeleton />}>
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Sauvegardé pour plus tard</h1>
       {(!items || items.length === 0) ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg">{t("no_saved_items")}</p>
-          <p className="text-sm">
-            Les articles de votre panier peuvent être sauvegardés pour plus tard
-          </p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Save className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t("no_saved_items")}</EmptyTitle>
+            <EmptyDescription>
+              Les articles de votre panier peuvent être sauvegardés pour plus tard
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <SaveForLaterPanel
           items={items}

@@ -5,6 +5,12 @@ import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 export function CustomerCollectionDetailPageClient({ collectionId }: { collectionId: string }) {
   const t = useTranslations("wishlist");
@@ -20,7 +26,20 @@ export function CustomerCollectionDetailPageClient({ collectionId }: { collectio
     utils.wishlistManagement.collections.listItems.invalidate({ collection_id: collectionId });
   }
 
-  if (!collection) return null;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <Skeleton className="mb-4 h-9 w-24" />
+        <Skeleton className="mb-2 h-8 w-48" />
+        <Skeleton className="mb-6 h-4 w-64" />
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <QueryGuard query={{ isLoading }}>
@@ -39,9 +58,11 @@ export function CustomerCollectionDetailPageClient({ collectionId }: { collectio
 
       <div className="space-y-2">
         {(!itemsData?.items || itemsData.items.length === 0) ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <p className="text-lg">{t("empty_collection")}</p>
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{t("empty_collection")}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         ) : (
           itemsData.items.map((item: any) => (
             <div

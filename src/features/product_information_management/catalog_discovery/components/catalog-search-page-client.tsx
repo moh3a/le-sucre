@@ -11,11 +11,12 @@ import {
 import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
-import { CatalogSearchBar } from "./catalog-search-bar";
 import { CatalogSortSelect } from "./catalog-sort-select";
 import { CatalogFilterSidebar } from "./catalog-filter-sidebar";
+import { CatalogMobileFiltersSheet } from "./catalog-mobile-filters-sheet";
 import { CatalogProductGrid } from "./catalog-product-grid";
 import { CatalogPagination } from "./catalog-pagination";
+import { SearchPageSkeleton } from "./search-page-skeleton";
 import type { CatalogSort } from "../types";
 
 import type { CatalogSearchInput, CatalogFacetsInput } from "../models/search.dto";
@@ -36,7 +37,6 @@ export function CatalogSearchPageClient({
 }: CatalogSearchPageClientProps) {
   const t = useTranslations("catalog");
 
-  // Use nuqs to manage URL-synchronized state
   const [params, setParams] = useQueryStates(
     {
       q: parseAsString.withDefault(initial?.q ?? ""),
@@ -47,17 +47,17 @@ export function CatalogSearchPageClient({
       in_stock: parseAsBoolean.withDefault(initial?.in_stock_only ?? false),
     },
     {
-      shallow: false, // Update browser history
+      shallow: false,
     },
   );
 
-  // Extract nested properties filters
   const [selectedProperties, setSelectedProperties] = React.useState<Record<string, string[]>>(
     (initial?.properties as Record<string, string[]>) ?? {},
   );
 
   const searchInput: CatalogSearchInput = {
     q: params.q || undefined,
+    include_descendants: true,
     category_id,
     brand_ids: params.brand.length ? params.brand : undefined,
     price_min: 0,
@@ -72,6 +72,7 @@ export function CatalogSearchPageClient({
 
   const facetInput: CatalogFacetsInput = {
     q: params.q || undefined,
+    include_descendants: true,
     category_id,
     brand_ids: params.brand.length ? params.brand : undefined,
     price_min: 0,
@@ -81,7 +82,6 @@ export function CatalogSearchPageClient({
     locale,
   };
 
-  // TRPC queries
   const search_query = trpc.catalog.search.useQuery(searchInput);
   const { data: searchResult, isLoading: isSearchLoading } = search_query;
   const { data: facetsResult } = trpc.catalog.facets.useQuery(facetInput);
@@ -99,58 +99,86 @@ export function CatalogSearchPageClient({
     setParams({ page: 1 });
   };
 
+  const activeFilterCount =
+    (params.in_stock ? 1 : 0) +
+    params.brand.length +
+    (params.price_max < 20000 ? 1 : 0) +
+    Object.values(selectedProperties).reduce((sum, v) => sum + v.length, 0);
+
   return (
-    <QueryGuard query={search_query}>
-      <div className="font-moya mx-auto min-h-screen max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="font-orla text-3xl text-primary-foreground">
-              {category_name ? category_name : t("default_heading")}
+    <QueryGuard query={search_query} loadingFallback={<SearchPageSkeleton />}>
+      <div className="container mx-auto min-h-screen px-4 py-6">
+        {/* Header: title + sort + mobile filter */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-xl font-bold sm:text-2xl">
+              {params.q ? (
+                <>
+                  <span className="text-muted-foreground font-normal">
+                    {t("results", { count: searchResult?.meta.total_records ?? 0 })}
+                    {" — "}
+                  </span>
+                  {params.q}
+                </>
+              ) : category_name ? (
+                category_name
+              ) : (
+                t("default_heading")
+              )}
             </h1>
-            <p className="text-secondary/60 mt-1 text-sm">
-              {t("results", { count: searchResult?.meta.total_records ?? 0 })}
-            </p>
+            {!params.q && (
+              <p className="text-muted-foreground mt-0.5 text-sm">
+                {t("results", { count: searchResult?.meta.total_records ?? 0 })}
+              </p>
+            )}
           </div>
 
-          {/* Sorting Dropdown */}
-          <CatalogSortSelect
-            value={params.sort as CatalogSort}
-            onChange={(sort) => setParams({ sort, page: 1 })}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
-          {/* Filter Sidebar */}
-          <div className="lg:col-span-1">
-            <CatalogFilterSidebar
-              facets={facetsResult ?? undefined}
-              selectedBrandIds={params.brand}
-              onBrandChange={(brand) => setParams({ brand, page: 1 })}
-              priceRange={[0, params.price_max]}
-              onPriceChange={(range) => setParams({ price_max: range[1], page: 1 })}
-              inStockOnly={params.in_stock}
-              onInStockChange={(in_stock) => setParams({ in_stock, page: 1 })}
-              selectedProperties={selectedProperties}
-              onPropertyChange={handlePropertyChange}
-            />
-          </div>
-
-          {/* Search Results & Pagination */}
-          <div className="space-y-8 lg:col-span-3">
-            {/* Real-time search bar */}
-            <div className="flex items-center justify-between rounded-2xl border border-border bg-muted p-4">
-              <CatalogSearchBar
-                value={params.q}
-                onChange={(q) => setParams({ q, page: 1 })}
-                placeholder={category_name ? t("search_in_category", { category_name }) : undefined}
+          <div className="flex items-center gap-2">
+            {/* Mobile filter button */}
+            <div className="lg:hidden">
+              <CatalogMobileFiltersSheet
+                facets={facetsResult ?? undefined}
+                selectedBrandIds={params.brand}
+                onBrandChange={(brand) => setParams({ brand, page: 1 })}
+                priceRange={[0, params.price_max]}
+                onPriceChange={(range) => setParams({ price_max: range[1], page: 1 })}
+                inStockOnly={params.in_stock}
+                onInStockChange={(in_stock) => setParams({ in_stock, page: 1 })}
+                selectedProperties={selectedProperties}
+                onPropertyChange={handlePropertyChange}
+                activeFilterCount={activeFilterCount}
               />
             </div>
 
-            {/* Grid Products */}
+            <CatalogSortSelect
+              value={params.sort as CatalogSort}
+              onChange={(sort) => setParams({ sort, page: 1 })}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-8">
+          {/* Desktop sidebar */}
+          <aside className="hidden w-64 shrink-0 lg:block">
+            <div className="sticky top-24">
+              <CatalogFilterSidebar
+                facets={facetsResult ?? undefined}
+                selectedBrandIds={params.brand}
+                onBrandChange={(brand) => setParams({ brand, page: 1 })}
+                priceRange={[0, params.price_max]}
+                onPriceChange={(range) => setParams({ price_max: range[1], page: 1 })}
+                inStockOnly={params.in_stock}
+                onInStockChange={(in_stock) => setParams({ in_stock, page: 1 })}
+                selectedProperties={selectedProperties}
+                onPropertyChange={handlePropertyChange}
+              />
+            </div>
+          </aside>
+
+          {/* Results */}
+          <div className="min-w-0 flex-1 space-y-6">
             <CatalogProductGrid products={searchResult?.items ?? []} isLoading={isSearchLoading} />
 
-            {/* Pagination */}
             {searchResult && (
               <CatalogPagination
                 page={params.page}

@@ -7,15 +7,23 @@ import { trpc } from "@/components/providers/app-providers";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ReviewsPageSkeleton } from "./reviews-page-skeleton";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+} from "@/components/ui/empty";
 
 export function CustomerReviewsPageClient() {
   const t = useTranslations("reviews");
-  const { data, isLoading } = trpc.reviews.myReviews.useQuery({ page: 1, limit: 20 });
+  const { data, isLoading, error } = trpc.reviews.myReviews.useQuery({ page: 1, limit: 20 });
 
   const reviews = data?.items ?? [];
 
   return (
-    <QueryGuard query={{ isLoading }}>
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<ReviewsPageSkeleton />}>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{t("page_title")}</h2>
@@ -23,13 +31,15 @@ export function CustomerReviewsPageClient() {
       </div>
 
       {reviews.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">{t("no_reviews_customer")}</h3>
-            <p className="text-muted-foreground">{t("share_experience")}</p>
-          </CardContent>
-        </Card>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FileText className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t("no_reviews_customer")}</EmptyTitle>
+            <EmptyDescription>{t("share_experience")}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (

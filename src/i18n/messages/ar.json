@@ -15,7 +15,11 @@
     "category_pastry": "المعجنات",
     "category_chocolates": "الشوكولاتة",
     "category_candy": "الحلويات",
-    "category_lollipops": "المصاصات"
+    "category_lollipops": "المصاصات",
+    "error_loading": "تعذر تحميل الأكثر مبيعاً.",
+    "empty": "لا توجد منتجات حالياً.",
+    "empty_category": "لا توجد منتجات في هذا التصنيف.",
+    "empty_trending": "لا توجد منتجات رائجة حالياً."
   },
   "trackOrder": {
     "title": "تتبع الطلب",
@@ -90,7 +94,8 @@
     "viewProduct": "عرض المنتج",
     "emptyTitle": "لا توجد منتجات تم عرضها مؤخراً",
     "emptyDescription": "المنتجات التي تشاهدها ستظهر هنا.",
-    "shopNow": "تسوق الآن"
+    "shopNow": "تسوق الآن",
+    "error_loading": "تعذر تحميل المنتجات التي تم عرضها مؤخراً."
   },
   "product_detail": {
     "title": "المنتج",
@@ -137,7 +142,12 @@
     "saleName": "تخفيض رقم {index}",
     "termine": "انتهى",
     "sale1_name": "تخفيضات الصيف",
-    "sale2_name": "عرض نهاية الأسبوع الخاطف"
+    "sale2_name": "عرض نهاية الأسبوع الخاطف",
+    "error_loading": "تعذر تحميل التخفيضات السريعة.",
+    "empty_active": "لا توجد تخفيضات سريعة نشطة حالياً.",
+    "empty_active_subtitle": "عد قريباً لاكتشاف عروضنا.",
+    "empty_upcoming": "لا توجد تخفيضات سريعة قادمة حالياً.",
+    "empty_ended": "لا توجد تخفيضات سريعة منتهية مؤخراً."
   },
   "compare": {
     "title": "مقارنة المنتجات",
@@ -215,7 +225,11 @@
     "nouveau": "جديد",
     "category": "التصنيف",
     "sort": "ترتيب",
-    "viewProduct": "عرض المنتج"
+    "viewProduct": "عرض المنتج",
+    "error_loading": "تعذر تحميل الوافدين الجدد.",
+    "empty": "لا توجد منتجات جديدة حالياً.",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "console": {
     "title": "لوحة الإدارة",
@@ -696,7 +710,12 @@
     "search_dots": "بحث…",
     "clear_filter": "مسح فلتر {title}",
     "min": "الحد الأدنى",
-    "max": "الحد الأقصى"
+    "max": "الحد الأقصى",
+    "session_expired": "انتهت الجلسة",
+    "session_expired_description": "انتهت صلاحية جلستك أو لم تقم بتسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.",
+    "unexpected_error": "حدث خطأ غير متوقع",
+    "error": "خطأ",
+    "updating": "جارٍ التحديث…"
   },
   "data_table": {
     "no_results": "لا توجد نتائج.",
@@ -3267,6 +3286,10 @@
     "nav_wishlists": "قائمة الأمنيات",
     "nav_settings": "الإعدادات",
     "nav_support": "الدعم",
+    "nav_favorites": "المفضلة",
+    "nav_collections": "المجموعات",
+    "nav_returns": "مرتجعاتي",
+    "nav_saved": "المحفوظة",
     "hello": "مرحباً",
     "name_placeholder": "[الاسم]",
     "dashboard_description": "مرحباً بك في مساحتك الشخصية. يمكنك إدارة طلباتك وعناوينك وتفضيلاتك.",
@@ -3291,6 +3314,18 @@
     "recent_activity_desc": "سجل نشاطك الأخير",
     "activity_register": "التسجيل",
     "activity_register_desc": "تم إنشاء حسابك",
+    "activity_order_placed": "تم تقديم الطلب",
+    "activity_order_placed_desc": "تم إنشاء طلب جديد",
+    "activity_profile_updated": "تم تحديث الملف الشخصي",
+    "activity_profile_updated_desc": "تم تحديث معلومات الملف الشخصي",
+    "status_pending_payment": "في انتظار الدفع",
+    "status_paid": "تم الدفع",
+    "status_processing": "قيد المعالجة",
+    "status_failed_delivery": "فشل التوصيل",
+    "status_cancelled": "ملغي",
+    "status_refunded": "تم الاسترداد",
+    "loading": "جارٍ التحميل…",
+    "error": "خطأ",
     "addresses_title": "عناويني",
     "addresses_description": "إدارة عناوين الشحن الخاصة بك",
     "add_address": "إضافة عنوان",
@@ -3328,6 +3363,11 @@
     "email": "البريد الإلكتروني",
     "phone": "الهاتف",
     "save_changes": "حفظ التغييرات",
+    "profile_updated": "تم تحديث الملف الشخصي",
+    "password_updated": "تم تحديث كلمة المرور",
+    "language_updated": "تم تحديث اللغة",
+    "notifications_updated": "تم تحديث التفضيلات",
+    "passwords_dont_match": "كلمات المرور غير متطابقة",
     "change_password_title": "تغيير كلمة المرور",
     "change_password_description": "تأكد من استخدام كلمة مرور آمنة",
     "current_password": "كلمة المرور الحالية",
@@ -3453,7 +3493,14 @@
     "sort_placeholder": "ترتيب حسب",
     "default_heading": "كل ما لدينا من لذائذ",
     "search_in_category": "ابحث في {category_name}...",
-    "clear_search": "مسح البحث"
+    "clear_search": "مسح البحث",
+    "min_price": "الحد الأدنى للسعر",
+    "max_price": "الحد الأقصى للسعر",
+    "filter": "تصفية",
+    "all_filters": "جميع الفلاتر",
+    "active_filters": "الفلاتر النشطة",
+    "clear_all": "مسح الكل",
+    "filters_count": "{count} فلتر نشط"
   },
   "routing_rules": {
     "title": "قواعد توجيه الطلبات",

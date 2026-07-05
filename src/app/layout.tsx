@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "./globals.css";

@@ -1,9 +1,16 @@
 import { getTranslations } from "next-intl/server";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { DataState } from "@/components/storefront/data-state";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyMedia,
+  EmptyContent,
+} from "@/components/ui/empty";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -40,18 +47,21 @@ export default async function ComparePage({ params }: Props) {
         emptyTitle={t("emptyTitle")}
         emptyDescription={t("emptyDescription")}
         emptyState={
-          <section className="py-16 text-center">
-            <Card className="mx-auto max-w-md">
-              <CardHeader>
-                <CardTitle>{t("emptyTitle")}</CardTitle>
-                <CardDescription>{t("emptyDescription")}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center gap-3">
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <span className="text-2xl">⇄</span>
+              </EmptyMedia>
+              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
+              <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <div className="flex gap-3">
                 <Button variant="outline">{t("addProduct")}</Button>
                 <Button variant="link">{t("browseProducts")}</Button>
-              </CardContent>
-            </Card>
-          </section>
+              </div>
+            </EmptyContent>
+          </Empty>
         }
       >
         <section>

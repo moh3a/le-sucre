@@ -20,6 +20,12 @@ import {
 
 export const return_replacement_router = create_trpc_router({
   // Customer-facing procedures
+  myReturns: storefront_procedure
+    .input(z.object({}).optional())
+    .query(({ ctx }) =>
+      return_service.customer_list_all(ctx.session!.user.id),
+    ),
+
   myCreateReturnRequest: storefront_procedure
     .input(customer_create_return_request_dto)
     .mutation(({ ctx, input }) =>
