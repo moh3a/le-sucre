@@ -4,8 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DataState } from "@/components/storefront/data-state";
-import { ProductImage } from "@/components/storefront/product/product-image";
-import { ProductQuantitySelector } from "@/components/storefront/product/product-quantity-selector";
+import { ProductImage } from "@/features/product_information_management/products/components/storefront/product-image";
+import { ProductQuantitySelector } from "@/features/product_information_management/products/components/storefront/product-quantity-selector";
 import type { StorefrontProduct } from "@/components/storefront/types";
 import { cn } from "@/lib/utils";
 

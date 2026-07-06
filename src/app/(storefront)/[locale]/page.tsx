@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionHeader } from "@/components/storefront/section-header";
-import { InfoCard } from "@/components/storefront/info-card";
+import { InfoCard } from "@/components/info-card";
 import { CategoryCard } from "@/features/product_information_management/categories/components/storefront/category-card";
 
 export async function generateMetadata({ params }: Props) {
@@ -22,7 +22,7 @@ export default async function HomePage({ params }: Props) {
   const t = await getTranslations({ locale });
 
   return (
-    <div className="mx-auto max-w-7xl space-y-16 px-4 py-8">
+    <div className="mx-auto container space-y-16 p-6">
       {/* HERO BANNER */}
       <section className="from-lemon-lime/20 to-lemon-chiffon/40 relative overflow-hidden rounded-2xl bg-linear-to-r p-12 md:p-20">
         <div className="relative z-10 max-w-xl space-y-4">

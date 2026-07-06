@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { PackageOpen } from "lucide-react";
-import { ProductCard, ProductCardSkeleton } from "@/components/storefront/product/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
 import type { StorefrontProduct } from "@/components/storefront/types";
 import type { CatalogProductCard as ProductType } from "../types";
 import {

@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CircleAlert, Clock } from "lucide-react";
 import { trpc } from "@/components/providers/app-providers";
-import { ProductCard, ProductCardSkeleton } from "@/components/storefront/product/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -74,7 +74,7 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
 
   if (query.isLoading) {
     return (
-      <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+      <div className="mx-auto container space-y-12 px-4 py-8">
         <section className="flex items-center justify-between">
           <div>
             <Skeleton className="h-8 w-56" />
@@ -96,7 +96,7 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
 
   if (query.error) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
@@ -115,7 +115,7 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
   const items = query.data ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+    <div className="mx-auto container space-y-12 px-4 py-8">
       {/* PAGE HEADER */}
       <section className="flex items-center justify-between">
         <div>

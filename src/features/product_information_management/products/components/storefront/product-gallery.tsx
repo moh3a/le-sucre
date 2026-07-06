@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { DataState } from "@/components/storefront/data-state";
-import { ProductImage } from "@/components/storefront/product/product-image";
+import { ProductImage } from "@/features/product_information_management/products/components/storefront/product-image";
 import { cn } from "@/lib/utils";
 
 interface ProductGalleryProps {

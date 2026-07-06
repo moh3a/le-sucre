@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, LayoutGrid, Search, ShoppingCart, User } from "lucide-react";
+import { Home, LayoutGrid, Search, ShoppingCart, User, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -21,6 +21,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { siteConfig } from "@/constants";
 import { authClient } from "@/lib/auth/client";
 import { QueryGuard } from "@/components/query-guard";
+import { AuthSheet } from "@/features/authentication_and_authorization/auth/components/auth-sheet";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -30,6 +31,7 @@ export function Header() {
 
   const { data: session, isPending, error } = authClient.useSession();
   const [searchQuery, setSearchQuery] = useState("");
+  const [authSheetOpen, setAuthSheetOpen] = useState(false);
 
   const userInitials = session?.user?.name
     ? session.user.name
@@ -158,7 +160,31 @@ export function Header() {
             </Button>
 
             {/* Account */}
-            {session ? (
+            {session?.user?.isAnonymous ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="shrink-0">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/orders">{t("my_orders")}</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">{t("my_account")}</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-brand-olive-leaf font-medium"
+                    onClick={() => setAuthSheetOpen(true)}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    {t("sign_in_sign_up") || "Se connecter / S'inscrire"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="shrink-0 rounded-full">
@@ -191,13 +217,9 @@ export function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Button variant="ghost" size="icon" asChild className="shrink-0">
-                <Link href="/auth">
-                  <User className="h-5 w-5" />
-                </Link>
-              </Button>
-            )}
+            ) : null}
+
+            <AuthSheet open={authSheetOpen} onOpenChange={setAuthSheetOpen} />
 
             {/* Theme toggle & locale selector — desktop only */}
             <div className="hidden items-center gap-1 md:flex">

@@ -1,9 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { ProductCardSkeleton } from "@/components/storefront/product/product-card";
+import { ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
 
 export function SearchPageSkeleton() {
   return (
-    <div className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto min-h-screen container px-4 py-6 sm:px-6 lg:px-8">
       {/* Header skeleton */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-2">

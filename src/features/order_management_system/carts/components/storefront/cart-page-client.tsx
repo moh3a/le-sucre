@@ -111,7 +111,7 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
       query={{ isLoading: cartQuery.isLoading, error: cartQuery.error }}
       loadingFallback={<CartPageSkeleton />}
     >
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">{t("title")}</h1>

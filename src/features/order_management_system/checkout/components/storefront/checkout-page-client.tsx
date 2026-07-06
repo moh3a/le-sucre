@@ -194,7 +194,7 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
       query={{ isLoading, error }}
       loadingFallback={<CheckoutPageSkeleton />}
     >
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <h1 className="mb-8 text-3xl font-bold">{t("title")}</h1>
 
         {/* LOGIN / SESSION CARD */}

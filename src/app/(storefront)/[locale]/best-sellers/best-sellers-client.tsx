@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -18,15 +19,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CircleAlert, Star, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/components/providers/app-providers";
-import { ProductCard, ProductCardSkeleton } from "@/components/storefront/product/product-card";
+import { ProductCard } from "@/features/product_information_management/products/components/storefront/product-card";
 import type { AppLocale } from "@/i18n/config";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyMedia,
-} from "@/components/ui/empty";
+import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
 
 const CATEGORY_KEYS = [
   "category_all",
@@ -79,10 +74,10 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
 
   if (trending_query.isLoading) {
     return (
-      <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+      <div className="container mx-auto space-y-12 p-6">
         <section className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center">
-            <Trophy className="h-8 w-8 text-muted-foreground/40" />
+            <Trophy className="text-muted-foreground/40 h-8 w-8" />
           </span>
           <div>
             <Skeleton className="h-8 w-56" />
@@ -110,7 +105,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
 
   if (trending_query.error) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
@@ -137,10 +132,10 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
 
   if (empty) {
     return (
-      <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+      <div className="mx-auto container space-y-12 px-4 py-8">
         <section className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center">
-            <Trophy className="h-8 w-8 text-muted-foreground/40" />
+            <Trophy className="text-muted-foreground/40 h-8 w-8" />
           </span>
           <div>
             <h1 className="text-3xl font-bold">{t("title")}</h1>
@@ -161,7 +156,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+    <div className="mx-auto container space-y-12 px-4 py-8">
       {/* PAGE HEADER */}
       <section className="flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center">
@@ -185,9 +180,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
                 <span
                   className={cn(
                     "flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold",
-                    i < 3
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground",
+                    i < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
                   )}
                 >
                   {i + 1}
@@ -201,8 +194,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
                       </Badge>
                     ) : (
                       <span className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-current" />{" "}
-                        {t("rating", { stars: 5 })}
+                        <Star className="h-3 w-3 fill-current" /> {t("rating", { stars: 5 })}
                       </span>
                     )}
                   </CardDescription>
@@ -220,7 +212,9 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
                 )}
               </CardContent>
               <CardFooter className="justify-between">
-                <span className="font-semibold">{item.min_price} {item.currency}</span>
+                <span className="font-semibold">
+                  {item.min_price} {item.currency}
+                </span>
                 <Button size="sm" disabled={!item.in_stock}>
                   {t("addToCart")}
                 </Button>
@@ -244,10 +238,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
             ))}
           </TabsList>
           {CATEGORY_KEYS.map((key, catIdx) => {
-            const cat_items = category_items.slice(
-              catIdx * 4,
-              catIdx * 4 + 4,
-            );
+            const cat_items = category_items.slice(catIdx * 4, catIdx * 4 + 4);
             return (
               <TabsContent key={key} value={key}>
                 {cat_items.length > 0 ? (

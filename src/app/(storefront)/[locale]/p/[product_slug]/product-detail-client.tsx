@@ -20,12 +20,12 @@ import {
 
 import { trpc } from "@/components/providers/app-providers";
 import { ProductGallery } from "@/features/product_information_management/products/components/storefront/product-gallery";
-import { ProductPrice } from "@/components/storefront/product/product-price";
-import { ProductRating } from "@/components/storefront/product/product-rating";
-import { ProductQuantitySelector } from "@/components/storefront/product/product-quantity-selector";
-import { ProductCard, ProductCardSkeleton } from "@/components/storefront/product/product-card";
+import { ProductPrice } from "@/features/product_information_management/products/components/storefront/product-price";
+import { ProductRating } from "@/features/product_information_management/products/components/storefront/product-rating";
+import { ProductQuantitySelector } from "@/features/product_information_management/products/components/storefront/product-quantity-selector";
+import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
 import { SectionHeader } from "@/components/storefront/section-header";
-import { ProductSpecs } from "@/components/storefront/product/product-specs";
+import { ProductSpecs } from "@/features/product_information_management/products/components/storefront/product-specs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
 
   if (product_query.error) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
@@ -132,7 +132,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
   const data = product_query.data;
   if (!data?.product) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -233,7 +233,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
       : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto container px-4 py-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <ProductGallery images={images} alt={name} />
 
@@ -769,7 +769,7 @@ function ReviewsSection({
 
 function ProductDetailSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto container px-4 py-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="space-y-4">
           <Skeleton className="aspect-square w-full rounded-xl" />

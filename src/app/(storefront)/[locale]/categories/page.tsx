@@ -23,7 +23,7 @@ export default async function CategoriesPage({ params }: Props) {
   const tree = await category_service.get_full_tree(true);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8">
+    <div className="mx-auto container space-y-8 px-4 py-8">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">{t("page_title")}</h1>
         <p className="text-muted-foreground">{t("page_description")}</p>

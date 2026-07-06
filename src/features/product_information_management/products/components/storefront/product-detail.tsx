@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DataState } from "@/components/storefront/data-state";
-import { ProductPrice } from "@/components/storefront/product/product-price";
-import { ProductRating } from "@/components/storefront/product/product-rating";
-import { ProductQuantitySelector } from "@/components/storefront/product/product-quantity-selector";
-import { ProductVariantSelector } from "@/components/storefront/product/product-variant-selector";
+import { ProductPrice } from "@/features/product_information_management/products/components/storefront/product-price";
+import { ProductRating } from "@/features/product_information_management/products/components/storefront/product-rating";
+import { ProductQuantitySelector } from "@/features/product_information_management/products/components/storefront/product-quantity-selector";
+import { ProductVariantSelector } from "@/features/product_information_management/variants/components/product-variant-selector";
 import type { StorefrontProduct, ReviewItem, SpecItem } from "@/components/storefront/types";
 
 interface ProductDetailProps {

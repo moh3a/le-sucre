@@ -3,7 +3,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { DataState } from "@/components/storefront/data-state";
-import { ProductRating } from "@/components/storefront/product/product-rating";
+import { ProductRating } from "@/features/product_information_management/products/components/storefront/product-rating";
 import type { ReviewItem } from "@/components/storefront/types";
 import { Star } from "lucide-react";
 

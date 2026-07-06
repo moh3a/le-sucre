@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { DataState } from "@/components/storefront/data-state";
-import { ProductImage } from "@/components/storefront/product/product-image";
+import { ProductImage } from "@/features/product_information_management/products/components/storefront/product-image";
 import type { StorefrontProduct } from "@/components/storefront/types";
 
 interface ReviewItem {

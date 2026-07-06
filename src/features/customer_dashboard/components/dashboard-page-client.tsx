@@ -1,14 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertCircle } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import { AlertCircle, LogIn, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AccountNavCard } from "@/components/storefront/account/account-nav-card";
-import { RecentOrdersTable } from "@/components/storefront/account/recent-orders-table";
+import { AccountNavCard } from "@/features/customer_dashboard/components/account-nav-card";
+import { RecentOrdersTable } from "@/features/customer_dashboard/components/recent-orders-table";
+import { AuthSheet } from "@/features/authentication_and_authorization/auth/components/auth-sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { authClient } from "@/lib/auth/client";
 import { Separator } from "@/components/ui/separator";
 
 const status_translation_map: Record<string, string> = {
@@ -38,7 +44,20 @@ const navCards = [
 
 export function DashboardPageClient() {
   const t = useTranslations("account");
-  const { data, isLoading, error } = trpc.dashboard.getSummary.useQuery();
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const [authSheetOpen, setAuthSheetOpen] = useState(false);
+  const isAnonymous = session?.user?.isAnonymous ?? false;
+  const { data, isLoading, error } = trpc.dashboard.getSummary.useQuery(undefined, {
+    enabled: !!session && !isAnonymous,
+  });
+
+  if (sessionLoading) {
+    return <DashboardLoading />;
+  }
+
+  if (isAnonymous) {
+    return <AnonymousDashboard authSheetOpen={authSheetOpen} setAuthSheetOpen={setAuthSheetOpen} />;
+  }
 
   if (isLoading) {
     return <DashboardLoading />;
@@ -157,6 +176,110 @@ export function DashboardPageClient() {
           </CardContent>
         </Card>
       </section>
+    </div>
+  );
+}
+
+function AnonymousDashboard({
+  authSheetOpen,
+  setAuthSheetOpen,
+}: {
+  authSheetOpen: boolean;
+  setAuthSheetOpen: (open: boolean) => void;
+}) {
+  const t = useTranslations("account");
+  const tLayout = useTranslations("layout");
+  const router = useRouter();
+  const isMobile = useIsMobile();
+
+  function handleCtaClick() {
+    if (isMobile) {
+      router.push("/customer-login");
+    } else {
+      setAuthSheetOpen(true);
+    }
+  }
+
+  return (
+    <div className="mx-auto container space-y-8">
+      {/* CTA BANNER */}
+      <section>
+        <Card className="border-lemon-lime/50 bg-linear-to-br from-lemon-chiffon/20 to-cream/50">
+          <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
+            <div className="bg-background/80 flex h-14 w-14 items-center justify-center rounded-full shadow-sm">
+              <User className="text-muted-foreground h-7 w-7" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">{tLayout("my_account")}</h2>
+              <p className="text-muted-foreground mt-1 max-w-sm text-sm">
+                {tLayout("customer_auth_desc") ||
+                  "Connectez-vous ou créez un compte pour gérer vos commandes, listes de souhaits et bien plus"}
+              </p>
+            </div>
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={handleCtaClick}
+            >
+              <LogIn className="h-5 w-5" />
+              {tLayout("sign_in_sign_up") || "Se connecter / S'inscrire"}
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ACCOUNT NAV CARDS */}
+      <AccountNavCard
+        title={t("quick_actions")}
+        items={navCards.map((card) => ({
+          href: card.href,
+          label: t(card.key),
+          icon: "",
+        }))}
+      />
+
+      {/* EMPTY ORDERS PLACEHOLDER */}
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("recent_orders")}</CardTitle>
+            <CardDescription>{t("recent_orders_desc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm">{t("no_orders")}</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <Separator />
+
+      {/* SAVED ITEMS */}
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("saved_items")}</CardTitle>
+            <CardDescription>{t("saved_items_desc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm">{t("no_saved_items")}</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* WISHLIST */}
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("wishlist")}</CardTitle>
+            <CardDescription>{t("wishlist_desc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm">{t("no_wishlist_items")}</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <AuthSheet open={authSheetOpen} onOpenChange={setAuthSheetOpen} />
     </div>
   );
 }

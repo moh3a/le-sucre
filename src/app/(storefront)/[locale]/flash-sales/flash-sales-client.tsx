@@ -11,7 +11,7 @@ import { CircleAlert, Clock, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/components/providers/app-providers";
-import { ProductCard, ProductCardSkeleton } from "@/components/storefront/product/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -88,7 +88,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+      <div className="mx-auto container space-y-12 px-4 py-8">
         <section>
           <div className="mb-6 flex items-center gap-3">
             <Skeleton className="h-8 w-56" />
@@ -124,7 +124,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
 
   if (flash_sales_query.error) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto container px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
@@ -146,7 +146,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
   const empty = active_sales.length === 0;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
+    <div className="mx-auto container space-y-12 px-4 py-8">
       {/* ACTIVE FLASH SALES */}
       <section>
         <div className="mb-6 flex items-center gap-3">

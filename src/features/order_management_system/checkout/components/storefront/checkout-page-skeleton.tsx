@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function CheckoutPageSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto container px-4 py-8">
       <Skeleton className="mb-8 h-9 w-48" />
       <Skeleton className="mb-8 h-16 w-full rounded-lg" />
       <div className="mb-8 flex items-center justify-center gap-2">
