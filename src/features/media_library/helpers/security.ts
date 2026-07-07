@@ -1,25 +1,17 @@
 import "server-only";
 
-import { writeFile, mkdir, unlink, readFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { existsSync } from "fs";
 
 import { media_config } from "@/config/media";
 import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
-import { redisKeys } from "@/lib/redis/keys";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 
 const FILE_SIGNATURES: Record<string, Uint8Array[]> = {
-  "image/jpeg": [
-    new Uint8Array([0xff, 0xd8, 0xff]),
-  ],
-  "image/png": [
-    new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
-  ],
-  "image/webp": [
-    new Uint8Array([0x52, 0x49, 0x46, 0x46]),
-  ],
+  "image/jpeg": [new Uint8Array([0xff, 0xd8, 0xff])],
+  "image/png": [new Uint8Array([0x89, 0x50, 0x4e, 0x47])],
+  "image/webp": [new Uint8Array([0x52, 0x49, 0x46, 0x46])],
   "image/gif": [
     new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x37, 0x61]),
     new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]),
@@ -34,18 +26,10 @@ const FILE_SIGNATURES: Record<string, Uint8Array[]> = {
     new Uint8Array([0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
     new Uint8Array([0x66, 0x74, 0x79, 0x70, 0x6d, 0x70, 0x34, 0x32]),
   ],
-  "video/webm": [
-    new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]),
-  ],
-  "video/ogg": [
-    new Uint8Array([0x4f, 0x67, 0x67, 0x53]),
-  ],
-  "application/pdf": [
-    new Uint8Array([0x25, 0x50, 0x44, 0x46]),
-  ],
-  "application/msword": [
-    new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]),
-  ],
+  "video/webm": [new Uint8Array([0x1a, 0x45, 0xdf, 0xa3])],
+  "video/ogg": [new Uint8Array([0x4f, 0x67, 0x67, 0x53])],
+  "application/pdf": [new Uint8Array([0x25, 0x50, 0x44, 0x46])],
+  "application/msword": [new Uint8Array([0xd0, 0xcf, 0x11, 0xe0])],
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
     new Uint8Array([0x50, 0x4b, 0x03, 0x04]),
   ],
@@ -74,7 +58,10 @@ export function get_mime_from_magic(buffer: Uint8Array): string | null {
 
   if (
     hex.startsWith("52 49 46 46") &&
-    (buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50)
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
   ) {
     return "image/webp";
   }
@@ -82,10 +69,12 @@ export function get_mime_from_magic(buffer: Uint8Array): string | null {
   if (
     hex.startsWith("00 00 00") &&
     buffer.length >= 12 &&
-    ((buffer[4] === 0x1c && buffer.slice(5, 8).toString() === "ftyp" &&
+    ((buffer[4] === 0x1c &&
+      buffer.slice(5, 8).toString() === "ftyp" &&
       (buffer.slice(8, 12).toString() === "avif" || buffer.slice(8, 12).toString() === "avis")) ||
-     (buffer[4] === 0x20 && buffer.slice(5, 8).toString() === "ftyp" &&
-      buffer.slice(8, 12).toString() === "avif"))
+      (buffer[4] === 0x20 &&
+        buffer.slice(5, 8).toString() === "ftyp" &&
+        buffer.slice(8, 12).toString() === "avif"))
   ) {
     return "image/avif";
   }
@@ -116,10 +105,7 @@ export function get_mime_from_magic(buffer: Uint8Array): string | null {
   return null;
 }
 
-export function verify_file_magic(
-  buffer: Uint8Array,
-  mime_type: string,
-): boolean {
+export function verify_file_magic(buffer: Uint8Array, mime_type: string): boolean {
   if (mime_type === "image/svg+xml") return true;
 
   const signatures = FILE_SIGNATURES[mime_type];
@@ -132,10 +118,37 @@ export function verify_file_magic(
 }
 
 const EXECUTABLE_EXTENSIONS = new Set([
-  ".exe", ".dll", ".bat", ".cmd", ".sh", ".bin", ".msi", ".jar",
-  ".py", ".pl", ".rb", ".wasm", ".app", ".com", ".scr", ".sys",
-  ".vbs", ".vbe", ".js", ".jse", ".wsf", ".wsh", ".ps1", ".psm1",
-  ".psd1", ".reg", ".inf", ".drv", ".ocx", ".cpl", ".efi",
+  ".exe",
+  ".dll",
+  ".bat",
+  ".cmd",
+  ".sh",
+  ".bin",
+  ".msi",
+  ".jar",
+  ".py",
+  ".pl",
+  ".rb",
+  ".wasm",
+  ".app",
+  ".com",
+  ".scr",
+  ".sys",
+  ".vbs",
+  ".vbe",
+  ".js",
+  ".jse",
+  ".wsf",
+  ".wsh",
+  ".ps1",
+  ".psm1",
+  ".psd1",
+  ".reg",
+  ".inf",
+  ".drv",
+  ".ocx",
+  ".cpl",
+  ".efi",
 ]);
 
 const DOUBLE_EXTENSION_PATTERNS = [
@@ -191,10 +204,7 @@ export async function check_user_upload_quota(
   }
 }
 
-export async function track_upload_quota(
-  user_id: string,
-  file_size: number,
-): Promise<void> {
+export async function track_upload_quota(user_id: string, file_size: number): Promise<void> {
   try {
     const quota_key = `media:quota:user:${user_id}`;
     const daily_key = `media:daily:user:${user_id}:${new Date().toISOString().slice(0, 10)}`;
@@ -210,20 +220,19 @@ export async function track_upload_quota(
   } catch {}
 }
 
-export async function enforce_upload_rate_limit(
-  identifier: string,
-): Promise<boolean> {
-  const result = await rateLimit(
-    `media_upload:${identifier}`,
-    { action: "media_upload", limit: 50, windowSec: 3600 },
-  );
+export async function enforce_upload_rate_limit(identifier: string): Promise<boolean> {
+  const result = await rateLimit(`media_upload:${identifier}`, {
+    action: "media_upload",
+    limit: 50,
+    windowSec: 3600,
+  });
   return result.success;
 }
 
 export const SUSPICIOUS_CONTENT_PATTERNS = [
-  /<\s*(script|iframe|embed|object|applet|meta|link).*?>/i,
+  /<\s*(?:script|iframe|embed|object|applet|meta|link)[\s\S]*?>/i,
   /(?:base64_decode|eval|exec|system|passthru|shell_exec|popen|proc_open|pcntl_exec)/i,
-  /(?:GIF89a|GIF87a).*?(?:<?php|<?PHp|<?=)/i,
+  /(?:GIF89a|GIF87a)[\s\S]*?(?:<?php|<?PHp|<?=)/i,
   /\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00{20,}/,
   /(?:cmd|powershell|wscript|cscript)\.exe/i,
   /_\$_{[\s\S]*?\(/,

@@ -230,7 +230,9 @@
     "addToCart": "Ajouter au panier",
     "about": "À propos de {brand}",
     "aboutText": "{brand} est une marque renommée connue pour ses produits de confiserie de haute qualité. Découvrez notre sélection de leurs meilleurs produits.",
-    "meta_title": "{brand} : {name}"
+    "meta_title": "{brand} : {name}",
+    "error_loading": "Impossible de charger les détails de la marque.",
+    "no_products": "Aucun produit trouvé pour cette marque."
   },
   "newArrivals": {
     "title": "Nouveautés",
@@ -772,7 +774,9 @@
     "searchBrands": "Rechercher des marques…",
     "featured": "Marques en vedette",
     "products": "produits",
-    "allBrands": "Toutes les marques"
+    "allBrands": "Toutes les marques",
+    "error_loading": "Impossible de charger les marques.",
+    "no_results": "Aucune marque trouvée."
   },
   "catalog": {
     "search_placeholder": "Rechercher des produits…",
@@ -3877,7 +3881,13 @@
     "faqButton": "Consultez notre FAQ",
     "socialTitle": "Suivez-nous",
     "mapTitle": "Nous trouver",
-    "mapPlaceholder": "Carte interactive à venir"
+    "mapPlaceholder": "Carte interactive à venir",
+    "successTitle": "Message envoyé !",
+    "successDescription": "Merci pour votre message. Notre équipe vous répondra dans les plus brefs délais.",
+    "errorTitle": "Erreur",
+    "errorDescription": "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.",
+    "sending": "Envoi en cours...",
+    "sendAnother": "Envoyer un autre message"
   },
   "cookie_consent": {
     "title": "Préférences de cookies",

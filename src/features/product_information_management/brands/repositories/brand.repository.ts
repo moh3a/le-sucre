@@ -1,9 +1,10 @@
 import "server-only";
 
-import { and, count, desc, eq, like, or } from "drizzle-orm";
+import { and, count, desc, eq, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { brands } from "../schema";
+import { products } from "@/features/product_information_management/products/schema";
 
 export class BrandRepository {
   async find_by_id(id: string) {
@@ -53,6 +54,42 @@ export class BrandRepository {
 
   async list_active() {
     return db.select().from(brands).where(eq(brands.is_active, true)).orderBy(brands.name);
+  }
+
+  async find_active_by_slug_with_product_count(slug: string) {
+    const [row] = await db
+      .select({
+        id: brands.id,
+        name: brands.name,
+        slug: brands.slug,
+        description: brands.description,
+        website_url: brands.website_url,
+        logo_url: brands.logo_url,
+        product_count: sql<number>`cast(count(${products.id}) as unsigned)`,
+      })
+      .from(brands)
+      .leftJoin(products, eq(products.brand_id, brands.id))
+      .where(and(eq(brands.slug, slug), eq(brands.is_active, true)))
+      .groupBy(brands.id)
+      .limit(1);
+    return row ?? null;
+  }
+
+  async list_active_with_product_counts() {
+    const rows = await db
+      .select({
+        id: brands.id,
+        name: brands.name,
+        slug: brands.slug,
+        logo_url: brands.logo_url,
+        product_count: sql<number>`cast(count(${products.id}) as unsigned)`,
+      })
+      .from(brands)
+      .leftJoin(products, eq(products.brand_id, brands.id))
+      .where(eq(brands.is_active, true))
+      .groupBy(brands.id)
+      .orderBy(brands.name);
+    return rows;
   }
 
   async count_by_active() {

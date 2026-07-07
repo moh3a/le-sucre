@@ -32,12 +32,7 @@ const FORBIDDEN_TAGS = new Set([
   "listener",
 ]);
 
-const FORBIDDEN_ATTR_PATTERNS = [
-  /^on/i,
-  /^xmlns:/i,
-  /^xlink:/i,
-  /^x:/i,
-];
+const FORBIDDEN_ATTR_PATTERNS = [/^on/i, /^xmlns:/i, /^xlink:/i, /^x:/i];
 
 const FORBIDDEN_VALUES = [
   /javascript:/i,
@@ -347,19 +342,20 @@ export function sanitize_svg_content(input: string): SanitizedSvgResult {
       safe_attrs.push(`${attr_name}="${safe_value.replace(/"/g, "&quot;")}"`);
     }
 
-    const cdata_match = attr_content.match(/<!\[CDATA\[.*?\]\]>/g);
+    const cdata_match = attr_content.match(/<!\[CDATA\[[\s\S]*?\]\]>/g);
     if (cdata_match) {
       warnings.push(`Removed CDATA section from <${tag_name}>`);
       is_modified = true;
       continue;
     }
 
-    const comment_match = attr_content.match(/<!--.*?-->/g);
+    const comment_match = attr_content.match(/<!--[\s\S]*?-->/g);
     if (comment_match) {
       is_modified = true;
     }
 
-    const attr_str = safe_attrs.length > 0 ? ` ${safe_attrs.join(" ")}` : (attr_removed ? "" : attrs_str);
+    const attr_str =
+      safe_attrs.length > 0 ? ` ${safe_attrs.join(" ")}` : attr_removed ? "" : attrs_str;
     parts.push(`<${tag_name}${attr_str}${self_closing ? " /" : ""}>`);
   }
 
@@ -374,19 +370,35 @@ export function sanitize_svg_content(input: string): SanitizedSvgResult {
 
   let final = sanitized;
   if (has_cdata) {
-    final = final.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, "");
+    let prev: string;
+    do {
+      prev = final;
+      final = final.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, "");
+    } while (final !== prev);
     is_modified = true;
   }
   if (has_comments) {
-    final = final.replace(/<!--[\s\S]*?-->/g, "");
+    let prev: string;
+    do {
+      prev = final;
+      final = final.replace(/<!--[\s\S]*?-->/g, "");
+    } while (final !== prev);
     is_modified = true;
   }
   if (has_doctype) {
-    final = final.replace(/<!DOCTYPE[^>]*>/gi, "");
+    let prev: string;
+    do {
+      prev = final;
+      final = final.replace(/<!DOCTYPE[^>]*>/gi, "");
+    } while (final !== prev);
     is_modified = true;
   }
   if (has_xml_header) {
-    final = final.replace(/<\?xml[^>]*\?>/gi, "");
+    let prev: string;
+    do {
+      prev = final;
+      final = final.replace(/<\?xml[^>]*\?>/gi, "");
+    } while (final !== prev);
     is_modified = true;
   }
 

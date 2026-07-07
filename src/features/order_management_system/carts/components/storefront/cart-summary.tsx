@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,12 @@ export function CartSummary({
   onCta,
   ctaDisabled,
 }: CartSummaryProps) {
+  const [inputCode, setInputCode] = useState("");
+
+  function handleApply() {
+    promoCode?.onApply?.(inputCode);
+  }
+
   return (
     <DataState
       isLoading={isLoading}
@@ -67,8 +74,14 @@ export function CartSummary({
         </div>
         {promoCode && (
           <div className="flex gap-2">
-            <Input placeholder={promoCode.placeholder} className="flex-1" disabled={promoCode.isLoading} />
-            <Button variant="outline" disabled={promoCode.isLoading} onClick={() => promoCode.onApply?.("")}>
+            <Input
+              placeholder={promoCode.placeholder}
+              className="flex-1"
+              value={inputCode}
+              onChange={(e) => setInputCode(e.target.value)}
+              disabled={promoCode.isLoading}
+            />
+            <Button variant="outline" disabled={promoCode.isLoading} onClick={handleApply}>
               {promoCode.isLoading ? "..." : promoCode.applyLabel}
             </Button>
           </div>

@@ -1,10 +1,17 @@
-import { create_trpc_router } from "@/lib/trpc/router";
+import { z } from "zod";
+
+import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { brand_service } from "./services/brand.service";
 import { create_brand_dto, update_brand_dto, list_brands_dto } from "./models/brand.dto";
 
 export const brand_router = create_trpc_router({
+  listActive: public_procedure.query(() => brand_service.list_active_storefront()),
+
+  bySlug: public_procedure
+    .input(z.object({ slug: z.string().min(1).max(255) }))
+    .query(({ input }) => brand_service.get_by_slug_storefront(input.slug)),
   list: permission_procedure(PERMISSIONS.products_read)
     .input(list_brands_dto)
     .query(({ input }) => brand_service.list(input)),

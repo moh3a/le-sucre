@@ -63,24 +63,29 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
   );
 
   const applyPromo = trpc.promotions.validateCode.useMutation({
-    onSuccess: (data: any) => {
-      if (data) {
-        setAppliedPromo({
-          code: promoCode,
-          discount_label: data.discount_label ?? "Réduction",
-          discount_amount: Number(data.discount_amount ?? 0),
-        });
-      }
+    onSuccess: (data) => {
+      const promoData = data as {
+        applied?: Array<{ label: string }>;
+        discount_total?: string;
+      };
+      const first = promoData.applied?.[0];
+      setAppliedPromo({
+        code: promoCode,
+        discount_label: first?.label ?? "Réduction",
+        discount_amount: Number(promoData.discount_total ?? 0),
+      });
     },
   });
 
   const placeOrder = trpc.checkout.place.useMutation({
-    onSuccess: (order: any) => {
-      router.push(`/account/orders/${order.id}`);
+    onSuccess: (result) => {
+      if (result) {
+        router.push(`/account/orders/${result.order.id}`);
+      }
     },
   });
 
-  const items = cartQuery.data?.items ?? [];
+  const items = useMemo(() => cartQuery.data?.items ?? [], [cartQuery.data?.items]);
   const currency = cartQuery.data?.currency ?? "DZD";
   const totals = previewQuery.data?.totals;
   const subtotal = totals ? Number(totals.subtotal) : 0;
@@ -89,28 +94,31 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
   const shippingTotal = totals ? Number(totals.shipping_total) : 0;
   const grandTotal = totals ? Number(totals.grand_total) : 0;
 
-  function formatPrice(amount: number) {
-    return `${amount.toLocaleString()} ${currency}`;
-  }
+  const formatPrice = useCallback(
+    (amount: number) => `${amount.toLocaleString()} ${currency}`,
+    [currency],
+  );
 
-  const reviewItems = useMemo(() =>
-    items.map((item: any) => ({
-      product: {
-        id: item.product_id,
-        slug: item.sku_id,
-        name: item.product_name,
-        image_url: null,
-        currency: item.currency,
-        min_price: item.unit_price,
-        max_price: null,
-        is_featured: false,
-        in_stock: true,
-        brand_name: null,
-      },
-      quantity: item.quantity,
-      price: formatPrice(Number(item.line_total)),
-    })),
-  [items, currency]);
+  const reviewItems = useMemo(
+    () =>
+      items.map((item) => ({
+        product: {
+          id: item.product_id,
+          slug: item.sku_id,
+          name: item.product_name,
+          image_url: null,
+          currency: item.currency,
+          min_price: item.unit_price,
+          max_price: null,
+          is_featured: false,
+          in_stock: true,
+          brand_name: null,
+        },
+        quantity: item.quantity,
+        price: formatPrice(Number(item.line_total)),
+      })),
+    [items, formatPrice],
+  );
 
   function handleAddressChange(name: string, value: string) {
     setAddress((prev) => ({ ...prev, [name]: value }));
@@ -121,7 +129,7 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
     setPromoCode(code);
     applyPromo.mutate({
       code: code.trim(),
-      lines: items.map((i: any) => ({
+      lines: items.map((i) => ({
         product_id: i.product_id,
         sku_id: i.sku_id,
         quantity: i.quantity,
@@ -161,9 +169,24 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
   }
 
   const shippingMethods = [
-    { id: "standard", name: t("shipping_standard_name"), description: t("shipping_standard_desc"), price: t("shipping_standard_price") },
-    { id: "express", name: t("shipping_express_name"), description: t("shipping_express_desc"), price: t("shipping_express_price") },
-    { id: "sameday", name: t("shipping_sameday_name"), description: t("shipping_sameday_desc"), price: t("shipping_sameday_price") },
+    {
+      id: "standard",
+      name: t("shipping_standard_name"),
+      description: t("shipping_standard_desc"),
+      price: t("shipping_standard_price"),
+    },
+    {
+      id: "express",
+      name: t("shipping_express_name"),
+      description: t("shipping_express_desc"),
+      price: t("shipping_express_price"),
+    },
+    {
+      id: "sameday",
+      name: t("shipping_sameday_name"),
+      description: t("shipping_sameday_desc"),
+      price: t("shipping_sameday_price"),
+    },
   ];
 
   const paymentMethods = [
@@ -177,24 +200,29 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
       { label: t("subtotal"), value: formatPrice(subtotal) },
     ];
     if (discount > 0) {
-      lines.push({ label: appliedPromo?.discount_label ?? "Réduction", value: `-${formatPrice(discount)}`, highlight: true });
+      lines.push({
+        label: appliedPromo?.discount_label ?? "Réduction",
+        value: `-${formatPrice(discount)}`,
+        highlight: true,
+      });
     }
-    lines.push({ label: t("shipping"), value: shippingTotal > 0 ? formatPrice(shippingTotal) : t("free"), highlight: true });
+    lines.push({
+      label: t("shipping"),
+      value: shippingTotal > 0 ? formatPrice(shippingTotal) : t("free"),
+      highlight: true,
+    });
     if (taxTotal > 0) {
       lines.push({ label: t("taxes"), value: formatPrice(taxTotal) });
     }
     return lines;
-  }, [subtotal, discount, shippingTotal, taxTotal, appliedPromo, currency]);
+  }, [t, formatPrice, subtotal, discount, shippingTotal, taxTotal, appliedPromo?.discount_label]);
 
   const isLoading = sessionLoading || (isLoggedIn && cartQuery.isLoading);
   const error = sessionError || (isLoggedIn ? cartQuery.error : null);
 
   return (
-    <QueryGuard
-      query={{ isLoading, error }}
-      loadingFallback={<CheckoutPageSkeleton />}
-    >
-      <div className="mx-auto container px-4 py-8">
+    <QueryGuard query={{ isLoading, error }} loadingFallback={<CheckoutPageSkeleton />}>
+      <div className="container mx-auto px-4 py-8">
         <h1 className="mb-8 text-3xl font-bold">{t("title")}</h1>
 
         {/* LOGIN / SESSION CARD */}
@@ -218,13 +246,17 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
         {!isLoggedIn ? (
           <Card className="flex flex-col items-center gap-4 p-12 text-center">
             <h2 className="text-lg font-semibold">Connectez-vous pour continuer</h2>
-            <p className="text-muted-foreground text-sm">Vous devez être connecté pour passer commande.</p>
+            <p className="text-muted-foreground text-sm">
+              Vous devez être connecté pour passer commande.
+            </p>
             <Button onClick={() => router.push("/auth/login")}>{t("login")}</Button>
           </Card>
         ) : items.length === 0 ? (
           <Card className="flex flex-col items-center gap-4 p-12 text-center">
             <h2 className="text-lg font-semibold">Votre panier est vide</h2>
-            <p className="text-muted-foreground text-sm">Ajoutez des articles avant de passer commande.</p>
+            <p className="text-muted-foreground text-sm">
+              Ajoutez des articles avant de passer commande.
+            </p>
             <Button onClick={() => router.push("/boutique")}>Continuer mes achats</Button>
           </Card>
         ) : (
@@ -246,7 +278,7 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
                   fields={[
                     { name: "first_name", placeholder: t("first_name") },
                     { name: "last_name", placeholder: t("last_name") },
-                    { name: "address", placeholder: t("address") , fullWidth: true },
+                    { name: "address", placeholder: t("address"), fullWidth: true },
                     { name: "city", placeholder: t("city") },
                     { name: "postal_code", placeholder: t("postal_code") },
                     { name: "phone", placeholder: t("phone"), fullWidth: true },
@@ -276,11 +308,18 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
                   items={reviewItems}
                   ctaLabel={placeOrder.isPending ? "..." : t("place_order")}
                   onCta={handlePlaceOrder}
-                  ctaDisabled={!address.first_name || !address.last_name || !address.address || !address.city || !address.phone || placeOrder.isPending}
+                  ctaDisabled={
+                    !address.first_name ||
+                    !address.last_name ||
+                    !address.address ||
+                    !address.city ||
+                    !address.phone ||
+                    placeOrder.isPending
+                  }
                 />
 
                 {placeOrder.error && (
-                  <Card className="border-destructive p-4 text-sm text-destructive">
+                  <Card className="border-destructive text-destructive p-4 text-sm">
                     {placeOrder.error.message}
                   </Card>
                 )}
@@ -292,7 +331,14 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
                 totalLabel={t("summary")}
                 ctaLabel={t("place_order")}
                 onCta={handlePlaceOrder}
-                ctaDisabled={!address.first_name || !address.last_name || !address.address || !address.city || !address.phone || placeOrder.isPending}
+                ctaDisabled={
+                  !address.first_name ||
+                  !address.last_name ||
+                  !address.address ||
+                  !address.city ||
+                  !address.phone ||
+                  placeOrder.isPending
+                }
                 promoCode={{
                   placeholder: t("promo_placeholder"),
                   applyLabel: t("apply"),

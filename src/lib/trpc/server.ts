@@ -46,6 +46,7 @@ import {
   profile_router,
   admin_profile_router,
 } from "@/features/authentication_and_authorization/profile/routers/profile.router";
+import { contact_router } from "@/features/contact_management/router";
 import { health_router } from "@/features/monitoring/health/routers/health.router";
 import { dashboard_router } from "@/features/customer_dashboard/routers/dashboard.router";
 
@@ -93,6 +94,7 @@ export const app_router = create_trpc_router({
   profile: profile_router,
   adminProfile: admin_profile_router,
   blacklist: blacklist_router,
+  contact: contact_router,
   operationsWorkflows: operations_workflows_router,
   health: health_router,
   dashboard: dashboard_router,

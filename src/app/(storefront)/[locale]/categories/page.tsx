@@ -45,7 +45,7 @@ export default async function CategoriesPage({ params }: Props) {
                 slug: category.slug,
                 description: category.description,
                 image_url: null,
-                children: category.children.map((c: any) => ({
+                children: category.children.map((c) => ({
                   id: c.id,
                   name: c.name,
                   slug: c.slug,

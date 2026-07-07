@@ -67,6 +67,14 @@ export class BrandService {
     return this.repo.list_active();
   }
 
+  async list_active_storefront() {
+    return this.repo.list_active_with_product_counts();
+  }
+
+  async get_by_slug_storefront(slug: string) {
+    return this.repo.find_active_by_slug_with_product_count(slug);
+  }
+
   async get_by_id(id: string) {
     const brand = await this.repo.find_by_id(id);
     if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);

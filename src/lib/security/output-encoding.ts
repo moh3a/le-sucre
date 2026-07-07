@@ -53,26 +53,32 @@ export function sanitize_rich_text(input: string): string {
   ]);
   const FORBIDDEN_PROTOCOLS = /^(javascript|data|vbscript|file):/i;
 
-  return input.replace(/<[^>]*>/g, (tag) => {
-    const match = tag.match(/^<\s*(\/?)(\w+)([^>]*)>/);
-    if (!match) return "";
-    const [, slash, tagName, attrs] = match;
-    const lowerTag = tagName.toLowerCase();
-    if (!ALLOWED_TAGS.has(lowerTag)) return "";
-    if (slash) return `</${lowerTag}>`;
+  let previous: string;
+  let result = input;
+  do {
+    previous = result;
+    result = result.replace(/<[^>]*>/g, (tag) => {
+      const match = tag.match(/^<\s*(\/?)(\w+)([^>]*)>/);
+      if (!match) return "";
+      const [, slash, tagName, attrs] = match;
+      const lowerTag = tagName.toLowerCase();
+      if (!ALLOWED_TAGS.has(lowerTag)) return "";
+      if (slash) return `</${lowerTag}>`;
 
-    const safe_attrs = attrs.replace(/(\w+)\s*=\s*("[^"]*"|'[^']*'|\S+)/g, (_, attr, value) => {
-      const lowerAttr = attr.toLowerCase();
-      if (!ALLOWED_ATTRS.has(lowerAttr)) return "";
-      const clean = value.replace(/^["']|["']$/g, "");
-      if (lowerAttr === "href" || lowerAttr === "src") {
-        if (FORBIDDEN_PROTOCOLS.test(clean.trim())) return "";
+      const safe_attrs = attrs.replace(/(\w+)\s*=\s*("[^"]*"|'[^']*'|\S+)/g, (_, attr, value) => {
+        const lowerAttr = attr.toLowerCase();
+        if (!ALLOWED_ATTRS.has(lowerAttr)) return "";
+        const clean = value.replace(/^["']|["']$/g, "");
+        if (lowerAttr === "href" || lowerAttr === "src") {
+          if (FORBIDDEN_PROTOCOLS.test(clean.trim())) return "";
+          return `${attr}="${encode_html_attr(clean)}"`;
+        }
         return `${attr}="${encode_html_attr(clean)}"`;
-      }
-      return `${attr}="${encode_html_attr(clean)}"`;
+      });
+      return `<${lowerTag}${safe_attrs}>`;
     });
-    return `<${lowerTag}${safe_attrs}>`;
-  });
+  } while (result !== previous);
+  return result;
 }
 
 export const RENDER_OUTPUT = {
