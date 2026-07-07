@@ -12,8 +12,8 @@ type Props = {
 
 type ShippingMethod = {
   labelKey: string;
-  cost: string;
-  delay: string;
+  costKey: string;
+  delayKey: string;
   badgeKey: string;
 };
 
@@ -23,35 +23,40 @@ type ReturnStep = {
   descKey: string;
 };
 
+const SHIPPING_METHODS: ShippingMethod[] = [
+  { labelKey: "method_standard", costKey: "cost_standard", delayKey: "delay_standard", badgeKey: "badge_economical" },
+  { labelKey: "method_express", costKey: "cost_express", delayKey: "delay_express", badgeKey: "badge_popular" },
+  { labelKey: "method_relay", costKey: "cost_relay", delayKey: "delay_standard", badgeKey: "badge_economical" },
+  { labelKey: "method_free", costKey: "cost_free", delayKey: "delay_standard", badgeKey: "badge_from" },
+] as const;
+
+const RETURN_STEPS: ReturnStep[] = [
+  { icon: RotateCcw, titleKey: "step1_title", descKey: "step1_desc" },
+  { icon: Package, titleKey: "step2_title", descKey: "step2_desc" },
+  { icon: Truck, titleKey: "step3_title", descKey: "step3_desc" },
+  { icon: CheckCircle, titleKey: "step4_title", descKey: "step4_desc" },
+] as const;
+
 export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "shippingReturns" });
-  return { title: t("title") };
+  return {
+    title: t("title"),
+    description: t("subtitle"),
+  };
 }
 
 export default async function ShippingReturnsPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "shippingReturns" });
 
-  const shippingMethods: ShippingMethod[] = [
-    { labelKey: "method_standard", cost: t("cost_standard"), delay: t("delay_standard"), badgeKey: "badge_economical" },
-    { labelKey: "method_express", cost: t("cost_express"), delay: t("delay_express"), badgeKey: "badge_popular" },
-    { labelKey: "method_relay", cost: t("cost_relay"), delay: t("delay_standard"), badgeKey: "badge_economical" },
-    { labelKey: "method_free", cost: t("cost_free"), delay: t("delay_standard"), badgeKey: "badge_from" },
-  ];
-
-  const returnSteps: ReturnStep[] = [
-    { icon: RotateCcw, titleKey: "step1_title", descKey: "step1_desc" },
-    { icon: Package, titleKey: "step2_title", descKey: "step2_desc" },
-    { icon: Truck, titleKey: "step3_title", descKey: "step3_desc" },
-    { icon: CheckCircle, titleKey: "step4_title", descKey: "step4_desc" },
-  ];
-
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
       <section className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">{t("subtitle")}</p>
+        <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg text-balance leading-relaxed">
+          {t("subtitle")}
+        </p>
       </section>
 
       <Separator />
@@ -61,21 +66,21 @@ export default async function ShippingReturnsPage({ params }: Props) {
           <Card>
             <CardHeader>
               <Globe className="mb-2 size-6 text-primary" />
-              <CardTitle className="text-base">{t("zoneTitle")}</CardTitle>
+              <CardTitle className="text-base font-heading">{t("zoneTitle")}</CardTitle>
               <CardDescription>{t("zoneDesc")}</CardDescription>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
               <Truck className="mb-2 size-6 text-primary" />
-              <CardTitle className="text-base">{t("carrierTitle")}</CardTitle>
+              <CardTitle className="text-base font-heading">{t("carrierTitle")}</CardTitle>
               <CardDescription>{t("carrierDesc")}</CardDescription>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
               <Clock className="mb-2 size-6 text-primary" />
-              <CardTitle className="text-base">{t("delayTitle")}</CardTitle>
+              <CardTitle className="text-base font-heading">{t("delayTitle")}</CardTitle>
               <CardDescription>{t("delayDesc")}</CardDescription>
             </CardHeader>
           </Card>
@@ -85,7 +90,7 @@ export default async function ShippingReturnsPage({ params }: Props) {
       <Separator />
 
       <section>
-        <h2 className="mb-6 text-2xl font-bold">{t("methodsTitle")}</h2>
+        <h2 className="mb-6 text-balance text-2xl font-bold">{t("methodsTitle")}</h2>
         <Card>
           <CardContent className="p-0">
             <table className="w-full text-sm">
@@ -98,11 +103,11 @@ export default async function ShippingReturnsPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {shippingMethods.map((m) => (
+                {SHIPPING_METHODS.map((m) => (
                   <tr key={m.labelKey} className="border-b last:border-0">
                     <td className="p-4 font-medium">{t(m.labelKey)}</td>
-                    <td className="p-4">{m.cost}</td>
-                    <td className="p-4">{m.delay}</td>
+                    <td className="p-4">{t(m.costKey)}</td>
+                    <td className="p-4">{t(m.delayKey)}</td>
                     <td className="p-4 text-right">
                       <Badge variant="secondary">{t(m.badgeKey)}</Badge>
                     </td>
@@ -117,15 +122,15 @@ export default async function ShippingReturnsPage({ params }: Props) {
       <Separator />
 
       <section>
-        <h2 className="mb-6 text-2xl font-bold">{t("returnPolicyTitle")}</h2>
+        <h2 className="mb-6 text-balance text-2xl font-bold">{t("returnPolicyTitle")}</h2>
         <Card>
           <CardHeader>
             <CardTitle>{t("returnConditionsTitle")}</CardTitle>
             <CardDescription>{t("returnConditionsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-muted-foreground text-sm">{t("returnCondition1")}</p>
-            <p className="text-muted-foreground text-sm">{t("returnCondition2")}</p>
+            <p className="text-muted-foreground text-sm leading-relaxed">{t("returnCondition1")}</p>
+            <p className="text-muted-foreground text-sm leading-relaxed">{t("returnCondition2")}</p>
           </CardContent>
         </Card>
       </section>
@@ -133,15 +138,15 @@ export default async function ShippingReturnsPage({ params }: Props) {
       <Separator />
 
       <section>
-        <h2 className="mb-6 text-2xl font-bold">{t("returnProcessTitle")}</h2>
+        <h2 className="mb-6 text-balance text-2xl font-bold">{t("returnProcessTitle")}</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {returnSteps.map((step) => {
+          {RETURN_STEPS.map((step) => {
             const Icon = step.icon;
             return (
               <Card key={step.titleKey}>
                 <CardHeader>
                   <Icon className="mb-2 size-8 text-primary" />
-                  <CardTitle className="text-base">{t(step.titleKey)}</CardTitle>
+                  <CardTitle className="text-base font-heading">{t(step.titleKey)}</CardTitle>
                   <CardDescription>{t(step.descKey)}</CardDescription>
                 </CardHeader>
               </Card>

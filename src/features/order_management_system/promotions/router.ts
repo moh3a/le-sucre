@@ -59,4 +59,6 @@ export const promotion_router = create_trpc_router({
   ),
 
   activeFlashSales: public_procedure.query(() => flash_sale_service.list_storefront()),
+
+  storefrontPromotions: public_procedure.query(() => promotion_service.get_storefront_data()),
 });

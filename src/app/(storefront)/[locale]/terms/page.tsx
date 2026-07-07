@@ -13,17 +13,20 @@ type Article = {
   contentKey: string;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "terms" });
-  return { title: t("title") };
-}
-
 const ARTICLES: Article[] = Array.from({ length: 10 }, (_, i) => ({
   number: i + 1,
   titleKey: `article_${i + 1}_title`,
   contentKey: `article_${i + 1}_content`,
 }));
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "terms" });
+  return {
+    title: t("title"),
+    description: t("lastUpdated"),
+  };
+}
 
 export default async function TermsPage({ params }: Props) {
   const { locale } = await params;
@@ -32,14 +35,16 @@ export default async function TermsPage({ params }: Props) {
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
       <section className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("lastUpdated")}</p>
+        <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("lastUpdated")}</p>
       </section>
 
       <Separator />
 
       <section className="text-center">
-        <p className="text-muted-foreground text-sm">{t("readNotice")}</p>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-sm leading-relaxed text-balance">
+          {t("readNotice")}
+        </p>
       </section>
 
       <Separator />
@@ -48,8 +53,8 @@ export default async function TermsPage({ params }: Props) {
         {ARTICLES.map((article) => (
           <Card key={article.number}>
             <CardHeader>
-              <CardTitle className="text-lg">
-                {t("articleLabel", { number: article.number })} - {t(article.titleKey)}
+              <CardTitle className="text-lg font-heading">
+                {t("articleLabel", { number: article.number })} — {t(article.titleKey)}
               </CardTitle>
             </CardHeader>
             <CardContent>

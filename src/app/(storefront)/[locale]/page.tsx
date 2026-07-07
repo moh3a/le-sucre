@@ -184,22 +184,6 @@ export default async function HomePage({ params }: Props) {
         />
       </section>
 
-      {/* NEWSLETTER CTA */}
-      <section className="bg-olive-leaf space-y-4 rounded-xl p-12 text-center text-white">
-        <h2 className="text-3xl font-bold">{t("home.newsletter_title")}</h2>
-        <p className="text-white/80">
-          {t("home.newsletter_subtitle")}
-        </p>
-        <div className="mx-auto flex max-w-md gap-2">
-          <input
-            type="email"
-            placeholder={t("home.newsletter_placeholder")}
-            className="text-foreground flex-1 rounded-md px-4 py-2"
-          />
-          <Button variant="secondary">{t("home.newsletter_subscribe")}</Button>
-        </div>
-      </section>
-
       {/* TESTIMONIALS */}
       <section className="space-y-6">
         <h2 className="text-center text-2xl font-bold">

@@ -36,6 +36,7 @@ import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
 import { assert_order_transition } from "../order-lifecycle.engine";
+import { shipping_repository } from "@/features/shipping_management_system/repository";
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -294,6 +295,25 @@ export class OrderService {
       throw_error(ORDER_ERROR.GUEST_ACCESS_DENIED);
     }
     return data;
+  }
+
+  async track_order(order_number: string) {
+    const order = await this.repo.find_by_order_number(order_number);
+    if (!order) throw_error(ORDER_ERROR.NOT_FOUND);
+
+    const items = await this.repo.find_items_by_order(order.id);
+
+    const shipment = await shipping_repository.find_shipment_by_order(order.id);
+    const tracking_events = shipment
+      ? await shipping_repository.get_tracking_events(shipment.id)
+      : [];
+
+    return {
+      order,
+      items,
+      shipment,
+      tracking_events,
+    };
   }
 
   admin_list(input: z.infer<typeof list_orders_dto>) {

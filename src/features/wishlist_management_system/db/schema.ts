@@ -106,6 +106,7 @@ export const collections = mysqlTable(
     slug: varchar("slug", { length: 255 }).notNull(),
     description: text("description"),
     cover_image_url: varchar("cover_image_url", { length: 2048 }),
+    share_token: varchar("share_token", { length: 255 }),
     is_public: boolean("is_public").notNull().default(false),
     is_featured: boolean("is_featured").notNull().default(false),
     sort_order: int("sort_order").notNull().default(0),
@@ -116,6 +117,7 @@ export const collections = mysqlTable(
   },
   (t) => [
     uniqueIndex("collections_customer_slug_uidx").on(t.customer_id, t.slug),
+    uniqueIndex("collections_share_token_uidx").on(t.share_token),
     index("collections_customer_idx").on(t.customer_id),
     index("collections_public_idx").on(t.is_public),
     index("collections_featured_idx").on(t.is_featured),

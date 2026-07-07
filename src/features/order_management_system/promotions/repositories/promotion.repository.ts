@@ -219,6 +219,76 @@ export class PromotionRepository {
       .where(eq(promotion_redemptions.user_id, user_id))
       .orderBy(desc(promotion_redemptions.created_at));
   }
+
+  async list_storefront() {
+    const now = now_iso();
+
+    const active_promotions = await db
+      .select()
+      .from(promotions)
+      .where(
+        and(
+          eq(promotions.status, PROMOTION_STATUS.active),
+          inArray(promotions.promotion_type, [
+            PROMOTION_TYPE.automatic,
+            PROMOTION_TYPE.promo_code,
+            PROMOTION_TYPE.customer,
+          ]),
+          or(sql`${promotions.starts_at} IS NULL`, lte(promotions.starts_at, now)),
+          or(sql`${promotions.ends_at} IS NULL`, gte(promotions.ends_at, now)),
+        ),
+      )
+      .orderBy(asc(promotions.priority));
+
+    if (!active_promotions.length) return { promotions: [], promo_codes: [] };
+
+    const promotion_ids = active_promotions.map((p) => p.id);
+
+    const [rules, codes] = await Promise.all([
+      db
+        .select()
+        .from(promotion_rules)
+        .where(
+          and(
+            inArray(promotion_rules.promotion_id, promotion_ids),
+            eq(promotion_rules.is_active, true),
+          ),
+        )
+        .orderBy(asc(promotion_rules.sort_order)),
+      db
+        .select()
+        .from(promo_codes)
+        .where(
+          and(
+            inArray(promo_codes.promotion_id, promotion_ids),
+            eq(promo_codes.is_active, true),
+            or(sql`${promo_codes.starts_at} IS NULL`, lte(promo_codes.starts_at, now)),
+            or(sql`${promo_codes.ends_at} IS NULL`, gte(promo_codes.ends_at, now)),
+          ),
+        ),
+    ]);
+
+    const rules_by_promotion = new Map<string, typeof rules>();
+    for (const rule of rules) {
+      const existing = rules_by_promotion.get(rule.promotion_id) ?? [];
+      existing.push(rule);
+      rules_by_promotion.set(rule.promotion_id, existing);
+    }
+
+    const codes_by_promotion = new Map<string, typeof codes>();
+    for (const code of codes) {
+      const existing = codes_by_promotion.get(code.promotion_id) ?? [];
+      existing.push(code);
+      codes_by_promotion.set(code.promotion_id, existing);
+    }
+
+    const promotions_with_rules = active_promotions.map((p) => ({
+      ...p,
+      rules: rules_by_promotion.get(p.id) ?? [],
+    }));
+
+    return { promotions: promotions_with_rules, promo_codes: codes };
+  }
 }
 
 export const promotion_repository = new PromotionRepository();

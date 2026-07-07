@@ -172,6 +172,11 @@ export class PromotionService {
     });
     return bundle;
   }
+
+  async get_storefront_data() {
+    const data = await promotion_repository.list_storefront();
+    return data;
+  }
 }
 
 export const promotion_service = new PromotionService();

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { create_trpc_router } from "@/lib/trpc/router";
+import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import {
   permission_procedure,
   storefront_procedure,
@@ -128,4 +128,8 @@ export const order_router = create_trpc_router({
     .mutation(({ ctx, input }) =>
       order_service.admin_update_shipping({ ...input, actor_user_id: ctx.session!.user.id }),
     ),
+
+  trackOrder: public_procedure
+    .input(z.object({ order_number: z.string().min(1).max(32) }))
+    .query(({ input }) => order_service.track_order(input.order_number)),
 });

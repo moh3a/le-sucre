@@ -47,4 +47,8 @@ export const collection_router = create_trpc_router({
   listItems: storefront_procedure
     .input(list_collection_items_dto)
     .query(({ ctx, input }) => collection_service.list_items(ctx.user.id, input)),
+
+  getSharedByToken: public_procedure
+    .input(z.object({ token: z.string().min(1) }))
+    .query(({ input }) => collection_service.get_shared_collection(input.token)),
 });

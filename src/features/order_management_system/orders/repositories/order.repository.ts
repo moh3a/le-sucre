@@ -45,6 +45,15 @@ export class OrderRepository {
       .then((r) => r[0] ?? null);
   }
 
+  async find_by_order_number(order_number: string) {
+    return await db
+      .select()
+      .from(orders)
+      .where(eq(orders.order_number, order_number))
+      .limit(1)
+      .then((r) => r[0] ?? null);
+  }
+
   async find_by_idempotency(idempotency_key: string) {
     return await db
       .select()

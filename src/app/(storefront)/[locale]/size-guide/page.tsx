@@ -13,12 +13,6 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "sizeGuide" });
-  return { title: t("title") };
-}
-
 const CLOTHING_ROWS: RowData[] = [
   { labelKey: "clothes_chest", values: ["82-86", "86-90", "90-95", "95-100", "100-106", "106-112"] },
   { labelKey: "clothes_waist", values: ["62-66", "66-70", "70-75", "75-80", "80-86", "86-92"] },
@@ -26,11 +20,15 @@ const CLOTHING_ROWS: RowData[] = [
   { labelKey: "clothes_length", values: ["60", "62", "64", "66", "68", "70"] },
 ];
 
+const CLOTHING_HEADERS = ["XS", "S", "M", "L", "XL", "XXL"];
+
 const SHOE_ROWS: RowData[] = [
   { labelKey: "shoe_foot", values: ["22.5", "23", "23.8", "24.5", "25.2", "25.8", "26.5", "27.2", "27.8", "28.5"] },
   { labelKey: "shoe_eu", values: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45"] },
   { labelKey: "shoe_uk", values: ["3.5", "4", "5", "5.5", "6.5", "7.5", "8", "9", "9.5", "10.5"] },
 ];
+
+const SHOE_HEADERS = ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45"];
 
 const ACCESSORY_ROWS: RowData[] = [
   { labelKey: "accessory_caps", values: ["S/M : 54-57", "L/XL : 57-60", "-"] },
@@ -42,7 +40,16 @@ const TIPS = [
   { titleKey: "tip_chest_title", descKey: "tip_chest_desc" },
   { titleKey: "tip_waist_title", descKey: "tip_waist_desc" },
   { titleKey: "tip_hips_title", descKey: "tip_hips_desc" },
-];
+] as const;
+
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "sizeGuide" });
+  return {
+    title: t("title"),
+    description: t("subtitle"),
+  };
+}
 
 export default async function SizeGuidePage({ params }: Props) {
   const { locale } = await params;
@@ -51,8 +58,10 @@ export default async function SizeGuidePage({ params }: Props) {
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
       <section className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">{t("subtitle")}</p>
+        <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg text-balance leading-relaxed">
+          {t("subtitle")}
+        </p>
       </section>
 
       <Separator />
@@ -77,7 +86,7 @@ export default async function SizeGuidePage({ params }: Props) {
                     <thead>
                       <tr className="border-b">
                         <th className="text-muted-foreground p-3 text-left font-medium">{t("measureHeader")}</th>
-                        {["XS", "S", "M", "L", "XL", "XXL"].map((h) => (
+                        {CLOTHING_HEADERS.map((h) => (
                           <th key={h} className="text-muted-foreground p-3 text-center font-medium">{h}</th>
                         ))}
                       </tr>
@@ -110,7 +119,7 @@ export default async function SizeGuidePage({ params }: Props) {
                     <thead>
                       <tr className="border-b">
                         <th className="text-muted-foreground p-3 text-left font-medium">{t("measureHeader")}</th>
-                        {["36", "37", "38", "39", "40", "41", "42", "43", "44", "45"].map((h) => (
+                        {SHOE_HEADERS.map((h) => (
                           <th key={h} className="text-muted-foreground p-3 text-center font-medium">{h}</th>
                         ))}
                       </tr>
@@ -169,7 +178,7 @@ export default async function SizeGuidePage({ params }: Props) {
       <Separator />
 
       <section>
-        <h2 className="mb-6 text-2xl font-bold">{t("tipsTitle")}</h2>
+        <h2 className="mb-6 text-balance text-2xl font-bold">{t("tipsTitle")}</h2>
         <div className="grid gap-6 sm:grid-cols-3">
           {TIPS.map((tip) => (
             <Card key={tip.titleKey}>
@@ -183,7 +192,9 @@ export default async function SizeGuidePage({ params }: Props) {
             </Card>
           ))}
         </div>
-        <p className="text-muted-foreground mt-4 text-center text-sm">{t("tipsComingSoon")}</p>
+        <p className="text-muted-foreground mt-4 text-center text-sm">
+          {t("tipsComingSoon")}
+        </p>
       </section>
     </div>
   );

@@ -184,6 +184,16 @@ export class CollectionService {
     await this.analytics.record_event(customer_id, null, item.product_id!, "remove_from_collection");
   }
 
+  async get_shared_collection(token: string) {
+    const collection = await this.repo.find_by_share_token(token);
+    if (!collection) throw_error(WISHLIST_ERROR.COLLECTION_NOT_FOUND);
+    if (!collection.is_public) throw_error(WISHLIST_ERROR.COLLECTION_NOT_FOUND);
+
+    const items = await this.item_repo.get_items_with_products(collection.id);
+
+    return { collection, items };
+  }
+
   async list_items(customer_id: string, input: z.infer<typeof list_collection_items_dto>) {
     const collection = await this.repo.find_by_id(input.collection_id);
     if (!collection) throw_error(WISHLIST_ERROR.COLLECTION_NOT_FOUND);
