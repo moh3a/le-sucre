@@ -21,6 +21,7 @@ import * as feature_flag_schema from "@/features/feature_flag_system/schema";
 import * as media_schema from "@/features/media_library/db/schema";
 import * as mfa_schema from "@/features/authentication_and_authorization/auth/mfa_schema";
 import * as profile_schema from "@/features/authentication_and_authorization/profile/db/schema";
+import * as init_schema from "@/features/init_system/schema";
 
 const pool = mysql.createPool({
   uri: env.DATABASE_URL,
@@ -49,6 +50,7 @@ export const db = drizzle(pool, {
     ...media_schema,
     ...mfa_schema,
     ...profile_schema,
+    ...init_schema,
   },
   mode: "default",
 });

@@ -49,6 +49,7 @@ import {
 import { contact_router } from "@/features/contact_management/router";
 import { health_router } from "@/features/monitoring/health/routers/health.router";
 import { dashboard_router } from "@/features/customer_dashboard/routers/dashboard.router";
+import { init_router } from "@/features/init_system/router";
 
 export const app_router = create_trpc_router({
   auth: auth_router,
@@ -98,6 +99,7 @@ export const app_router = create_trpc_router({
   operationsWorkflows: operations_workflows_router,
   health: health_router,
   dashboard: dashboard_router,
+  init: init_router,
 });
 
 export type AppRouter = typeof app_router;

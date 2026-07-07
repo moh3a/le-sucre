@@ -8,6 +8,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { auth } from "@/lib/auth";
 import { AuthorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
+import { InitService } from "@/features/init_system/services/init.service";
 import { APP_NAME } from "@/constants";
 
 export const metadata: Metadata = {
@@ -16,6 +17,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
+  const { initialized } = await new InitService().check_status();
+  if (!initialized) redirect("/init");
+
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) redirect("/auth?next=/console");
 
