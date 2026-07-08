@@ -13,9 +13,7 @@ export function RecentlyViewedSection({
   locale: AppLocale;
   limit?: number;
 }) {
-  const [sessionKey, setSessionKey] = React.useState<string>("");
-
-  React.useEffect(() => {
+  const [sessionKey] = React.useState<string>(() => {
     let key = localStorage.getItem("ls_session_key");
     if (!key) {
       const array = new Uint8Array(16);
@@ -23,8 +21,8 @@ export function RecentlyViewedSection({
       key = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
       localStorage.setItem("ls_session_key", key);
     }
-    setSessionKey(key);
-  }, []);
+    return key;
+  });
 
   const query = trpc.recommendations.recent.useQuery(
     {

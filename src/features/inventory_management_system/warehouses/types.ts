@@ -14,5 +14,6 @@ export type WarehouseOption = {
   id: string;
   name: string;
   slug: string;
+  location?: string | null;
   is_active: boolean;
 };

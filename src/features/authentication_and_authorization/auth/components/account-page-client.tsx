@@ -7,7 +7,6 @@ import { z } from "zod";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AccountProfileTab } from "./account-profile-tab";
 import { AccountSecurityTab } from "./account-security-tab";
 import { AccountActivityTab } from "./account-activity-tab";
 import { ProfileSection } from "@/features/authentication_and_authorization/profile/components/profile-section";

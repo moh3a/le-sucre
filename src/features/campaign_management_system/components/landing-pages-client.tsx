@@ -3,6 +3,13 @@
 import { trpc } from "@/components/providers/app-providers";
 import Link from "next/link";
 
+type LandingPageItem = {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+};
+
 export function LandingPagesClient() {
   const { data: pages } = trpc.campaigns.landingPagesAdmin.useQuery();
 
@@ -13,21 +20,35 @@ export function LandingPagesClient() {
 
       <div className="rounded-lg border">
         <div className="divide-y">
-          {pages?.items?.map((p: any) => (
+          {pages?.items?.map((p: LandingPageItem) => (
             <div key={p.id} className="flex items-center justify-between px-4 py-3">
               <div>
-                <Link href={`/console/campaigns/${p.id}`} className="text-sm font-medium text-blue-600 hover:underline">
+                <Link
+                  href={`/console/campaigns/${p.id}`}
+                  className="text-sm font-medium text-blue-600 hover:underline"
+                >
                   {p.name}
                 </Link>
-                <p className="text-xs text-gray-500">/{p.slug} · {p.status}</p>
+                <p className="text-xs text-gray-500">
+                  /{p.slug} · {p.status}
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`rounded-full px-2 py-0.5 text-xs ${statusColor(p.status)}`}>{p.status}</span>
-                <Link href={`/console/campaigns/${p.id}`} className="text-xs text-blue-600 hover:underline">Edit</Link>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${statusColor(p.status)}`}>
+                  {p.status}
+                </span>
+                <Link
+                  href={`/console/campaigns/${p.id}`}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Edit
+                </Link>
               </div>
             </div>
           ))}
-          {(!pages || pages.items?.length === 0) && <p className="p-4 text-sm text-gray-400">No landing pages</p>}
+          {(!pages || pages.items?.length === 0) && (
+            <p className="p-4 text-sm text-gray-400">No landing pages</p>
+          )}
         </div>
       </div>
     </div>

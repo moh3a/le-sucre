@@ -28,8 +28,9 @@ export function SettingsPageClient() {
   const [notifValues, setNotifValues] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (data) {
-      const profile = data.profile;
+    if (!data) return;
+    const profile = data.profile;
+    const raf = requestAnimationFrame(() => {
       setProfileValues({
         first_name: profile?.first_name ?? "",
         last_name: profile?.last_name ?? "",
@@ -43,7 +44,8 @@ export function SettingsPageClient() {
         promotions: profile?.marketing_opt_in ?? false,
         newsletter: profile?.newsletter_opt_in ?? true,
       });
-    }
+    });
+    return () => cancelAnimationFrame(raf);
   }, [data]);
 
   const profileSave = trpc.profile.update.useMutation({

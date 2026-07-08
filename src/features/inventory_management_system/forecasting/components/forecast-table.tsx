@@ -85,7 +85,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -132,12 +135,18 @@ export function ForecastTable() {
     { label: t("risk_low"), value: "low" },
   ];
 
-  const riskBadges: Record<string, { label: string; variant: "destructive" | "secondary" | "default" | "outline" }> = {
-    critical: { label: t("risk_critical"), variant: "destructive" },
-    high: { label: t("risk_high"), variant: "secondary" },
-    normal: { label: t("risk_normal"), variant: "default" },
-    low: { label: t("risk_low"), variant: "outline" },
-  };
+  const riskBadges: Record<
+    string,
+    { label: string; variant: "destructive" | "secondary" | "default" | "outline" }
+  > = React.useMemo(
+    () => ({
+      critical: { label: t("risk_critical"), variant: "destructive" },
+      high: { label: t("risk_high"), variant: "secondary" },
+      normal: { label: t("risk_normal"), variant: "default" },
+      low: { label: t("risk_low"), variant: "outline" },
+    }),
+    [t],
+  );
 
   const columns = React.useMemo<ColumnDef<ForecastRow>[]>(
     () => [
@@ -149,7 +158,9 @@ export function ForecastTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("product_column")} />
+        ),
         cell: ({ row }) => (
           <span className="text-sm font-medium">{row.original.product_name ?? "—"}</span>
         ),
@@ -157,13 +168,17 @@ export function ForecastTable() {
       {
         id: "sku_code",
         accessorKey: "sku_code",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("sku_code_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("sku_code_column")} />
+        ),
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.sku_code}</span>,
       },
       {
         id: "risk_level",
         accessorKey: "risk_level",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("risk_level_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("risk_level_column")} />
+        ),
         cell: ({ row }) => {
           const cfg = riskBadges[row.original.risk_level] ?? {
             label: row.original.risk_level,
@@ -183,7 +198,9 @@ export function ForecastTable() {
       {
         id: "current_stock",
         accessorKey: "current_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("stock_on_hand_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("stock_on_hand_column")} />
+        ),
         cell: ({ row }) =>
           row.original.current_stock != null ? (
             <Badge
@@ -204,7 +221,9 @@ export function ForecastTable() {
       {
         id: "reserved_stock",
         accessorKey: "reserved_stock",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reserved_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("reserved_column")} />
+        ),
         cell: ({ row }) =>
           row.original.reserved_stock != null ? (
             <span className="text-muted-foreground text-sm">{row.original.reserved_stock}</span>
@@ -261,27 +280,31 @@ export function ForecastTable() {
       {
         id: "computed_at",
         accessorKey: "computed_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("calculation_date_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("calculation_date_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.computed_at, { month: "short" }),
       },
     ],
     [riskBadges, t],
   );
 
-  const items = ((data?.items ?? []) as ForecastRow[]).filter((item) => {
-    if (search) {
-      const q = search.toLowerCase();
-      const matchesProduct = item.product_name?.toLowerCase().includes(q);
-      const matchesSku = item.sku_code.toLowerCase().includes(q);
-      if (!matchesProduct && !matchesSku) return false;
-    }
-    return true;
-  }).sort((a, b) => {
-    const aOrder = RISK_SORT_ORDER[a.risk_level] ?? 0;
-    const bOrder = RISK_SORT_ORDER[b.risk_level] ?? 0;
-    if (bOrder !== aOrder) return bOrder - aOrder;
-    return (a.days_until_stockout ?? 9999) - (b.days_until_stockout ?? 9999);
-  });
+  const items = ((data?.items ?? []) as ForecastRow[])
+    .filter((item) => {
+      if (search) {
+        const q = search.toLowerCase();
+        const matchesProduct = item.product_name?.toLowerCase().includes(q);
+        const matchesSku = item.sku_code.toLowerCase().includes(q);
+        if (!matchesProduct && !matchesSku) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const aOrder = RISK_SORT_ORDER[a.risk_level] ?? 0;
+      const bOrder = RISK_SORT_ORDER[b.risk_level] ?? 0;
+      if (bOrder !== aOrder) return bOrder - aOrder;
+      return (a.days_until_stockout ?? 9999) - (b.days_until_stockout ?? 9999);
+    });
   const page_count = data?.meta.totalPages ?? 0;
 
   const { table } = useDataTable({
@@ -299,29 +322,29 @@ export function ForecastTable() {
       loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />}
     >
       <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <Input
-          placeholder={t("search_placeholder")}
-          value={search || ""}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="max-w-sm"
-        />
-        <FacetedFilter
-          title={t("risk_level_title")}
-          options={riskOptions}
-          icon={XCircle}
-          value={risk_level ?? undefined}
-          onChange={(val) => {
-            setRiskLevel(val);
-            setPage(1);
-          }}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-    </DataTable>
+        <DataTableAdvancedToolbar table={table}>
+          <Input
+            placeholder={t("search_placeholder")}
+            value={search || ""}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="max-w-sm"
+          />
+          <FacetedFilter
+            title={t("risk_level_title")}
+            options={riskOptions}
+            icon={XCircle}
+            value={risk_level ?? undefined}
+            onChange={(val) => {
+              setRiskLevel(val);
+              setPage(1);
+            }}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+      </DataTable>
     </QueryGuard>
   );
 }

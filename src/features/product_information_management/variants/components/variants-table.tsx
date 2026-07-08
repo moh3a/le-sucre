@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -322,14 +323,14 @@ export function VariantsTable() {
                 >
                   {opt.color_hex ? (
                     <span
-                      className="inline-block h-3 w-3 flex-shrink-0 rounded-full border"
+                      className="inline-block h-3 w-3 shrink-0 rounded-full border"
                       style={{ backgroundColor: opt.color_hex }}
                     />
                   ) : opt.thumbnail_image ? (
                     <img
                       src={opt.thumbnail_image}
                       alt=""
-                      className="h-4 w-4 flex-shrink-0 rounded object-cover"
+                      className="h-4 w-4 shrink-0 rounded object-cover"
                     />
                   ) : null}
                   {opt.value_label || opt.value_code}
@@ -356,7 +357,7 @@ export function VariantsTable() {
                   <span className="font-semibold text-emerald-600">
                     {Number(offer).toLocaleString("fr-FR")} {currency}
                   </span>
-                  <span className="text-muted-foreground line-through text-[10px]">
+                  <span className="text-muted-foreground text-[10px] line-through">
                     {Number(base).toLocaleString("fr-FR")} {currency}
                   </span>
                 </>
@@ -381,7 +382,7 @@ export function VariantsTable() {
           return (
             <span
               className={
-                stock < 10 ? "text-warning font-bold font-mono" : "font-mono font-semibold"
+                stock < 10 ? "text-warning font-mono font-bold" : "font-mono font-semibold"
               }
             >
               {stock}
@@ -392,7 +393,9 @@ export function VariantsTable() {
       {
         id: "is_active",
         accessorKey: "is_active",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? "outline" : "secondary"}>
             {row.original.is_active ? t("active") : t("inactive")}
@@ -441,7 +444,7 @@ export function VariantsTable() {
     status: status ?? undefined,
     search: search?.trim() || undefined,
   });
-  const { data, isLoading } = query;
+  const { data } = query;
 
   const bulkUpdate = trpc.variants.bulkUpdateSku.useMutation({
     onSuccess: () => {
@@ -458,7 +461,6 @@ export function VariantsTable() {
   });
 
   const items = (data?.items ?? []) as SkuRow[];
-  const total_records = data?.meta.total_records ?? 0;
   const page_count = data?.meta.total_pages ?? 0;
 
   const { table } = useDataTable({
@@ -486,7 +488,10 @@ export function VariantsTable() {
   }
 
   return (
-    <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />}>
+    <QueryGuard
+      query={query}
+      loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={3} />}
+    >
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
@@ -554,7 +559,9 @@ export function VariantsTable() {
       <PriceTierManager
         skuId={pricingSkuId ?? ""}
         open={pricingSkuId !== null}
-        onOpenChange={(open) => { if (!open) setPricingSkuId(null); }}
+        onOpenChange={(open) => {
+          if (!open) setPricingSkuId(null);
+        }}
       />
     </QueryGuard>
   );

@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    setMatches(media.matches);
-
-    const listener = (e: MediaQueryListEvent) => setMatches(e.matches);
+    const listener = () => setTick((c) => c + 1);
     media.addEventListener("change", listener);
     return () => media.removeEventListener("change", listener);
   }, [query]);
 
-  return matches;
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(query).matches;
 }
 
 // Convenience hooks for Tailwind breakpoints

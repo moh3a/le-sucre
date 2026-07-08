@@ -1,11 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ArrowLeftRight, Clock, PackageX, RotateCcw } from "lucide-react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
-import { ArrowLeftRight, Ban, CheckCircle2, Clock, PackageX, RotateCcw } from "lucide-react";
 import { AdminReturnsTable } from "./admin-returns-table";
 
 export function AdminReturnsPageClient() {

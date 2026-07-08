@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Banknote, CheckCircle2, Clock, RefreshCcw, Wallet, XCircle } from "lucide-react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";

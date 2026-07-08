@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +27,11 @@ export function BrandCard({ brand, isLoading, error, variant = "list" }: BrandCa
           <CardHeader>
             <div className="bg-muted mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full">
               {brand.logo_url ? (
-                <img src={brand.logo_url} alt={brand.name} className="h-full w-full rounded-full object-cover" />
+                <img
+                  src={brand.logo_url}
+                  alt={brand.name}
+                  className="h-full w-full rounded-full object-cover"
+                />
               ) : (
                 <span className="text-muted-foreground text-xs">{brand.name.charAt(0)}</span>
               )}
@@ -42,7 +47,11 @@ export function BrandCard({ brand, isLoading, error, variant = "list" }: BrandCa
           <CardHeader className="flex-row items-center gap-4">
             <div className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
               {brand.logo_url ? (
-                <img src={brand.logo_url} alt={brand.name} className="h-full w-full rounded-full object-cover" />
+                <img
+                  src={brand.logo_url}
+                  alt={brand.name}
+                  className="h-full w-full rounded-full object-cover"
+                />
               ) : (
                 <span className="text-muted-foreground text-xs">{brand.name.charAt(0)}</span>
               )}

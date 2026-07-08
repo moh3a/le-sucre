@@ -24,11 +24,11 @@ export function RelatedProductsSection({
 
   return (
     <QueryGuard query={query}>
-    <ProductRecommendationCarousel
-      title={locale === "fr" ? "Vous aimerez aussi" : "You Might Also Like"}
-      items={data?.related ?? []}
-      isLoading={isLoading}
-    />
+      <ProductRecommendationCarousel
+        title={locale === "fr" ? "Vous aimerez aussi" : "You Might Also Like"}
+        items={data?.related ?? []}
+        isLoading={isLoading}
+      />
     </QueryGuard>
   );
 }

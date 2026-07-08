@@ -41,7 +41,7 @@ export function BrandFormDialog({
     { id: brand_id! },
     { enabled: mode === "edit" && !!brand_id && open },
   );
-  const { data: brand, isLoading } = brand_query;
+  const { data: brand } = brand_query;
 
   const title = mode === "create" ? t("new") : t("edit");
   const description = mode === "create" ? t("new_description") : t("edit_description");
@@ -59,14 +59,17 @@ export function BrandFormDialog({
           <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        <QueryGuard query={brand_query} loadingFallback={
-          <div className="space-y-4 py-4">
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-        }>
+        <QueryGuard
+          query={brand_query}
+          loadingFallback={
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          }
+        >
           <BrandForm
             key={mode === "edit" ? brand_id : "create"}
             mode={mode}

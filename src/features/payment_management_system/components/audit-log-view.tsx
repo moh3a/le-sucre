@@ -53,7 +53,7 @@ export function PaymentAuditLog({ paymentId }: PaymentAuditLogProps) {
   if (!data || data.items.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-4 text-center">
-        Aucun journal d'audit trouvé.
+        Aucun journal d&apos;audit trouvé.
       </p>
     );
   }

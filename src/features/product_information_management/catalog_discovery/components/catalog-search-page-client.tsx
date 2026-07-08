@@ -9,6 +9,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { CatalogSortSelect } from "./catalog-sort-select";
@@ -18,7 +19,6 @@ import { CatalogProductGrid } from "./catalog-product-grid";
 import { CatalogPagination } from "./catalog-pagination";
 import { SearchPageSkeleton } from "./search-page-skeleton";
 import type { CatalogSort } from "../types";
-
 import type { CatalogSearchInput, CatalogFacetsInput } from "../models/search.dto";
 import type { AppLocale } from "@/i18n/config";
 

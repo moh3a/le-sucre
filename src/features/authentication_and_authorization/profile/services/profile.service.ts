@@ -4,7 +4,8 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { PROFILE_ERROR } from "@/features/authentication_and_authorization/profile/constants/error-codes";
 import { profile_repository } from "@/features/authentication_and_authorization/profile/repositories/profile.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
-import type { UserProfileInsert, UserAddressInsert } from "@/features/authentication_and_authorization/profile/types";
+import type { UserProfileInsert } from "@/features/authentication_and_authorization/profile/types";
+import type { CreateAddressInput, UpdateAddressInput } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
 
 const ADDRESS_LIMIT = 10;
 
@@ -45,13 +46,17 @@ export class ProfileService {
     return profile;
   }
 
-  async create_address(user_id: string, data: UserAddressInsert) {
+  async create_address(user_id: string, data: CreateAddressInput) {
     const count = await profile_repository.count_addresses(user_id);
     if (count >= ADDRESS_LIMIT) {
       throw_error(PROFILE_ERROR.ADDRESS_LIMIT_REACHED);
     }
 
-    const address = await profile_repository.create_address(user_id, data);
+    const address = await profile_repository.create_address(user_id, {
+      ...data,
+      latitude: data.latitude?.toString() ?? null,
+      longitude: data.longitude?.toString() ?? null,
+    });
 
     // If this is the first address, set it as default in profile
     if (count === 0) {
@@ -70,8 +75,12 @@ export class ProfileService {
     return address;
   }
 
-  async update_address(user_id: string, address_id: string, data: Partial<UserAddressInsert>) {
-    const updated = await profile_repository.update_address(address_id, user_id, data);
+  async update_address(user_id: string, address_id: string, data: Partial<CreateAddressInput>) {
+    const updated = await profile_repository.update_address(address_id, user_id, {
+      ...data,
+      latitude: data.latitude?.toString() ?? null,
+      longitude: data.longitude?.toString() ?? null,
+    });
     if (!updated) {
       throw_error(PROFILE_ERROR.ADDRESS_NOT_FOUND);
     }

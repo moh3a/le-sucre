@@ -61,58 +61,56 @@ export function CreateShipmentDialog() {
 
   return (
     <QueryGuard mutation={create}>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          {t("new_shipment")}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("create_shipment_title")}</DialogTitle>
-          <DialogDescription>
-            {t("create_shipment_desc")}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handle_submit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("order_id")}</Label>
-            <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("provider")}</Label>
-            <Select value={provider} onValueChange={setProvider}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PROVIDERS.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p.toUpperCase()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>{t("weight_kg")}</Label>
-            <Input
-              type="number"
-              step="0.1"
-              min="0.1"
-              value={weight_kg}
-              onChange={(e) => setWeightKg(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={create.isPending}>
-            <Package />
-            {t("create_shipment_button")}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus />
+            {t("new_shipment")}
           </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("create_shipment_title")}</DialogTitle>
+            <DialogDescription>{t("create_shipment_desc")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handle_submit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("order_id")}</Label>
+              <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("provider")}</Label>
+              <Select value={provider} onValueChange={setProvider}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROVIDERS.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("weight_kg")}</Label>
+              <Input
+                type="number"
+                step="0.1"
+                min="0.1"
+                value={weight_kg}
+                onChange={(e) => setWeightKg(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={create.isPending}>
+              <Package />
+              {t("create_shipment_button")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </QueryGuard>
   );
 }

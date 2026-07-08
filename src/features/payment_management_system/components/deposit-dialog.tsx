@@ -3,7 +3,6 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { Landmark } from "lucide-react";
-
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 
 const PROVIDERS = [
   { value: "stripe", label: "Stripe" },

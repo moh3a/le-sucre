@@ -3,6 +3,7 @@
 import { Search, X } from "lucide-react";
 import * as React from "react";
 import { useTranslations } from "next-intl";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -12,11 +13,7 @@ interface CatalogSearchBarProps {
   placeholder?: string;
 }
 
-export function CatalogSearchBar({
-  value,
-  onChange,
-  placeholder,
-}: CatalogSearchBarProps) {
+export function CatalogSearchBar({ value, onChange, placeholder }: CatalogSearchBarProps) {
   const t = useTranslations("catalog");
   const resolvedPlaceholder = placeholder ?? t("search_placeholder");
   const [prevValue, setPrevValue] = React.useState(value);
@@ -42,7 +39,7 @@ export function CatalogSearchBar({
       </div>
       <Input
         type="text"
-        className="w-full rounded-lg bg-background py-5 pr-10 pl-10 text-sm md:text-base"
+        className="bg-background w-full rounded-lg py-5 pr-10 pl-10 text-sm md:text-base"
         placeholder={resolvedPlaceholder}
         value={internalValue}
         onChange={(e) => setInternalValue(e.target.value)}

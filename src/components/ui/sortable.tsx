@@ -497,7 +497,10 @@ function SortableOverlay(props: SortableOverlayProps) {
   const context = useSortableContext(OVERLAY_NAME);
 
   const [mounted, setMounted] = React.useState(false);
-  React.useLayoutEffect(() => setMounted(true), []);
+  React.useLayoutEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const container = containerProp ?? (mounted ? globalThis.document?.body : null);
 

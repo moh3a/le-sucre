@@ -182,7 +182,7 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
 
   if (!data) return <p className="text-muted-foreground">{t("order_not_found")}</p>;
 
-  const { order, items, adjustments, status_events } = data;
+  const { order, items, adjustments } = data;
   const shipping_addr = order.shipping_address as Record<string, string>;
 
   // ── Payment handlers ──

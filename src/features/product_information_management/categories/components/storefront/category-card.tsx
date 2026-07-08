@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +29,7 @@ export function CategoryCard({ category, isLoading, error, variant = "grid" }: C
     >
       {category && variant === "home" ? (
         <Link href={`/c/${category.slug}`} className="group block">
-          <Card className="group cursor-pointer overflow-hidden p-4 text-center transition-shadow hover:shadow-md h-full">
+          <Card className="group h-full cursor-pointer overflow-hidden p-4 text-center transition-shadow hover:shadow-md">
             <div className="bg-muted mx-auto mb-3 h-20 w-20 rounded-full transition-transform group-hover:scale-105" />
             <p className="text-sm font-medium">{category.name}</p>
           </Card>
@@ -61,7 +62,7 @@ export function CategoryCard({ category, isLoading, error, variant = "grid" }: C
                     </Badge>
                   ))}
                   {category.children.length > 6 && (
-                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-muted-foreground text-xs">
                       +{category.children.length - 6}
                     </Badge>
                   )}

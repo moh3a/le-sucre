@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { ExternalLink, Plus, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
-
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -99,50 +98,50 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
 
   return (
     <QueryGuard query={{ isLoading }}>
-    <Card className="mt-4">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{t("shipment")}</CardTitle>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/console/shipping/${shipment.id}`}>{t("view_detail")}</Link>
-          </Button>
-          {shipment.tracking_url ? (
+      <Card className="mt-4">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>{t("shipment")}</CardTitle>
+          <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
-              <a href={shipment.tracking_url} target="_blank" rel="noreferrer">
-                <ExternalLink className="size-4" />
-              </a>
+              <Link href={`/console/shipping/${shipment.id}`}>{t("view_detail")}</Link>
             </Button>
-          ) : null}
-          <Button
-            size="sm"
-            disabled={!shipment.tracking_number || sync_mutation.isPending}
-            onClick={() => sync_mutation.mutate({ shipment_id: shipment.id })}
-          >
-            <RefreshCcw className="size-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">{shipment.provider}</Badge>
-          <Badge>{shipment.status}</Badge>
-          <Badge variant="secondary">{shipment.delivery_status}</Badge>
-        </div>
-        <p className="font-mono text-xs">{shipment.tracking_number ?? t("no_tracking_number")}</p>
-        {tracking_events.slice(0, 3).map((event) => (
-          <div key={event.id} className="text-muted-foreground border-l pl-3">
-            <p className="text-foreground font-medium">{event.status}</p>
-            <p className="text-xs">
-              {formatDate(event.occurred_at, {
-                month: "short",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
+            {shipment.tracking_url ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={shipment.tracking_url} target="_blank" rel="noreferrer">
+                  <ExternalLink className="size-4" />
+                </a>
+              </Button>
+            ) : null}
+            <Button
+              size="sm"
+              disabled={!shipment.tracking_number || sync_mutation.isPending}
+              onClick={() => sync_mutation.mutate({ shipment_id: shipment.id })}
+            >
+              <RefreshCcw className="size-4" />
+            </Button>
           </div>
-        ))}
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">{shipment.provider}</Badge>
+            <Badge>{shipment.status}</Badge>
+            <Badge variant="secondary">{shipment.delivery_status}</Badge>
+          </div>
+          <p className="font-mono text-xs">{shipment.tracking_number ?? t("no_tracking_number")}</p>
+          {tracking_events.slice(0, 3).map((event) => (
+            <div key={event.id} className="text-muted-foreground border-l pl-3">
+              <p className="text-foreground font-medium">{event.status}</p>
+              <p className="text-xs">
+                {formatDate(event.occurred_at, {
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </QueryGuard>
   );
 }

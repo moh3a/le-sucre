@@ -3,7 +3,19 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { ArrowLeftRight, Ban, Check, CheckCircle2, Download, MoreHorizontal, PackageX, RotateCcw, Truck, X, XCircle } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Ban,
+  Check,
+  CheckCircle2,
+  Download,
+  MoreHorizontal,
+  PackageX,
+  RotateCcw,
+  Truck,
+  X,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -30,7 +42,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -40,9 +51,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
-import {
-  RETURN_REQUEST_STATUS_BADGE,
-} from "../constants/status";
+import { RETURN_REQUEST_STATUS_BADGE } from "../constants/status";
 import type { ReturnRequestRow } from "./types";
 
 function FacetedFilter({
@@ -83,7 +92,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -135,9 +147,12 @@ function ReviewDialog({
 
   if (!request) return null;
 
-  const typeLabel = request.type === "return" ? t("type_return")
-    : request.type === "replacement" ? t("type_replacement")
-    : t("type_failed_delivery");
+  const typeLabel =
+    request.type === "return"
+      ? t("type_return")
+      : request.type === "replacement"
+        ? t("type_replacement")
+        : t("type_failed_delivery");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -151,7 +166,9 @@ function ReviewDialog({
         <div className="space-y-4">
           {request.reason && (
             <div className="text-sm">
-              <span className="text-muted-foreground text-xs font-medium">{t("reason_label")}:</span>
+              <span className="text-muted-foreground text-xs font-medium">
+                {t("reason_label")}:
+              </span>
               <p className="mt-0.5">{request.reason}</p>
             </div>
           )}
@@ -220,21 +237,27 @@ export function AdminReturnsTable() {
   const [reviewTarget, setReviewTarget] = React.useState<ReturnRequestRow | null>(null);
   const [reviewOpen, setReviewOpen] = React.useState(false);
 
-  const STATUS_LABELS: Record<string, string> = {
-    pending: t("status_pending"),
-    approved: t("status_approved"),
-    rejected: t("status_rejected"),
-    in_transit: t("status_in_transit"),
-    received: t("status_received"),
-    completed: t("status_completed"),
-    cancelled: t("status_cancelled"),
-  };
+  const STATUS_LABELS: Record<string, string> = React.useMemo(
+    () => ({
+      pending: t("status_pending"),
+      approved: t("status_approved"),
+      rejected: t("status_rejected"),
+      in_transit: t("status_in_transit"),
+      received: t("status_received"),
+      completed: t("status_completed"),
+      cancelled: t("status_cancelled"),
+    }),
+    [t],
+  );
 
-  const TYPE_LABELS: Record<string, string> = {
-    return: t("type_return"),
-    replacement: t("type_replacement"),
-    failed_delivery: t("type_failed_delivery"),
-  };
+  const TYPE_LABELS: Record<string, string> = React.useMemo(
+    () => ({
+      return: t("type_return"),
+      replacement: t("type_replacement"),
+      failed_delivery: t("type_failed_delivery"),
+    }),
+    [t],
+  );
 
   const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
     label,
@@ -247,14 +270,6 @@ export function AdminReturnsTable() {
   }));
 
   const utils = trpc.useUtils();
-
-  const reviewMutation = trpc.returns.adminReview.useMutation({
-    onSuccess: () => {
-      toast.success(t("review_updated"));
-      utils.returns.adminList.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
 
   const receiveMutation = trpc.returns.adminReceive.useMutation({
     onSuccess: () => {
@@ -288,9 +303,14 @@ export function AdminReturnsTable() {
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => {
           const type = row.original.type;
-          const icon = type === "return" ? <RotateCcw className="size-4" />
-            : type === "replacement" ? <ArrowLeftRight className="size-4" />
-            : <PackageX className="size-4" />;
+          const icon =
+            type === "return" ? (
+              <RotateCcw className="size-4" />
+            ) : type === "replacement" ? (
+              <ArrowLeftRight className="size-4" />
+            ) : (
+              <PackageX className="size-4" />
+            );
           return (
             <div className="flex items-center gap-2">
               {icon}
@@ -306,7 +326,7 @@ export function AdminReturnsTable() {
         cell: ({ row }) => (
           <Link
             href={`/console/orders/${row.original.order_id}`}
-            className="font-mono text-xs underline underline-offset-2 hover:text-primary"
+            className="hover:text-primary font-mono text-xs underline underline-offset-2"
           >
             {row.original.order_id.slice(0, 12)}…
           </Link>
@@ -315,7 +335,9 @@ export function AdminReturnsTable() {
       {
         id: "reason",
         accessorKey: "reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("reason_column")} />
+        ),
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[200px] truncate text-xs">
             {row.original.reason ?? "—"}
@@ -328,11 +350,7 @@ export function AdminReturnsTable() {
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("items_column")} />,
         cell: ({ row }) => {
           const items = row.original.items;
-          return (
-            <span className="text-sm">
-              {items?.reduce((s, i) => s + i.quantity, 0) ?? 0}
-            </span>
-          );
+          return <span className="text-sm">{items?.reduce((s, i) => s + i.quantity, 0) ?? 0}</span>;
         },
       },
       {
@@ -348,7 +366,9 @@ export function AdminReturnsTable() {
       {
         id: "refund_amount",
         accessorKey: "refund_amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("refund_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("refund_column")} />
+        ),
         cell: ({ row }) => (
           <span className="text-sm">
             {row.original.refund_amount
@@ -407,9 +427,7 @@ export function AdminReturnsTable() {
                 )}
                 {r.status === "approved" && r.type !== "replacement" && (
                   <>
-                    <DropdownMenuItem
-                      onClick={() => receiveMutation.mutate({ id: r.id })}
-                    >
+                    <DropdownMenuItem onClick={() => receiveMutation.mutate({ id: r.id })}>
                       <Truck className="mr-2 size-4 text-blue-600" />
                       {t("mark_received")}
                     </DropdownMenuItem>
@@ -424,14 +442,14 @@ export function AdminReturnsTable() {
                   </>
                 )}
                 {r.status === "received" && (
-                  <DropdownMenuItem
-                    onClick={() => completeMutation.mutate({ id: r.id })}
-                  >
+                  <DropdownMenuItem onClick={() => completeMutation.mutate({ id: r.id })}>
                     <Check className="mr-2 size-4 text-green-600" />
                     {t("complete_action")}
                   </DropdownMenuItem>
                 )}
-                {(r.status === "rejected" || r.status === "completed" || r.status === "cancelled") && (
+                {(r.status === "rejected" ||
+                  r.status === "completed" ||
+                  r.status === "cancelled") && (
                   <DropdownMenuItem disabled>
                     {t("already_label")} {STATUS_LABELS[r.status]?.toLowerCase()}
                   </DropdownMenuItem>
@@ -442,7 +460,7 @@ export function AdminReturnsTable() {
         },
       },
     ],
-    [reviewMutation, receiveMutation, completeMutation, cancelMutation, t],
+    [t, TYPE_LABELS, STATUS_LABELS, cancelMutation, receiveMutation, completeMutation],
   );
 
   const { data, isLoading } = trpc.returns.adminList.useQuery({
@@ -465,7 +483,10 @@ export function AdminReturnsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}
+    >
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <FacetedFilter

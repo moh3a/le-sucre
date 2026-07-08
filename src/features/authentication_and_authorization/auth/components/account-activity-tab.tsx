@@ -11,7 +11,6 @@ import { DataTableColumnHeader } from "@/features/data-table/components/data-tab
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 
 type ActivityRow = {

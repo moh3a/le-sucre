@@ -1,7 +1,9 @@
 import { json_ok, json_error } from "@/lib/http";
 import { get_storefront_identity } from "@/features/order_management_system/carts/cart-context.helper";
 import { review_service } from "@/features/product_reviews_management/services/review.service";
-import { product_repository } from "@/features/product_information_management/products/repositories/product.repository";
+import { ProductRepository } from "@/features/product_information_management/products/repositories/product.repository";
+
+const product_repository = new ProductRepository();
 import { z } from "zod";
 import { REVIEW_SORT } from "@/features/product_reviews_management/constants/review-status";
 

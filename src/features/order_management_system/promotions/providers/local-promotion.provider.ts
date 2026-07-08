@@ -82,7 +82,7 @@ export const local_promotion_provider: PromotionProvider = {
       });
 
       const promo = await promotion_repository.get_with_rules(code_row.promotion_id);
-      for (const rule of promo.rules) {
+      if (promo) for (const rule of promo.rules) {
         const result = apply_rule_to_lines(rule, lines, subtotal_num - discount_total);
         discount_total += result.amount;
         free_shipping ||= result.free_shipping;

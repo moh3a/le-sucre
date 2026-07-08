@@ -6,12 +6,13 @@ import { Star } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
@@ -73,71 +74,71 @@ export function ProductReviewForm({ product_id, onSuccess }: ProductReviewFormPr
 
   return (
     <QueryGuard mutation={createMutation}>
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="font-moya space-y-6 rounded-2xl border border-primary-foreground/15 bg-background p-6 shadow-sm"
-    >
-      <h3 className="font-orla text-lg text-primary-foreground">{t("heading")}</h3>
-
-      {/* Star Picker */}
-      <div className="space-y-2">
-        <Label className="text-secondary text-sm font-semibold">{t("overall_rating")}</Label>
-        <div className="flex items-center gap-1.5">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHoverRating(star)}
-              onMouseLeave={() => setHoverRating(null)}
-              className="text-yellow-500 transition-transform hover:scale-110 focus:outline-none"
-            >
-              <Star
-                className={`size-8 ${
-                  star <= (hoverRating ?? rating) ? "fill-yellow-500" : "text-gray-300"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Title */}
-      <div className="space-y-2">
-        <Label htmlFor="title" className="text-secondary text-sm font-semibold">
-          {t("review_title_optional")}
-        </Label>
-        <Input
-          id="title"
-          placeholder={t("review_title_placeholder")}
-          className="text-secondary border-primary-foreground/30 focus-visible:ring-crimson-violet"
-          {...register("title")}
-        />
-        {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
-      </div>
-
-      {/* Body */}
-      <div className="space-y-2">
-        <Label htmlFor="body" className="text-secondary text-sm font-semibold">
-          {t("your_comment")}
-        </Label>
-        <Textarea
-          id="body"
-          placeholder={t("comment_placeholder")}
-          className="text-secondary min-h-32 border-primary-foreground/30 focus-visible:ring-crimson-violet"
-          {...register("body")}
-        />
-        {errors.body && <p className="text-xs text-red-500">{errors.body.message}</p>}
-      </div>
-
-      <Button
-        type="submit"
-        disabled={createMutation.isPending}
-        className="w-full rounded-xl bg-crimson-violet text-white hover:bg-crimson-violet/90"
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="font-moya border-primary-foreground/15 bg-background space-y-6 rounded-2xl border p-6 shadow-sm"
       >
-        {createMutation.isPending ? t("submitting") : t("submit_review")}
-      </Button>
-    </form>
+        <h3 className="font-orla text-primary-foreground text-lg">{t("heading")}</h3>
+
+        {/* Star Picker */}
+        <div className="space-y-2">
+          <Label className="text-secondary text-sm font-semibold">{t("overall_rating")}</Label>
+          <div className="flex items-center gap-1.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(null)}
+                className="text-yellow-500 transition-transform hover:scale-110 focus:outline-none"
+              >
+                <Star
+                  className={`size-8 ${
+                    star <= (hoverRating ?? rating) ? "fill-yellow-500" : "text-gray-300"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="space-y-2">
+          <Label htmlFor="title" className="text-secondary text-sm font-semibold">
+            {t("review_title_optional")}
+          </Label>
+          <Input
+            id="title"
+            placeholder={t("review_title_placeholder")}
+            className="text-secondary border-primary-foreground/30 focus-visible:ring-crimson-violet"
+            {...register("title")}
+          />
+          {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+        </div>
+
+        {/* Body */}
+        <div className="space-y-2">
+          <Label htmlFor="body" className="text-secondary text-sm font-semibold">
+            {t("your_comment")}
+          </Label>
+          <Textarea
+            id="body"
+            placeholder={t("comment_placeholder")}
+            className="text-secondary border-primary-foreground/30 focus-visible:ring-crimson-violet min-h-32"
+            {...register("body")}
+          />
+          {errors.body && <p className="text-xs text-red-500">{errors.body.message}</p>}
+        </div>
+
+        <Button
+          type="submit"
+          disabled={createMutation.isPending}
+          className="bg-crimson-violet hover:bg-crimson-violet/90 w-full rounded-xl text-white"
+        >
+          {createMutation.isPending ? t("submitting") : t("submit_review")}
+        </Button>
+      </form>
     </QueryGuard>
   );
 }

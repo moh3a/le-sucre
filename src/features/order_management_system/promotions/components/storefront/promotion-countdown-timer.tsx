@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useRef, useState } from "react";
 
 interface CountdownTimerProps {
   endsAt: string | null;
@@ -18,31 +17,36 @@ interface TimeLeft {
   totalSeconds: number;
 }
 
+function computeTimeLeft(endsAt: string): TimeLeft {
+  const end = new Date(endsAt).getTime();
+  const diff = Math.max(0, end - Date.now());
+  return {
+    days: Math.floor(diff / 86400000),
+    hours: Math.floor((diff % 86400000) / 3600000),
+    minutes: Math.floor((diff % 3600000) / 60000),
+    seconds: Math.floor((diff % 60000) / 1000),
+    totalSeconds: Math.floor(diff / 1000),
+  };
+}
+
 export function CountdownTimer({ endsAt, onExpired, variant = "default", label }: CountdownTimerProps) {
-  const [time, setTime] = useState<TimeLeft | null>(null);
+  const [, setTick] = useState(0);
+  const expiredRef = useRef(false);
 
   useEffect(() => {
     if (!endsAt) return;
-    const end = new Date(endsAt).getTime();
 
-    function compute(): TimeLeft {
-      const diff = Math.max(0, end - Date.now());
-      return {
-        days: Math.floor(diff / 86400000),
-        hours: Math.floor((diff % 86400000) / 3600000),
-        minutes: Math.floor((diff % 3600000) / 60000),
-        seconds: Math.floor((diff % 60000) / 1000),
-        totalSeconds: Math.floor(diff / 1000),
-      };
-    }
+    expiredRef.current = false;
 
-    setTime(compute());
     const interval = setInterval(() => {
-      const t = compute();
-      setTime(t);
+      const t = computeTimeLeft(endsAt);
+      setTick(c => c + 1);
       if (t.totalSeconds <= 0) {
         clearInterval(interval);
-        onExpired?.();
+        if (!expiredRef.current) {
+          expiredRef.current = true;
+          onExpired?.();
+        }
       }
     }, 1000);
 
@@ -51,23 +55,13 @@ export function CountdownTimer({ endsAt, onExpired, variant = "default", label }
 
   if (!endsAt) return null;
 
-  if (!time) {
-    return variant === "bar" ? (
-      <Skeleton className="h-12 w-full rounded" />
-    ) : (
-      <div className="flex gap-2">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-14 w-14 rounded-lg" />
-        ))}
-      </div>
-    );
-  }
+  const time = computeTimeLeft(endsAt);
 
   if (time.totalSeconds <= 0) return null;
 
   if (variant === "bar") {
     return (
-      <div className="flex items-center justify-center gap-4 bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 text-white">
+      <div className="flex items-center justify-center gap-4 bg-linear-to-r from-red-600 to-orange-500 px-4 py-3 text-white">
         {label && <span className="text-sm font-medium">{label}</span>}
         <div className="flex items-center gap-1 font-mono text-lg font-bold tabular-nums">
           <span className="rounded bg-white/20 px-2 py-1">{String(time.hours).padStart(2, "0")}</span>

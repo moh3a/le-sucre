@@ -52,57 +52,60 @@ export function BrandCombobox({
   }
 
   return (
-    <QueryGuard isLoading={isLoading} loadingFallback={<Input value={value} disabled placeholder={placeholder} />}>
-    <>
-      <Combobox
-        value={value}
-        onValueChange={(val) => onValueChange(val || null)}
-        disabled={disabled}
-      >
-        <ComboboxInput placeholder={placeholder} showClear />
-        <ComboboxContent>
-          <ComboboxList>
-            {brand_options.map((brand) => (
-              <ComboboxItem key={brand.id} value={brand.id}>
-                {brand.name}
-              </ComboboxItem>
-            ))}
-          </ComboboxList>
-          <ComboboxEmpty>
-            <div className="flex flex-col items-center gap-2 px-4 py-3">
-              <p className="text-muted-foreground text-sm">Aucune marque trouvée.</p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => set_create_open(true)}
-              >
-                <PlusIcon className="size-3.5" />
-                Créer une marque
-              </Button>
-            </div>
-          </ComboboxEmpty>
-        </ComboboxContent>
-      </Combobox>
+    <QueryGuard
+      isLoading={isLoading}
+      loadingFallback={<Input value={value} disabled placeholder={placeholder} />}
+    >
+      <>
+        <Combobox
+          value={value}
+          onValueChange={(val) => onValueChange(val || null)}
+          disabled={disabled}
+        >
+          <ComboboxInput placeholder={placeholder} showClear />
+          <ComboboxContent>
+            <ComboboxList>
+              {brand_options.map((brand) => (
+                <ComboboxItem key={brand.id} value={brand.id}>
+                  {brand.name}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+            <ComboboxEmpty>
+              <div className="flex flex-col items-center gap-2 px-4 py-3">
+                <p className="text-muted-foreground text-sm">Aucune marque trouvée.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => set_create_open(true)}
+                >
+                  <PlusIcon className="size-3.5" />
+                  Créer une marque
+                </Button>
+              </div>
+            </ComboboxEmpty>
+          </ComboboxContent>
+        </Combobox>
 
-      <ResponsiveDialog open={create_open} onOpenChange={set_create_open}>
-        <ResponsiveDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>Nouvelle marque</ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              Créer une nouvelle marque et l&apos;associer au produit.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <BrandForm
-            key="brand-combobox-create"
-            mode="create"
-            onCreated={handle_created}
-            onSuccess={() => set_create_open(false)}
-          />
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
-    </>
+        <ResponsiveDialog open={create_open} onOpenChange={set_create_open}>
+          <ResponsiveDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle>Nouvelle marque</ResponsiveDialogTitle>
+              <ResponsiveDialogDescription>
+                Créer une nouvelle marque et l&apos;associer au produit.
+              </ResponsiveDialogDescription>
+            </ResponsiveDialogHeader>
+            <BrandForm
+              key="brand-combobox-create"
+              mode="create"
+              onCreated={handle_created}
+              onSuccess={() => set_create_open(false)}
+            />
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
+      </>
     </QueryGuard>
   );
 }

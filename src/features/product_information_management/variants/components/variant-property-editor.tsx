@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { ImageIcon, ImagePlus, Plus, X } from "lucide-react";
+import { ImagePlus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+
 import {
   ColorPicker,
   ColorPickerArea,
@@ -17,7 +18,6 @@ import {
   ColorPickerSwatch,
   ColorPickerTrigger,
 } from "@/components/ui/color-picker";
-
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
@@ -124,235 +124,245 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
   const properties = data?.properties ?? [];
 
   return (
-    <QueryGuard isLoading={isLoading} loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}>
-    <div className="space-y-6">
-      <div className="flex items-center gap-1">
+    <QueryGuard
+      isLoading={isLoading}
+      loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}
+    >
+      <div className="space-y-6">
         <div className="flex items-center gap-1">
-          <span className="font-heading text-2xl font-semibold">{t("property_list")}</span>
-          <Badge variant="secondary">{properties.length}</Badge>
-        </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button type="button">{t("add_property")}</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("add_property")}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={property_form.handleSubmit(on_add_property)}>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel>{t("property_code")}</FieldLabel>
-                  <Input placeholder={t("property_code_placeholder")} {...property_form.register("code")} />
-                </Field>
-                <Field>
-                  <FieldLabel>{t("property_name")}</FieldLabel>
-                  <Input placeholder={t("property_name_placeholder")} {...property_form.register("name")} />
-                </Field>
-                <Field>
-                  <FieldLabel>{t("property_sort")}</FieldLabel>
-                  <Input
-                    type="number"
-                    {...property_form.register("sort_order", { valueAsNumber: true })}
-                  />
-                </Field>
-                <Field className="flex items-end">
-                  <Button type="submit" disabled={create_property.isPending}>
-                    {t("add_property")}
-                  </Button>
-                </Field>
-              </FieldGroup>
-            </form>
-          </DialogContent>
-        </Dialog>
-        <SkuGeneratorPanel product_id={product_id} on_change={on_change} />
-      </div>
-
-      {properties.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("empty_properties")}</p>
-      ) : (
-        <ul className="space-y-3">
-          {properties.map((property) => (
-            <li key={property.id} className="rounded-lg border">
-              <Collapsible defaultOpen>
-                <div className="flex items-center justify-between gap-2 p-4">
-                  <CollapsibleTrigger className="text-left font-medium">
-                    {property.name}{" "}
-                    <span className="text-muted-foreground font-normal">({property.code})</span>
-                  </CollapsibleTrigger>
-                  <div className="flex items-center gap-2">
-                    {property.is_required && (
-                      <Badge variant="secondary">{t("property_required")}</Badge>
-                    )}
-                    <DeletePropertyDialog
-                      property_id={property.id}
-                      product_id={product_id}
-                      on_change={on_change}
+          <div className="flex items-center gap-1">
+            <span className="font-heading text-2xl font-semibold">{t("property_list")}</span>
+            <Badge variant="secondary">{properties.length}</Badge>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button type="button">{t("add_property")}</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("add_property")}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={property_form.handleSubmit(on_add_property)}>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel>{t("property_code")}</FieldLabel>
+                    <Input
+                      placeholder={t("property_code_placeholder")}
+                      {...property_form.register("code")}
                     />
-                  </div>
-                </div>
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("property_name")}</FieldLabel>
+                    <Input
+                      placeholder={t("property_name_placeholder")}
+                      {...property_form.register("name")}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("property_sort")}</FieldLabel>
+                    <Input
+                      type="number"
+                      {...property_form.register("sort_order", { valueAsNumber: true })}
+                    />
+                  </Field>
+                  <Field className="flex items-end">
+                    <Button type="submit" disabled={create_property.isPending}>
+                      {t("add_property")}
+                    </Button>
+                  </Field>
+                </FieldGroup>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <SkuGeneratorPanel product_id={product_id} on_change={on_change} />
+        </div>
 
-                <CollapsibleContent className="space-y-4 border-t p-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {property.values.map((value) => (
-                      <div key={value.id}>
-                        <Badge variant="outline" className="gap-2 pr-1">
-                          {value.color_hex ? (
-                            <span
-                              className="inline-block h-4 w-4 rounded-full border"
-                              style={{ backgroundColor: value.color_hex }}
-                              title={value.color_hex}
-                            />
-                          ) : value.thumbnail_image ? (
-                            <img
-                              src={value.thumbnail_image}
-                              alt=""
-                              className="h-4 w-4 rounded object-cover"
-                            />
-                          ) : null}
-                          {value.label}
-                          <button
-                            type="button"
-                            className="text-muted-foreground hover:text-destructive ml-1"
-                            onClick={() => delete_value.mutate({ id: value.id })}
-                            aria-label={t("delete_value")}
-                          >
-                            x
-                          </button>
-                        </Badge>
-                      </div>
-                    ))}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          type="button"
-                          variant="outline"
-                          disabled={create_value.isPending}
-                        >
-                          <Plus />
-                          {t("add_value")}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>{t("add_value")}</DialogTitle>
-                        </DialogHeader>
-                        <Field>
-                          <FieldLabel>{t("value_code")}</FieldLabel>
-                          <Input
-                            value={get_value_defaults(property.id).code}
-                            onChange={(e) => set_value_field(property.id, "code", e.target.value)}
-                            placeholder={t("value_code_placeholder")}
-                          />
-                        </Field>
-                        <Field>
-                          <FieldLabel>{t("value_label")}</FieldLabel>
-                          <Input
-                            value={get_value_defaults(property.id).label}
-                            onChange={(e) => set_value_field(property.id, "label", e.target.value)}
-                            placeholder={t("value_label_placeholder")}
-                          />
-                        </Field>
-                        <Field>
-                          <FieldLabel>{t("image_field")}</FieldLabel>
-                          <div className="flex items-center gap-2">
-                            {get_value_defaults(property.id).thumbnail_image ? (
-                              <div className="group relative inline-flex overflow-hidden rounded-lg border">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={get_value_defaults(property.id).thumbnail_image!}
-                                  alt=""
-                                  className="h-14 w-14 object-cover"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    set_value_field(property.id, "thumbnail_image", null)
-                                  }
-                                  className="bg-destructive text-destructive-foreground absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-full"
-                                >
-                                  <X className="size-3" />
-                                </button>
-                              </div>
+        {properties.length === 0 ? (
+          <p className="text-muted-foreground text-sm">{t("empty_properties")}</p>
+        ) : (
+          <ul className="space-y-3">
+            {properties.map((property) => (
+              <li key={property.id} className="rounded-lg border">
+                <Collapsible defaultOpen>
+                  <div className="flex items-center justify-between gap-2 p-4">
+                    <CollapsibleTrigger className="text-left font-medium">
+                      {property.name}{" "}
+                      <span className="text-muted-foreground font-normal">({property.code})</span>
+                    </CollapsibleTrigger>
+                    <div className="flex items-center gap-2">
+                      {property.is_required && (
+                        <Badge variant="secondary">{t("property_required")}</Badge>
+                      )}
+                      <DeletePropertyDialog
+                        property_id={property.id}
+                        product_id={product_id}
+                        on_change={on_change}
+                      />
+                    </div>
+                  </div>
+
+                  <CollapsibleContent className="space-y-4 border-t p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {property.values.map((value) => (
+                        <div key={value.id}>
+                          <Badge variant="outline" className="gap-2 pr-1">
+                            {value.color_hex ? (
+                              <span
+                                className="inline-block h-4 w-4 rounded-full border"
+                                style={{ backgroundColor: value.color_hex }}
+                                title={value.color_hex}
+                              />
+                            ) : value.thumbnail_image ? (
+                              <img
+                                src={value.thumbnail_image}
+                                alt=""
+                                className="h-4 w-4 rounded object-cover"
+                              />
                             ) : null}
-                            <MediaPickerDialog
-                              onSelect={(media) =>
-                                set_value_field(property.id, "thumbnail_image", media.url)
-                              }
-                              trigger={
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  className="gap-1"
-                                >
-                                  <ImagePlus className="size-4" />
-                                  {get_value_defaults(property.id).thumbnail_image
-                    ? t("change_image")
-                    : t("choose_image")}
-                                </Button>
-                              }
-                            />
-                          </div>
-                        </Field>
-                        <Field>
-                          <FieldLabel>{t("color_field")}</FieldLabel>
-                          <ColorPicker
-                            value={get_value_defaults(property.id).color_hex ?? undefined}
-                            onValueChange={(value) =>
-                              set_value_field(property.id, "color_hex", value)
-                            }
+                            {value.label}
+                            <button
+                              type="button"
+                              className="text-muted-foreground hover:text-destructive ml-1"
+                              onClick={() => delete_value.mutate({ id: value.id })}
+                              aria-label={t("delete_value")}
+                            >
+                              x
+                            </button>
+                          </Badge>
+                        </div>
+                      ))}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            type="button"
+                            variant="outline"
+                            disabled={create_value.isPending}
                           >
-                            {/* <ColorPickerTrigger className="w-full justify-start gap-2">
+                            <Plus />
+                            {t("add_value")}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>{t("add_value")}</DialogTitle>
+                          </DialogHeader>
+                          <Field>
+                            <FieldLabel>{t("value_code")}</FieldLabel>
+                            <Input
+                              value={get_value_defaults(property.id).code}
+                              onChange={(e) => set_value_field(property.id, "code", e.target.value)}
+                              placeholder={t("value_code_placeholder")}
+                            />
+                          </Field>
+                          <Field>
+                            <FieldLabel>{t("value_label")}</FieldLabel>
+                            <Input
+                              value={get_value_defaults(property.id).label}
+                              onChange={(e) =>
+                                set_value_field(property.id, "label", e.target.value)
+                              }
+                              placeholder={t("value_label_placeholder")}
+                            />
+                          </Field>
+                          <Field>
+                            <FieldLabel>{t("image_field")}</FieldLabel>
+                            <div className="flex items-center gap-2">
+                              {get_value_defaults(property.id).thumbnail_image ? (
+                                <div className="group relative inline-flex overflow-hidden rounded-lg border">
+                                  <img
+                                    src={get_value_defaults(property.id).thumbnail_image!}
+                                    alt=""
+                                    className="h-14 w-14 object-cover"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      set_value_field(property.id, "thumbnail_image", null)
+                                    }
+                                    className="bg-destructive text-destructive-foreground absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-full"
+                                  >
+                                    <X className="size-3" />
+                                  </button>
+                                </div>
+                              ) : null}
+                              <MediaPickerDialog
+                                onSelect={(media) =>
+                                  set_value_field(property.id, "thumbnail_image", media.url)
+                                }
+                                trigger={
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1"
+                                  >
+                                    <ImagePlus className="size-4" />
+                                    {get_value_defaults(property.id).thumbnail_image
+                                      ? t("change_image")
+                                      : t("choose_image")}
+                                  </Button>
+                                }
+                              />
+                            </div>
+                          </Field>
+                          <Field>
+                            <FieldLabel>{t("color_field")}</FieldLabel>
+                            <ColorPicker
+                              value={get_value_defaults(property.id).color_hex ?? undefined}
+                              onValueChange={(value) =>
+                                set_value_field(property.id, "color_hex", value)
+                              }
+                            >
+                              {/* <ColorPickerTrigger className="w-full justify-start gap-2">
                               <ColorPickerSwatch className="size-6 rounded" />
                               <span className="text-muted-foreground font-mono text-sm">
                                 {get_value_defaults(property.id).color_hex ?? "Choisir une couleur"}
                               </span>
                             </ColorPickerTrigger> */}
-                            <ColorPickerTrigger asChild>
-                              <Button variant="outline" className="flex items-center gap-2 px-3">
-                                <ColorPickerSwatch className="size-4" />
-                                {get_value_defaults(property.id).color_hex ?? t("choose_color")}
-                              </Button>
-                            </ColorPickerTrigger>
-                            <ColorPickerContent>
-                              <ColorPickerArea />
-                              <ColorPickerHueSlider />
-                              <ColorPickerInput />
-                            </ColorPickerContent>
-                          </ColorPicker>
-                        </Field>
-                        <Field>
-                          <FieldLabel>{t("property_sort")}</FieldLabel>
-                          <Input
-                            type="number"
-                            value={get_value_defaults(property.id).sort_order}
-                            onChange={(e) =>
-                              set_value_field(property.id, "sort_order", Number(e.target.value))
-                            }
-                          />
-                        </Field>
-                        <Field className="flex items-end">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            disabled={create_value.isPending}
-                            onClick={() => on_add_value(property.id)}
-                          >
-                            {t("add_value")}
-                          </Button>
-                        </Field>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+                              <ColorPickerTrigger asChild>
+                                <Button variant="outline" className="flex items-center gap-2 px-3">
+                                  <ColorPickerSwatch className="size-4" />
+                                  {get_value_defaults(property.id).color_hex ?? t("choose_color")}
+                                </Button>
+                              </ColorPickerTrigger>
+                              <ColorPickerContent>
+                                <ColorPickerArea />
+                                <ColorPickerHueSlider />
+                                <ColorPickerInput />
+                              </ColorPickerContent>
+                            </ColorPicker>
+                          </Field>
+                          <Field>
+                            <FieldLabel>{t("property_sort")}</FieldLabel>
+                            <Input
+                              type="number"
+                              value={get_value_defaults(property.id).sort_order}
+                              onChange={(e) =>
+                                set_value_field(property.id, "sort_order", Number(e.target.value))
+                              }
+                            />
+                          </Field>
+                          <Field className="flex items-end">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              disabled={create_value.isPending}
+                              onClick={() => on_add_value(property.id)}
+                            >
+                              {t("add_value")}
+                            </Button>
+                          </Field>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </QueryGuard>
   );
 }

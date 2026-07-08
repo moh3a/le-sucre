@@ -140,7 +140,8 @@ function ActionBar(props: ActionBarProps) {
   const dir = DirectionPrimitive.useDirection(dirProp);
 
   React.useLayoutEffect(() => {
-    setMounted(true);
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
   }, []);
 
   React.useEffect(() => {

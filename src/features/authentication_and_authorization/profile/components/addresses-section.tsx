@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/responsive-dialog";
 import { create_address_schema } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
 import type { UserAddress } from "@/features/authentication_and_authorization/profile/types";
+import type { CreateAddressInput } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AddressFormCard({
@@ -71,7 +72,7 @@ export function AddressFormCard({
     onError: (err) => toast.error(err.message),
   });
 
-  const form = useForm({
+  const form = useForm<CreateAddressInput>({
     resolver: zodResolver(create_address_schema),
     values: address
       ? {
@@ -103,11 +104,11 @@ export function AddressFormCard({
 
   const is_saving = createAddress.isPending || updateAddress.isPending || deleteAddress.isPending;
 
-  async function onSubmit(values: Record<string, unknown>) {
+  async function onSubmit(values: CreateAddressInput) {
     if (address) {
-      await updateAddress.mutateAsync({ id: address.id, ...values } as any);
+      await updateAddress.mutateAsync({ id: address.id, ...values });
     } else {
-      await createAddress.mutateAsync(values as any);
+      await createAddress.mutateAsync(values);
     }
   }
 

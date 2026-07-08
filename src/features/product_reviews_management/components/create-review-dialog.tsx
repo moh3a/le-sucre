@@ -64,60 +64,53 @@ export function CreateReviewDialog() {
 
   return (
     <QueryGuard mutation={create}>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          {t("admin_new_review")}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("admin_create_title")}</DialogTitle>
-          <DialogDescription>
-            {t("admin_create_description")}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handle_submit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("admin_product_id")}</Label>
-            <Input value={product_id} onChange={(e) => setProductId(e.target.value)} required />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("admin_rating")}</Label>
-            <Select value={rating} onValueChange={setRating}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[5, 4, 3, 2, 1].map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {t("admin_stars", { count: n })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>{t("admin_title_optional")}</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("admin_comment")}</Label>
-            <Textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={4}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={create.isPending}>
-            <Star />
-            {t("admin_publish")}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus />
+            {t("admin_new_review")}
           </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("admin_create_title")}</DialogTitle>
+            <DialogDescription>{t("admin_create_description")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handle_submit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("admin_product_id")}</Label>
+              <Input value={product_id} onChange={(e) => setProductId(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("admin_rating")}</Label>
+              <Select value={rating} onValueChange={setRating}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 4, 3, 2, 1].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {t("admin_stars", { count: n })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("admin_title_optional")}</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("admin_comment")}</Label>
+              <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} required />
+            </div>
+            <Button type="submit" className="w-full" disabled={create.isPending}>
+              <Star />
+              {t("admin_publish")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </QueryGuard>
   );
 }

@@ -43,30 +43,30 @@ export function DeletePropertyDialog({
 
   return (
     <QueryGuard mutation={delete_property}>
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon">
-          <Trash />
-          <span className="sr-only">{t("delete_property")}</span>
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>{t("delete_property")}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => {
-              delete_property.mutate({ id: property_id });
-            }}
-          >
-            Oui, {t("delete_property")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button type="button" variant="destructive" size="icon">
+            <Trash />
+            <span className="sr-only">{t("delete_property")}</span>
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>{t("delete_property")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                delete_property.mutate({ id: property_id });
+              }}
+            >
+              Oui, {t("delete_property")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

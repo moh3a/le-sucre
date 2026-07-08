@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -17,7 +18,9 @@ import { trpc } from "@/components/providers/app-providers";
 export function SharedWishlistPageClient({ token }: { token: string }) {
   const t = useTranslations("sharedWishlist");
 
-  const { data, isLoading, error } = trpc.wishlistManagement.sharedWishlists.getByToken.useQuery({ token });
+  const { data, isLoading, error } = trpc.wishlistManagement.sharedWishlists.getByToken.useQuery({
+    token,
+  });
 
   if (isLoading) {
     return (
@@ -72,7 +75,7 @@ export function SharedWishlistPageClient({ token }: { token: string }) {
     );
   }
 
-  const { wishlist, items } = data as any;
+  const { wishlist, items } = data as unknown as { wishlist: { name: string; description?: string | null }; items: { id: string; product_id: string; quantity: number; current_price?: string; product?: { media?: { url?: string }[]; translations?: { name?: string }[] } }[] };
 
   return (
     <div className="container mx-auto max-w-3xl py-6">
@@ -98,38 +101,41 @@ export function SharedWishlistPageClient({ token }: { token: string }) {
             </EmptyHeader>
           </Empty>
         ) : (
-          items.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-4 rounded-lg border p-4"
-            >
-              {item.product?.media?.[0]?.url ? (
-                <img
-                  src={item.product.media[0].url}
-                  alt=""
-                  className="size-16 shrink-0 rounded-md object-cover"
-                />
-              ) : (
-                <div className="bg-muted flex size-16 shrink-0 items-center justify-center rounded-md">
-                  <span className="text-muted-foreground text-xs">?</span>
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">
-                  {item.product?.translations?.[0]?.name ?? item.product_id}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {t("quantityLabel", { quantity: item.quantity })}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {item.current_price && (
-                  <p className="font-semibold">{item.current_price} DA</p>
+          items.map(
+            (item: {
+              id: string;
+              product_id: string;
+              quantity: number;
+              current_price?: string;
+              product?: { media?: { url?: string }[]; translations?: { name?: string }[] };
+            }) => (
+              <div key={item.id} className="flex items-center gap-4 rounded-lg border p-4">
+                {item.product?.media?.[0]?.url ? (
+                  <img
+                    src={item.product.media[0].url}
+                    alt=""
+                    className="size-16 shrink-0 rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="bg-muted flex size-16 shrink-0 items-center justify-center rounded-md">
+                    <span className="text-muted-foreground text-xs">?</span>
+                  </div>
                 )}
-                <Button size="sm">{t("addToCart")}</Button>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">
+                    {item.product?.translations?.[0]?.name ?? item.product_id}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("quantityLabel", { quantity: item.quantity })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {item.current_price && <p className="font-semibold">{item.current_price} DA</p>}
+                  <Button size="sm">{t("addToCart")}</Button>
+                </div>
               </div>
-            </div>
-          ))
+            ),
+          )
         )}
       </div>
     </div>

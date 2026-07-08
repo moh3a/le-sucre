@@ -4,7 +4,7 @@ import { helpful_service } from "@/features/product_reviews_management/services/
 
 export async function POST(
   req: Request,
-  { params }: { params: { review_id: string } },
+  { params }: { params: Promise<{ review_id: string }> },
 ) {
   try {
     const identity = await get_storefront_identity(req.headers);
@@ -12,7 +12,7 @@ export async function POST(
       return json_error(new Error("Unauthorized"), 401);
     }
 
-    const { review_id } = params;
+    const { review_id } = await params;
     const result = await helpful_service.vote(identity.user_id, review_id);
     return json_ok(result);
   } catch (e) {

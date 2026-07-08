@@ -4,7 +4,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import { Banknote, CheckCircle2, Download, MoreHorizontal, XCircle } from "lucide-react";
-
 import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -22,7 +21,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -83,7 +81,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -112,13 +113,19 @@ function FacetedFilter({
 
 export function PayoutsTable() {
   const t = useTranslations("payouts");
-  const STATUS_STYLES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    pending: { label: t("pending"), variant: "outline" },
-    processing: { label: t("processing"), variant: "secondary" },
-    completed: { label: t("completed"), variant: "default" },
-    failed: { label: t("failed"), variant: "destructive" },
-    cancelled: { label: t("cancelled"), variant: "destructive" },
-  };
+  const STATUS_STYLES: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = React.useMemo(
+    () => ({
+      pending: { label: t("pending"), variant: "outline" },
+      processing: { label: t("processing"), variant: "secondary" },
+      completed: { label: t("completed"), variant: "default" },
+      failed: { label: t("failed"), variant: "destructive" },
+      cancelled: { label: t("cancelled"), variant: "destructive" },
+    }),
+    [t],
+  );
   const STATUS_OPTIONS = [
     { label: t("pending"), value: "pending" },
     { label: t("processing"), value: "processing" },
@@ -161,7 +168,9 @@ export function PayoutsTable() {
       {
         id: "vendor_id",
         accessorKey: "vendor_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("vendor_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("vendor_column")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono text-xs">{row.original.vendor_id?.slice(0, 14) ?? "N/A"}</span>
         ),
@@ -169,7 +178,9 @@ export function PayoutsTable() {
       {
         id: "gross_amount",
         accessorKey: "gross_amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("gross_amount_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("gross_amount_column")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono font-medium">
             {Number(row.original.gross_amount).toLocaleString("fr-DZ", {
@@ -182,9 +193,11 @@ export function PayoutsTable() {
       {
         id: "commission_amount",
         accessorKey: "commission_amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("commission_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("commission_column")} />
+        ),
         cell: ({ row }) => (
-          <span className="font-mono text-muted-foreground text-sm">
+          <span className="text-muted-foreground font-mono text-sm">
             {Number(row.original.commission_amount).toLocaleString("fr-DZ", {
               style: "currency",
               currency: row.original.currency,
@@ -208,7 +221,9 @@ export function PayoutsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => {
           const cfg = STATUS_STYLES[row.original.status] ?? {
             label: row.original.status,
@@ -220,9 +235,11 @@ export function PayoutsTable() {
       {
         id: "payout_method",
         accessorKey: "payout_method",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("method_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("method_column")} />
+        ),
         cell: ({ row }) => (
-          <span className="capitalize text-sm">{row.original.payout_method ?? "—"}</span>
+          <span className="text-sm capitalize">{row.original.payout_method ?? "—"}</span>
         ),
       },
       {
@@ -262,7 +279,7 @@ export function PayoutsTable() {
         ),
       },
     ],
-    [processMutation, completeMutation],
+    [t, STATUS_STYLES, processMutation, completeMutation],
   );
 
   const { data, isLoading } = trpc.payments.adminListPayouts.useQuery({
@@ -284,37 +301,40 @@ export function PayoutsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={1} />}>
-    <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <FacetedFilter
-          title={t("status_title")}
-          options={STATUS_OPTIONS}
-          icon={Banknote}
-          value={status ?? undefined}
-          onChange={(val) => setStatus(val)}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center gap-2 border-t p-2">
-          <Badge variant="outline">
-            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-          </Badge>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href={`/api/admin/payouts/export?${new URLSearchParams({
-                ...(status ? { status } : {}),
-              })}`}
-              download="payouts.csv"
-            >
-              <Download className="mr-1 h-4 w-4" />
-              {t("export")}
-            </a>
-          </Button>
-        </div>
-      )}
-    </DataTable>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={1} />}
+    >
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <FacetedFilter
+            title={t("status_title")}
+            options={STATUS_OPTIONS}
+            icon={Banknote}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/payouts/export?${new URLSearchParams({
+                  ...(status ? { status } : {}),
+                })}`}
+                download="payouts.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                {t("export")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
     </QueryGuard>
   );
 }

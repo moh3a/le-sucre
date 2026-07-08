@@ -313,6 +313,8 @@ function DataTableFilterItem<TData>({
   onFilterUpdate,
   onFilterRemove,
 }: DataTableFilterItemProps<TData>) {
+  const t = useTranslations("data_table");
+
   {
     const [showFieldSelector, setShowFieldSelector] = React.useState(false);
     const [showOperatorSelector, setShowOperatorSelector] = React.useState(false);
@@ -370,9 +372,9 @@ function DataTableFilterItem<TData>({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-48 p-0">
             <Command loop>
-              <CommandInput placeholder="Search fields..." />
+              <CommandInput placeholder={t("search_fields")} />
               <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
+                <CommandEmpty>{t("no_fields_found")}</CommandEmpty>
                 <CommandGroup>
                   {columns.map((column) => (
                     <CommandItem
@@ -434,6 +436,7 @@ function DataTableFilterItem<TData>({
         {onFilterInputRender({
           filter,
           column,
+          t,
           inputId,
           onFilterUpdate,
           showValueSelector,
@@ -460,6 +463,7 @@ interface FilterValueSelectorProps<TData> {
 }
 
 function FilterValueSelector<TData>({ column, value, onSelect }: FilterValueSelectorProps<TData>) {
+  const t = useTranslations("data_table");
   const variant = column.columnDef.meta?.variant ?? "text";
 
   switch (variant) {
@@ -532,6 +536,7 @@ function FilterValueSelector<TData>({ column, value, onSelect }: FilterValueSele
 function onFilterInputRender<TData>({
   filter,
   column,
+  t,
   inputId,
   onFilterUpdate,
   showValueSelector,
@@ -539,6 +544,7 @@ function onFilterInputRender<TData>({
 }: {
   filter: ExtendedColumnFilter<TData>;
   column: Column<TData>;
+  t: ReturnType<typeof useTranslations>;
   inputId: string;
   onFilterUpdate: (
     filterId: string,
@@ -552,9 +558,11 @@ function onFilterInputRender<TData>({
       <div
         id={inputId}
         role="status"
-        aria-label={`${column.columnDef.meta?.label} filter is ${
-          filter.operator === "isEmpty" ? "empty" : "not empty"
-        }`}
+        aria-label={
+          filter.operator === "isEmpty"
+            ? t("filter_empty", { label: column.columnDef.meta?.label ?? column.id })
+            : t("filter_not_empty", { label: column.columnDef.meta?.label ?? column.id })
+        }
         aria-live="polite"
         className="text-muted-foreground dark:bg-input/30 h-full w-16 rounded-none border bg-transparent px-1.5 py-0.5"
       />
@@ -661,7 +669,7 @@ function onFilterInputRender<TData>({
                   </div>
                   <span className="truncate">
                     {selectedOptions.length > 1
-                      ? `${selectedOptions.length} selected`
+                      ? t("x_selected", { count: selectedOptions.length })
                       : selectedOptions[0]?.label}
                   </span>
                 </>

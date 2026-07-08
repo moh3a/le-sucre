@@ -1,10 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ArrowLeft, Trash2, Heart } from "lucide-react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { WishlistShareDialog } from "./wishlist-share-dialog";
-import { ArrowLeft, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +18,19 @@ import {
   EmptyDescription,
   EmptyMedia,
 } from "@/components/ui/empty";
-import type { WishlistPriority } from "../types";
+import type { WishlistPriority, WishlistWithProduct } from "../types";
+import Link from "next/link";
 
 export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: string }) {
   const t = useTranslations("wishlist");
-  const { data: wishlist, isLoading } = trpc.wishlistManagement.wishlists.byId.useQuery({ id: wishlistId });
-  const { data: itemsData } = trpc.wishlistManagement.wishlists.listItems.useQuery(
-    { wishlist_id: wishlistId, page: 1, limit: 100 },
-  );
+  const { data: wishlist, isLoading } = trpc.wishlistManagement.wishlists.byId.useQuery({
+    id: wishlistId,
+  });
+  const { data: itemsData } = trpc.wishlistManagement.wishlists.listItems.useQuery({
+    wishlist_id: wishlistId,
+    page: 1,
+    limit: 100,
+  });
   const removeItemMut = trpc.wishlistManagement.wishlists.removeItem.useMutation();
   const utils = trpc.useUtils();
 
@@ -52,6 +59,8 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
     );
   }
 
+  if (!wishlist) return null;
+
   const priorityColors: Record<WishlistPriority, string> = {
     low: "bg-gray-100 text-gray-600",
     medium: "bg-blue-100 text-blue-600",
@@ -61,83 +70,85 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
 
   return (
     <QueryGuard query={{ isLoading }}>
-    <div className="container mx-auto py-6">
-      <Button variant="ghost" className="mb-4" asChild>
-        <a href="/account/wishlists">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {t("back")}
-        </a>
-      </Button>
+      <div className="container mx-auto py-6">
+        <Button variant="ghost" className="mb-4" asChild>
+          <Link href="/account/wishlists">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {t("back")}
+          </Link>
+        </Button>
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{wishlist.name}</h1>
-          {wishlist.description && (
-            <p className="text-muted-foreground mt-1">{wishlist.description}</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{wishlist.name}</h1>
+            {wishlist.description && (
+              <p className="text-muted-foreground mt-1">{wishlist.description}</p>
+            )}
+          </div>
+          <WishlistShareDialog wishlistId={wishlistId} wishlistName={wishlist.name} />
+        </div>
+
+        <div className="space-y-2">
+          {!itemsData?.items || itemsData.items.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Heart className="size-6" />
+                </EmptyMedia>
+                <EmptyTitle>{t("empty_list_message")}</EmptyTitle>
+                <EmptyDescription>{t("empty_list_hint")}</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            itemsData.items.map(
+              (item: WishlistWithProduct) => (
+                <div
+                  key={item.id}
+                  className="hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4"
+                >
+                  {item.product?.media?.[0]?.url && (
+                    <img
+                      src={item.product.media[0].url}
+                      alt=""
+                      className="h-16 w-16 rounded object-cover"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">
+                      {item.product?.translations?.[0]?.name ?? item.product_id}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        className={cn("text-xs", priorityColors[item.priority as WishlistPriority])}
+                      >
+                        {item.priority}
+                      </Badge>
+                      <span className="text-muted-foreground text-sm">
+                        {t("qty", { count: item.quantity })}
+                      </span>
+                    </div>
+                    {item.notes && (
+                      <p className="text-muted-foreground mt-1 text-sm">{item.notes}</p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    {item.current_price && <p className="font-semibold">{item.current_price} DA</p>}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive"
+                    onClick={() => handleRemove(item.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ),
+            )
           )}
         </div>
-        <WishlistShareDialog wishlistId={wishlistId} wishlistName={wishlist.name} />
       </div>
-
-      <div className="space-y-2">
-        {(!itemsData?.items || itemsData.items.length === 0) ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Heart className="size-6" />
-              </EmptyMedia>
-              <EmptyTitle>{t("empty_list_message")}</EmptyTitle>
-              <EmptyDescription>{t("empty_list_hint")}</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          itemsData.items.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50"
-            >
-              {item.product?.media?.[0]?.url && (
-                <img
-                  src={item.product.media[0].url}
-                  alt=""
-                  className="h-16 w-16 object-cover rounded"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">
-                  {item.product?.translations?.[0]?.name ?? item.product_id}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge
-                    variant="secondary"
-                    className={cn("text-xs", priorityColors[item.priority as WishlistPriority])}
-                  >
-                    {item.priority}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">{t("qty", { count: item.quantity })}</span>
-                </div>
-                {item.notes && (
-                  <p className="text-sm text-muted-foreground mt-1">{item.notes}</p>
-                )}
-              </div>
-              <div className="text-right">
-                {item.current_price && (
-                  <p className="font-semibold">{item.current_price} DA</p>
-                )}
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => handleRemove(item.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
     </QueryGuard>
   );
 }

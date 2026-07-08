@@ -1,6 +1,12 @@
 import React from "react";
 import { StyleSheet, View, Text } from "@react-pdf/renderer";
 
+type PDFStyle = React.ComponentProps<typeof View>["style"];
+
+const flex_row = StyleSheet.create({ base: { flexDirection: "row" } }).base;
+const flex_col = StyleSheet.create({ base: { flexDirection: "column" } }).base;
+const bold_text = StyleSheet.create({ base: { fontFamily: "Helvetica-Bold" } }).base;
+
 // Register default fonts if needed, otherwise use system defaults.
 // Standard fonts supported by react-pdf out of the box: Helvetica, Times-Roman, Courier.
 export const primaryColor = "#c8d152";
@@ -171,24 +177,21 @@ export const styles = StyleSheet.create({
 });
 
 interface BoxProps {
-  style?: Record<string, unknown> | Array<Record<string, unknown>>;
+  style?: PDFStyle;
   children: React.ReactNode;
 }
 
 export const FlexRow: React.FC<BoxProps> = ({ style, children }) => (
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  <View style={[{ flexDirection: "row" }, style as any]}>{children}</View>
+  <View style={[flex_row, ...(Array.isArray(style) ? style : style ? [style] : [])]}>{children}</View>
 );
 
 export const FlexCol: React.FC<BoxProps> = ({ style, children }) => (
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  <View style={[{ flexDirection: "column" }, style as any]}>{children}</View>
+  <View style={[flex_col, ...(Array.isArray(style) ? style : style ? [style] : [])]}>{children}</View>
 );
 
 export const BoldText: React.FC<{
-  style?: Record<string, unknown> | Array<Record<string, unknown>>;
+  style?: PDFStyle;
   children: React.ReactNode;
 }> = ({ style, children }) => (
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  <Text style={[{ fontFamily: "Helvetica-Bold" }, style as any]}>{children}</Text>
+  <Text style={[bold_text, ...(Array.isArray(style) ? style : style ? [style] : [])]}>{children}</Text>
 );

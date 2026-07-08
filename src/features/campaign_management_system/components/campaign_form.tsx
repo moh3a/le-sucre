@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,6 @@ import { slugify } from "@/lib/utils";
 import { full_campaign_dto } from "../models/campaign.dto";
 import { QueryGuard } from "@/components/query-guard";
 import { CategoryTreeNode } from "@/features/product_information_management/categories/types";
-import type { MediaDTO } from "@/features/media_library/types";
 
 // Form value schema matching Zod DTO
 const form_schema = z.object({
@@ -176,7 +175,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
     }
 
     const tMap = new Map((default_values.translations || []).map((t) => [t.locale, t]));
-    const translations = ["fr", "en", "ar"].map((loc) => {
+    const translations = (["fr", "en", "ar"] as const).map((loc) => {
       const existing = tMap.get(loc);
       return {
         locale: loc as "en" | "fr" | "ar",
@@ -231,15 +230,15 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
   const watchName = watch("name");
   const watchSlug = watch("slug");
 
-  useEffect(() => {
-    if (
-      mode === "create" &&
-      watchName &&
-      (!watchSlug || watchSlug === slugify(watchName.slice(0, -1)))
-    ) {
-      setValue("slug", slugify(watchName), { shouldValidate: true });
+  const syncSlug = useEffectEvent((name: string) => {
+    if (mode === "create" && name && (!watchSlug || watchSlug === slugify(name.slice(0, -1)))) {
+      setValue("slug", slugify(name), { shouldValidate: true });
     }
-  }, [watchName, watchSlug, mode, setValue]);
+  });
+
+  useEffect(() => {
+    syncSlug(watchName);
+  }, [watchName]);
 
   // Form submission handler
   const on_submit = async (values: FormValues) => {

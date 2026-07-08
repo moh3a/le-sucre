@@ -8,7 +8,7 @@ import { campaign_ab_test_service } from "./services/campaign_ab_test.service";
 import { campaign_flash_sale_service } from "./services/campaign_flash_sale.service";
 import { campaign_landing_page_service } from "./services/campaign_landing_page.service";
 import { campaign_webhooks_service } from "./services/campaign_webhooks.service";
-import { campaign_automation_service } from "./services/campaign_automation.service";
+import { campaign_automation_service, type AutomationTrigger, type AutomationAction } from "./services/campaign_automation.service";
 import {
   list_campaigns_dto,
   create_campaign_dto,
@@ -155,23 +155,19 @@ export const campaign_router = create_trpc_router({
     .query(() => campaign_automation_service.list_rules()),
 
   createAutomationRule: permission_procedure(PERMISSIONS.campaigns_write)
-    .input(
-      z.object({
-        name: z.string().min(1).max(255),
-        trigger: z.string().min(1).max(64),
-        action: z.string().min(1).max(64),
-        campaign_type_filter: z.string().optional(),
-        status_filter: z.string().optional(),
-        config: z.record(z.string(), z.unknown()).default({}),
-        priority: z.number().int().min(1).max(9999).default(100),
-      }),
-    )
+      .input(
+        z.object({
+          name: z.string().min(1).max(255),
+          trigger: z.string().min(1).max(64) as z.ZodType<AutomationTrigger>,
+          action: z.string().min(1).max(64) as z.ZodType<AutomationAction>,
+          campaign_type_filter: z.string().optional(),
+          status_filter: z.string().optional(),
+          config: z.record(z.string(), z.unknown()).default({}),
+          priority: z.number().int().min(1).max(9999).default(100),
+        }),
+      )
     .mutation(({ input }) =>
-      campaign_automation_service.create_rule({
-        ...input,
-        trigger: input.trigger as any,
-        action: input.action as any,
-      }),
+      campaign_automation_service.create_rule(input),
     ),
 
   automationLogs: permission_procedure(PERMISSIONS.campaigns_read)

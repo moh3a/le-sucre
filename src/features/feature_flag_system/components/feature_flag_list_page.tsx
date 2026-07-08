@@ -11,7 +11,6 @@ import {
   Trash2,
   MoreHorizontal,
   Pencil,
-  Layers,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -33,7 +32,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -60,12 +58,6 @@ type FeatureFlagRow = {
   enabled: boolean;
   created_at: string;
   updated_at: string;
-};
-
-const LANGUAGE_LABELS: Record<string, string> = {
-  fr: "Français",
-  en: "English",
-  ar: "العربية",
 };
 
 function CreateFlagDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -199,14 +191,16 @@ function EditFlagDialog({
   const [ar_desc, setArDesc] = React.useState("");
 
   React.useEffect(() => {
-    if (flag) {
+    if (!flag) return;
+    const raf = requestAnimationFrame(() => {
       setFrName(flag.name.fr);
       setEnName(flag.name.en);
       setArName(flag.name.ar);
       setFrDesc(flag.description?.fr ?? "");
       setEnDesc(flag.description?.en ?? "");
       setArDesc(flag.description?.ar ?? "");
-    }
+    });
+    return () => cancelAnimationFrame(raf);
   }, [flag]);
 
   const update = trpc.featureFlags.update.useMutation({
@@ -235,7 +229,7 @@ function EditFlagDialog({
         <DialogHeader>
           <DialogTitle>{t("edit_flag_title")}</DialogTitle>
           <DialogDescription>
-            {t("edit_flag_description", { key: flag?.key })}
+            {t("edit_flag_description", { key: flag?.key ?? "" })}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -415,7 +409,7 @@ export function FeatureFlagListPage() {
         ),
       },
     ],
-    [toggle],
+    [toggle, t],
   );
 
   const items = (data?.items ?? []) as FeatureFlagRow[];
@@ -490,7 +484,7 @@ export function FeatureFlagListPage() {
           <DialogHeader>
             <DialogTitle>{t("confirm_delete_title")}</DialogTitle>
             <DialogDescription>
-              {t("confirm_delete_description", { key: delete_flag?.key })}
+              {t("confirm_delete_description", { key: delete_flag?.key ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -499,7 +493,7 @@ export function FeatureFlagListPage() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => delete_flag && remove.mutate(delete_flag.id)}
+              onClick={() => delete_flag && remove.mutate({ id: delete_flag.id })}
               disabled={remove.isPending}
             >
               {remove.isPending ? t("deleting") : t("delete")}

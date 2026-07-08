@@ -12,15 +12,15 @@ export function CategoryBreadcrumbs({ category_id }: { category_id: string }) {
   const { data } = query;
   return (
     <QueryGuard query={query}>
-    <nav className="text-muted-foreground text-sm">
-      <Link href="/console/categories">{t("breadcrumb_root")}</Link>
-      {data?.map((a) => (
-        <span key={a.id}>
-          {" / "}
-          <Link href={`/console/categories/${a.id}/edit`}>{a.name}</Link>
-        </span>
-      ))}
-    </nav>
+      <nav className="text-muted-foreground text-sm">
+        <Link href="/console/categories">{t("breadcrumb_root")}</Link>
+        {data?.map((a) => (
+          <span key={a.id}>
+            {" / "}
+            <Link href={`/console/categories/${a.id}/edit`}>{a.name}</Link>
+          </span>
+        ))}
+      </nav>
     </QueryGuard>
   );
 }

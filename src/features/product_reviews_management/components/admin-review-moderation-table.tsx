@@ -152,10 +152,7 @@ function FacetedFilter({
   );
 }
 
-const STATUS_BADGE_VARIANTS: Record<
-  string,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
+const STATUS_BADGE_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "secondary",
   approved: "outline",
   rejected: "destructive",
@@ -204,20 +201,24 @@ export function AdminReviewModerationTable() {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("product_column")} />
+        ),
         cell: ({ row }) => (
           <Link
             href={`/console/products/${row.original.product_id}`}
             className="flex items-center gap-1 text-sm font-medium hover:underline"
           >
             {row.original.product_name ?? "—"}
-            <ExternalLink className="ml-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+            <ExternalLink className="text-muted-foreground ml-0.5 h-3 w-3 shrink-0" />
           </Link>
         ),
       },
       {
         id: "author",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("author_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("author_column")} />
+        ),
         cell: ({ row }) => (
           <div className="text-sm">
             <p className="font-medium">{row.original.author_name ?? "—"}</p>
@@ -230,7 +231,9 @@ export function AdminReviewModerationTable() {
       {
         id: "rating",
         accessorKey: "rating",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("rating_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("rating_column")} />
+        ),
         cell: ({ row }) => (
           <div className="flex items-center gap-1">
             <span className="text-sm font-semibold">{row.original.rating}</span>
@@ -240,7 +243,9 @@ export function AdminReviewModerationTable() {
       },
       {
         id: "content",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("review_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("review_column")} />
+        ),
         cell: ({ row }) => (
           <div className="max-w-xs space-y-1">
             {row.original.title && (
@@ -258,7 +263,9 @@ export function AdminReviewModerationTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant={STATUS_BADGE_VARIANTS[row.original.status] ?? "default"}>
             {t(STATUS_LABELS[row.original.status] ?? row.original.status)}
@@ -268,7 +275,9 @@ export function AdminReviewModerationTable() {
       {
         id: "reports",
         accessorKey: "report_count",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reports_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("reports_column")} />
+        ),
         cell: ({ row }) =>
           row.original.report_count > 0 ? (
             <Badge
@@ -285,10 +294,12 @@ export function AdminReviewModerationTable() {
       {
         id: "helpful",
         accessorKey: "helpful_count",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("helpful_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("helpful_column")} />
+        ),
         cell: ({ row }) => (
           <div className="flex items-center gap-1 text-sm">
-            <MessageSquare className="size-3.5 text-muted-foreground" />
+            <MessageSquare className="text-muted-foreground size-3.5" />
             {row.original.helpful_count}
           </div>
         ),
@@ -340,7 +351,7 @@ export function AdminReviewModerationTable() {
         ),
       },
     ],
-    [moderate.isPending],
+    [moderate.isPending, t],
   );
 
   const { data: responseData, isLoading: isListLoading } = trpc.reviews.adminList.useQuery({
@@ -390,7 +401,10 @@ export function AdminReviewModerationTable() {
   }
 
   return (
-    <QueryGuard query={{ isLoading: isListLoading }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />}>
+    <QueryGuard
+      query={{ isLoading: isListLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={2} />}
+    >
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
           <Input
@@ -427,7 +441,7 @@ export function AdminReviewModerationTable() {
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length}{" "}{t("selected")}
+              {table.getFilteredSelectedRowModel().rows.length} {t("selected")}
             </Badge>
             <Button
               variant="secondary"
@@ -490,8 +504,8 @@ export function AdminReviewModerationTable() {
               {moderate.isPending
                 ? t("moderating")
                 : moderateDialog?.action === "approved"
-                ? t("approve")
-                : t("reject")}
+                  ? t("approve")
+                  : t("reject")}
             </Button>
           </DialogFooter>
         </DialogContent>

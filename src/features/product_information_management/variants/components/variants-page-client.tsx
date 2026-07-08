@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { Layers, Activity, AlertTriangle, ShoppingCart } from "lucide-react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
-import { Layers, Activity, AlertTriangle, ShoppingCart } from "lucide-react";
 import { VariantsTable } from "./variants-table";
 
 export function VariantsPageClient() {
@@ -43,13 +44,13 @@ export function VariantsPageClient() {
 
   return (
     <QueryGuard query={stats_query}>
-    <ConsolePageShell
-      title="Variantes"
-      subtitle="Gestion des variantes et des SKUs"
-      stats={<StatsGrid items={statsItems} loading={isStatsLoading} />}
-    >
-      <VariantsTable />
-    </ConsolePageShell>
+      <ConsolePageShell
+        title="Variantes"
+        subtitle="Gestion des variantes et des SKUs"
+        stats={<StatsGrid items={statsItems} loading={isStatsLoading} />}
+      >
+        <VariantsTable />
+      </ConsolePageShell>
     </QueryGuard>
   );
 }

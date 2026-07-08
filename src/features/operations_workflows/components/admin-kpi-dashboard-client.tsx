@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import Link from "next/link";
 
 export function AdminKPIDashboardClient() {
   const { data: kpi } = trpc.operationsWorkflows.agentKPIDashboard.useQuery({ days: 7 });
@@ -56,14 +57,14 @@ export function AdminKPIDashboardClient() {
       <div className="rounded-lg border">
         <h2 className="border-b bg-gray-50 px-4 py-2 font-semibold text-sm">Management Quick Links</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
-          <a href="/console/operations/approval-workflows" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Approvals</a>
-          <a href="/console/operations/sla-definitions" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">SLA Tracking</a>
-          <a href="/console/operations/fraud-reviews" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Fraud Queue</a>
-          <a href="/console/operations/routing-rules" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Routing Rules</a>
-          <a href="/console/operations/reconciliation" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Reconciliation</a>
-          <a href="/console/operations/rma" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">RMA</a>
-          <a href="/console/operations/inventory-transfers" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Transfers</a>
-          <a href="/console/operations/purchase-orders" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Purchase Orders</a>
+          <Link href="/console/operations/approval-workflows" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Approvals</Link>
+          <Link href="/console/operations/sla-definitions" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">SLA Tracking</Link>
+          <Link href="/console/operations/fraud-reviews" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Fraud Queue</Link>
+          <Link href="/console/operations/routing-rules" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Routing Rules</Link>
+          <Link href="/console/operations/reconciliation" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Reconciliation</Link>
+          <Link href="/console/operations/rma" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">RMA</Link>
+          <Link href="/console/operations/inventory-transfers" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Transfers</Link>
+          <Link href="/console/operations/purchase-orders" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Purchase Orders</Link>
         </div>
       </div>
     </div>

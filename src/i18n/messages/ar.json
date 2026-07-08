@@ -790,6 +790,7 @@
     "no_fields_found": "لم يتم العثور على حقول.",
     "enter_value": "أدخل قيمة…",
     "select_options": "اختيار خيار(ات)…",
+    "x_selected": "تم تحديد {count}",
     "search_options": "البحث في الخيارات…",
     "no_options_found": "لم يتم العثور على خيارات.",
     "true": "صحيح",

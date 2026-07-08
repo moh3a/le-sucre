@@ -7,7 +7,6 @@ import { Search, Upload, Check, FileVideo, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ResponsiveDialog,
@@ -48,7 +47,6 @@ export function MediaPickerDialog({
   entity_id,
   field,
   allowed_types,
-  selected_ids = [],
 }: MediaPickerDialogProps) {
   const t = useTranslations("media");
   const [open_internal, set_open_internal] = React.useState(false);
@@ -95,12 +93,14 @@ export function MediaPickerDialog({
   }
 
   React.useEffect(() => {
-    if (!open) {
+    if (open) return;
+    const raf = requestAnimationFrame(() => {
       set_selected([]);
       set_page(1);
       set_search("");
       set_show_upload(false);
-    }
+    });
+    return () => cancelAnimationFrame(raf);
   }, [open]);
 
   return (
@@ -202,7 +202,7 @@ export function MediaPickerDialog({
                           <Check className="size-3" />
                         </div>
                       )}
-                      <div className="from-background/80 absolute right-0 bottom-0 left-0 bg-gradient-to-t to-transparent p-1">
+                      <div className="from-background/80 absolute right-0 bottom-0 left-0 bg-linear-to-t to-transparent p-1">
                         <p className="truncate text-[10px] font-medium text-white drop-shadow-md">
                           {item.original_name}
                         </p>

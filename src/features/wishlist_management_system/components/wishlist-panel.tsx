@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -7,22 +8,15 @@ import {
   List,
   Plus,
   Trash2,
-  Edit3,
-  Share2,
   ChevronRight,
   Loader2,
   Package,
   MoreHorizontal,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,8 +117,8 @@ export function WishlistPanel({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-1 space-y-4">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-4 lg:col-span-1">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -133,22 +127,22 @@ export function WishlistPanel({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-              <div className="p-2 bg-muted rounded">
+            <div className="mb-4 grid grid-cols-2 gap-2 text-sm">
+              <div className="bg-muted rounded p-2">
                 <p className="font-bold">{stats.total_wishlists}</p>
-                <p className="text-xs text-muted-foreground">{t("lists")}</p>
+                <p className="text-muted-foreground text-xs">{t("lists")}</p>
               </div>
-              <div className="p-2 bg-muted rounded">
+              <div className="bg-muted rounded p-2">
                 <p className="font-bold">{stats.total_items}</p>
-                <p className="text-xs text-muted-foreground">{t("items")}</p>
+                <p className="text-muted-foreground text-xs">{t("items")}</p>
               </div>
-              <div className="p-2 bg-muted rounded">
+              <div className="bg-muted rounded p-2">
                 <p className="font-bold">{stats.total_purchased}</p>
-                <p className="text-xs text-muted-foreground">{t("purchased")}</p>
+                <p className="text-muted-foreground text-xs">{t("purchased")}</p>
               </div>
-              <div className="p-2 bg-muted rounded">
+              <div className="bg-muted rounded p-2">
                 <p className="font-bold">{stats.conversion_rate}%</p>
-                <p className="text-xs text-muted-foreground">{t("conversion")}</p>
+                <p className="text-muted-foreground text-xs">{t("conversion")}</p>
               </div>
             </div>
 
@@ -158,30 +152,30 @@ export function WishlistPanel({
                   key={wl.id}
                   onClick={() => onSelectWishlist(wl.id)}
                   className={cn(
-                    "w-full flex items-center justify-between p-2 rounded text-sm transition-colors",
+                    "flex w-full items-center justify-between rounded p-2 text-sm transition-colors",
                     selectedWishlistId === wl.id
                       ? "bg-primary/10 text-primary font-medium"
                       : "hover:bg-muted",
                   )}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
                     <List className="h-4 w-4 shrink-0" />
                     <span className="truncate">{wl.name}</span>
                     {wl.is_default && (
-                      <Badge variant="secondary" className="text-[10px] px-1 py-0">
+                      <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                         {t("default")}
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <span className="text-xs text-muted-foreground">{wl.item_count}</span>
-                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  <div className="flex shrink-0 items-center gap-1">
+                    <span className="text-muted-foreground text-xs">{wl.item_count}</span>
+                    <ChevronRight className="text-muted-foreground h-3 w-3" />
                   </div>
                 </button>
               ))}
             </div>
 
-            <div className="flex gap-2 mt-4">
+            <div className="mt-4 flex gap-2">
               <Input
                 placeholder={t("new_list_placeholder")}
                 value={newName}
@@ -195,7 +189,11 @@ export function WishlistPanel({
                 disabled={!newName.trim() || isCreating}
                 className="h-8"
               >
-                {isCreating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                {isCreating ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Plus className="h-3 w-3" />
+                )}
               </Button>
             </div>
           </CardContent>
@@ -215,17 +213,18 @@ export function WishlistPanel({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onDeleteWishlist(selected.id)} className="text-destructive">
-                        <Trash2 className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem
+                        onClick={() => onDeleteWishlist(selected.id)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
                         {t("delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
-              {selected.description && (
-                <CardDescription>{selected.description}</CardDescription>
-              )}
+              {selected.description && <CardDescription>{selected.description}</CardDescription>}
             </CardHeader>
           </Card>
         )}
@@ -268,55 +267,61 @@ export function WishlistPanel({
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="hover:bg-muted/50 flex items-center gap-3 rounded-lg border p-3 transition-colors"
                   >
                     {item.product?.media?.[0]?.url && (
                       <img
                         src={item.product.media[0].url}
                         alt=""
-                        className="h-14 w-14 object-cover rounded shrink-0"
+                        className="h-14 w-14 shrink-0 rounded object-cover"
                       />
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
                         {item.product?.translations?.[0]?.name ?? item.product_id}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="mt-1 flex items-center gap-2">
                         <Badge
                           variant="secondary"
                           className={cn(
-                            "text-[10px] px-1.5 py-0",
+                            "px-1.5 py-0 text-[10px]",
                             priorityColors[item.priority as WishlistPriority],
                           )}
                         >
                           {item.priority}
                         </Badge>
                         {item.is_purchased && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-600">
+                          <Badge
+                            variant="outline"
+                            className="px-1.5 py-0 text-[10px] text-green-600"
+                          >
                             {t("purchased")}
                           </Badge>
                         )}
-                        <span className="text-xs text-muted-foreground">Qté: {item.quantity}</span>
+                        <span className="text-muted-foreground text-xs">Qté: {item.quantity}</span>
                       </div>
                       {item.notes && (
-                        <p className="text-xs text-muted-foreground mt-1 truncate">{item.notes}</p>
+                        <p className="text-muted-foreground mt-1 truncate text-xs">{item.notes}</p>
                       )}
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="shrink-0 text-right">
                       {item.current_price && (
                         <p className="text-sm font-semibold">{item.current_price} DA</p>
                       )}
-                      {item.saved_price && item.current_price && item.saved_price !== item.current_price && (
-                        <p className="text-xs text-green-600">
-                          {Number(item.current_price) < Number(item.saved_price) ? "↓" : "↑"} {t("price_change")}
-                        </p>
-                      )}
+                      {item.saved_price &&
+                        item.current_price &&
+                        item.saved_price !== item.current_price && (
+                          <p className="text-xs text-green-600">
+                            {Number(item.current_price) < Number(item.saved_price) ? "↓" : "↑"}{" "}
+                            {t("price_change")}
+                          </p>
+                        )}
                     </div>
                     {onRemoveItem && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive h-8 w-8"
                         onClick={() => onRemoveItem(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />

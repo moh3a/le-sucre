@@ -72,8 +72,6 @@ export function InvoiceTable() {
     limit: per_page,
     status: (status ?? undefined) as InvoiceStatus | undefined,
     type: (type ?? undefined) as InvoiceType | undefined,
-    from: from ?? undefined,
-    to: to ?? undefined,
   });
 
   const handleDownload = async (id: string, invoice_number: string) => {

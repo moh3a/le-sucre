@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -100,11 +101,7 @@ export function BrandDataTable() {
           const url = row.getValue("logo_url") as string | null;
           return url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={url}
-              alt=""
-              className="h-10 w-10 rounded-md object-cover"
-            />
+            <img src={url} alt="" className="h-10 w-10 rounded-md object-cover" />
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-200 text-neutral-400">
               <Image className="size-5" />
@@ -117,12 +114,8 @@ export function BrandDataTable() {
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("name")} />
-        ),
-        cell: ({ row }) => (
-          <span className="font-medium">{row.getValue("name")}</span>
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("name")} />,
+        cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
         meta: {
           label: t("name"),
           placeholder: t("search_name"),
@@ -135,9 +128,7 @@ export function BrandDataTable() {
       {
         id: "slug",
         accessorKey: "slug",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("slug")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("slug")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground font-mono text-xs">{row.getValue("slug")}</span>
         ),
@@ -147,9 +138,7 @@ export function BrandDataTable() {
       {
         id: "description",
         accessorKey: "description",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("description")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("description")} />,
         cell: ({ row }) => {
           const value = row.getValue("description") as string | null;
           if (!value) return <span className="text-muted-foreground">—</span>;
@@ -165,9 +154,7 @@ export function BrandDataTable() {
       {
         id: "website_url",
         accessorKey: "website_url",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("website")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("website")} />,
         cell: ({ row }) => {
           const url = row.getValue("website_url") as string | null;
           if (!url) return <span className="text-muted-foreground">—</span>;
@@ -190,9 +177,7 @@ export function BrandDataTable() {
       {
         id: "is_active",
         accessorKey: "is_active",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("active")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("active")} />,
         cell: ({ row }) => {
           const active = row.getValue("is_active") as boolean;
           return (
@@ -216,9 +201,7 @@ export function BrandDataTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("created_at")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at")} />,
         cell: ({ row }) =>
           formatDate(row.getValue("created_at"), {
             day: "numeric",
@@ -231,9 +214,7 @@ export function BrandDataTable() {
       },
       {
         id: "actions",
-        cell: ({ row }) => (
-          <BrandRowActions brand={row.original} on_edit={set_edit_id} />
-        ),
+        cell: ({ row }) => <BrandRowActions brand={row.original} on_edit={set_edit_id} />,
         enableSorting: false,
         enableHiding: false,
       },
@@ -248,8 +229,7 @@ export function BrandDataTable() {
 
   const search = name_filter?.trim() || undefined;
   const active_value = active_filter?.[0];
-  const is_active =
-    active_value === "true" ? true : active_value === "false" ? false : undefined;
+  const is_active = active_value === "true" ? true : active_value === "false" ? false : undefined;
 
   const query = trpc.brands.list.useQuery({
     page,
@@ -283,27 +263,32 @@ export function BrandDataTable() {
   });
 
   return (
-    <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={columns.length} rowCount={10} filterCount={2} />}>
-    <>
-      <DataTable table={table}>
-        <DataTableToolbar table={table}>
-          <DataTableSortList table={table} />
-        </DataTableToolbar>
-      </DataTable>
+    <QueryGuard
+      query={query}
+      loadingFallback={
+        <DataTableSkeleton columnCount={columns.length} rowCount={10} filterCount={2} />
+      }
+    >
+      <>
+        <DataTable table={table}>
+          <DataTableToolbar table={table}>
+            <DataTableSortList table={table} />
+          </DataTableToolbar>
+        </DataTable>
 
-      {isFetching && !isLoading ? (
-        <p className="text-muted-foreground text-xs">{t("refreshing")}</p>
-      ) : null}
+        {isFetching && !isLoading ? (
+          <p className="text-muted-foreground text-xs">{t("refreshing")}</p>
+        ) : null}
 
-      <BrandFormDialog
-        mode="edit"
-        brand_id={edit_id ?? undefined}
-        open={!!edit_id}
-        onOpenChange={(open) => {
-          if (!open) set_edit_id(null);
-        }}
-      />
-    </>
+        <BrandFormDialog
+          mode="edit"
+          brand_id={edit_id ?? undefined}
+          open={!!edit_id}
+          onOpenChange={(open) => {
+            if (!open) set_edit_id(null);
+          }}
+        />
+      </>
     </QueryGuard>
   );
 }

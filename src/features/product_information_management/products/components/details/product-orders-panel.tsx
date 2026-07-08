@@ -74,7 +74,7 @@ export function ProductOrdersPanel({ product_id }: { product_id: string }) {
     page: 1,
     limit: 10,
   });
-  const { data, isLoading } = query;
+  const { data } = query;
 
   const items = (data?.items ?? []) as ProductOrderRow[];
   const { table } = useDataTable({
@@ -87,17 +87,17 @@ export function ProductOrdersPanel({ product_id }: { product_id: string }) {
 
   return (
     <QueryGuard query={query} loadingFallback={<DataTableSkeleton columnCount={5} rowCount={5} />}>
-    <Card>
-      <CardHeader>
-        <CardTitle>Commandes</CardTitle>
-        <CardDescription>
-          {data?.meta.total_records ?? 0} commande(s) contenant ce produit
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DataTable table={table} />
-      </CardContent>
-    </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Commandes</CardTitle>
+          <CardDescription>
+            {data?.meta.total_records ?? 0} commande(s) contenant ce produit
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable table={table} />
+        </CardContent>
+      </Card>
     </QueryGuard>
   );
 }

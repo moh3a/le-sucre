@@ -1037,6 +1037,7 @@
     "no_fields_found": "Aucun champ trouvé.",
     "enter_value": "Entrez une valeur…",
     "select_options": "Sélectionner une ou plusieurs option{s}…",
+    "x_selected": "{count} sélectionné(s)",
     "search_options": "Rechercher des options…",
     "no_options_found": "Aucune option trouvée.",
     "true": "Vrai",

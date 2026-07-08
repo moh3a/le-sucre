@@ -1,12 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { QueryGuard } from "@/components/query-guard";
-import { trpc } from "@/components/providers/app-providers";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/format";
-import { ORDER_LABELS } from "../constants/order-status";
 import {
   ArrowRightLeft,
   UserPlus,
@@ -17,6 +11,12 @@ import {
   Ban,
   Info,
 } from "lucide-react";
+
+import { QueryGuard } from "@/components/query-guard";
+import { trpc } from "@/components/providers/app-providers";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/format";
+import { ORDER_LABELS } from "../constants/order-status";
 
 type TimelineTabProps = {
   order_id: string;

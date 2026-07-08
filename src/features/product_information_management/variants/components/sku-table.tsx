@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -119,7 +120,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   const [manual_values, set_manual_values] = useState<Record<string, string>>({});
 
   const sku_form = useForm<SkuFormValues>({
-    resolver: zodResolver(sku_form_schema) as any,
+    resolver: zodResolver(sku_form_schema),
     defaultValues: { sku_code: "", base_price: "", offer_price: "", is_active: true },
   });
 
@@ -136,12 +137,12 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   const [bulk_stock_dialog_open, set_bulk_stock_dialog_open] = useState(false);
 
   const bulk_price_form = useForm<BulkPriceFormValues>({
-    resolver: zodResolver(bulk_price_schema) as any,
+    resolver: zodResolver(bulk_price_schema),
     defaultValues: { base_price: "", offer_price: "" },
   });
 
   const bulk_stock_form = useForm<BulkStockFormValues>({
-    resolver: zodResolver(bulk_stock_schema) as any,
+    resolver: zodResolver(bulk_stock_schema),
     defaultValues: { stock: "" },
   });
 
@@ -319,14 +320,12 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
           const flat = flatten_options(row.original.options);
           const val = flat[prop.code];
           if (!val) return <span className="text-muted-foreground">—</span>;
-          const option = row.original.options.find(
-            (o) => o.property_code === prop.code,
-          );
+          const option = row.original.options.find((o) => o.property_code === prop.code);
           return (
             <Badge variant="outline" className="gap-1.5">
               {option?.color_hex ? (
                 <span
-                  className="inline-block h-3.5 w-3.5 flex-shrink-0 rounded-full border"
+                  className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border"
                   style={{ backgroundColor: option.color_hex }}
                   title={option.color_hex}
                 />
@@ -334,7 +333,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 <img
                   src={option.thumbnail_image}
                   alt=""
-                  className="h-5 w-5 flex-shrink-0 rounded object-cover"
+                  className="h-5 w-5 shrink-0 rounded object-cover"
                 />
               ) : null}
               {val.label}
@@ -358,7 +357,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               (table.getIsSomePageRowsSelected() ?? "indeterminate")
             }
             onChange={(e) => table.toggleAllPageRowsSelected(!!e.target.checked)}
-            className="rounded border-gray-300 text-primary"
+            className="text-primary rounded border-gray-300"
             aria-label={t("select_all_label")}
           />
         ),
@@ -367,7 +366,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             type="checkbox"
             checked={row.getIsSelected()}
             onChange={(e) => row.toggleSelected(!!e.target.checked)}
-            className="rounded border-gray-300 text-primary"
+            className="text-primary rounded border-gray-300"
             aria-label={t("select_row_label")}
           />
         ),
@@ -706,81 +705,146 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   );
 
   return (
-    <QueryGuard isLoading={isLoading} loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}>
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex max-w-sm flex-1 items-center gap-2">
-          <Input
-            placeholder={t("search_sku_short")}
-            value={(table.getColumn("sku_code")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("sku_code")?.setFilterValue(event.target.value)}
-            className="h-9"
-          />
+    <QueryGuard
+      isLoading={isLoading}
+      loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}
+    >
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex max-w-sm flex-1 items-center gap-2">
+            <Input
+              placeholder={t("search_sku_short")}
+              value={(table.getColumn("sku_code")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("sku_code")?.setFilterValue(event.target.value)}
+              className="h-9"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              onClick={open_create}
+              disabled={properties.length === 0}
+            >
+              {t("create_sku")}
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" size="sm" onClick={open_create} disabled={properties.length === 0}>
-            {t("create_sku")}
-          </Button>
-        </div>
-      </div>
 
-      {action_bar && (
-        <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2">
-          {action_bar}
-        </div>
-      )}
+        {action_bar && (
+          <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2">
+            {action_bar}
+          </div>
+        )}
 
-      {items.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("empty_skus")}</p>
-      ) : (
-        <DataTable table={table} />
-      )}
+        {items.length === 0 ? (
+          <p className="text-muted-foreground text-sm">{t("empty_skus")}</p>
+        ) : (
+          <DataTable table={table} />
+        )}
 
-      <Sheet open={sheet_open} onOpenChange={set_sheet_open}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>{editing_id ? t("edit") : t("create_sku")}</SheetTitle>
-          </SheetHeader>
+        <Sheet open={sheet_open} onOpenChange={set_sheet_open}>
+          <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+            <SheetHeader>
+              <SheetTitle>{editing_id ? t("edit") : t("create_sku")}</SheetTitle>
+            </SheetHeader>
 
-          <div className="space-y-4 px-6 py-4">
-            {!editing_id &&
-              properties.map((property) => (
-                <Field key={property.id}>
-                  <FieldLabel>{property.name}</FieldLabel>
-                  <select
-                    className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
-                    value={manual_values[property.id] ?? ""}
-                    onChange={(e) =>
-                      set_manual_values((prev) => ({
-                        ...prev,
-                        [property.id]: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">{t("select_option")}</option>
-                    {property.values.map((value) => (
-                      <option key={value.id} value={value.id}>
-                        {value.label}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-              ))}
-
-            <FieldGroup className="grid gap-4">
-              <Controller
-                name="sku_code"
-                control={sku_form.control}
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>{t("sku_code")}</FieldLabel>
-                    <Input {...field} placeholder={editing_item?.sku_code ?? "auto"} />
+            <div className="space-y-4 px-6 py-4">
+              {!editing_id &&
+                properties.map((property) => (
+                  <Field key={property.id}>
+                    <FieldLabel>{property.name}</FieldLabel>
+                    <select
+                      className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
+                      value={manual_values[property.id] ?? ""}
+                      onChange={(e) =>
+                        set_manual_values((prev) => ({
+                          ...prev,
+                          [property.id]: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">{t("select_option")}</option>
+                      {property.values.map((value) => (
+                        <option key={value.id} value={value.id}>
+                          {value.label}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
-                )}
-              />
+                ))}
+
+              <FieldGroup className="grid gap-4">
+                <Controller
+                  name="sku_code"
+                  control={sku_form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{t("sku_code")}</FieldLabel>
+                      <Input {...field} placeholder={editing_item?.sku_code ?? "auto"} />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="base_price"
+                  control={sku_form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{t("base_price")}</FieldLabel>
+                      <Input type="number" min={0} step="0.01" {...field} />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="offer_price"
+                  control={sku_form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{t("offer_price")}</FieldLabel>
+                      <Input type="number" min={0} step="0.01" {...field} />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="is_active"
+                  control={sku_form.control}
+                  render={({ field }) => (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                      {t("active")}
+                    </label>
+                  )}
+                />
+              </FieldGroup>
+            </div>
+
+            <SheetFooter>
+              <Button
+                type="button"
+                onClick={on_save_sheet}
+                disabled={create_sku.isPending || update_sku.isPending}
+              >
+                {t("save")}
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+
+        <Dialog open={bulk_price_dialog_open} onOpenChange={set_bulk_price_dialog_open}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("bulk_edit_price_title")}</DialogTitle>
+              <DialogDescription>{t("bulk_edit_price_description")}</DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
               <Controller
                 name="base_price"
-                control={sku_form.control}
+                control={bulk_price_form.control}
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>{t("base_price")}</FieldLabel>
@@ -790,7 +854,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               />
               <Controller
                 name="offer_price"
-                control={sku_form.control}
+                control={bulk_price_form.control}
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>{t("offer_price")}</FieldLabel>
@@ -798,123 +862,68 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                   </Field>
                 )}
               />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => set_bulk_price_dialog_open(false)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button type="button" onClick={on_save_bulk_price} disabled={bulk_update.isPending}>
+                {t("update")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={bulk_stock_dialog_open} onOpenChange={set_bulk_stock_dialog_open}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>{t("bulk_set_stock_title")}</DialogTitle>
+              <DialogDescription>{t("bulk_set_stock_description")}</DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4">
               <Controller
-                name="is_active"
-                control={sku_form.control}
+                name="stock"
+                control={bulk_stock_form.control}
                 render={({ field }) => (
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
+                  <Field>
+                    <FieldLabel>{t("stock_quantity")}</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="1"
+                      {...field}
+                      placeholder={t("new_stock_placeholder")}
                     />
-                    {t("active")}
-                  </label>
+                  </Field>
                 )}
               />
-            </FieldGroup>
-          </div>
+            </div>
 
-          <SheetFooter>
-            <Button
-              type="button"
-              onClick={on_save_sheet}
-              disabled={create_sku.isPending || update_sku.isPending}
-            >
-              {t("save")}
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <Dialog open={bulk_price_dialog_open} onOpenChange={set_bulk_price_dialog_open}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("bulk_edit_price_title")}</DialogTitle>
-            <DialogDescription>
-              {t("bulk_edit_price_description")}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <Controller
-              name="base_price"
-              control={bulk_price_form.control}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t("base_price")}</FieldLabel>
-                  <Input type="number" min={0} step="0.01" {...field} />
-                </Field>
-              )}
-            />
-            <Controller
-              name="offer_price"
-              control={bulk_price_form.control}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t("offer_price")}</FieldLabel>
-                  <Input type="number" min={0} step="0.01" {...field} />
-                </Field>
-              )}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => set_bulk_price_dialog_open(false)}
-            >
-              {t("cancel")}
-            </Button>
-            <Button type="button" onClick={on_save_bulk_price} disabled={bulk_update.isPending}>
-              {t("update")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={bulk_stock_dialog_open} onOpenChange={set_bulk_stock_dialog_open}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{t("bulk_set_stock_title")}</DialogTitle>
-            <DialogDescription>
-              {t("bulk_set_stock_description")}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <Controller
-              name="stock"
-              control={bulk_stock_form.control}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t("stock_quantity")}</FieldLabel>
-                  <Input type="number" min={0} step="1" {...field} placeholder={t("new_stock_placeholder")} />
-                </Field>
-              )}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => set_bulk_stock_dialog_open(false)}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="button"
-              onClick={on_save_bulk_stock}
-              disabled={bulk_update.isPending || !bulk_stock_form.watch("stock")}
-            >
-              {t("set_stock")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => set_bulk_stock_dialog_open(false)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="button"
+                onClick={on_save_bulk_stock}
+                disabled={bulk_update.isPending || !bulk_stock_form.watch("stock")}
+              >
+                {t("set_stock")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </QueryGuard>
   );
 }

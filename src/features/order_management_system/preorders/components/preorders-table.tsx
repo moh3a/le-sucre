@@ -60,8 +60,6 @@ interface Option {
   value: string;
 }
 
-
-
 function FacetedFilter({
   title,
   options,
@@ -100,7 +98,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -141,12 +142,18 @@ export function PreordersTable() {
     { label: t("cancelled"), value: "cancelled" },
   ];
 
-  const STATUS_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    pending: { label: t("pending"), variant: "outline" },
-    confirmed: { label: t("confirmed"), variant: "secondary" },
-    fulfilled: { label: t("fulfilled"), variant: "default" },
-    cancelled: { label: t("cancelled"), variant: "destructive" },
-  };
+  const STATUS_BADGES: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = React.useMemo(
+    () => ({
+      pending: { label: t("pending"), variant: "outline" },
+      confirmed: { label: t("confirmed"), variant: "secondary" },
+      fulfilled: { label: t("fulfilled"), variant: "default" },
+      cancelled: { label: t("cancelled"), variant: "destructive" },
+    }),
+    [t],
+  );
 
   const [etaDialog, setEtaDialog] = React.useState<{
     allocation_id: string;
@@ -179,12 +186,16 @@ export function PreordersTable() {
       {
         id: "id",
         accessorKey: "id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("allocation_id_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("allocation_id_column")} />
+        ),
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.id}</span>,
       },
       {
         id: "product",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("product_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("product_column")} />
+        ),
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-sm font-medium">{row.original.product_name ?? "—"}</span>
@@ -216,14 +227,14 @@ export function PreordersTable() {
         id: "quantity",
         accessorKey: "quantity",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("qty_column")} />,
-        cell: ({ row }) => (
-          <span className="font-mono text-sm">{row.original.quantity}</span>
-        ),
+        cell: ({ row }) => <span className="font-mono text-sm">{row.original.quantity}</span>,
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => {
           const cfg = STATUS_BADGES[row.original.status] ?? {
             label: row.original.status,
@@ -235,19 +246,14 @@ export function PreordersTable() {
       {
         id: "estimated_available_at",
         accessorKey: "estimated_available_at",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("eta_column")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("eta_column")} />,
         cell: ({ row }) => {
           const eta = row.original.estimated_available_at;
-          const canEdit = row.original.status !== "fulfilled" && row.original.status !== "cancelled";
+          const canEdit =
+            row.original.status !== "fulfilled" && row.original.status !== "cancelled";
           return (
             <div className="flex items-center gap-2">
-              <span className="text-xs">
-                {eta
-                  ? formatDate(eta, { month: "short" })
-                  : "—"}
-              </span>
+              <span className="text-xs">{eta ? formatDate(eta, { month: "short" }) : "—"}</span>
               {canEdit && (
                 <Button
                   size="icon"
@@ -275,7 +281,9 @@ export function PreordersTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("created_at_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -319,7 +327,7 @@ export function PreordersTable() {
         ),
       },
     ],
-    [],
+    [STATUS_BADGES, t],
   );
 
   const items = (data?.items ?? []) as PreorderRow[];
@@ -345,84 +353,86 @@ export function PreordersTable() {
   }
 
   return (
-    <QueryGuard query={{ isLoading }} mutation={updateEtaMutation} loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}>
-    <>
-      <DataTable table={table}>
-        <DataTableAdvancedToolbar table={table}>
-          <Input
-            placeholder={t("search_placeholder")}
-            value={search || ""}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="max-w-sm"
-          />
-          <FacetedFilter
-            title={t("status_title")}
-            options={STATUS_OPTIONS}
-            value={status ?? undefined}
-            onChange={(val) => {
-              setStatus(val);
-              setPage(1);
-            }}
-          />
-          <DataTableSortList table={table} />
-        </DataTableAdvancedToolbar>
-        {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <div className="flex items-center gap-2 border-t p-2">
-            <Badge variant="outline">
-              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-            </Badge>
-            <Button variant="ghost" size="sm" asChild>
-              <a
-                href={`/api/admin/preorders/export?${new URLSearchParams({
-                  ...(search ? { search } : {}),
-                  ...(status ? { status } : {}),
-                })}`}
-                download="preorders.csv"
-              >
-                <Download className="mr-1 h-4 w-4" />
-                {t("export")}
-              </a>
-            </Button>
-          </div>
-        )}
-      </DataTable>
-
-      <Dialog
-        open={!!etaDialog}
-        onOpenChange={(open) => {
-          if (!open) setEtaDialog(null);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("edit_eta_title")}</DialogTitle>
-            <DialogDescription>
-              {t("edit_eta_description")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Label htmlFor="eta-date">{t("availability_date")}</Label>
+    <QueryGuard
+      query={{ isLoading }}
+      mutation={updateEtaMutation}
+      loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}
+    >
+      <>
+        <DataTable table={table}>
+          <DataTableAdvancedToolbar table={table}>
             <Input
-              id="eta-date"
-              type="date"
-              value={etaDate}
-              onChange={(e) => setEtaDate(e.target.value)}
+              placeholder={t("search_placeholder")}
+              value={search || ""}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="max-w-sm"
             />
-          </div>
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setEtaDialog(null)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleUpdateEta} disabled={!etaDate || updateEtaMutation.isPending}>
-              {updateEtaMutation.isPending ? t("updating") : t("save")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+            <FacetedFilter
+              title={t("status_title")}
+              options={STATUS_OPTIONS}
+              value={status ?? undefined}
+              onChange={(val) => {
+                setStatus(val);
+                setPage(1);
+              }}
+            />
+            <DataTableSortList table={table} />
+          </DataTableAdvancedToolbar>
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <div className="flex items-center gap-2 border-t p-2">
+              <Badge variant="outline">
+                {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+              </Badge>
+              <Button variant="ghost" size="sm" asChild>
+                <a
+                  href={`/api/admin/preorders/export?${new URLSearchParams({
+                    ...(search ? { search } : {}),
+                    ...(status ? { status } : {}),
+                  })}`}
+                  download="preorders.csv"
+                >
+                  <Download className="mr-1 h-4 w-4" />
+                  {t("export")}
+                </a>
+              </Button>
+            </div>
+          )}
+        </DataTable>
+
+        <Dialog
+          open={!!etaDialog}
+          onOpenChange={(open) => {
+            if (!open) setEtaDialog(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("edit_eta_title")}</DialogTitle>
+              <DialogDescription>{t("edit_eta_description")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Label htmlFor="eta-date">{t("availability_date")}</Label>
+              <Input
+                id="eta-date"
+                type="date"
+                value={etaDate}
+                onChange={(e) => setEtaDate(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setEtaDialog(null)}>
+                {t("cancel")}
+              </Button>
+              <Button onClick={handleUpdateEta} disabled={!etaDate || updateEtaMutation.isPending}>
+                {updateEtaMutation.isPending ? t("updating") : t("save")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     </QueryGuard>
   );
 }

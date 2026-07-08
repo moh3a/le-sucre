@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { eq, and, gte, lte, sql, asc } from "drizzle-orm";
 import { campaigns, campaign_sections, campaign_banners, campaign_translations } from "../schema";
 import { CAMPAIGN_TYPE, CAMPAIGN_STATUS } from "../constants/campaign_types";
-import { campaign_recommendation_service } from "./campaign_recommendation.service";
+import { campaign_recommendation_service, type RecommendationStrategy } from "./campaign_recommendation.service";
 
 export interface LandingPageSection {
   id: string;
@@ -92,7 +92,7 @@ export class CampaignLandingPageService {
       const limit = (config.limit as number) ?? 12;
 
       const recommendations = await campaign_recommendation_service.get_recommendations({
-        strategy: (config.strategy as string) as any ?? "trending",
+        strategy: (config.strategy as RecommendationStrategy) ?? "trending",
         limit,
         category_id: config.category_id as string | undefined,
         brand_id: config.brand_id as string | undefined,

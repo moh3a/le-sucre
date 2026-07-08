@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { eq, and, asc, desc, sql } from "drizzle-orm";
+import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { payment_reconciliation } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
@@ -72,7 +72,7 @@ export class PaymentReconciliationService {
   }
 
   async list(status?: string, order_id?: string) {
-    const clauses: any[] = [];
+    const clauses: SQL[] = [];
     if (status) clauses.push(eq(payment_reconciliation.status, status));
     if (order_id) clauses.push(eq(payment_reconciliation.order_id, order_id));
     return db

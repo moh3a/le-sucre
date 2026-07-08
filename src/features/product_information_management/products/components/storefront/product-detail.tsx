@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DataState } from "@/components/storefront/data-state";
 import { ProductPrice } from "@/features/product_information_management/products/components/storefront/product-price";

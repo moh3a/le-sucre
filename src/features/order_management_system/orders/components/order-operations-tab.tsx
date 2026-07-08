@@ -1,19 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { Ban, TriangleAlert, PauseCircle, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
-import { useTranslations } from "next-intl";
-import { Ban, TriangleAlert, PauseCircle, PlayCircle, Send } from "lucide-react";
 
 const ESCALATION_STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "outline"> = {
   open: "destructive",
@@ -33,7 +32,7 @@ type OrderOpsTabProps = {
   order_status: string;
 };
 
-export function OrderOperationsTab({ order_id, order_status }: OrderOpsTabProps) {
+export function OrderOperationsTab({ order_id }: OrderOpsTabProps) {
   const t = useTranslations("orders");
   const utils = trpc.useUtils();
 

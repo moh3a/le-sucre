@@ -65,28 +65,23 @@ export function ThemeProvider({
   forcedTheme,
   defaultTheme = "system",
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-  const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme());
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => getSystemTheme());
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
+    const stored = getStoredTheme();
+    return stored === "system" ? getSystemTheme() : stored;
+  });
+  const [mounted] = useState(true);
 
   useEffect(() => {
-    const stored = getStoredTheme();
-    setThemeState(stored);
-
-    const sys = getSystemTheme();
-    setSystemTheme(sys);
-    setResolvedTheme(stored === "system" ? sys : stored);
-    applyTheme(stored);
-    setMounted(true);
+    applyTheme(theme);
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = (e: MediaQueryListEvent) => {
       const sys = e.matches ? "dark" : "light";
       setSystemTheme(sys);
       setResolvedTheme((prev) => {
-        const currentTheme = theme;
-        if (currentTheme === "system") {
+        if (theme === "system") {
           applyTheme("system");
           return sys;
         }
@@ -95,7 +90,7 @@ export function ThemeProvider({
     };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, []);
+  }, [theme]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

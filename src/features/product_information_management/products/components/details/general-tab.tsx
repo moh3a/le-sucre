@@ -42,7 +42,6 @@ import {
   product_status_enum,
   upsert_translation_dto,
 } from "../../models/product.dto";
-import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 
 const general_form_schema = z.object({
   name: z.string().min(1, "Requis"),
@@ -63,15 +62,15 @@ const general_form_schema = z.object({
 
 type GeneralFormValues = z.infer<typeof general_form_schema>;
 
-function flatten_categories(
-  nodes: CategoryTreeNode[],
-  depth = 0,
-): Array<{ id: string; label: string }> {
-  return nodes.flatMap((node) => [
-    { id: node.id, label: `${"—".repeat(depth)} ${node.name}`.trim() },
-    ...flatten_categories(node.children ?? [], depth + 1),
-  ]);
-}
+// function flatten_categories(
+//   nodes: CategoryTreeNode[],
+//   depth = 0,
+// ): Array<{ id: string; label: string }> {
+//   return nodes.flatMap((node) => [
+//     { id: node.id, label: `${"—".repeat(depth)} ${node.name}`.trim() },
+//     ...flatten_categories(node.children ?? [], depth + 1),
+//   ]);
+// }
 
 export function ProductDetailGeneralTab({
   product,
@@ -185,308 +184,320 @@ export function ProductDetailGeneralTab({
 
   return (
     <QueryGuard mutation={update}>
-    <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("general")}</CardTitle>
-          <CardDescription>{t("general_description")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <FieldGroup>
-            <Controller
-              name="name"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>{t("name_fr")}</FieldLabel>
-                  <Input {...field} />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="description"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>{t("description_fr")}</FieldLabel>
-                  <Textarea
-                    value={field.value ?? ""}
-                    onChange={(e) => field.onChange(e.target.value || null)}
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button type="button" variant="ghost" size="sm" className="flex items-center gap-2">
-                  <ChevronRight className="size-4" />
-                  {t("english")}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="space-y-4 border-l-2 pl-4">
-                  <Controller
-                    name="name_en"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>{t("name_en")}</FieldLabel>
-                        <Input {...field} />
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name="description_en"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>{t("description_en")}</FieldLabel>
-                        <Textarea
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value || null)}
-                        />
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button type="button" variant="ghost" size="sm" className="flex items-center gap-2">
-                  <ChevronRight className="size-4" />
-                  {t("arabic")}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="space-y-4 border-l-2 pl-4">
-                  <Controller
-                    name="name_ar"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>{t("name_ar")}</FieldLabel>
-                        <Input {...field} dir="rtl" />
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name="description_ar"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>{t("description_ar")}</FieldLabel>
-                        <Textarea
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value || null)}
-                          dir="rtl"
-                        />
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Controller
-              name="keywords"
-              control={form.control}
-              render={({ field }) => {
-                const tags = field.value ?? [];
-                return (
-                  <Field>
-                    <FieldLabel className="sr-only">{t("keywords")}</FieldLabel>
-                    <TagsInput value={tags} onValueChange={field.onChange} className="w-full">
-                      <TagsInputLabel>{t("keywords")}</TagsInputLabel>
-                      <TagsInputList>
-                        {tags.map((tag) => (
-                          <TagsInputItem key={tag} value={tag}>
-                            {tag}
-                          </TagsInputItem>
-                        ))}
-                        <TagsInputInput placeholder={t("add_keyword_placeholder")} />
-                      </TagsInputList>
-                    </TagsInput>
-                  </Field>
-                );
-              }}
-            />
-
-            <Controller
-              name="slug"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>{t("slug")}</FieldLabel>
-                  <Input {...field} />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="status"
-              control={form.control}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t("status")}</FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">{t("draft")}</SelectItem>
-                      <SelectItem value="published">{t("published")}</SelectItem>
-                      <SelectItem value="archived">{t("archived")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-              )}
-            />
-
-            <div className="grid gap-4 md:grid-cols-2">
+      <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("general")}</CardTitle>
+            <CardDescription>{t("general_description")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FieldGroup>
               <Controller
-                name="base_price"
+                name="name"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("base_price")}</FieldLabel>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={field.value}
-                      onChange={(e) =>
-                        field.onChange(e.target.value === "" ? 0 : parseFloat(e.target.value) || 0)
-                      }
-                    />
+                    <FieldLabel>{t("name_fr")}</FieldLabel>
+                    <Input {...field} />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
               />
 
               <Controller
-                name="offer_price"
+                name="description"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("offer_price")}</FieldLabel>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
+                    <FieldLabel>{t("description_fr")}</FieldLabel>
+                    <Textarea
                       value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === "" ? null : parseFloat(e.target.value) || 0,
-                        )
-                      }
-                      placeholder={t("none_placeholder")}
+                      onChange={(e) => field.onChange(e.target.value || null)}
                     />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
               />
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+              <Collapsible>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronRight className="size-4" />
+                    {t("english")}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-4 border-l-2 pl-4">
+                    <Controller
+                      name="name_en"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>{t("name_en")}</FieldLabel>
+                          <Input {...field} />
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name="description_en"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>{t("description_en")}</FieldLabel>
+                          <Textarea
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.value || null)}
+                          />
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronRight className="size-4" />
+                    {t("arabic")}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-4 border-l-2 pl-4">
+                    <Controller
+                      name="name_ar"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>{t("name_ar")}</FieldLabel>
+                          <Input {...field} dir="rtl" />
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name="description_ar"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>{t("description_ar")}</FieldLabel>
+                          <Textarea
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.value || null)}
+                            dir="rtl"
+                          />
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               <Controller
-                name="category_id"
+                name="keywords"
+                control={form.control}
+                render={({ field }) => {
+                  const tags = field.value ?? [];
+                  return (
+                    <Field>
+                      <FieldLabel className="sr-only">{t("keywords")}</FieldLabel>
+                      <TagsInput value={tags} onValueChange={field.onChange} className="w-full">
+                        <TagsInputLabel>{t("keywords")}</TagsInputLabel>
+                        <TagsInputList>
+                          {tags.map((tag) => (
+                            <TagsInputItem key={tag} value={tag}>
+                              {tag}
+                            </TagsInputItem>
+                          ))}
+                          <TagsInputInput placeholder={t("add_keyword_placeholder")} />
+                        </TagsInputList>
+                      </TagsInput>
+                    </Field>
+                  );
+                }}
+              />
+
+              <Controller
+                name="slug"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("category")}</FieldLabel>
-                    {data_ready ? (
-                      <Combobox value={field.value} onValueChange={field.onChange}>
-                        <ComboboxInput placeholder={t("search_category_placeholder")} showClear />
-                        <ComboboxContent>
-                          <ComboboxList>
-                            {category_options.map((cat) => (
-                              <ComboboxItem key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    ) : (
-                      <Input value={field.value} disabled />
-                    )}
+                    <FieldLabel>{t("slug")}</FieldLabel>
+                    <Input {...field} />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
               />
 
               <Controller
-                name="subcategory_id"
+                name="status"
                 control={form.control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>{t("subcategory")}</FieldLabel>
-                    {data_ready ? (
-                      <Combobox
-                        value={field.value ?? ""}
-                        onValueChange={(val) => field.onChange(val || null)}
-                      >
-                        <ComboboxInput
-                          placeholder={
-                            watched_category_id
-                              ? t("search_subcategory_placeholder")
-                              : t("select_category_first")
-                          }
-                          showClear
-                          disabled={!watched_category_id}
-                        />
-                        <ComboboxContent>
-                          <ComboboxList>
-                            {subcategory_options.map((sub) => (
-                              <ComboboxItem key={sub.id} value={sub.id}>
-                                {sub.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    ) : (
-                      <Input value={field.value ?? ""} disabled />
-                    )}
+                    <FieldLabel>{t("status")}</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">{t("draft")}</SelectItem>
+                        <SelectItem value="published">{t("published")}</SelectItem>
+                        <SelectItem value="archived">{t("archived")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
               />
-            </div>
 
-            <Controller
-              name="brand_id"
-              control={form.control}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel>{t("brand")}</FieldLabel>
-                  <BrandCombobox
-                    value={field.value ?? ""}
-                    onValueChange={(val) => field.onChange(val ?? null)}
-                  />
-                </Field>
-              )}
-            />
+              <div className="grid gap-4 md:grid-cols-2">
+                <Controller
+                  name="base_price"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>{t("base_price")}</FieldLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? 0 : parseFloat(e.target.value) || 0,
+                          )
+                        }
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
 
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={pending}>
-                {pending ? t("saving") : t("save")}
-              </Button>
-            </div>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-    </form>
+                <Controller
+                  name="offer_price"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>{t("offer_price")}</FieldLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? null : parseFloat(e.target.value) || 0,
+                          )
+                        }
+                        placeholder={t("none_placeholder")}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Controller
+                  name="category_id"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>{t("category")}</FieldLabel>
+                      {data_ready ? (
+                        <Combobox value={field.value} onValueChange={field.onChange}>
+                          <ComboboxInput placeholder={t("search_category_placeholder")} showClear />
+                          <ComboboxContent>
+                            <ComboboxList>
+                              {category_options.map((cat) => (
+                                <ComboboxItem key={cat.id} value={cat.id}>
+                                  {cat.name}
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxList>
+                          </ComboboxContent>
+                        </Combobox>
+                      ) : (
+                        <Input value={field.value} disabled />
+                      )}
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="subcategory_id"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{t("subcategory")}</FieldLabel>
+                      {data_ready ? (
+                        <Combobox
+                          value={field.value ?? ""}
+                          onValueChange={(val) => field.onChange(val || null)}
+                        >
+                          <ComboboxInput
+                            placeholder={
+                              watched_category_id
+                                ? t("search_subcategory_placeholder")
+                                : t("select_category_first")
+                            }
+                            showClear
+                            disabled={!watched_category_id}
+                          />
+                          <ComboboxContent>
+                            <ComboboxList>
+                              {subcategory_options.map((sub) => (
+                                <ComboboxItem key={sub.id} value={sub.id}>
+                                  {sub.name}
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxList>
+                          </ComboboxContent>
+                        </Combobox>
+                      ) : (
+                        <Input value={field.value ?? ""} disabled />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
+
+              <Controller
+                name="brand_id"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t("brand")}</FieldLabel>
+                    <BrandCombobox
+                      value={field.value ?? ""}
+                      onValueChange={(val) => field.onChange(val ?? null)}
+                    />
+                  </Field>
+                )}
+              />
+
+              <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={pending}>
+                  {pending ? t("saving") : t("save")}
+                </Button>
+              </div>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+      </form>
     </QueryGuard>
   );
 }

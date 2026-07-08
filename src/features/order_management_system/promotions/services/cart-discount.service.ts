@@ -5,7 +5,7 @@ import { products } from "@/features/product_information_management/products/sch
 import { get_promotion_provider } from "../providers/provider-registry";
 import { promotion_cache_service } from "./promotion-cache.service";
 import { PROMOTION_CACHE } from "../constants/cache-keys";
-import type { CartLineForPromo } from "../types";
+import type { CartDiscountResult, CartLineForPromo } from "../types";
 import { inArray } from "drizzle-orm";
 
 export class CartDiscountService {
@@ -28,7 +28,7 @@ export class CartDiscountService {
     );
 
     if (!input.promo_code) {
-      const cached = await promotion_cache_service.get(cache_key);
+      const cached = await promotion_cache_service.get<CartDiscountResult>(cache_key);
       if (cached) return cached;
     }
 

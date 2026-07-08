@@ -1,6 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState } from "react";
 import type { StorefrontSection } from "./types";
 import { StorefrontFlashSaleTimer } from "./storefront-flash-sale-timer";
 
@@ -14,9 +14,7 @@ export function StorefrontSectionRenderer({ section, locale = "en" }: Props) {
 
   return (
     <section className={`storefront-section storefront-section--${section.section_type} my-8`}>
-      {headingText && (
-        <h2 className="mb-4 text-2xl font-bold tracking-tight">{headingText}</h2>
-      )}
+      {headingText && <h2 className="mb-4 text-2xl font-bold tracking-tight">{headingText}</h2>}
       <div className="storefront-section__content">
         <SectionContent section={section} />
       </div>
@@ -71,9 +69,9 @@ function ProductCarouselSection({ section }: { section: StorefrontSection }) {
   if (!product_ids.length) return null;
 
   return (
-    <div className="product-carousel flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
+    <div className="product-carousel flex scrollbar-thin gap-4 overflow-x-auto pb-4">
       {product_ids.map((id) => (
-        <div key={id} className="min-w-[200px] flex-shrink-0">
+        <div key={id} className="min-w-[200px] shrink-0">
           <ProductCard product_id={id} />
         </div>
       ))}
@@ -87,7 +85,7 @@ function CategoryShowcaseSection({ section }: { section: StorefrontSection }) {
   if (!category_ids.length) return null;
 
   return (
-    <div className="category-showcase grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="category-showcase grid grid-cols-2 gap-4 md:grid-cols-4">
       {category_ids.map((id) => (
         <CategoryCard key={id} category_id={id} />
       ))}
@@ -101,7 +99,7 @@ function BrandShowcaseSection({ section }: { section: StorefrontSection }) {
   if (!brand_ids.length) return null;
 
   return (
-    <div className="brand-showcase grid grid-cols-3 md:grid-cols-6 gap-4">
+    <div className="brand-showcase grid grid-cols-3 gap-4 md:grid-cols-6">
       {brand_ids.map((id) => (
         <BrandCard key={id} brand_id={id} />
       ))}
@@ -115,13 +113,13 @@ function BannerRowSection({ section }: { section: StorefrontSection }) {
   if (!images.length) return null;
 
   return (
-    <div className="banner-row grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="banner-row grid grid-cols-1 gap-4 md:grid-cols-2">
       {images.map((src, i) => (
         <img
           key={i}
           src={src}
           alt=""
-          className="w-full h-auto rounded-lg object-cover"
+          className="h-auto w-full rounded-lg object-cover"
           loading="lazy"
         />
       ))}
@@ -135,7 +133,7 @@ function CountdownSection({ section }: { section: StorefrontSection }) {
   if (!target_date) return null;
 
   return (
-    <div className="countdown-section flex flex-col items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white">
+    <div className="countdown-section flex flex-col items-center justify-center rounded-lg bg-linear-to-r from-purple-600 to-indigo-600 p-8 text-white">
       <StorefrontFlashSaleTimer ends_at={target_date} />
     </div>
   );
@@ -178,24 +176,24 @@ function VideoSection({ section }: { section: StorefrontSection }) {
 function ProductCard({ product_id }: { product_id: string }) {
   return (
     <div className="product-card rounded-lg border bg-white p-4 shadow-sm transition hover:shadow-md">
-      <div className="aspect-square rounded-md bg-gray-100 mb-2" />
-      <div className="h-4 w-3/4 rounded bg-gray-200 mb-1" />
+      <div className="mb-2 aspect-square rounded-md bg-gray-100" />
+      <div className="mb-1 h-4 w-3/4 rounded bg-gray-200" />
       <div className="h-4 w-1/2 rounded bg-gray-200" />
       <p className="mt-1 text-xs text-gray-400">{product_id.slice(0, 8)}</p>
     </div>
   );
 }
 
-function CategoryCard({ category_id }: { category_id: string }) {
+function CategoryCard({}: { category_id: string }) {
   return (
     <div className="category-card rounded-lg border bg-white p-4 shadow-sm transition hover:shadow-md">
-      <div className="h-24 rounded-md bg-gray-100 mb-2" />
-      <div className="h-4 w-3/4 rounded bg-gray-200 mx-auto" />
+      <div className="mb-2 h-24 rounded-md bg-gray-100" />
+      <div className="mx-auto h-4 w-3/4 rounded bg-gray-200" />
     </div>
   );
 }
 
-function BrandCard({ brand_id }: { brand_id: string }) {
+function BrandCard({}: { brand_id: string }) {
   return (
     <div className="brand-card flex items-center justify-center rounded-lg border bg-white p-4 shadow-sm">
       <div className="h-8 w-20 rounded bg-gray-200" />

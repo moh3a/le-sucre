@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useMemo, useState } from "react";
@@ -49,60 +50,57 @@ export function VariantSelector({ product_id, on_sku_change }: VariantSelectorPr
 
   return (
     <QueryGuard isLoading={isLoading} loadingFallback={null}>
-    {!config?.properties.length ? null : (
-    <div className="space-y-4">
-      {config.properties.map((property) => (
-        <div key={property.id}>
-          <p className="mb-2 text-sm font-medium">{property.name}</p>
-          <div className="flex flex-wrap gap-2">
-              {property.values.map((value) => {
-              const is_selected = selected[property.id] === value.id;
-              return (
-                <Button
-                  key={value.id}
-                  type="button"
-                  variant={is_selected ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => pick(property.id, value.id)}
-                  className={cn(
-                    "gap-1.5",
-                    value.color_hex && is_selected && "text-white",
-                  )}
-                  style={
-                    value.color_hex && is_selected
-                      ? { backgroundColor: value.color_hex, borderColor: value.color_hex }
-                      : undefined
-                  }
-                >
-                  {value.color_hex ? (
-                    <span
-                      className={cn(
-                        "inline-block h-3.5 w-3.5 flex-shrink-0 rounded-full border",
-                        is_selected && "border-white/50",
-                      )}
-                      style={{ backgroundColor: value.color_hex }}
-                    />
-                  ) : value.thumbnail_image ? (
-                    <img
-                      src={value.thumbnail_image}
-                      alt=""
-                      className="h-4 w-4 flex-shrink-0 rounded object-cover"
-                    />
-                  ) : null}
-                  {value.label}
-                </Button>
-              );
-            })}
-          </div>
+      {!config?.properties.length ? null : (
+        <div className="space-y-4">
+          {config.properties.map((property) => (
+            <div key={property.id}>
+              <p className="mb-2 text-sm font-medium">{property.name}</p>
+              <div className="flex flex-wrap gap-2">
+                {property.values.map((value) => {
+                  const is_selected = selected[property.id] === value.id;
+                  return (
+                    <Button
+                      key={value.id}
+                      type="button"
+                      variant={is_selected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => pick(property.id, value.id)}
+                      className={cn("gap-1.5", value.color_hex && is_selected && "text-white")}
+                      style={
+                        value.color_hex && is_selected
+                          ? { backgroundColor: value.color_hex, borderColor: value.color_hex }
+                          : undefined
+                      }
+                    >
+                      {value.color_hex ? (
+                        <span
+                          className={cn(
+                            "inline-block h-3.5 w-3.5 shrink-0 rounded-full border",
+                            is_selected && "border-white/50",
+                          )}
+                          style={{ backgroundColor: value.color_hex }}
+                        />
+                      ) : value.thumbnail_image ? (
+                        <img
+                          src={value.thumbnail_image}
+                          alt=""
+                          className="h-4 w-4 shrink-0 rounded object-cover"
+                        />
+                      ) : null}
+                      {value.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {matched_sku && (
+            <Badge variant="secondary">
+              {matched_sku.sku_code} · {matched_sku.base_price} {matched_sku.currency}
+            </Badge>
+          )}
         </div>
-      ))}
-      {matched_sku && (
-        <Badge variant="secondary">
-          {matched_sku.sku_code} · {matched_sku.base_price} {matched_sku.currency}
-        </Badge>
       )}
-    </div>
-    )}
     </QueryGuard>
   );
 }

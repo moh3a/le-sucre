@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, RefreshCw, Star } from "lucide-react";
+import { Loader2, Plus, Trash2, RefreshCw } from "lucide-react";
 import Image from "next/image";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -26,7 +26,6 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -42,8 +41,6 @@ import { RECOMMENDATION_TYPE } from "@/features/product_information_management/r
 type Props = {
   product_id: string;
 };
-
-
 
 export function ProductRecommendationsTab({ product_id }: Props) {
   const t = useTranslations("products");
@@ -75,7 +72,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
   });
 
   const reindex = trpc.recommendations.admin.reindex.useMutation({
-    onSuccess: () =>       toast.success(t("reindex_scheduled")),
+    onSuccess: () => toast.success(t("reindex_scheduled")),
     onError: (err) => toast.error(err.message),
   });
 
@@ -96,14 +93,12 @@ export function ProductRecommendationsTab({ product_id }: Props) {
     image_url: string | null;
   } | null>(null);
 
-  const { data: search_results, isFetching: search_loading } =
-    trpc.products.adminList.useQuery(
-      { search: search_query, page: 1, limit: 10 },
-      { enabled: search_query.length >= 2 },
-    );
+  const { data: search_results, isFetching: search_loading } = trpc.products.adminList.useQuery(
+    { search: search_query, page: 1, limit: 10 },
+    { enabled: search_query.length >= 2 },
+  );
 
   const edges = edges_data?.edges ?? [];
-  const edge_counts = edges_data?.counts ?? [];
 
   const edges_by_type: Record<string, typeof edges> = {};
   for (const edge of edges) {
@@ -135,236 +130,230 @@ export function ProductRecommendationsTab({ product_id }: Props) {
 
   return (
     <QueryGuard mutation={add_edge}>
-    <div className="space-y-6">
-      {/* ─── Catalog Discovery Section ─── */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("catalog_discovery")}</CardTitle>
-          <CardDescription>
-            {t("catalog_discovery_description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <Switch
-              checked={product?.is_featured ?? false}
-              onCheckedChange={handle_toggle_featured}
-              disabled={update.isPending}
-            />
+      <div className="space-y-6">
+        {/* ─── Catalog Discovery Section ─── */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("catalog_discovery")}</CardTitle>
+            <CardDescription>{t("catalog_discovery_description")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Switch
+                checked={product?.is_featured ?? false}
+                onCheckedChange={handle_toggle_featured}
+                disabled={update.isPending}
+              />
+              <div>
+                <p className="text-sm font-medium">{t("featured_product")}</p>
+                <p className="text-muted-foreground text-xs">{t("featured_product_description")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ─── Recommendation Edges Section ─── */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <p className="text-sm font-medium">{t("featured_product")}</p>
-              <p className="text-muted-foreground text-xs">
-                {t("featured_product_description")}
+              <CardTitle>{t("recommendations")}</CardTitle>
+              <CardDescription>{t("recommendations_description")}</CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => reindex.mutate({ product_id, locale: "fr" })}
+              disabled={reindex.isPending}
+            >
+              <RefreshCw className={`mr-2 size-4 ${reindex.isPending ? "animate-spin" : ""}`} />
+              {t("reindex")}
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {edges_loading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ) : edges.length === 0 ? (
+              <p className="text-muted-foreground py-4 text-center text-sm">
+                {t("no_recommendations")}
               </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ─── Recommendation Edges Section ─── */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>{t("recommendations")}</CardTitle>
-            <CardDescription>
-              {t("recommendations_description")}
-            </CardDescription>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => reindex.mutate({ product_id, locale: "fr" })}
-            disabled={reindex.isPending}
-          >
-            <RefreshCw
-              className={`mr-2 size-4 ${reindex.isPending ? "animate-spin" : ""}`}
-            />
-            {t("reindex")}
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {edges_loading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          ) : edges.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-center text-sm">
-              {t("no_recommendations")}
-            </p>
-          ) : (
-            <div className="space-y-6">
-              {Object.entries(edges_by_type).map(([type, type_edges]) => (
-                <div key={type}>
-                  <div className="mb-2 flex items-center gap-2">
-                    <Badge variant="secondary">{t(`type_${type}`)}</Badge>
-                    <span className="text-muted-foreground text-xs">
-                      {type_edges.length} {t("product_count")}
-                    </span>
-                  </div>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-12">{t("rank")}</TableHead>
-                          <TableHead>{t("product")}</TableHead>
-                          <TableHead className="w-24 text-right">{t("score")}</TableHead>
-                          <TableHead className="w-20" />
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {type_edges.map((edge) => (
-                          <TableRow key={edge.id}>
-                            <TableCell className="text-muted-foreground text-xs">
-                              #{edge.rank}
-                            </TableCell>
-                            <TableCell>
-                              <EdgeProductCell target_product_id={edge.target_product_id} />
-                            </TableCell>
-                            <TableCell className="text-right text-sm">
-                              {Number(edge.score).toFixed(1)}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-8 text-destructive"
-                                onClick={() => handle_remove_edge(edge.id)}
-                                disabled={remove_edge.isPending}
-                              >
-                                <Trash2 className="size-4" />
-                              </Button>
-                            </TableCell>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(edges_by_type).map(([type, type_edges]) => (
+                  <div key={type}>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge variant="secondary">{t(`type_${type}`)}</Badge>
+                      <span className="text-muted-foreground text-xs">
+                        {type_edges.length} {t("product_count")}
+                      </span>
+                    </div>
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12">{t("rank")}</TableHead>
+                            <TableHead>{t("product")}</TableHead>
+                            <TableHead className="w-24 text-right">{t("score")}</TableHead>
+                            <TableHead className="w-20" />
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {type_edges.map((edge) => (
+                            <TableRow key={edge.id}>
+                              <TableCell className="text-muted-foreground text-xs">
+                                #{edge.rank}
+                              </TableCell>
+                              <TableCell>
+                                <EdgeProductCell target_product_id={edge.target_product_id} />
+                              </TableCell>
+                              <TableCell className="text-right text-sm">
+                                {Number(edge.score).toFixed(1)}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive size-8"
+                                  onClick={() => handle_remove_edge(edge.id)}
+                                  disabled={remove_edge.isPending}
+                                >
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
+                ))}
+              </div>
+            )}
+
+            {/* ─── Add Manual Edge ─── */}
+            <div className="rounded-lg border p-4">
+              <h4 className="mb-3 text-sm font-medium">{t("add_manual_recommendation")}</h4>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="min-w-[160px] flex-1">
+                  <Field>
+                    <FieldLabel className="text-xs">{t("type")}</FieldLabel>
+                    <Select value={new_edge_type} onValueChange={set_new_edge_type}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={RECOMMENDATION_TYPE.similar}>
+                          {t("type_similar")}
+                        </SelectItem>
+                        <SelectItem value={RECOMMENDATION_TYPE.related}>
+                          {t("type_related")}
+                        </SelectItem>
+                        <SelectItem value={RECOMMENDATION_TYPE.fbt}>{t("type_fbt")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
                 </div>
-              ))}
-            </div>
-          )}
 
-          {/* ─── Add Manual Edge ─── */}
-          <div className="rounded-lg border p-4">
-            <h4 className="mb-3 text-sm font-medium">{t("add_manual_recommendation")}</h4>
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="min-w-[160px] flex-1">
-                <Field>
-                  <FieldLabel className="text-xs">{t("type")}</FieldLabel>
-                  <Select value={new_edge_type} onValueChange={set_new_edge_type}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={RECOMMENDATION_TYPE.similar}>{t("type_similar")}</SelectItem>
-                      <SelectItem value={RECOMMENDATION_TYPE.related}>{t("type_related")}</SelectItem>
-                      <SelectItem value={RECOMMENDATION_TYPE.fbt}>
-                        {t("type_fbt")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
-
-              <div className="min-w-[200px] flex-1">
-                <Field>
-                  <FieldLabel className="text-xs">{t("target_product")}</FieldLabel>
-                  <Combobox
-                    value={selected_target?.id ?? ""}
-                    onValueChange={(val) => {
-                      const found = search_results?.items?.find((p) => p.id === val);
-                      if (found) {
-                        set_selected_target({
-                          id: found.id,
-                          name: found.name ?? found.slug,
-                          image_url: found.image_url,
-                        });
-                      }
-                    }}
-                  >
-                    <ComboboxInput
-                      placeholder={t("search_product_placeholder")}
-                      value={search_query}
-                      onChange={(e) => set_search_query(e.target.value)}
-                    />
-                    <ComboboxContent>
-                      <ComboboxList>
-                        {search_loading ? (
-                          <div className="flex items-center justify-center p-4">
-                            <Loader2 className="size-4 animate-spin" />
-                          </div>
-                        ) : search_results?.items?.length ? (
-                          search_results.items
-                            .filter((p) => p.id !== product_id)
-                            .map((p) => (
-                              <ComboboxItem key={p.id} value={p.id}>
-                                <div className="flex items-center gap-2">
-                                  {p.image_url ? (
-                                    <Image
-                                      src={p.image_url}
-                                      alt=""
-                                      width={24}
-                                      height={24}
-                                      className="size-6 rounded object-cover"
-                                      unoptimized
-                                    />
-                                  ) : (
-                                    <div className="size-6 rounded bg-neutral-200" />
-                                  )}
-                                  <span className="truncate">{p.name ?? p.slug}</span>
-                                </div>
-                              </ComboboxItem>
-                            ))
-                        ) : search_query.length >= 2 ? (
-                          <p className="text-muted-foreground p-4 text-center text-sm">
-                            {t("no_results")}
-                          </p>
-                        ) : (
-                          <p className="text-muted-foreground p-4 text-center text-sm">
-                            {t("type_at_least")}
-                          </p>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                </Field>
-              </div>
-
-              {selected_target && (
-                <div className="flex items-center gap-2 pb-2">
-                  <Badge variant="outline" className="gap-1">
-                    {selected_target.image_url && (
-                      <Image
-                        src={selected_target.image_url}
-                        alt=""
-                        width={16}
-                        height={16}
-                        className="size-4 rounded object-cover"
-                        unoptimized
+                <div className="min-w-[200px] flex-1">
+                  <Field>
+                    <FieldLabel className="text-xs">{t("target_product")}</FieldLabel>
+                    <Combobox
+                      value={selected_target?.id ?? ""}
+                      onValueChange={(val) => {
+                        const found = search_results?.items?.find((p) => p.id === val);
+                        if (found) {
+                          set_selected_target({
+                            id: found.id,
+                            name: found.name ?? found.slug,
+                            image_url: found.image_url,
+                          });
+                        }
+                      }}
+                    >
+                      <ComboboxInput
+                        placeholder={t("search_product_placeholder")}
+                        value={search_query}
+                        onChange={(e) => set_search_query(e.target.value)}
                       />
-                    )}
-                    {selected_target.name}
-                  </Badge>
+                      <ComboboxContent>
+                        <ComboboxList>
+                          {search_loading ? (
+                            <div className="flex items-center justify-center p-4">
+                              <Loader2 className="size-4 animate-spin" />
+                            </div>
+                          ) : search_results?.items?.length ? (
+                            search_results.items
+                              .filter((p) => p.id !== product_id)
+                              .map((p) => (
+                                <ComboboxItem key={p.id} value={p.id}>
+                                  <div className="flex items-center gap-2">
+                                    {p.image_url ? (
+                                      <Image
+                                        src={p.image_url}
+                                        alt=""
+                                        width={24}
+                                        height={24}
+                                        className="size-6 rounded object-cover"
+                                        unoptimized
+                                      />
+                                    ) : (
+                                      <div className="size-6 rounded bg-neutral-200" />
+                                    )}
+                                    <span className="truncate">{p.name ?? p.slug}</span>
+                                  </div>
+                                </ComboboxItem>
+                              ))
+                          ) : search_query.length >= 2 ? (
+                            <p className="text-muted-foreground p-4 text-center text-sm">
+                              {t("no_results")}
+                            </p>
+                          ) : (
+                            <p className="text-muted-foreground p-4 text-center text-sm">
+                              {t("type_at_least")}
+                            </p>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  </Field>
                 </div>
-              )}
 
-              <Button
-                type="button"
-                size="sm"
-                onClick={handle_add_edge}
-                disabled={!selected_target || add_edge.isPending}
-                className="mb-0.5"
-              >
-                <Plus className="mr-1 size-4" />
-                {t("add")}
-              </Button>
+                {selected_target && (
+                  <div className="flex items-center gap-2 pb-2">
+                    <Badge variant="outline" className="gap-1">
+                      {selected_target.image_url && (
+                        <Image
+                          src={selected_target.image_url}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="size-4 rounded object-cover"
+                          unoptimized
+                        />
+                      )}
+                      {selected_target.name}
+                    </Badge>
+                  </div>
+                )}
+
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handle_add_edge}
+                  disabled={!selected_target || add_edge.isPending}
+                  className="mb-0.5"
+                >
+                  <Plus className="mr-1 size-4" />
+                  {t("add")}
+                </Button>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
     </QueryGuard>
   );
 }

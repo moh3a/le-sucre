@@ -246,11 +246,7 @@ function FileUpload(props: FileUploadProps) {
   });
 
   const store = React.useMemo<Store>(() => {
-    let state: StoreState = {
-      files,
-      dragOver: false,
-      invalid: invalid,
-    };
+    const stateRef = { current: { files, dragOver: false, invalid: invalid } as StoreState };
 
     function reducer(state: StoreState, action: StoreAction): StoreState {
       switch (action.type) {
@@ -373,9 +369,9 @@ function FileUpload(props: FileUploadProps) {
     }
 
     return {
-      getState: () => state,
+      getState: () => stateRef.current,
       dispatch: (action) => {
-        state = reducer(state, action);
+        stateRef.current = reducer(stateRef.current, action);
         for (const listener of listeners) {
           listener();
         }
@@ -661,6 +657,7 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
   } = props;
 
   const context = useFileUploadContext(DROPZONE_NAME);
+  const inputRef = context.inputRef;
   const store = useStoreContext(DROPZONE_NAME);
   const dragOver = useStore((state) => state.dragOver);
   const invalid = useStore((state) => state.invalid);
@@ -687,10 +684,10 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
         target instanceof HTMLElement && target.closest('[data-slot="file-upload-trigger"]');
 
       if (!isFromTrigger) {
-        context.inputRef.current?.click();
+        inputRef.current?.click();
       }
     },
-    [context.inputRef, propsRef],
+    [inputRef, propsRef],
   );
 
   const onDragOver = React.useCallback(
@@ -740,7 +737,8 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
 
   const onDrop = React.useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
-      propsRef.current.onDrop?.(event);
+      const { onDrop: onDropCallback } = propsRef.current;
+      onDropCallback?.(event);
 
       if (event.defaultPrevented) return;
 
@@ -748,7 +746,7 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
       store.dispatch({ type: "SET_DRAG_OVER", dragOver: false });
 
       const files = Array.from(event.dataTransfer.files);
-      const inputElement = context.inputRef.current;
+      const inputElement = inputRef.current;
       if (!inputElement) return;
 
       const dataTransfer = new DataTransfer();
@@ -756,15 +754,16 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
         dataTransfer.items.add(file);
       }
 
-      inputElement.files = dataTransfer.files;
+      (inputElement as unknown as { files: FileList }).files = dataTransfer.files;
       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
     },
-    [store, context.inputRef, propsRef],
+    [store, inputRef, propsRef],
   );
 
   const onPaste = React.useCallback(
     (event: React.ClipboardEvent<HTMLDivElement>) => {
-      propsRef.current.onPaste?.(event);
+      const { onPaste: onPasteCallback } = propsRef.current;
+      onPasteCallback?.(event);
 
       if (event.defaultPrevented) return;
 
@@ -787,7 +786,7 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
 
       if (files.length === 0) return;
 
-      const inputElement = context.inputRef.current;
+      const inputElement = inputRef.current;
       if (!inputElement) return;
 
       const dataTransfer = new DataTransfer();
@@ -795,10 +794,10 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
         dataTransfer.items.add(file);
       }
 
-      inputElement.files = dataTransfer.files;
+      (inputElement as unknown as { files: FileList }).files = dataTransfer.files;
       inputElement.dispatchEvent(new Event("change", { bubbles: true }));
     },
-    [store, context.inputRef, propsRef],
+    [store, inputRef, propsRef],
   );
 
   const onKeyDown = React.useCallback(
@@ -807,10 +806,10 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
 
       if (!event.defaultPrevented && (event.key === "Enter" || event.key === " ")) {
         event.preventDefault();
-        context.inputRef.current?.click();
+        inputRef.current?.click();
       }
     },
-    [context.inputRef, propsRef],
+    [inputRef, propsRef],
   );
 
   const DropzonePrimitive = asChild ? SlotPrimitive.Slot : "div";
@@ -820,8 +819,6 @@ function FileUploadDropzone(props: FileUploadDropzoneProps) {
       role="region"
       id={context.dropzoneId}
       aria-controls={`${context.inputId} ${context.listId}`}
-      aria-disabled={context.disabled}
-      aria-invalid={invalid}
       data-disabled={context.disabled ? "" : undefined}
       data-dragging={dragOver ? "" : undefined}
       data-invalid={invalid ? "" : undefined}
@@ -852,6 +849,7 @@ function FileUploadTrigger(props: FileUploadTriggerProps) {
   const { asChild, onClick: onClickProp, ...triggerProps } = props;
 
   const context = useFileUploadContext(TRIGGER_NAME);
+  const inputRef = context.inputRef;
 
   const propsRef = useAsRef({
     onClick: onClickProp,
@@ -862,10 +860,9 @@ function FileUploadTrigger(props: FileUploadTriggerProps) {
       propsRef.current.onClick?.(event);
 
       if (event.defaultPrevented) return;
-
-      context.inputRef.current?.click();
+      inputRef.current?.click();
     },
-    [context.inputRef, propsRef],
+    [inputRef, propsRef],
   );
 
   const TriggerPrimitive = asChild ? SlotPrimitive.Slot : "button";
@@ -904,7 +901,6 @@ function FileUploadList(props: FileUploadListProps) {
     <ListPrimitive
       role="list"
       id={context.listId}
-      aria-orientation={orientation}
       data-orientation={orientation}
       data-slot="file-upload-list"
       data-state={shouldRender ? "active" : "inactive"}

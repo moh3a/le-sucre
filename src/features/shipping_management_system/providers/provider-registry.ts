@@ -1,15 +1,15 @@
-import type { ShippingProviderAdapter, ShippingProviderName } from "./contracts";
+import type { ShippingProviderAdapter, ShippingProviderName, ShippingQuoteInput, ShippingQuoteResult, CreateShipmentInput, CreateShipmentResult, TrackingResult } from "./contracts";
 import { yalidine_adapter } from "./yalidine.adapter";
 
 class PlaceholderAdapter implements ShippingProviderAdapter {
   constructor(public readonly name: ShippingProviderName) {}
-  async quote() {
+  async quote(_input: ShippingQuoteInput): Promise<ShippingQuoteResult> {
     throw new Error(`${this.name} adapter not implemented yet`);
   }
-  async create_shipment() {
+  async create_shipment(_input: CreateShipmentInput): Promise<CreateShipmentResult> {
     throw new Error(`${this.name} adapter not implemented yet`);
   }
-  async get_tracking() {
+  async get_tracking(_tracking_number: string): Promise<TrackingResult> {
     throw new Error(`${this.name} adapter not implemented yet`);
   }
 }

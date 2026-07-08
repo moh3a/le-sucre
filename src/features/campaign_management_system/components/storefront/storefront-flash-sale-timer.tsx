@@ -34,7 +34,7 @@ export function StorefrontFlashSaleTimer({ ends_at, on_expired }: Props) {
       };
     }
 
-    setTime(compute());
+    const raf = requestAnimationFrame(() => setTime(compute()));
     const interval = setInterval(() => {
       const t = compute();
       setTime(t);
@@ -44,7 +44,10 @@ export function StorefrontFlashSaleTimer({ ends_at, on_expired }: Props) {
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(interval);
+    };
   }, [ends_at, on_expired]);
 
   if (!time || time.total_seconds <= 0) return null;

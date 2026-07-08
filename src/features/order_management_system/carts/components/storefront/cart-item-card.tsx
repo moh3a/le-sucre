@@ -7,7 +7,6 @@ import { DataState } from "@/components/storefront/data-state";
 import { ProductImage } from "@/features/product_information_management/products/components/storefront/product-image";
 import { ProductQuantitySelector } from "@/features/product_information_management/products/components/storefront/product-quantity-selector";
 import type { StorefrontProduct } from "@/components/storefront/types";
-import { cn } from "@/lib/utils";
 
 export interface CartItemData {
   id: string;

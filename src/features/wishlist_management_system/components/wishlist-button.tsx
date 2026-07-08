@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, HeartOff, Loader2 } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useFavorites, useWishlist } from "../hooks/use-wishlist";
+import { useFavorites } from "../hooks/use-wishlist";
 
 interface WishlistButtonProps {
   productId: string;
@@ -48,11 +48,7 @@ export function WishlistButton({
     <Button
       variant="ghost"
       size={size}
-      className={cn(
-        "group",
-        isFavorited && "text-red-500 hover:text-red-600",
-        className,
-      )}
+      className={cn("group", isFavorited && "text-red-500 hover:text-red-600", className)}
       onClick={handleToggle}
       disabled={isPending}
       aria-label={isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"}
@@ -64,9 +60,7 @@ export function WishlistButton({
       ) : (
         <Heart className="h-4 w-4" />
       )}
-      {showLabel && (
-        <span className="ml-2">{isFavorited ? "Favori" : "Ajouter aux favoris"}</span>
-      )}
+      {showLabel && <span className="ml-2">{isFavorited ? "Favori" : "Ajouter aux favoris"}</span>}
     </Button>
   );
 }

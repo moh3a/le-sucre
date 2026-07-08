@@ -14,8 +14,9 @@ const HTTP_TO_TRPC_CODE: Record<number, string> = {
   503: "SERVICE_UNAVAILABLE",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function app_error_formatter({ shape, error }: any) {
+export function app_error_formatter(opts: Record<string, unknown>) {
+  const shape = opts.shape as { message: string; data?: Record<string, unknown> };
+  const error = opts.error as { cause: unknown };
   const cause = error.cause;
   if (cause instanceof AppError) {
     const httpStatus = cause.status_code;

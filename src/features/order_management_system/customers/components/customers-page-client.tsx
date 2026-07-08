@@ -1,8 +1,9 @@
 "use client";
 
+import { User, ShoppingCart, TrendingUp } from "lucide-react";
+
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
-import { User, ShoppingCart, TrendingUp } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { CustomersTable } from "./customers-table";

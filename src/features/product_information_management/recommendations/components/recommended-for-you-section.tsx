@@ -24,11 +24,11 @@ export function RecommendedForYouSection({
 
   return (
     <QueryGuard query={query}>
-    <ProductRecommendationCarousel
-      title={locale === "fr" ? "Recommandé pour vous" : "Recommended For You"}
-      items={data ?? []}
-      isLoading={isLoading}
-    />
+      <ProductRecommendationCarousel
+        title={locale === "fr" ? "Recommandé pour vous" : "Recommended For You"}
+        items={data ?? []}
+        isLoading={isLoading}
+      />
     </QueryGuard>
   );
 }

@@ -4,13 +4,12 @@ import { RATE_LIMIT_PRESETS } from "@/lib/security/rate-limit-presets";
 import { verify_stripe_signature } from "@/lib/security/webhook";
 import { logger } from "@/lib/logger";
 import { env } from "@/config/env";
-import { AppError } from "@/lib/error_handling";
+import { PaymentProviderName } from "@/features/payment_management_system/providers/contracts";
 
-const ALLOWED_PROVIDERS = ["stripe", "paypal"] as const;
-
+const ALLOWED_PROVIDERS = ["stripe", "paypal", "chargily", "satim", "cib", "manual"] as const;
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ provider: string }> },
+  { params }: { params: Promise<{ provider: PaymentProviderName }> },
 ) {
   try {
     const { provider } = await params;
@@ -61,10 +60,9 @@ export async function POST(
     const payload = JSON.parse(raw_body);
     const { payment_webhook_service } =
       await import("@/features/payment_management_system/services/payment-webhook.service");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await payment_webhook_service.handle_provider_webhook(
-      provider as any,
-      request.headers as any,
+      provider,
+      request.headers,
       raw_body,
     );
 

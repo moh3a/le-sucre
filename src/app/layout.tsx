@@ -40,10 +40,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>
             <ThemeProvider
-              attribute="class"
               defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
             >
               <AppProviders>{children}</AppProviders>
               <Toaster />

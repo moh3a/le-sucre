@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -25,7 +26,9 @@ interface SharedCollectionPageClientProps {
 export function SharedCollectionPageClient({ token }: SharedCollectionPageClientProps) {
   const t = useTranslations("sharedCollection");
 
-  const { data, isLoading, error } = trpc.wishlistManagement.collections.getSharedByToken.useQuery({ token });
+  const { data, isLoading, error } = trpc.wishlistManagement.collections.getSharedByToken.useQuery({
+    token,
+  });
 
   if (isLoading) {
     return (
@@ -111,9 +114,7 @@ export function SharedCollectionPageClient({ token }: SharedCollectionPageClient
         )}
         <div className="mt-4 flex items-center justify-center gap-2">
           <Badge variant="outline">{t("itemsLabel", { count: items.length })}</Badge>
-          <Badge variant="secondary">
-            {t("tokenLabel", { token: token.slice(0, 8) })}
-          </Badge>
+          <Badge variant="secondary">{t("tokenLabel", { token: token.slice(0, 8) })}</Badge>
         </div>
       </section>
 
@@ -144,9 +145,7 @@ export function SharedCollectionPageClient({ token }: SharedCollectionPageClient
                         className="h-full w-full rounded-lg object-cover"
                       />
                     ) : (
-                      <span className="text-muted-foreground text-sm">
-                        {t("productImageAlt")}
-                      </span>
+                      <span className="text-muted-foreground text-sm">{t("productImageAlt")}</span>
                     )}
                   </div>
                   <div className="flex items-start justify-between">
@@ -155,9 +154,7 @@ export function SharedCollectionPageClient({ token }: SharedCollectionPageClient
                         {item.product?.translations?.[0]?.name ?? item.product_id}
                       </CardTitle>
                       <CardDescription>
-                        {item.product
-                          ? `${item.product.base_price} ${item.product.currency}`
-                          : ""}
+                        {item.product ? `${item.product.base_price} ${item.product.currency}` : ""}
                       </CardDescription>
                     </div>
                     <Button variant="ghost" size="icon" className="shrink-0">

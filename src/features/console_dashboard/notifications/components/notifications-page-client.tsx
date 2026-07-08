@@ -3,6 +3,9 @@
 import { trpc } from "@/components/providers/app-providers";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import type { notifications as notification_schema } from "@/features/console_dashboard/notifications/schema";
+
+type NotificationRow = typeof notification_schema.$inferSelect;
 
 export function NotificationsPageClient() {
   const t = useTranslations("notifications");
@@ -26,7 +29,7 @@ export function NotificationsPageClient() {
 
       <div className="rounded-lg border">
         <div className="divide-y">
-          {notifications.map((n: any) => (
+          {notifications.map((n: NotificationRow) => (
             <div
               key={n.id}
               className={`flex items-start gap-3 px-4 py-3 ${n.is_read ? "" : "bg-blue-50"}`}

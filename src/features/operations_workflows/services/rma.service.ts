@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { eq, and, asc, desc, sql } from "drizzle-orm";
+import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { rma_records } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
@@ -130,7 +130,7 @@ export class RMAService {
   }
 
   async list(status?: string) {
-    const clauses: any[] = [];
+    const clauses: SQL[] = [];
     if (status) clauses.push(eq(rma_records.status, status));
     return db
       .select()

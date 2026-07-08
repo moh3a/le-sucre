@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { BarChart, Bar, LineChart, Line, XAxis, CartesianGrid, Tooltip } from "recharts";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, LineChart } from "recharts";
 
 export function OrderCharts() {
   const t = useTranslations("orders");
@@ -32,11 +32,12 @@ export function OrderCharts() {
           <CardTitle>{t("revenue_growth")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <LineChart
-            data={revenueData}
-            xKey="date"
-            lines={[{ key: "revenue", name: t("revenue"), color: "#c8d152" }]}
-          />
+          <LineChart width={400} height={300} data={revenueData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <Tooltip />
+            <Line type="monotone" dataKey="revenue" stroke="#c8d152" />
+          </LineChart>
         </CardContent>
       </Card>
 
@@ -45,11 +46,12 @@ export function OrderCharts() {
           <CardTitle>{t("order_growth_chart")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <LineChart
-            data={revenueData}
-            xKey="date"
-            lines={[{ key: "orders", name: t("orders_chart"), color: "#700145" }]}
-          />
+          <LineChart width={400} height={300} data={revenueData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <Tooltip />
+            <Line type="monotone" dataKey="orders" stroke="#700145" />
+          </LineChart>
         </CardContent>
       </Card>
 
@@ -58,11 +60,12 @@ export function OrderCharts() {
           <CardTitle>{t("status_distribution")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <BarChart
-            data={statusData}
-            xKey="status"
-            bars={[{ key: "count", name: t("count"), color: "#4d4c20" }]}
-          />
+          <BarChart width={800} height={300} data={statusData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="status" />
+            <Tooltip />
+            <Bar dataKey="count" fill="#4d4c20" />
+          </BarChart>
         </CardContent>
       </Card>
     </div>

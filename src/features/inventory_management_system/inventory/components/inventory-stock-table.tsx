@@ -113,7 +113,7 @@ export function InventoryStockTable() {
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const low_stock = stock_filter === "low";

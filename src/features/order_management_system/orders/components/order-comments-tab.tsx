@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { MessageSquare, Send, Lock, Globe } from "lucide-react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -9,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslations } from "next-intl";
 import { formatDate } from "@/lib/format";
-import { MessageSquare, Send, Lock, Globe } from "lucide-react";
 
 type OrderCommentsTabProps = {
   order_id: string;

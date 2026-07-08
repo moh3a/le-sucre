@@ -105,98 +105,98 @@ export function BrandForm({
 
   return (
     <QueryGuard mutation={{ isPending: pending }}>
-    <form className="space-y-6" onSubmit={form.handleSubmit(on_submit)}>
-      <FieldGroup>
-        <Controller
-          name="name"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t("name")}</FieldLabel>
-              <Input {...field} />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="slug"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t("slug")}</FieldLabel>
-              <Input {...field} placeholder={t("auto_slug_placeholder")} />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="description"
-          control={form.control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>{t("description")}</FieldLabel>
-              <Input
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value || null)}
-              />
-            </Field>
-          )}
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
+      <form className="space-y-6" onSubmit={form.handleSubmit(on_submit)}>
+        <FieldGroup>
           <Controller
-            name="website_url"
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>{t("name")}</FieldLabel>
+                <Input {...field} />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="slug"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>{t("slug")}</FieldLabel>
+                <Input {...field} placeholder={t("auto_slug_placeholder")} />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="description"
             control={form.control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t("website_url")}</FieldLabel>
+                <FieldLabel>{t("description")}</FieldLabel>
                 <Input
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value || null)}
-                  placeholder={t("website_url_placeholder")}
                 />
               </Field>
             )}
           />
 
-          <Controller
-            name="is_active"
-            control={form.control}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel>{t("active")}</FieldLabel>
-                <select
-                  className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                  value={field.value ? "true" : "false"}
-                  onChange={(e) => field.onChange(e.target.value === "true")}
-                >
-                  <option value="true">{t("status_active")}</option>
-                  <option value="false">{t("status_inactive")}</option>
-                </select>
-              </Field>
-            )}
-          />
-        </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Controller
+              name="website_url"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>{t("website_url")}</FieldLabel>
+                  <Input
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value || null)}
+                    placeholder={t("website_url_placeholder")}
+                  />
+                </Field>
+              )}
+            />
 
-        <Field>
-          <FieldLabel>{t("logo_url")}</FieldLabel>
-          <MediaPickerField
-            value={logo_url_value}
-            media_item={logo_media_item}
-            onSelect={(media) => form.setValue("logo_url", media.url)}
-            onClear={() => form.setValue("logo_url", null)}
-            entity_type="brand"
-            field="logo"
-          />
-        </Field>
+            <Controller
+              name="is_active"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>{t("active")}</FieldLabel>
+                  <select
+                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                    value={field.value ? "true" : "false"}
+                    onChange={(e) => field.onChange(e.target.value === "true")}
+                  >
+                    <option value="true">{t("status_active")}</option>
+                    <option value="false">{t("status_inactive")}</option>
+                  </select>
+                </Field>
+              )}
+            />
+          </div>
 
-        <Button type="submit" disabled={pending}>
-          {pending ? "…" : t("save")}
-        </Button>
-      </FieldGroup>
-    </form>
+          <Field>
+            <FieldLabel>{t("logo_url")}</FieldLabel>
+            <MediaPickerField
+              value={logo_url_value}
+              media_item={logo_media_item}
+              onSelect={(media) => form.setValue("logo_url", media.url)}
+              onClear={() => form.setValue("logo_url", null)}
+              entity_type="brand"
+              field="logo"
+            />
+          </Field>
+
+          <Button type="submit" disabled={pending}>
+            {pending ? "…" : t("save")}
+          </Button>
+        </FieldGroup>
+      </form>
     </QueryGuard>
   );
 }

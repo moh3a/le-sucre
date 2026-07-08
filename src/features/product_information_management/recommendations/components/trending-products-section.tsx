@@ -23,11 +23,11 @@ export function TrendingProductsSection({
 
   return (
     <QueryGuard query={query}>
-    <ProductRecommendationCarousel
-      title={locale === "fr" ? "Tendances du moment" : "Trending Products"}
-      items={data ?? []}
-      isLoading={isLoading}
-    />
+      <ProductRecommendationCarousel
+        title={locale === "fr" ? "Tendances du moment" : "Trending Products"}
+        items={data ?? []}
+        isLoading={isLoading}
+      />
     </QueryGuard>
   );
 }

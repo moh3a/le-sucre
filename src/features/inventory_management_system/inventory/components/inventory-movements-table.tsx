@@ -109,7 +109,7 @@ export function InventoryMovementsTable() {
         ),
       },
     ],
-    [],
+    [t, ml],
   );
 
   const { data, isLoading } = trpc.inventory.adminListMovements.useQuery({

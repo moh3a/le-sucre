@@ -51,60 +51,62 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
 
   return (
     <QueryGuard mutation={link_media}>
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-6">
-        <div>
-          <CardTitle>{t("media_card_title")}</CardTitle>
-          <CardDescription>{t("media_card_description")}</CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <MediaPickerDialog
-            onSelect={handle_library_select}
-            entity_type="product"
-            entity_id={product_id}
-            field="gallery"
-            trigger={
-              <Button disabled={link_media.isPending}>
-                <ImagePlus className="mr-2 size-4" />
-                {t("add_media_button")}
-              </Button>
-            }
-          />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {initial_media.map((item) => (
-              <div key={item.id} className="relative overflow-hidden rounded-lg border">
-                {item.url.match(/\.(mp4|webm)$/i) ? (
-                  <video src={item.url} className="h-32 w-full object-cover" controls />
-                ) : (
-                  <Image
-                    src={item.url}
-                    alt={item.alt ?? ""}
-                    width={320}
-                    height={320}
-                    className="aspect-square w-full object-cover"
-                    unoptimized
-                  />
-                )}
-                {item.is_primary && <Badge className="absolute top-2 left-2">{t("media_primary")}</Badge>}
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="destructive"
-                  className="absolute right-2 bottom-2"
-                  onClick={() => remove_media.mutate({ product_id, media_id: item.id })}
-                >
-                  {t("delete")}
-                </Button>
-              </div>
-            ))}
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between gap-6">
+          <div>
+            <CardTitle>{t("media_card_title")}</CardTitle>
+            <CardDescription>{t("media_card_description")}</CardDescription>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex items-center gap-2">
+            <MediaPickerDialog
+              onSelect={handle_library_select}
+              entity_type="product"
+              entity_id={product_id}
+              field="gallery"
+              trigger={
+                <Button disabled={link_media.isPending}>
+                  <ImagePlus className="mr-2 size-4" />
+                  {t("add_media_button")}
+                </Button>
+              }
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {initial_media.map((item) => (
+                <div key={item.id} className="relative overflow-hidden rounded-lg border">
+                  {item.url.match(/\.(mp4|webm)$/i) ? (
+                    <video src={item.url} className="h-32 w-full object-cover" controls />
+                  ) : (
+                    <Image
+                      src={item.url}
+                      alt={item.alt ?? ""}
+                      width={320}
+                      height={320}
+                      className="aspect-square w-full object-cover"
+                      unoptimized
+                    />
+                  )}
+                  {item.is_primary && (
+                    <Badge className="absolute top-2 left-2">{t("media_primary")}</Badge>
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    className="absolute right-2 bottom-2"
+                    onClick={() => remove_media.mutate({ product_id, media_id: item.id })}
+                  >
+                    {t("delete")}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </QueryGuard>
   );
 }

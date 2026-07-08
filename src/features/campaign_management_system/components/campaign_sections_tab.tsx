@@ -24,7 +24,7 @@ import { SECTION_TYPE } from "../constants/campaign_types";
 import type { AppLocale } from "@/i18n/config";
 import { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 
-type SectionConfig = {
+export type SectionConfig = {
   product_ids?: string[];
   category_id?: string;
   brand_id?: string;
@@ -33,7 +33,7 @@ type SectionConfig = {
   countdown_end?: string;
 };
 
-type SectionRow = {
+export type SectionRow = {
   id: string;
   campaign_id: string;
   section_type: string;

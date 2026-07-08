@@ -189,7 +189,7 @@ export function MediaUploadDialog({
     try {
       const blob = await crop_image(selected_file, crop_area);
       await handle_upload(blob);
-    } catch (error) {
+    } catch {
       toast.error(t("crop_failed"));
     }
   }

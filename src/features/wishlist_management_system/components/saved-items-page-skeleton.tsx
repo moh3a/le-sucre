@@ -14,10 +14,7 @@ export function SavedItemsPageSkeleton() {
         </CardHeader>
         <CardContent className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between rounded-lg border p-3"
-            >
+            <div key={i} className="flex items-center justify-between rounded-lg border p-3">
               <div className="flex items-center gap-3">
                 <Skeleton className="size-12 rounded" />
                 <div className="space-y-1">

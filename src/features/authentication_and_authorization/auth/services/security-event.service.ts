@@ -21,6 +21,7 @@ type SecurityEventType =
   | "csrf_failure"
   | "invalid_origin"
   | "webhook_failure"
+  | "authorization_failure"
   | "api_key_created"
   | "api_key_revoked"
   | "export_downloaded"

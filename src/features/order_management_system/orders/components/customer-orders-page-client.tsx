@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Package } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
@@ -29,7 +29,6 @@ const FILTERS = [
 ];
 
 export function CustomerOrdersPageClient() {
-  const t = useTranslations("account");
   const tLayout = useTranslations("layout");
   const router = useRouter();
   const [page, setPage] = useState(1);

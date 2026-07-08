@@ -49,8 +49,6 @@ interface Option {
   value: string;
 }
 
-
-
 function FacetedFilter({
   title,
   options,
@@ -89,7 +87,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -140,23 +141,34 @@ export function PromotionsTable() {
     { label: t("status_expired"), value: "expired" },
   ];
 
-  const STATUS_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    draft: { label: t("status_draft"), variant: "secondary" },
-    scheduled: { label: t("status_scheduled"), variant: "outline" },
-    active: { label: t("status_active"), variant: "default" },
-    paused: { label: t("status_paused"), variant: "destructive" },
-    expired: { label: t("status_expired"), variant: "secondary" },
-  };
+  const STATUS_BADGES: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = React.useMemo(
+    () => ({
+      draft: { label: t("status_draft"), variant: "secondary" },
+      scheduled: { label: t("status_scheduled"), variant: "outline" },
+      active: { label: t("status_active"), variant: "default" },
+      paused: { label: t("status_paused"), variant: "destructive" },
+      expired: { label: t("status_expired"), variant: "secondary" },
+    }),
+    [t],
+  );
 
-  const TYPE_BADGES: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-    promo_code: { label: t("type_promo_code"), variant: "default" },
-    automatic: { label: t("type_automatic"), variant: "secondary" },
-    flash_sale: { label: t("type_flash_sale"), variant: "outline" },
-    bundle: { label: t("type_bundle"), variant: "outline" },
-    customer: { label: t("type_customer"), variant: "secondary" },
-  };
+  const TYPE_BADGES: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "outline" }
+  > = React.useMemo(
+    () => ({
+      promo_code: { label: t("type_promo_code"), variant: "default" },
+      automatic: { label: t("type_automatic"), variant: "secondary" },
+      flash_sale: { label: t("type_flash_sale"), variant: "outline" },
+      bundle: { label: t("type_bundle"), variant: "outline" },
+      customer: { label: t("type_customer"), variant: "secondary" },
+    }),
+    [t],
+  );
 
-  const utils = trpc.useUtils();
   const { data, isLoading } = trpc.promotions.adminList.useQuery({
     page,
     limit: per_page,
@@ -215,23 +227,23 @@ export function PromotionsTable() {
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority_column")} />,
-        cell: ({ row }) => (
-          <span className="font-mono text-sm">{row.original.priority}</span>
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("priority_column")} />
         ),
+        cell: ({ row }) => <span className="font-mono text-sm">{row.original.priority}</span>,
       },
       {
         id: "usage_count",
         accessorKey: "usage_count",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("usage_column")} />,
-        cell: ({ row }) => (
-          <span className="font-mono text-sm">{row.original.usage_count}</span>
-        ),
+        cell: ({ row }) => <span className="font-mono text-sm">{row.original.usage_count}</span>,
       },
       {
         id: "total_discount",
         accessorKey: "total_discount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("total_discount_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("total_discount_column")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono text-sm">
             {Number(row.original.total_discount).toLocaleString("fr-FR", {
@@ -244,7 +256,9 @@ export function PromotionsTable() {
       {
         id: "is_stackable",
         accessorKey: "is_stackable",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("stackable_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("stackable_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant={row.original.is_stackable ? "default" : "secondary"}>
             {row.original.is_stackable ? t("yes") : t("no")}
@@ -253,11 +267,14 @@ export function PromotionsTable() {
       },
       {
         id: "dates",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("validity_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("validity_column")} />
+        ),
         cell: ({ row }) => {
           const start = row.original.starts_at;
           const end = row.original.ends_at;
-          if (!start && !end) return <span className="text-muted-foreground text-xs">{t("unlimited")}</span>;
+          if (!start && !end)
+            return <span className="text-muted-foreground text-xs">{t("unlimited")}</span>;
           return (
             <span className="text-xs">
               {start ? formatDate(start, { month: "short" }) : "∞"} →{" "}
@@ -269,7 +286,9 @@ export function PromotionsTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("created_at_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -309,7 +328,7 @@ export function PromotionsTable() {
         ),
       },
     ],
-    [],
+    [STATUS_BADGES, TYPE_BADGES, t],
   );
 
   const items = (data?.items ?? []) as PromotionRow[];
@@ -325,73 +344,76 @@ export function PromotionsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={10} rowCount={10} filterCount={2} />}>
-    <>
-      <DataTable table={table}>
-        <DataTableAdvancedToolbar table={table}>
-          <Input
-            placeholder={t("search_placeholder")}
-            value={search || ""}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="max-w-sm"
-          />
-          <FacetedFilter
-            title={t("type_title")}
-            options={TYPE_OPTIONS}
-            value={promotion_type ?? undefined}
-            onChange={(val) => {
-              setPromotionType(val);
-              setPage(1);
-            }}
-          />
-          <FacetedFilter
-            title={t("status_title")}
-            options={STATUS_OPTIONS}
-            value={status ?? undefined}
-            onChange={(val) => {
-              setStatus(val);
-              setPage(1);
-            }}
-          />
-          <DataTableSortList table={table} />
-        </DataTableAdvancedToolbar>
-        {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <div className="flex items-center gap-2 border-t p-2">
-            <Badge variant="outline">
-              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-            </Badge>
-            <Button variant="secondary" size="sm">
-              <Play className="mr-1 h-4 w-4" />
-              {t("activate")}
-            </Button>
-            <Button variant="secondary" size="sm">
-              <Square className="mr-1 h-4 w-4" />
-              {t("pause")}
-            </Button>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="mr-1 h-4 w-4" />
-              {t("delete")}
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <a
-                href={`/api/admin/promotions/export?${new URLSearchParams({
-                  ...(search ? { search } : {}),
-                  ...(status ? { status } : {}),
-                  ...(promotion_type ? { promotion_type } : {}),
-                })}`}
-                download="promotions.csv"
-              >
-                <Download className="mr-1 h-4 w-4" />
-                {t("export")}
-              </a>
-            </Button>
-          </div>
-        )}
-      </DataTable>
-    </>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={10} rowCount={10} filterCount={2} />}
+    >
+      <>
+        <DataTable table={table}>
+          <DataTableAdvancedToolbar table={table}>
+            <Input
+              placeholder={t("search_placeholder")}
+              value={search || ""}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="max-w-sm"
+            />
+            <FacetedFilter
+              title={t("type_title")}
+              options={TYPE_OPTIONS}
+              value={promotion_type ?? undefined}
+              onChange={(val) => {
+                setPromotionType(val);
+                setPage(1);
+              }}
+            />
+            <FacetedFilter
+              title={t("status_title")}
+              options={STATUS_OPTIONS}
+              value={status ?? undefined}
+              onChange={(val) => {
+                setStatus(val);
+                setPage(1);
+              }}
+            />
+            <DataTableSortList table={table} />
+          </DataTableAdvancedToolbar>
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <div className="flex items-center gap-2 border-t p-2">
+              <Badge variant="outline">
+                {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+              </Badge>
+              <Button variant="secondary" size="sm">
+                <Play className="mr-1 h-4 w-4" />
+                {t("activate")}
+              </Button>
+              <Button variant="secondary" size="sm">
+                <Square className="mr-1 h-4 w-4" />
+                {t("pause")}
+              </Button>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="mr-1 h-4 w-4" />
+                {t("delete")}
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <a
+                  href={`/api/admin/promotions/export?${new URLSearchParams({
+                    ...(search ? { search } : {}),
+                    ...(status ? { status } : {}),
+                    ...(promotion_type ? { promotion_type } : {}),
+                  })}`}
+                  download="promotions.csv"
+                >
+                  <Download className="mr-1 h-4 w-4" />
+                  {t("export")}
+                </a>
+              </Button>
+            </div>
+          )}
+        </DataTable>
+      </>
     </QueryGuard>
   );
 }

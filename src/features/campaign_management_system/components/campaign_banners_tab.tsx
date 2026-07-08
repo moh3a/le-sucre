@@ -37,7 +37,7 @@ import { BANNER_TYPE, CAMPAIGN_PLACEMENT_PAGES } from "../constants/campaign_typ
 import { banner_schema } from "../models/campaign.dto";
 import { DeviceTarget } from "../types";
 
-type BannerRow = z.infer<typeof banner_schema> & {
+export type BannerRow = z.infer<typeof banner_schema> & {
   id: string;
   campaign_id: string;
 };

@@ -96,16 +96,11 @@ export function useBadgeOverflow<T>({
   React.useEffect(() => {
     if (!containerRef.current) return;
 
-    function measureWidth() {
-      if (containerRef.current) {
-        const width = containerRef.current.clientWidth - containerPadding;
-        setContainerWidth(width);
-      }
-    }
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      const width = entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
+      setContainerWidth(width - containerPadding);
+    });
 
-    measureWidth();
-
-    const resizeObserver = new ResizeObserver(measureWidth);
     resizeObserver.observe(containerRef.current);
 
     return () => {

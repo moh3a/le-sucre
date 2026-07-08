@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { eq, and, asc, desc, sql } from "drizzle-orm";
+import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { inventory_transfers, inventory_transfer_items } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
@@ -150,7 +150,7 @@ export class InventoryTransferService {
   }
 
   async list(status?: string) {
-    const clauses: any[] = [];
+    const clauses: SQL[] = [];
     if (status) clauses.push(eq(inventory_transfers.status, status));
     return db
       .select()

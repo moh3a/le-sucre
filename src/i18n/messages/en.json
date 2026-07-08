@@ -861,6 +861,7 @@
     "no_fields_found": "No fields found.",
     "enter_value": "Enter a value...",
     "select_options": "Select option{s}...",
+    "x_selected": "{count} selected",
     "search_options": "Search options...",
     "no_options_found": "No options found.",
     "true": "True",

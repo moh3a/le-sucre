@@ -34,9 +34,7 @@ export class ProfileRepository {
         .where(eq(user_profiles.user_id, user_id));
       return (await this.find_by_user_id(user_id))!;
     }
-    await db
-      .insert(user_profiles)
-      .values({ user_id, ...data } as UserProfileInsert);
+    await db.insert(user_profiles).values({ user_id, ...data } as UserProfileInsert);
     return (await this.find_by_user_id(user_id))!;
   }
 
@@ -77,8 +75,8 @@ export class ProfileRepository {
     await db.insert(user_addresses).values({
       ...insert_data,
       user_id,
-      is_default: is_first ? true : data.is_default ?? false,
-    } as any);
+      is_default: is_first ? true : (data.is_default ?? false),
+    });
 
     const [created] = await db
       .select()
@@ -169,9 +167,7 @@ export class ProfileRepository {
     await db
       .update(user_addresses)
       .set({ is_default: false })
-      .where(
-        and(eq(user_addresses.user_id, user_id), sql`${user_addresses.id} != ${except_id}`),
-      );
+      .where(and(eq(user_addresses.user_id, user_id), sql`${user_addresses.id} != ${except_id}`));
   }
 }
 

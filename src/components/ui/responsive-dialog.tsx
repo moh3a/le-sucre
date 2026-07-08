@@ -69,7 +69,7 @@ function ResponsiveDialog({
   defaultOpen = false,
   onOpenChange: onOpenChangeProp,
   children,
-  breakpoint: _breakpoint,
+  // breakpoint: _breakpoint,
 }: ResponsiveDialogProps) {
   const isMobile = useIsMobile();
 
@@ -108,9 +108,12 @@ function ResponsiveDialog({
     };
   }, [listenersRef, stateRef, onOpenChangeRef]);
 
-  if (stateRef.current.isMobile !== isMobile) {
-    stateRef.current.isMobile = isMobile;
-  }
+  useIsomorphicLayoutEffect(() => {
+    if (stateRef.current.isMobile !== isMobile) {
+      stateRef.current.isMobile = isMobile;
+      listenersRef.current.forEach((cb) => cb());
+    }
+  }, [isMobile]);
 
   const open = useStore((state) => state.open, store);
 
@@ -195,11 +198,7 @@ function ResponsiveDialogContent({
 
   if (isMobile) {
     return (
-      <DrawerContent
-        data-variant="drawer"
-        className={cn("p-0", className)}
-        {...props}
-      >
+      <DrawerContent data-variant="drawer" className={cn("p-0", className)} {...props}>
         <div className="overflow-y-auto px-4 pb-4">{children}</div>
       </DrawerContent>
     );

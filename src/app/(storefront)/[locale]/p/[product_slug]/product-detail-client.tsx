@@ -24,6 +24,9 @@ import { ProductPrice } from "@/features/product_information_management/products
 import { ProductRating } from "@/features/product_information_management/products/components/storefront/product-rating";
 import { ProductQuantitySelector } from "@/features/product_information_management/products/components/storefront/product-quantity-selector";
 import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
+import type { create_preorder_allocation_dto } from "@/features/order_management_system/preorders/models/preorder.dto";
+
+type PreorderInput = z.infer<typeof create_preorder_allocation_dto>;
 import { SectionHeader } from "@/components/storefront/section-header";
 import { ProductSpecs } from "@/features/product_information_management/products/components/storefront/product-specs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -436,10 +439,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
 // ─── Hook ───
 
 function useSessionKey() {
-  const [key, setKey] = useState("");
-  useEffect(() => {
-    setKey(get_or_create_session_key());
-  }, []);
+  const [key] = useState(() => get_or_create_session_key());
   return key;
 }
 
@@ -547,7 +547,7 @@ function QuantityAndCartSection({
   display_in_stock: boolean;
   sku_id: string | null;
   session: { user?: { name?: string | null; email?: string | null } } | null;
-  create_preorder: { mutateAsync: (input: any) => Promise<any>; isPending: boolean };
+  create_preorder: { mutateAsync: (input: PreorderInput) => Promise<{ ok: boolean }>; isPending: boolean };
   onAddToCart: (quantity: number) => void;
 }) {
   const t = useTranslations("product_detail");
@@ -626,9 +626,9 @@ function QuantityAndCartSection({
                     placeholder="Votre nom"
                     {...preorder_form.register("contact_name")}
                   />
-                  {preorder_form.formState.errors.contact_name && (
+                   {preorder_form.formState.errors.contact_name?.message && (
                     <p className="text-destructive text-xs">
-                      {preorder_form.formState.errors.contact_name.message}
+                      {String(preorder_form.formState.errors.contact_name.message)}
                     </p>
                   )}
                 </div>
@@ -641,9 +641,9 @@ function QuantityAndCartSection({
                     placeholder="05 XX XX XX XX"
                     {...preorder_form.register("contact_phone")}
                   />
-                  {preorder_form.formState.errors.contact_phone && (
+                  {preorder_form.formState.errors.contact_phone?.message && (
                     <p className="text-destructive text-xs">
-                      {preorder_form.formState.errors.contact_phone.message}
+                      {String(preorder_form.formState.errors.contact_phone.message)}
                     </p>
                   )}
                 </div>
@@ -658,9 +658,9 @@ function QuantityAndCartSection({
                     max={99}
                     {...preorder_form.register("quantity")}
                   />
-                  {preorder_form.formState.errors.quantity && (
+                  {preorder_form.formState.errors.quantity?.message && (
                     <p className="text-destructive text-xs">
-                      {preorder_form.formState.errors.quantity.message}
+                      {String(preorder_form.formState.errors.quantity.message)}
                     </p>
                   )}
                 </div>

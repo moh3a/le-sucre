@@ -57,7 +57,7 @@ export function useWishlist(wishlistId?: string) {
     deleteWishlist: useCallback((id: string) => deleteWishlist.mutateAsync({ id }), [deleteWishlist]),
     addItem: useCallback(
       (data: { wishlist_id: string; product_id: string; variant_id?: string | null; quantity?: number; priority?: "low" | "medium" | "high" | "urgent" }) =>
-        addItem.mutateAsync(data as any),
+        addItem.mutateAsync(data),
       [addItem],
     ),
     removeItem: useCallback((id: string) => removeItem.mutateAsync({ id }), [removeItem]),
@@ -204,8 +204,8 @@ export function useWishlistSharing() {
 
   return {
     createLink: useCallback(
-      (data: { wishlist_id: string; permission?: "read" | "collaborate"; expires_in_days?: number; max_uses?: number }) =>
-        createLink.mutateAsync(data as any),
+      (data: Parameters<(typeof createLink)['mutateAsync']>[0]) =>
+        createLink.mutateAsync(data),
       [createLink],
     ),
     revokeLink: useCallback((token_id: string) => revokeLink.mutateAsync({ token_id }), [revokeLink]),

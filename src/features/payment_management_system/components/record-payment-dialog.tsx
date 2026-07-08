@@ -69,58 +69,56 @@ export function RecordPaymentDialog() {
 
   return (
     <QueryGuard mutation={process}>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          {t("record_button")}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("record_title")}</DialogTitle>
-          <DialogDescription>
-            {t("record_description")}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handle_submit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("order_id_label")}</Label>
-            <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("amount_dzd_label")}</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("payment_method_label")}</Label>
-            <Select value={provider} onValueChange={setProvider}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PROVIDERS.map((p) => (
-                  <SelectItem key={p.value} value={p.value}>
-                    {p.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button type="submit" className="w-full" disabled={process.isPending}>
-            <CreditCard />
-            {t("record_submit")}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus />
+            {t("record_button")}
           </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("record_title")}</DialogTitle>
+            <DialogDescription>{t("record_description")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handle_submit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("order_id_label")}</Label>
+              <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("amount_dzd_label")}</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("payment_method_label")}</Label>
+              <Select value={provider} onValueChange={setProvider}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROVIDERS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" className="w-full" disabled={process.isPending}>
+              <CreditCard />
+              {t("record_submit")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </QueryGuard>
   );
 }

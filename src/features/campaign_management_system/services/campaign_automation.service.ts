@@ -4,8 +4,6 @@ import { db } from "@/lib/db";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { mysqlTable, varchar, json, timestamp, index, int, boolean } from "drizzle-orm/mysql-core";
 import { generate_id } from "@/lib/utils";
-import { campaigns } from "../schema";
-import { CAMPAIGN_TYPE, CAMPAIGN_STATUS } from "../constants/campaign_types";
 
 export type AutomationTrigger =
   | "campaign.activated"
@@ -42,8 +40,8 @@ export const campaign_automation_rules = mysqlTable(
     priority: int("priority").notNull().default(100),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
   },
-  (t: Record<string, unknown>) => [
-    index("automation_rules_trigger_idx").on(t.trigger as any, t.is_active as any),
+  (t) => [
+    index("automation_rules_trigger_idx").on(t.trigger, t.is_active),
   ],
 );
 

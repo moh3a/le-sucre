@@ -19,7 +19,6 @@ type MediaPickerFieldProps = {
 };
 
 export function MediaPickerField({
-  value,
   media_item,
   onSelect,
   onClear,

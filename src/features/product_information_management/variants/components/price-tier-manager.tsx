@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import * as React from "react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+
 import { trpc } from "@/components/providers/app-providers";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -21,12 +23,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Trash2 } from "lucide-react";
 
-const TIER_CHANNELS = (t: (key: string) => string) => [
-  { value: "retail", label: t("tier_channel_retail") },
-  { value: "wholesale", label: t("tier_channel_wholesale") },
-] as const;
+const TIER_CHANNELS = (t: (key: string) => string) =>
+  [
+    { value: "retail", label: t("tier_channel_retail") },
+    { value: "wholesale", label: t("tier_channel_wholesale") },
+  ] as const;
 
 type PriceTierManagerProps = {
   skuId: string;
@@ -141,7 +143,7 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
 
         {isFetching ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground size-6 animate-spin" />
           </div>
         ) : (
           <div className="space-y-6">
@@ -149,7 +151,7 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
             <div>
               <h3 className="mb-2 text-sm font-semibold">{t("tier_section_title")}</h3>
               {tiers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("tier_empty")}</p>
+                <p className="text-muted-foreground text-sm">{t("tier_empty")}</p>
               ) : (
                 <div className="divide-y rounded-lg border">
                   {tiers.map((tier, i) => (
@@ -178,8 +180,8 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
             </div>
 
             {/* Add Price Tier */}
-            <div className="rounded-lg border p-3 space-y-3">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+            <div className="space-y-3 rounded-lg border p-3">
+              <h4 className="text-muted-foreground text-xs font-semibold uppercase">
                 {t("tier_add")}
               </h4>
               <div className="grid grid-cols-4 gap-2">
@@ -241,13 +243,18 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
             <div>
               <h3 className="mb-2 text-sm font-semibold">{t("wholesale_section_title")}</h3>
               {wholesaleRules.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("wholesale_empty")}</p>
+                <p className="text-muted-foreground text-sm">{t("wholesale_empty")}</p>
               ) : (
                 <div className="divide-y rounded-lg border">
                   {wholesaleRules.map((rule) => (
-                    <div key={rule.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <div
+                      key={rule.id}
+                      className="flex items-center justify-between px-3 py-2 text-sm"
+                    >
                       <div>
-                        <span className="font-mono">{t("tier_min_qty_label", { qty: rule.min_quantity })}</span>
+                        <span className="font-mono">
+                          {t("tier_min_qty_label", { qty: rule.min_quantity })}
+                        </span>
                         {rule.discount_percent && (
                           <span className="ml-2 text-emerald-600">
                             -{Number(rule.discount_percent).toFixed(1)}%
@@ -274,8 +281,8 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
             </div>
 
             {/* Add Wholesale Rule */}
-            <div className="rounded-lg border p-3 space-y-3">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase">
+            <div className="space-y-3 rounded-lg border p-3">
+              <h4 className="text-muted-foreground text-xs font-semibold uppercase">
                 {t("wholesale_add_rule")}
               </h4>
               <div className="grid grid-cols-3 gap-2">

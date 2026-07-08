@@ -150,7 +150,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         meta: { label: t("date_column"), icon: ReceiptCent },
       },
     ],
-    [],
+    [t],
   );
 
   const [page] = useQueryState("ordPage", parseAsInteger.withDefault(1));

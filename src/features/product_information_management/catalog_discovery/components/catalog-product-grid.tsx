@@ -2,15 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import { PackageOpen } from "lucide-react";
-import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
+
+import {
+  ProductCard,
+  ProductCardSkeleton,
+} from "@/features/product_information_management/products/components/storefront/product-card";
 import type { StorefrontProduct } from "@/components/storefront/types";
 import type { CatalogProductCard as ProductType } from "../types";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyMedia,
-} from "@/components/ui/empty";
+import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
 
 interface CatalogProductGridProps {
   products: ProductType[];

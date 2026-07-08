@@ -24,11 +24,11 @@ export function SimilarProductsSection({
 
   return (
     <QueryGuard query={query}>
-    <ProductRecommendationCarousel
-      title={locale === "fr" ? "Produits similaires" : "Similar Products"}
-      items={data?.similar ?? []}
-      isLoading={isLoading}
-    />
+      <ProductRecommendationCarousel
+        title={locale === "fr" ? "Produits similaires" : "Similar Products"}
+        items={data?.similar ?? []}
+        isLoading={isLoading}
+      />
     </QueryGuard>
   );
 }

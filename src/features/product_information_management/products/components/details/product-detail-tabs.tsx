@@ -58,78 +58,78 @@ export function ProductDetailTabs({ product_id }: Props) {
 
   return (
     <QueryGuard query={product_details_query}>
-    <div className="space-y-6">
-      {product && (
-        <>
-          <div>
-            <h1 className="font-heading text-2xl font-bold">{fr?.name ?? product.slug}</h1>
-            <p className="text-muted-foreground text-sm">Product details</p>
-          </div>
+      <div className="space-y-6">
+        {product && (
+          <>
+            <div>
+              <h1 className="font-heading text-2xl font-bold">{fr?.name ?? product.slug}</h1>
+              <p className="text-muted-foreground text-sm">Product details</p>
+            </div>
 
-          <Tabs value={active_tab} onValueChange={on_tab_change}>
-            <TabsList className="flex flex-wrap">
-              <TabsTrigger value="general">Général</TabsTrigger>
-              <TabsTrigger value="variants">Variantes</TabsTrigger>
-              <TabsTrigger value="orders">Commandes</TabsTrigger>
-              <TabsTrigger value="inventory">Inventaire</TabsTrigger>
-              <TabsTrigger value="media">Médias</TabsTrigger>
-              <TabsTrigger value="reviews">Avis</TabsTrigger>
-              <TabsTrigger value="analytics">Analytique</TabsTrigger>
-              <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
-              <TabsTrigger value="journal">Journal</TabsTrigger>
-            </TabsList>
+            <Tabs value={active_tab} onValueChange={on_tab_change}>
+              <TabsList className="flex flex-wrap">
+                <TabsTrigger value="general">Général</TabsTrigger>
+                <TabsTrigger value="variants">Variantes</TabsTrigger>
+                <TabsTrigger value="orders">Commandes</TabsTrigger>
+                <TabsTrigger value="inventory">Inventaire</TabsTrigger>
+                <TabsTrigger value="media">Médias</TabsTrigger>
+                <TabsTrigger value="reviews">Avis</TabsTrigger>
+                <TabsTrigger value="analytics">Analytique</TabsTrigger>
+                <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
+                <TabsTrigger value="journal">Journal</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="general" className="space-y-4">
-              {translations && (
-                <ProductDetailGeneralTab
+              <TabsContent value="general" className="space-y-4">
+                {translations && (
+                  <ProductDetailGeneralTab
+                    product_id={product_id}
+                    product={product}
+                    translations={translations}
+                  />
+                )}
+              </TabsContent>
+
+              <TabsContent value="variants">
+                <ProductVariantsPanel
                   product_id={product_id}
-                  product={product}
-                  translations={translations}
+                  product_sku={product.sku}
+                  currency={product.currency}
+                  has_variants={product.has_variants}
                 />
-              )}
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="variants">
-              <ProductVariantsPanel
-                product_id={product_id}
-                product_sku={product.sku}
-                currency={product.currency}
-                has_variants={product.has_variants}
-              />
-            </TabsContent>
+              <TabsContent value="orders">
+                <ProductOrdersPanel product_id={product_id} />
+              </TabsContent>
 
-            <TabsContent value="orders">
-              <ProductOrdersPanel product_id={product_id} />
-            </TabsContent>
+              <TabsContent value="inventory" className="space-y-6">
+                <ProductInventoryPanel product_id={product_id} />
+              </TabsContent>
 
-            <TabsContent value="inventory" className="space-y-6">
-              <ProductInventoryPanel product_id={product_id} />
-            </TabsContent>
+              <TabsContent value="media">
+                {media && <ProductMediaGallery product_id={product_id} initial_media={media} />}
+              </TabsContent>
 
-            <TabsContent value="media">
-              {media && <ProductMediaGallery product_id={product_id} initial_media={media} />}
-            </TabsContent>
+              <TabsContent value="reviews" className="space-y-6">
+                <ProductRatingSummary product_id={product_id} />
+                <ProductReviewsList product_id={product_id} />
+              </TabsContent>
 
-            <TabsContent value="reviews" className="space-y-6">
-              <ProductRatingSummary product_id={product_id} />
-              <ProductReviewsList product_id={product_id} />
-            </TabsContent>
+              <TabsContent value="analytics">
+                <ProductAnalyticsPanel product_id={product_id} />
+              </TabsContent>
 
-            <TabsContent value="analytics">
-              <ProductAnalyticsPanel product_id={product_id} />
-            </TabsContent>
+              <TabsContent value="recommendations" className="space-y-6">
+                <ProductRecommendationsTab product_id={product_id} />
+              </TabsContent>
 
-            <TabsContent value="recommendations" className="space-y-6">
-              <ProductRecommendationsTab product_id={product_id} />
-            </TabsContent>
-
-            <TabsContent value="journal" className="space-y-6">
-              <ProductChangeLog product_id={product_id} />
-            </TabsContent>
-          </Tabs>
-        </>
-      )}
-    </div>
+              <TabsContent value="journal" className="space-y-6">
+                <ProductChangeLog product_id={product_id} />
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
+      </div>
     </QueryGuard>
   );
 }

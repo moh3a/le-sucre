@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSaveForLater } from "../hooks/use-wishlist";
 
-interface SaveForLaterPanelProps {
+export interface SaveForLaterPanelProps {
   items: Array<{
     id: string;
     product_id: string;
@@ -59,23 +60,20 @@ export function SaveForLaterPanel({ items, onMovedToCart }: SaveForLaterPanelPro
       </CardHeader>
       <CardContent className="space-y-3">
         {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center justify-between p-3 border rounded-lg"
-          >
+          <div key={item.id} className="flex items-center justify-between rounded-lg border p-3">
             <div className="flex items-center gap-3">
               {item.product?.image_url && (
                 <img
                   src={item.product.image_url}
                   alt=""
-                  className="h-12 w-12 object-cover rounded"
+                  className="h-12 w-12 rounded object-cover"
                 />
               )}
               <div>
                 <p className="text-sm font-medium">{item.product?.name ?? item.product_id}</p>
-                <p className="text-xs text-muted-foreground">Qté: {item.quantity}</p>
+                <p className="text-muted-foreground text-xs">Qté: {item.quantity}</p>
                 {item.product?.offer_price && (
-                  <p className="text-sm font-semibold text-primary">
+                  <p className="text-primary text-sm font-semibold">
                     {item.product.offer_price} DA
                   </p>
                 )}

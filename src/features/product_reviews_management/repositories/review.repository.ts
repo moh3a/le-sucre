@@ -210,6 +210,12 @@ export class ReviewRepository {
     return db.insert(product_review_helpful_votes).values({ review_id, user_id });
   }
 
+  remove_helpful_vote(review_id: string, user_id: string) {
+    return db.delete(product_review_helpful_votes).where(
+      and(eq(product_review_helpful_votes.review_id, review_id), eq(product_review_helpful_votes.user_id, user_id)),
+    );
+  }
+
   create_report(input: typeof product_review_reports.$inferInsert) {
     return db.insert(product_review_reports).values(input);
   }

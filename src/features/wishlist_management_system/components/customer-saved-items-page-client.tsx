@@ -2,9 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { Save } from "lucide-react";
+
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
-import { SaveForLaterPanel } from "./save-for-later";
+import { SaveForLaterPanel, type SaveForLaterPanelProps } from "./save-for-later";
 import { SavedItemsPageSkeleton } from "./saved-items-page-skeleton";
 import {
   Empty,
@@ -16,39 +17,39 @@ import {
 
 export function CustomerSavedItemsPageClient() {
   const t = useTranslations("wishlist");
-  const { data, isLoading, error } = trpc.wishlistManagement.saveForLater.list.useQuery({ page: 1, limit: 50 });
+  const { data, isLoading, error } = trpc.wishlistManagement.saveForLater.list.useQuery({
+    page: 1,
+    limit: 50,
+  });
   const utils = trpc.useUtils();
 
-  const items = (data?.items ?? []).map((item: any) => ({
-    ...item,
-    product: item.product ?? undefined,
-  }));
+  const items = (data?.items ?? []).map((item: SaveForLaterPanelProps["items"][number]) => item);
 
   return (
     <QueryGuard query={{ isLoading, error }} loadingFallback={<SavedItemsPageSkeleton />}>
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">Sauvegardé pour plus tard</h1>
-      {(!items || items.length === 0) ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Save className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>{t("no_saved_items")}</EmptyTitle>
-            <EmptyDescription>
-              Les articles de votre panier peuvent être sauvegardés pour plus tard
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <SaveForLaterPanel
-          items={items}
-          onMovedToCart={() => {
-            utils.wishlistManagement.saveForLater.list.invalidate();
-          }}
-        />
-      )}
-    </div>
+      <div className="container mx-auto py-6">
+        <h1 className="mb-6 text-2xl font-bold">Sauvegardé pour plus tard</h1>
+        {!items || items.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Save className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>{t("no_saved_items")}</EmptyTitle>
+              <EmptyDescription>
+                Les articles de votre panier peuvent être sauvegardés pour plus tard
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <SaveForLaterPanel
+            items={items}
+            onMovedToCart={() => {
+              utils.wishlistManagement.saveForLater.list.invalidate();
+            }}
+          />
+        )}
+      </div>
     </QueryGuard>
   );
 }

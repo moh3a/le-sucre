@@ -13,7 +13,7 @@ export function BrandStats() {
   const t = useTranslations("brands");
 
   const query = trpc.brands.stats.useQuery();
-  const { data: statsData, isLoading } = query;
+  const { data: statsData } = query;
 
   const stats = [
     {
@@ -47,29 +47,32 @@ export function BrandStats() {
   ];
 
   return (
-    <QueryGuard query={query} loadingFallback={
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[88px] rounded-lg" />
-        ))}
-      </div>
-    }>
-    <Carousel>
-      <CarouselContent>
-        {stats.map((stat) => (
-          <CarouselItem key={stat.label} className="lg:basis-[22%]">
-            <Stat>
-              <StatLabel>{stat.label}</StatLabel>
-              <StatValue>{stat.value}</StatValue>
-              <StatIndicator variant="icon" color={stat.color}>
-                <stat.icon />
-              </StatIndicator>
-              <StatDescription>{stat.description}</StatDescription>
-            </Stat>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-    </Carousel>
+    <QueryGuard
+      query={query}
+      loadingFallback={
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-[88px] rounded-lg" />
+          ))}
+        </div>
+      }
+    >
+      <Carousel>
+        <CarouselContent>
+          {stats.map((stat) => (
+            <CarouselItem key={stat.label} className="lg:basis-[22%]">
+              <Stat>
+                <StatLabel>{stat.label}</StatLabel>
+                <StatValue>{stat.value}</StatValue>
+                <StatIndicator variant="icon" color={stat.color}>
+                  <stat.icon />
+                </StatIndicator>
+                <StatDescription>{stat.description}</StatDescription>
+              </Stat>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </QueryGuard>
   );
 }

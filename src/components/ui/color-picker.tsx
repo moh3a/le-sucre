@@ -595,10 +595,10 @@ function ColorPicker(props: ColorPickerProps) {
   );
 }
 
-interface ColorPickerImplProps extends Omit<
+type ColorPickerImplProps = Omit<
   ColorPickerProps,
   "defaultValue" | "onValueChange" | "onOpenChange" | "format" | "defaultFormat" | "onFormatChange"
-> {}
+>
 
 function ColorPickerImpl(props: ColorPickerImplProps) {
   const {

@@ -3,14 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import {
-  Banknote,
-  CreditCard,
-  Download,
-  MoreHorizontal,
-  RefreshCcw,
-  XCircle,
-} from "lucide-react";
+import { Banknote, CreditCard, Download, MoreHorizontal, RefreshCcw, XCircle } from "lucide-react";
 import Link from "next/link";
 
 import { useTranslations } from "next-intl";
@@ -97,7 +90,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -126,18 +122,24 @@ function FacetedFilter({
 
 export function PaymentsTable() {
   const t = useTranslations("payments");
-  const STATUS_STYLES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    pending: { label: t("pending"), variant: "outline" },
-    processing: { label: t("processing"), variant: "secondary" },
-    captured: { label: t("captured"), variant: "default" },
-    completed: { label: t("completed"), variant: "default" },
-    failed: { label: t("failed"), variant: "destructive" },
-    refunded: { label: t("refunded"), variant: "secondary" },
-    partially_refunded: { label: t("partially_refunded"), variant: "secondary" },
-    cancelled: { label: t("cancelled"), variant: "destructive" },
-    expired: { label: t("expired"), variant: "outline" },
-    on_hold: { label: t("on_hold"), variant: "outline" },
-  };
+  const STATUS_STYLES: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = React.useMemo(
+    () => ({
+      pending: { label: t("pending"), variant: "outline" },
+      processing: { label: t("processing"), variant: "secondary" },
+      captured: { label: t("captured"), variant: "default" },
+      completed: { label: t("completed"), variant: "default" },
+      failed: { label: t("failed"), variant: "destructive" },
+      refunded: { label: t("refunded"), variant: "secondary" },
+      partially_refunded: { label: t("partially_refunded"), variant: "secondary" },
+      cancelled: { label: t("cancelled"), variant: "destructive" },
+      expired: { label: t("expired"), variant: "outline" },
+      on_hold: { label: t("on_hold"), variant: "outline" },
+    }),
+    [t],
+  );
   const STATUS_OPTIONS = [
     { label: t("pending"), value: "pending" },
     { label: t("processing"), value: "processing" },
@@ -212,7 +214,7 @@ export function PaymentsTable() {
           return on ? (
             <Link
               href={`/console/orders/${row.original.order_id}`}
-              className="font-medium text-sm hover:underline"
+              className="text-sm font-medium hover:underline"
             >
               #{on}
             </Link>
@@ -223,7 +225,9 @@ export function PaymentsTable() {
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("customer_column")} />
+        ),
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-sm">{row.original.user_name ?? "—"}</span>
@@ -236,7 +240,9 @@ export function PaymentsTable() {
       {
         id: "provider",
         accessorKey: "provider",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("provider_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("provider_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant="outline" className="capitalize">
             {row.original.provider}
@@ -246,7 +252,9 @@ export function PaymentsTable() {
       {
         id: "amount",
         accessorKey: "amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("amount_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("amount_column")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono font-medium">
             {Number(row.original.amount).toLocaleString("fr-FR", {
@@ -261,7 +269,7 @@ export function PaymentsTable() {
         accessorKey: "fee",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("fee_column")} />,
         cell: ({ row }) => (
-          <span className="font-mono text-muted-foreground text-xs">
+          <span className="text-muted-foreground font-mono text-xs">
             {Number(row.original.fee).toLocaleString("fr-FR", {
               style: "currency",
               currency: row.original.currency,
@@ -273,12 +281,14 @@ export function PaymentsTable() {
         id: "type",
         accessorKey: "type",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
-        cell: ({ row }) => <span className="capitalize text-sm">{row.original.type}</span>,
+        cell: ({ row }) => <span className="text-sm capitalize">{row.original.type}</span>,
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => {
           const cfg = STATUS_STYLES[row.original.status] ?? {
             label: row.original.status,
@@ -332,7 +342,7 @@ export function PaymentsTable() {
         ),
       },
     ],
-    [retryMutation, cancelMutation],
+    [t, STATUS_STYLES, retryMutation, cancelMutation],
   );
 
   const { data, isLoading } = trpc.payments.adminList.useQuery({
@@ -356,54 +366,57 @@ export function PaymentsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={3} />}>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={3} />}
+    >
       <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <Input
-          placeholder={t("search_placeholder")}
-          value={search || ""}
-          onChange={(e) => {
-            setSearch(e.target.value);
-          }}
-          className="max-w-sm"
-        />
-        <FacetedFilter
-          title={t("status_title")}
-          options={STATUS_OPTIONS}
-          icon={Banknote}
-          value={status ?? undefined}
-          onChange={(val) => setStatus(val)}
-        />
-        <FacetedFilter
-          title={t("type_title")}
-          options={TYPE_OPTIONS}
-          icon={CreditCard}
-          value={type ?? undefined}
-          onChange={(val) => setType(val)}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center gap-2 border-t p-2">
-          <Badge variant="outline">
-            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-          </Badge>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href={`/api/admin/payments/export?${new URLSearchParams({
-                ...(search ? { search } : {}),
-                ...(status ? { status } : {}),
-                ...(type ? { type } : {}),
-              })}`}
-              download="payments.csv"
-            >
-              <Download className="mr-1 h-4 w-4" />
-              {t("export")}
-            </a>
-          </Button>
-        </div>
-      )}
-    </DataTable>
+        <DataTableAdvancedToolbar table={table}>
+          <Input
+            placeholder={t("search_placeholder")}
+            value={search || ""}
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            className="max-w-sm"
+          />
+          <FacetedFilter
+            title={t("status_title")}
+            options={STATUS_OPTIONS}
+            icon={Banknote}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <FacetedFilter
+            title={t("type_title")}
+            options={TYPE_OPTIONS}
+            icon={CreditCard}
+            value={type ?? undefined}
+            onChange={(val) => setType(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/payments/export?${new URLSearchParams({
+                  ...(search ? { search } : {}),
+                  ...(status ? { status } : {}),
+                  ...(type ? { type } : {}),
+                })}`}
+                download="payments.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                {t("export")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
     </QueryGuard>
   );
 }

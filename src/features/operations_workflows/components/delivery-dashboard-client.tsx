@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export function DeliveryDashboardClient() {
   return (
     <div className="space-y-6 p-6">
@@ -35,9 +37,9 @@ export function DeliveryDashboardClient() {
       <div className="rounded-lg border">
         <h2 className="border-b bg-gray-50 px-4 py-2 font-semibold text-sm">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4">
-          <a href="/console/shipping" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">View Shipments</a>
-          <a href="/console/operations/delivery" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Delivery Tracking</a>
-          <a href="/console/operations/rma" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">RMA Returns</a>
+          <Link href="/console/shipping" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">View Shipments</Link>
+          <Link href="/console/operations/delivery" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Delivery Tracking</Link>
+          <Link href="/console/operations/rma" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">RMA Returns</Link>
         </div>
       </div>
     </div>

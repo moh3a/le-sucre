@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import type { WarehouseRow } from "../../warehouses/types";
 
 const warehouse_form_schema = z.object({
@@ -63,17 +62,19 @@ export function InventoryWarehouseDialog({ warehouse, open, onOpenChange }: Prop
     },
   });
 
+  const syncForm = useEffectEvent(() => {
+    reset({
+      name: warehouse?.name ?? "",
+      slug: warehouse?.slug ?? "",
+      location: warehouse?.location ?? "",
+      phone: warehouse?.phone ?? "",
+      email: warehouse?.email ?? "",
+    });
+  });
+
   useEffect(() => {
-    if (open) {
-      reset({
-        name: warehouse?.name ?? "",
-        slug: warehouse?.slug ?? "",
-        location: warehouse?.location ?? "",
-        phone: warehouse?.phone ?? "",
-        email: warehouse?.email ?? "",
-      });
-    }
-  }, [open, warehouse, reset]);
+    if (open) syncForm();
+  }, [open]);
 
   const create = trpc.warehouses.create.useMutation({
     onSuccess: async () => {

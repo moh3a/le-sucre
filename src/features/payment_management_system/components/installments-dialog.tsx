@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Calendar, CheckCircle, Clock, DollarSign, XCircle } from "lucide-react";
-
+import { Calendar, CheckCircle, Clock, DollarSign } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 import { formatDate } from "@/lib/utils";
 
 const PROVIDERS = [
@@ -198,7 +196,7 @@ export function InstallmentsView({ orderId }: InstallmentsViewProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">
-                {t("installment_number", { number: inst.installment_number, total: inst.total_installments })}
+                {t("installment_number", { number: inst.installment_number ?? 0, total: inst.total_installments ?? 0 })}
               </span>
               <Badge
                 className={INSTALLMENT_STATUS_STYLES[inst.status] ?? ""}

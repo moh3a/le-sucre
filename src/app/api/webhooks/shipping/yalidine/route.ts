@@ -4,7 +4,6 @@ import { rate_limit } from "@/lib/redis";
 import { RATE_LIMIT_PRESETS } from "@/lib/security/rate-limit-presets";
 import { verify_hmac_signature, verify_webhook_timestamp } from "@/lib/security/webhook";
 import { logger } from "@/lib/logger";
-import { AppError } from "@/lib/error_handling";
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,12 +51,7 @@ export async function POST(request: NextRequest) {
 
     const { shipping_webhook_service } =
       await import("@/features/shipping_management_system/services/shipping-webhook.service");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await shipping_webhook_service.handle_provider_webhook(
-      "yalidine",
-      request.headers as any,
-      raw_body,
-    );
+    await shipping_webhook_service.handle_provider_webhook("yalidine", request.headers, raw_body);
 
     return NextResponse.json({ received: true });
   } catch (error) {

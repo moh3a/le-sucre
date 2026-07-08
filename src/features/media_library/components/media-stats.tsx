@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 "use client";
 
 import { Image, FileVideo, HardDrive } from "lucide-react";

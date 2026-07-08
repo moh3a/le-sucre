@@ -24,7 +24,6 @@ import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,7 +90,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -120,14 +122,20 @@ function FacetedFilter({
 
 export function RefundsTable() {
   const t = useTranslations("refunds");
-  const STATUS_STYLES: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    pending: { label: t("pending"), variant: "outline" },
-    approved: { label: t("approved"), variant: "secondary" },
-    rejected: { label: t("rejected"), variant: "destructive" },
-    processing: { label: t("processing"), variant: "secondary" },
-    completed: { label: t("completed"), variant: "default" },
-    failed: { label: t("failed"), variant: "destructive" },
-  };
+  const STATUS_STYLES: Record<
+    string,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = React.useMemo(
+    () => ({
+      pending: { label: t("pending"), variant: "outline" },
+      approved: { label: t("approved"), variant: "secondary" },
+      rejected: { label: t("rejected"), variant: "destructive" },
+      processing: { label: t("processing"), variant: "secondary" },
+      completed: { label: t("completed"), variant: "default" },
+      failed: { label: t("failed"), variant: "destructive" },
+    }),
+    [t],
+  );
   const STATUS_OPTIONS = [
     { label: t("pending"), value: "pending" },
     { label: t("approved"), value: "approved" },
@@ -191,7 +199,7 @@ export function RefundsTable() {
           return on ? (
             <Link
               href={`/console/orders/${row.original.order_id}`}
-              className="font-medium text-sm hover:underline"
+              className="text-sm font-medium hover:underline"
             >
               #{on}
             </Link>
@@ -203,7 +211,9 @@ export function RefundsTable() {
       {
         id: "amount",
         accessorKey: "amount",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("amount_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("amount_column")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono font-medium">
             {Number(row.original.amount).toLocaleString("fr-DZ", {
@@ -217,12 +227,14 @@ export function RefundsTable() {
         id: "type",
         accessorKey: "type",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
-        cell: ({ row }) => <span className="capitalize text-sm">{row.original.type}</span>,
+        cell: ({ row }) => <span className="text-sm capitalize">{row.original.type}</span>,
       },
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => {
           const cfg = STATUS_STYLES[row.original.status] ?? {
             label: row.original.status,
@@ -233,15 +245,17 @@ export function RefundsTable() {
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_column")} />,
-        cell: ({ row }) => (
-          <span className="text-sm">{row.original.user_name ?? "—"}</span>
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("customer_column")} />
         ),
+        cell: ({ row }) => <span className="text-sm">{row.original.user_name ?? "—"}</span>,
       },
       {
         id: "reason",
         accessorKey: "reason",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("reason_column")} />
+        ),
         cell: ({ row }) => (
           <span className="text-muted-foreground max-w-[200px] truncate text-xs">
             {row.original.reason ?? "—"}
@@ -268,9 +282,7 @@ export function RefundsTable() {
               {(row.original.status === "pending" || row.original.status === "rejected") && (
                 <>
                   <DropdownMenuItem
-                    onClick={() =>
-                      approveMutation.mutate({ refund_id: row.original.id })
-                    }
+                    onClick={() => approveMutation.mutate({ refund_id: row.original.id })}
                   >
                     <CheckCircle2 className="mr-2 size-4 text-green-600" />
                     {t("approve")}
@@ -287,9 +299,7 @@ export function RefundsTable() {
               )}
               {row.original.status === "approved" && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    processMutation.mutate({ refund_id: row.original.id })
-                  }
+                  onClick={() => processMutation.mutate({ refund_id: row.original.id })}
                 >
                   <RefreshCcw className="mr-2 size-4" />
                   {t("process")}
@@ -297,16 +307,14 @@ export function RefundsTable() {
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={`/console/orders/${row.original.order_id}`}>
-                  {t("view_order")}
-                </Link>
+                <Link href={`/console/orders/${row.original.order_id}`}>{t("view_order")}</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
       },
     ],
-    [approveMutation, rejectMutation, processMutation],
+    [t, STATUS_STYLES, approveMutation, rejectMutation, processMutation],
   );
 
   const { data, isLoading } = trpc.payments.adminListRefunds.useQuery({
@@ -329,44 +337,47 @@ export function RefundsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={8} rowCount={10} filterCount={2} />}
+    >
       <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <FacetedFilter
-          title={t("status_title")}
-          options={STATUS_OPTIONS}
-          icon={Banknote}
-          value={status ?? undefined}
-          onChange={(val) => setStatus(val)}
-        />
-        <FacetedFilter
-          title={t("type_title")}
-          options={TYPE_OPTIONS}
-          value={type ?? undefined}
-          onChange={(val) => setType(val)}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center gap-2 border-t p-2">
-          <Badge variant="outline">
-            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-          </Badge>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href={`/api/admin/refunds/export?${new URLSearchParams({
-                ...(status ? { status } : {}),
-                ...(type ? { type } : {}),
-              })}`}
-              download="refunds.csv"
-            >
-              <Download className="mr-1 h-4 w-4" />
-              {t("export")}
-            </a>
-          </Button>
-        </div>
-      )}
-    </DataTable>
+        <DataTableAdvancedToolbar table={table}>
+          <FacetedFilter
+            title={t("status_title")}
+            options={STATUS_OPTIONS}
+            icon={Banknote}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <FacetedFilter
+            title={t("type_title")}
+            options={TYPE_OPTIONS}
+            value={type ?? undefined}
+            onChange={(val) => setType(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/refunds/export?${new URLSearchParams({
+                  ...(status ? { status } : {}),
+                  ...(type ? { type } : {}),
+                })}`}
+                download="refunds.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                {t("export")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
     </QueryGuard>
   );
 }

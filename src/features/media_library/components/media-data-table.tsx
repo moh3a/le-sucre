@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { MediaDTO, MediaListItem } from "../types";
+import type { MediaListItem } from "../types";
 import { MediaOperationsDialog } from "./admin-media-operations";
 
 function format_bytes(bytes: number) {

@@ -6,7 +6,6 @@ import { ExternalLink, RefreshCcw, ToggleLeft, Truck } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
-
 import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -74,7 +73,9 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
       {
         id: "tracking_number",
         accessorKey: "tracking_number",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("tracking_number")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("tracking_number")} />
+        ),
         cell: ({ row }) => (
           <Link
             href={`/console/shipping/${row.original.id}`}
@@ -174,7 +175,7 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
         ),
       },
     ],
-    [sync_mutation],
+    [sync_mutation, t],
   );
 
   const [page] = useQueryState("shipPage", parseAsInteger.withDefault(1));
@@ -211,21 +212,24 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
   ];
 
   return (
-    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={compact ? 5 : 10} />}>
-    <DataTable table={table}>
-      {!compact ? (
-        <DataTableAdvancedToolbar table={table}>
-          <FacetedFilter
-            title={t("status")}
-            options={statusOptions}
-            icon={ToggleLeft}
-            value={status_filter || null}
-            onChange={(value) => setStatusFilter(value ?? "")}
-          />
-          <DataTableSortList table={table} />
-        </DataTableAdvancedToolbar>
-      ) : null}
-    </DataTable>
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={compact ? 5 : 10} />}
+    >
+      <DataTable table={table}>
+        {!compact ? (
+          <DataTableAdvancedToolbar table={table}>
+            <FacetedFilter
+              title={t("status")}
+              options={statusOptions}
+              icon={ToggleLeft}
+              value={status_filter || null}
+              onChange={(value) => setStatusFilter(value ?? "")}
+            />
+            <DataTableSortList table={table} />
+          </DataTableAdvancedToolbar>
+        ) : null}
+      </DataTable>
     </QueryGuard>
   );
 }

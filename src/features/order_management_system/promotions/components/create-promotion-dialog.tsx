@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -119,11 +119,15 @@ export function CreatePromotionDialog() {
   const watch_slug = watch("slug");
   const is_pending = create_mutation.isPending;
 
-  useEffect(() => {
-    if (watch_name && (!watch_slug || watch_slug === slugify(watch_name.slice(0, -1)))) {
-      setValue("slug", slugify(watch_name), { shouldValidate: true });
+  const syncSlug = useEffectEvent((name: string) => {
+    if (name && (!watch_slug || watch_slug === slugify(name.slice(0, -1)))) {
+      setValue("slug", slugify(name), { shouldValidate: true });
     }
-  }, [watch_name, watch_slug, setValue]);
+  });
+
+  useEffect(() => {
+    syncSlug(watch_name);
+  }, [watch_name]);
 
   const on_submit = async (values: FormValues) => {
     const starts_at = values.starts_at ? new Date(values.starts_at).toISOString() : undefined;

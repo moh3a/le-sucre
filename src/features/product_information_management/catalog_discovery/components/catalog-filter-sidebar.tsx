@@ -8,11 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import type { CatalogFacets } from "../types";
 
@@ -73,7 +69,10 @@ export function CatalogFilterSidebar({
   const handlePropertyToggle = (code: string, valueCode: string) => {
     const current = selectedProperties[code] ?? [];
     if (current.includes(valueCode)) {
-      onPropertyChange(code, current.filter((v) => v !== valueCode));
+      onPropertyChange(
+        code,
+        current.filter((v) => v !== valueCode),
+      );
     } else {
       onPropertyChange(code, [...current, valueCode]);
     }
@@ -140,9 +139,7 @@ export function CatalogFilterSidebar({
                   type="number"
                   placeholder={t("min_price")}
                   value={priceRange[0]}
-                  onChange={(e) =>
-                    onPriceChange([Number(e.target.value) || 0, priceRange[1]])
-                  }
+                  onChange={(e) => onPriceChange([Number(e.target.value) || 0, priceRange[1]])}
                   className="h-8 text-xs"
                   min={0}
                   max={facets?.price?.max ?? 20000}
@@ -152,15 +149,13 @@ export function CatalogFilterSidebar({
                   type="number"
                   placeholder={t("max_price")}
                   value={priceRange[1]}
-                  onChange={(e) =>
-                    onPriceChange([priceRange[0], Number(e.target.value) || 0])
-                  }
+                  onChange={(e) => onPriceChange([priceRange[0], Number(e.target.value) || 0])}
                   className="h-8 text-xs"
                   min={0}
                   max={facets?.price?.max ?? 20000}
                 />
               </div>
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <div className="text-muted-foreground flex items-center justify-between text-[11px]">
                 <span>{facets?.price?.min ?? 0} DZD</span>
                 <span>{facets?.price?.max ?? 20000} DZD</span>
               </div>

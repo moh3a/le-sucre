@@ -41,7 +41,7 @@ export function CategoryFormDialog({
     { id: category_id! },
     { enabled: mode === "edit" && !!category_id && open },
   );
-  const { data: category, isLoading } = category_query;
+  const { data: category } = category_query;
 
   const title = mode === "create" ? t("new") : t("edit");
   const description = mode === "create" ? t("new_description") : t("edit_description");
@@ -59,13 +59,16 @@ export function CategoryFormDialog({
           <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        <QueryGuard query={category_query} loadingFallback={
-          <div className="space-y-4 py-4">
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-        }>
+        <QueryGuard
+          query={category_query}
+          loadingFallback={
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          }
+        >
           <CategoryForm
             key={mode === "edit" ? category_id : "create"}
             mode={mode}

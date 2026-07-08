@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { eq, and, asc, desc, sql, gte } from "drizzle-orm";
+import { eq, and, desc, sql, gte, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { fraud_reviews } from "../schema";
 import { orders } from "@/features/order_management_system/orders/schema";
@@ -77,7 +77,7 @@ export class FraudReviewService {
       id,
       order_id,
       risk_score,
-      flags: flags as any,
+      flags,
       status,
     });
 
@@ -134,7 +134,7 @@ export class FraudReviewService {
   }
 
   async list_all(status?: string) {
-    const clauses: any[] = [];
+    const clauses: SQL[] = [];
     if (status) clauses.push(eq(fraud_reviews.status, status));
     return db
       .select()

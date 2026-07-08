@@ -19,7 +19,7 @@ export class AuthorizationAuditService {
     const ip = params.req ? extract_client_ip(params.req) : undefined;
 
     if (params.result === "denied" || params.result === "forbidden") {
-      await security_event_service.log("authorization_failure" as any, "warning", {
+      await security_event_service.log("authorization_failure", "warning", {
         user_id: params.user_id ?? undefined,
         ip_address: ip,
         metadata: {
@@ -66,7 +66,7 @@ export class AuthorizationAuditService {
     reason: string;
     user_id?: string;
   }): Promise<void> {
-    await security_event_service.log("login_suspicious" as any, "warning", {
+    await security_event_service.log("login_suspicious", "warning", {
       user_id: params.user_id,
       ip_address: params.ip,
       metadata: {

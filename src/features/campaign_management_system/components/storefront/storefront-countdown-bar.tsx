@@ -9,20 +9,19 @@ interface Props {
 }
 
 export function CampaignCountdownBar({ banner, end_time }: Props) {
-  const [remaining, setRemaining] = useState(0);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     if (!end_time) return;
-    const end = new Date(end_time).getTime();
-    const tick = () => {
-      const diff = Math.max(0, end - Date.now());
-      setRemaining(diff);
-    };
-    tick();
-    const interval = setInterval(tick, 1000);
+    const interval = setInterval(() => {
+      setTick((c) => c + 1);
+    }, 1000);
     return () => clearInterval(interval);
   }, [end_time]);
 
+  if (!end_time) return null;
+
+  const remaining = Math.max(0, new Date(end_time).getTime() - Date.now());
   if (remaining <= 0) return null;
 
   const hours = Math.floor(remaining / 3600000);
@@ -30,7 +29,7 @@ export function CampaignCountdownBar({ banner, end_time }: Props) {
   const seconds = Math.floor((remaining % 60000) / 1000);
 
   return (
-    <div className="campaign-countdown-bar flex items-center justify-center gap-4 bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 text-white">
+    <div className="campaign-countdown-bar flex items-center justify-center gap-4 bg-linear-to-r from-red-600 to-orange-500 px-4 py-3 text-white">
       <span className="text-sm font-medium">{banner.alt_text ?? "Offre à durée limitée"}</span>
       <div className="flex items-center gap-1 text-lg font-mono font-bold tabular-nums">
         <span className="rounded bg-white/20 px-2 py-1">{String(hours).padStart(2, "0")}</span>

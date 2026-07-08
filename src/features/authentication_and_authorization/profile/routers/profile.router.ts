@@ -39,14 +39,14 @@ export const profile_router = create_trpc_router({
   createAddress: protected_procedure
     .input(create_address_schema)
     .mutation(async ({ ctx, input }) => {
-      return profile_service.create_address(ctx.user.id, input as any);
+      return profile_service.create_address(ctx.user.id, input);
     }),
 
   updateAddress: protected_procedure
     .input(update_address_schema)
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
-      return profile_service.update_address(ctx.user.id, id, data as any);
+      return profile_service.update_address(ctx.user.id, id, data);
     }),
 
   deleteAddress: protected_procedure
@@ -69,7 +69,7 @@ export const profile_router = create_trpc_router({
 export const admin_profile_router = create_trpc_router({
   getByUserId: permission_procedure(PERMISSIONS.users_read)
     .input(z.object({ user_id: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       return profile_service.get_profile(input.user_id);
     }),
 });

@@ -26,10 +26,11 @@ function useCountdown(targetSeconds: number | null) {
 
   useEffect(() => {
     if (targetSeconds === null || targetSeconds <= 0) return;
-    setRemaining(targetSeconds);
+
+    const endTime = Date.now() + targetSeconds * 1000;
 
     const interval = setInterval(() => {
-      setRemaining((prev) => Math.max(0, prev - 1));
+      setRemaining(Math.max(0, Math.round((endTime - Date.now()) / 1000)));
     }, 1000);
 
     return () => clearInterval(interval);

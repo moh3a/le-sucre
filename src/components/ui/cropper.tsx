@@ -440,15 +440,14 @@ function Cropper(props: CropperProps) {
   });
 
   const rootRef = React.useRef<RootElement | null>(null);
+  const isBatchingRef = React.useRef(false);
+  const rafRef = React.useRef<number | null>(null);
 
   const store = React.useMemo<Store>(() => {
-    let isBatching = false;
-    let raf: number | null = null;
-
     function notifyCropAreaChange() {
-      if (raf != null) return;
-      raf = requestAnimationFrame(() => {
-        raf = null;
+      if (rafRef.current != null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
         const s = stateRef.current;
         if (s?.mediaSize && s.cropSize && propsRef.current.onCropAreaChange) {
           const { croppedAreaPercentages, croppedAreaPixels } = getCroppedArea(
@@ -525,7 +524,7 @@ function Cropper(props: CropperProps) {
           notifyCropAreaChange();
         }
 
-        if (!isBatching) {
+        if (!isBatchingRef.current) {
           store.notify();
         }
       },
@@ -535,15 +534,15 @@ function Cropper(props: CropperProps) {
         }
       },
       batch: (fn: () => void) => {
-        if (isBatching) {
+        if (isBatchingRef.current) {
           fn();
           return;
         }
-        isBatching = true;
+        isBatchingRef.current = true;
         try {
           fn();
         } finally {
-          isBatching = false;
+          isBatchingRef.current = false;
           store.notify();
         }
       },
@@ -942,10 +941,16 @@ function CropperImpl(props: CropperImplProps) {
     [onZoomChange, store],
   );
 
+  const onGestureEndRef = React.useRef<((event: Event) => void) | null>(null);
+
   const onGestureEnd = React.useCallback(() => {
     document.removeEventListener("gesturechange", onGestureChange as EventListener);
-    document.removeEventListener("gestureend", onGestureEnd as EventListener);
+    document.removeEventListener("gestureend", onGestureEndRef.current as EventListener);
   }, [onGestureChange]);
+
+  useIsomorphicLayoutEffect(() => {
+    onGestureEndRef.current = onGestureEnd;
+  });
 
   const onGestureStart = React.useCallback(
     (event: GestureEvent) => {
@@ -967,14 +972,20 @@ function CropperImpl(props: CropperImplProps) {
     document.removeEventListener("gestureend", onGestureEnd as EventListener);
   }, [onMouseMove, onTouchMove, onGestureChange, onGestureEnd]);
 
+  const onDragStoppedRef = React.useRef<((event: Event) => void) | null>(null);
+
   const onDragStopped = React.useCallback(() => {
     isTouchingRef.current = false;
     store.setState("isDragging", false);
     onRefsCleanup();
-    document.removeEventListener("mouseup", onDragStopped);
-    document.removeEventListener("touchend", onDragStopped);
+    document.removeEventListener("mouseup", onDragStoppedRef.current as EventListener);
+    document.removeEventListener("touchend", onDragStoppedRef.current as EventListener);
     onEventsCleanup();
   }, [store, onEventsCleanup, onRefsCleanup]);
+
+  useIsomorphicLayoutEffect(() => {
+    onDragStoppedRef.current = onDragStopped;
+  });
 
   const getWheelDelta = React.useCallback((event: WheelEvent) => {
     let deltaX = event.deltaX;

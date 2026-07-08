@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export function ModeratorDashboardClient() {
   return (
     <div className="space-y-6 p-6">
@@ -38,8 +40,8 @@ export function ModeratorDashboardClient() {
       <div className="rounded-lg border">
         <h2 className="border-b bg-gray-50 px-4 py-2 font-semibold text-sm">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4">
-          <a href="/console/reviews" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Review Queue</a>
-          <a href="/console/operations/approval-workflows" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Approvals</a>
+          <Link href="/console/reviews" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Review Queue</Link>
+          <Link href="/console/operations/approval-workflows" className="rounded-lg border bg-white p-3 text-center text-sm font-medium hover:bg-gray-50">Approvals</Link>
         </div>
       </div>
     </div>

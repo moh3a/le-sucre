@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { wishlist_items, wishlists } from "../db/schema";
 import type { WishlistItem } from "../types";
@@ -117,7 +117,7 @@ export class WishlistItemRepository {
 
     await db
       .update(wishlist_items)
-      .set({ current_price: current_price, price_history: updated_history as any })
+      .set({ current_price: current_price, price_history: updated_history })
       .where(eq(wishlist_items.id, id));
   }
 
@@ -139,7 +139,7 @@ export class WishlistItemRepository {
       .select({ total: count() })
       .from(wishlist_items)
       .innerJoin(
-        wishlists as any,
+        wishlists,
         eq(wishlist_items.wishlist_id, wishlists.id),
       )
       .where(and(
@@ -155,7 +155,7 @@ export class WishlistItemRepository {
       .select({ total: count() })
       .from(wishlist_items)
       .innerJoin(
-        wishlists as any,
+        wishlists,
         eq(wishlist_items.wishlist_id, wishlists.id),
       )
       .where(eq(wishlists.customer_id, customer_id));

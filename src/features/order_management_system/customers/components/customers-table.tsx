@@ -5,6 +5,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { User } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -13,8 +14,6 @@ import { DataTableSkeleton } from "@/features/data-table/components/data-table-s
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
 import { useDataTable } from "@/features/data-table/use-data-table";
-import { useTranslations } from "next-intl";
-
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -132,7 +131,7 @@ export function CustomersTable() {
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
     ],
-    [],
+    [t],
   );
 
   const [page] = useQueryState("custPage", parseAsInteger.withDefault(1));

@@ -98,108 +98,108 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
 
   return (
     <QueryGuard query={tree_query}>
-    <form className="space-y-6" onSubmit={form.handleSubmit(on_submit)}>
-      <FieldGroup>
-        <Controller
-          name="name"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t("name")}</FieldLabel>
-              <Input {...field} />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="slug"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t("slug")}</FieldLabel>
-              <Input {...field} placeholder={t("auto_slug_placeholder")} />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="parent_id"
-          control={form.control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>{t("parent")}</FieldLabel>
-              <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value || null)}
-              >
-                {parent_options.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="description"
-          control={form.control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>{t("description")}</FieldLabel>
-              <Input
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value || null)}
-              />
-            </Field>
-          )}
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
+      <form className="space-y-6" onSubmit={form.handleSubmit(on_submit)}>
+        <FieldGroup>
           <Controller
-            name="sort_order"
+            name="name"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>{t("sort_order")}</FieldLabel>
-                <Input
-                  type="number"
-                  value={field.value ?? 0}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
+                <FieldLabel>{t("name")}</FieldLabel>
+                <Input {...field} />
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}
           />
 
           <Controller
-            name="is_active"
+            name="slug"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>{t("slug")}</FieldLabel>
+                <Input {...field} placeholder={t("auto_slug_placeholder")} />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="parent_id"
             control={form.control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>{t("active")}</FieldLabel>
+                <FieldLabel>{t("parent")}</FieldLabel>
                 <select
                   className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                  value={field.value ? "true" : "false"}
-                  onChange={(e) => field.onChange(e.target.value === "true")}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value || null)}
                 >
-                  <option value="true">{t("active")}</option>
-                  <option value="false">{t("inactive")}</option>
+                  {parent_options.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
               </Field>
             )}
           />
-        </div>
 
-        <Button type="submit" disabled={pending}>
-          {pending ? t("saving") : t("save")}
-        </Button>
-      </FieldGroup>
-    </form>
+          <Controller
+            name="description"
+            control={form.control}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel>{t("description")}</FieldLabel>
+                <Input
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value || null)}
+                />
+              </Field>
+            )}
+          />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Controller
+              name="sort_order"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>{t("sort_order")}</FieldLabel>
+                  <Input
+                    type="number"
+                    value={field.value ?? 0}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="is_active"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>{t("active")}</FieldLabel>
+                  <select
+                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                    value={field.value ? "true" : "false"}
+                    onChange={(e) => field.onChange(e.target.value === "true")}
+                  >
+                    <option value="true">{t("active")}</option>
+                    <option value="false">{t("inactive")}</option>
+                  </select>
+                </Field>
+              )}
+            />
+          </div>
+
+          <Button type="submit" disabled={pending}>
+            {pending ? t("saving") : t("save")}
+          </Button>
+        </FieldGroup>
+      </form>
     </QueryGuard>
   );
 }

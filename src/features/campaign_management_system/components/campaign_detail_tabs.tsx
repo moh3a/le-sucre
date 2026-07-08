@@ -2,6 +2,7 @@
 
 import { Megaphone, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { z } from "zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -15,6 +16,11 @@ import { CampaignSectionsTab } from "./campaign_sections_tab";
 import { CampaignTargetingTab } from "./campaign_targeting_tab";
 import { CampaignAnalyticsTab } from "./campaign_analytics_tab";
 import { CampaignStatusBadge } from "./campaign_status_badge";
+import { full_campaign_dto } from "@/features/campaign_management_system/models/campaign.dto";
+import type { SectionRow } from "@/features/campaign_management_system/components/campaign_sections_tab";
+import type { BannerRow } from "@/features/campaign_management_system/components/campaign_banners_tab";
+
+type CampaignDto = z.infer<typeof full_campaign_dto>;
 
 type DetailTabsProps = {
   campaign_id: string;
@@ -22,7 +28,7 @@ type DetailTabsProps = {
 };
 
 export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps) {
-  const { data: campaign, isLoading, error } = trpc.campaigns.byId.useQuery({ id: campaign_id });
+  const { data: campaign, isLoading } = trpc.campaigns.byId.useQuery({ id: campaign_id });
 
   const format_date = (d?: string | null) => {
     if (!d) return "indéfinie";
@@ -87,19 +93,19 @@ export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps
         </TabsList>
 
         <TabsContent value="general">
-          <CampaignForm mode="edit" campaign_id={campaign_id} default_values={campaign} />
+          <CampaignForm mode="edit" campaign_id={campaign_id} default_values={campaign as unknown as CampaignDto} />
         </TabsContent>
 
         <TabsContent value="banners">
-          <CampaignBannersTab campaign_id={campaign_id} banners={campaign.banners ?? []} />
+            <CampaignBannersTab campaign_id={campaign_id} banners={campaign.banners as unknown as BannerRow[] ?? []} />
         </TabsContent>
 
         <TabsContent value="sections">
-          <CampaignSectionsTab campaign_id={campaign_id} sections={campaign.sections ?? []} />
+            <CampaignSectionsTab campaign_id={campaign_id} sections={campaign.sections as unknown as SectionRow[] ?? []} />
         </TabsContent>
 
         <TabsContent value="targeting">
-          <CampaignTargetingTab campaign={campaign} />
+            <CampaignTargetingTab campaign={campaign as unknown as CampaignDto} />
         </TabsContent>
 
         <TabsContent value="analytics">

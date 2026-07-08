@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ExternalLink, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
-
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -17,7 +16,9 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
   const t = useTranslations("shipping");
   const utils = trpc.useUtils();
 
-  const { data, isLoading, refetch, error } = trpc.shipping.adminGetDetail.useQuery({ shipment_id });
+  const { data, isLoading, refetch, error } = trpc.shipping.adminGetDetail.useQuery({
+    shipment_id,
+  });
 
   const sync_mutation = trpc.shipping.sync.useMutation({
     onSuccess: () => {
@@ -36,101 +37,101 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
 
   return (
     <QueryGuard query={{ isLoading, error }}>
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{t("information")}</CardTitle>
-          <div className="flex gap-2">
-            {shipment.tracking_url ? (
-              <Button variant="outline" size="sm" asChild>
-                <a href={shipment.tracking_url} target="_blank" rel="noreferrer">
-                  <ExternalLink className="size-4" />
-                  {t("carrier_tracking")}
-                </a>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{t("information")}</CardTitle>
+            <div className="flex gap-2">
+              {shipment.tracking_url ? (
+                <Button variant="outline" size="sm" asChild>
+                  <a href={shipment.tracking_url} target="_blank" rel="noreferrer">
+                    <ExternalLink className="size-4" />
+                    {t("carrier_tracking")}
+                  </a>
+                </Button>
+              ) : null}
+              <Button
+                size="sm"
+                disabled={!shipment.tracking_number || sync_mutation.isPending}
+                onClick={() => sync_mutation.mutate({ shipment_id })}
+              >
+                <RefreshCcw className="size-4" />
+                {t("sync")}
               </Button>
-            ) : null}
-            <Button
-              size="sm"
-              disabled={!shipment.tracking_number || sync_mutation.isPending}
-              onClick={() => sync_mutation.mutate({ shipment_id })}
-            >
-              <RefreshCcw className="size-4" />
-              {t("sync")}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-3 text-sm md:grid-cols-2">
-          <div>
-            <span className="text-muted-foreground">{t("tracking_number_label")}</span>
-            <p className="font-mono">{shipment.tracking_number ?? "—"}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">{t("carrier_label")}</span>
-            <p>
-              <Badge variant="outline">{shipment.provider}</Badge>
-            </p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">{t("status_label")}</span>
-            <p>{shipment.status}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">{t("delivery_label")}</span>
-            <p>{shipment.delivery_status}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">{t("order_label")}</span>
-            <p>
-              <Link href={`/console/orders/${shipment.order_id}`} className="hover:underline">
-                {t("view_order")}
-              </Link>
-            </p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">{t("recipient_label")}</span>
-            <p>
-              {shipment.recipient_name} — {shipment.recipient_phone}
-            </p>
-          </div>
-          <div className="md:col-span-2">
-            <span className="text-muted-foreground">{t("address_label")}</span>
-            <p>
-              {shipment.address_line1}
-              {shipment.address_line2 ? `, ${shipment.address_line2}` : ""}, {shipment.city},{" "}
-              {shipment.country_code}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3 text-sm md:grid-cols-2">
+            <div>
+              <span className="text-muted-foreground">{t("tracking_number_label")}</span>
+              <p className="font-mono">{shipment.tracking_number ?? "—"}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">{t("carrier_label")}</span>
+              <p>
+                <Badge variant="outline">{shipment.provider}</Badge>
+              </p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">{t("status_label")}</span>
+              <p>{shipment.status}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">{t("delivery_label")}</span>
+              <p>{shipment.delivery_status}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">{t("order_label")}</span>
+              <p>
+                <Link href={`/console/orders/${shipment.order_id}`} className="hover:underline">
+                  {t("view_order")}
+                </Link>
+              </p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">{t("recipient_label")}</span>
+              <p>
+                {shipment.recipient_name} — {shipment.recipient_phone}
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <span className="text-muted-foreground">{t("address_label")}</span>
+              <p>
+                {shipment.address_line1}
+                {shipment.address_line2 ? `, ${shipment.address_line2}` : ""}, {shipment.city},{" "}
+                {shipment.country_code}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("tracking_history")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {tracking_events.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t("no_tracking_events")}</p>
-          ) : (
-            tracking_events.map((event) => (
-              <div key={event.id} className="border-primary/30 border-l-2 pl-4">
-                <p className="font-medium">{event.status}</p>
-                {event.description ? (
-                  <p className="text-muted-foreground text-sm">{event.description}</p>
-                ) : null}
-                <p className="text-muted-foreground text-xs">
-                  {event.location ? `${event.location} — ` : ""}
-                  {formatDate(event.occurred_at, {
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("tracking_history")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {tracking_events.length === 0 ? (
+              <p className="text-muted-foreground text-sm">{t("no_tracking_events")}</p>
+            ) : (
+              tracking_events.map((event) => (
+                <div key={event.id} className="border-primary/30 border-l-2 pl-4">
+                  <p className="font-medium">{event.status}</p>
+                  {event.description ? (
+                    <p className="text-muted-foreground text-sm">{event.description}</p>
+                  ) : null}
+                  <p className="text-muted-foreground text-xs">
+                    {event.location ? `${event.location} — ` : ""}
+                    {formatDate(event.occurred_at, {
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </QueryGuard>
   );
 }

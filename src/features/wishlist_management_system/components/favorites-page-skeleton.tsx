@@ -11,10 +11,7 @@ export function FavoritesPageSkeleton() {
       </div>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between rounded-lg border p-3"
-          >
+          <div key={i} className="flex items-center justify-between rounded-lg border p-3">
             <div className="flex items-center gap-2">
               <Skeleton className="size-4 rounded" />
               <Skeleton className="h-4 w-32" />

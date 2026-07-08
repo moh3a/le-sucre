@@ -84,7 +84,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -147,11 +150,17 @@ export function AlertsTable({ status }: { status?: string }) {
     { label: t("alert_type_reorder"), value: "reorder" },
   ];
 
-  const severityBadges: Record<string, { label: string; variant: "destructive" | "secondary" | "default" | "outline" }> = {
-    critical: { label: t("alert_severity_critical"), variant: "destructive" },
-    warning: { label: t("alert_severity_warning"), variant: "secondary" },
-    info: { label: t("alert_severity_info"), variant: "default" },
-  };
+  const severityBadges: Record<
+    string,
+    { label: string; variant: "destructive" | "secondary" | "default" | "outline" }
+  > = React.useMemo(
+    () => ({
+      critical: { label: t("alert_severity_critical"), variant: "destructive" },
+      warning: { label: t("alert_severity_warning"), variant: "secondary" },
+      info: { label: t("alert_severity_info"), variant: "default" },
+    }),
+    [t],
+  );
 
   const columns = React.useMemo<ColumnDef<AlertRow>[]>(
     () => [
@@ -163,7 +172,9 @@ export function AlertsTable({ status }: { status?: string }) {
       {
         id: "product_name",
         accessorKey: "product_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_product_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("alert_product_column")} />
+        ),
         cell: ({ row }) => (
           <span className="text-sm font-medium">{row.original.product_name ?? "—"}</span>
         ),
@@ -171,38 +182,51 @@ export function AlertsTable({ status }: { status?: string }) {
       {
         id: "sku_id",
         accessorKey: "sku_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_sku_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("alert_sku_column")} />
+        ),
         cell: ({ row }) => <span className="font-mono text-xs">{row.original.sku_id}</span>,
       },
       {
         id: "severity",
         accessorKey: "severity",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_severity_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("alert_severity_column")} />
+        ),
         cell: ({ row }) => {
-          const cfg = severityBadges[row.original.severity] ?? { label: row.original.severity, variant: "outline" as const };
+          const cfg = severityBadges[row.original.severity] ?? {
+            label: row.original.severity,
+            variant: "outline" as const,
+          };
           return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
         },
       },
       {
         id: "alert_type",
         accessorKey: "alert_type",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_type_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("alert_type_column")} />
+        ),
         cell: ({ row }) => (
-          <span className="text-sm capitalize">
-            {row.original.alert_type.replace(/_/g, " ")}
-          </span>
+          <span className="text-sm capitalize">{row.original.alert_type.replace(/_/g, " ")}</span>
         ),
       },
       {
         id: "message",
         accessorKey: "message",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_message_column")} />,
-        cell: ({ row }) => <span className="max-w-xs truncate text-sm">{row.original.message}</span>,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("alert_message_column")} />
+        ),
+        cell: ({ row }) => (
+          <span className="max-w-xs truncate text-sm">{row.original.message}</span>
+        ),
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("alert_detected_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("alert_detected_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -331,9 +355,7 @@ export function AlertsTable({ status }: { status?: string }) {
         </DataTableAdvancedToolbar>
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
-            <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length}
-            </Badge>
+            <Badge variant="outline">{table.getFilteredSelectedRowModel().rows.length}</Badge>
             <Button
               variant="secondary"
               size="sm"

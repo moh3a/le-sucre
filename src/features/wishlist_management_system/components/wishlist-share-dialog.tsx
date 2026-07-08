@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Share2, Copy, Check, Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -63,7 +64,7 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Share2 className="h-4 w-4 mr-2" />
+          <Share2 className="mr-2 h-4 w-4" />
           {t("share")}
         </Button>
       </DialogTrigger>
@@ -73,7 +74,10 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <div className="flex gap-2">
-            <Select value={permission} onValueChange={(v: string) => setPermission(v as "read" | "collaborate")}>
+            <Select
+              value={permission}
+              onValueChange={(v: string) => setPermission(v as "read" | "collaborate")}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -111,9 +115,14 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
             <div className="space-y-2">
               <p className="text-sm font-medium">{t("active_links")}</p>
               {links.map((link) => (
-                <div key={link.id} className="flex items-center justify-between text-sm p-2 bg-muted rounded">
-                  <span className="truncate flex-1">{link.url}</span>
-                  <span className="text-xs text-muted-foreground capitalize ml-2">{link.permission}</span>
+                <div
+                  key={link.id}
+                  className="bg-muted flex items-center justify-between rounded p-2 text-sm"
+                >
+                  <span className="flex-1 truncate">{link.url}</span>
+                  <span className="text-muted-foreground ml-2 text-xs capitalize">
+                    {link.permission}
+                  </span>
                 </div>
               ))}
             </div>

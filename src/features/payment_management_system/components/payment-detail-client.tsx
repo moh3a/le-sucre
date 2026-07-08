@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { CreditCard, RefreshCcw, XCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-
 import { useTranslations } from "next-intl";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
@@ -42,7 +39,6 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function PaymentDetailClient({ paymentId }: { paymentId: string }) {
   const t = useTranslations("payments");
-  const router = useRouter();
   const utils = trpc.useUtils();
   const { data: payment, isFetching } = trpc.payments.adminGet.useQuery({
     transaction_id: paymentId,

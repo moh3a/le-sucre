@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 const COOKIE_CONSENT_KEY = "le_sucre_cookie_consent";
 const CONSENT_EXPIRY_DAYS = 365;
@@ -43,13 +43,8 @@ function write_consent(consent: CookieConsent) {
 }
 
 export function useCookieConsent() {
-  const [consent, setConsent] = useState<CookieConsent>(default_consent);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setConsent(read_consent());
-    setLoaded(true);
-  }, []);
+  const [consent, setConsent] = useState<CookieConsent>(() => read_consent());
+  const [loaded] = useState(() => true);
 
   const accept_all = useCallback(() => {
     const new_consent: CookieConsent = {

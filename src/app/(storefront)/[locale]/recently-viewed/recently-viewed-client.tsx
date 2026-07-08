@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -30,10 +30,7 @@ function get_or_create_session_key(): string {
 }
 
 function useSessionKey() {
-  const [key, setKey] = useState("");
-  useEffect(() => {
-    setKey(get_or_create_session_key());
-  }, []);
+  const [key] = useState(() => get_or_create_session_key());
   return key;
 }
 

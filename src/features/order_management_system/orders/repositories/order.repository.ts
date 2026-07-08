@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, not } from "drizzle-orm";
 
 import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/lib/db";
@@ -283,7 +283,7 @@ export class OrderRepository {
 
   async delete_items_by_order(order_id: string, keep_ids?: string[]) {
     const where = keep_ids?.length
-      ? and(eq(order_items.order_id, order_id), inArray(order_items.id, keep_ids).not())
+      ? and(eq(order_items.order_id, order_id), not(inArray(order_items.id, keep_ids)))
       : eq(order_items.order_id, order_id);
     await db.delete(order_items).where(where);
   }

@@ -1,6 +1,6 @@
 // repositories/recommendation.repository.ts
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { format } from "date-fns";
 import { db } from "@/lib/db";
 import { product_recommendation_edges } from "../schema";
@@ -53,7 +53,7 @@ export class RecommendationRepository {
     score: number;
   }) {
     const max_rank = await db
-      .select({ max_rank: db.fn.max(product_recommendation_edges.rank) })
+      .select({ max_rank: sql`MAX(${product_recommendation_edges.rank})`.mapWith(Number) })
       .from(product_recommendation_edges)
       .where(
         and(
@@ -84,7 +84,7 @@ export class RecommendationRepository {
     const rows = await db
       .select({
         recommendation_type: product_recommendation_edges.recommendation_type,
-        count: db.fn.count(),
+        count: sql`COUNT(*)`.mapWith(Number),
       })
       .from(product_recommendation_edges)
       .where(eq(product_recommendation_edges.source_product_id, source_product_id))

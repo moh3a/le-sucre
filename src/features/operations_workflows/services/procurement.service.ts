@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { eq, and, asc, desc, sql } from "drizzle-orm";
+import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { suppliers, supplier_products, purchase_orders, purchase_order_items } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
@@ -165,7 +165,7 @@ export class ProcurementService {
   }
 
   async list_pos(status?: string) {
-    const clauses: any[] = [];
+    const clauses: SQL[] = [];
     if (status) clauses.push(eq(purchase_orders.status, status));
     return db
       .select()

@@ -139,7 +139,7 @@ export function WarrantyTable() {
   const [per_page] = useQueryState("wrPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("wrStatus", parseAsString);
 
-  const STATUS_LABELS: Record<string, string> = {
+  const STATUS_LABELS: Record<string, string> = React.useMemo(() => ({
     pending: t("status_pending"),
     under_review: t("status_under_review"),
     approved: t("status_approved"),
@@ -149,15 +149,15 @@ export function WarrantyTable() {
     replaced: t("status_replaced"),
     completed: t("status_completed"),
     cancelled: t("status_cancelled"),
-  };
+  }), [t]);
 
-  const ISSUE_LABELS: Record<string, string> = {
+  const ISSUE_LABELS: Record<string, string> = React.useMemo(() => ({
     defect: t("issue_defect"),
     damage: t("issue_damage"),
     malfunction: t("issue_malfunction"),
     cosmetic: t("issue_cosmetic"),
     other: t("issue_other"),
-  };
+  }), [t]);
 
   const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
     label,
@@ -313,7 +313,7 @@ export function WarrantyTable() {
         },
       },
     ],
-    [reviewMutation, resolveMutation, t],
+    [t, ISSUE_LABELS, STATUS_LABELS, reviewMutation, resolveMutation],
   );
 
   const { data, isLoading } = trpc.operations.warrantyList.useQuery({

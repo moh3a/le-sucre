@@ -56,10 +56,7 @@ export function CatalogPagination({ page, totalPages, onChange }: CatalogPaginat
           key={p}
           variant={p === page ? "default" : "outline"}
           onClick={() => onChange(p)}
-          className={cn(
-            "size-9 rounded-lg text-sm",
-            p === page && "shadow-sm",
-          )}
+          className={cn("size-9 rounded-lg text-sm", p === page && "shadow-sm")}
         >
           {p}
         </Button>

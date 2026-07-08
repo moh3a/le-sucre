@@ -27,11 +27,11 @@ export function CategoryTree() {
   if (!data?.length) return <p className="text-muted-foreground text-sm">…</p>;
   return (
     <QueryGuard query={query}>
-    <ul className="space-y-1 text-sm">
-      {data.map((n) => (
-        <Node key={n.id} node={n} depth={0} />
-      ))}
-    </ul>
+      <ul className="space-y-1 text-sm">
+        {data.map((n) => (
+          <Node key={n.id} node={n} depth={0} />
+        ))}
+      </ul>
     </QueryGuard>
   );
 }

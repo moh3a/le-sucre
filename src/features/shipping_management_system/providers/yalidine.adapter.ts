@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 
 import { verify_hmac_signature, verify_webhook_timestamp } from "@/lib/security/webhook";
@@ -11,6 +10,19 @@ import type {
   TrackingResult,
 } from "./contracts";
 import { format } from "date-fns";
+
+interface YalidineTrackingEvent {
+  id?: string;
+  status?: string;
+  description?: string;
+  location?: string;
+  occurred_at?: string;
+}
+
+interface YalidineWebhookPayload {
+  tracking_number?: string;
+  data?: { tracking_number?: string };
+}
 
 const YALIDINE_API = process.env.YALIDINE_API_URL ?? "https://api.yalidine.app/v1";
 const YALIDINE_TOKEN = process.env.YALIDINE_API_TOKEN ?? "";
@@ -90,7 +102,7 @@ export class YalidineAdapter implements ShippingProviderAdapter {
     const data = await yalidine_fetch(`/shipments/tracking/${encodeURIComponent(tracking_number)}`);
 
     const events = Array.isArray(data.events)
-      ? data.events.map((e: any) => ({
+      ? data.events.map((e: YalidineTrackingEvent) => ({
           provider_event_id: e.id ? String(e.id) : undefined,
           status: String(e.status ?? "unknown"),
           description: e.description ? String(e.description) : undefined,
@@ -122,7 +134,7 @@ export class YalidineAdapter implements ShippingProviderAdapter {
     return verify_hmac_signature(signed_payload, signature, secret, "sha256");
   }
 
-  async parse_webhook(payload: any) {
+  async parse_webhook(payload: YalidineWebhookPayload) {
     const tn = payload?.tracking_number ?? payload?.data?.tracking_number;
     if (!tn) return null;
     return { tracking_number: String(tn) };

@@ -35,7 +35,7 @@ export async function GET(req: Request, props: { params: Promise<{ invoice_id: s
       order_number: order_details?.order?.order_number,
     });
 
-    return new Response(pdf_buffer, {
+    return new Response(new Uint8Array(pdf_buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

@@ -64,106 +64,102 @@ export function ProductVariantsPanel({
 
   return (
     <QueryGuard query={price_range_query}>
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap justify-between gap-4">
-        <div>
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("subtitle")}</CardDescription>
-          {price_range?.min_price != null && price_range?.max_price != null && (
-            <p className="mt-2 text-sm">
-              {t("price_range_value", {
-                min: price_range.min_price,
-                max: price_range.max_price,
-                currency: price_range.currency ?? currency,
-              })}
-            </p>
-          )}
-        </div>
-        <div>
-          <Badge variant={has_variants ? "outline" : "destructive"}>
-            {has_variants ? <Check /> : <X />}
-            <span>{t("enable_variants")}</span>
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={active_tab} onValueChange={on_tab_change} className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="properties">{t("section_properties")}</TabsTrigger>
-            <TabsTrigger value="skus">{t("section_skus")}</TabsTrigger>
-            <TabsTrigger value="wholesale">Gros</TabsTrigger>
-          </TabsList>
-          <TabsContent value="properties">
-            <VariantPropertyEditor product_id={product_id} />
-          </TabsContent>
-          <TabsContent value="skus">
-            <SkuTable
-              product_id={product_id}
-              product_sku={product_sku}
-              currency={currency}
-            />
-          </TabsContent>
-          <TabsContent value="wholesale">
-            <div className="font-heading pb-6 text-2xl font-semibold">{t("wholesale_title")}</div>
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("wholesale_min_qty")}</FieldLabel>
-                <Input
-                  type="number"
-                  min={1}
-                  value={wholesale.min_quantity}
-                  onChange={(e) =>
-                    set_wholesale((w) => ({ ...w, min_quantity: Number(e.target.value) }))
-                  }
-                />
-              </Field>
-              <Field>
-                <FieldLabel>{t("wholesale_price")}</FieldLabel>
-                <Input
-                  type="number"
-                  min={0}
-                  value={wholesale.price}
-                  onChange={(e) => set_wholesale((w) => ({ ...w, price: e.target.value }))}
-                />
-              </Field>
-              <Field>
-                <FieldLabel>{t("wholesale_discount")}</FieldLabel>
-                <Input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={wholesale.discount_percent}
-                  onChange={(e) =>
-                    set_wholesale((w) => ({ ...w, discount_percent: e.target.value }))
-                  }
-                />
-              </Field>
-              <Field className="flex items-end">
-                <Button
-                  type="button"
-                  onClick={() =>
-                    upsert_wholesale.mutate({
-                      product_id,
-                      sku_id: null,
-                      min_quantity: wholesale.min_quantity,
-                      currency,
-                      price: wholesale.price ? Number(wholesale.price) : null,
-                      discount_percent: wholesale.discount_percent
-                        ? Number(wholesale.discount_percent)
-                        : null,
-                      is_active: true,
-                    })
-                  }
-                  disabled={upsert_wholesale.isPending}
-                >
-                  {t("add_wholesale_rule")}
-                </Button>
-              </Field>
-            </FieldGroup>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap justify-between gap-4">
+          <div>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("subtitle")}</CardDescription>
+            {price_range?.min_price != null && price_range?.max_price != null && (
+              <p className="mt-2 text-sm">
+                {t("price_range_value", {
+                  min: price_range.min_price,
+                  max: price_range.max_price,
+                  currency: price_range.currency ?? currency,
+                })}
+              </p>
+            )}
+          </div>
+          <div>
+            <Badge variant={has_variants ? "outline" : "destructive"}>
+              {has_variants ? <Check /> : <X />}
+              <span>{t("enable_variants")}</span>
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={active_tab} onValueChange={on_tab_change} className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="properties">{t("section_properties")}</TabsTrigger>
+              <TabsTrigger value="skus">{t("section_skus")}</TabsTrigger>
+              <TabsTrigger value="wholesale">Gros</TabsTrigger>
+            </TabsList>
+            <TabsContent value="properties">
+              <VariantPropertyEditor product_id={product_id} />
+            </TabsContent>
+            <TabsContent value="skus">
+              <SkuTable product_id={product_id} product_sku={product_sku} currency={currency} />
+            </TabsContent>
+            <TabsContent value="wholesale">
+              <div className="font-heading pb-6 text-2xl font-semibold">{t("wholesale_title")}</div>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel>{t("wholesale_min_qty")}</FieldLabel>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={wholesale.min_quantity}
+                    onChange={(e) =>
+                      set_wholesale((w) => ({ ...w, min_quantity: Number(e.target.value) }))
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>{t("wholesale_price")}</FieldLabel>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={wholesale.price}
+                    onChange={(e) => set_wholesale((w) => ({ ...w, price: e.target.value }))}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>{t("wholesale_discount")}</FieldLabel>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={wholesale.discount_percent}
+                    onChange={(e) =>
+                      set_wholesale((w) => ({ ...w, discount_percent: e.target.value }))
+                    }
+                  />
+                </Field>
+                <Field className="flex items-end">
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      upsert_wholesale.mutate({
+                        product_id,
+                        sku_id: null,
+                        min_quantity: wholesale.min_quantity,
+                        currency,
+                        price: wholesale.price ? Number(wholesale.price) : null,
+                        discount_percent: wholesale.discount_percent
+                          ? Number(wholesale.discount_percent)
+                          : null,
+                        is_active: true,
+                      })
+                    }
+                    disabled={upsert_wholesale.isPending}
+                  >
+                    {t("add_wholesale_rule")}
+                  </Button>
+                </Field>
+              </FieldGroup>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </QueryGuard>
   );
 }

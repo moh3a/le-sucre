@@ -24,7 +24,7 @@ export function FlashSaleCountdown({ ends_at }: { ends_at: string }) {
   }, [ends_at]);
 
   return (
-    <span className="font-mono text-sm font-semibold text-(--crimson-violet) tabular-nums">
+    <span className="font-mono text-sm font-semibold text-crimson-violet tabular-nums">
       {remaining}
     </span>
   );

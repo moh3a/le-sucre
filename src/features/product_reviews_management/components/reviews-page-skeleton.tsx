@@ -23,14 +23,14 @@ export function ReviewsPageSkeleton() {
                 </div>
                 <Skeleton className="h-5 w-20 rounded-full" />
               </div>
-              <div className="flex items-center gap-4 mt-1">
+              <div className="mt-1 flex items-center gap-4">
                 <Skeleton className="h-3 w-28" />
                 <Skeleton className="h-3 w-36" />
               </div>
             </CardHeader>
             <CardContent>
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4 mt-1" />
+              <Skeleton className="mt-1 h-4 w-3/4" />
             </CardContent>
           </Card>
         ))}
