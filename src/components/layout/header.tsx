@@ -1,7 +1,7 @@
 "use client";
 
 import { Home, LayoutGrid, Search, ShoppingCart, User, LogIn } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
@@ -23,8 +23,13 @@ import { authClient } from "@/lib/auth/client";
 import { QueryGuard } from "@/components/query-guard";
 import { AuthSheet } from "@/features/authentication_and_authorization/auth/components/auth-sheet";
 import { cn } from "@/lib/utils";
+import { CatalogSearchBar } from "@/features/product_information_management/catalog_discovery/components/catalog-search-bar";
 
-export function Header() {
+interface HeaderProps {
+  locale?: string;
+}
+
+export function Header({ locale = "fr" }: HeaderProps) {
   const t = useTranslations("layout");
   const pathname = usePathname();
   const router = useRouter();
@@ -41,12 +46,6 @@ export function Header() {
         .toUpperCase()
         .slice(0, 2)
     : "?";
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
-  }
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -133,18 +132,18 @@ export function Header() {
               </Link>
             </nav>
             {/* Desktop search bar */}
-            <form onSubmit={handleSearch} className="hidden w-full max-w-md md:block">
-              <div className="relative">
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <input
-                  type="search"
-                  placeholder={t("search_placeholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-input placeholder:text-muted-foreground focus-visible:border-ring flex h-9 w-full rounded-md border bg-transparent py-2 pr-3 pl-10 text-sm shadow-xs transition-colors focus-visible:ring-0 focus-visible:outline-hidden"
-                />
-              </div>
-            </form>
+            <div className="hidden w-full max-w-md md:block">
+              <CatalogSearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSubmit={(q) => {
+                  const query = q.trim();
+                  router.push(query ? `/search?q=${encodeURIComponent(query)}` : "/search");
+                }}
+                placeholder={t("search_placeholder")}
+                locale={locale}
+              />
+            </div>
           </div>
 
           {/* Right actions */}

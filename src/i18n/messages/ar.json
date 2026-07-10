@@ -3539,7 +3539,9 @@
     "all_filters": "جميع الفلاتر",
     "active_filters": "الفلاتر النشطة",
     "clear_all": "مسح الكل",
-    "filters_count": "{count} فلتر نشط"
+    "filters_count": "{count} فلتر نشط",
+    "trending_searches": "عمليات البحث الرائجة",
+    "close_suggestions": "إغلاق الاقتراحات"
   },
   "routing_rules": {
     "title": "قواعد توجيه الطلبات",

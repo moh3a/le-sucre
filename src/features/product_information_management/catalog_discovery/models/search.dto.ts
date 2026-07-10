@@ -54,5 +54,18 @@ export const catalog_search_dto = z.object({
 
 export const catalog_facets_dto = catalog_search_dto.omit({ page: true, limit: true, sort: true });
 
+export const catalog_suggestions_dto = z.object({
+  locale: catalog_locale_enum.default("fr"),
+  q: z.string().max(200).optional(),
+  limit: z.coerce.number().int().min(1).max(20).default(10),
+});
+
+export const catalog_trending_dto = z.object({
+  locale: catalog_locale_enum.default("fr"),
+  limit: z.coerce.number().int().min(1).max(20).default(10),
+});
+
 export type CatalogSearchInput = z.infer<typeof catalog_search_dto>;
 export type CatalogFacetsInput = z.infer<typeof catalog_facets_dto>;
+export type CatalogSuggestionsInput = z.infer<typeof catalog_suggestions_dto>;
+export type CatalogTrendingInput = z.infer<typeof catalog_trending_dto>;

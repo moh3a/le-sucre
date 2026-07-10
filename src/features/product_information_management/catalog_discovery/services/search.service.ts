@@ -21,6 +21,7 @@ import { search_cache_service, CATALOG_CACHE, CATALOG_CACHE_TTL } from "./search
 import type { CatalogFacets } from "../types";
 import { effective_list_price_sql } from "../engines/sort.engine";
 import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
+import { suggestions_service } from "./suggestions.service";
 
 export class SearchService {
   async search(input: z.infer<typeof catalog_search_dto>) {
@@ -31,12 +32,18 @@ export class SearchService {
       await search_cache_service.get<Awaited<ReturnType<typeof search_repository.search>>>(
         cache_key,
       );
-    if (cached) return { ...cached, cached: true as const };
+    if (cached) {
+      if (input.q) {
+        void suggestions_service.track_search(input.q, input.locale);
+      }
+      return { ...cached, cached: true as const };
+    }
 
     const filters = await filtering_engine.resolve(input);
     const result = await search_repository.search(filters, input.sort, input.page, input.limit);
 
     if (input.q) {
+      void suggestions_service.track_search(input.q, input.locale);
       void event_ingestion_service.track({
         event_type: "search",
         search_query: input.q,

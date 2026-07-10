@@ -36,6 +36,19 @@ export type CatalogFacets = {
   properties: CatalogFacetProperty[];
 };
 
+export type SearchSuggestion = {
+  type: "product" | "brand" | "category";
+  text: string;
+  slug: string;
+  image_url?: string | null;
+};
+
+export type TrendingSearchTerm = {
+  query: string;
+  locale: string;
+  count: number;
+};
+
 export type ResolvedCatalogFilters = {
   locale: string;
   category_ids?: string[];

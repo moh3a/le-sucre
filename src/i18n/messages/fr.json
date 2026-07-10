@@ -811,7 +811,9 @@
     "all_filters": "Tous les filtres",
     "active_filters": "Filtres actifs",
     "clear_all": "Tout effacer",
-    "filters_count": "{count} filtre(s) actif(s)"
+    "filters_count": "{count} filtre(s) actif(s)",
+    "trending_searches": "Recherches tendance",
+    "close_suggestions": "Fermer les suggestions"
   },
   "nav": {
     "catalog": "Catalogue",

@@ -613,7 +613,9 @@
     "all_filters": "All filters",
     "active_filters": "Active filters",
     "clear_all": "Clear all",
-    "filters_count": "{count} filter(s) active"
+    "filters_count": "{count} filter(s) active",
+    "trending_searches": "Trending searches",
+    "close_suggestions": "Close suggestions"
   },
   "layout": {
     "boutique_title": "Shop",
