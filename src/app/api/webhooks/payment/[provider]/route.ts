@@ -4,23 +4,26 @@ import { RATE_LIMIT_PRESETS } from "@/lib/security/rate-limit-presets";
 import { verify_stripe_signature } from "@/lib/security/webhook";
 import { logger } from "@/lib/logger";
 import { env } from "@/config/env";
-import { PaymentProviderName } from "@/features/payment_management_system/providers/contracts";
+import {
+  paymentProviders,
+  paymentProvidersSchema,
+} from "@/features/payment_management_system/constants/payment-status";
 
-const ALLOWED_PROVIDERS = ["stripe", "paypal", "chargily", "satim", "cib", "manual"] as const;
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ provider: PaymentProviderName }> },
+  { params }: { params: Promise<{ provider: string }> },
 ) {
   try {
     const { provider } = await params;
-    if (!ALLOWED_PROVIDERS.includes(provider as (typeof ALLOWED_PROVIDERS)[number])) {
+    const providerName = paymentProvidersSchema.parse(provider);
+    if (!paymentProviders.includes(providerName as (typeof paymentProviders)[number])) {
       return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
     }
 
     const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? `${provider}-webhook`;
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? `${providerName}-webhook`;
     const rl = await rate_limit(
-      `webhook:${provider}:${ip}`,
+      `webhook:${providerName}:${ip}`,
       RATE_LIMIT_PRESETS.webhook.limit,
       RATE_LIMIT_PRESETS.webhook.window_sec,
     );
@@ -30,7 +33,7 @@ export async function POST(
 
     const raw_body = await request.text();
 
-    if (provider === "stripe") {
+    if (providerName === "stripe") {
       const signature = request.headers.get("stripe-signature");
       if (!signature) {
         return NextResponse.json({ error: "Missing signature" }, { status: 401 });
@@ -46,7 +49,7 @@ export async function POST(
       }
     }
 
-    if (provider === "paypal") {
+    if (providerName === "paypal") {
       const transmission_id = request.headers.get("paypal-transmission-id");
       const transmission_sig = request.headers.get("paypal-transmission-sig");
       const cert_url = request.headers.get("paypal-cert-url");
@@ -61,7 +64,7 @@ export async function POST(
     const { payment_webhook_service } =
       await import("@/features/payment_management_system/services/payment-webhook.service");
     const result = await payment_webhook_service.handle_provider_webhook(
-      provider,
+      providerName,
       request.headers,
       raw_body,
     );

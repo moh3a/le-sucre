@@ -134,6 +134,13 @@
       "when": 1783169684589,
       "tag": "0018_true_mulholland_black",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1783638435132,
+      "tag": "0019_striped_crystal",
+      "breakpoints": true
     }
   ]
 }

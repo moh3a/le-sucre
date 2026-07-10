@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CircleAlert, CheckCircle2, Database, Shield, User, Sparkles, Loader2 } from "lucide-react";
 
@@ -11,91 +11,124 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Stepper, StepperContent, StepperIndicator, StepperItem, StepperList, StepperSeparator, StepperTitle, StepperTrigger } from "@/components/ui/stepper";
+import {
+  Stepper,
+  StepperContent,
+  StepperIndicator,
+  StepperItem,
+  StepperList,
+  StepperSeparator,
+  StepperTitle,
+  StepperTrigger,
+} from "@/components/ui/stepper";
 
-const STEPS = ["database", "admin", "seed", "complete"] as const;
-type Step = (typeof STEPS)[number];
+type StepId = "database" | "admin" | "seed" | "finalize";
+
+interface StepDef {
+  id: StepId;
+  label: string;
+  icon: typeof Database;
+}
+
+const ALL_STEPS: StepDef[] = [
+  { id: "database", label: "Database", icon: Database },
+  { id: "admin", label: "Admin", icon: User },
+  { id: "seed", label: "Permissions", icon: Shield },
+  { id: "finalize", label: "Complete", icon: CheckCircle2 },
+];
 
 export function InitWizardClient() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("database");
   const [error, setError] = useState<string | null>(null);
   const [adminUserId, setAdminUserId] = useState<string | null>(null);
 
   const { data: status, isLoading: statusLoading } = trpc.init.status.useQuery();
 
-  const runMutations = trpc.init.runMigrations.useMutation({
-    onSuccess: () => { setStep("admin"); setError(null); },
-    onError: (e) => { setError(e.message); },
+  const steps = useMemo(() => {
+    if (!status) return ALL_STEPS;
+    return ALL_STEPS.filter((s) => {
+      if (s.id === "database" && status.tables_exist) return false;
+      if (s.id === "admin" && status.has_admin) return false;
+      if (s.id === "seed" && status.has_roles) return false;
+      return true;
+    });
+  }, [status]);
+
+  const initialStep = steps[0]?.id ?? "finalize";
+
+  const [step, setStep] = useState<StepId>(initialStep);
+
+  useEffect(() => {
+    if (status?.initialized) {
+      router.replace("/console");
+    }
+  }, [status?.initialized, router]);
+
+  const runMigrations = trpc.init.runMigrations.useMutation({
+    onSuccess: () => {
+      setError(null);
+      advance("database");
+    },
+    onError: (e) => setError(e.message),
   });
 
   const createAdmin = trpc.init.createAdmin.useMutation({
-    onSuccess: (data) => { setAdminUserId(data.user_id); setStep("seed"); setError(null); },
-    onError: (e) => { setError(e.message); },
+    onSuccess: (data) => {
+      setAdminUserId(data.user_id);
+      setError(null);
+      advance("admin");
+    },
+    onError: (e) => setError(e.message),
   });
 
   const seedRbac = trpc.init.seedRbac.useMutation({
-    onSuccess: () => { setStep("complete"); setError(null); },
-    onError: (e) => { setError(e.message); },
+    onSuccess: () => {
+      setError(null);
+      advance("seed");
+    },
+    onError: (e) => setError(e.message),
   });
 
-  const complete = trpc.init.complete.useMutation({
-    onSuccess: () => { setError(null); },
-    onError: (e) => { setError(e.message); },
-  });
+  const ensureStatus = trpc.init.ensureStatus.useMutation({});
 
-  const [adminForm, setAdminForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const advance = useCallback(
+    (from: StepId) => {
+      const currentIdx = steps.findIndex((s) => s.id === from);
+      const next = steps[currentIdx + 1];
+      if (next) {
+        setStep(next.id);
+      }
+    },
+    [steps],
+  );
+
+  const [adminForm, setAdminForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [adminFormErrors, setAdminFormErrors] = useState<Record<string, string>>({});
 
   const validateAdminForm = useCallback(() => {
     const errors: Record<string, string> = {};
-    if (!adminForm.name || adminForm.name.length < 2) errors.name = "Name must be at least 2 characters";
-    if (!adminForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminForm.email)) errors.email = "Valid email is required";
-    if (!adminForm.password || adminForm.password.length < 8) errors.password = "Password must be at least 8 characters";
-    if (adminForm.password !== adminForm.confirmPassword) errors.confirmPassword = "Passwords do not match";
+    if (!adminForm.name || adminForm.name.length < 2)
+      errors.name = "Name must be at least 2 characters";
+    if (!adminForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminForm.email))
+      errors.email = "Valid email is required";
+    if (!adminForm.password || adminForm.password.length < 8)
+      errors.password = "Password must be at least 8 characters";
+    if (adminForm.password !== adminForm.confirmPassword)
+      errors.confirmPassword = "Passwords do not match";
     setAdminFormErrors(errors);
     return Object.keys(errors).length === 0;
   }, [adminForm]);
 
-  const handleSelectStep = useCallback((value: string) => {
-    if (value === "database") { setStep("database"); return; }
-  }, []);
-
-  if (statusLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex items-center gap-3">
-          <Loader2 className="size-5 animate-spin" />
-          <p className="text-muted-foreground text-sm">Checking system status...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (status?.initialized) {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="mx-auto max-w-md">
-          <CardHeader className="text-center">
-            <CheckCircle2 className="mx-auto mb-2 size-12 text-green-500" />
-            <CardTitle>System Already Initialized</CardTitle>
-            <CardDescription>
-              The system has already been set up. You can proceed to the admin console.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <Button onClick={() => router.push("/console")}>Go to Admin Console</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const currentStepIndex = STEPS.indexOf(step);
+  const handleSelectStep = useCallback((_value: string) => {}, []);
 
   const handleRunMigrations = () => {
     setError(null);
-    runMutations.mutate();
+    runMigrations.mutate();
   };
 
   const handleCreateAdmin = () => {
@@ -113,11 +146,58 @@ export function InitWizardClient() {
     seedRbac.mutate();
   };
 
-  const handleComplete = () => {
-    if (!adminUserId) return;
+  const handleFinalize = async () => {
     setError(null);
-    complete.mutate({ admin_user_id: adminUserId });
+
+    try {
+      await ensureStatus.mutateAsync({ admin_user_id: adminUserId ?? undefined });
+      router.push("/console");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to finalize");
+    }
   };
+
+  useEffect(() => {
+    if (!status || status.initialized) return;
+    if (steps.length === 0 || (status.tables_exist && status.has_admin && status.has_roles)) {
+      (async () => {
+        try {
+          await ensureStatus.mutateAsync({});
+        } catch {
+          // proceed to console anyway
+        }
+        router.replace("/console");
+      })();
+    }
+  }, [steps, status, ensureStatus, router]);
+
+  if (statusLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="size-5 animate-spin" />
+          <p className="text-muted-foreground text-sm">Checking system status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (steps.length === 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="mx-auto max-w-md">
+          <CardHeader className="text-center">
+            <Loader2 className="mx-auto mb-2 size-12 animate-spin text-green-500" />
+            <CardTitle>All Set!</CardTitle>
+            <CardDescription>Everything is already configured. Redirecting...</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const currentStepIndex = steps.findIndex((s) => s.id === step);
+  const isLastStep = currentStepIndex === steps.length - 1;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -126,34 +206,33 @@ export function InitWizardClient() {
           <Sparkles className="mx-auto mb-2 size-10 text-[#c8d152]" />
           <CardTitle className="text-2xl">System Initialization</CardTitle>
           <CardDescription>
-            Set up your platform for the first time. This wizard will guide you through
-            database setup, admin account creation, and role configuration.
+            Set up your platform for the first time. Steps already completed are skipped.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           <Stepper value={step} onValueChange={handleSelectStep} orientation="horizontal">
             <StepperList className="justify-center">
-              {STEPS.map((s, i) => (
-                <StepperItem key={s} value={s} completed={currentStepIndex > i}>
+              {steps.map((s, i) => (
+                <StepperItem key={s.id} value={s.id} completed={currentStepIndex > i}>
                   <StepperTrigger className="flex-col gap-2">
                     <StepperIndicator />
-                    <StepperTitle className="text-xs capitalize">{s}</StepperTitle>
+                    <StepperTitle className="text-xs capitalize">{s.label}</StepperTitle>
                   </StepperTrigger>
-                  {i < STEPS.length - 1 && <StepperSeparator />}
+                  {i < steps.length - 1 && <StepperSeparator />}
                 </StepperItem>
               ))}
             </StepperList>
 
             <StepperContent value="database" className="space-y-4 pt-4">
               <div className="space-y-2 text-center">
-                <Database className="mx-auto size-8 text-muted-foreground" />
+                <Database className="text-muted-foreground mx-auto size-8" />
                 <h3 className="text-lg font-medium">Database Setup</h3>
                 <p className="text-muted-foreground text-sm">
                   Run database migrations to create all required tables.
                 </p>
               </div>
 
-              {runMutations.isPending ? (
+              {runMigrations.isPending ? (
                 <div className="space-y-3">
                   <Progress value={65} className="h-2" />
                   <p className="text-muted-foreground animate-pulse text-center text-sm">
@@ -166,18 +245,23 @@ export function InitWizardClient() {
                 </Button>
               )}
 
-              {runMutations.isSuccess && (
-                <Alert variant="default" className="border-green-500 bg-green-50 dark:bg-green-950/20">
+              {runMigrations.isSuccess && (
+                <Alert
+                  variant="default"
+                  className="border-green-500 bg-green-50 dark:bg-green-950/20"
+                >
                   <CheckCircle2 className="size-4 text-green-600" />
                   <AlertTitle>Migrations Complete</AlertTitle>
-                  <AlertDescription>All database tables have been created successfully.</AlertDescription>
+                  <AlertDescription>
+                    All database tables have been created successfully.
+                  </AlertDescription>
                 </Alert>
               )}
             </StepperContent>
 
             <StepperContent value="admin" className="space-y-4 pt-4">
               <div className="space-y-2 text-center">
-                <User className="mx-auto size-8 text-muted-foreground" />
+                <User className="text-muted-foreground mx-auto size-8" />
                 <h3 className="text-lg font-medium">Create Admin Account</h3>
                 <p className="text-muted-foreground text-sm">
                   Set up the primary administrator account for the platform.
@@ -193,7 +277,9 @@ export function InitWizardClient() {
                     value={adminForm.name}
                     onChange={(e) => setAdminForm((f) => ({ ...f, name: e.target.value }))}
                   />
-                  {adminFormErrors.name && <p className="text-destructive text-xs">{adminFormErrors.name}</p>}
+                  {adminFormErrors.name && (
+                    <p className="text-destructive text-xs">{adminFormErrors.name}</p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="email">Email</Label>
@@ -204,7 +290,9 @@ export function InitWizardClient() {
                     value={adminForm.email}
                     onChange={(e) => setAdminForm((f) => ({ ...f, email: e.target.value }))}
                   />
-                  {adminFormErrors.email && <p className="text-destructive text-xs">{adminFormErrors.email}</p>}
+                  {adminFormErrors.email && (
+                    <p className="text-destructive text-xs">{adminFormErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="password">Password</Label>
@@ -215,7 +303,9 @@ export function InitWizardClient() {
                     value={adminForm.password}
                     onChange={(e) => setAdminForm((f) => ({ ...f, password: e.target.value }))}
                   />
-                  {adminFormErrors.password && <p className="text-destructive text-xs">{adminFormErrors.password}</p>}
+                  {adminFormErrors.password && (
+                    <p className="text-destructive text-xs">{adminFormErrors.password}</p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -224,9 +314,13 @@ export function InitWizardClient() {
                     type="password"
                     placeholder="Repeat password"
                     value={adminForm.confirmPassword}
-                    onChange={(e) => setAdminForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+                    onChange={(e) =>
+                      setAdminForm((f) => ({ ...f, confirmPassword: e.target.value }))
+                    }
                   />
-                  {adminFormErrors.confirmPassword && <p className="text-destructive text-xs">{adminFormErrors.confirmPassword}</p>}
+                  {adminFormErrors.confirmPassword && (
+                    <p className="text-destructive text-xs">{adminFormErrors.confirmPassword}</p>
+                  )}
                 </div>
               </div>
 
@@ -236,7 +330,9 @@ export function InitWizardClient() {
                 className="w-full"
               >
                 {createAdmin.isPending ? (
-                  <><Loader2 className="mr-2 size-4 animate-spin" /> Creating...</>
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" /> Creating...
+                  </>
                 ) : (
                   "Create Admin Account"
                 )}
@@ -245,7 +341,7 @@ export function InitWizardClient() {
 
             <StepperContent value="seed" className="space-y-4 pt-4">
               <div className="space-y-2 text-center">
-                <Shield className="mx-auto size-8 text-muted-foreground" />
+                <Shield className="text-muted-foreground mx-auto size-8" />
                 <h3 className="text-lg font-medium">Seed Roles & Permissions</h3>
                 <p className="text-muted-foreground text-sm">
                   Configure access control roles and their permissions.
@@ -266,45 +362,32 @@ export function InitWizardClient() {
               )}
 
               {seedRbac.isSuccess && (
-                <Alert variant="default" className="border-green-500 bg-green-50 dark:bg-green-950/20">
+                <Alert
+                  variant="default"
+                  className="border-green-500 bg-green-50 dark:bg-green-950/20"
+                >
                   <CheckCircle2 className="size-4 text-green-600" />
                   <AlertTitle>Roles Seeded</AlertTitle>
-                  <AlertDescription>All roles and permissions have been configured.</AlertDescription>
+                  <AlertDescription>
+                    All roles and permissions have been configured.
+                  </AlertDescription>
                 </Alert>
               )}
             </StepperContent>
 
-            <StepperContent value="complete" className="space-y-4 pt-4">
+            <StepperContent value="finalize" className="space-y-4 pt-4">
               <div className="space-y-2 text-center">
                 <CheckCircle2 className="mx-auto size-12 text-green-500" />
                 <h3 className="text-lg font-medium">Setup Complete!</h3>
                 <p className="text-muted-foreground text-sm">
-                  Your platform is ready. Click the button below to finish initialization
-                  and access the admin console.
+                  Your platform is ready. Click below to save the status and access the admin
+                  console.
                 </p>
               </div>
 
-              <Button
-                onClick={handleComplete}
-                disabled={complete.isPending}
-                className="w-full"
-              >
-                {complete.isPending ? (
-                  <><Loader2 className="mr-2 size-4 animate-spin" /> Finalizing...</>
-                ) : (
-                  "Complete Setup & Go to Admin"
-                )}
+              <Button onClick={handleFinalize} disabled={false} className="w-full">
+                Complete Setup & Go to Admin Console
               </Button>
-
-              {complete.isSuccess && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/console")}
-                >
-                  Enter Admin Console
-                </Button>
-              )}
             </StepperContent>
           </Stepper>
 

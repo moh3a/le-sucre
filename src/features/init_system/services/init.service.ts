@@ -1,7 +1,7 @@
 import "server-only";
 
 import { migrate } from "drizzle-orm/mysql2/migrator";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -9,6 +9,7 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import {
   users,
   roles,
+  user_roles,
   permissions as permissions_table,
   role_permissions,
 } from "@/features/authentication_and_authorization/auth/schema";
@@ -22,32 +23,105 @@ import { generate_id } from "@/lib/utils";
 import { INIT_ERROR } from "../constants/error-codes";
 import { init_repository } from "../repositories/init.repository";
 
+export interface InitStatus {
+  initialized: boolean;
+  db_connected: boolean;
+  tables_exist: boolean;
+  has_admin: boolean;
+  has_roles: boolean;
+}
+
 export class InitService {
-  async check_status() {
+  async check_status(): Promise<InitStatus> {
     const db_ok = await this.test_db_connection();
+    const statusObject = {
+      initialized: false,
+      db_connected: false,
+      tables_exist: false,
+      has_admin: false,
+      has_roles: false,
+    };
 
     if (!db_ok) {
-      return { initialized: false, db_connected: false, has_admin: false, has_roles: false };
+      return statusObject;
+    }
+
+    const tables_exist = await this.check_tables_exist();
+    statusObject.db_connected = tables_exist;
+
+    if (!tables_exist) {
+      return statusObject;
     }
 
     const status = await init_repository.get_status();
     const initialized = status?.initialized ?? false;
+    statusObject.initialized = initialized;
 
     if (initialized) {
-      return { initialized: true, db_connected: true, has_admin: true, has_roles: true };
+      return statusObject;
     }
 
-    const [admin_user] = await db
-      .select({ id: users.id })
-      .from(users)
-      .limit(1);
+    const [admin_user] = await db.select({ id: users.id }).from(users).limit(1);
+    const has_admin = !!admin_user;
+    statusObject.has_admin = has_admin;
 
     const role_count = await db.$count(roles);
-
-    const has_admin = !!admin_user;
     const has_roles = role_count > 0;
+    statusObject.has_roles = has_roles;
 
-    return { initialized, db_connected: true, has_admin, has_roles };
+    // Auto-heal: if everything is already in place but system_status is missing,
+    // create and mark it completed so subsequent checks see initialized: true.
+    if (has_admin && has_roles && !initialized) {
+      const admin = await this.find_first_admin();
+      await init_repository.upsert(admin?.id);
+      if (admin?.id) {
+        await init_repository.mark_completed(admin.id);
+      }
+      return {
+        initialized: true,
+        db_connected: true,
+        tables_exist: true,
+        has_admin: true,
+        has_roles: true,
+      };
+    }
+
+    return statusObject;
+  }
+
+  async ensure_status_entry(admin_user_id?: string) {
+    let resolved_id = admin_user_id;
+
+    if (!resolved_id) {
+      const admin = await this.find_first_admin();
+      resolved_id = admin?.id;
+    }
+
+    await init_repository.upsert(resolved_id);
+
+    if (resolved_id) {
+      const already = await init_repository.is_initialized();
+      if (!already) {
+        await init_repository.mark_completed(resolved_id);
+      }
+    }
+  }
+
+  async find_first_admin() {
+    const [admin_role] = await db
+      .select({ id: roles.id })
+      .from(roles)
+      .where(eq(roles.name, ROLE_NAMES.admin))
+      .limit(1);
+    if (!admin_role) return null;
+
+    const [admin_user] = await db
+      .select({ id: users.id, name: users.name, email: users.email })
+      .from(users)
+      .innerJoin(user_roles, eq(user_roles.user_id, users.id))
+      .where(eq(user_roles.role_id, admin_role.id))
+      .limit(1);
+    return admin_user ?? null;
   }
 
   async run_migrations() {
@@ -120,9 +194,9 @@ export class InitService {
           .filter((id): id is string => id !== undefined && !existing_perm_ids.has(id));
 
         if (missing.length > 0) {
-          await db.insert(role_permissions).values(
-            missing.map((permission_id) => ({ role_id, permission_id })),
-          );
+          await db
+            .insert(role_permissions)
+            .values(missing.map((permission_id) => ({ role_id, permission_id })));
         }
       }
     } catch {
@@ -165,9 +239,18 @@ export class InitService {
     }
   }
 
+  private async check_tables_exist(): Promise<boolean> {
+    try {
+      const data = await db._.tableNamesMap;
+      return !!Object.keys(data).length;
+    } catch {
+      return false;
+    }
+  }
+
   private async test_db_connection() {
     try {
-      await db.execute("SELECT 1");
+      await db.execute(sql`SELECT 1`);
       return true;
     } catch {
       return false;

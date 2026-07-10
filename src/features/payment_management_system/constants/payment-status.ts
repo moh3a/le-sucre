@@ -1,3 +1,5 @@
+import z from "zod";
+
 export const PAYMENT_TRANSACTION_STATUS = {
   PENDING: "pending",
   PROCESSING: "processing",
@@ -49,8 +51,7 @@ export const PARTIAL_PAYMENT_TYPE = {
   INSTALLMENT: "installment",
 } as const;
 
-export type PartialPaymentType =
-  (typeof PARTIAL_PAYMENT_TYPE)[keyof typeof PARTIAL_PAYMENT_TYPE];
+export type PartialPaymentType = (typeof PARTIAL_PAYMENT_TYPE)[keyof typeof PARTIAL_PAYMENT_TYPE];
 
 export const PARTIAL_PAYMENT_STATUS = {
   PENDING: "pending",
@@ -90,7 +91,9 @@ export const PAYMENT_PROVIDER = {
   MANUAL: "manual",
 } as const;
 
-export type PaymentProvider = (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];
+export const paymentProviders = ["stripe", "paypal", "chargily", "satim", "cib", "manual"] as const;
+export const paymentProvidersSchema = z.enum(paymentProviders);
+export type PaymentProvider = z.infer<typeof paymentProvidersSchema>;
 
 export const AUDIT_ACTION = {
   PAYMENT_CREATED: "payment.created",

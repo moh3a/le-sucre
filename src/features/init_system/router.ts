@@ -35,4 +35,15 @@ export const init_router = create_trpc_router({
       await init_service.complete(input.admin_user_id);
       return { ok: true };
     }),
+
+  ensureStatus: public_procedure
+    .input(z.object({ admin_user_id: z.string().optional() }))
+    .mutation(async ({ input }) => {
+      await init_service.ensure_status_entry(input.admin_user_id);
+      return { ok: true };
+    }),
+
+  adminExists: public_procedure.query(async () => {
+    return init_service.find_first_admin();
+  }),
 });

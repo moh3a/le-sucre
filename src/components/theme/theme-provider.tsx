@@ -1,6 +1,5 @@
 "use client";
 
-import Script from "next/script";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
@@ -42,7 +41,7 @@ function applyTheme(theme: Theme) {
   root.style.colorScheme = resolved;
 }
 
-const FOUC_SCRIPT = `
+export const FOUC_SCRIPT = `
 (function() {
   var theme;
   try { theme = localStorage.getItem('theme') || 'system'; } catch(e) { theme = 'system'; }
@@ -92,16 +91,19 @@ export function ThemeProvider({
     return () => mq.removeEventListener("change", handler);
   }, [theme]);
 
-  const setTheme = useCallback((newTheme: Theme) => {
-    setThemeState(newTheme);
-    try {
-      localStorage.setItem(STORAGE_KEY, newTheme);
-    } catch {}
-    if (forcedTheme) return;
-    applyTheme(newTheme);
-    const resolved = newTheme === "system" ? getSystemTheme() : newTheme;
-    setResolvedTheme(resolved);
-  }, [forcedTheme]);
+  const setTheme = useCallback(
+    (newTheme: Theme) => {
+      setThemeState(newTheme);
+      try {
+        localStorage.setItem(STORAGE_KEY, newTheme);
+      } catch {}
+      if (forcedTheme) return;
+      applyTheme(newTheme);
+      const resolved = newTheme === "system" ? getSystemTheme() : newTheme;
+      setResolvedTheme(resolved);
+    },
+    [forcedTheme],
+  );
 
   const value = useMemo<ThemeContextValue>(
     () => ({
@@ -115,12 +117,7 @@ export function ThemeProvider({
     [theme, forcedTheme, setTheme, resolvedTheme, systemTheme, mounted],
   );
 
-  return (
-    <ThemeContext.Provider value={value}>
-      <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: FOUC_SCRIPT }} />
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme(): ThemeContextValue {

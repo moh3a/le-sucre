@@ -157,5 +157,5 @@ import { routing } from "./i18n/routing";
 export default createMiddleware(routing);
 
 export const config = {
-  matcher: "/((?!api|trpc|console|auth|_next|_vercel|.*\\..*).*)",
+  matcher: "/((?!api|trpc|console|init|auth|_next|_vercel|.*\\..*).*)",
 };
