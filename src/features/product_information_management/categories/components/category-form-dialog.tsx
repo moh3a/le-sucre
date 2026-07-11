@@ -59,35 +59,39 @@ export function CategoryFormDialog({
           <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        <QueryGuard
-          query={category_query}
-          loadingFallback={
-            <div className="space-y-4 py-4">
-              <Skeleton className="h-9 w-full" />
-              <Skeleton className="h-9 w-full" />
-              <Skeleton className="h-9 w-full" />
-            </div>
-          }
-        >
-          <CategoryForm
-            key={mode === "edit" ? category_id : "create"}
-            mode={mode}
-            category_id={category_id}
-            default_values={
-              mode === "edit" && category
-                ? {
-                    name: category.name,
-                    slug: category.slug,
-                    description: category.description,
-                    parent_id: category.parent_id,
-                    sort_order: category.sort_order,
-                    is_active: category.is_active,
-                  }
-                : undefined
+        {mode === "create" ? (
+          <CategoryForm key="create" mode={mode} onSuccess={handle_success} />
+        ) : (
+          <QueryGuard
+            query={category_query}
+            loadingFallback={
+              <div className="space-y-4 py-4">
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+              </div>
             }
-            onSuccess={handle_success}
-          />
-        </QueryGuard>
+          >
+            <CategoryForm
+              key={mode === "edit" ? category_id : "create"}
+              mode={mode}
+              category_id={category_id}
+              default_values={
+                mode === "edit" && category
+                  ? {
+                      name: category.name,
+                      slug: category.slug,
+                      description: category.description,
+                      parent_id: category.parent_id,
+                      sort_order: category.sort_order,
+                      is_active: category.is_active,
+                    }
+                  : undefined
+              }
+              onSuccess={handle_success}
+            />
+          </QueryGuard>
+        )}
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

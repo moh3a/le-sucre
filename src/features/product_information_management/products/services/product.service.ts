@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { generate_id } from "@/lib/utils";
+import { tryFn, AppError } from "@/lib/error_handling";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { PRODUCT_ERROR } from "../constants/error-codes";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
@@ -28,6 +29,21 @@ import { variant_service } from "@/features/product_information_management/varia
 import { sku_service } from "@/features/product_information_management/variants/services/sku.service";
 
 const DEFAULT_LOCALE = "fr";
+
+function db_error_reason(err: Error): string {
+  const msg = err.message.toLowerCase();
+  if (msg.includes("foreign key") || msg.includes("referenced")) {
+    return "Une entité associée empêche cette opération";
+  }
+  if (msg.includes("duplicate") || msg.includes("unique")) {
+    return "Un enregistrement similaire existe déjà";
+  }
+  if (msg.includes("not null")) return "Un champ obligatoire est manquant";
+  if (msg.includes("data too long")) return "Le contenu dépasse la taille maximale autorisée";
+  if (msg.includes("connection") || msg.includes("connect"))
+    return "La connexion à la base de données est interrompue";
+  return "Erreur interne du serveur";
+}
 
 export class ProductService {
   constructor(private readonly repo = new ProductRepository()) {}
@@ -250,6 +266,71 @@ export class ProductService {
       resource_id: id,
     });
     return { ok: true };
+  }
+
+  async duplicate(id: string) {
+    const original = await this.repo.find_by_id(id);
+    if (!original) throw_error(PRODUCT_ERROR.NOT_FOUND);
+
+    const new_id = generate_id();
+    const copy_slug = `${original.slug}-copie-${Date.now().toString(36)}`;
+
+    const [create_err] = await tryFn(
+      this.repo.create({
+        id: new_id,
+        sku: `${original.sku}-COPY`,
+        slug: copy_slug,
+        category_id: original.category_id,
+        brand_id: original.brand_id,
+        base_price: original.base_price,
+        offer_price: original.offer_price,
+        currency: original.currency,
+        status: "draft",
+        is_featured: false,
+        has_variants: original.has_variants,
+        metadata: original.metadata,
+        seo_title: original.seo_title,
+        seo_description: original.seo_description,
+        seo_keywords: original.seo_keywords,
+      }),
+    );
+    if (create_err) {
+      if (create_err instanceof AppError) throw create_err;
+      throw new AppError(db_error_reason(create_err), "PRODUCT_DUPLICATE_FAILED", 500, {
+        _messages: PRODUCT_ERROR.DUPLICATE_FAILED.message,
+      });
+    }
+
+    const translations = await this.repo.list_translations(id);
+    for (const tr of translations) {
+      const [tr_err] = await tryFn(
+        this.repo.upsert_translation({
+          id: generate_id(),
+          product_id: new_id,
+          locale: tr.locale,
+          name: `${tr.name} (copie)`,
+          description: tr.description,
+          keywords: tr.keywords,
+          seo_title: tr.seo_title,
+          seo_description: tr.seo_description,
+        }),
+      );
+      if (tr_err && !(tr_err instanceof AppError)) {
+        throw new AppError(db_error_reason(tr_err), "PRODUCT_DUPLICATE_FAILED", 500, {
+          _messages: PRODUCT_ERROR.DUPLICATE_FAILED.message,
+        });
+      }
+    }
+
+    void invalidate_catalog_cache();
+    void invalidate_recommendations_for_product(new_id);
+    void audit_service.log({
+      action: "product.duplicate",
+      resource_type: "product_id",
+      resource_id: new_id,
+    });
+
+    return this.get_by_id(new_id);
   }
 
   async list(params: {

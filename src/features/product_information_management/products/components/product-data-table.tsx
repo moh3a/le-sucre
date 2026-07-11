@@ -5,6 +5,7 @@ import { parseAsArrayOf, parseAsInteger, parseAsFloat, parseAsString, useQuerySt
 import {
   Archive,
   CheckCircle2,
+  Copy,
   Download,
   FileText,
   Folder,
@@ -12,10 +13,12 @@ import {
   Pencil,
   Star,
   Tag,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -39,6 +42,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -269,10 +273,103 @@ function RangeFilter({
   );
 }
 
+function ProductRowActions({ row }: { row: ProductRow }) {
+  const t = useTranslations("products");
+  const tc = useTranslations("common");
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const utils = trpc.useUtils();
+
+  const delete_mutation = trpc.products.delete.useMutation({
+    onSuccess: () => {
+      utils.products.adminList.invalidate();
+      toast.success(t("delete_confirm_title"));
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const duplicate_mutation = trpc.products.duplicate.useMutation({
+    onSuccess: () => {
+      utils.products.adminList.invalidate();
+      toast.success(t("duplicate_success"));
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="size-8">
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href={`/console/products/${row.id}`}>
+              <Pencil className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/console/products/${row.id}?tab=recommendations`}>
+              <Star className="mr-2 size-4" />
+              {t("recommendations")}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={duplicate_mutation.isPending}
+            onClick={() => {
+              duplicate_mutation.mutate({ id: row.id });
+            }}
+          >
+            <Copy className="mr-2 size-4" />
+            {t("duplicate")}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive"
+            disabled={delete_mutation.isPending}
+            onClick={() => setDeleteOpen(true)}
+          >
+            <Trash2 className="mr-2 size-4" />
+            {t("delete")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("delete_confirm_title")}</DialogTitle>
+            <DialogDescription>{t("delete_confirm")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              disabled={delete_mutation.isPending}
+              onClick={() => setDeleteOpen(false)}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={delete_mutation.isPending}
+              onClick={() => {
+                delete_mutation.mutate({ id: row.id });
+              }}
+            >
+              {delete_mutation.isPending ? tc("loading") : t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 export function ProductDataTable() {
   const t = useTranslations("products");
   const [assignCategoryOpen, setAssignCategoryOpen] = React.useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("");
+  const utils = trpc.useUtils();
 
   const columns = React.useMemo<ColumnDef<ProductRow>[]>(
     () => [
@@ -298,7 +395,14 @@ export function ProductDataTable() {
         id: "name",
         accessorKey: "name",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("name")} />,
-        cell: ({ row }) => <span className="font-medium">{row.original.name ?? "—"}</span>,
+        cell: ({ row }) => (
+          <Link
+            href={`/console/products/${row.original.id}`}
+            className="text-primary hover:underline font-medium"
+          >
+            {row.original.name ?? "—"}
+          </Link>
+        ),
       }, 
       {
         id: "status",
@@ -380,27 +484,7 @@ export function ProductDataTable() {
       {
         id: "actions",
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/console/products/${row.original.id}`}>
-                  <Pencil className="mr-2 size-4" />
-                  {t("edit")}
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/console/products/${row.original.id}?tab=recommendations`}>
-                  <Star className="mr-2 size-4" />
-                  {t("recommendations")}
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ProductRowActions row={row.original} />
         ),
       },
     ],
@@ -421,7 +505,6 @@ export function ProductDataTable() {
 
   const status = status_filter?.[0] as ProductRow["status"] | undefined;
 
-  const utils = trpc.useUtils();
   const { data: brandsData } = trpc.brands.active.useQuery();
   const { data: categoriesData } = trpc.categories.tree.useQuery();
   const { data, isLoading } = trpc.products.adminList.useQuery({

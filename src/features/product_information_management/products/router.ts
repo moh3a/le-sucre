@@ -44,6 +44,10 @@ export const product_router = create_trpc_router({
     .input(update_product_dto.pick({ id: true }))
     .mutation(({ input }) => product_service.remove(input.id)),
 
+  duplicate: permission_procedure(PERMISSIONS.products_write)
+    .input(update_product_dto.pick({ id: true }))
+    .mutation(({ input }) => product_service.duplicate(input.id)),
+
   upsertTranslation: permission_procedure(PERMISSIONS.products_write)
     .input(upsert_translation_dto)
     .mutation(({ input }) => product_service.upsert_translation(input)),

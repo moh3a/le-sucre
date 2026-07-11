@@ -145,6 +145,15 @@ export const PRODUCT_ERROR = {
       ar: "فشل تصدير المنتجات",
     },
   },
+  DUPLICATE_FAILED: {
+    code: "PRODUCT_DUPLICATE_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de la duplication du produit",
+      en: "Product duplication failed",
+      ar: "فشل نسخ المنتج",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;
 
 

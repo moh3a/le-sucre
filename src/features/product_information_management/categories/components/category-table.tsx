@@ -5,6 +5,7 @@ import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nu
 import { Calendar, Hash, MoreHorizontal, Pencil, Text, ToggleLeft, Trash2 } from "lucide-react";
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -15,6 +16,16 @@ import { DataTableSortList } from "@/features/data-table/components/data-table-s
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,44 +46,68 @@ function CategoryRowActions({
   on_edit: (id: string) => void;
 }) {
   const t = useTranslations("categories");
+  const tc = useTranslations("common");
   const utils = trpc.useUtils();
+  const [delete_open, set_delete_open] = React.useState(false);
 
   const delete_mutation = trpc.categories.delete.useMutation({
     onSuccess: async () => {
+      set_delete_open(false);
       await utils.categories.list.invalidate();
       await utils.categories.tree.invalidate();
     },
+    onError: (err) => toast.error(err.message),
   });
 
-  async function on_delete() {
-    if (!window.confirm(t("delete_confirm", { name: category.name }))) return;
-    await delete_mutation.mutateAsync({ id: category.id });
-  }
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-8">
-          <MoreHorizontal className="size-4" />
-          <span className="sr-only">{t("actions")}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => on_edit(category.id)}>
-          <Pencil />
-          {t("edit")}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          disabled={delete_mutation.isPending}
-          onClick={() => void on_delete()}
-        >
-          <Trash2 />
-          {t("delete")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="size-8">
+            <MoreHorizontal className="size-4" />
+            <span className="sr-only">{t("actions")}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => on_edit(category.id)}>
+            <Pencil />
+            {t("edit")}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            disabled={delete_mutation.isPending}
+            onClick={() => set_delete_open(true)}
+          >
+            <Trash2 />
+            {t("delete")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={delete_open} onOpenChange={set_delete_open}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_confirm_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_confirm", { name: category.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={delete_mutation.isPending}>
+              {tc("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={delete_mutation.isPending}
+              onClick={() => delete_mutation.mutate({ id: category.id })}
+            >
+              {tc("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

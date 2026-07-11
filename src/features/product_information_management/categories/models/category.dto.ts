@@ -6,7 +6,9 @@ export const create_category_dto = z.object({
     .string()
     .min(2)
     .max(255)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional()
+    .nullable(),
   description: z.string().max(5000).optional().nullable(),
   parent_id: z.string().length(24).nullable().optional(),
   sort_order: z.number().int().min(0).default(0),
