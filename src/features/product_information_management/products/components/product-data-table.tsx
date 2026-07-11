@@ -9,6 +9,7 @@ import {
   Download,
   FileText,
   Folder,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Star,
@@ -31,13 +32,15 @@ import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -282,6 +285,7 @@ function ProductRowActions({ row }: { row: ProductRow }) {
   const delete_mutation = trpc.products.delete.useMutation({
     onSuccess: () => {
       utils.products.adminList.invalidate();
+      setDeleteOpen(false);
       toast.success(t("delete_confirm_title"));
     },
     onError: (err) => toast.error(err.message),
@@ -335,40 +339,35 @@ function ProductRowActions({ row }: { row: ProductRow }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("delete_confirm_title")}</DialogTitle>
-            <DialogDescription>{t("delete_confirm")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              disabled={delete_mutation.isPending}
-              onClick={() => setDeleteOpen(false)}
-            >
-              {tc("cancel")}
-            </Button>
-            <Button
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_confirm_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("delete_confirm")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={delete_mutation.isPending}>{tc("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
               variant="destructive"
               disabled={delete_mutation.isPending}
-              onClick={() => {
-                delete_mutation.mutate({ id: row.id });
-              }}
+              onClick={() => delete_mutation.mutate({ id: row.id })}
             >
+              {delete_mutation.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
               {delete_mutation.isPending ? tc("loading") : t("delete")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
 
 export function ProductDataTable() {
   const t = useTranslations("products");
+  const tc = useTranslations("common");
   const [assignCategoryOpen, setAssignCategoryOpen] = React.useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("");
+  const [bulkDeleteOpen, setBulkDeleteOpen] = React.useState(false);
   const utils = trpc.useUtils();
 
   const columns = React.useMemo<ColumnDef<ProductRow>[]>(
@@ -403,7 +402,7 @@ export function ProductDataTable() {
             {row.original.name ?? "—"}
           </Link>
         ),
-      }, 
+      },
       {
         id: "status",
         accessorKey: "status",
@@ -526,12 +525,22 @@ export function ProductDataTable() {
   });
 
   const bulk = trpc.products.bulkAction.useMutation({
-    onSuccess: () => {
+    onSuccess: (_result, variables) => {
       utils.products.adminList.invalidate();
       setAssignCategoryOpen(false);
+      setSelectedCategoryId("");
+      const action_labels: Record<string, string> = {
+        activate: t("activate"),
+        deactivate: t("deactivate"),
+        delete: t("delete"),
+        assign_category: t("assign_category"),
+      };
+      toast.success(`${action_labels[variables.action] ?? tc("actions")} — ${variables.product_ids.length} ${t("selected_count").replace("{count}", "")}`);
     },
+    onError: (err) => toast.error(err.message),
   });
 
+  
   const items = data?.items ?? [];
   const page_count = data?.meta.total_pages ?? 0;
 
@@ -543,8 +552,7 @@ export function ProductDataTable() {
     getRowId: (row) => row.id,
     enableRowSelection: true,
   });
-  // "name""status""brand_id""category_id""stock_status""price_min""price_max""rating_min""rating_max"
-
+  
   const brandOptions = brandsData?.map((b) => ({ label: b.name, value: b.id })) ?? [];
   const categoryOptions = categoriesData?.map((c) => ({ label: c.name, value: c.id })) ?? [];
   const stockOptions = [
@@ -553,10 +561,16 @@ export function ProductDataTable() {
     { label: t("out_of_stock"), value: "out_of_stock" },
   ];
 
+  function getSelectedIds() {
+    return table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+  }
+
   function runBulk(action: "activate" | "deactivate" | "delete" | "assign_category") {
-    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+    const ids = getSelectedIds();
     if (!ids.length) return;
-    if (action === "assign_category") {
+    if (action === "delete") {
+      setBulkDeleteOpen(true);
+    } else if (action === "assign_category") {
       setAssignCategoryOpen(true);
     } else {
       bulk.mutate({ product_ids: ids, action });
@@ -564,9 +578,16 @@ export function ProductDataTable() {
   }
 
   function handleAssignCategory() {
-    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+    const ids = getSelectedIds();
     if (!ids.length || !selectedCategoryId) return;
     bulk.mutate({ product_ids: ids, action: "assign_category", category_id: selectedCategoryId });
+  }
+
+  function handleBulkDelete() {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+    bulk.mutate({ product_ids: ids, action: "delete" });
+    setBulkDeleteOpen(false);
   }
 
   return (
@@ -627,20 +648,40 @@ export function ProductDataTable() {
             <Badge variant="outline">
               {table.getFilteredSelectedRowModel().rows.length} {t("selected_count")}
             </Badge>
-            <Button variant="secondary" size="sm" onClick={() => runBulk("activate")}>
-              <CheckCircle2 className="mr-1 h-4 w-4" />
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={bulk.isPending}
+              onClick={() => runBulk("activate")}
+            >
+              {bulk.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-1 h-4 w-4" />}
               {t("activate")}
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => runBulk("deactivate")}>
-              <Archive className="mr-1 h-4 w-4" />
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={bulk.isPending}
+              onClick={() => runBulk("deactivate")}
+            >
+              {bulk.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Archive className="mr-1 h-4 w-4" />}
               {t("deactivate")}
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => runBulk("assign_category")}>
-              <Folder className="mr-1 h-4 w-4" />
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={bulk.isPending}
+              onClick={() => runBulk("assign_category")}
+            >
+              {bulk.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Folder className="mr-1 h-4 w-4" />}
               {t("assign_category")}
             </Button>
-            <Button variant="destructive" size="sm" onClick={() => runBulk("delete")}>
-              <Archive className="mr-1 h-4 w-4" />
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={bulk.isPending}
+              onClick={() => runBulk("delete")}
+            >
+              {bulk.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
               {t("delete")}
             </Button>
             <Button variant="ghost" size="sm" asChild>
@@ -666,14 +707,36 @@ export function ProductDataTable() {
         )}
       </DataTable>
 
-      <Dialog open={assignCategoryOpen} onOpenChange={setAssignCategoryOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("assign_category_title")}</DialogTitle>
-            <DialogDescription>
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("bulk_delete_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("bulk_delete_confirm")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulk.isPending}>{tc("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={bulk.isPending}
+              onClick={handleBulkDelete}
+            >
+              {bulk.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+              {bulk.isPending ? tc("loading") : t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Assign category dialog */}
+      <AlertDialog open={assignCategoryOpen} onOpenChange={setAssignCategoryOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("assign_category_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
               {t("assign_category_description")}
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
             <SelectTrigger>
               <SelectValue placeholder={t("select_category_filter")} />
@@ -686,14 +749,18 @@ export function ProductDataTable() {
               ))}
             </SelectContent>
           </Select>
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setAssignCategoryOpen(false)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleAssignCategory}>{t("assign")}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulk.isPending}>{tc("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={bulk.isPending || !selectedCategoryId}
+              onClick={handleAssignCategory}
+            >
+              {bulk.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+              {bulk.isPending ? tc("loading") : t("assign")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
     </QueryGuard>
   );

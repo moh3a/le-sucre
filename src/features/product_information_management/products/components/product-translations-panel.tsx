@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import z from "zod";
+import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -26,7 +27,11 @@ export function ProductTranslationsPanel({
   const t = useTranslations("products");
   const utils = trpc.useUtils();
   const upsert = trpc.products.upsertTranslation.useMutation({
-    onSuccess: () => utils.products.byId.invalidate({ id: product_id }),
+    onSuccess: () => {
+      utils.products.byId.invalidate({ id: product_id });
+      toast.success(t("save_translation"));
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const [forms, set_forms] = useState(() =>

@@ -136,6 +136,24 @@ export const CATEGORY_ERROR = {
       ar: "فشل الحذف من قاعدة البيانات. لم يتم حذف التصنيف",
     },
   },
+  HAS_PRODUCTS: {
+    code: "CATEGORY_HAS_PRODUCTS",
+    status: 409,
+    message: {
+      fr: "Impossible de désactiver cette catégorie car des produits lui sont encore assignés. Réassignez ou supprimez les produits d'abord",
+      en: "Cannot deactivate this category because products are still assigned to it. Reassign or delete the products first",
+      ar: "لا يمكن تعطيل هذا التصنيف لأنه لا تزال منتجات مرتبطة به. قم بإعادة تعيين المنتجات أو حذفها أولاً",
+    },
+  },
+  HAS_PRODUCTS_DELETE: {
+    code: "CATEGORY_HAS_PRODUCTS_DELETE",
+    status: 409,
+    message: {
+      fr: "Impossible de supprimer cette catégorie car des produits lui sont assignés. Réassignez ou supprimez les produits d'abord",
+      en: "Cannot delete this category because products are assigned to it. Reassign or delete the products first",
+      ar: "لا يمكن حذف هذا التصنيف لأنه توجد منتجات مرتبطة به. قم بإعادة تعيين المنتجات أو حذفها أولاً",
+    },
+  },
   STATS_FAILED: {
     code: "CATEGORY_STATS_FAILED",
     status: 500,

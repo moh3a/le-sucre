@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
@@ -9,6 +9,7 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { SKU_ERROR, VARIANT_ERROR } from "../constants/error-codes";
 import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 import { products } from "@/features/product_information_management/products/schema";
+import { order_items } from "@/features/order_management_system/orders/schema";
 import { product_properties } from "../schema";
 
 import type {
@@ -186,6 +187,19 @@ export class SkuService {
   }
 
   async remove(id: string) {
+    const sku = await this.skus.find_by_id(id);
+    if (!sku) throw_error(SKU_ERROR.NOT_FOUND);
+
+    const [order_count] = await db
+      .select({ total: db.$count(order_items, eq(order_items.sku_id, id)) })
+      .from(order_items)
+      .where(eq(order_items.sku_id, id))
+      .limit(1);
+
+    if (order_count && order_count.total > 0) {
+      throw_error(SKU_ERROR.HAS_ASSOCIATED_ORDERS);
+    }
+
     return this.skus.delete_sku(id);
   }
 
@@ -256,23 +270,53 @@ export class SkuService {
     stock_available?: number;
     is_active?: boolean;
   }) {
-    await this.skus.bulk_update_skus(input.ids, {
-      ...(input.base_price !== undefined && {
-        base_price: input.base_price != null ? String(input.base_price) : null,
-      }),
-      ...(input.offer_price !== undefined && {
-        offer_price: input.offer_price != null ? String(input.offer_price) : null,
-      }),
-      ...(input.stock_available !== undefined && {
-        stock_available: input.stock_available,
-      }),
-      ...(input.is_active !== undefined && { is_active: input.is_active }),
-    });
+    if (!input.ids.length) return { ok: true };
+
+    const existing = await this.skus.find_by_ids(input.ids);
+    if (existing.length !== input.ids.length) throw_error(SKU_ERROR.NOT_FOUND);
+
+    try {
+      await this.skus.bulk_update_skus(input.ids, {
+        ...(input.base_price !== undefined && {
+          base_price: input.base_price != null ? String(input.base_price) : null,
+        }),
+        ...(input.offer_price !== undefined && {
+          offer_price: input.offer_price != null ? String(input.offer_price) : null,
+        }),
+        ...(input.stock_available !== undefined && {
+          stock_available: input.stock_available,
+        }),
+        ...(input.is_active !== undefined && { is_active: input.is_active }),
+      });
+    } catch {
+      throw_error(SKU_ERROR.DATABASE_OPERATION_FAILED);
+    }
+
     return { ok: true };
   }
 
   async bulk_delete(ids: string[]) {
-    await this.skus.bulk_delete_skus(ids);
+    if (!ids.length) return { ok: true };
+
+    const existing = await this.skus.find_by_ids(ids);
+    if (existing.length !== ids.length) throw_error(SKU_ERROR.NOT_FOUND);
+
+    const [order_count] = await db
+      .select({ total: db.$count(order_items, inArray(order_items.sku_id, ids)) })
+      .from(order_items)
+      .where(inArray(order_items.sku_id, ids))
+      .limit(1);
+
+    if (order_count && order_count.total > 0) {
+      throw_error(SKU_ERROR.HAS_ASSOCIATED_ORDERS);
+    }
+
+    try {
+      await this.skus.bulk_delete_skus(ids);
+    } catch {
+      throw_error(SKU_ERROR.DATABASE_OPERATION_FAILED);
+    }
+
     return { ok: true };
   }
 }

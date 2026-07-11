@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DataState } from "@/components/storefront/data-state";
@@ -14,6 +15,8 @@ interface BrandCardProps {
 }
 
 export function BrandCard({ brand, isLoading, error, variant = "list" }: BrandCardProps) {
+  const t = useTranslations("brands");
+
   return (
     <DataState
       isLoading={isLoading}
@@ -38,7 +41,7 @@ export function BrandCard({ brand, isLoading, error, variant = "list" }: BrandCa
             </div>
             <CardTitle className="text-center text-lg">{brand.name}</CardTitle>
             <CardDescription className="text-center">
-              {brand.product_count} produits
+              {brand.product_count} {t("products")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -58,7 +61,7 @@ export function BrandCard({ brand, isLoading, error, variant = "list" }: BrandCa
             </div>
             <div>
               <CardTitle className="text-sm">{brand.name}</CardTitle>
-              <CardDescription>{brand.product_count} produits</CardDescription>
+              <CardDescription>{brand.product_count} {t("products")}</CardDescription>
             </div>
           </CardHeader>
         </Card>

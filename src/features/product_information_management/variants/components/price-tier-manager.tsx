@@ -23,6 +23,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const TIER_CHANNELS = (t: (key: string) => string) =>
   [
@@ -55,6 +65,7 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
   const deletePriceTier = trpc.variants.deleteSkuPriceTier.useMutation({
     onSuccess: () => {
       utils.variants.getSku.invalidate({ id: skuId });
+      set_delete_tier_target(null);
       toast.success(t("tier_deleted"));
     },
     onError: (err) => toast.error(err.message),
@@ -73,19 +84,24 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
   const deleteRule = trpc.variants.deleteWholesaleRule.useMutation({
     onSuccess: () => {
       utils.variants.getSku.invalidate({ id: skuId });
+      set_delete_rule_target(null);
       toast.success(t("wholesale_rule_deleted"));
     },
     onError: (err) => toast.error(err.message),
   });
 
-  // New price tier form
   const [tierChannel, setTierChannel] = React.useState<"retail" | "wholesale">("retail");
   const [tierMinQty, setTierMinQty] = React.useState(1);
   const [tierPrice, setTierPrice] = React.useState("");
 
-  // New wholesale rule form
   const [ruleMinQty, setRuleMinQty] = React.useState(1);
   const [ruleDiscount, setRuleDiscount] = React.useState("");
+
+  const [delete_tier_target, set_delete_tier_target] = React.useState<{
+    channel: string;
+    minQty: number;
+  } | null>(null);
+  const [delete_rule_target, set_delete_rule_target] = React.useState<string | null>(null);
 
   function handleAddTier() {
     const price = parseFloat(tierPrice);
@@ -101,14 +117,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
     });
   }
 
-  function handleDeleteTier(channel: string, minQty: number) {
-    deletePriceTier.mutate({
-      sku_id: skuId,
-      channel: channel as "retail" | "wholesale",
-      min_quantity: minQty,
-    });
-  }
-
   function handleAddRule() {
     const discount = parseFloat(ruleDiscount);
     if (isNaN(discount) || discount < 0 || discount > 100) {
@@ -121,10 +129,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
       discount_percent: discount,
       is_active: true,
     });
-  }
-
-  function handleDeleteRule(ruleId: string) {
-    deleteRule.mutate({ id: ruleId });
   }
 
   const sku = data?.sku;
@@ -147,7 +151,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Existing Price Tiers */}
             <div>
               <h3 className="mb-2 text-sm font-semibold">{t("tier_section_title")}</h3>
               {tiers.length === 0 ? (
@@ -169,7 +172,13 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
                         variant="ghost"
                         size="icon"
                         className="size-7 text-red-500"
-                        onClick={() => handleDeleteTier(tier.channel, tier.min_quantity)}
+                        disabled={deletePriceTier.isPending}
+                        onClick={() =>
+                          set_delete_tier_target({
+                            channel: tier.channel,
+                            minQty: tier.min_quantity,
+                          })
+                        }
                       >
                         <Trash2 className="size-3.5" />
                       </Button>
@@ -179,7 +188,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
               )}
             </div>
 
-            {/* Add Price Tier */}
             <div className="space-y-3 rounded-lg border p-3">
               <h4 className="text-muted-foreground text-xs font-semibold uppercase">
                 {t("tier_add")}
@@ -239,7 +247,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
               </div>
             </div>
 
-            {/* Existing Wholesale Rules */}
             <div>
               <h3 className="mb-2 text-sm font-semibold">{t("wholesale_section_title")}</h3>
               {wholesaleRules.length === 0 ? (
@@ -270,7 +277,8 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
                         variant="ghost"
                         size="icon"
                         className="size-7 text-red-500"
-                        onClick={() => handleDeleteRule(rule.id)}
+                        disabled={deleteRule.isPending}
+                        onClick={() => set_delete_rule_target(rule.id)}
                       >
                         <Trash2 className="size-3.5" />
                       </Button>
@@ -280,7 +288,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
               )}
             </div>
 
-            {/* Add Wholesale Rule */}
             <div className="space-y-3 rounded-lg border p-3">
               <h4 className="text-muted-foreground text-xs font-semibold uppercase">
                 {t("wholesale_add_rule")}
@@ -325,6 +332,72 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
           </div>
         )}
       </DialogContent>
+
+      <AlertDialog
+        open={delete_tier_target !== null}
+        onOpenChange={(open) => {
+          if (!open) set_delete_tier_target(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_tier_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("delete_tier_description")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletePriceTier.isPending}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletePriceTier.isPending}
+              onClick={() => {
+                if (delete_tier_target) {
+                  deletePriceTier.mutate({
+                    sku_id: skuId,
+                    channel: delete_tier_target.channel as "retail" | "wholesale",
+                    min_quantity: delete_tier_target.minQty,
+                  });
+                }
+              }}
+            >
+              {deletePriceTier.isPending ? t("deleting") : t("confirm_delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={delete_rule_target !== null}
+        onOpenChange={(open) => {
+          if (!open) set_delete_rule_target(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_wholesale_rule_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_wholesale_rule_description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteRule.isPending}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteRule.isPending}
+              onClick={() => {
+                if (delete_rule_target) {
+                  deleteRule.mutate({ id: delete_rule_target });
+                }
+              }}
+            >
+              {deleteRule.isPending ? t("deleting") : t("confirm_delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

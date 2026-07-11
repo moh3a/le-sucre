@@ -1,4 +1,7 @@
+"use client";
+
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -15,9 +18,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
-import { useTranslations } from "next-intl";
 
-type VariantPropertyEditorProps = {
+type DeletePropertyDialogProps = {
   property_id: string;
   product_id: string;
   on_change?: () => void;
@@ -27,7 +29,7 @@ export function DeletePropertyDialog({
   property_id,
   product_id,
   on_change,
-}: VariantPropertyEditorProps) {
+}: DeletePropertyDialogProps) {
   const t = useTranslations("variants");
 
   const utils = trpc.useUtils();
@@ -37,7 +39,10 @@ export function DeletePropertyDialog({
   }
 
   const delete_property = trpc.variants.deleteProperty.useMutation({
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      toast.success(t("property_deleted"));
+      await invalidate();
+    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -52,17 +57,23 @@ export function DeletePropertyDialog({
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>{t("delete_property")}</AlertDialogDescription>
+            <AlertDialogTitle>{t("delete_property_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_property_description")}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel disabled={delete_property.isPending}>
+              {t("cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={delete_property.isPending}
               onClick={() => {
                 delete_property.mutate({ id: property_id });
               }}
             >
-              Oui, {t("delete_property")}
+              {delete_property.isPending ? t("deleting") : t("confirm_delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

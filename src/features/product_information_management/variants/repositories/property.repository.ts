@@ -3,8 +3,9 @@ import "server-only";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
+import { VARIANT_ERROR } from "../constants/error-codes";
 
 import { product_properties, property_values, sku_option_values } from "../schema";
 
@@ -61,8 +62,7 @@ export class PropertyRepository {
       )
       .limit(1);
 
-    if (existing.length)
-      throw new ConflictError("Ce code de propriété existe déjà pour ce produit");
+    if (existing.length) throw_error(VARIANT_ERROR.SLUG_CONFLICT);
 
     const id = generate_id();
     await db.insert(product_properties).values({
@@ -82,7 +82,7 @@ export class PropertyRepository {
     input: Partial<{ code: string; name: string; sort_order: number; is_required: boolean }>,
   ) {
     const current = await this.get_property(id);
-    if (!current) throw new NotFoundError("Propriété introuvable");
+    if (!current) throw_error(VARIANT_ERROR.NOT_FOUND);
 
     if (input.code && input.code !== current.code) {
       const conflict = await db
@@ -95,8 +95,7 @@ export class PropertyRepository {
           ),
         )
         .limit(1);
-      if (conflict.length)
-        throw new ConflictError("Ce code de propriété existe déjà pour ce produit");
+      if (conflict.length) throw_error(VARIANT_ERROR.SLUG_CONFLICT);
     }
 
     await db
@@ -114,7 +113,7 @@ export class PropertyRepository {
 
   async delete_property(id: string) {
     const current = await this.get_property(id);
-    if (!current) throw new NotFoundError("Propriété introuvable");
+    if (!current) throw_error(VARIANT_ERROR.NOT_FOUND);
 
     const values = await this.list_values(id);
     const value_ids = values.map((v) => v.id);
@@ -148,8 +147,7 @@ export class PropertyRepository {
       )
       .limit(1);
 
-    if (existing.length)
-      throw new ConflictError("Ce code de valeur existe déjà pour cette propriété");
+    if (existing.length) throw_error(VARIANT_ERROR.VALUE_SLUG_CONFLICT);
 
     const id = generate_id();
     await db.insert(property_values).values({
@@ -178,7 +176,7 @@ export class PropertyRepository {
     }>,
   ) {
     const current = await this.get_value(id);
-    if (!current) throw new NotFoundError("Valeur introuvable");
+    if (!current) throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
 
     if (input.code && input.code !== current.code) {
       const conflict = await db
@@ -191,8 +189,7 @@ export class PropertyRepository {
           ),
         )
         .limit(1);
-      if (conflict.length)
-        throw new ConflictError("Ce code de valeur existe déjà pour cette propriété");
+      if (conflict.length) throw_error(VARIANT_ERROR.VALUE_SLUG_CONFLICT);
     }
 
     await db
@@ -212,7 +209,7 @@ export class PropertyRepository {
 
   async delete_value(id: string) {
     const current = await this.get_value(id);
-    if (!current) throw new NotFoundError("Valeur introuvable");
+    if (!current) throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
 
     await db.delete(sku_option_values).where(eq(sku_option_values.property_value_id, id));
     await db.delete(property_values).where(eq(property_values.id, id));

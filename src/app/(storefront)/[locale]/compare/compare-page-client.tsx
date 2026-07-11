@@ -80,7 +80,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive" className="mx-auto max-w-lg">
           <CircleAlert className="mt-0.5 size-4 shrink-0" />
-          <AlertTitle>{t("error_title") || "Erreur"}</AlertTitle>
+          <AlertTitle>{t("error_title")}</AlertTitle>
           <AlertDescription>{error.message}</AlertDescription>
         </Alert>
       </div>
@@ -160,7 +160,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
                 />
                 <Button size="sm" variant="default" className="mt-3 gap-2 rounded-full text-xs">
                   <ShoppingCart className="h-3.5 w-3.5" />
-                  {t("add_to_cart") || "Ajouter"}
+                  {t("add_to_cart")}
                 </Button>
               </div>
             ))}
@@ -213,12 +213,12 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
                 p.in_stock ? (
                   <Badge variant="secondary" className="gap-1 rounded-full text-xs">
                     <Check className="h-3 w-3" />
-                    {t("in_stock") || "En stock"}
+                    {t("in_stock")}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="gap-1 rounded-full text-xs text-muted-foreground">
                     <Minus className="h-3 w-3" />
-                    {t("out_of_stock") || "Rupture"}
+                    {t("out_of_stock")}
                   </Badge>
                 )
               }
@@ -245,11 +245,11 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
                           val === "true" ? (
                             <Badge variant="secondary" className="gap-1 rounded-full text-xs">
                               <Check className="h-3 w-3" />
-                              {t("yes") || "Oui"}
+                              {t("yes")}
                             </Badge>
                           ) : (
                             <span className="text-muted-foreground text-sm">
-                              {t("no") || "Non"}
+                              {t("no")}
                             </span>
                           )
                         ) : (

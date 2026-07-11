@@ -84,6 +84,8 @@ export class BrandService {
   async remove(id: string) {
     const brand = await this.repo.find_by_id(id);
     if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
+    const product_count = await this.repo.count_products_by_brand(id);
+    if (product_count > 0) throw_error(BRAND_ERROR.HAS_PRODUCTS);
     await this.repo.delete(id);
     void audit_service.log({
       action: "brand.delete",
@@ -94,15 +96,16 @@ export class BrandService {
   }
 
   async stats() {
-    const [all, active_result] = await Promise.all([
+    const [all, active_result, total_products] = await Promise.all([
       this.repo.list({ page: 1, limit: 1 }),
       this.repo.count_by_active(),
+      this.repo.count_total_products(),
     ]);
     return {
       total: all.meta.total_records,
       active: active_result.active,
       inactive: active_result.inactive,
-      total_products: 0,
+      total_products,
     };
   }
 }

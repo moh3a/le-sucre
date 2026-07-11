@@ -55,6 +55,7 @@ function CategoryRowActions({
       set_delete_open(false);
       await utils.categories.list.invalidate();
       await utils.categories.tree.invalidate();
+      toast.success(t("category_deleted"));
     },
     onError: (err) => toast.error(err.message),
   });

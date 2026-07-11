@@ -31,16 +31,16 @@ export function CategoriesPageClient() {
         />
       </div>
       <CategoryStats />
-      <Tabs defaultValue="account">
+      <Tabs defaultValue="list">
         <TabsList className="mb-6">
-          <TabsTrigger value="account">Liste</TabsTrigger>
-          <TabsTrigger value="password">{t("tree_title")}</TabsTrigger>
+          <TabsTrigger value="list">{t("tab_list")}</TabsTrigger>
+          <TabsTrigger value="tree">{t("tree_title")}</TabsTrigger>
         </TabsList>
-        <TabsContent value="account">
-          <h3>Liste des catégories</h3>
+        <TabsContent value="list">
+          <h3>{t("tab_list")}</h3>
           <CategoryTable />
         </TabsContent>
-        <TabsContent value="password">
+        <TabsContent value="tree">
           <h3>{t("tree_title")}</h3>
           <CategoryTree />
         </TabsContent>

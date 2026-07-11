@@ -69,8 +69,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NavUser } from "./nav-user";
 import { authClient } from "@/lib/auth/client";
-import { QueryGuard } from "@/components/query-guard";
 import { TooltipProvider } from "../ui/tooltip";
+import { Skeleton } from "../ui/skeleton";
+
+function SidebarSkeleton() {
+  return (
+    <Sidebar variant="floating" collapsible="icon">
+      <SidebarHeader>
+        <Skeleton className="h-5 w-24" />
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <Skeleton className="h-3 w-20" />
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Skeleton className="h-8 w-full" />
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Skeleton className="h-8 w-full" />
+            </SidebarMenuItem>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SidebarMenuItem key={i}>
+                <Skeleton className="h-8 w-full" />
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <Skeleton className="h-8 w-full" />
+        <div className="flex items-center gap-2 px-2">
+          <Skeleton className="size-8 rounded-full" />
+          <div className="flex flex-col gap-1">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-2.5 w-32" />
+          </div>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
 
 export function AppSidebar() {
   const { data, isPending, error } = authClient.useSession();
@@ -184,8 +224,28 @@ export function AppSidebar() {
     },
   ];
 
+  if (error) {
+    return (
+      <Sidebar variant="floating" collapsible="icon">
+        <SidebarHeader>
+          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
+        </SidebarHeader>
+        <SidebarContent>
+          <p className="text-destructive px-4 text-sm">Failed to load session.</p>
+        </SidebarContent>
+      </Sidebar>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <TooltipProvider>
+        <SidebarSkeleton />
+      </TooltipProvider>
+    );
+  }
+
   return (
-    <QueryGuard session={{ isPending, error }}>
       <TooltipProvider>
         <Sidebar variant="floating" collapsible="icon">
           <SidebarHeader>
@@ -303,6 +363,5 @@ export function AppSidebar() {
           <SidebarRail />
         </Sidebar>
       </TooltipProvider>
-    </QueryGuard>
   );
 }

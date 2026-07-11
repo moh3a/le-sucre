@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import type { z } from "zod";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -44,16 +45,20 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
     onSuccess: async () => {
       await utils.categories.tree.invalidate();
       await utils.categories.list.invalidate();
+      toast.success(t("category_created"));
       onSuccess?.();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const update_mutation = trpc.categories.update.useMutation({
     onSuccess: async () => {
       await utils.categories.tree.invalidate();
       await utils.categories.list.invalidate();
+      toast.success(t("category_updated"));
       onSuccess?.();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const move_mutation = trpc.categories.move.useMutation({
@@ -61,6 +66,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess }: C
       await utils.categories.tree.invalidate();
       await utils.categories.list.invalidate();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const form = useForm<CategoryFormValues>({

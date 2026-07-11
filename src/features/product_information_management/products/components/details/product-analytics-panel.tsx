@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { format, subDays } from "date-fns";
+import { useTranslations } from "next-intl";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function ProductAnalyticsPanel({ product_id }: { product_id: string }) {
+  const t = useTranslations("products");
   const range = useMemo(() => {
     return {
       from: format(subDays(new Date(), 30), "yyyy-MM-dd"),
@@ -49,50 +51,50 @@ export function ProductAnalyticsPanel({ product_id }: { product_id: string }) {
   );
   const { data } = query;
 
-  if (!data) return <p>Aucune donnée</p>;
+  if (!data) return <p>{t("analytics_no_data")}</p>;
 
   return (
-    <QueryGuard query={query} loadingFallback={<p>Chargement…</p>}>
+    <QueryGuard query={query} loadingFallback={<p>{t("analytics_no_data")}</p>}>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat>
-          <StatLabel>Revenu (30j)</StatLabel>
+          <StatLabel>{t("analytics_revenue_30d")}</StatLabel>
           <StatIndicator variant="icon" color="success">
             <DollarSign />
           </StatIndicator>
           <StatValue>{data.totals.revenue} DZD</StatValue>
           <StatSeparator />
-          <StatDescription>Revenu total generate dans les 30 derniers jours</StatDescription>
+          <StatDescription>{t("analytics_revenue_30d_desc")}</StatDescription>
         </Stat>
         <Stat>
-          <StatLabel>Vues</StatLabel>
+          <StatLabel>{t("analytics_views")}</StatLabel>
           <StatIndicator variant="icon" color="success">
             <DollarSign />
           </StatIndicator>
           <StatValue>{data.totals.views}</StatValue>
           <StatSeparator />
-          <StatDescription>Total des vues de produits</StatDescription>
+          <StatDescription>{t("analytics_views_desc")}</StatDescription>
         </Stat>
         <Stat>
-          <StatLabel>Panier</StatLabel>
+          <StatLabel>{t("analytics_cart")}</StatLabel>
           <StatIndicator variant="icon" color="success">
             <DollarSign />
           </StatIndicator>
           <StatValue>{data.totals.add_to_cart}</StatValue>
           <StatSeparator />
-          <StatDescription>Total des ajouts au panier du produit</StatDescription>
+          <StatDescription>{t("analytics_cart_desc")}</StatDescription>
         </Stat>
         <Stat>
-          <StatLabel>Conversion</StatLabel>
+          <StatLabel>{t("analytics_conversion")}</StatLabel>
           <StatIndicator variant="icon" color="success">
             <DollarSign />
           </StatIndicator>
           <StatValue>{(data.totals.avg_conversion * 100).toFixed(1)}%</StatValue>
           <StatSeparator />
-          <StatDescription>Moyenne de conversion du produit</StatDescription>
+          <StatDescription>{t("analytics_conversion_desc")}</StatDescription>
         </Stat>
         <Card className="col-span-2 lg:col-span-4">
           <CardHeader>
-            <CardTitle>Revenus journaliers</CardTitle>
+            <CardTitle>{t("analytics_daily_revenue")}</CardTitle>
             <CardDescription>
               {range.from} - {range.to}
             </CardDescription>

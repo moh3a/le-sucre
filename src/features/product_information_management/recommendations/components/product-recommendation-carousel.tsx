@@ -3,6 +3,7 @@
 import * as React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,7 @@ export function ProductRecommendationCarousel({
   items,
   isLoading,
 }: ProductRecommendationCarouselProps) {
+  const t = useTranslations("recommendations");
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     slidesToScroll: 1,
@@ -117,7 +119,7 @@ export function ProductRecommendationCarousel({
                       />
                     ) : (
                       <div className="bg-primary-foreground/5 text-primary-foreground/40 flex h-full w-full items-center justify-center text-xs">
-                        Aucune image
+                        {t("no_image")}
                       </div>
                     )}
                   </div>

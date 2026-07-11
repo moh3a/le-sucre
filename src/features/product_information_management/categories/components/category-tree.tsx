@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { cn } from "@/lib/utils";
@@ -22,9 +23,10 @@ function Node({ node, depth }: { node: CategoryTreeNode; depth: number }) {
 }
 
 export function CategoryTree() {
+  const t = useTranslations("categories");
   const query = trpc.categories.tree.useQuery();
   const { data } = query;
-  if (!data?.length) return <p className="text-muted-foreground text-sm">…</p>;
+  if (!data?.length) return <p className="text-muted-foreground text-sm">{t("empty")}</p>;
   return (
     <QueryGuard query={query}>
       <ul className="space-y-1 text-sm">

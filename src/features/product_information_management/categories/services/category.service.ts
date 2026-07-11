@@ -21,25 +21,49 @@ import { invalidate_catalog_cache } from "@/features/product_information_managem
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { tryFn, AppError } from "@/lib/error_handling";
 
-function db_error_reason(err: Error): string {
+function db_error_reason(err: Error): { fr: string; en: string; ar: string } {
   const msg = err.message.toLowerCase();
 
-  if (msg.includes("foreign key constraint") || msg.includes("a]parent row")) {
-    return "Cette catégorie est référencée par d'autres éléments (produits, campagnes) et ne peut pas être modifiée tant que ces références existent";
+  if (msg.includes("foreign key constraint") || msg.includes("a parent row")) {
+    return {
+      fr: "Cette catégorie est référencée par d'autres éléments (produits, campagnes) et ne peut pas être modifiée tant que ces références existent",
+      en: "This category is referenced by other items (products, campaigns) and cannot be modified while those references exist",
+      ar: "يشير هذا التصنيف إلى عناصر أخرى (منتجات، حملات) ولا يمكن تعديلها طالما توجد هذه المراجع",
+    };
   }
   if (msg.includes("duplicate entry") || msg.includes("unique")) {
-    return "Une contrainte d'unicité est violée. Un élément avec la même valeur existe déjà";
+    return {
+      fr: "Une contrainte d'unicité est violée. Un élément avec la même valeur existe déjà",
+      en: "A unique constraint is violated. An item with the same value already exists",
+      ar: "يتم انتهاك قيد الفريد. يوجد عنصر بنفس القيمة بالفعل",
+    };
   }
   if (msg.includes("cannot be null")) {
-    return "Un champ obligatoire n'a pas été fourni";
+    return {
+      fr: "Un champ obligatoire n'a pas été fourni",
+      en: "A required field was not provided",
+      ar: "لم يتم تقديم حق مطلوب",
+    };
   }
   if (msg.includes("data too long") || msg.includes("out of range")) {
-    return "La valeur fournie dépasse la taille maximale autorisée par le champ";
+    return {
+      fr: "La valeur fournie dépasse la taille maximale autorisée par le champ",
+      en: "The provided value exceeds the maximum size allowed by the field",
+      ar: "القيمة المقدمة تتجاوز الحد الأقصى المسموح به للحقل",
+    };
   }
   if (msg.includes("connection") || msg.includes("econnrefused") || msg.includes("etimeout")) {
-    return "La connexion à la base de données a été perdue. Vérifiez que le serveur est accessible";
+    return {
+      fr: "La connexion à la base de données a été perdue. Vérifiez que le serveur est accessible",
+      en: "The database connection was lost. Check that the server is accessible",
+      ar: "فقد الاتصال بقاعدة البيانات. تحقق من أن الخادم متاح",
+    };
   }
-  return "Une erreur inattendue est survenue lors de l'opération sur la base de données";
+  return {
+    fr: "Une erreur inattendue est survenue lors de l'opération sur la base de données",
+    en: "An unexpected error occurred during the database operation",
+    ar: "حدث خطأ غير متوقع أثناء عملية قاعدة البيانات",
+  };
 }
 
 async function count_products_in_category(category_id: string): Promise<number> {
@@ -66,8 +90,9 @@ export class CategoryService {
   }) {
     const [error, result] = await tryFn(this.repo.list_flat(params));
     if (error) {
-      throw new AppError(db_error_reason(error), "CATEGORY_LIST_FAILED", 500, {
-        _messages: CATEGORY_ERROR.LIST_FAILED.message,
+      const msg = db_error_reason(error);
+      throw new AppError(msg.fr, "CATEGORY_LIST_FAILED", 500, {
+        _messages: msg,
       });
     }
     return result;
@@ -76,8 +101,9 @@ export class CategoryService {
   async find_by_id(id: string) {
     const [error, result] = await tryFn(this.repo.find_by_id(id));
     if (error) {
-      throw new AppError(db_error_reason(error), "CATEGORY_FETCH_FAILED", 500, {
-        _messages: CATEGORY_ERROR.FETCH_FAILED.message,
+      const msg = db_error_reason(error);
+      throw new AppError(msg.fr, "CATEGORY_FETCH_FAILED", 500, {
+        _messages: msg,
       });
     }
     return result;
@@ -93,8 +119,9 @@ export class CategoryService {
 
     const [db_err, rows] = await tryFn(this.repo.list_all_for_tree(active_only));
     if (db_err) {
-      throw new AppError(db_error_reason(db_err), "CATEGORY_TREE_BUILD_FAILED", 500, {
-        _messages: CATEGORY_ERROR.TREE_BUILD_FAILED.message,
+      const msg = db_error_reason(db_err);
+      throw new AppError(msg.fr, "CATEGORY_TREE_BUILD_FAILED", 500, {
+        _messages: msg,
       });
     }
 
@@ -129,8 +156,9 @@ export class CategoryService {
     );
     if (insert_err) {
       if (insert_err instanceof AppError) throw insert_err;
-      throw new AppError(db_error_reason(insert_err), "CATEGORY_CREATE_FAILED", 500, {
-        _messages: CATEGORY_ERROR.CREATE_FAILED.message,
+      const msg = db_error_reason(insert_err);
+      throw new AppError(msg.fr, "CATEGORY_CREATE_FAILED", 500, {
+        _messages: msg,
       });
     }
 
@@ -145,8 +173,9 @@ export class CategoryService {
 
     const [fetch_err, created] = await tryFn(this.repo.find_by_id(id));
     if (fetch_err) {
-      throw new AppError(db_error_reason(fetch_err), "CATEGORY_FETCH_FAILED", 500, {
-        _messages: CATEGORY_ERROR.FETCH_FAILED.message,
+      const fetch_msg = db_error_reason(fetch_err);
+      throw new AppError(fetch_msg.fr, "CATEGORY_FETCH_FAILED", 500, {
+        _messages: fetch_msg,
       });
     }
     return created;
@@ -163,12 +192,7 @@ export class CategoryService {
     if (input.is_active === false) {
       const product_count = await count_products_in_category(input.id);
       if (product_count > 0) {
-        throw new AppError(
-          `Impossible de désactiver cette catégorie car ${product_count} produit${product_count > 1 ? "s y sont rattachés" : " y est rattaché"}. Réassignez ou supprimez les produits d'abord`,
-          "CATEGORY_UPDATE_FAILED",
-          409,
-          { _messages: CATEGORY_ERROR.UPDATE_FAILED.message, product_count },
-        );
+        throw_error(CATEGORY_ERROR.HAS_PRODUCTS, { product_count });
       }
     }
 
@@ -183,8 +207,9 @@ export class CategoryService {
     );
     if (update_err) {
       if (update_err instanceof AppError) throw update_err;
-      throw new AppError(db_error_reason(update_err), "CATEGORY_UPDATE_FAILED", 500, {
-        _messages: CATEGORY_ERROR.UPDATE_FAILED.message,
+      const msg = db_error_reason(update_err);
+      throw new AppError(msg.fr, "CATEGORY_UPDATE_FAILED", 500, {
+        _messages: msg,
       });
     }
 
@@ -200,8 +225,9 @@ export class CategoryService {
 
     const [fetch_err, updated] = await tryFn(this.repo.find_by_id(input.id));
     if (fetch_err) {
-      throw new AppError(db_error_reason(fetch_err), "CATEGORY_FETCH_FAILED", 500, {
-        _messages: CATEGORY_ERROR.FETCH_FAILED.message,
+      const fetch_msg = db_error_reason(fetch_err);
+      throw new AppError(fetch_msg.fr, "CATEGORY_FETCH_FAILED", 500, {
+        _messages: fetch_msg,
       });
     }
     return updated;
@@ -223,8 +249,9 @@ export class CategoryService {
     );
     if (move_err) {
       if (move_err instanceof AppError) throw move_err;
-      throw new AppError(db_error_reason(move_err), "CATEGORY_MOVE_FAILED", 500, {
-        _messages: CATEGORY_ERROR.MOVE_FAILED.message,
+      const msg = db_error_reason(move_err);
+      throw new AppError(msg.fr, "CATEGORY_MOVE_FAILED", 500, {
+        _messages: msg,
       });
     }
 
@@ -233,8 +260,9 @@ export class CategoryService {
 
     const [fetch_err, moved] = await tryFn(this.repo.find_by_id(id));
     if (fetch_err) {
-      throw new AppError(db_error_reason(fetch_err), "CATEGORY_FETCH_FAILED", 500, {
-        _messages: CATEGORY_ERROR.FETCH_FAILED.message,
+      const fetch_msg = db_error_reason(fetch_err);
+      throw new AppError(fetch_msg.fr, "CATEGORY_FETCH_FAILED", 500, {
+        _messages: fetch_msg,
       });
     }
     return moved;
@@ -249,19 +277,15 @@ export class CategoryService {
 
     const product_count = await count_products_in_category(id);
     if (product_count > 0) {
-      throw new AppError(
-        `Impossible de supprimer cette catégorie car ${product_count} produit${product_count > 1 ? "s lui sont assignés" : " lui est assigné"}. Réassignez ou supprimez les produits d'abord`,
-        "CATEGORY_DELETE_FAILED",
-        409,
-        { _messages: CATEGORY_ERROR.DELETE_FAILED.message, product_count },
-      );
+      throw_error(CATEGORY_ERROR.HAS_PRODUCTS_DELETE, { product_count });
     }
 
     const [delete_err] = await tryFn(this.repo.delete(id));
     if (delete_err) {
       if (delete_err instanceof AppError) throw delete_err;
-      throw new AppError(db_error_reason(delete_err), "CATEGORY_DELETE_FAILED", 500, {
-        _messages: CATEGORY_ERROR.DELETE_FAILED.message,
+      const msg = db_error_reason(delete_err);
+      throw new AppError(msg.fr, "CATEGORY_DELETE_FAILED", 500, {
+        _messages: msg,
       });
     }
 
@@ -274,7 +298,7 @@ export class CategoryService {
       resource_id: id,
     });
 
-    return { ok: true };
+    return { deleted: true };
   }
 
   get_descendants = (id: string, include_self?: boolean) =>
@@ -286,8 +310,9 @@ export class CategoryService {
   async get_stats() {
     const [error, result] = await tryFn(this.repo.get_stats());
     if (error) {
-      throw new AppError(db_error_reason(error), "CATEGORY_STATS_FAILED", 500, {
-        _messages: CATEGORY_ERROR.STATS_FAILED.message,
+      const msg = db_error_reason(error);
+      throw new AppError(msg.fr, "CATEGORY_STATS_FAILED", 500, {
+        _messages: msg,
       });
     }
     return result;

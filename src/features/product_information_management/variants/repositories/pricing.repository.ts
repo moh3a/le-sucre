@@ -3,8 +3,9 @@ import "server-only";
 import { and, desc, eq, lte } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
+import { SKU_ERROR } from "../constants/error-codes";
 
 import { sku_prices, wholesale_rules } from "../schema";
 
@@ -78,7 +79,7 @@ export class PricingRepository {
         ),
       )
       .limit(1);
-    if (!existing.length) throw new NotFoundError("Palier de prix introuvable");
+    if (!existing.length) throw_error(SKU_ERROR.PRICE_TIER_NOT_FOUND);
     await db.delete(sku_prices).where(eq(sku_prices.id, existing[0]!.id));
     return { ok: true };
   }
@@ -137,7 +138,7 @@ export class PricingRepository {
     const has_product = Boolean(input.product_id);
     const has_sku = Boolean(input.sku_id);
     if (has_product === has_sku)
-      throw new ConflictError("Provide exactly one of product_id or sku_id");
+      throw_error(SKU_ERROR.INVALID_WHOLESALE_SCOPE);
 
     const id = generate_id();
     await db.insert(wholesale_rules).values({
@@ -159,7 +160,7 @@ export class PricingRepository {
       .from(wholesale_rules)
       .where(eq(wholesale_rules.id, id))
       .limit(1);
-    if (!existing.length) throw new NotFoundError("Règle wholesale introuvable");
+    if (!existing.length) throw_error(SKU_ERROR.WHOLESALE_RULE_NOT_FOUND);
     await db.delete(wholesale_rules).where(eq(wholesale_rules.id, id));
     return { ok: true };
   }

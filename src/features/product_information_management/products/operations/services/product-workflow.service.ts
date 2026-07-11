@@ -2,8 +2,8 @@ import "server-only";
 import { db } from "@/lib/db";
 import { eq, and, desc, count } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 import { products } from "@/features/product_information_management/products/schema";
-import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { product_change_log, product_publishing_schedule } from "../schema";
 
 export class ProductWorkflowService {
@@ -18,11 +18,22 @@ export class ProductWorkflowService {
   }
 
   async schedule_publishing(input: { product_id: string; action: "publish" | "unpublish"; scheduled_at: string; created_by_user_id: string }) {
+    const product = await db.select({ id: products.id }).from(products).where(eq(products.id, input.product_id)).limit(1);
+    if (!product.length) {
+      throw new Error("Le produit spécifié n'existe pas.");
+    }
     const [created] = await db.insert(product_publishing_schedule).values({ id: generate_id(), product_id: input.product_id, action: input.action, scheduled_at: input.scheduled_at, status: "pending", created_by_user_id: input.created_by_user_id }).$returningId();
     return db.select().from(product_publishing_schedule).where(eq(product_publishing_schedule.id, created.id)).then((r) => r[0] ?? null);
   }
 
   async cancel_schedule(input: { schedule_id: string; cancelled_by_user_id: string; reason?: string }) {
+    const schedule = await db.select({ id: product_publishing_schedule.id, status: product_publishing_schedule.status }).from(product_publishing_schedule).where(eq(product_publishing_schedule.id, input.schedule_id)).limit(1);
+    if (!schedule.length) {
+      throw new Error("Cette planification n'existe pas.");
+    }
+    if (schedule[0].status !== "pending") {
+      throw new Error("Seules les planifications en attente peuvent être annulées.");
+    }
     await db.update(product_publishing_schedule).set({ status: "cancelled", cancelled_by_user_id: input.cancelled_by_user_id, cancel_reason: input.reason ?? null }).where(eq(product_publishing_schedule.id, input.schedule_id));
   }
 
@@ -59,7 +70,12 @@ export class ProductWorkflowService {
         const new_status = schedule.action === "publish" ? "published" : "archived";
         await db.update(products).set({ status: new_status }).where(eq(products.id, schedule.product_id));
         await db.update(product_publishing_schedule).set({ status: "executed", executed_at: new Date().toISOString() }).where(eq(product_publishing_schedule.id, schedule.id));
-      } catch {
+      } catch (err) {
+        logger.error("product_schedule_execution_failed", {
+          schedule_id: schedule.id,
+          product_id: schedule.product_id,
+          error: err instanceof Error ? err.message : String(err),
+        });
         await db.update(product_publishing_schedule).set({ status: "failed" }).where(eq(product_publishing_schedule.id, schedule.id));
       }
     }

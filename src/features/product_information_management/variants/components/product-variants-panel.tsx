@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, X } from "lucide-react";
 import { z } from "zod";
+import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -41,7 +42,12 @@ export function ProductVariantsPanel({
   const { data: price_range } = price_range_query;
 
   const upsert_wholesale = trpc.variants.upsertWholesaleRule.useMutation({
-    onSuccess: () => utils.variants.getPriceRange.invalidate({ product_id }),
+    onSuccess: async () => {
+      toast.success(t("wholesale_rule_added"));
+      await utils.variants.getPriceRange.invalidate({ product_id });
+      set_wholesale({ min_quantity: 10, price: "", discount_percent: "" });
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const [wholesale, set_wholesale] = useState({
@@ -91,7 +97,7 @@ export function ProductVariantsPanel({
             <TabsList>
               <TabsTrigger value="properties">{t("section_properties")}</TabsTrigger>
               <TabsTrigger value="skus">{t("section_skus")}</TabsTrigger>
-              <TabsTrigger value="wholesale">Gros</TabsTrigger>
+              <TabsTrigger value="wholesale">{t("wholesale_tab")}</TabsTrigger>
             </TabsList>
             <TabsContent value="properties">
               <VariantPropertyEditor product_id={product_id} />
@@ -152,7 +158,7 @@ export function ProductVariantsPanel({
                     }
                     disabled={upsert_wholesale.isPending}
                   >
-                    {t("add_wholesale_rule")}
+                    {upsert_wholesale.isPending ? t("saving") : t("add_wholesale_rule")}
                   </Button>
                 </Field>
               </FieldGroup>

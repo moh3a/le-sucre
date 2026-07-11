@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -35,8 +36,9 @@ export function BrandCombobox({
   value,
   onValueChange,
   disabled = false,
-  placeholder = "Rechercher une marque...",
+  placeholder,
 }: BrandComboboxProps) {
+  const t = useTranslations("brands");
   const [create_open, set_create_open] = React.useState(false);
 
   const { data: brands_data, isLoading } = trpc.brands.active.useQuery();
@@ -54,7 +56,7 @@ export function BrandCombobox({
   return (
     <QueryGuard
       isLoading={isLoading}
-      loadingFallback={<Input value={value} disabled placeholder={placeholder} />}
+      loadingFallback={<Input value={value} disabled placeholder={placeholder ?? t("searchBrands")} />}
     >
       <>
         <Combobox
@@ -62,7 +64,7 @@ export function BrandCombobox({
           onValueChange={(val) => onValueChange(val || null)}
           disabled={disabled}
         >
-          <ComboboxInput placeholder={placeholder} showClear />
+          <ComboboxInput placeholder={placeholder ?? t("searchBrands")} showClear />
           <ComboboxContent>
             <ComboboxList>
               {brand_options.map((brand) => (
@@ -73,7 +75,7 @@ export function BrandCombobox({
             </ComboboxList>
             <ComboboxEmpty>
               <div className="flex flex-col items-center gap-2 px-4 py-3">
-                <p className="text-muted-foreground text-sm">Aucune marque trouvée.</p>
+                <p className="text-muted-foreground text-sm">{t("no_results")}</p>
                 <Button
                   type="button"
                   variant="outline"
@@ -82,7 +84,7 @@ export function BrandCombobox({
                   onClick={() => set_create_open(true)}
                 >
                   <PlusIcon className="size-3.5" />
-                  Créer une marque
+                  {t("create_brand")}
                 </Button>
               </div>
             </ComboboxEmpty>
@@ -92,9 +94,9 @@ export function BrandCombobox({
         <ResponsiveDialog open={create_open} onOpenChange={set_create_open}>
           <ResponsiveDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
             <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>Nouvelle marque</ResponsiveDialogTitle>
+              <ResponsiveDialogTitle>{t("new")}</ResponsiveDialogTitle>
               <ResponsiveDialogDescription>
-                Créer une nouvelle marque et l&apos;associer au produit.
+                {t("create_brand_desc")}
               </ResponsiveDialogDescription>
             </ResponsiveDialogHeader>
             <BrandForm

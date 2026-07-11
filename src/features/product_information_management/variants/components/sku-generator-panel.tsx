@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -14,6 +15,7 @@ import {
   DialogTrigger,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -26,34 +28,47 @@ type SkuGeneratorPanelProps = {
 export function SkuGeneratorPanel({ product_id, on_change }: SkuGeneratorPanelProps) {
   const t = useTranslations("variants");
   const utils = trpc.useUtils();
+  const [dialog_open, set_dialog_open] = useState(false);
   const [max_combinations, set_max_combinations] = useState(500);
   const [last_result, set_last_result] = useState<GenerateSkusResult | null>(null);
 
   const generate = trpc.variants.generateSkus.useMutation({
     onSuccess: async (result) => {
       set_last_result(result);
+      toast.success(
+        t("generate_result", {
+          created: result.created,
+          skipped: result.skipped,
+          attempted: result.attempted,
+        }),
+      );
+      if (result.capped) {
+        toast.warning(t("generate_capped"));
+      }
       await utils.variants.listSkus.invalidate({ product_id });
       await utils.variants.getPriceRange.invalidate({ product_id });
       on_change?.();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   return (
     <QueryGuard mutation={generate}>
-      <Dialog>
+      <Dialog
+        open={dialog_open}
+        onOpenChange={(open) => {
+          set_dialog_open(open);
+          if (!open) set_last_result(null);
+        }}
+      >
         <DialogTrigger asChild>
-          <Button variant="outline">Générer les SKUs</Button>
+          <Button variant="outline">{t("section_generate")}</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("section_generate")}</DialogTitle>
             <DialogDescription>
-              Générer les SKUs depuis les propriétés créées.
-              <br />
-              <span className="text-destructive">
-                Attention&nbsp;: la régénération supprime les SKUs existants et vide les paniers
-                contenant ce produit.
-              </span>
+              {t("generate_warning")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4">
@@ -67,6 +82,16 @@ export function SkuGeneratorPanel({ product_id, on_change }: SkuGeneratorPanelPr
                 onChange={(e) => set_max_combinations(Number(e.target.value))}
               />
             </Field>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => set_dialog_open(false)}
+              disabled={generate.isPending}
+            >
+              {t("cancel")}
+            </Button>
             <Button
               type="button"
               onClick={() =>
@@ -77,9 +102,9 @@ export function SkuGeneratorPanel({ product_id, on_change }: SkuGeneratorPanelPr
               }
               disabled={generate.isPending}
             >
-              {t("generate_skus")}
+              {generate.isPending ? t("generating") : t("generate_skus")}
             </Button>
-          </div>
+          </DialogFooter>
 
           {last_result && (
             <p className="text-muted-foreground mt-3 text-sm">

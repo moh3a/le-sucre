@@ -32,6 +32,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
 import { create_property_dto, create_property_value_dto } from "../models/variant.dto";
 import { SkuGeneratorPanel } from "./sku-generator-panel";
@@ -51,15 +61,42 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
 
   const { data, isLoading } = trpc.variants.getConfig.useQuery({ product_id });
 
+  const [property_dialog_open, set_property_dialog_open] = useState(false);
+  const [value_dialog_open, set_value_dialog_open] = useState<string | null>(null);
+  const [delete_value_target, set_delete_value_target] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
+
   const invalidate = async () => {
     await utils.variants.getConfig.invalidate({ product_id });
     on_change?.();
   };
 
-  const create_property = trpc.variants.createProperty.useMutation({ onSuccess: invalidate });
-  const create_value = trpc.variants.createPropertyValue.useMutation({ onSuccess: invalidate });
+  const create_property = trpc.variants.createProperty.useMutation({
+    onSuccess: async () => {
+      toast.success(t("property_created"));
+      set_property_dialog_open(false);
+      await invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const create_value = trpc.variants.createPropertyValue.useMutation({
+    onSuccess: async () => {
+      toast.success(t("value_created"));
+      set_value_dialog_open(null);
+      await invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const delete_value = trpc.variants.deletePropertyValue.useMutation({
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      toast.success(t("value_deleted"));
+      set_delete_value_target(null);
+      await invalidate();
+    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -134,7 +171,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
             <span className="font-heading text-2xl font-semibold">{t("property_list")}</span>
             <Badge variant="secondary">{properties.length}</Badge>
           </div>
-          <Dialog>
+          <Dialog open={property_dialog_open} onOpenChange={set_property_dialog_open}>
             <DialogTrigger asChild>
               <Button type="button">{t("add_property")}</Button>
             </DialogTrigger>
@@ -167,7 +204,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                   </Field>
                   <Field className="flex items-end">
                     <Button type="submit" disabled={create_property.isPending}>
-                      {t("add_property")}
+                      {create_property.isPending ? t("saving") : t("add_property")}
                     </Button>
                   </Field>
                 </FieldGroup>
@@ -223,7 +260,9 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                             <button
                               type="button"
                               className="text-muted-foreground hover:text-destructive ml-1"
-                              onClick={() => delete_value.mutate({ id: value.id })}
+                              onClick={() =>
+                                set_delete_value_target({ id: value.id, label: value.label })
+                              }
                               aria-label={t("delete_value")}
                             >
                               x
@@ -231,13 +270,19 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           </Badge>
                         </div>
                       ))}
-                      <Dialog>
+                      <Dialog
+                        open={value_dialog_open === property.id}
+                        onOpenChange={(open) => {
+                          if (!open) set_value_dialog_open(null);
+                        }}
+                      >
                         <DialogTrigger asChild>
                           <Button
                             size="sm"
                             type="button"
                             variant="outline"
                             disabled={create_value.isPending}
+                            onClick={() => set_value_dialog_open(property.id)}
                           >
                             <Plus />
                             {t("add_value")}
@@ -251,7 +296,9 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                             <FieldLabel>{t("value_code")}</FieldLabel>
                             <Input
                               value={get_value_defaults(property.id).code}
-                              onChange={(e) => set_value_field(property.id, "code", e.target.value)}
+                              onChange={(e) =>
+                                set_value_field(property.id, "code", e.target.value)
+                              }
                               placeholder={t("value_code_placeholder")}
                             />
                           </Field>
@@ -309,21 +356,21 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                           <Field>
                             <FieldLabel>{t("color_field")}</FieldLabel>
                             <ColorPicker
-                              value={get_value_defaults(property.id).color_hex ?? undefined}
+                              value={
+                                get_value_defaults(property.id).color_hex ?? undefined
+                              }
                               onValueChange={(value) =>
                                 set_value_field(property.id, "color_hex", value)
                               }
                             >
-                              {/* <ColorPickerTrigger className="w-full justify-start gap-2">
-                              <ColorPickerSwatch className="size-6 rounded" />
-                              <span className="text-muted-foreground font-mono text-sm">
-                                {get_value_defaults(property.id).color_hex ?? "Choisir une couleur"}
-                              </span>
-                            </ColorPickerTrigger> */}
                               <ColorPickerTrigger asChild>
-                                <Button variant="outline" className="flex items-center gap-2 px-3">
+                                <Button
+                                  variant="outline"
+                                  className="flex items-center gap-2 px-3"
+                                >
                                   <ColorPickerSwatch className="size-4" />
-                                  {get_value_defaults(property.id).color_hex ?? t("choose_color")}
+                                  {get_value_defaults(property.id).color_hex ??
+                                    t("choose_color")}
                                 </Button>
                               </ColorPickerTrigger>
                               <ColorPickerContent>
@@ -339,7 +386,11 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                               type="number"
                               value={get_value_defaults(property.id).sort_order}
                               onChange={(e) =>
-                                set_value_field(property.id, "sort_order", Number(e.target.value))
+                                set_value_field(
+                                  property.id,
+                                  "sort_order",
+                                  Number(e.target.value),
+                                )
                               }
                             />
                           </Field>
@@ -350,7 +401,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
                               disabled={create_value.isPending}
                               onClick={() => on_add_value(property.id)}
                             >
-                              {t("add_value")}
+                              {create_value.isPending ? t("saving") : t("add_value")}
                             </Button>
                           </Field>
                         </DialogContent>
@@ -363,6 +414,38 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
           </ul>
         )}
       </div>
+
+      <AlertDialog
+        open={delete_value_target !== null}
+        onOpenChange={(open) => {
+          if (!open) set_delete_value_target(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_value_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_value_description", { label: delete_value_target?.label ?? "" })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={delete_value.isPending}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={delete_value.isPending}
+              onClick={() => {
+                if (delete_value_target) {
+                  delete_value.mutate({ id: delete_value_target.id });
+                }
+              }}
+            >
+              {delete_value.isPending ? t("deleting") : t("confirm_delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

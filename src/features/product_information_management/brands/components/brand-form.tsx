@@ -12,6 +12,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { MediaPickerField } from "@/features/media_library/components/media-picker-field";
 import type { MediaDTO } from "@/features/media_library/types";
+import { toast } from "sonner";
 import { create_brand_dto } from "../models/brand.dto";
 import { format } from "date-fns";
 
@@ -40,9 +41,11 @@ export function BrandForm({
       await utils.brands.list.invalidate();
       await utils.brands.active.invalidate();
       await utils.brands.stats.invalidate();
+      toast.success(t("create_success"));
       if (brand?.id) onCreated?.(brand.id);
       onSuccess?.();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const update_mutation = trpc.brands.update.useMutation({
@@ -50,8 +53,10 @@ export function BrandForm({
       await utils.brands.list.invalidate();
       await utils.brands.active.invalidate();
       await utils.brands.stats.invalidate();
+      toast.success(t("update_success"));
       onSuccess?.();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const form = useForm<BrandFormValues>({

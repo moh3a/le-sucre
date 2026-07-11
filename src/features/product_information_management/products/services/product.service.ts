@@ -30,19 +30,48 @@ import { sku_service } from "@/features/product_information_management/variants/
 
 const DEFAULT_LOCALE = "fr";
 
-function db_error_reason(err: Error): string {
+function db_error_reason(err: Error): { fr: string; en: string; ar: string } {
   const msg = err.message.toLowerCase();
   if (msg.includes("foreign key") || msg.includes("referenced")) {
-    return "Une entité associée empêche cette opération";
+    return {
+      fr: "Une entité associée empêche cette opération",
+      en: "An associated entity prevents this operation",
+      ar: "كيان مرتبط يمنع هذا الإجراء",
+    };
   }
   if (msg.includes("duplicate") || msg.includes("unique")) {
-    return "Un enregistrement similaire existe déjà";
+    return {
+      fr: "Un enregistrement similaire existe déjà",
+      en: "A similar record already exists",
+      ar: "يوجد سجل مشابه بالفعل",
+    };
   }
-  if (msg.includes("not null")) return "Un champ obligatoire est manquant";
-  if (msg.includes("data too long")) return "Le contenu dépasse la taille maximale autorisée";
-  if (msg.includes("connection") || msg.includes("connect"))
-    return "La connexion à la base de données est interrompue";
-  return "Erreur interne du serveur";
+  if (msg.includes("not null")) {
+    return {
+      fr: "Un champ obligatoire est manquant",
+      en: "A required field is missing",
+      ar: "حقول مطلوبة مفقودة",
+    };
+  }
+  if (msg.includes("data too long")) {
+    return {
+      fr: "Le contenu dépasse la taille maximale autorisée",
+      en: "The content exceeds the maximum allowed size",
+      ar: "المحتوى يتجاوز الحد الأقصى المسموح به",
+    };
+  }
+  if (msg.includes("connection") || msg.includes("connect")) {
+    return {
+      fr: "La connexion à la base de données est interrompue",
+      en: "The database connection has been lost",
+      ar: "تم فقدان اتصال قاعدة البيانات",
+    };
+  }
+  return {
+    fr: "Erreur interne du serveur",
+    en: "Internal server error",
+    ar: "خطأ داخلي في الخادم",
+  };
 }
 
 export class ProductService {
@@ -52,6 +81,10 @@ export class ProductService {
     const slug = input.slug ?? slugify_name(input.name);
     if (await this.repo.find_by_slug(slug)) {
       throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
+    }
+
+    if ((await this.repo.count_by_sku(input.sku)) > 0) {
+      throw_error(PRODUCT_ERROR.SKU_CONFLICT);
     }
 
     const resolved_ids = await category_service.resolve_filter_ids(input.category_id, false);
@@ -184,6 +217,10 @@ export class ProductService {
       throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
     }
 
+    if (input.sku && input.sku !== current.sku && (await this.repo.count_by_sku(input.sku, input.id)) > 0) {
+      throw_error(PRODUCT_ERROR.SKU_CONFLICT);
+    }
+
     if (input.category_id) {
       const resolved = await category_service.resolve_filter_ids(input.category_id, false);
       if (!resolved.length) throw_error(PRODUCT_ERROR.CATEGORY_NOT_FOUND);
@@ -255,6 +292,11 @@ export class ProductService {
   async remove(id: string) {
     const current = await this.repo.find_by_id(id);
     if (!current) throw_error(PRODUCT_ERROR.NOT_FOUND);
+
+    if (await this.repo.has_orders(id)) {
+      throw_error(PRODUCT_ERROR.HAS_ACTIVE_ORDERS);
+    }
+
     await this.repo.delete(id);
 
     void invalidate_catalog_cache();
@@ -296,7 +338,8 @@ export class ProductService {
     );
     if (create_err) {
       if (create_err instanceof AppError) throw create_err;
-      throw new AppError(db_error_reason(create_err), "PRODUCT_DUPLICATE_FAILED", 500, {
+      const reasons = db_error_reason(create_err);
+      throw new AppError(reasons.fr, "PRODUCT_DUPLICATE_FAILED", 500, {
         _messages: PRODUCT_ERROR.DUPLICATE_FAILED.message,
       });
     }
@@ -316,7 +359,8 @@ export class ProductService {
         }),
       );
       if (tr_err && !(tr_err instanceof AppError)) {
-        throw new AppError(db_error_reason(tr_err), "PRODUCT_DUPLICATE_FAILED", 500, {
+        const reasons = db_error_reason(tr_err);
+        throw new AppError(reasons.fr, "PRODUCT_DUPLICATE_FAILED", 500, {
           _messages: PRODUCT_ERROR.DUPLICATE_FAILED.message,
         });
       }

@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -39,6 +40,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { PriceTierManager } from "./price-tier-manager";
 
 type SkuOption = {
@@ -256,6 +267,7 @@ function RangeFilter({
 export function VariantsTable() {
   const t = useTranslations("variants");
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = React.useState(false);
 
   const handleCopy = (id: string) => {
     void navigator.clipboard.writeText(id);
@@ -418,7 +430,7 @@ export function VariantsTable() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setPricingSkuId(row.original.id)}>
-                Tarifs
+                {t("pricing")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -450,13 +462,21 @@ export function VariantsTable() {
     onSuccess: () => {
       utils.variants.adminList.invalidate();
       utils.variants.adminStats.invalidate();
+      toast.success(t("bulk_update_success"));
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const bulkDelete = trpc.variants.bulkDeleteSku.useMutation({
     onSuccess: () => {
       utils.variants.adminList.invalidate();
       utils.variants.adminStats.invalidate();
+      setBulkDeleteDialogOpen(false);
+      toast.success(t("bulk_delete_success"));
+    },
+    onError: (err) => {
+      setBulkDeleteDialogOpen(false);
+      toast.error(err.message);
     },
   });
 
@@ -477,14 +497,11 @@ export function VariantsTable() {
     { label: t("inactive"), value: "inactive" },
   ];
 
-  function runBulk(action: "activate" | "deactivate" | "delete") {
-    const ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
-    if (!ids.length) return;
-    if (action === "delete") {
-      bulkDelete.mutate({ ids });
-    } else {
-      bulkUpdate.mutate({ ids, is_active: action === "activate" });
-    }
+  const selected_ids = table.getFilteredSelectedRowModel().rows.map((r) => r.original.id);
+
+  function runBulk(action: "activate" | "deactivate") {
+    if (!selected_ids.length) return;
+    bulkUpdate.mutate({ ids: selected_ids, is_active: action === "activate" });
   }
 
   return (
@@ -522,20 +539,35 @@ export function VariantsTable() {
           <DataTableSortList table={table} />
           <DataTableViewOptions table={table} />
         </DataTableAdvancedToolbar>
-        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+        {selected_ids.length > 0 && (
           <div className="flex items-center gap-2 border-t p-2">
             <Badge variant="outline">
-              {table.getFilteredSelectedRowModel().rows.length} {t("selected_count")}
+              {selected_ids.length} {t("selected_count")}
             </Badge>
-            <Button variant="secondary" size="sm" onClick={() => runBulk("activate")}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => runBulk("activate")}
+              disabled={bulkUpdate.isPending}
+            >
               <CheckCircle2 className="mr-1 h-4 w-4" />
               {t("activate")}
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => runBulk("deactivate")}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => runBulk("deactivate")}
+              disabled={bulkUpdate.isPending}
+            >
               <Archive className="mr-1 h-4 w-4" />
               {t("deactivate")}
             </Button>
-            <Button variant="destructive" size="sm" onClick={() => runBulk("delete")}>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteDialogOpen(true)}
+              disabled={bulkDelete.isPending}
+            >
               <Archive className="mr-1 h-4 w-4" />
               {t("delete")}
             </Button>
@@ -556,6 +588,26 @@ export function VariantsTable() {
           </div>
         )}
       </DataTable>
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("bulk_delete_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("bulk_delete_description", { count: selected_ids.length })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDelete.isPending}>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={bulkDelete.isPending}
+              onClick={() => bulkDelete.mutate({ ids: selected_ids })}
+            >
+              {bulkDelete.isPending ? t("deleting") : t("confirm_delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <PriceTierManager
         skuId={pricingSkuId ?? ""}
         open={pricingSkuId !== null}

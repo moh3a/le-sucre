@@ -3,6 +3,7 @@ import { sanitize_csv_value } from "@/lib/security/export";
 import type { z } from "zod";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import type { admin_list_products_dto, bulk_product_action_dto } from "../models/product-admin.dto";
 import { product_admin_repository } from "../repositories/product-admin.repository";
 
@@ -32,16 +33,47 @@ export class ProductAdminService {
   }
 
   async bulk(input: z.infer<typeof bulk_product_action_dto>) {
-    if (input.action === "activate")
+    const count = input.product_ids.length;
+
+    if (input.action === "activate") {
       await product_admin_repository.bulk_update_status(input.product_ids, "published");
-    if (input.action === "deactivate")
+      void audit_service.log({
+        action: "product.bulk_activate",
+        resource_type: "product_id",
+        resource_id: input.product_ids[0],
+        metadata: { count },
+      });
+    }
+    if (input.action === "deactivate") {
       await product_admin_repository.bulk_update_status(input.product_ids, "draft");
-    if (input.action === "delete") await product_admin_repository.bulk_delete(input.product_ids);
-    if (input.action === "assign_category" && input.category_id)
+      void audit_service.log({
+        action: "product.bulk_deactivate",
+        resource_type: "product_id",
+        resource_id: input.product_ids[0],
+        metadata: { count },
+      });
+    }
+    if (input.action === "delete") {
+      await product_admin_repository.bulk_delete(input.product_ids);
+      void audit_service.log({
+        action: "product.bulk_delete",
+        resource_type: "product_id",
+        resource_id: input.product_ids[0],
+        metadata: { count },
+      });
+    }
+    if (input.action === "assign_category" && input.category_id) {
       await product_admin_repository.bulk_update_category(input.product_ids, input.category_id);
+      void audit_service.log({
+        action: "product.bulk_assign_category",
+        resource_type: "product_id",
+        resource_id: input.product_ids[0],
+        metadata: { count, category_id: input.category_id },
+      });
+    }
 
     void invalidate_catalog_cache();
-    return { ok: true };
+    return { affected: count };
   }
 
   async export_csv(input: Omit<z.infer<typeof admin_list_products_dto>, "page" | "limit">) {

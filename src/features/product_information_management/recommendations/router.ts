@@ -21,6 +21,8 @@ import { product_service } from "@/features/product_information_management/produ
 import { recommendation_repository } from "./repositories/recommendation.repository";
 import { indexing_service } from "./services/indexing.service";
 import { invalidate_recommendations_for_product } from "./helpers/invalidate-recommendations.helper";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { RECOMMENDATION_ERROR, RECOMMENDATION_INDEX_ERROR } from "./constants/error-codes";
 
 export const recommendations_router = create_trpc_router({
   byProduct: public_procedure.input(product_recommendations_query_dto).query(async ({ input }) => {
@@ -29,7 +31,7 @@ export const recommendations_router = create_trpc_router({
       (input.slug
         ? (await product_service.get_by_slug(input.slug, input.locale)).product.id
         : null);
-    if (!product_id) throw new Error("product_required");
+    if (!product_id) throw_error(RECOMMENDATION_ERROR.PRODUCT_NOT_FOUND);
     return recommendation_service.get_product_recommendations({
       product_id,
       locale: input.locale,
@@ -93,21 +95,21 @@ export const recommendations_router = create_trpc_router({
       .mutation(async ({ input }) => {
         await recommendation_repository.add_edge(input);
         await invalidate_recommendations_for_product(input.source_product_id);
-        return { ok: true };
+        return { added: true };
       }),
 
     removeEdge: permission_procedure(PERMISSIONS.products_write)
       .input(admin_remove_recommendation_edge_dto)
       .mutation(async ({ input }) => {
         await recommendation_repository.delete_edge_by_id(input.edge_id);
-        return { ok: true };
+        return { deleted: true };
       }),
 
     reindex: permission_procedure(PERMISSIONS.products_write)
       .input(admin_reindex_product_dto)
       .mutation(async ({ input }) => {
         await indexing_service.enqueue("reindex_product", { product_id: input.product_id, locale: input.locale });
-        return { ok: true, message: "Réindexation planifiée" };
+        return { scheduled: true };
       }),
   }),
 });

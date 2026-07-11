@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
@@ -12,6 +13,7 @@ export function RecommendedForYouSection({
   locale: AppLocale;
   limit?: number;
 }) {
+  const t = useTranslations("recommendations");
   const query = trpc.recommendations.forYou.useQuery(
     { locale, limit },
     {
@@ -25,7 +27,7 @@ export function RecommendedForYouSection({
   return (
     <QueryGuard query={query}>
       <ProductRecommendationCarousel
-        title={locale === "fr" ? "Recommandé pour vous" : "Recommended For You"}
+        title={t("recommended_for_you")}
         items={data ?? []}
         isLoading={isLoading}
       />

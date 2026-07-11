@@ -2,7 +2,8 @@ import "server-only";
 import { eq, inArray, like, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { categories } from "../schema";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { CATEGORY_ERROR } from "../constants/error-codes";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import type { CategoryRecord, CategoryTreeNode } from "../types";
 
 const MAX_DEPTH = 50;
@@ -56,12 +57,12 @@ export class CategoryTreeEngine {
       .from(categories)
       .where(eq(categories.id, parent_id))
       .limit(1);
-    if (!parent) throw new NotFoundError("Catégorie parente introuvable");
+    if (!parent) throw_error(CATEGORY_ERROR.NOT_FOUND);
     if (self_id && parent.path.includes(`/${self_id}/`)) {
-      throw new ConflictError("Déplacement invalide : cycle détecté");
+      throw_error(CATEGORY_ERROR.INVALID_PARENT);
     }
     if (parent.depth >= MAX_DEPTH - 1) {
-      throw new ConflictError(`Profondeur maximale (${MAX_DEPTH}) atteinte`);
+      throw_error(CATEGORY_ERROR.DEPTH_EXCEEDED);
     }
     return { parent_path: parent.path, depth: parent.depth + 1 };
   }
@@ -73,7 +74,7 @@ export class CategoryTreeEngine {
       .from(categories)
       .where(eq(categories.id, category_id))
       .limit(1);
-    if (!node) throw new NotFoundError("Catégorie introuvable");
+    if (!node) throw_error(CATEGORY_ERROR.NOT_FOUND);
 
     const rows = await db
       .select()
@@ -91,7 +92,7 @@ export class CategoryTreeEngine {
       .from(categories)
       .where(eq(categories.id, category_id))
       .limit(1);
-    if (!node) throw new NotFoundError("Catégorie introuvable");
+    if (!node) throw_error(CATEGORY_ERROR.NOT_FOUND);
 
     const ids = parse_ancestor_ids(node.path).filter((id) => id !== category_id);
     if (!ids.length) return [];

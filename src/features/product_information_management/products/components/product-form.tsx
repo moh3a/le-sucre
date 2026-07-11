@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -81,12 +82,18 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
   const create = trpc.products.create.useMutation({
     onSuccess: (result) => {
       utils.products.adminList.invalidate();
+      toast.success(t("product_created"));
       router.push(`/console/products/${result.product.id}`);
     },
+    onError: (err) => toast.error(err.message),
   });
 
-  const upsert_en = trpc.products.upsertTranslation.useMutation();
-  const upsert_ar = trpc.products.upsertTranslation.useMutation();
+  const upsert_en = trpc.products.upsertTranslation.useMutation({
+    onError: (err) => toast.error(err.message),
+  });
+  const upsert_ar = trpc.products.upsertTranslation.useMutation({
+    onError: (err) => toast.error(err.message),
+  });
 
   const default_values: ProductFormValues = {
     name: "",

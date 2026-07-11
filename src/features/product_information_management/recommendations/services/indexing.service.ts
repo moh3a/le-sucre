@@ -13,16 +13,20 @@ import { get_fbt_candidates } from "../engines/collaborative.engine";
 import { invalidate_recommendations_for_product } from "../helpers/invalidate-recommendations.helper";
 import { RECOMMENDATION_TYPE } from "../constants/recommendation-types";
 import { format } from "date-fns";
+import { tryFn } from "@/lib/error_handling";
 
 export class IndexingService {
   async enqueue(job_type: string, payload: Record<string, unknown>, run_after?: string) {
-    await db.insert(recommendation_index_jobs).values({
-      id: generate_id(),
-      job_type,
-      payload,
-      status: "pending",
-      run_after: run_after ?? format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-    });
+    const [err] = await tryFn(
+      db.insert(recommendation_index_jobs).values({
+        id: generate_id(),
+        job_type,
+        payload,
+        status: "pending",
+        run_after: run_after ?? format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      }),
+    );
+    if (err) throw err;
   }
 
   async reindex_product(product_id: string, locale = "fr") {

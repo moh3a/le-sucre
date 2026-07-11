@@ -1,8 +1,9 @@
 import "server-only";
-import { and, count, desc, eq, inArray, like, or } from "drizzle-orm";
+import { and, count, desc, eq, inArray, like, ne, or } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { products, product_translations, product_media } from "../schema";
+import { order_items } from "@/features/order_management_system/orders/schema";
 import type { ProductStatus } from "../models/product.dto";
 
 const DEFAULT_LOCALE = "fr";
@@ -161,5 +162,27 @@ export class ProductRepository {
       .from(product_translations)
       .where(like(product_translations.name, q));
     return rows.map((r) => r.product_id);
+  }
+
+  async has_orders(product_id: string): Promise<boolean> {
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(order_items)
+      .where(eq(order_items.product_id, product_id))
+      .limit(1);
+    return Number(total ?? 0) > 0;
+  }
+
+  async count_by_sku(sku: string, exclude_id?: string): Promise<number> {
+    const filters = [eq(products.sku, sku)];
+    if (exclude_id) {
+      filters.push(ne(products.id, exclude_id));
+    }
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(products)
+      .where(and(...filters))
+      .limit(1);
+    return Number(total ?? 0);
   }
 }

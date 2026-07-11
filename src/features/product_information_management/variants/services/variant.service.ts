@@ -15,9 +15,13 @@ import type {
   update_property_value_dto,
 } from "../models/variant.dto";
 import { property_repository } from "../repositories/property.repository";
+import { sku_repository } from "../repositories/sku.repository";
 
 export class VariantService {
-  constructor(private readonly properties = property_repository) {}
+  constructor(
+    private readonly properties = property_repository,
+    private readonly skus = sku_repository,
+  ) {}
 
   private async assert_product(product_id: string) {
     const product = await db
@@ -64,6 +68,20 @@ export class VariantService {
   }
 
   async delete_property(id: string) {
+    const current = await this.properties.get_property(id);
+    if (!current) throw_error(VARIANT_ERROR.NOT_FOUND);
+
+    const values = await this.properties.list_values(id);
+    if (values.length > 0) {
+      const value_ids = values.map((v) => v.id);
+      const skus = await this.skus.list_by_product(current.product_id);
+      const has_skus = skus.some((sku) => {
+        if (!sku.option_signature) return false;
+        return value_ids.some((vid) => sku.option_signature.includes(vid));
+      });
+      if (has_skus) throw_error(VARIANT_ERROR.PROPERTY_HAS_SKUS);
+    }
+
     return this.properties.delete_property(id);
   }
 
@@ -82,6 +100,8 @@ export class VariantService {
   }
 
   async update_property_value(input: z.infer<typeof update_property_value_dto>) {
+    const current = await this.properties.get_value(input.id);
+    if (!current) throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
     return this.properties.update_value(input.id, {
       ...(input.code !== undefined && { code: input.code }),
       ...(input.label !== undefined && { label: input.label }),
@@ -93,6 +113,8 @@ export class VariantService {
   }
 
   async delete_property_value(id: string) {
+    const current = await this.properties.get_value(id);
+    if (!current) throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
     return this.properties.delete_value(id);
   }
 }

@@ -55,6 +55,24 @@ export const VARIANT_ERROR = {
       ar: "وضع المتغيرات مفعل بالفعل لهذا المنتج",
     },
   },
+  PROPERTY_HAS_SKUS: {
+    code: "VARIANT_PROPERTY_HAS_SKUS",
+    status: 409,
+    message: {
+      fr: "La propriété est utilisée par des SKUs et ne peut pas être supprimée",
+      en: "Property is used by existing SKUs and cannot be deleted",
+      ar: "الخاصية مستخدمة بواسطة SKUs ولا يمكن حذفها",
+    },
+  },
+  VALUE_IN_USE: {
+    code: "VARIANT_VALUE_IN_USE",
+    status: 409,
+    message: {
+      fr: "La valeur est utilisée par des SKUs et ne peut pas être supprimée",
+      en: "Value is used by existing SKUs and cannot be deleted",
+      ar: "القيمة مستخدمة بواسطة SKUs ولا يمكن حذفها",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;
 
 export const SKU_ERROR = {
@@ -155,6 +173,33 @@ export const SKU_ERROR = {
       fr: "Échec de la mise à jour groupée des SKUs",
       en: "Bulk SKU update failed",
       ar: "فشل التحديث الجماعي لـ SKUs",
+    },
+  },
+  HAS_ASSOCIATED_ORDERS: {
+    code: "SKU_HAS_ASSOCIATED_ORDERS",
+    status: 409,
+    message: {
+      fr: "Ce SKU est associé à des commandes et ne peut pas être supprimé",
+      en: "This SKU is associated with existing orders and cannot be deleted",
+      ar: "هذا الـ SKU مرتبط بطلبات موجودة ولا يمكن حذفه",
+    },
+  },
+  INVALID_WHOLESALE_SCOPE: {
+    code: "SKU_INVALID_WHOLESALE_SCOPE",
+    status: 400,
+    message: {
+      fr: "Veuillez fournir exactement un product_id ou un sku_id",
+      en: "Provide exactly one of product_id or sku_id",
+      ar: "يجب تحديد أحد المعرّفين product_id أو sku_id فقط",
+    },
+  },
+  DATABASE_OPERATION_FAILED: {
+    code: "SKU_DATABASE_OPERATION_FAILED",
+    status: 500,
+    message: {
+      fr: "L'opération a échoué car les données ont été modifiées par un autre processus. Veuillez réessayer",
+      en: "The operation failed because the data was modified by another process. Please try again",
+      ar: "فشلت العملية لأن البيانات تم تعديلها بواسطة عملية أخرى. يرجى المحاولة مرة أخرى",
     },
   },
 } as const satisfies Record<string, ErrorDef>;

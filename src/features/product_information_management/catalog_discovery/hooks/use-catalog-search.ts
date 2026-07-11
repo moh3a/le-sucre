@@ -20,7 +20,7 @@ async function fetch_catalog_search(params: CatalogSearchInput) {
 
   const res = await fetch(`/api/storefront/catalog/search?${sp.toString()}`);
   const json = await res.json();
-  if (!json.success) throw new Error(json.error?.message ?? "Search failed");
+  if (!json.success) throw new Error(json.error?.message);
   return json.data as {
     items: Array<{
       id: string;

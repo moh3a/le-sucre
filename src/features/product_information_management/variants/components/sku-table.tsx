@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -38,6 +39,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { build_option_signature, build_sku_code } from "../engines/option-signature.engine";
@@ -97,21 +108,49 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     on_change?.();
   };
 
-  const update_sku = trpc.variants.updateSku.useMutation({ onSuccess: invalidate });
-  const delete_sku = trpc.variants.deleteSku.useMutation({ onSuccess: invalidate });
-  const create_sku = trpc.variants.createSku.useMutation({ onSuccess: invalidate });
+  const update_sku = trpc.variants.updateSku.useMutation({
+    onSuccess: async () => {
+      toast.success(t("sku_updated"));
+      await invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const delete_sku = trpc.variants.deleteSku.useMutation({
+    onSuccess: async () => {
+      toast.success(t("sku_deleted"));
+      set_delete_target(null);
+      await invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const create_sku = trpc.variants.createSku.useMutation({
+    onSuccess: async () => {
+      toast.success(t("sku_created"));
+      set_sheet_open(false);
+      await invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
   const bulk_update = trpc.variants.bulkUpdateSku.useMutation({
     onSuccess: async () => {
       setRowSelection({});
       set_bulk_price_dialog_open(false);
       set_bulk_stock_dialog_open(false);
+      toast.success(t("bulk_update_success"));
       await invalidate();
     },
+    onError: (err) => toast.error(err.message),
   });
   const bulk_delete = trpc.variants.bulkDeleteSku.useMutation({
     onSuccess: async () => {
       setRowSelection({});
+      set_bulk_delete_dialog_open(false);
+      toast.success(t("bulk_delete_success"));
       await invalidate();
+    },
+    onError: (err) => {
+      set_bulk_delete_dialog_open(false);
+      toast.error(err.message);
     },
   });
 
@@ -135,6 +174,8 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
 
   const [bulk_price_dialog_open, set_bulk_price_dialog_open] = useState(false);
   const [bulk_stock_dialog_open, set_bulk_stock_dialog_open] = useState(false);
+  const [bulk_delete_dialog_open, set_bulk_delete_dialog_open] = useState(false);
+  const [delete_target, set_delete_target] = useState<{ id: string; code: string } | null>(null);
 
   const bulk_price_form = useForm<BulkPriceFormValues>({
     resolver: zodResolver(bulk_price_schema),
@@ -146,7 +187,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     defaultValues: { stock: "" },
   });
 
-  // Inline editing state: { sku_id: { field: value } }
   const [inline_edits, set_inline_edits] = useState<
     Record<string, { base_price?: string; offer_price?: string; stock_available?: string }>
   >({});
@@ -217,10 +257,8 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       is_active: values.is_active,
       property_value_ids,
     });
-    set_sheet_open(false);
   }
 
-  // Inline edit handlers
   const start_inline_edit = useCallback((sku_id: string, field: string, value: string | number) => {
     set_inline_edits((prev) => ({
       ...prev,
@@ -282,8 +320,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       const edit = inline_edits[sku_id];
       if (!edit || edit.stock_available === undefined) return;
 
-      // Update stock via the single SKU update — stock_available is not in update_sku_dto
-      // so use bulk_update with a single ID
       await bulk_update.mutateAsync({
         ids: [sku_id],
         stock_available: Number(edit.stock_available),
@@ -306,7 +342,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     [inline_edits, bulk_update],
   );
 
-  // Dynamic property columns
   const property_columns = useMemo<ColumnDef<SkuListRow>[]>(
     () =>
       properties.map((prop) => ({
@@ -544,10 +579,9 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => {
-                if (!window.confirm(t("confirm_delete_sku"))) return;
-                delete_sku.mutate({ id: row.original.sku_id });
-              }}
+              onClick={() =>
+                set_delete_target({ id: row.original.sku_id, code: row.original.sku_code })
+              }
             >
               {t("delete")}
             </Button>
@@ -558,7 +592,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       currency,
-      delete_sku,
       open_edit,
       t,
       properties,
@@ -597,7 +630,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     enableRowSelection: true,
   });
 
-  // Bulk actions
   const selected_ids = useMemo(
     () => table?.getFilteredSelectedRowModel().rows.map((row) => row.id) ?? [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -628,11 +660,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       ids: selected_ids,
       stock_available: Number(stock),
     });
-  }
-
-  async function on_bulk_delete() {
-    if (!window.confirm(t("confirm_bulk_delete"))) return;
-    await bulk_delete.mutateAsync({ ids: selected_ids });
   }
 
   const action_bar = useMemo(
@@ -688,7 +715,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             variant="destructive"
             size="sm"
             className="h-8 text-xs"
-            onClick={on_bulk_delete}
+            onClick={() => set_bulk_delete_dialog_open(true)}
             disabled={bulk_delete.isPending}
           >
             {t("delete")}
@@ -828,7 +855,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 onClick={on_save_sheet}
                 disabled={create_sku.isPending || update_sku.isPending}
               >
-                {t("save")}
+                {(create_sku.isPending || update_sku.isPending) ? t("saving") : t("save")}
               </Button>
             </SheetFooter>
           </SheetContent>
@@ -869,11 +896,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 type="button"
                 variant="outline"
                 onClick={() => set_bulk_price_dialog_open(false)}
+                disabled={bulk_update.isPending}
               >
                 {t("cancel")}
               </Button>
-              <Button type="button" onClick={on_save_bulk_price} disabled={bulk_update.isPending}>
-                {t("update")}
+              <Button
+                type="button"
+                onClick={on_save_bulk_price}
+                disabled={bulk_update.isPending}
+              >
+                {bulk_update.isPending ? t("saving") : t("update")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -910,6 +942,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 type="button"
                 variant="outline"
                 onClick={() => set_bulk_stock_dialog_open(false)}
+                disabled={bulk_update.isPending}
               >
                 {t("cancel")}
               </Button>
@@ -918,11 +951,66 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 onClick={on_save_bulk_stock}
                 disabled={bulk_update.isPending || !bulk_stock_form.watch("stock")}
               >
-                {t("set_stock")}
+                {bulk_update.isPending ? t("saving") : t("set_stock")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog
+          open={delete_target !== null}
+          onOpenChange={(open) => {
+            if (!open) set_delete_target(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("delete_sku_title")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("delete_sku_description", { code: delete_target?.code ?? "" })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={delete_sku.isPending}>
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={delete_sku.isPending}
+                onClick={() => {
+                  if (delete_target) {
+                    delete_sku.mutate({ id: delete_target.id });
+                  }
+                }}
+              >
+                {delete_sku.isPending ? t("deleting") : t("confirm_delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={bulk_delete_dialog_open} onOpenChange={set_bulk_delete_dialog_open}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("bulk_delete_title")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("bulk_delete_description", { count: selected_ids.length })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={bulk_delete.isPending}>
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={bulk_delete.isPending}
+                onClick={() => bulk_delete.mutate({ ids: selected_ids })}
+              >
+                {bulk_delete.isPending ? t("deleting") : t("confirm_delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </QueryGuard>
   );

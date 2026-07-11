@@ -1,8 +1,11 @@
+import "server-only";
+
 import { and, asc, count, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { ConflictError, NotFoundError } from "@/lib/error_handling";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
+import { SKU_ERROR } from "../constants/error-codes";
 
 import { products, product_translations } from "@/features/product_information_management/products/schema";
 import { product_properties, property_values, product_skus, sku_option_values } from "../schema";
@@ -16,6 +19,11 @@ export class SkuRepository {
   async find_by_id(id: string) {
     const [row] = await db.select().from(product_skus).where(eq(product_skus.id, id)).limit(1);
     return row ?? null;
+  }
+
+  async find_by_ids(ids: string[]) {
+    if (!ids.length) return [];
+    return db.select().from(product_skus).where(inArray(product_skus.id, ids));
   }
 
   async find_by_signature(product_id: string, option_signature: string) {
@@ -83,7 +91,7 @@ export class SkuRepository {
     metadata: Record<string, unknown>;
   }) {
     const existing = await this.find_by_signature(input.product_id, input.option_signature);
-    if (existing) throw new ConflictError("Ce SKU (combinaison) existe déjà");
+    if (existing) throw_error(SKU_ERROR.CODE_CONFLICT);
 
     const id = generate_id();
     await db.insert(product_skus).values({
@@ -143,7 +151,7 @@ export class SkuRepository {
     }>,
   ) {
     const current = await this.find_by_id(id);
-    if (!current) throw new NotFoundError("SKU introuvable");
+    if (!current) throw_error(SKU_ERROR.NOT_FOUND);
 
     await db
       .update(product_skus)
@@ -163,7 +171,7 @@ export class SkuRepository {
 
   async delete_sku(id: string) {
     const current = await this.find_by_id(id);
-    if (!current) throw new NotFoundError("SKU introuvable");
+    if (!current) throw_error(SKU_ERROR.NOT_FOUND);
     await db.delete(product_skus).where(eq(product_skus.id, id));
     return { ok: true };
   }

@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import z from "zod";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, Trash2 } from "lucide-react";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -14,6 +15,16 @@ import { MediaPickerDialog } from "@/features/media_library/components/media-pic
 import { full_product_media_dto } from "../../models/product.dto";
 import type { MediaDTO } from "@/features/media_library/types";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProductMediaGalleryProps = {
   product_id: string;
@@ -22,10 +33,16 @@ type ProductMediaGalleryProps = {
 
 export function ProductMediaGallery({ product_id, initial_media }: ProductMediaGalleryProps) {
   const t = useTranslations("products");
+  const tc = useTranslations("common");
   const utils = trpc.useUtils();
+  const [delete_target, set_delete_target] = useState<string | null>(null);
 
   const remove_media = trpc.products.removeMedia.useMutation({
-    onSuccess: () => utils.products.byId.invalidate({ id: product_id }),
+    onSuccess: () => {
+      utils.products.byId.invalidate({ id: product_id });
+      toast.success(t("media_deleted"));
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const link_media = trpc.products.addMedia.useMutation({
@@ -97,9 +114,10 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
                     size="sm"
                     variant="destructive"
                     className="absolute right-2 bottom-2"
-                    onClick={() => remove_media.mutate({ product_id, media_id: item.id })}
+                    disabled={remove_media.isPending}
+                    onClick={() => set_delete_target(item.id)}
                   >
-                    {t("delete")}
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               ))}
@@ -107,6 +125,30 @@ export function ProductMediaGallery({ product_id, initial_media }: ProductMediaG
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!delete_target} onOpenChange={(open) => { if (!open) set_delete_target(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("media_delete_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("media_delete_confirm")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={remove_media.isPending}>{tc("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={remove_media.isPending}
+              onClick={() => {
+                if (delete_target) {
+                  remove_media.mutate({ product_id, media_id: delete_target });
+                  set_delete_target(null);
+                }
+              }}
+            >
+              {remove_media.isPending ? tc("loading") : tc("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

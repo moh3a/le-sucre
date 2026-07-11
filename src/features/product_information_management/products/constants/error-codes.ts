@@ -154,6 +154,24 @@ export const PRODUCT_ERROR = {
       ar: "فشل نسخ المنتج",
     },
   },
+  SKU_CONFLICT: {
+    code: "PRODUCT_SKU_CONFLICT",
+    status: 409,
+    message: {
+      fr: "Un produit avec ce code SKU existe déjà",
+      en: "A product with this SKU already exists",
+      ar: "يوجد منتج بهذا الرمز بالفعل",
+    },
+  },
+  HAS_ACTIVE_ORDERS: {
+    code: "PRODUCT_HAS_ACTIVE_ORDERS",
+    status: 409,
+    message: {
+      fr: "Ce produit ne peut pas être supprimé car il est référencé par des commandes existantes",
+      en: "This product cannot be deleted because it is referenced by existing orders",
+      ar: "لا يمكن حذف هذا المنتج لأنه مرتبط ب orders موجودة",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;
 
 

@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -90,15 +91,19 @@ export function ProductDetailGeneralTab({
     onSuccess: () => {
       utils.products.byId.invalidate({ id: product_id });
       utils.products.adminList.invalidate();
+      toast.success(t("product_updated"));
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const upsert_en = trpc.products.upsertTranslation.useMutation({
     onSuccess: () => utils.products.byId.invalidate({ id: product_id }),
+    onError: (err) => toast.error(err.message),
   });
 
   const upsert_ar = trpc.products.upsertTranslation.useMutation({
     onSuccess: () => utils.products.byId.invalidate({ id: product_id }),
+    onError: (err) => toast.error(err.message),
   });
 
   const fr_tr = translations.find((tr) => tr.locale === "fr");

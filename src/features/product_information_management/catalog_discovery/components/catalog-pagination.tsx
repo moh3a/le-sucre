@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,8 @@ interface CatalogPaginationProps {
 }
 
 export function CatalogPagination({ page, totalPages, onChange }: CatalogPaginationProps) {
+  const t = useTranslations("catalog");
+
   if (totalPages <= 1) return null;
 
   const pages: number[] = [];
@@ -28,7 +31,7 @@ export function CatalogPagination({ page, totalPages, onChange }: CatalogPaginat
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         className="size-9 rounded-lg"
-        aria-label="Previous page"
+        aria-label={t("previous_page")}
       >
         <ChevronLeft className="size-4" />
       </Button>
@@ -86,7 +89,7 @@ export function CatalogPagination({ page, totalPages, onChange }: CatalogPaginat
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
         className="size-9 rounded-lg"
-        aria-label="Next page"
+        aria-label={t("next_page")}
       >
         <ChevronRight className="size-4" />
       </Button>

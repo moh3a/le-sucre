@@ -34,6 +34,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RECOMMENDATION_TYPE } from "@/features/product_information_management/recommendations/constants/recommendation-types";
@@ -92,6 +102,7 @@ export function ProductRecommendationsTab({ product_id }: Props) {
     name: string;
     image_url: string | null;
   } | null>(null);
+  const [edge_to_delete, set_edge_to_delete] = useState<{ id: string; name: string } | null>(null);
 
   const { data: search_results, isFetching: search_loading } = trpc.products.adminList.useQuery(
     { search: search_query, page: 1, limit: 10 },
@@ -217,7 +228,11 @@ export function ProductRecommendationsTab({ product_id }: Props) {
                                   variant="ghost"
                                   size="icon"
                                   className="text-destructive size-8"
-                                  onClick={() => handle_remove_edge(edge.id)}
+                                  onClick={() => {
+                                    const target_name =
+                                      edges.find((e) => e.id === edge.id)?.target_product_id ?? "";
+                                    set_edge_to_delete({ id: edge.id, name: target_name });
+                                  }}
                                   disabled={remove_edge.isPending}
                                 >
                                   <Trash2 className="size-4" />
@@ -354,6 +369,26 @@ export function ProductRecommendationsTab({ product_id }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={!!edge_to_delete} onOpenChange={(open) => !open && set_edge_to_delete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("media_delete_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("recommendation_edge_confirm")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (edge_to_delete) handle_remove_edge(edge_to_delete.id);
+                set_edge_to_delete(null);
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

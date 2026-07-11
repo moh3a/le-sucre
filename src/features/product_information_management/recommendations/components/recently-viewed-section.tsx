@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { ProductRecommendationCarousel } from "./product-recommendation-carousel";
@@ -13,6 +14,7 @@ export function RecentlyViewedSection({
   locale: AppLocale;
   limit?: number;
 }) {
+  const t = useTranslations("recommendations");
   const [sessionKey] = React.useState<string>(() => {
     let key = localStorage.getItem("ls_session_key");
     if (!key) {
@@ -39,7 +41,7 @@ export function RecentlyViewedSection({
   return (
     <QueryGuard query={query}>
       <ProductRecommendationCarousel
-        title={locale === "fr" ? "Récemment consultés" : "Recently Viewed"}
+        title={t("recently_viewed")}
         items={data ?? []}
         isLoading={isLoading}
       />

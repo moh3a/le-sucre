@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
@@ -35,6 +36,7 @@ type Props = {
 };
 
 export function ProductDetailTabs({ product_id }: Props) {
+  const t = useTranslations("products");
   const product_details_query = trpc.products.byId.useQuery({ id: product_id });
   const product = product_details_query.data?.product;
   const translations = product_details_query.data?.translations;
@@ -63,20 +65,20 @@ export function ProductDetailTabs({ product_id }: Props) {
           <>
             <div>
               <h1 className="font-heading text-2xl font-bold">{fr?.name ?? product.slug}</h1>
-              <p className="text-muted-foreground text-sm">Product details</p>
+              <p className="text-muted-foreground text-sm">{t("detail_subtitle")}</p>
             </div>
 
             <Tabs value={active_tab} onValueChange={on_tab_change}>
               <TabsList className="flex flex-wrap">
-                <TabsTrigger value="general">Général</TabsTrigger>
-                <TabsTrigger value="variants">Variantes</TabsTrigger>
-                <TabsTrigger value="orders">Commandes</TabsTrigger>
-                <TabsTrigger value="inventory">Inventaire</TabsTrigger>
-                <TabsTrigger value="media">Médias</TabsTrigger>
-                <TabsTrigger value="reviews">Avis</TabsTrigger>
-                <TabsTrigger value="analytics">Analytique</TabsTrigger>
-                <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
-                <TabsTrigger value="journal">Journal</TabsTrigger>
+                <TabsTrigger value="general">{t("tab_general")}</TabsTrigger>
+                <TabsTrigger value="variants">{t("tab_variants")}</TabsTrigger>
+                <TabsTrigger value="orders">{t("tab_orders")}</TabsTrigger>
+                <TabsTrigger value="inventory">{t("tab_inventory")}</TabsTrigger>
+                <TabsTrigger value="media">{t("tab_media")}</TabsTrigger>
+                <TabsTrigger value="reviews">{t("tab_reviews")}</TabsTrigger>
+                <TabsTrigger value="analytics">{t("tab_analytics")}</TabsTrigger>
+                <TabsTrigger value="recommendations">{t("tab_recommendations")}</TabsTrigger>
+                <TabsTrigger value="journal">{t("tab_journal")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="general" className="space-y-4">

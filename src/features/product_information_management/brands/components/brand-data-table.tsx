@@ -32,6 +32,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { BrandFormDialog } from "./brand-form-dialog";
 import type { BrandRecord } from "../types";
 import { useDataTable } from "@/features/data-table/use-data-table";
@@ -46,19 +57,18 @@ function BrandRowActions({
 }) {
   const t = useTranslations("brands");
   const utils = trpc.useUtils();
+  const [delete_open, set_delete_open] = React.useState(false);
 
   const delete_mutation = trpc.brands.delete.useMutation({
     onSuccess: async () => {
       await utils.brands.list.invalidate();
       await utils.brands.active.invalidate();
       await utils.brands.stats.invalidate();
+      toast.success(t("delete_success"));
+      set_delete_open(false);
     },
+    onError: (err) => toast.error(err.message),
   });
-
-  async function on_delete() {
-    if (!window.confirm(t("delete_confirm", { name: brand.name }))) return;
-    await delete_mutation.mutateAsync({ id: brand.id });
-  }
 
   return (
     <DropdownMenu>
@@ -76,13 +86,35 @@ function BrandRowActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          disabled={delete_mutation.isPending}
-          onClick={() => void on_delete()}
+          onClick={() => set_delete_open(true)}
         >
           <Trash2 />
           {t("delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <AlertDialog open={delete_open} onOpenChange={set_delete_open}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_confirm", { name: brand.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={delete_mutation.isPending}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={delete_mutation.isPending}
+              onClick={() => void delete_mutation.mutateAsync({ id: brand.id })}
+            >
+              {delete_mutation.isPending ? "…" : t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DropdownMenu>
   );
 }

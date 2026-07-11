@@ -4,6 +4,7 @@ import { get_recommendation_provider } from "../providers/provider-registry";
 import type { RecommendationContext, RecommendationItem } from "../types";
 import { recommendation_cache_service } from "./recommendation-cache.service";
 import { RECOMMENDATION_CACHE } from "../constants/cache-keys";
+import { tryFn } from "@/lib/error_handling";
 
 export class RecommendationService {
   private provider = get_recommendation_provider();
@@ -14,13 +15,16 @@ export class RecommendationService {
   ): Promise<RecommendationItem[]> {
     if (!scored.length) return [];
     const ids = scored.map((s) => s.product_id);
-    const { items } = await search_repository.search(
-      { locale, fulltext_product_ids: ids, in_stock_only: true, property_filters: [] },
-      "featured",
-      1,
-      ids.length,
+    const [err, result] = await tryFn(
+      search_repository.search(
+        { locale, fulltext_product_ids: ids, in_stock_only: true, property_filters: [] },
+        "featured",
+        1,
+        ids.length,
+      ),
     );
-    const by_id = new Map(items.map((c) => [c.id, c]));
+    if (err || !result) return [];
+    const by_id = new Map(result.items.map((c) => [c.id, c]));
     return scored
       .map((s) => {
         const card = by_id.get(s.product_id);
@@ -47,8 +51,10 @@ export class RecommendationService {
             ? RECOMMENDATION_CACHE.related(input.product_id, input.locale)
             : RECOMMENDATION_CACHE.similar(input.product_id, input.locale);
 
-      const cached = await recommendation_cache_service.get<RecommendationItem[]>(cache_key);
-      if (cached) {
+      const [cache_err, cached] = await tryFn(
+        recommendation_cache_service.get<RecommendationItem[]>(cache_key),
+      );
+      if (!cache_err && cached) {
         result[type] = cached;
         continue;
       }
@@ -59,7 +65,8 @@ export class RecommendationService {
       else if (type === "related") items = await this.provider.get_related(input.product_id, ctx);
       else items = await this.provider.get_similar(input.product_id, ctx);
 
-      await recommendation_cache_service.set(cache_key, items);
+      const [set_err] = await tryFn(recommendation_cache_service.set(cache_key, items));
+      void set_err;
       result[type] = items;
     }
 
@@ -68,31 +75,40 @@ export class RecommendationService {
 
   async get_trending(locale: string, period: "day" | "week", limit: number) {
     const cache_key = RECOMMENDATION_CACHE.trending(period, locale);
-    const cached = await recommendation_cache_service.get<RecommendationItem[]>(cache_key);
-    if (cached) return cached;
+    const [cache_err, cached] = await tryFn(
+      recommendation_cache_service.get<RecommendationItem[]>(cache_key),
+    );
+    if (!cache_err && cached) return cached;
     const items = await this.provider.get_trending({ locale, limit, period });
-    await recommendation_cache_service.set(cache_key, items);
+    const [set_err] = await tryFn(recommendation_cache_service.set(cache_key, items));
+    void set_err;
     return items;
   }
 
   async get_for_you(user_id: string, locale: string, limit: number) {
     const cache_key = RECOMMENDATION_CACHE.for_you(user_id, locale);
-    const cached = await recommendation_cache_service.get<RecommendationItem[]>(cache_key);
-    if (cached) return cached;
+    const [cache_err, cached] = await tryFn(
+      recommendation_cache_service.get<RecommendationItem[]>(cache_key),
+    );
+    if (!cache_err && cached) return cached;
     const items = await this.provider.get_for_you({ locale, limit, user_id });
-    await recommendation_cache_service.set(cache_key, items);
+    const [set_err] = await tryFn(recommendation_cache_service.set(cache_key, items));
+    void set_err;
     return items;
   }
 
   async hydrate_ids(locale: string, ids: string[]) {
     if (!ids.length) return [];
-    const { items } = await search_repository.search(
-      { locale, fulltext_product_ids: ids, in_stock_only: false, property_filters: [] },
-      "featured",
-      1,
-      ids.length,
+    const [err, result] = await tryFn(
+      search_repository.search(
+        { locale, fulltext_product_ids: ids, in_stock_only: false, property_filters: [] },
+        "featured",
+        1,
+        ids.length,
+      ),
     );
-    const by_id = new Map(items.map((c) => [c.id, c]));
+    if (err || !result) return [];
+    const by_id = new Map(result.items.map((c) => [c.id, c]));
     return ids
       .map((id) => {
         const card = by_id.get(id);

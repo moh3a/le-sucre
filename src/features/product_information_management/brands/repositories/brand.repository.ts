@@ -114,6 +114,19 @@ export class BrandRepository {
   delete(id: string) {
     return db.delete(brands).where(eq(brands.id, id));
   }
+
+  async count_products_by_brand(brand_id: string) {
+    const [result] = await db
+      .select({ total: count() })
+      .from(products)
+      .where(eq(products.brand_id, brand_id));
+    return Number(result?.total ?? 0);
+  }
+
+  async count_total_products() {
+    const [result] = await db.select({ total: count() }).from(products);
+    return Number(result?.total ?? 0);
+  }
 }
 
 export const brand_repository = new BrandRepository();
