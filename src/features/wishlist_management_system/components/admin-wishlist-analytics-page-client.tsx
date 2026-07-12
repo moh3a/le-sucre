@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
-import { Heart, TrendingUp, Package, ShoppingBag, RefreshCw } from "lucide-react";
+import { Heart, TrendingUp, Package, ShoppingBag, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 export function AdminWishlistAnalyticsPageClient() {
   const t = useTranslations("wishlist");
@@ -44,7 +45,14 @@ export function AdminWishlistAnalyticsPageClient() {
     limit: 10,
   });
   const { data: topFavorited } = trpc.wishlistManagement.admin.topFavorited.useQuery({ limit: 10 });
-  const invalidateMut = trpc.wishlistManagement.admin.invalidateCache.useMutation();
+  const invalidateMut = trpc.wishlistManagement.admin.invalidateCache.useMutation({
+    onSuccess: () => {
+      toast.success(t("cache_invalidated"));
+    },
+    onError: () => {
+      toast.error(t("cache_invalidated"));
+    },
+  });
 
   return (
     <QueryGuard query={{ isLoading }}>
@@ -72,8 +80,17 @@ export function AdminWishlistAnalyticsPageClient() {
             <Button variant="outline" size="icon" onClick={() => refetch()}>
               <RefreshCw className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => invalidateMut.mutate()}>
-              <RefreshCw className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={invalidateMut.isPending}
+              onClick={() => invalidateMut.mutate()}
+            >
+              {invalidateMut.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
@@ -170,8 +187,8 @@ export function AdminWishlistAnalyticsPageClient() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead className="text-right">Signal</TableHead>
+                          <TableHead>{t("product")}</TableHead>
+                          <TableHead className="text-right">{t("signal")}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -199,8 +216,8 @@ export function AdminWishlistAnalyticsPageClient() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead className="text-right">Ajouts sans achat</TableHead>
+                          <TableHead>{t("product")}</TableHead>
+                          <TableHead className="text-right">{t("adds_without_purchase")}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -225,10 +242,10 @@ export function AdminWishlistAnalyticsPageClient() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead className="text-right">Ajouts</TableHead>
-                          <TableHead className="text-right">Conversions</TableHead>
-                          <TableHead className="text-right">Taux</TableHead>
+                          <TableHead>{t("product")}</TableHead>
+                          <TableHead className="text-right">{t("adds")}</TableHead>
+                          <TableHead className="text-right">{t("conversions")}</TableHead>
+                          <TableHead className="text-right">{t("rate")}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -264,8 +281,8 @@ export function AdminWishlistAnalyticsPageClient() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead className="text-right">Favoris</TableHead>
+                          <TableHead>{t("product")}</TableHead>
+                          <TableHead className="text-right">{t("favorites")}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Share2, Copy, Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +50,9 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
       const url = `${window.location.origin}${result.url}`;
       setShareUrl(url);
       setLinks((prev) => [...prev, { id: result.id, url, permission: result.permission }]);
+      toast.success(t("link_created"));
+    } catch {
+      toast.error(t("link_created"));
     } finally {
       setIsCreating(false);
     }

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Plus, Package } from "lucide-react";
+import { Loader2, Plus, Package } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -105,7 +105,11 @@ export function CreateShipmentDialog() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={create.isPending}>
-              <Package />
+              {create.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Package className="mr-2 h-4 w-4" />
+              )}
               {t("create_shipment_button")}
             </Button>
           </form>

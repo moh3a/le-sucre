@@ -3,8 +3,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { Download, MoreHorizontal, RotateCcw, Warehouse, XCircle } from "lucide-react";
+import { Download, Loader2, MoreHorizontal, RotateCcw, Warehouse, XCircle } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { useTranslations } from "next-intl";
 
@@ -26,10 +27,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
-import { toast } from "sonner";
 
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   successful: "default",
@@ -123,6 +133,9 @@ export function DeliveryAttemptsTable() {
   const [page] = useQueryState("dvPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("dvPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("dvStatus", parseAsString);
+
+  const [retryTarget, setRetryTarget] = React.useState<string | null>(null);
+  const [rtoTarget, setRtoTarget] = React.useState<string | null>(null);
 
   const STATUS_LABELS: Record<string, string> = {
     successful: t("delivered"),
@@ -237,6 +250,8 @@ export function DeliveryAttemptsTable() {
         id: "actions",
         cell: ({ row }) => {
           const r = row.original;
+          const isRetryPending = retryMutation.isPending;
+          const isRtoPending = rtoMutation.isPending;
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -252,24 +267,27 @@ export function DeliveryAttemptsTable() {
                 <DropdownMenuSeparator />
                 {r.status !== "successful" && r.status !== "cancelled" && (
                   <DropdownMenuItem
-                    onClick={() =>
-                      retryMutation.mutate({
-                        order_id: r.order_id,
-                        scheduled_at: new Date(Date.now() + 86400000).toISOString(),
-                      })
-                    }
+                    disabled={isRetryPending || isRtoPending}
+                    onClick={() => setRetryTarget(r.order_id)}
                   >
-                    <RotateCcw className="mr-2 size-4" />
+                    {isRetryPending ? (
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                    ) : (
+                      <RotateCcw className="mr-2 size-4" />
+                    )}
                     {t("reschedule")}
                   </DropdownMenuItem>
                 )}
                 {r.status !== "successful" && r.status !== "cancelled" && (
                   <DropdownMenuItem
-                    onClick={() =>
-                      rtoMutation.mutate({ order_id: r.order_id })
-                    }
+                    disabled={isRetryPending || isRtoPending}
+                    onClick={() => setRtoTarget(r.order_id)}
                   >
-                    <Warehouse className="mr-2 size-4" />
+                    {isRtoPending ? (
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                    ) : (
+                      <Warehouse className="mr-2 size-4" />
+                    )}
                     {t("return_warehouse")}
                   </DropdownMenuItem>
                 )}
@@ -331,6 +349,58 @@ export function DeliveryAttemptsTable() {
         </div>
       )}
     </DataTable>
+
+    <AlertDialog open={retryTarget !== null} onOpenChange={(open) => !open && setRetryTarget(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("reschedule")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("confirm_reschedule_description")}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => {
+            if (retryTarget) {
+              retryMutation.mutate({
+                order_id: retryTarget,
+                scheduled_at: new Date(Date.now() + 86400000).toISOString(),
+              });
+              setRetryTarget(null);
+            }
+          }}>
+            {retryMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            {t("reschedule")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <AlertDialog open={rtoTarget !== null} onOpenChange={(open) => !open && setRtoTarget(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("return_warehouse")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("confirm_return_warehouse_description")}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => {
+              if (rtoTarget) {
+                rtoMutation.mutate({ order_id: rtoTarget });
+                setRtoTarget(null);
+              }
+            }}
+          >
+            {rtoMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            {t("return_warehouse")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </QueryGuard>
   );
 }

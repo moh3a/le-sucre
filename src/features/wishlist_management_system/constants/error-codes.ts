@@ -136,4 +136,31 @@ export const WISHLIST_ERROR = {
       ar: "عنصر السلة غير موجود",
     },
   },
+  MAX_ITEMS: {
+    code: "WISHLIST_MAX_ITEMS",
+    status: 400,
+    message: {
+      fr: "Nombre maximum d'articles atteint (500)",
+      en: "Maximum number of items reached (500)",
+      ar: "تم الوصول إلى الحد الأقصى لعدد العناصر (500)",
+    },
+  },
+  FAVORITE_NOT_FOUND: {
+    code: "FAVORITE_NOT_FOUND",
+    status: 404,
+    message: {
+      fr: "Favori introuvable",
+      en: "Favorite not found",
+      ar: "المفضلة غير موجودة",
+    },
+  },
+  COLLECTION_ITEM_NOT_FOUND: {
+    code: "COLLECTION_ITEM_NOT_FOUND",
+    status: 404,
+    message: {
+      fr: "Article de collection introuvable",
+      en: "Collection item not found",
+      ar: "عنصر المجموعة غير موجود",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;

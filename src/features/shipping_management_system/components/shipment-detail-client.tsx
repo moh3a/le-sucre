@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, RefreshCcw } from "lucide-react";
+import { ExternalLink, Loader2, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -55,7 +55,11 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
                 disabled={!shipment.tracking_number || sync_mutation.isPending}
                 onClick={() => sync_mutation.mutate({ shipment_id })}
               >
-                <RefreshCcw className="size-4" />
+                {sync_mutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCcw className="mr-2 h-4 w-4" />
+                )}
                 {t("sync")}
               </Button>
             </div>

@@ -20,40 +20,31 @@ import { InventoryForecastTable } from "./inventory-forecast-table";
 import { InventoryAlertsTable } from "./inventory-alerts-table";
 import { RecordStockDialog } from "./record-stock-dialog";
 
+const TABS = [
+  { value: "stock", icon: Boxes, label: "Stock" },
+  { value: "movements", icon: History, label: "Mouvements" },
+  { value: "warehouses", icon: Warehouse, label: "Entrepôts" },
+  { value: "forecast", icon: TrendingUpDown, label: "Prévisions" },
+  { value: "alerts", icon: AlertTriangle, label: "Alertes" },
+  { value: "charts", icon: BarChart3, label: "Analytiques" },
+] as const;
+
 export function InventoryPageClient() {
   return (
     <ConsolePageShell
       title="Inventaire"
-      subtitle="Gestion complète des stocks, entrepôts, mouvements et prévisions"
+      subtitle="Gestion des stocks, entrepôts, mouvements et prévisions"
       actions={<RecordStockDialog />}
       stats={<InventoryStats />}
       tabs={
         <Tabs defaultValue="stock">
           <TabsList>
-            <TabsTrigger value="stock">
-              <Boxes className="mr-2 h-4 w-4" />
-              Stock
-            </TabsTrigger>
-            <TabsTrigger value="movements">
-              <History className="mr-2 h-4 w-4" />
-              Mouvements
-            </TabsTrigger>
-            <TabsTrigger value="warehouses">
-              <Warehouse className="mr-2 h-4 w-4" />
-              Entrepôts
-            </TabsTrigger>
-            <TabsTrigger value="forecast">
-              <TrendingUpDown className="mr-2 h-4 w-4" />
-              Prévisions
-            </TabsTrigger>
-            <TabsTrigger value="alerts">
-              <AlertTriangle className="mr-2 h-4 w-4" />
-              Alertes
-            </TabsTrigger>
-            <TabsTrigger value="charts">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Analytiques
-            </TabsTrigger>
+            {TABS.map(({ value, icon: Icon, label }) => (
+              <TabsTrigger key={value} value={value}>
+                <Icon className="mr-2 h-4 w-4" />
+                {label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <TabsContent value="stock" className="mt-4 space-y-4">

@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Heart, Trash2 } from "lucide-react";
+import { Heart, Trash2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -10,10 +11,22 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FavoritesPageSkeleton } from "./favorites-page-skeleton";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export function CustomerFavoritesPageClient() {
   const t = useTranslations("wishlist");
   const [tab, setTab] = useState("products");
+  const [removeTarget, setRemoveTarget] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const type = tab === "products" ? "product" : tab === "brands" ? "brand" : "category";
   const query = trpc.wishlistManagement.favorites.list.useQuery({
     page: 1,
@@ -24,8 +37,16 @@ export function CustomerFavoritesPageClient() {
   const utils = trpc.useUtils();
 
   async function handleRemove(id: string) {
-    await removeMut.mutateAsync({ id });
-    utils.wishlistManagement.favorites.list.invalidate();
+    setPendingId(id);
+    try {
+      await removeMut.mutateAsync({ id });
+      toast.success(t("favorite_removed"));
+      utils.wishlistManagement.favorites.list.invalidate();
+    } catch {
+      toast.error(t("favorite_removed"));
+    } finally {
+      setPendingId(null);
+    }
   }
 
   return (
@@ -70,9 +91,14 @@ export function CustomerFavoritesPageClient() {
                       variant="ghost"
                       size="icon"
                       className="text-destructive h-8 w-8"
-                      onClick={() => handleRemove(fav.id)}
+                      disabled={pendingId === fav.id}
+                      onClick={() => setRemoveTarget(fav.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {pendingId === fav.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 ))}
@@ -81,6 +107,29 @@ export function CustomerFavoritesPageClient() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AlertDialog open={removeTarget !== null} onOpenChange={(open) => !open && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm_remove_favorite_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("confirm_remove_favorite_description")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("edit")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeTarget) {
+                  handleRemove(removeTarget);
+                  setRemoveTarget(null);
+                }
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

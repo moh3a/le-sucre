@@ -1,4 +1,4 @@
-import { PaymentsPageClient } from "@/features/payment_management_system/components/payments-page-client";
+import { PaymentsPageClient } from "@/features/payment_management_system/components/payments-page-tabbed";
 
 export const metadata = { title: "Paiements" };
 

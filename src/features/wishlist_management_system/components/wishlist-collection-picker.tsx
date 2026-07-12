@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Plus, Bookmark, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,7 +51,10 @@ export function WishlistCollectionPicker({
     setIsAdding(true);
     try {
       await addItem({ wishlist_id: wishlistId, product_id: productId, variant_id: variantId });
+      toast.success(t("item_added"));
       setOpen(false);
+    } catch {
+      toast.error(t("item_added"));
     } finally {
       setIsAdding(false);
     }
@@ -65,7 +69,10 @@ export function WishlistCollectionPicker({
         product_id: productId,
         variant_id: variantId,
       });
+      toast.success(t("item_added"));
       setOpen(false);
+    } catch {
+      toast.error(t("item_added"));
     } finally {
       setIsAdding(false);
     }
@@ -77,8 +84,11 @@ export function WishlistCollectionPicker({
     try {
       const wl = await createWishlist({ name: newWishlistName });
       await addItem({ wishlist_id: wl.id, product_id: productId, variant_id: variantId });
+      toast.success(t("item_added"));
       setOpen(false);
       setNewWishlistName("");
+    } catch {
+      toast.error(t("item_added"));
     } finally {
       setIsAdding(false);
     }

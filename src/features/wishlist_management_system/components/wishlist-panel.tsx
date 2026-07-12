@@ -23,6 +23,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -95,6 +105,8 @@ export function WishlistPanel({
   const t = useTranslations("wishlist");
   const [newName, setNewName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
   const selected = wishlists.find((w) => w.id === selectedWishlistId);
 
@@ -214,7 +226,9 @@ export function WishlistPanel({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => onDeleteWishlist(selected.id)}
+                        onClick={() =>
+                          setDeleteTarget({ id: selected.id, name: selected.name })
+                        }
                         className="text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -298,7 +312,9 @@ export function WishlistPanel({
                             {t("purchased")}
                           </Badge>
                         )}
-                        <span className="text-muted-foreground text-xs">Qté: {item.quantity}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {t("quantity")}: {item.quantity}
+                        </span>
                       </div>
                       {item.notes && (
                         <p className="text-muted-foreground mt-1 truncate text-xs">{item.notes}</p>
@@ -322,7 +338,7 @@ export function WishlistPanel({
                         variant="ghost"
                         size="icon"
                         className="text-muted-foreground hover:text-destructive h-8 w-8"
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => setRemoveTarget(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -334,6 +350,54 @@ export function WishlistPanel({
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm_delete_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirm_delete_description", { name: deleteTarget?.name ?? "" })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("edit")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  onDeleteWishlist(deleteTarget.id);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={removeTarget !== null} onOpenChange={(open) => !open && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm_remove_item_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("confirm_remove_item_description")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("edit")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeTarget && onRemoveItem) {
+                  onRemoveItem(removeTarget);
+                  setRemoveTarget(null);
+                }
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

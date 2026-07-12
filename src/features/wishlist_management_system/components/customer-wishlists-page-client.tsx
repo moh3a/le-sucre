@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -33,22 +34,37 @@ export function CustomerWishlistsPageClient() {
   const isItemsLoading = itemsQuery.isLoading;
 
   async function handleCreate(name: string) {
-    await createWishlistMut.mutateAsync({ name, is_public: false, is_private: true });
-    utils.wishlistManagement.wishlists.list.invalidate();
-    utils.wishlistManagement.wishlists.stats.invalidate();
+    try {
+      await createWishlistMut.mutateAsync({ name, is_public: false, is_private: true });
+      toast.success(t("wishlist_created"));
+      utils.wishlistManagement.wishlists.list.invalidate();
+      utils.wishlistManagement.wishlists.stats.invalidate();
+    } catch {
+      toast.error(t("wishlist_created"));
+    }
   }
 
   async function handleDelete(id: string) {
-    await deleteWishlistMut.mutateAsync({ id });
-    utils.wishlistManagement.wishlists.list.invalidate();
-    utils.wishlistManagement.wishlists.stats.invalidate();
-    if (selectedId === id) setSelectedId(undefined);
+    try {
+      await deleteWishlistMut.mutateAsync({ id });
+      toast.success(t("wishlist_deleted"));
+      utils.wishlistManagement.wishlists.list.invalidate();
+      utils.wishlistManagement.wishlists.stats.invalidate();
+      if (selectedId === id) setSelectedId(undefined);
+    } catch {
+      toast.error(t("wishlist_deleted"));
+    }
   }
 
   async function handleRemoveItem(itemId: string) {
-    await removeItemMut.mutateAsync({ id: itemId });
-    utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: selectedId ?? "" });
-    utils.wishlistManagement.wishlists.stats.invalidate();
+    try {
+      await removeItemMut.mutateAsync({ id: itemId });
+      toast.success(t("item_removed"));
+      utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: selectedId ?? "" });
+      utils.wishlistManagement.wishlists.stats.invalidate();
+    } catch {
+      toast.error(t("item_removed"));
+    }
   }
 
   return (

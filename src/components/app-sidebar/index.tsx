@@ -15,29 +15,26 @@ import {
   ShoppingCart,
   Truck,
   MessageCircleCheck,
-  Banknote,
   Warehouse,
   TrendingUpDown,
   ChartArea,
   Gauge,
   FileText,
   Megaphone,
-  CalendarClock,
   Cog,
-  TriangleAlert,
   Handshake,
   Ban,
-  RefreshCw,
-  Wrench,
   ListTodo,
-  Phone,
-  HeadphonesIcon,
   CreditCard,
-  Wallet,
   Flag,
   HeartPulse,
   Image as ImageIcon,
   ExternalLink,
+  Clock,
+  Route,
+  Shield,
+  GitBranch,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -138,15 +135,11 @@ export function AppSidebar() {
       icon: ReceiptCent,
       items: [
         { title: t("orders"), url: "/console/orders", icon: ReceiptCent },
+        { title: t("shipments") /* t("deliveries")*/, url: "/console/shipping", icon: Truck },
         { title: t("preorders"), url: "/console/preorders", icon: ClipboardList },
         { title: t("carts"), url: "/console/carts", icon: ShoppingCart },
         { title: t("customers"), url: "/console/customers", icon: Handshake },
       ],
-    },
-    {
-      title: t("shipments"),
-      icon: Truck,
-      items: [{ title: t("deliveries"), url: "/console/shipping", icon: Truck }],
     },
     {
       title: t("payments_invoices"),
@@ -154,8 +147,6 @@ export function AppSidebar() {
       items: [
         { title: t("payments"), url: "/console/payments", icon: CreditCard },
         { title: t("invoices"), url: "/console/invoices", icon: FileText },
-        { title: t("refunds"), url: "/console/refunds", icon: RefreshCw },
-        { title: t("supplier_payments"), url: "/console/payouts", icon: Wallet },
       ],
     },
     {
@@ -171,8 +162,13 @@ export function AppSidebar() {
       icon: Warehouse,
       items: [
         { title: t("inventory"), url: "/console/inventory", icon: Warehouse },
-        { title: t("alerts"), url: "/console/inventory/alerts", icon: TriangleAlert },
-        { title: t("forecast"), url: "/console/inventory/forecast", icon: TrendingUpDown },
+        {
+          title: t("approvisionnement"),
+          url: "/console/procurement",
+          icon: Truck,
+          activeExact: false,
+        },
+        { title: t("returns_rma"), url: "/console/returns", icon: RotateCcw, activeExact: false },
       ],
     },
     {
@@ -180,34 +176,16 @@ export function AppSidebar() {
       icon: Gauge,
       items: [
         { title: t("dashboard"), url: "/console/operations", icon: Gauge },
-        { title: t("deliveries"), url: "/console/operations/delivery", icon: Truck },
-        { title: t("returns_ops"), url: "/console/operations/refunds", icon: RefreshCw },
-        { title: t("cancellations"), url: "/console/operations/cancellations", icon: Ban },
-        {
-          title: t("verifications"),
-          url: "/console/operations/payment-verifications",
-          icon: Banknote,
-        },
-        { title: t("warranty"), url: "/console/operations/warranty", icon: Wrench },
-        {
-          title: t("promo_validations"),
-          url: "/console/operations/promotion-reviews",
-          icon: TicketPercent,
-        },
         { title: t("tasks"), url: "/console/operations/tasks", icon: ListTodo },
-        { title: t("follow_ups"), url: "/console/operations/follow-ups", icon: Phone },
-        { title: t("support"), url: "/console/operations/support-cases", icon: HeadphonesIcon },
+        { title: t("sla_definitions"), url: "/console/operations/sla-definitions", icon: Clock },
+        { title: t("routing_rules"), url: "/console/operations/routing-rules", icon: Route },
         {
-          title: t("stock_adjustments"),
-          url: "/console/operations/inventory-adjustments",
-          icon: Warehouse,
+          title: t("approval_workflows"),
+          url: "/console/operations/approval-workflows",
+          icon: GitBranch,
         },
-        {
-          title: t("publications"),
-          url: "/console/operations/publishing-schedules",
-          icon: CalendarClock,
-        },
-        { title: t("escalations"), url: "/console/operations/escalations", icon: TriangleAlert },
+        { title: t("fraud_reviews"), url: "/console/operations/fraud-reviews", icon: Shield },
+        { title: t("agent_kpi"), url: "/console/operations/agent-kpi", icon: TrendingUpDown },
       ],
     },
     {
@@ -246,122 +224,122 @@ export function AppSidebar() {
   }
 
   return (
-      <TooltipProvider>
-        <Sidebar variant="floating" collapsible="icon">
-          <SidebarHeader>
-            <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>{t("navigation")}</SidebarGroupLabel>
-              <SidebarMenu>
-                <Link href="/console">
-                  <SidebarMenuButton tooltip={t("dashboard")} isActive={pathname === "/console"}>
-                    <Gauge className="size-4" />
-                    <span>{t("dashboard")}</span>
-                  </SidebarMenuButton>
-                </Link>
-                <Link href="/console/analytics">
-                  <SidebarMenuButton
-                    tooltip={t("analytics")}
-                    isActive={pathname.startsWith("/console/analytics")}
-                  >
-                    <ChartArea className="size-4" />
-                    <span>{t("analytics")}</span>
-                  </SidebarMenuButton>
-                </Link>
-                {nav.map(({ icon: Icon, ...section }) =>
-                  is_collapsed ? (
-                    <SidebarMenuItem key={section.title}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <SidebarMenuButton tooltip={section.title}>
-                            <Icon />
-                            <span>{section.title}</span>
-                          </SidebarMenuButton>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="right" align="start" className="min-w-48">
+    <TooltipProvider>
+      <Sidebar variant="floating" collapsible="icon">
+        <SidebarHeader>
+          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>{t("navigation")}</SidebarGroupLabel>
+            <SidebarMenu>
+              <Link href="/console">
+                <SidebarMenuButton tooltip={t("dashboard")} isActive={pathname === "/console"}>
+                  <Gauge className="size-4" />
+                  <span>{t("dashboard")}</span>
+                </SidebarMenuButton>
+              </Link>
+              <Link href="/console/analytics">
+                <SidebarMenuButton
+                  tooltip={t("analytics")}
+                  isActive={pathname.startsWith("/console/analytics")}
+                >
+                  <ChartArea className="size-4" />
+                  <span>{t("analytics")}</span>
+                </SidebarMenuButton>
+              </Link>
+              {nav.map(({ icon: Icon, ...section }) =>
+                is_collapsed ? (
+                  <SidebarMenuItem key={section.title}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton tooltip={section.title}>
+                          <Icon />
+                          <span>{section.title}</span>
+                        </SidebarMenuButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" align="start" className="min-w-48">
+                        {section.items.map((item) => (
+                          <DropdownMenuItem key={item.url} asChild>
+                            <Link
+                              href={item.url}
+                              className={cn(
+                                "flex items-center gap-2",
+                                pathname.startsWith(item.url) && "font-medium",
+                              )}
+                            >
+                              <item.icon className="size-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </SidebarMenuItem>
+                ) : (
+                  <Collapsible key={section.title} defaultOpen className="group/collapsible">
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip={section.title}>
+                          <Icon />
+                          <span>{section.title}</span>
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
                           {section.items.map((item) => (
-                            <DropdownMenuItem key={item.url} asChild>
-                              <Link
-                                href={item.url}
-                                className={cn(
-                                  "flex items-center gap-2",
-                                  pathname.startsWith(item.url) && "font-medium",
-                                )}
+                            <SidebarMenuSubItem key={item.url}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={pathname.startsWith(item.url)}
                               >
-                                <item.icon className="size-4" />
-                                <span>{item.title}</span>
-                              </Link>
-                            </DropdownMenuItem>
+                                <Link href={item.url}>
+                                  <item.icon className="size-4" />
+                                  <span>{item.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
                           ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
                     </SidebarMenuItem>
-                  ) : (
-                    <Collapsible key={section.title} defaultOpen className="group/collapsible">
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton tooltip={section.title}>
-                            <Icon />
-                            <span>{section.title}</span>
-                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {section.items.map((item) => (
-                              <SidebarMenuSubItem key={item.url}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={pathname.startsWith(item.url)}
-                                >
-                                  <Link href={item.url}>
-                                    <item.icon className="size-4" />
-                                    <span>{item.title}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  ),
-                )}
-                <Link href="/console/settings">
-                  <SidebarMenuButton
-                    tooltip={t("settings")}
-                    isActive={pathname.startsWith("/console/settings")}
-                  >
-                    <Cog className="size-4" />
-                    <span>{t("settings")}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenu>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <Link href="/">
-              <SidebarMenuButton
-                tooltip="Website"
-                className="bg-primary text-primary-foreground hover:bg-primary/75"
-              >
-                <ExternalLink className="size-4" />
-                <span>Visit website</span>
-              </SidebarMenuButton>
-            </Link>
-            <NavUser
-              user={{
-                name: data?.user.name ?? "",
-                email: data?.user.email ?? "",
-                avatar: data?.user.image ?? "",
-                role: data?.userRole ?? null,
-              }}
-            />
-          </SidebarFooter>
-          <SidebarRail />
-        </Sidebar>
-      </TooltipProvider>
+                  </Collapsible>
+                ),
+              )}
+              <Link href="/console/settings">
+                <SidebarMenuButton
+                  tooltip={t("settings")}
+                  isActive={pathname.startsWith("/console/settings")}
+                >
+                  <Cog className="size-4" />
+                  <span>{t("settings")}</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <Link href="/">
+            <SidebarMenuButton
+              tooltip="Website"
+              className="bg-primary text-primary-foreground hover:bg-primary/75"
+            >
+              <ExternalLink className="size-4" />
+              <span>Visit website</span>
+            </SidebarMenuButton>
+          </Link>
+          <NavUser
+            user={{
+              name: data?.user.name ?? "",
+              email: data?.user.email ?? "",
+              avatar: data?.user.image ?? "",
+              role: data?.userRole ?? null,
+            }}
+          />
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+    </TooltipProvider>
   );
 }

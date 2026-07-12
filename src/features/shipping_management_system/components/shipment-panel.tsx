@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ExternalLink, Plus, RefreshCcw } from "lucide-react";
+import { ExternalLink, Loader2, Plus, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -86,7 +86,11 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
               })
             }
           >
-            <Plus className="size-4" />
+            {create_mutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="size-4" />
+            )}
             {t("create_shipment_btn")}
           </Button>
         </CardContent>
@@ -117,7 +121,11 @@ export function ShipmentPanel({ order_id }: { order_id: string }) {
               disabled={!shipment.tracking_number || sync_mutation.isPending}
               onClick={() => sync_mutation.mutate({ shipment_id: shipment.id })}
             >
-              <RefreshCcw className="size-4" />
+              {sync_mutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <RefreshCcw className="size-4" />
+              )}
             </Button>
           </div>
         </CardHeader>

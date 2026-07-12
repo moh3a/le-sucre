@@ -2,7 +2,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { ArrowLeft, Trash2, Heart } from "lucide-react";
+import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -10,6 +12,16 @@ import { WishlistShareDialog } from "./wishlist-share-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import {
   Empty,
@@ -23,6 +35,7 @@ import Link from "next/link";
 
 export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: string }) {
   const t = useTranslations("wishlist");
+  const [removeTarget, setRemoveTarget] = useState<string | null>(null);
   const { data: wishlist, isLoading } = trpc.wishlistManagement.wishlists.byId.useQuery({
     id: wishlistId,
   });
@@ -35,8 +48,13 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
   const utils = trpc.useUtils();
 
   async function handleRemove(itemId: string) {
-    await removeItemMut.mutateAsync({ id: itemId });
-    utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
+    try {
+      await removeItemMut.mutateAsync({ id: itemId });
+      toast.success(t("item_removed"));
+      utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
+    } catch {
+      toast.error(t("item_removed"));
+    }
   }
 
   if (isLoading) {
@@ -139,7 +157,7 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
                     variant="ghost"
                     size="icon"
                     className="text-destructive"
-                    onClick={() => handleRemove(item.id)}
+                    onClick={() => setRemoveTarget(item.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -149,6 +167,29 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
           )}
         </div>
       </div>
+
+      <AlertDialog open={removeTarget !== null} onOpenChange={(open) => !open && setRemoveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm_remove_item_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("confirm_remove_item_description")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("edit")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeTarget) {
+                  handleRemove(removeTarget);
+                  setRemoveTarget(null);
+                }
+              }}
+            >
+              {t("delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

@@ -74,7 +74,7 @@ export class FavoritesService {
 
   async remove(customer_id: string, id: string) {
     const favorite = await this.repo.find_by_id(id);
-    if (!favorite) throw_error(WISHLIST_ERROR.NOT_FOUND);
+    if (!favorite) throw_error(WISHLIST_ERROR.FAVORITE_NOT_FOUND);
     if (favorite.customer_id !== customer_id) throw_error(WISHLIST_ERROR.ACCESS_DENIED);
 
     await this.repo.delete(id);

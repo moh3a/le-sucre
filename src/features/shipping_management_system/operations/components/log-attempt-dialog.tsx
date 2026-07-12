@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Plus, Truck } from "lucide-react";
+import { Loader2, Plus, Truck } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 type LogAttemptDialogProps = {
@@ -154,7 +154,14 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
               {t("cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? t("saving") : t("save")}
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("saving")}
+                </>
+              ) : (
+                t("save")
+              )}
             </Button>
           </DialogFooter>
         </form>

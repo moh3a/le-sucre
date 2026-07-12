@@ -163,4 +163,31 @@ export const SHIPPING_ERROR = {
       ar: "فشل تنفيذ مشغل مهام الشحن",
     },
   },
+  DELIVERY_INVALID_STATUS: {
+    code: "SHIPPING_DELIVERY_INVALID_STATUS",
+    status: 400,
+    message: {
+      fr: "Statut de livraison invalide",
+      en: "Invalid delivery status",
+      ar: "حالة توصيل غير صالحة",
+    },
+  },
+  DELIVERY_ALREADY_DELIVERED: {
+    code: "SHIPPING_DELIVERY_ALREADY_DELIVERED",
+    status: 409,
+    message: {
+      fr: "La livraison a déjà été effectuée",
+      en: "Delivery has already been completed",
+      ar: "تم التوصيل بالفعل",
+    },
+  },
+  DELIVERY_CANCELLED_NO_RETRY: {
+    code: "SHIPPING_DELIVERY_CANCELLED_NO_RETRY",
+    status: 409,
+    message: {
+      fr: "Impossible de reprogrammer une livraison annulée",
+      en: "Cannot reschedule a cancelled delivery",
+      ar: "لا يمكن إعادة جدولة توصيل ملغي",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;

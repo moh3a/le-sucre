@@ -176,7 +176,7 @@ export class CollectionService {
     if (collection.customer_id !== customer_id) throw_error(WISHLIST_ERROR.ACCESS_DENIED);
 
     const item = await this.item_repo.find_by_id(item_id);
-    if (!item || item.collection_id !== collection_id) throw_error(WISHLIST_ERROR.ITEM_NOT_FOUND);
+    if (!item || item.collection_id !== collection_id) throw_error(WISHLIST_ERROR.COLLECTION_ITEM_NOT_FOUND);
 
     await this.item_repo.delete(item_id);
     await this.repo.decrement_item_count(collection_id);

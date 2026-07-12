@@ -9,6 +9,17 @@ import { Button } from "@/components/ui/button";
 import { ProductStats } from "./product-stats";
 import { ProductDataTable } from "./product-data-table";
 
+export function ProductsContent() {
+  const t = useTranslations("products");
+
+  return (
+    <>
+      <ProductStats />
+      <ProductDataTable />
+    </>
+  );
+}
+
 export function ProductsPageClient() {
   const t = useTranslations("products");
 
@@ -24,9 +35,8 @@ export function ProductsPageClient() {
           </Link>
         </Button>
       }
-      stats={<ProductStats />}
     >
-      <ProductDataTable />
+      <ProductsContent />
     </ConsolePageShell>
   );
 }

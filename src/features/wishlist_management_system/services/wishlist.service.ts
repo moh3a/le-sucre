@@ -183,15 +183,7 @@ export class WishlistService {
 
     const item_count = await this.item_repo.count_by_wishlist(input.wishlist_id);
     if (item_count >= MAX_WISHLIST_ITEMS) {
-      throw_error({
-        code: "WISHLIST_MAX_ITEMS",
-        status: 400,
-        message: {
-          fr: "Nombre maximum d'articles atteint (500)",
-          en: "Maximum number of items reached (500)",
-          ar: "تم الوصول إلى الحد الأقصى لعدد العناصر (500)",
-        },
-      });
+      throw_error(WISHLIST_ERROR.MAX_ITEMS);
     }
 
     const item_id = generate_id();

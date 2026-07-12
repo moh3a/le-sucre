@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 
-import { ProductsPageClient } from "@/features/product_information_management/products/components/products-page-client";
+import { ProductsPageClientTabbed } from "@/features/product_information_management/products/components/products-page-tabbed";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("products");
-  return { title: t("title") };
+  return { title: "Produits" };
 }
 
 export default function ProductsPage() {
-  return <ProductsPageClient />;
+  return <ProductsPageClientTabbed />;
 }

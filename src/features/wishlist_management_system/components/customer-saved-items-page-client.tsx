@@ -28,7 +28,7 @@ export function CustomerSavedItemsPageClient() {
   return (
     <QueryGuard query={{ isLoading, error }} loadingFallback={<SavedItemsPageSkeleton />}>
       <div className="container mx-auto py-6">
-        <h1 className="mb-6 text-2xl font-bold">Sauvegardé pour plus tard</h1>
+        <h1 className="mb-6 text-2xl font-bold">{t("saved_title")}</h1>
         {!items || items.length === 0 ? (
           <Empty>
             <EmptyHeader>
@@ -36,9 +36,7 @@ export function CustomerSavedItemsPageClient() {
                 <Save className="size-6" />
               </EmptyMedia>
               <EmptyTitle>{t("no_saved_items")}</EmptyTitle>
-              <EmptyDescription>
-                Les articles de votre panier peuvent être sauvegardés pour plus tard
-              </EmptyDescription>
+              <EmptyDescription>{t("saved_for_later_desc")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (

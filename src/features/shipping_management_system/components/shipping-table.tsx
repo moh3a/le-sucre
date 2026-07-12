@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { ExternalLink, RefreshCcw, ToggleLeft, Truck } from "lucide-react";
+import { ExternalLink, Loader2, RefreshCcw, ToggleLeft, Truck } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
@@ -169,7 +169,11 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
               disabled={!row.original.tracking_number || sync_mutation.isPending}
               onClick={() => sync_mutation.mutate({ shipment_id: row.original.id })}
             >
-              <RefreshCcw className="size-4" />
+              {sync_mutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <RefreshCcw className="size-4" />
+              )}
             </Button>
           </div>
         ),

@@ -9,7 +9,7 @@ import { Banknote, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { RefundsTable } from "./refunds-table";
 import { RequestRefundDialog } from "./request-refund-dialog";
 
-export function RefundsPageClient() {
+export function RefundRequestsContent() {
   const t = useTranslations("refunds");
   const { data, isLoading } = trpc.operations.paymentListRefundRequests.useQuery({
     page: 1,
@@ -24,24 +24,29 @@ export function RefundsPageClient() {
 
   return (
     <QueryGuard query={{ isLoading }}>
+      <StatsGrid
+        loading={isLoading}
+        items={[
+          { label: t("stats_pending"), value: pending, icon: Clock, color: "warning" },
+          { label: t("stats_approved"), value: approved, icon: CheckCircle2, color: "info" },
+          { label: t("stats_completed"), value: completed, icon: Banknote, color: "success" },
+          { label: t("stats_failed"), value: failed, icon: XCircle, color: "error" },
+        ]}
+      />
+      <RefundsTable />
+    </QueryGuard>
+  );
+}
+
+export function RefundsPageClient() {
+  const t = useTranslations("refunds");
+  return (
     <ConsolePageShell
       title={t("ops_title")}
       subtitle={t("ops_subtitle")}
       actions={<RequestRefundDialog />}
-      stats={
-        <StatsGrid
-          loading={isLoading}
-          items={[
-            { label: t("stats_pending"), value: pending, icon: Clock, color: "warning" },
-            { label: t("stats_approved"), value: approved, icon: CheckCircle2, color: "info" },
-            { label: t("stats_completed"), value: completed, icon: Banknote, color: "success" },
-            { label: t("stats_failed"), value: failed, icon: XCircle, color: "error" },
-          ]}
-        />
-      }
     >
-      <RefundsTable />
+      <RefundRequestsContent />
     </ConsolePageShell>
-    </QueryGuard>
   );
 }

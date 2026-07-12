@@ -10,7 +10,7 @@ import { PaymentVerificationsTable } from "./payment-verifications-table";
 import { CreateVerificationDialog } from "./create-verification-dialog";
 import { RecordPartialPaymentDialog } from "./record-partial-payment-dialog";
 
-export function PaymentVerificationsPageClient() {
+export function VerificationsContent() {
   const t = useTranslations("verifications");
   const { data, isLoading } = trpc.operations.paymentListVerifications.useQuery({
     page: 1,
@@ -24,6 +24,27 @@ export function PaymentVerificationsPageClient() {
 
   return (
     <QueryGuard query={{ isLoading }}>
+      <StatsGrid
+        loading={isLoading}
+        items={[
+          {
+            label: t("stats_pending"),
+            value: pendingCount.data ?? 0,
+            icon: Clock,
+            color: "warning",
+          },
+          { label: t("stats_verified"), value: verified, icon: CheckCircle2, color: "success" },
+          { label: t("stats_rejected"), value: rejected, icon: XCircle, color: "error" },
+        ]}
+      />
+      <PaymentVerificationsTable />
+    </QueryGuard>
+  );
+}
+
+export function PaymentVerificationsPageClient() {
+  const t = useTranslations("verifications");
+  return (
     <ConsolePageShell
       title={t("title")}
       subtitle={t("subtitle")}
@@ -33,24 +54,8 @@ export function PaymentVerificationsPageClient() {
           <RecordPartialPaymentDialog />
         </div>
       }
-      stats={
-        <StatsGrid
-          loading={isLoading}
-          items={[
-            {
-              label: t("stats_pending"),
-              value: pendingCount.data ?? 0,
-              icon: Clock,
-              color: "warning",
-            },
-            { label: t("stats_verified"), value: verified, icon: CheckCircle2, color: "success" },
-            { label: t("stats_rejected"), value: rejected, icon: XCircle, color: "error" },
-          ]}
-        />
-      }
     >
-      <PaymentVerificationsTable />
+      <VerificationsContent />
     </ConsolePageShell>
-    </QueryGuard>
   );
 }
