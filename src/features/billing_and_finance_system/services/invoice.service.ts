@@ -1,5 +1,6 @@
 import "server-only";
 import { generate_id } from "@/lib/utils";
+import { tryFn } from "@/lib/error_handling";
 import { invoice_repository } from "../repositories/invoice.repository";
 import { tax_calculation_service } from "./tax_calculation.service";
 import { pdf_generation_service } from "./pdf_generation.service";
@@ -19,7 +20,10 @@ export class InvoiceService {
    * Generates a standard invoice from an existing order.
    */
   async generate_order_invoice(order_id: string) {
-    const full_order = await this.order_repo.get_full(order_id);
+    const [order_err, full_order] = await tryFn(this.order_repo.get_full(order_id));
+    if (order_err) {
+      throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
+    }
     if (!full_order) {
       throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
     }
@@ -27,8 +31,12 @@ export class InvoiceService {
     const { order, items } = full_order;
 
     // Check if invoice already exists
-    const existing = await this.repo.find_by_order_id(order_id);
-    const existing_invoice = existing.find((inv) => inv.type === "order_invoice");
+    const [existing_err, existing] = await tryFn(this.repo.find_by_order_id(order_id));
+    if (existing_err) {
+      throw_error(INVOICE_ERROR.CREATION_FAILED);
+    }
+
+    const existing_invoice = existing!.find((inv) => inv.type === "order_invoice");
     if (existing_invoice) {
       return this.repo.find_by_id(existing_invoice.id);
     }
@@ -86,10 +94,13 @@ export class InvoiceService {
       };
     });
 
-    const invoice_id = await this.repo.create_invoice(new_invoice, new_items);
-    const invoice = await this.repo.find_by_id(invoice_id);
+    const [create_err, invoice_id] = await tryFn(this.repo.create_invoice(new_invoice, new_items));
+    if (create_err) {
+      throw_error(INVOICE_ERROR.CREATION_FAILED);
+    }
 
-    if (!invoice) {
+    const [fetch_err, invoice] = await tryFn(this.repo.find_by_id(invoice_id!));
+    if (fetch_err || !invoice) {
       throw_error(INVOICE_ERROR.NUMBER_GENERATION_FAILED);
     }
 
@@ -130,7 +141,11 @@ export class InvoiceService {
     notes?: string;
   }) {
     const { order_id, refund_items, notes } = params;
-    const full_order = await this.order_repo.get_full(order_id);
+
+    const [order_err, full_order] = await tryFn(this.order_repo.get_full(order_id));
+    if (order_err) {
+      throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
+    }
     if (!full_order) {
       throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
     }
@@ -199,8 +214,12 @@ export class InvoiceService {
       };
     });
 
-    const invoice_id = await this.repo.create_invoice(new_invoice, new_items);
-    return this.repo.find_by_id(invoice_id);
+    const [create_err, invoice_id] = await tryFn(this.repo.create_invoice(new_invoice, new_items));
+    if (create_err) {
+      throw_error(INVOICE_ERROR.CREATION_FAILED);
+    }
+
+    return this.repo.find_by_id(invoice_id!);
   }
 
   /**
@@ -208,7 +227,11 @@ export class InvoiceService {
    */
   async generate_credit_note(params: { order_id: string; amount: string; notes?: string }) {
     const { order_id, amount, notes } = params;
-    const full_order = await this.order_repo.get_full(order_id);
+
+    const [order_err, full_order] = await tryFn(this.order_repo.get_full(order_id));
+    if (order_err) {
+      throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
+    }
     if (!full_order) {
       throw_error(INVOICE_ERROR.ORDER_NOT_FOUND);
     }
@@ -263,14 +286,24 @@ export class InvoiceService {
       },
     ];
 
-    const invoice_id = await this.repo.create_invoice(new_invoice, new_items);
-    return this.repo.find_by_id(invoice_id);
+    const [create_err, invoice_id] = await tryFn(this.repo.create_invoice(new_invoice, new_items));
+    if (create_err) {
+      throw_error(INVOICE_ERROR.CREATION_FAILED);
+    }
+
+    return this.repo.find_by_id(invoice_id!);
   }
 
   async mark_as_paid(invoice_id: string) {
-    const invoice = await this.repo.find_by_id(invoice_id);
+    const [fetch_err, invoice] = await tryFn(this.repo.find_by_id(invoice_id));
+    if (fetch_err) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
     if (!invoice) {
       throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    if (invoice.status === "paid") {
+      throw_error(INVOICE_ERROR.ALREADY_PAID);
     }
     const now_str = new Date().toISOString().slice(0, 19).replace("T", " ");
     await this.repo.update_status(invoice_id, "paid", now_str);
@@ -278,9 +311,18 @@ export class InvoiceService {
   }
 
   async void_invoice(invoice_id: string) {
-    const invoice = await this.repo.find_by_id(invoice_id);
+    const [fetch_err, invoice] = await tryFn(this.repo.find_by_id(invoice_id));
+    if (fetch_err) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
     if (!invoice) {
       throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    if (invoice.status === "void") {
+      throw_error(INVOICE_ERROR.ALREADY_VOID);
+    }
+    if (invoice.status === "paid") {
+      throw_error(INVOICE_ERROR.CANNOT_VOID_PAID);
     }
     await this.repo.update_status(invoice_id, "void");
     return this.repo.find_by_id(invoice_id);

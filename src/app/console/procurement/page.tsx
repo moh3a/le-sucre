@@ -1,45 +1,75 @@
 "use client";
 
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Truck, ShoppingCart, CheckCircle } from "lucide-react";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SuppliersListClient, PurchaseOrdersListClient } from "@/features/operations_workflows/components/procurement-client";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CreateSupplierDialog,
+  SuppliersListClient,
+  CreatePurchaseOrderDialog,
+  PurchaseOrdersListClient,
+} from "@/features/operations_workflows/components/procurement-client";
 import { ReconciliationClient } from "@/features/operations_workflows/components/reconciliation-client";
 
 const TABS = [
-  { value: "suppliers", icon: Truck, label: "Fournisseurs" },
-  { value: "purchase-orders", icon: ShoppingCart, label: "Bons de commande" },
-  { value: "reconciliation", icon: CheckCircle, label: "Réconciliation" },
+  { value: "suppliers", icon: Truck },
+  { value: "purchase_orders", icon: ShoppingCart },
+  { value: "reconciliation", icon: CheckCircle },
 ] as const;
 
 export default function ProcurementPage() {
+  const t = useTranslations("procurement");
+  const [tab, setTab] = useState("suppliers");
+
+  const actions: Record<string, React.ReactNode> = {
+    suppliers: <CreateSupplierDialog />,
+    purchase_orders: <CreatePurchaseOrderDialog />,
+    reconciliation: null,
+  };
+
   return (
     <ConsolePageShell
-      title="Approvisionnement"
-      subtitle="Gestion des fournisseurs, bons de commande et réconciliation"
+      title={t("title")}
+      subtitle={t("subtitle")}
+      actions={actions[tab]}
     >
-      <Tabs defaultValue="suppliers">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          {TABS.map(({ value, icon: Icon, label }) => (
-            <TabsTrigger key={value} value={value}>
-              <Icon className="mr-2 h-4 w-4" />
-              {label}
+          {TABS.map(({ value, icon: Icon }) => (
+            <TabsTrigger key={value} value={value} className="gap-2">
+              <Icon className="size-4" />
+              {t(`tab_${value}`)}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="suppliers" className="mt-4 space-y-4">
-          <SuppliersListClient />
-        </TabsContent>
+        <Separator className="my-4" />
 
-        <TabsContent value="purchase-orders" className="mt-4 space-y-4">
-          <PurchaseOrdersListClient />
-        </TabsContent>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">{t(`tab_${tab}`)}</CardTitle>
+            <CardDescription>{t(`tab_description_${tab}`)}</CardDescription>
+          </CardHeader>
+        </Card>
 
-        <TabsContent value="reconciliation" className="mt-4 space-y-4">
-          <ReconciliationClient />
-        </TabsContent>
+        <div className="mt-4">
+          <TabsContent value="suppliers" className="mt-0 space-y-4">
+            <SuppliersListClient />
+          </TabsContent>
+
+          <TabsContent value="purchase_orders" className="mt-0 space-y-4">
+            <PurchaseOrdersListClient />
+          </TabsContent>
+
+          <TabsContent value="reconciliation" className="mt-0 space-y-4">
+            <ReconciliationClient />
+          </TabsContent>
+        </div>
       </Tabs>
     </ConsolePageShell>
   );

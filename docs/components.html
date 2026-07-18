@@ -1,0 +1,1495 @@
+﻿<!DOCTYPE html><html lang="en" dir="ltr"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>ORLA � Component Library</title>    <link rel="stylesheet" href="tokens.css">  <link rel="preconnect" href="https://fonts.googleapis.com">  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">  <style>    /* ========================================       ORLA COMPONENT LIBRARY       shadcn/ui radix-maia � Tailwind v4       ======================================== */        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }    html {      font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;      font-size: 16px;      line-height: 1.6;      color: var(--foreground);      background: var(--background);      scroll-behavior: smooth;      -webkit-font-smoothing: antialiased;    }    body { min-height: 100vh; }    ::selection { background: var(--primary); color: var(--primary-foreground); }    /* ========================================       LAYOUT       ======================================== */    .container { max-width: 1200px; margin: 0 auto; padding: 48px 32px 96px; }    .section { margin-bottom: 56px; }    .section-label {      font-family: "Montserrat", sans-serif;      font-size: 0.6875rem;      font-weight: 600;      letter-spacing: 0.08em;      text-transform: uppercase;      color: var(--accent);      margin-bottom: 6px;    }    .section-title {      font-family: "Orla Serif", Georgia, serif;      font-size: clamp(1.44rem, 2.5vw, 2rem);      font-weight: 400;      line-height: 1.2;      letter-spacing: -0.015em;      margin-bottom: 24px;    }    .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }    /* ========================================       HEADER       ======================================== */    .header {      display: flex;      justify-content: space-between;      align-items: flex-start;      margin-bottom: 56px;      padding-bottom: 24px;      border-bottom: 1px solid var(--border);    }    .logo {      font-family: "Orla Serif", Georgia, serif;      font-size: clamp(2rem, 3.5vw, 3rem);      font-weight: 400;      line-height: 1.1;      letter-spacing: -0.025em;    }    .logo span { color: var(--accent); }    .subtitle {      font-size: 0.875rem;      color: var(--muted-foreground);      margin-top: 6px;    }    .header-actions { display: flex; gap: 10px; flex-shrink: 0; }    /* ========================================       THEME TOGGLE       ======================================== */    .theme-toggle {      display: inline-flex;      align-items: center;      gap: 6px;      padding: 5px 12px;      border: 1px solid var(--border);      border-radius: var(--radius-full);      background: var(--card);      color: var(--foreground);      font-family: "Montserrat", sans-serif;      font-size: 0.8125rem;      font-weight: 500;      cursor: pointer;      transition: background 0.15s, border-color 0.15s;    }    .theme-toggle:hover { background: var(--secondary); border-color: var(--muted-foreground); }    .theme-toggle svg { width: 15px; height: 15px; }    /* ========================================       BUTTONS       ======================================== */    .btn {      display: inline-flex;      align-items: center;      justify-content: center;      gap: 6px;      font-family: "Montserrat", sans-serif;      font-weight: 600;      font-size: 0.875rem;      letter-spacing: 0.01em;      border: none;      border-radius: var(--radius-full);      cursor: pointer;      transition: all 0.15s;      white-space: nowrap;      line-height: 1;    }    .btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }    .btn:disabled { opacity: 0.5; cursor: not-allowed; }    .btn-sm { height: 32px; padding: 0 12px; font-size: 0.8125rem; }    .btn-md { height: 36px; padding: 0 16px; }    .btn-lg { height: 40px; padding: 0 24px; font-size: 0.9375rem; }    .btn-icon { width: 36px; padding: 0; }    .btn-icon-sm { width: 32px; padding: 0; }    .btn-icon-lg { width: 40px; padding: 0; }    .btn-primary { background: var(--primary); color: var(--primary-foreground); }    .btn-primary:hover { background: oklch(0.80 0.199 91.936); }    .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }    .btn-secondary:hover { background: oklch(0.94 0.035 95); }    .btn-outline { background: oklch(0.90 0.015 85 / 0.3); color: var(--foreground); border: 1px solid var(--border); }    .btn-outline:hover { background: oklch(0.90 0.015 85 / 0.5); }    .btn-ghost { background: transparent; color: var(--foreground); }    .btn-ghost:hover { background: var(--muted); }    .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }    .btn-destructive:hover { opacity: 0.9; }    .btn-link { background: transparent; color: var(--primary); text-decoration: underline; text-underline-offset: 4px; }    .btn-link:hover { opacity: 0.8; }    .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 16px; }    .row-label {      width: 100%;      font-size: 0.75rem;      font-weight: 600;      color: var(--muted-foreground);      margin-bottom: -4px;    }    /* ========================================       BADGES       ======================================== */    .badge {      display: inline-flex;      align-items: center;      gap: 4px;      font-family: "Montserrat", sans-serif;      font-size: 0.6875rem;      font-weight: 600;      letter-spacing: 0.02em;      padding: 2px 8px;      border-radius: var(--radius-full);      white-space: nowrap;      line-height: 1.5;      border: 1px solid transparent;    }    .badge-primary { background: var(--primary); color: var(--primary-foreground); }    .badge-secondary { background: var(--secondary); color: var(--secondary-foreground); }    .badge-accent { background: var(--accent); color: var(--accent-foreground); }    .badge-outline { background: transparent; color: var(--foreground); border-color: var(--border); }    .badge-success { background: oklch(0.65 0.17 145 / 0.1); color: var(--success); border-color: oklch(0.65 0.17 145 / 0.2); }    .badge-warning { background: oklch(0.82 0.16 80 / 0.1); color: var(--warning-foreground); border-color: oklch(0.82 0.16 80 / 0.2); }    .badge-destructive { background: oklch(0.577 0.245 27.325 / 0.1); color: var(--destructive); border-color: oklch(0.577 0.245 27.325 / 0.2); }    .badge-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }    /* ========================================       CARDS       ======================================== */    .card {      background: var(--card);      border: 1px solid var(--border);      border-radius: var(--radius-lg);      box-shadow: var(--shadow-sm);      transition: box-shadow 0.15s;    }    .card:hover { box-shadow: var(--shadow-md); }    .card-header { padding: 20px 24px 0; }    .card-content { padding: 20px 24px; }    .card-footer { padding: 0 24px 20px; display: flex; gap: 8px; }    .card-label {      font-size: 0.6875rem;      font-weight: 600;      letter-spacing: 0.08em;      text-transform: uppercase;      color: var(--accent);      margin-bottom: 6px;    }    .card-title {      font-family: "Orla Serif", Georgia, serif;      font-size: 1.125rem;      font-weight: 400;      line-height: 1.3;      letter-spacing: -0.01em;    }    .card-desc {      font-size: 0.8125rem;      color: var(--muted-foreground);      margin-top: 4px;    }    .card-stat {      font-family: "Orla Serif", Georgia, serif;      font-size: clamp(1.6rem, 2.5vw, 2rem);      font-weight: 400;      line-height: 1.1;      letter-spacing: -0.02em;      margin-top: 8px;    }    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }    /* ========================================       FORM CONTROLS       ======================================== */    .form-group { display: flex; flex-direction: column; gap: 5px; }    .form-label {      font-size: 0.8125rem;      font-weight: 500;      color: var(--foreground);    }    .form-hint { font-size: 0.75rem; color: var(--muted-foreground); }    .form-error { font-size: 0.75rem; color: var(--destructive); }    .input {      font-family: "Montserrat", sans-serif;      font-size: 0.875rem;      height: 36px;      padding: 0 12px;      border: 1px solid var(--input);      border-radius: var(--radius-full);      background: oklch(0.90 0.015 85 / 0.3);      color: var(--foreground);      outline: none;      transition: border-color 0.15s, box-shadow 0.15s;      width: 100%;    }    .input::placeholder { color: var(--muted-foreground); }    .input:focus { border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.852 0.199 91.936 / 0.15); }    .input-error { border-color: var(--destructive); }    .input-error:focus { box-shadow: 0 0 0 3px oklch(0.577 0.245 27.325 / 0.15); }    .textarea {      font-family: "Montserrat", sans-serif;      font-size: 0.875rem;      padding: 8px 12px;      border: 1px solid var(--input);      border-radius: var(--radius-xl);      background: oklch(0.90 0.015 85 / 0.3);      color: var(--foreground);      outline: none;      resize: vertical;      min-height: 80px;      width: 100%;      transition: border-color 0.15s, box-shadow 0.15s;    }    .textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.852 0.199 91.936 / 0.15); }    .select {      font-family: "Montserrat", sans-serif;      font-size: 0.875rem;      height: 36px;      padding: 0 32px 0 12px;      border: 1px solid var(--input);      border-radius: var(--radius-full);      background: oklch(0.90 0.015 85 / 0.3);      color: var(--foreground);      outline: none;      appearance: none;      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8460' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");      background-repeat: no-repeat;      background-position: right 10px center;      cursor: pointer;      width: 100%;      transition: border-color 0.15s;    }    .select:focus { border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.852 0.199 91.936 / 0.15); }    .checkbox {      width: 16px;      height: 16px;      border: 2px solid var(--input);      border-radius: 5px;      background: var(--background);      display: inline-flex;      align-items: center;      justify-content: center;      cursor: pointer;      transition: all 0.15s;      flex-shrink: 0;    }    .checkbox.checked { background: var(--primary); border-color: var(--primary); }    .checkbox svg { display: none; width: 10px; height: 10px; color: var(--primary-foreground); }    .checkbox.checked svg { display: block; }    .switch {      width: 32px;      height: 18px;      border-radius: var(--radius-full);      background: var(--input);      border: none;      cursor: pointer;      position: relative;      transition: background 0.2s;      flex-shrink: 0;    }    .switch::after {      content: "";      position: absolute;      top: 2px;      left: 2px;      width: 14px;      height: 14px;      border-radius: 50%;      background: white;      transition: transform 0.2s;      box-shadow: 0 1px 2px oklch(0 0 0 / 0.15);    }    .switch.active { background: var(--primary); }    .switch.active::after { transform: translateX(14px); }    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }    .form-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }    /* ========================================       ALERTS       ======================================== */    .alert {      display: flex;      gap: 12px;      padding: 14px 16px;      border-radius: var(--radius-lg);      border: 1px solid;      font-size: 0.875rem;    }    .alert-icon { flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; }    .alert-content { flex: 1; }    .alert-title { font-weight: 600; margin-bottom: 2px; }    .alert-desc { opacity: 0.85; }    .alert-info { background: oklch(0.60 0.12 240 / 0.08); border-color: oklch(0.60 0.12 240 / 0.2); color: var(--info); }    .alert-success { background: oklch(0.65 0.17 145 / 0.08); border-color: oklch(0.65 0.17 145 / 0.2); color: var(--success); }    .alert-warning { background: oklch(0.82 0.16 80 / 0.08); border-color: oklch(0.82 0.16 80 / 0.2); color: oklch(0.40 0.10 80); }    .alert-destructive { background: oklch(0.577 0.245 27.325 / 0.08); border-color: oklch(0.577 0.245 27.325 / 0.2); color: var(--destructive); }    /* ========================================       TABS       ======================================== */    .tabs-list {      display: inline-flex;      gap: 2px;      padding: 3px;      background: var(--muted);      border-radius: var(--radius-4xl);    }    .tabs-list-line { background: transparent; gap: 4px; padding: 0; }    .tabs-trigger {      font-family: "Montserrat", sans-serif;      font-size: 0.8125rem;      font-weight: 500;      padding: 6px 14px;      border: none;      border-radius: calc(var(--radius-4xl) - 3px);      background: transparent;      color: var(--muted-foreground);      cursor: pointer;      transition: all 0.15s;      white-space: nowrap;    }    .tabs-trigger:hover { color: var(--foreground); }    .tabs-trigger.active {      background: var(--card);      color: var(--foreground);      box-shadow: 0 1px 2px oklch(0 0 0 / 0.06);    }    .tabs-trigger-line {      border-radius: 0;      padding: 8px 14px;      border-bottom: 2px solid transparent;    }    .tabs-trigger-line.active {      background: transparent;      color: var(--foreground);      box-shadow: none;      border-bottom-color: var(--foreground);    }    .tabs-content { padding: 16px 0; font-size: 0.875rem; color: var(--muted-foreground); }    /* ========================================       PROGRESS       ======================================== */    .progress {      position: relative;      height: 8px;      width: 100%;      border-radius: var(--radius-full);      background: var(--muted);      overflow: hidden;    }    .progress-bar {      height: 100%;      border-radius: var(--radius-full);      background: var(--primary);      transition: width 0.3s ease;    }    /* ========================================       SKELETON       ======================================== */    .skeleton {      background: var(--muted);      border-radius: var(--radius-xl);      animation: pulse 2s ease-in-out infinite;    }    @keyframes pulse {      0%, 100% { opacity: 1; }      50% { opacity: 0.5; }    }    /* ========================================       SEPARATOR       ======================================== */    .separator {      background: var(--border);      flex-shrink: 0;    }    .separator-h { height: 1px; width: 100%; }    .separator-v { width: 1px; align-self: stretch; }    /* ========================================       AVATAR       ======================================== */    .avatar {      position: relative;      display: inline-flex;      align-items: center;      justify-content: center;      border-radius: var(--radius-full);      overflow: hidden;      background: var(--muted);      color: var(--muted-foreground);      font-weight: 600;      flex-shrink: 0;    }    .avatar-sm { width: 32px; height: 32px; font-size: 0.75rem; }    .avatar-md { width: 40px; height: 40px; font-size: 0.875rem; }    .avatar-lg { width: 56px; height: 56px; font-size: 1.125rem; }    .avatar img { width: 100%; height: 100%; object-fit: cover; }    /* ========================================       ACCORDION       ======================================== */    .accordion { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }    .accordion-item { border-bottom: 1px solid var(--border); }    .accordion-item:last-child { border-bottom: none; }    .accordion-trigger {      display: flex;      align-items: center;      justify-content: space-between;      width: 100%;      padding: 14px 16px;      font-family: "Montserrat", sans-serif;      font-size: 0.875rem;      font-weight: 500;      background: none;      border: none;      color: var(--foreground);      cursor: pointer;      text-align: left;      transition: background 0.15s;    }    .accordion-trigger:hover { background: var(--muted); }    .accordion-trigger svg { width: 16px; height: 16px; color: var(--muted-foreground); transition: transform 0.2s; flex-shrink: 0; }    .accordion-trigger.open svg { transform: rotate(180deg); }    .accordion-content {      padding: 0 16px 14px;      font-size: 0.8125rem;      color: var(--muted-foreground);      line-height: 1.6;      display: none;    }    .accordion-content.open { display: block; }    /* ========================================       TABLE       ======================================== */    .table-wrapper {      border: 1px solid var(--border);      border-radius: var(--radius-lg);      overflow: hidden;      background: var(--card);    }    .table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }    .table th {      text-align: left;      padding: 10px 14px;      font-weight: 600;      font-size: 0.75rem;      letter-spacing: 0.02em;      color: var(--muted-foreground);      background: var(--muted);      border-bottom: 1px solid var(--border);    }    .table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }    .table tr:last-child td { border-bottom: none; }    .table tr:hover td { background: oklch(0.955 0.012 85 / 0.5); }    /* ========================================       TOOLTIP (simulated)       ======================================== */    .tooltip-wrapper { position: relative; display: inline-flex; }    .tooltip-content {      position: absolute;      bottom: calc(100% + 8px);      left: 50%;      transform: translateX(-50%);      padding: 4px 10px;      background: var(--foreground);      color: var(--background);      font-size: 0.6875rem;      font-weight: 500;      border-radius: var(--radius-sm);      white-space: nowrap;      pointer-events: none;      opacity: 0;      transition: opacity 0.15s;      z-index: 50;    }    .tooltip-wrapper:hover .tooltip-content { opacity: 1; }    /* ========================================       POPOVER (simulated)       ======================================== */    .popover-demo {      position: relative;      display: inline-flex;    }    .popover-panel {      position: absolute;      top: calc(100% + 8px);      left: 0;      width: 280px;      padding: 16px;      background: var(--popover);      border: 1px solid var(--border);      border-radius: var(--radius-2xl);      box-shadow: var(--shadow-lg);      z-index: 50;      display: none;    }    .popover-panel.open { display: block; }    .popover-title { font-size: 0.9375rem; font-weight: 600; margin-bottom: 4px; }    .popover-desc { font-size: 0.8125rem; color: var(--muted-foreground); margin-bottom: 12px; }    /* ========================================       DIALOG (simulated)       ======================================== */    .dialog-overlay {      position: fixed;      inset: 0;      background: oklch(0 0 0 / 0.8);      backdrop-filter: blur(2px);      z-index: 50;      display: none;      align-items: center;      justify-content: center;    }    .dialog-overlay.open { display: flex; }    .dialog-content {      background: var(--popover);      border-radius: var(--radius-4xl);      padding: 24px;      width: 100%;      max-width: 420px;      box-shadow: var(--shadow-lg);      position: relative;    }    .dialog-title {      font-family: "Orla Serif", Georgia, serif;      font-size: 1.125rem;      font-weight: 400;      letter-spacing: -0.01em;      margin-bottom: 6px;    }    .dialog-desc { font-size: 0.8125rem; color: var(--muted-foreground); margin-bottom: 20px; }    .dialog-close {      position: absolute;      top: 16px;      right: 16px;      width: 28px;      height: 28px;      border: none;      border-radius: var(--radius-sm);      background: transparent;      color: var(--muted-foreground);      cursor: pointer;      display: flex;      align-items: center;      justify-content: center;      transition: background 0.15s;    }    .dialog-close:hover { background: var(--muted); }    .dialog-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }    /* ========================================       DROPDOWN (simulated)       ======================================== */    .dropdown-wrapper { position: relative; display: inline-flex; }    .dropdown-panel {      position: absolute;      top: calc(100% + 4px);      left: 0;      min-width: 180px;      padding: 4px;      background: var(--popover);      border: 1px solid var(--border);      border-radius: var(--radius-2xl);      box-shadow: var(--shadow-lg);      z-index: 50;      display: none;    }    .dropdown-panel.open { display: block; }    .dropdown-item {      display: flex;      align-items: center;      gap: 8px;      padding: 6px 10px;      font-size: 0.8125rem;      border-radius: var(--radius-xl);      cursor: pointer;      transition: background 0.1s;      border: none;      background: none;      width: 100%;      text-align: left;      color: var(--foreground);    }    .dropdown-item:hover { background: var(--muted); }    .dropdown-item svg { width: 14px; height: 14px; color: var(--muted-foreground); }    .dropdown-label { padding: 6px 10px 4px; font-size: 0.6875rem; font-weight: 600; color: var(--muted-foreground); letter-spacing: 0.02em; }    .dropdown-sep { height: 1px; background: var(--border); margin: 4px 0; }    /* ========================================       EMPTY STATE       ======================================== */    .empty-state {      display: flex;      flex-direction: column;      align-items: center;      justify-content: center;      padding: 48px 24px;      text-align: center;    }    .empty-icon { width: 48px; height: 48px; color: var(--muted-foreground); margin-bottom: 12px; opacity: 0.5; }    .empty-title { font-size: 0.9375rem; font-weight: 600; }    .empty-desc { font-size: 0.8125rem; color: var(--muted-foreground); margin-top: 4px; max-width: 320px; }    /* ========================================       TOAST (simulated)       ======================================== */    .toast-container {      position: fixed;      bottom: 16px;      right: 16px;      display: flex;      flex-direction: column;      gap: 8px;      z-index: 100;      pointer-events: none;    }    .toast {      display: flex;      align-items: center;      gap: 10px;      padding: 12px 16px;      background: var(--card);      border: 1px solid var(--border);      border-radius: var(--radius-lg);      box-shadow: var(--shadow-lg);      font-size: 0.8125rem;      pointer-events: auto;      min-width: 280px;      max-width: 400px;    }    .toast-icon { width: 18px; height: 18px; flex-shrink: 0; }    .toast-success .toast-icon { color: var(--success); }    .toast-error .toast-icon { color: var(--destructive); }    .toast-warning .toast-icon { color: var(--warning); }    .toast-message { flex: 1; }    .toast-title { font-weight: 600; }    .toast-desc { color: var(--muted-foreground); font-size: 0.75rem; margin-top: 1px; }    /* ========================================       FOCUS STATES       ======================================== */    .focus-demo {      display: inline-flex;      align-items: center;      justify-content: center;      padding: 6px 14px;      font-family: "Montserrat", sans-serif;      font-size: 0.8125rem;      font-weight: 500;      border: 1px solid var(--border);      border-radius: var(--radius-full);      background: var(--card);      color: var(--foreground);      transition: all 0.15s;    }    .focus-demo:focus-visible {      outline: none;      border-color: var(--ring);      box-shadow: 0 0 0 3px oklch(0.852 0.199 91.936 / 0.2);    }    .focus-error:focus-visible {      border-color: var(--destructive);      box-shadow: 0 0 0 3px oklch(0.577 0.245 27.325 / 0.2);    }    /* ========================================       OVERLAY PATTERNS       ======================================== */    .overlay-demo {      position: relative;      display: inline-block;    }    .overlay-scrim {      position: absolute;      inset: 0;      background: oklch(0 0 0 / 0.8);      backdrop-filter: blur(2px);      border-radius: var(--radius-lg);      display: flex;      align-items: center;      justify-content: center;      color: white;      font-size: 0.8125rem;      font-weight: 500;    }    .glass-panel {      background: oklch(1 0 0 / 0.7);      backdrop-filter: blur(24px) saturate(1.5);      border: 1px solid oklch(0 0 0 / 0.05);      border-radius: var(--radius-xl);      box-shadow: var(--shadow-md);      padding: 16px;      max-width: 260px;    }    .dark .glass-panel {      background: oklch(0.22 0.02 80 / 0.7);      border: 1px solid oklch(1 0 0 / 0.05);    }    /* ========================================       FORM VALIDATION       ======================================== */    .input-valid {      border-color: var(--success);    }    .input-valid:focus {      box-shadow: 0 0 0 3px oklch(0.65 0.17 145 / 0.15);      border-color: var(--success);    }    /* ========================================       SPINNER       ======================================== */    .spinner {      width: 18px;      height: 18px;      border: 2px solid var(--muted);      border-top-color: var(--foreground);      border-radius: 50%;      animation: spin 0.6s linear infinite;    }    .spinner-sm { width: 14px; height: 14px; border-width: 2px; }    .spinner-success { border-top-color: var(--success); }    .spinner-destructive { border-top-color: var(--destructive); }    @keyframes spin {      to { transform: rotate(360deg); }    }    /* ========================================       STATE CARDS       ======================================== */    .state-card {      background: var(--card);      border: 1px solid var(--border);      border-radius: var(--radius-lg);      box-shadow: var(--shadow-sm);      padding: 32px 24px;      display: flex;      flex-direction: column;      align-items: center;      justify-content: center;      text-align: center;      min-height: 180px;    }    .state-icon {      width: 48px;      height: 48px;      margin-bottom: 12px;      flex-shrink: 0;    }    .state-title {      font-size: 0.9375rem;      font-weight: 600;      margin-bottom: 4px;    }    .state-desc {      font-size: 0.8125rem;      color: var(--muted-foreground);      max-width: 280px;      margin-bottom: 16px;    }    .state-actions {      display: flex;      gap: 8px;    }    /* ========================================       ANIMATION & TRANSITIONS       ======================================== */    .duration-demo {      display: inline-flex;      align-items: center;      justify-content: center;      padding: 6px 14px;      font-family: "Montserrat", sans-serif;      font-size: 0.75rem;      font-weight: 600;      letter-spacing: 0.02em;      border-radius: var(--radius-full);      background: var(--primary);      color: var(--primary-foreground);      transition-property: background, transform, box-shadow;      cursor: pointer;    }    .duration-demo:hover {      transform: translateY(-1px);      box-shadow: var(--shadow-md);    }    .easing-demo {      width: 40px;      height: 40px;      border-radius: var(--radius-full);      background: var(--accent);      animation: demo-bounce 2s ease-in-out infinite;    }    @keyframes demo-bounce {      0%, 100% { transform: translateY(0); }      50% { transform: translateY(-12px); }    }    /* ========================================       STATS CARDS       ======================================== */    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }    .stat-card {      background: var(--card);      border: 1px solid var(--border);      border-radius: var(--radius-lg);      box-shadow: var(--shadow-sm);      padding: 20px 24px;      transition: box-shadow 0.15s;    }    .stat-card:hover { box-shadow: var(--shadow-md); }    .stat-label {      font-size: 0.6875rem;      font-weight: 600;      letter-spacing: 0.08em;      text-transform: uppercase;      color: var(--muted-foreground);      margin-bottom: 6px;      display: flex;      align-items: center;      gap: 6px;    }    .stat-label svg { width: 14px; height: 14px; }    .stat-value {      font-family: "Orla Serif", Georgia, serif;      font-size: clamp(1.5rem, 2.5vw, 1.875rem);      font-weight: 400;      line-height: 1.1;      letter-spacing: -0.02em;      margin-bottom: 4px;    }    .stat-trend { font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }    .stat-trend svg { width: 12px; height: 12px; }    .stat-trend-up { color: var(--success); }    .stat-trend-down { color: var(--destructive); }    .stat-sparkline { margin-top: 12px; height: 32px; display: flex; align-items: flex-end; gap: 3px; }    .stat-sparkline-bar {      flex: 1;      border-radius: 2px;      background: var(--primary);      opacity: 0.6;      transition: opacity 0.15s;    }    .stat-card:hover .stat-sparkline-bar { opacity: 1; }    /* ========================================       ALERT DIALOG       ======================================== */    .alert-dialog-overlay {      position: fixed;      inset: 0;      background: oklch(0 0 0 / 0.8);      backdrop-filter: blur(2px);      z-index: 50;      display: none;      align-items: center;      justify-content: center;    }    .alert-dialog-overlay.open { display: flex; }    .alert-dialog-content {      background: var(--popover);      border-radius: var(--radius-4xl);      padding: 24px;      width: 100%;      max-width: 400px;      box-shadow: var(--shadow-lg);    }    .alert-dialog-icon-wrap {      width: 40px;      height: 40px;      border-radius: var(--radius-full);      display: flex;      align-items: center;      justify-content: center;      margin-bottom: 16px;    }    .alert-dialog-icon-destructive { background: oklch(0.577 0.245 27.325 / 0.1); color: var(--destructive); }    .alert-dialog-title {      font-family: "Orla Serif", Georgia, serif;      font-size: 1.125rem;      font-weight: 400;      letter-spacing: -0.01em;      margin-bottom: 6px;    }    .alert-dialog-desc { font-size: 0.8125rem; color: var(--muted-foreground); line-height: 1.6; }    .alert-dialog-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }    /* ========================================       RESPONSIVE DIALOG / DRAWER       ======================================== */    .responsive-overlay {      position: fixed;      inset: 0;      background: oklch(0 0 0 / 0.8);      backdrop-filter: blur(2px);      z-index: 50;      display: none;    }    .responsive-overlay.open { display: block; }    .responsive-drawer {      position: fixed;      bottom: 0;      left: 0;      right: 0;      background: var(--popover);      border-radius: var(--radius-4xl) var(--radius-4xl) 0 0;      padding: 24px;      box-shadow: var(--shadow-lg);      transform: translateY(100%);      transition: transform 0.3s ease;      z-index: 51;      max-height: 80vh;      overflow-y: auto;    }    .responsive-overlay.open ~ .responsive-drawer,    .responsive-drawer.open { transform: translateY(0); display: block; }    @media (min-width: 769px) {      .responsive-overlay.open ~ .responsive-drawer,      .responsive-drawer.open { display: none; }    }    .responsive-dialog {      position: fixed;      top: 50%;      left: 50%;      transform: translate(-50%, -50%) scale(0.95);      background: var(--popover);      border-radius: var(--radius-4xl);      padding: 24px;      width: 100%;      max-width: 420px;      box-shadow: var(--shadow-lg);      z-index: 51;      opacity: 0;      pointer-events: none;      transition: opacity 0.2s, transform 0.2s;    }    .responsive-overlay.open ~ .responsive-dialog,    .responsive-dialog.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }    @media (max-width: 768px) {      .responsive-overlay.open ~ .responsive-dialog,      .responsive-dialog.open { display: none; }    }    .drawer-handle {      width: 40px;      height: 4px;      background: var(--muted-foreground);      opacity: 0.3;      border-radius: var(--radius-full);      margin: 0 auto 16px;    }    /* ========================================       BREADCRUMB       ======================================== */    .breadcrumb {      display: flex;      align-items: center;      gap: 6px;      font-size: 0.8125rem;      flex-wrap: wrap;    }    .breadcrumb-item {      color: var(--muted-foreground);      text-decoration: none;      transition: color 0.15s;      border: none;      background: none;      font-family: "Montserrat", sans-serif;      font-size: 0.8125rem;      cursor: pointer;    }    .breadcrumb-item:hover { color: var(--foreground); }    .breadcrumb-current { color: var(--foreground); font-weight: 500; pointer-events: none; }    .breadcrumb-sep { color: var(--muted-foreground); user-select: none; font-size: 0.75rem; }    /* ========================================       CHARTS       ======================================== */    .chart-container {      background: var(--card);      border: 1px solid var(--border);      border-radius: var(--radius-lg);      box-shadow: var(--shadow-sm);      padding: 20px 24px;    }    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }    .chart-title { font-size: 0.875rem; font-weight: 600; }    .chart-subtitle { font-size: 0.75rem; color: var(--muted-foreground); }    .chart-bar-group { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-bottom: 24px; position: relative; }    .chart-bar {      flex: 1;      border-radius: var(--radius-sm) var(--radius-sm) 0 0;      background: var(--primary);      transition: background 0.15s;      min-height: 4px;      position: relative;    }    .chart-bar:hover { background: var(--accent); }    .chart-bar-label {      position: absolute;      bottom: -20px;      left: 50%;      transform: translateX(-50%);      font-size: 0.5625rem;      color: var(--muted-foreground);      white-space: nowrap;    }    .chart-bar-value {      position: absolute;      top: -18px;      left: 50%;      transform: translateX(-50%);      font-size: 0.5625rem;      font-weight: 600;      color: var(--foreground);      white-space: nowrap;    }    .chart-pie-container { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }    .chart-pie-legend { display: flex; flex-direction: column; gap: 6px; }    .chart-pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; }    .chart-pie-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }    /* ========================================       CAROUSEL       ======================================== */    .carousel {      position: relative;      border-radius: var(--radius-lg);      overflow: hidden;      background: var(--card);      border: 1px solid var(--border);      box-shadow: var(--shadow-sm);    }    .carousel-viewport { overflow: hidden; }    .carousel-track { display: flex; transition: transform 0.3s ease; }    .carousel-slide {      flex: 0 0 100%;      min-width: 0;      display: flex;      align-items: center;      justify-content: center;      aspect-ratio: 16/9;      background: var(--muted);    }    .carousel-btn {      position: absolute;      top: 50%;      transform: translateY(-50%);      width: 36px;      height: 36px;      border-radius: var(--radius-full);      border: 1px solid var(--border);      background: var(--card);      color: var(--foreground);      cursor: pointer;      display: flex;      align-items: center;      justify-content: center;      box-shadow: var(--shadow-md);      transition: background 0.15s;      z-index: 10;    }    .carousel-btn:hover { background: var(--muted); }    .carousel-btn-prev { left: 12px; }    .carousel-btn-next { right: 12px; }    .carousel-dots { display: flex; justify-content: center; gap: 6px; padding: 12px 0; }    .carousel-dot {      width: 8px;      height: 8px;      border-radius: 50%;      background: var(--muted);      border: none;      cursor: pointer;      transition: background 0.15s;      padding: 0;    }    .carousel-dot.active { background: var(--primary); }    /* ========================================       DATETIME PICKER       ======================================== */    .datetime-picker { position: relative; display: inline-block; }    .calendar-panel {      background: var(--popover);      border: 1px solid var(--border);      border-radius: var(--radius-2xl);      box-shadow: var(--shadow-lg);      padding: 16px;      width: 280px;      display: none;    }    .calendar-panel.open { display: block; }    .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }    .calendar-month { font-size: 0.875rem; font-weight: 600; }    .calendar-nav {      width: 28px;      height: 28px;      border-radius: var(--radius-full);      border: none;      background: transparent;      color: var(--muted-foreground);      cursor: pointer;      display: flex;      align-items: center;      justify-content: center;      transition: background 0.15s;    }    .calendar-nav:hover { background: var(--muted); }    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }    .calendar-weekday { font-size: 0.6875rem; font-weight: 600; color: var(--muted-foreground); padding: 4px 0; }    .calendar-day {      width: 32px;      height: 32px;      border-radius: var(--radius-full);      border: none;      background: transparent;      font-size: 0.75rem;      font-weight: 500;      color: var(--foreground);      cursor: pointer;      display: inline-flex;      align-items: center;      justify-content: center;      transition: background 0.15s;      font-family: "Montserrat", sans-serif;    }    .calendar-day:hover { background: var(--muted); }    .calendar-day.today { background: var(--primary); color: var(--primary-foreground); }    .calendar-day.selected { background: var(--accent); color: var(--accent-foreground); }    .calendar-day.other-month { color: var(--muted-foreground); opacity: 0.4; }    .time-picker {      margin-top: 12px;      padding-top: 12px;      border-top: 1px solid var(--border);      display: flex;      gap: 8px;      align-items: center;    }    .time-picker-label { font-size: 0.75rem; color: var(--muted-foreground); }    .time-input {      font-family: "Montserrat", sans-serif;      font-size: 0.8125rem;      height: 28px;      padding: 0 8px;      border: 1px solid var(--input);      border-radius: var(--radius-sm);      background: oklch(0.90 0.015 85 / 0.3);      color: var(--foreground);      outline: none;      width: 56px;      text-align: center;    }    .time-input:focus { border-color: var(--ring); }    /* ========================================       VARIANT SELECTOR       ======================================== */    .variant-group { margin-bottom: 16px; }    .variant-label {      font-size: 0.75rem;      font-weight: 600;      color: var(--muted-foreground);      margin-bottom: 8px;      text-transform: uppercase;      letter-spacing: 0.02em;    }    .variant-options { display: flex; flex-wrap: wrap; gap: 6px; }    .variant-option {      height: 32px;      padding: 0 14px;      border: 1px solid var(--border);      border-radius: var(--radius-full);      background: transparent;      font-family: "Montserrat", sans-serif;      font-size: 0.75rem;      font-weight: 500;      color: var(--foreground);      cursor: pointer;      transition: all 0.15s;    }    .variant-option:hover { border-color: var(--foreground); }    .variant-option.active { background: var(--foreground); color: var(--background); border-color: var(--foreground); }    .variant-option-swatch {      width: 28px;      height: 28px;      border-radius: var(--radius-full);      border: 2px solid var(--border);      cursor: pointer;      transition: border-color 0.15s;      padding: 0;    }    .variant-option-swatch:hover { border-color: var(--foreground); }    .variant-option-swatch.active {      border-color: var(--foreground);      box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--foreground);    }    /* ========================================       COLOR PICKER       ======================================== */    .color-picker-panel {      background: var(--card);      border: 1px solid var(--border);      border-radius: var(--radius-lg);      box-shadow: var(--shadow-md);      padding: 16px;      width: 220px;    }    .color-picker-swatch-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }    .color-picker-swatch {      width: 24px;      height: 24px;      border-radius: var(--radius-sm);      border: 1px solid var(--border);      cursor: pointer;      transition: transform 0.1s, box-shadow 0.1s;      padding: 0;    }    .color-picker-swatch:hover { transform: scale(1.15); }    .color-picker-swatch.active { box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring); }    .color-picker-input-row { display: flex; gap: 8px; align-items: center; }    .color-picker-hex {      font-family: "Montserrat", sans-serif;      font-size: 0.75rem;      font-weight: 500;      height: 28px;      padding: 0 8px;      border: 1px solid var(--input);      border-radius: var(--radius-sm);      background: oklch(0.90 0.015 85 / 0.3);      color: var(--foreground);      outline: none;      flex: 1;    }    .color-picker-preview {      width: 28px;      height: 28px;      border-radius: var(--radius-sm);      border: 1px solid var(--border);      flex-shrink: 0;    }    /* ========================================       COLOR SWATCH SELECTOR       ======================================== */    .swatch-grid { display: flex; flex-wrap: wrap; gap: 12px; }    .swatch-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }    .swatch-circle {      width: 36px;      height: 36px;      border-radius: var(--radius-full);      border: 2px solid transparent;      transition: border-color 0.15s, transform 0.1s;    }    .swatch-item:hover .swatch-circle { transform: scale(1.1); }    .swatch-item.active .swatch-circle {      border-color: var(--foreground);      box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--foreground);    }    .swatch-name { font-size: 0.625rem; color: var(--muted-foreground); font-weight: 500; }    .swatch-item.active .swatch-name { color: var(--foreground); font-weight: 600; }    /* ========================================       STEPPER       ======================================== */    .stepper { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }    .stepper-step { display: flex; align-items: center; gap: 8px; }    .stepper-circle {      width: 28px;      height: 28px;      border-radius: var(--radius-full);      display: flex;      align-items: center;      justify-content: center;      font-size: 0.75rem;      font-weight: 700;      flex-shrink: 0;      transition: all 0.2s;    }    .stepper-circle-complete { background: var(--primary); color: var(--primary-foreground); }    .stepper-circle-active { background: var(--accent); color: var(--accent-foreground); }    .stepper-circle-pending { background: var(--muted); color: var(--muted-foreground); }    .stepper-label { font-size: 0.8125rem; font-weight: 500; white-space: nowrap; }    .stepper-label-active { color: var(--foreground); font-weight: 600; }    .stepper-label-complete { color: var(--muted-foreground); }    .stepper-label-pending { color: var(--muted-foreground); opacity: 0.6; }    .stepper-line {      flex: 0 0 auto;      width: 32px;      height: 2px;      background: var(--border);      margin: 0 8px;    }    .stepper-line-complete { background: var(--primary); }    /* ========================================       RESPONSIVE       ======================================== */    @media (max-width: 768px) {      .container { padding: 32px 16px 64px; }      .header { flex-direction: column; gap: 16px; }      .card-grid { grid-template-columns: 1fr; }      .form-grid { grid-template-columns: 1fr; }      .stats-grid { grid-template-columns: 1fr; }      .stepper { gap: 0; }      .stepper-label { display: none; }      .stepper-line { width: 20px; margin: 0 4px; }      .chart-pie-container { flex-direction: column; }      .carousel-slide { aspect-ratio: 4/3; }    }
+
+    /* ========================================       POLISH: SCREEN READER ONLY       ======================================== */    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+
+    /* ========================================       POLISH: BUTTON ACTIVE STATES       ======================================== */    .btn-primary:active { transform: scale(0.97); }    .btn-secondary:active { background: oklch(0.92 0.035 95); }    .btn-outline:active { background: oklch(0.90 0.015 85 / 0.6); }    .btn-ghost:active { background: var(--muted); }    .btn-destructive:active { opacity: 0.85; transform: scale(0.97); }    .btn-link:active { opacity: 0.7; }
+
+    /* ========================================       POLISH: FOCUS-VISIBLE FOR ALL INTERACTIVES       ======================================== */    .tabs-trigger:focus-visible,    .accordion-trigger:focus-visible,    .variant-option:focus-visible,    .variant-option-swatch:focus-visible,    .color-picker-swatch:focus-visible,    .dropdown-item:focus-visible,    .carousel-btn:focus-visible,    .calendar-nav:focus-visible,    .calendar-day:focus-visible,    .breadcrumb-item:focus-visible {      outline: 2px solid var(--ring);      outline-offset: 2px;    }    .tabs-trigger:focus-visible { border-radius: calc(var(--radius-4xl) - 3px); }    .accordion-trigger:focus-visible { border-radius: var(--radius-sm); }    .variant-option:focus-visible { border-radius: var(--radius-full); }    .variant-option-swatch:focus-visible { border-radius: var(--radius-full); }    .color-picker-swatch:focus-visible { border-radius: var(--radius-sm); }    .carousel-btn:focus-visible { border-radius: var(--radius-full); }    .calendar-day:focus-visible { border-radius: var(--radius-full); }    .breadcrumb-item:focus-visible { border-radius: var(--radius-sm); }    .dropdown-item:focus-visible { border-radius: var(--radius-xl); }
+
+    
+
+    /* ========================================       POLISH: TOAST MOBILE POSITIONING       ======================================== */    @media (max-width: 480px) {      .toast-container { left: 16px; right: 16px; bottom: 72px; }      .toast { min-width: 0; max-width: 100%; }    }
+
+    /* ========================================       POLISH: PREFERS-REDUCED-MOTION       ======================================== */    @media (prefers-reduced-motion: reduce) {      *, *::before, *::after {        animation-duration: 0.01ms !important;        animation-iteration-count: 1 !important;        transition-duration: 0.01ms !important;      }      .skeleton { animation: none; opacity: 0.6; }      .spinner { animation: none; }    }
+  </style></head><body>  <div class="container" data-od-id="component-library">    <!-- HEADER -->    <header class="header" data-od-id="cl-header">      <div>        <div class="logo">ORLA <span>Components</span></div>        <div class="subtitle">Reusable UI library &middot; shadcn/ui radix-maia preset</div>      </div>      <div class="header-actions">        <button class="theme-toggle" id="theme-toggle" data-od-id="cl-theme-toggle" aria-label="Toggle theme">          <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>          <span id="theme-label">Dark</span>        </button>      </div>    </header>    <!-- ============================         BUTTONS         ============================ -->    <!-- ============================         COMPONENT LIBRARY         ============================ -->    <section class="section" data-od-id="cl-animation">
+      <div class="section-label">01 &mdash; Foundations</div>
+      <h2 class="section-title">Animation &amp; Transitions</h2>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Duration Scale</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;">
+        <div class="duration-demo" style="transition-duration:75ms;">75ms</div>
+        <div class="duration-demo" style="transition-duration:100ms;">100ms</div>
+        <div class="duration-demo" style="transition-duration:150ms;">150ms</div>
+        <div class="duration-demo" style="transition-duration:200ms;">200ms</div>
+        <div class="duration-demo" style="transition-duration:300ms;">300ms</div>
+        <div class="duration-demo" style="transition-duration:500ms;">500ms</div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Easing Curves</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;margin-bottom:24px;">
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;border-radius:var(--radius-lg);background:var(--muted);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--primary);animation:demo-bounce 2s ease-in-out infinite;"></div>
+          </div>
+          <div style="font-size:0.6875rem;color:var(--muted-foreground);margin-top:6px;">ease-in-out</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;border-radius:var(--radius-lg);background:var(--muted);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);animation:demo-bounce 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+          </div>
+          <div style="font-size:0.6875rem;color:var(--muted-foreground);margin-top:6px;">ease-out</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;border-radius:var(--radius-lg);background:var(--muted);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--success);animation:demo-bounce 2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;"></div>
+          </div>
+          <div style="font-size:0.6875rem;color:var(--muted-foreground);margin-top:6px;">ease-spring</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Overlay Animations</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;">
+        <div style="padding:8px 14px;background:var(--muted);border-radius:var(--radius-lg);font-size:0.75rem;color:var(--muted-foreground);font-family:monospace;">fade-in-0 + zoom-in-95</div>
+        <div style="padding:8px 14px;background:var(--muted);border-radius:var(--radius-lg);font-size:0.75rem;color:var(--muted-foreground);font-family:monospace;">slide-in-from-top-2</div>
+        <div style="padding:8px 14px;background:var(--muted);border-radius:var(--radius-lg);font-size:0.75rem;color:var(--muted-foreground);font-family:monospace;">slide-in-from-right-2</div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-focus">
+      <div class="section-label">02 &mdash; Foundations</div>
+      <h2 class="section-title">Focus States</h2>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Standard Focus Ring (Tab to see)</h3>
+      <div class="form-row" style="margin-bottom:24px;">
+        <button class="focus-demo">Primary</button>
+        <button class="focus-demo">Secondary</button>
+        <button class="focus-demo">Outline</button>
+        <input class="input" style="max-width:200px;" placeholder="Focus me...">
+        <select class="select" style="max-width:200px;">
+          <option>Select</option>
+        </select>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Invalid / Error Focus</h3>
+      <div class="form-row">
+        <input class="input input-error" style="max-width:200px;" value="1600" aria-invalid="true">
+        <input class="input focus-error" style="max-width:200px;" value="Invalid" aria-invalid="true">
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted-foreground);margin-top:8px;">
+        <code>aria-invalid:border-destructive</code> + <code>ring-destructive/20</code> (3px)
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-overlays">
+      <div class="section-label">03 &mdash; Foundations</div>
+      <h2 class="section-title">Overlay Patterns</h2>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Backdrop Scrim</h3>
+      <div style="display:flex;gap:16px;margin-bottom:24px;">
+        <div class="overlay-demo" style="width:200px;height:120px;border-radius:var(--radius-lg);background:var(--muted);overflow:hidden;">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);opacity:0.6;"></div>
+          <div class="overlay-scrim">
+            <span>bg-black/80 + blur</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Glassmorphism Panel</h3>
+      <div style="display:flex;gap:16px;margin-bottom:24px;">
+        <div style="width:260px;height:140px;border-radius:var(--radius-lg);background:linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);display:flex;align-items:center;justify-content:center;padding:16px;">
+          <div class="glass-panel">
+            <div style="font-weight:600;font-size:0.875rem;margin-bottom:4px;">Popover Content</div>
+            <div style="font-size:0.75rem;color:var(--muted-foreground);">bg-popover/70 + backdrop-blur-2xl + ring-1 ring-foreground/5</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Stacking Order</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="padding:4px 10px;background:var(--muted);border-radius:var(--radius-sm);font-size:0.6875rem;color:var(--muted-foreground);">z-0 � Content</span>
+        <span style="padding:4px 10px;background:var(--muted);border-radius:var(--radius-sm);font-size:0.6875rem;color:var(--muted-foreground);">z-10 � Sticky</span>
+        <span style="padding:4px 10px;background:var(--muted);border-radius:var(--radius-sm);font-size:0.6875rem;color:var(--muted-foreground);">z-50 � Dropdown/Popover</span>
+        <span style="padding:4px 10px;background:var(--muted);border-radius:var(--radius-sm);font-size:0.6875rem;color:var(--muted-foreground);">z-50 � Dialog/Sheet</span>
+        <span style="padding:4px 10px;background:var(--muted);border-radius:var(--radius-sm);font-size:0.6875rem;color:var(--muted-foreground);">z-[100] � Toast</span>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-buttons">
+      <div class="section-label">04 &mdash; Primitives</div>
+      <h2 class="section-title">Buttons</h2>
+
+      <div class="row"><span class="row-label">Variants</span></div>
+      <div class="row">
+        <button class="btn btn-md btn-primary">Ajouter au Panier</button>
+        <button class="btn btn-md btn-secondary">Sauvegarder</button>
+        <button class="btn btn-md btn-outline">Annuler</button>
+        <button class="btn btn-md btn-ghost">Ghost</button>
+        <button class="btn btn-md btn-destructive">Supprimer</button>
+        <button class="btn btn-md btn-link">En savoir plus</button>
+      </div>
+
+      <div class="row" style="margin-top:20px"><span class="row-label">Sizes</span></div>
+      <div class="row">
+        <button class="btn btn-sm btn-primary">Small</button>
+        <button class="btn btn-md btn-primary">Medium</button>
+        <button class="btn btn-lg btn-primary">Large</button>
+        <button class="btn btn-icon-sm btn-primary" aria-label="Icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        </button>
+        <button class="btn btn-icon btn-primary" aria-label="Icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        </button>
+        <button class="btn btn-icon-lg btn-primary" aria-label="Icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        </button>
+      </div>
+
+      <div class="row" style="margin-top:20px"><span class="row-label">States</span></div>
+      <div class="row">
+        <button class="btn btn-md btn-primary">Default</button>
+        <button class="btn btn-md btn-primary" disabled>Disabled</button>
+        <button class="btn btn-md btn-outline" disabled>Disabled</button>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-badges">
+      <div class="section-label">05 &mdash; Primitives</div>
+      <h2 class="section-title">Badges</h2>
+
+      <div class="row">
+        <span class="badge badge-primary">En stock</span>
+        <span class="badge badge-secondary">Nouveau</span>
+        <span class="badge badge-accent">Promo</span>
+        <span class="badge badge-outline">Brouillon</span>
+        <span class="badge badge-success badge-dot">Livr�</span>
+        <span class="badge badge-warning badge-dot">En attente</span>
+        <span class="badge badge-destructive badge-dot">Annul�</span>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-misc">
+      <div class="section-label">06 &mdash; Primitives</div>
+      <h2 class="section-title">Avatar &amp; Separator</h2>
+
+      <div class="form-row" style="margin-bottom:20px">
+        <div class="avatar avatar-sm">A</div>
+        <div class="avatar avatar-md">M</div>
+        <div class="avatar avatar-lg">OR</div>
+        <div class="avatar avatar-lg" style="background:var(--primary);color:var(--primary-foreground);">S</div>
+      </div>
+
+      <div class="separator separator-h" style="margin:16px 0;"></div>
+      <div style="display:flex;gap:16px;align-items:center;height:40px;">
+        <span style="font-size:0.875rem;">Produit</span>
+        <div class="separator separator-v" style="height:20px;"></div>
+        <span style="font-size:0.875rem;">Ingr�dient</span>
+        <div class="separator separator-v" style="height:20px;"></div>
+        <span style="font-size:0.875rem;">Packaging</span>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-progress">
+      <div class="section-label">07 &mdash; Primitives</div>
+      <h2 class="section-title">Progress &amp; Skeleton</h2>
+
+      <div style="max-width:400px;margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:0.8125rem;font-weight:500;">Stock restant</span>
+          <span style="font-size:0.8125rem;color:var(--muted-foreground);">72%</span>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:72%"></div></div>
+      </div>
+      <div style="max-width:400px;margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:0.8125rem;font-weight:500;">Objectif mensuel</span>
+          <span style="font-size:0.8125rem;color:var(--muted-foreground);">45%</span>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:45%;background:var(--accent)"></div></div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin:20px 0 10px;">Skeleton loaders</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="skeleton" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+            <div class="skeleton" style="height:12px;width:60%;"></div>
+            <div class="skeleton" style="height:10px;width:40%;"></div>
+          </div>
+        </div>
+        <div class="skeleton" style="height:14px;width:100%;"></div>
+        <div class="skeleton" style="height:14px;width:85%;"></div>
+        <div class="skeleton" style="height:100px;width:100%;"></div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-forms">
+      <div class="section-label">08 &mdash; Input</div>
+      <h2 class="section-title">Form Controls</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nom du produit</label>
+          <input class="input" type="text" placeholder="Ex: Moule � G�teau Round">
+          <span class="form-hint">Nom tel qu'il appara�tra sur la boutique</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prix (DA)</label>
+          <input class="input" type="text" value="2,500" style="font-family:'Montserrat',sans-serif;font-weight:600;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cat�gorie</label>
+          <select class="select">
+            <option>Outils de P�tisserie</option>
+            <option>Ingr�dients</option>
+            <option>Bo�tes &amp; Packaging</option>
+            <option>Moules</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Code postal</label>
+          <input class="input input-error" type="text" value="1600">
+          <span class="form-error">Code postal invalide</span>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:16px">
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="textarea" placeholder="D�crivez le produit..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:20px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <div class="checkbox checked" role="checkbox" aria-checked="true" tabindex="0" onclick="var c=this.classList.toggle('checked');this.setAttribute('aria-checked',c)" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();this.click()}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span style="font-size:0.875rem;">Actif</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <div class="checkbox" role="checkbox" aria-checked="false" tabindex="0" onclick="var c=this.classList.toggle('checked');this.setAttribute('aria-checked',c)" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();this.click()}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span style="font-size:0.875rem;">Visible en boutique</span>
+        </label>
+        <button class="switch active" role="switch" aria-checked="true" onclick="var a=this.classList.toggle('active');this.setAttribute('aria-checked',a)" aria-label="Notification email"></button>
+        <span style="font-size:0.875rem;">Notification email</span>
+        <button class="switch" role="switch" aria-checked="false" onclick="var a=this.classList.toggle('active');this.setAttribute('aria-checked',a)" aria-label="Mode �dition"></button>
+        <span style="font-size:0.875rem;">Mode �dition</span>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-validation">
+      <div class="section-label">09 &mdash; Input</div>
+      <h2 class="section-title">Form Validation States</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Default</label>
+          <input class="input" type="text" value="Valeur valide">
+          <span class="form-hint">Texte d&apos;aide sous le champ</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Succ�s</label>
+          <input class="input input-valid" type="text" value="16000">
+          <span class="form-hint" style="color:var(--success);">Code postal valide</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Erreur</label>
+          <input class="input input-error" type="text" value="ABC" aria-invalid="true">
+          <span class="form-error">Ce champ ne doit contenir que des chiffres</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="opacity:0.5;">D�sactiv�</label>
+          <input class="input" type="text" value="Non modifiable" disabled style="opacity:0.5;cursor:not-allowed;">
+          <span class="form-hint">Ce champ est en lecture seule</span>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin:24px 0 10px;">State Summary</h3>
+      <div class="table-wrapper" style="max-width:600px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">�tat</th>
+              <th scope="col">Bordure</th>
+              <th scope="col">Ring</th>
+              <th scope="col">Texte</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;">Default</td>
+              <td><code>--input</code></td>
+              <td>Aucun</td>
+              <td><code>--foreground</code></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">Focus</td>
+              <td><code>--ring</code></td>
+              <td>ring-ring/50 (3px)</td>
+              <td><code>--foreground</code></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--destructive);">Erreur</td>
+              <td><code>--destructive</code></td>
+              <td>ring-destructive/20 (3px)</td>
+              <td><code>--foreground</code></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--muted-foreground);">D�sactiv�</td>
+              <td><code>--input</code></td>
+              <td>Aucun</td>
+              <td><code>--muted-foreground</code> (50% opacity)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-datetime">
+      <div class="section-label">10 &mdash; Input</div>
+      <h2 class="section-title">Datetime Picker</h2>
+
+      <div class="datetime-picker">
+        <div class="form-group">
+          <label class="form-label">Date de livraison</label>
+          <input class="input" type="text" value="18 juillet 2026" readonly style="width:200px;cursor:pointer;" onclick="toggleCalendar()">
+        </div>
+        <div class="calendar-panel" id="demo-calendar">
+          <div class="calendar-header">
+            <button class="calendar-nav" aria-label="Mois pr�c�dent">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span class="calendar-month">Juillet 2026</span>
+            <button class="calendar-nav" aria-label="Mois suivant">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="calendar-grid">
+            <div class="calendar-weekday">Lu</div>
+            <div class="calendar-weekday">Ma</div>
+            <div class="calendar-weekday">Me</div>
+            <div class="calendar-weekday">Je</div>
+            <div class="calendar-weekday">Ve</div>
+            <div class="calendar-weekday">Sa</div>
+            <div class="calendar-weekday">Di</div>
+            <button class="calendar-day other-month">29</button>
+            <button class="calendar-day other-month">30</button>
+            <button class="calendar-day">1</button>
+            <button class="calendar-day">2</button>
+            <button class="calendar-day">3</button>
+            <button class="calendar-day">4</button>
+            <button class="calendar-day">5</button>
+            <button class="calendar-day">6</button>
+            <button class="calendar-day">7</button>
+            <button class="calendar-day">8</button>
+            <button class="calendar-day">9</button>
+            <button class="calendar-day">10</button>
+            <button class="calendar-day">11</button>
+            <button class="calendar-day">12</button>
+            <button class="calendar-day">13</button>
+            <button class="calendar-day">14</button>
+            <button class="calendar-day">15</button>
+            <button class="calendar-day">16</button>
+            <button class="calendar-day">17</button>
+            <button class="calendar-day today selected">18</button>
+            <button class="calendar-day">19</button>
+            <button class="calendar-day">20</button>
+            <button class="calendar-day">21</button>
+            <button class="calendar-day">22</button>
+            <button class="calendar-day">23</button>
+            <button class="calendar-day">24</button>
+            <button class="calendar-day">25</button>
+            <button class="calendar-day">26</button>
+            <button class="calendar-day">27</button>
+            <button class="calendar-day">28</button>
+            <button class="calendar-day">29</button>
+            <button class="calendar-day">30</button>
+            <button class="calendar-day">31</button>
+            <button class="calendar-day other-month">1</button>
+            <button class="calendar-day other-month">2</button>
+          </div>
+          <div class="time-picker">
+            <span class="time-picker-label">Heure</span>
+            <input class="time-input" type="text" value="14">
+            <span style="font-size:0.75rem;color:var(--muted-foreground);">:</span>
+            <input class="time-input" type="text" value="30">
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-variant">
+      <div class="section-label">11 &mdash; Input</div>
+      <h2 class="section-title">Variant Selector</h2>
+
+      <div style="max-width:360px;">
+        <div class="variant-group">
+          <div class="variant-label">Taille</div>
+          <div class="variant-options">
+            <button class="variant-option" onclick="selectVariant(this)">XS</button>
+            <button class="variant-option active" onclick="selectVariant(this)">S</button>
+            <button class="variant-option" onclick="selectVariant(this)">M</button>
+            <button class="variant-option" onclick="selectVariant(this)">L</button>
+            <button class="variant-option" onclick="selectVariant(this)">XL</button>
+            <button class="variant-option" onclick="selectVariant(this)" disabled style="opacity:0.4;cursor:not-allowed;">XXL</button>
+          </div>
+        </div>
+
+        <div class="variant-group">
+          <div class="variant-label">Couleur</div>
+          <div class="variant-options">
+            <button class="variant-option-swatch active" style="background:#c8d152;" onclick="selectSwatch(this)" title="Lemon Lime"></button>
+            <button class="variant-option-swatch" style="background:#700145;" onclick="selectSwatch(this)" title="Crimson Violet"></button>
+            <button class="variant-option-swatch" style="background:#4d4c20;" onclick="selectSwatch(this)" title="Olive"></button>
+            <button class="variant-option-swatch" style="background:#fff3e3;border-color:var(--border);" onclick="selectSwatch(this)" title="Cream"></button>
+            <button class="variant-option-swatch" style="background:#3a3520;" onclick="selectSwatch(this)" title="Dark Olive"></button>
+          </div>
+        </div>
+
+        <div class="variant-group">
+          <div class="variant-label">Quantit�</div>
+          <div class="variant-options">
+            <button class="variant-option" onclick="selectVariant(this)">1</button>
+            <button class="variant-option active" onclick="selectVariant(this)">2</button>
+            <button class="variant-option" onclick="selectVariant(this)">3-5</button>
+            <button class="variant-option" onclick="selectVariant(this)">6+</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-color-picker">
+      <div class="section-label">12 &mdash; Input</div>
+      <h2 class="section-title">Color Picker</h2>
+
+      <div style="display:flex;flex-wrap:wrap;gap:24px;">
+        <div class="color-picker-panel">
+          <div style="font-size:0.8125rem;font-weight:600;margin-bottom:12px;">Palette du th�me</div>
+          <div class="color-picker-swatch-row">
+            <button class="color-picker-swatch active" style="background:#c8d152;" onclick="selectColor(this,'#c8d152')" title="Lemon Lime"></button>
+            <button class="color-picker-swatch" style="background:#700145;" onclick="selectColor(this,'#700145')" title="Crimson Violet"></button>
+            <button class="color-picker-swatch" style="background:#f9f7be;" onclick="selectColor(this,'#f9f7be')" title="Lemon Chiffon"></button>
+            <button class="color-picker-swatch" style="background:#4d4c20;" onclick="selectColor(this,'#4d4c20')" title="Olive"></button>
+            <button class="color-picker-swatch" style="background:#faf6ed;" onclick="selectColor(this,'#faf6ed')" title="Cream"></button>
+            <button class="color-picker-swatch" style="background:#2d9a3e;" onclick="selectColor(this,'#2d9a3e')" title="Success"></button>
+            <button class="color-picker-swatch" style="background:#3b82f6;" onclick="selectColor(this,'#3b82f6')" title="Info"></button>
+            <button class="color-picker-swatch" style="background:#dc2626;" onclick="selectColor(this,'#dc2626')" title="Destructive"></button>
+          </div>
+          <div class="color-picker-input-row">
+            <div class="color-picker-preview" id="color-preview" style="background:#c8d152;"></div>
+            <input class="color-picker-hex" id="color-hex" type="text" value="#c8d152" readonly>
+          </div>
+        </div>
+
+        <div class="color-picker-panel">
+          <div style="font-size:0.8125rem;font-weight:600;margin-bottom:12px;">Nuances de primary</div>
+          <div class="color-picker-swatch-row">
+            <button class="color-picker-swatch" style="background:oklch(0.95 0.18 92);" onclick="selectColor(this,'oklch(0.95 0.18 92)')"></button>
+            <button class="color-picker-swatch" style="background:oklch(0.90 0.18 92);" onclick="selectColor(this,'oklch(0.90 0.18 92)')"></button>
+            <button class="color-picker-swatch active" style="background:oklch(0.85 0.199 92);" onclick="selectColor(this,'oklch(0.85 0.199 92)')"></button>
+            <button class="color-picker-swatch" style="background:oklch(0.75 0.18 92);" onclick="selectColor(this,'oklch(0.75 0.18 92)')"></button>
+            <button class="color-picker-swatch" style="background:oklch(0.65 0.16 92);" onclick="selectColor(this,'oklch(0.65 0.16 92)')"></button>
+            <button class="color-picker-swatch" style="background:oklch(0.55 0.14 92);" onclick="selectColor(this,'oklch(0.55 0.14 92)')"></button>
+            <button class="color-picker-swatch" style="background:oklch(0.45 0.12 92);" onclick="selectColor(this,'oklch(0.45 0.12 92)')"></button>
+            <button class="color-picker-swatch" style="background:oklch(0.35 0.10 92);" onclick="selectColor(this,'oklch(0.35 0.10 92)')"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-swatch">
+      <div class="section-label">13 &mdash; Input</div>
+      <h2 class="section-title">Color Swatch Selector</h2>
+
+      <div style="max-width:480px;">
+        <div style="font-size:0.8125rem;font-weight:600;margin-bottom:12px;">Couleur du produit</div>
+        <div class="swatch-grid" style="margin-bottom:24px;">
+          <div class="swatch-item active" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#c8d152;"></div>
+            <span class="swatch-name">Lemon</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#700145;"></div>
+            <span class="swatch-name">Crimson</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#4d4c20;"></div>
+            <span class="swatch-name">Olive</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#2d9a3e;"></div>
+            <span class="swatch-name">Vert</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#3b82f6;"></div>
+            <span class="swatch-name">Bleu</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#dc2626;"></div>
+            <span class="swatch-name">Rouge</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#faf6ed;border-color:var(--border);"></div>
+            <span class="swatch-name">Cr�me</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:#3a3520;"></div>
+            <span class="swatch-name">Noir</span>
+          </div>
+        </div>
+
+        <div style="font-size:0.8125rem;font-weight:600;margin-bottom:12px;">Format d'emballage</div>
+        <div class="swatch-grid">
+          <div class="swatch-item active" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:var(--secondary);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.5rem;">S</div>
+            <span class="swatch-name">Small</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:var(--secondary);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.5rem;">M</div>
+            <span class="swatch-name">Medium</span>
+          </div>
+          <div class="swatch-item" onclick="selectSwatchItem(this)">
+            <div class="swatch-circle" style="background:var(--secondary);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.5rem;">L</div>
+            <span class="swatch-name">Large</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-cards">
+      <div class="section-label">14 &mdash; Layout</div>
+      <h2 class="section-title">Cards</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">KPI</div>
+            <div class="card-title">Chiffre d'Affaires</div>
+          </div>
+          <div class="card-content">
+            <div class="card-stat">482,300 DA</div>
+            <div class="card-desc">+12.4% ce mois-ci</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">Commande #2847</div>
+            <div class="card-title">Livraison en cours</div>
+          </div>
+          <div class="card-content">
+            <div class="card-desc">3 articles &middot; Alger, 16000 &middot; Yalidine</div>
+            <div style="margin-top:10px"><span class="badge badge-warning badge-dot">En attente</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">Producteur Local</div>
+            <div class="card-title">Moule Silicone 12 Cavit�s</div>
+          </div>
+          <div class="card-content">
+            <div class="card-desc">Moule haute qualit� pour g�teaux et tartes individuelles.</div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-sm btn-primary">Voir</button>
+            <button class="btn btn-sm btn-outline">Modifier</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-accordion">
+      <div class="section-label">15 &mdash; Layout</div>
+      <h2 class="section-title">Accordion</h2>
+
+      <div class="accordion" style="max-width:560px;">
+        <div class="accordion-item">
+          <button class="accordion-trigger open" aria-expanded="true" onclick="toggleAccordion(this)">
+            <span>Comment passer une commande ?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="accordion-content open">Ajoutez les produits � votre panier, puis proc�dez au paiement. Vous pouvez payer par carte bancaire, CIB, ou � la livraison.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Quels sont les d�lais de livraison ?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="accordion-content">La livraison prend 2-5 jours ouvrables selon votre wilaya. Alger et environs : 24-48h.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)">
+            <span>Politique de retour</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="accordion-content">Retours accept�s sous 14 jours pour les produits non utilis�s et dans leur emballage d'origine.</div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-stats">
+      <div class="section-label">16 &mdash; Layout</div>
+      <h2 class="section-title">Stats Cards</h2>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Chiffre d'Affaires
+          </div>
+          <div class="stat-value">482,300 DA</div>
+          <span class="stat-trend stat-trend-up">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            +12.4%
+          </span>
+          <div class="stat-sparkline">
+            <div class="stat-sparkline-bar" style="height:40%;"></div>
+            <div class="stat-sparkline-bar" style="height:65%;"></div>
+            <div class="stat-sparkline-bar" style="height:55%;"></div>
+            <div class="stat-sparkline-bar" style="height:80%;"></div>
+            <div class="stat-sparkline-bar" style="height:70%;"></div>
+            <div class="stat-sparkline-bar" style="height:90%;"></div>
+            <div class="stat-sparkline-bar" style="height:100%;"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Commandes
+          </div>
+          <div class="stat-value">1,284</div>
+          <span class="stat-trend stat-trend-up">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            +8.2%
+          </span>
+          <div class="stat-sparkline">
+            <div class="stat-sparkline-bar" style="height:50%;background:var(--accent);"></div>
+            <div class="stat-sparkline-bar" style="height:70%;background:var(--accent);"></div>
+            <div class="stat-sparkline-bar" style="height:60%;background:var(--accent);"></div>
+            <div class="stat-sparkline-bar" style="height:85%;background:var(--accent);"></div>
+            <div class="stat-sparkline-bar" style="height:75%;background:var(--accent);"></div>
+            <div class="stat-sparkline-bar" style="height:95%;background:var(--accent);"></div>
+            <div class="stat-sparkline-bar" style="height:80%;background:var(--accent);"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Clients
+          </div>
+          <div class="stat-value">3,847</div>
+          <span class="stat-trend stat-trend-down">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            -2.1%
+          </span>
+          <div class="stat-sparkline">
+            <div class="stat-sparkline-bar" style="height:90%;background:var(--success);"></div>
+            <div class="stat-sparkline-bar" style="height:75%;background:var(--success);"></div>
+            <div class="stat-sparkline-bar" style="height:80%;background:var(--success);"></div>
+            <div class="stat-sparkline-bar" style="height:65%;background:var(--success);"></div>
+            <div class="stat-sparkline-bar" style="height:70%;background:var(--success);"></div>
+            <div class="stat-sparkline-bar" style="height:60%;background:var(--success);"></div>
+            <div class="stat-sparkline-bar" style="height:55%;background:var(--success);"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            Produits
+          </div>
+          <div class="stat-value">156</div>
+          <span class="stat-trend stat-trend-up">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            +5.7%
+          </span>
+          <div class="stat-sparkline">
+            <div class="stat-sparkline-bar" style="height:30%;background:var(--muted-foreground);"></div>
+            <div class="stat-sparkline-bar" style="height:45%;background:var(--muted-foreground);"></div>
+            <div class="stat-sparkline-bar" style="height:50%;background:var(--muted-foreground);"></div>
+            <div class="stat-sparkline-bar" style="height:65%;background:var(--muted-foreground);"></div>
+            <div class="stat-sparkline-bar" style="height:60%;background:var(--muted-foreground);"></div>
+            <div class="stat-sparkline-bar" style="height:80%;background:var(--muted-foreground);"></div>
+            <div class="stat-sparkline-bar" style="height:75%;background:var(--muted-foreground);"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-tabs">
+      <div class="section-label">17 &mdash; Navigation</div>
+      <h2 class="section-title">Tabs</h2>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Default variant</h3>
+      <div class="tabs-list" data-od-id="cl-tabs-default">
+        <button class="tabs-trigger active" onclick="switchTab(this,'tab-default')">G�n�ral</button>
+        <button class="tabs-trigger" onclick="switchTab(this,'tab-default')">Variantes</button>
+        <button class="tabs-trigger" onclick="switchTab(this,'tab-default')">Inventaire</button>
+        <button class="tabs-trigger" onclick="switchTab(this,'tab-default')">M�dias</button>
+        <button class="tabs-trigger" onclick="switchTab(this,'tab-default')">Avis</button>
+      </div>
+      <div class="tabs-content">Contenu de l'onglet G�n�ral � informations produit, prix, description, et cat�gories.</div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin:24px 0 10px;">Line variant</h3>
+      <div class="tabs-list tabs-list-line" data-od-id="cl-tabs-line">
+        <button class="tabs-trigger tabs-trigger-line active" onclick="switchTab(this,'tab-line')">Commandes</button>
+        <button class="tabs-trigger tabs-trigger-line" onclick="switchTab(this,'tab-line')">Paiements</button>
+        <button class="tabs-trigger tabs-trigger-line" onclick="switchTab(this,'tab-line')">Exp�dition</button>
+      </div>
+      <div class="tabs-content">Historique des commandes r�centes avec statut de livraison et d�tails de paiement.</div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-breadcrumb">
+      <div class="section-label">18 &mdash; Navigation</div>
+      <h2 class="section-title">Breadcrumb</h2>
+
+      <nav class="breadcrumb" style="margin-bottom:16px;" aria-label="Fil d'Ariane">
+        <a href="#" class="breadcrumb-item">Accueil</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="#" class="breadcrumb-item">Boutique</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="#" class="breadcrumb-item">Outils</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Moule Silicone 12 Cavit�s</span>
+      </nav>
+
+      <nav class="breadcrumb" style="margin-bottom:16px;" aria-label="Fil d'Ariane admin">
+        <a href="#" class="breadcrumb-item">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="#" class="breadcrumb-item">Commandes</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">#2847</span>
+      </nav>
+
+      <nav class="breadcrumb" aria-label="Fil d'Ariane avec chevrons">
+        <a href="#" class="breadcrumb-item" style="display:inline-flex;align-items:center;gap:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          Retour
+        </a>
+      </nav>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-stepper">
+      <div class="section-label">22 &mdash; Navigation</div>
+      <h2 class="section-title">Stepper</h2>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Checkout flow</h3>
+      <div class="stepper" style="margin-bottom:24px;">
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Panier</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Adresse</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-active">3</div>
+          <span class="stepper-label stepper-label-active">Paiement</span>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-pending">4</div>
+          <span class="stepper-label stepper-label-pending">Confirmation</span>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Onboarding wizard</h3>
+      <div class="stepper" style="margin-bottom:24px;">
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Profil</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Boutique</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Produits</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-active">4</div>
+          <span class="stepper-label stepper-label-active">Paiement</span>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-pending">5</div>
+          <span class="stepper-label stepper-label-pending">Lancement</span>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Order processing</h3>
+      <div class="stepper">
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Re�ue</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="stepper-label stepper-label-complete">Pay�e</span>
+        </div>
+        <div class="stepper-line stepper-line-complete"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-active">3</div>
+          <span class="stepper-label stepper-label-active">Exp�di�e</span>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step">
+          <div class="stepper-circle stepper-circle-pending">4</div>
+          <span class="stepper-label stepper-label-pending">Livr�e</span>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-alerts">
+      <div class="section-label">23 &mdash; Feedback</div>
+      <h2 class="section-title">Alerts</h2>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="alert alert-info">
+          <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <div class="alert-content">
+            <div class="alert-title">Nouvelle commande re�ue</div>
+            <div class="alert-desc">La commande #2847 a �t� pass�e par un client � Alger.</div>
+          </div>
+        </div>
+        <div class="alert alert-success">
+          <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <div class="alert-content">
+            <div class="alert-title">Produit cr�� avec succ�s</div>
+            <div class="alert-desc">Moule Silicone 12 Cavit�s a �t� ajout� au catalogue.</div>
+          </div>
+        </div>
+        <div class="alert alert-warning">
+          <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <div class="alert-content">
+            <div class="alert-title">Stock insuffisant</div>
+            <div class="alert-desc">Bo�te Kraft 20�20�10 � seulement 12 articles restants.</div>
+          </div>
+        </div>
+        <div class="alert alert-destructive">
+          <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+          <div class="alert-content">
+            <div class="alert-title">Erreur de paiement</div>
+            <div class="alert-desc">Le paiement Chargily a �chou� pour la commande #2831.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-toast">
+      <div class="section-label">24 &mdash; Feedback</div>
+      <h2 class="section-title">Toast Notifications</h2>
+
+      <div class="row">
+        <button class="btn btn-md btn-outline" onclick="showToast('success')">Succ�s</button>
+        <button class="btn btn-md btn-outline" onclick="showToast('error')">Erreur</button>
+        <button class="btn btn-md btn-outline" onclick="showToast('warning')">Alerte</button>
+      </div>
+
+      <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-empty">
+      <div class="section-label">25 &mdash; Feedback</div>
+      <h2 class="section-title">Empty State</h2>
+
+      <div class="card" style="max-width:480px;">
+        <div class="empty-state">
+          <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          <div class="empty-title">Aucun produit</div>
+          <div class="empty-desc">Commencez par ajouter des produits � votre catalogue pour les vendre en ligne.</div>
+          <button class="btn btn-md btn-primary" style="margin-top:16px;">Cr�er un produit</button>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-error-state">
+      <div class="section-label">26 &mdash; Feedback</div>
+      <h2 class="section-title">Error State</h2>
+
+      <div class="card-grid" style="margin-bottom:16px;">
+        <div class="state-card">
+          <svg class="state-icon" style="color:var(--destructive);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+          <div class="state-title">Erreur serveur</div>
+          <div class="state-desc">Une erreur interne s&apos;est produite. L&apos;quipe technique a �t� notifi�e.</div>
+          <div class="state-actions">
+            <button class="btn btn-sm btn-outline">Retour � l&apos;accueil</button>
+          </div>
+        </div>
+        <div class="state-card">
+          <svg class="state-icon" style="color:var(--destructive);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div class="state-title">Connexion perdue</div>
+          <div class="state-desc">V�rifiez votre connexion internet et r�essayez.</div>
+          <div class="state-actions">
+            <button class="btn btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              R�essayer
+            </button>
+            <button class="btn btn-sm btn-outline">D�tails</button>
+          </div>
+        </div>
+        <div class="state-card">
+          <svg class="state-icon" style="color:var(--destructive);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+          <div class="state-title">Paiement �chou�</div>
+          <div class="state-desc">Le paiement par Chargily a �t� refus� pour la commande #2831.</div>
+          <div class="state-actions">
+            <button class="btn btn-sm">R�essayer</button>
+            <button class="btn btn-sm btn-outline">Changer de moyen</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-destructive" style="max-width:540px;">
+        <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        <div class="alert-content">
+          <div class="alert-title">Erreur de chargement</div>
+          <div class="alert-desc">Les donn�es n&apos;ont pas pu �tre charg�es. <a href="#" style="color:var(--destructive);text-decoration:underline;text-underline-offset:4px;">R�essayer</a></div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-loading-state">
+      <div class="section-label">27 &mdash; Feedback</div>
+      <h2 class="section-title">Loading State</h2>
+
+      <div class="card-grid" style="margin-bottom:16px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="skeleton" style="height:10px;width:100px;margin-bottom:8px;"></div>
+            <div class="skeleton" style="height:14px;width:180px;"></div>
+          </div>
+          <div class="card-content">
+            <div class="skeleton" style="height:28px;width:140px;margin-bottom:8px;"></div>
+            <div class="skeleton" style="height:10px;width:100px;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="skeleton" style="height:10px;width:90px;margin-bottom:8px;"></div>
+            <div class="skeleton" style="height:14px;width:160px;"></div>
+          </div>
+          <div class="card-content">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">
+              <div class="skeleton" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="skeleton" style="height:10px;width:70%;margin-bottom:6px;"></div>
+                <div class="skeleton" style="height:8px;width:45%;"></div>
+              </div>
+            </div>
+            <div class="skeleton" style="height:10px;width:100%;margin-bottom:6px;"></div>
+            <div class="skeleton" style="height:10px;width:90%;"></div>
+          </div>
+        </div>
+        <div class="state-card" style="min-height:180px;">
+          <div class="spinner" style="width:28px;height:28px;margin-bottom:12px;border-top-color:var(--muted-foreground);"></div>
+          <div class="state-desc" style="margin-bottom:0;">Chargement en cours...</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Inline Loaders</h3>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+        <button class="btn btn-md btn-primary" disabled>
+          <div class="spinner spinner-sm" style="border-top-color:var(--primary-foreground);"></div>
+          Sauvegarde...
+        </button>
+        <button class="btn btn-md btn-outline" disabled>
+          <div class="spinner spinner-sm"></div>
+          Chargement
+        </button>
+      </div>
+
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Table Skeleton</h3>
+      <div class="table-wrapper" style="max-width:540px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Produit</th>
+              <th scope="col">Cat�gorie</th>
+              <th scope="col">Prix</th>
+              <th scope="col">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="skeleton" style="height:12px;width:140px;"></div></td>
+              <td><div class="skeleton" style="height:12px;width:70px;"></div></td>
+              <td><div class="skeleton" style="height:12px;width:60px;"></div></td>
+              <td><div class="skeleton" style="height:18px;width:65px;border-radius:var(--radius-full);"></div></td>
+            </tr>
+            <tr>
+              <td><div class="skeleton" style="height:12px;width:120px;"></div></td>
+              <td><div class="skeleton" style="height:12px;width:80px;"></div></td>
+              <td><div class="skeleton" style="height:12px;width:50px;"></div></td>
+              <td><div class="skeleton" style="height:18px;width:65px;border-radius:var(--radius-full);"></div></td>
+            </tr>
+            <tr>
+              <td><div class="skeleton" style="height:12px;width:155px;"></div></td>
+              <td><div class="skeleton" style="height:12px;width:65px;"></div></td>
+              <td><div class="skeleton" style="height:12px;width:55px;"></div></td>
+              <td><div class="skeleton" style="height:18px;width:65px;border-radius:var(--radius-full);"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-success-state">
+      <div class="section-label">28 &mdash; Feedback</div>
+      <h2 class="section-title">Success State</h2>
+
+      <div class="card-grid" style="margin-bottom:16px;">
+        <div class="state-card">
+          <svg class="state-icon" style="color:var(--success);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <div class="state-title">Produit cr��</div>
+          <div class="state-desc">Moule Silicone 12 Cavit�s a �t� ajout� au catalogue avec succ�s.</div>
+          <div class="state-actions">
+            <button class="btn btn-sm btn-primary">Voir le produit</button>
+            <button class="btn btn-sm btn-outline">Cr�er un autre</button>
+          </div>
+        </div>
+        <div class="state-card">
+          <svg class="state-icon" style="color:var(--success);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <div class="state-title">Commande confirm�e</div>
+          <div class="state-desc">La commande #2847 est en cours de traitement.</div>
+          <div class="state-actions">
+            <button class="btn btn-sm">Voir la commande</button>
+          </div>
+        </div>
+        <div class="state-card">
+          <svg class="state-icon" style="color:var(--success);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <div class="state-title">Paiement re�u</div>
+          <div class="state-desc">Le paiement de 2,500 DA a �t� confirm� par Chargily.</div>
+          <div class="state-actions">
+            <button class="btn btn-sm">Voir le re�u</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-success" style="max-width:540px;">
+        <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <div class="alert-content">
+          <div class="alert-title">Sauvegarde automatique</div>
+          <div class="alert-desc">Tous les changements ont �t� enregistr�s.</div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-overlay">
+      <div class="section-label">29 &mdash; Overlay</div>
+      <h2 class="section-title">Tooltip, Popover &amp; Dropdown</h2>
+
+      <div class="form-row" style="margin-bottom:20px;">
+        <div class="tooltip-wrapper">
+          <button class="btn btn-md btn-outline">Hover me</button>
+          <div class="tooltip-content">Ajouter au panier</div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-bottom:20px;">
+        <div class="popover-demo">
+          <button class="btn btn-md btn-outline" onclick="togglePopover(this)">Ouvrir Popover</button>
+          <div class="popover-panel">
+            <div class="popover-title">D�tails du produit</div>
+            <div class="popover-desc">Informations suppl�mentaires sur le produit s�lectionn�.</div>
+            <button class="btn btn-sm btn-primary" style="width:100%;">Voir le produit</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="dropdown-wrapper">
+          <button class="btn btn-md btn-outline" onclick="toggleDropdown(this)">
+            Actions
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-panel">
+            <div class="dropdown-label">Produit</div>
+            <button class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+              Modifier
+            </button>
+            <button class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              Dupliquer
+            </button>
+            <button class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              Exporter
+            </button>
+            <div class="dropdown-sep"></div>
+            <button class="dropdown-item" style="color:var(--destructive);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-dialog">
+      <div class="section-label">30 &mdash; Overlay</div>
+      <h2 class="section-title">Dialog</h2>
+
+      <button class="btn btn-md btn-primary" onclick="document.getElementById('demo-dialog').classList.add('open')">Ouvrir le dialogue</button>
+
+      <div class="dialog-overlay" id="demo-dialog" role="dialog" aria-modal="true" aria-label="Supprimer le produit" onclick="if(event.target===this)this.classList.remove('open')">
+        <div class="dialog-content" data-od-id="cl-dialog-content">
+          <button class="dialog-close" onclick="document.getElementById('demo-dialog').classList.remove('open')" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          <div class="dialog-title">Supprimer le produit</div>
+          <div class="dialog-desc">Cette action est irr�versible. Le produit sera d�finitivement supprim� du catalogue.</div>
+          <div class="dialog-footer">
+            <button class="btn btn-md btn-outline" onclick="document.getElementById('demo-dialog').classList.remove('open')">Annuler</button>
+            <button class="btn btn-md btn-destructive" onclick="document.getElementById('demo-dialog').classList.remove('open')">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-alert-dialog">
+      <div class="section-label">31 &mdash; Overlay</div>
+      <h2 class="section-title">Alert Dialog</h2>
+
+      <button class="btn btn-md btn-destructive" onclick="document.getElementById('demo-alert-dialog').classList.add('open')">Supprimer le produit</button>
+
+      <div class="alert-dialog-overlay" id="demo-alert-dialog" role="alertdialog" aria-modal="true" aria-label="Confirmer la suppression" onclick="if(event.target===this)this.classList.remove('open')">
+        <div class="alert-dialog-content" data-od-id="cl-alert-dialog-content">
+          <div class="alert-dialog-icon-wrap alert-dialog-icon-destructive">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          </div>
+          <div class="alert-dialog-title">�tes-vous s�r ?</div>
+          <div class="alert-dialog-desc">Cette action est irr�versible. Le produit &laquo; Moule Silicone 12 Cavit�s &raquo; sera d�finitivement supprim� du catalogue.</div>
+          <div class="alert-dialog-footer">
+            <button class="btn btn-md btn-outline" onclick="document.getElementById('demo-alert-dialog').classList.remove('open')">Annuler</button>
+            <button class="btn btn-md btn-destructive" onclick="document.getElementById('demo-alert-dialog').classList.remove('open')">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-responsive-dialog">
+      <div class="section-label">32 &mdash; Overlay</div>
+      <h2 class="section-title">Responsive Dialog / Drawer</h2>
+      <p style="font-size:0.8125rem;color:var(--muted-foreground);margin-bottom:16px;">Desktop: centered dialog &middot; Mobile: bottom drawer</p>
+
+      <button class="btn btn-md btn-primary" onclick="document.getElementById('demo-responsive').classList.add('open');document.getElementById('demo-responsive-drawer').classList.add('open');document.getElementById('demo-responsive-dialog').classList.add('open');">Ouvrir</button>
+
+      <div class="responsive-overlay" id="demo-responsive" role="dialog" aria-modal="true" aria-label="D�tails du produit" onclick="this.classList.remove('open');document.getElementById('demo-responsive-drawer').classList.remove('open');document.getElementById('demo-responsive-dialog').classList.remove('open');">
+      </div>
+      <div class="responsive-drawer" id="demo-responsive-drawer">
+        <div class="drawer-handle"></div>
+        <div class="alert-dialog-title">D�tails du produit</div>
+        <div class="alert-dialog-desc" style="margin-bottom:16px;">Moule Silicone 12 Cavit�s � Moule haute qualit� pour g�teaux et tartes individuelles. Prix : 2,500 DA.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn btn-md btn-outline" onclick="document.getElementById('demo-responsive').classList.remove('open');document.getElementById('demo-responsive-drawer').classList.remove('open');document.getElementById('demo-responsive-dialog').classList.remove('open');">Fermer</button>
+          <button class="btn btn-md btn-primary" onclick="document.getElementById('demo-responsive').classList.remove('open');document.getElementById('demo-responsive-drawer').classList.remove('open');document.getElementById('demo-responsive-dialog').classList.remove('open');">Ajouter au panier</button>
+        </div>
+      </div>
+      <div class="responsive-dialog" id="demo-responsive-dialog">
+        <button class="dialog-close" onclick="document.getElementById('demo-responsive').classList.remove('open');document.getElementById('demo-responsive-drawer').classList.remove('open');document.getElementById('demo-responsive-dialog').classList.remove('open');" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+        <div class="alert-dialog-title">D�tails du produit</div>
+        <div class="alert-dialog-desc" style="margin-bottom:16px;">Moule Silicone 12 Cavit�s � Moule haute qualit� pour g�teaux et tartes individuelles. Prix : 2,500 DA.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn btn-md btn-outline" onclick="document.getElementById('demo-responsive').classList.remove('open');document.getElementById('demo-responsive-drawer').classList.remove('open');document.getElementById('demo-responsive-dialog').classList.remove('open');">Fermer</button>
+          <button class="btn btn-md btn-primary" onclick="document.getElementById('demo-responsive').classList.remove('open');document.getElementById('demo-responsive-drawer').classList.remove('open');document.getElementById('demo-responsive-dialog').classList.remove('open');">Ajouter au panier</button>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-charts">
+      <div class="section-label">35 &mdash; Data</div>
+      <h2 class="section-title">Charts</h2>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
+        <div class="chart-container">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Ventes mensuelles</div>
+              <div class="chart-subtitle">Derniers 7 mois</div>
+            </div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar" style="height:35%;"><span class="chart-bar-value">35k</span><span class="chart-bar-label">Jan</span></div>
+            <div class="chart-bar" style="height:55%;"><span class="chart-bar-value">55k</span><span class="chart-bar-label">F�v</span></div>
+            <div class="chart-bar" style="height:45%;"><span class="chart-bar-value">45k</span><span class="chart-bar-label">Mar</span></div>
+            <div class="chart-bar" style="height:70%;"><span class="chart-bar-value">70k</span><span class="chart-bar-label">Avr</span></div>
+            <div class="chart-bar" style="height:60%;"><span class="chart-bar-value">60k</span><span class="chart-bar-label">Mai</span></div>
+            <div class="chart-bar" style="height:85%;"><span class="chart-bar-value">85k</span><span class="chart-bar-label">Jun</span></div>
+            <div class="chart-bar" style="height:100%;background:var(--accent);"><span class="chart-bar-value">92k</span><span class="chart-bar-label">Jul</span></div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">R�partition par cat�gorie</div>
+              <div class="chart-subtitle">Tous les produits</div>
+            </div>
+          </div>
+          <div class="chart-pie-container">
+            <svg width="100" height="100" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--primary)" stroke-width="4" stroke-dasharray="40 60" stroke-dashoffset="25"/>
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--accent)" stroke-width="4" stroke-dasharray="25 75" stroke-dashoffset="85"/>
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--success)" stroke-width="4" stroke-dasharray="20 80" stroke-dashoffset="60"/>
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--warning)" stroke-width="4" stroke-dasharray="15 85" stroke-dashoffset="40"/>
+            </svg>
+            <div class="chart-pie-legend">
+              <div class="chart-pie-legend-item"><div class="chart-pie-legend-dot" style="background:var(--primary);"></div> Outils � 40%</div>
+              <div class="chart-pie-legend-item"><div class="chart-pie-legend-dot" style="background:var(--accent);"></div> Ingr�dients � 25%</div>
+              <div class="chart-pie-legend-item"><div class="chart-pie-legend-dot" style="background:var(--success);"></div> Moules � 20%</div>
+              <div class="chart-pie-legend-item"><div class="chart-pie-legend-dot" style="background:var(--warning);"></div> Packaging � 15%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Ventes par jour</div>
+              <div class="chart-subtitle">Cette semaine</div>
+            </div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar" style="height:60%;background:var(--info);"><span class="chart-bar-label">Lun</span></div>
+            <div class="chart-bar" style="height:80%;background:var(--info);"><span class="chart-bar-label">Mar</span></div>
+            <div class="chart-bar" style="height:45%;background:var(--info);"><span class="chart-bar-label">Mer</span></div>
+            <div class="chart-bar" style="height:90%;background:var(--info);"><span class="chart-bar-label">Jeu</span></div>
+            <div class="chart-bar" style="height:70%;background:var(--info);"><span class="chart-bar-label">Ven</span></div>
+            <div class="chart-bar" style="height:100%;background:var(--info);"><span class="chart-bar-label">Sam</span></div>
+            <div class="chart-bar" style="height:30%;background:var(--info);"><span class="chart-bar-label">Dim</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+    <section class="section" data-od-id="cl-carousel">
+      <div class="section-label">36 &mdash; Media</div>
+      <h2 class="section-title">Carousel</h2>
+
+      <div style="max-width:540px;" data-od-id="cl-carousel-demo">
+        <div class="carousel" id="demo-carousel">
+          <div class="carousel-viewport">
+            <div class="carousel-track" id="carousel-track" style="transform:translateX(0%);">
+              <div class="carousel-slide">
+                <div style="text-align:center;">
+                  <div style="font-size:2rem;margin-bottom:8px;">??</div>
+                  <div style="font-weight:600;font-size:0.875rem;">Moule Silicone Noir</div>
+                  <div style="font-size:0.75rem;color:var(--muted-foreground);">Haute qualit� pour chocolat</div>
+                </div>
+              </div>
+              <div class="carousel-slide">
+                <div style="text-align:center;">
+                  <div style="font-size:2rem;margin-bottom:8px;">??</div>
+                  <div style="font-weight:600;font-size:0.875rem;">Moule Round 20cm</div>
+                  <div style="font-size:0.75rem;color:var(--muted-foreground);">Parfait pour g�teaux</div>
+                </div>
+              </div>
+              <div class="carousel-slide">
+                <div style="text-align:center;">
+                  <div style="font-size:2rem;margin-bottom:8px;">??</div>
+                  <div style="font-weight:600;font-size:0.875rem;">Bo�te Kraft Premium</div>
+                  <div style="font-size:0.75rem;color:var(--muted-foreground);">Packaging �l�gant</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="carousel-btn carousel-btn-prev" onclick="moveCarousel(-1)" aria-label="Pr�c�dent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button class="carousel-btn carousel-btn-next" onclick="moveCarousel(1)" aria-label="Suivant">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="carousel-dots" id="carousel-dots">
+          <button class="carousel-dot active" onclick="goToSlide(0)"></button>
+          <button class="carousel-dot" onclick="goToSlide(1)"></button>
+          <button class="carousel-dot" onclick="goToSlide(2)"></button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Theme toggle
+    (function () {
+      var toggle = document.getElementById("theme-toggle");
+      var iconSun = document.getElementById("icon-sun");
+      var iconMoon = document.getElementById("icon-moon");
+      var label = document.getElementById("theme-label");
+      var html = document.documentElement;
+      function setTheme(dark) {
+        if (dark) {
+          html.classList.add("dark");
+          iconSun.style.display = "none";
+          iconMoon.style.display = "block";
+          label.textContent = "Light";
+        } else {
+          html.classList.remove("dark");
+          iconSun.style.display = "block";
+          iconMoon.style.display = "none";
+          label.textContent = "Dark";
+        }
+      }
+      toggle.addEventListener("click", function () {
+        setTheme(!html.classList.contains("dark"));
+      });
+    })();
+
+    // Tabs
+    function switchTab(trigger, group) {
+      var list = trigger.parentElement;
+      list.querySelectorAll(".tabs-trigger").forEach(function(t) { t.classList.remove("active"); });
+      trigger.classList.add("active");
+    }
+
+    // Accordion
+    function toggleAccordion(trigger) {
+      var content = trigger.nextElementSibling;
+      var isOpen = trigger.classList.contains("open");
+      trigger.classList.toggle("open");
+      content.classList.toggle("open");
+      trigger.setAttribute("aria-expanded", !isOpen);
+    }
+
+    // Popover
+    function togglePopover(btn) {
+      var panel = btn.nextElementSibling;
+      var wasOpen = panel.classList.contains("open");
+      document.querySelectorAll(".popover-panel").forEach(function(p) { p.classList.remove("open"); });
+      if (!wasOpen) panel.classList.add("open");
+    }
+
+    // Dropdown
+    function toggleDropdown(btn) {
+      var panel = btn.nextElementSibling;
+      var wasOpen = panel.classList.contains("open");
+      document.querySelectorAll(".dropdown-panel").forEach(function(p) { p.classList.remove("open"); });
+      if (!wasOpen) panel.classList.add("open");
+    }
+
+    // Close popovers/dropdowns on outside click
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".popover-demo")) {
+        document.querySelectorAll(".popover-panel").forEach(function(p) { p.classList.remove("open"); });
+      }
+      if (!e.target.closest(".dropdown-wrapper")) {
+        document.querySelectorAll(".dropdown-panel").forEach(function(p) { p.classList.remove("open"); });
+      }
+    });
+
+    // Toast
+    function showToast(type) {
+      var container = document.getElementById("toast-container");
+      var icons = {
+        success: '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>',
+        error: '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+        warning: '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+      };
+      var messages = {
+        success: { title: "Produit cr\u00e9\u00e9", desc: "Ajout\u00e9 au catalogue avec succ\u00e8s" },
+        error: { title: "Erreur", desc: "Une erreur est survenue" },
+        warning: { title: "Stock bas", desc: "Il ne reste que 12 articles" }
+      };
+      var toast = document.createElement("div");
+      toast.className = "toast toast-" + type;
+      toast.innerHTML = icons[type] + '<div class="toast-message"><div class="toast-title">' + messages[type].title + '</div><div class="toast-desc">' + messages[type].desc + '</div></div>';
+      container.appendChild(toast);
+      setTimeout(function() { toast.style.opacity = "0"; toast.style.transition = "opacity 0.3s"; setTimeout(function() { toast.remove(); }, 300); }, 3000);
+    }
+
+    // Carousel
+    var carouselIndex = 0;
+    var carouselTotal = 3;
+    function moveCarousel(dir) {
+      carouselIndex = (carouselIndex + dir + carouselTotal) % carouselTotal;
+      updateCarousel();
+    }
+    function goToSlide(i) {
+      carouselIndex = i;
+      updateCarousel();
+    }
+    function updateCarousel() {
+      var track = document.getElementById("carousel-track");
+      if (track) track.style.transform = "translateX(-" + (carouselIndex * 100) + "%)";
+      var dots = document.getElementById("carousel-dots");
+      if (dots) {
+        dots.querySelectorAll(".carousel-dot").forEach(function(d, i) {
+          d.classList.toggle("active", i === carouselIndex);
+        });
+      }
+    }
+
+    // Calendar
+    function toggleCalendar() {
+      var panel = document.getElementById("demo-calendar");
+      if (panel) panel.classList.toggle("open");
+    }
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".datetime-picker")) {
+        var panel = document.getElementById("demo-calendar");
+        if (panel) panel.classList.remove("open");
+      }
+    });
+
+    // Variant selector
+    function selectVariant(btn) {
+      if (btn.disabled) return;
+      var group = btn.parentElement;
+      group.querySelectorAll(".variant-option").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+    }
+    function selectSwatch(btn) {
+      var group = btn.parentElement;
+      group.querySelectorAll(".variant-option-swatch").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+    }
+
+    // Color picker
+    function selectColor(btn, hex) {
+      var panel = btn.closest(".color-picker-panel");
+      panel.querySelectorAll(".color-picker-swatch").forEach(function(s) { s.classList.remove("active"); });
+      btn.classList.add("active");
+      var preview = panel.querySelector(".color-picker-preview") || document.getElementById("color-preview");
+      var hexInput = panel.querySelector(".color-picker-hex") || document.getElementById("color-hex");
+      if (preview) preview.style.background = hex;
+      if (hexInput) hexInput.value = hex;
+    }
+
+    // Color swatch selector
+    function selectSwatchItem(item) {
+      var grid = item.parentElement;
+      grid.querySelectorAll(".swatch-item").forEach(function(s) { s.classList.remove("active"); });
+      item.classList.add("active");
+    }
+
+
+</script>
+</body>
+</html>

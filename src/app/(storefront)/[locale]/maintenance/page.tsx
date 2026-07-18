@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { APP_NAME } from "@/constants";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -78,7 +79,7 @@ export default async function MaintenancePage({ params }: Props) {
           </div>
         </div>
 
-        <p className="text-muted-foreground text-xs">{t("copyright")}</p>
+        <p className="text-muted-foreground text-xs">{t("copyright", { appName: APP_NAME })}</p>
       </div>
     </div>
   );

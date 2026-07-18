@@ -5,7 +5,7 @@ import { redis } from "@/lib/redis";
 import { redisKeys } from "@/lib/redis/keys";
 import { blacklisted_ips, type BlacklistedIp, type NewBlacklistedIp } from "@/features/ip_blacklist/schema";
 import { BLACKLIST_CACHE_TTL, BLACKLIST_PAGINATION } from "@/features/ip_blacklist/constants";
-import { AppError, NotFoundError } from "@/lib/error_handling";
+import { NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 
 export class IpBlacklistService {
@@ -52,7 +52,7 @@ export class IpBlacklistService {
       .limit(1);
 
     if (existing) {
-      const [updated] = await db
+      await db
         .update(blacklisted_ips)
         .set({
           is_active: true,
@@ -113,7 +113,7 @@ export class IpBlacklistService {
     if (!entry) throw new NotFoundError("Blacklist entry not found");
 
     const new_active = !entry.is_active;
-    const [updated] = await db
+    await db
       .update(blacklisted_ips)
       .set({ is_active: new_active, updated_at: sql`NOW(3)` })
       .where(eq(blacklisted_ips.id, id));
@@ -254,6 +254,36 @@ export class IpBlacklistService {
     }
 
     return affected;
+  }
+
+  async stats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    expiring_soon: number;
+  }> {
+    const [total_result, active_result, inactive_result, expiring_result] = await Promise.all([
+      db.select({ count: sql<number>`COUNT(*)` }).from(blacklisted_ips),
+      db.select({ count: sql<number>`COUNT(*)` }).from(blacklisted_ips).where(eq(blacklisted_ips.is_active, true)),
+      db.select({ count: sql<number>`COUNT(*)` }).from(blacklisted_ips).where(eq(blacklisted_ips.is_active, false)),
+      db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(blacklisted_ips)
+        .where(
+          and(
+            eq(blacklisted_ips.is_active, true),
+            sql`${blacklisted_ips.expires_at} > NOW()`,
+            sql`${blacklisted_ips.expires_at} <= DATE_ADD(NOW(), INTERVAL 7 DAY)`,
+          ),
+        ),
+    ]);
+
+    return {
+      total: Number(total_result[0]?.count ?? 0),
+      active: Number(active_result[0]?.count ?? 0),
+      inactive: Number(inactive_result[0]?.count ?? 0),
+      expiring_soon: Number(expiring_result[0]?.count ?? 0),
+    };
   }
 
   async _invalidate_cache(ip_address: string): Promise<void> {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
+import { create_trpc_router } from "@/lib/trpc/router";
 import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { approval_workflow_service } from "./services/approval-workflow.service";

@@ -1,7 +1,20 @@
-import { RoutingRulesClient } from "@/features/operations_workflows/components/routing-rules-client";
+"use client";
 
-export const metadata = { title: "Routing Rules" };
+import { useTranslations } from "next-intl";
 
-export default function Page() {
-  return <RoutingRulesClient />;
+import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { CreateRoutingRuleDialog, RoutingRulesClient } from "@/features/operations_workflows/components/routing-rules-client";
+
+export default function RoutingRulesPage() {
+  const t = useTranslations("routing_rules");
+
+  return (
+    <ConsolePageShell
+      title={t("title")}
+      subtitle={t("subtitle")}
+      actions={<CreateRoutingRuleDialog />}
+    >
+      <RoutingRulesClient />
+    </ConsolePageShell>
+  );
 }

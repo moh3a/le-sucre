@@ -1,4 +1,4 @@
-export const APP_NAME = "Le Sucré";
+export const APP_NAME = "ORLA";
 
 export const siteConfig = {
   name: APP_NAME,

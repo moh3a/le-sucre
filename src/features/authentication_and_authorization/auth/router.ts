@@ -237,9 +237,11 @@ export const admin_auth_router = create_trpc_router({
       z.object({
         page: z.number().int().min(1).default(1),
         limit: z.number().int().min(1).max(100).default(20),
+        search: z.string().optional(),
       }),
     )
-    .query(({ input }) => audit_repository.list_paginated(input.page, input.limit)),
+    .query(({ input }) => audit_repository.list_paginated(input.page, input.limit, input.search)),
+  auditStats: permission_procedure(PERMISSIONS.audit_read).query(() => audit_repository.stats()),
   listUsersByRole: permission_procedure(PERMISSIONS.users_read)
     .input(
       z.object({

@@ -2,7 +2,17 @@ import "server-only";
 import { and, asc, count, desc, eq, gte, inArray, lte, like, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import { promotions, promotion_rules, promotion_redemptions, promo_codes } from "../schema";
+import {
+  promotions,
+  promotion_rules,
+  promotion_redemptions,
+  promo_codes,
+  flash_sales,
+  flash_sale_items,
+  promotion_bundles,
+  promotion_bundle_items,
+} from "../schema";
+import { orders } from "@/features/order_management_system/orders/schema";
 import { PROMOTION_STATUS, PROMOTION_TYPE } from "../constants/promotion-types";
 import { format } from "date-fns";
 
@@ -82,6 +92,11 @@ export class PromotionRepository {
 
   async get_by_id(id: string) {
     const [row] = await db.select().from(promotions).where(eq(promotions.id, id)).limit(1);
+    return row ?? null;
+  }
+
+  async get_by_slug(slug: string) {
+    const [row] = await db.select().from(promotions).where(eq(promotions.slug, slug)).limit(1);
     return row ?? null;
   }
 
@@ -288,6 +303,162 @@ export class PromotionRepository {
     }));
 
     return { promotions: promotions_with_rules, promo_codes: codes };
+  }
+
+  async list_promo_codes(promotion_id: string) {
+    return db
+      .select()
+      .from(promo_codes)
+      .where(eq(promo_codes.promotion_id, promotion_id))
+      .orderBy(desc(promo_codes.created_at));
+  }
+
+  async list_flash_sales_with_items(promotion_id: string) {
+    const sales = await db
+      .select()
+      .from(flash_sales)
+      .where(eq(flash_sales.promotion_id, promotion_id))
+      .orderBy(desc(flash_sales.created_at));
+
+    if (!sales.length) return [];
+
+    const sale_ids = sales.map((s) => s.id);
+    const items = await db
+      .select()
+      .from(flash_sale_items)
+      .where(inArray(flash_sale_items.flash_sale_id, sale_ids));
+
+    return sales.map((sale) => ({
+      ...sale,
+      items: items.filter((i) => i.flash_sale_id === sale.id),
+    }));
+  }
+
+  async list_bundles_with_items(promotion_id: string) {
+    const bundles = await db
+      .select()
+      .from(promotion_bundles)
+      .where(eq(promotion_bundles.promotion_id, promotion_id))
+      .orderBy(desc(promotion_bundles.created_at));
+
+    if (!bundles.length) return [];
+
+    const bundle_ids = bundles.map((b) => b.id);
+    const items = await db
+      .select()
+      .from(promotion_bundle_items)
+      .where(inArray(promotion_bundle_items.bundle_id, bundle_ids));
+
+    return bundles.map((bundle) => ({
+      ...bundle,
+      items: items.filter((i) => i.bundle_id === bundle.id),
+    }));
+  }
+
+  async list_redemptions(promotion_id: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+    const [[{ total }], items] = await Promise.all([
+      db
+        .select({ total: count() })
+        .from(promotion_redemptions)
+        .where(eq(promotion_redemptions.promotion_id, promotion_id)),
+      db
+        .select({
+          id: promotion_redemptions.id,
+          promotion_id: promotion_redemptions.promotion_id,
+          promo_code_id: promotion_redemptions.promo_code_id,
+          order_id: promotion_redemptions.order_id,
+          user_id: promotion_redemptions.user_id,
+          discount_amount: promotion_redemptions.discount_amount,
+          created_at: promotion_redemptions.created_at,
+          code: promo_codes.code,
+        })
+        .from(promotion_redemptions)
+        .leftJoin(promo_codes, eq(promo_codes.id, promotion_redemptions.promo_code_id))
+        .where(eq(promotion_redemptions.promotion_id, promotion_id))
+        .orderBy(desc(promotion_redemptions.created_at))
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    return {
+      items,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async detail_stats(promotion_id: string) {
+    const [redemptions, total_discount, promo_code_count, flash_sale_count, bundle_count] =
+      await Promise.all([
+        db
+          .select({ count: count() })
+          .from(promotion_redemptions)
+          .where(eq(promotion_redemptions.promotion_id, promotion_id)),
+        db
+          .select({
+            total: sql<string>`COALESCE(sum(${promotion_redemptions.discount_amount}), 0)`,
+          })
+          .from(promotion_redemptions)
+          .where(eq(promotion_redemptions.promotion_id, promotion_id)),
+        db
+          .select({ count: count() })
+          .from(promo_codes)
+          .where(eq(promo_codes.promotion_id, promotion_id)),
+        db
+          .select({ count: count() })
+          .from(flash_sales)
+          .where(eq(flash_sales.promotion_id, promotion_id)),
+        db
+          .select({ count: count() })
+          .from(promotion_bundles)
+          .where(eq(promotion_bundles.promotion_id, promotion_id)),
+      ]);
+
+    return {
+      total_redemptions: redemptions[0].count,
+      total_discount_amount: total_discount[0].total,
+      total_promo_codes: promo_code_count[0].count,
+      total_flash_sales: flash_sale_count[0].count,
+      total_bundles: bundle_count[0].count,
+    };
+  }
+
+  async list_orders_by_promotion(promotion_id: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+    const [[{ total }], items] = await Promise.all([
+      db
+        .select({ total: count() })
+        .from(promotion_redemptions)
+        .innerJoin(orders, eq(orders.id, promotion_redemptions.order_id))
+        .where(eq(promotion_redemptions.promotion_id, promotion_id)),
+      db
+        .select({
+          redemption_id: promotion_redemptions.id,
+          discount_amount: promotion_redemptions.discount_amount,
+          code: promo_codes.code,
+          redeemed_at: promotion_redemptions.created_at,
+          order_id: orders.id,
+          order_number: orders.order_number,
+          status: orders.status,
+          payment_status: orders.payment_status,
+          grand_total: orders.grand_total,
+          currency: orders.currency,
+          placed_at: orders.placed_at,
+          created_at: orders.created_at,
+        })
+        .from(promotion_redemptions)
+        .innerJoin(orders, eq(orders.id, promotion_redemptions.order_id))
+        .leftJoin(promo_codes, eq(promo_codes.id, promotion_redemptions.promo_code_id))
+        .where(eq(promotion_redemptions.promotion_id, promotion_id))
+        .orderBy(desc(promotion_redemptions.created_at))
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    return {
+      items,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
   }
 }
 

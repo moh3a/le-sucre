@@ -1,116 +1,312 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useCallback } from "react";
-import { Plus, ShieldBan } from "lucide-react";
-import { QueryGuard } from "@/components/query-guard";
+import * as React from "react";
+import { toast } from "sonner";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  ShieldBan,
+  Plus,
+  Power,
+  PowerOff,
+  Trash2,
+  MoreHorizontal,
+  Pencil,
+  CheckCircle2,
+  XCircle,
+  Clock,
+} from "lucide-react";
+
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
+import { useDataTable } from "@/features/data-table/use-data-table";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { StatsGrid } from "@/components/console/stats-grid";
+import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BlacklistTable } from "./blacklist-table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { formatDate } from "@/lib/format";
 import { BlacklistAddDialog } from "./blacklist-add-dialog";
+import { BlacklistEditDialog } from "./blacklist-edit-dialog";
+
+type BlacklistRow = {
+  id: string;
+  ip_address: string;
+  reason: string | null;
+  reason_fr: string | null;
+  reason_ar: string | null;
+  is_active: boolean;
+  expires_at: Date | string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
 export function BlacklistPageClient() {
   const t = useTranslations("blacklist");
-  const [page, setPage] = useState(1);
-  const [dialog_open, set_dialog_open] = useState(false);
-  const { data, isLoading, refetch } = trpc.blacklist.list.useQuery({ page, limit: 20 });
-  const toggle_mutation = trpc.blacklist.toggle.useMutation({
-    onSuccess: () => refetch(),
-  });
-  const remove_mutation = trpc.blacklist.remove.useMutation({
-    onSuccess: () => refetch(),
+  const [page] = useQueryState("blPage", parseAsInteger.withDefault(1));
+  const [per_page] = useQueryState("blPerPage", parseAsInteger.withDefault(20));
+  const [search, setSearch] = useQueryState("blSearch", parseAsString);
+
+  const [create_open, setCreateOpen] = React.useState(false);
+  const [edit_entry, setEditEntry] = React.useState<BlacklistRow | null>(null);
+  const [delete_entry, setDeleteEntry] = React.useState<BlacklistRow | null>(null);
+
+  const { data, isLoading } = trpc.blacklist.list.useQuery({
+    page,
+    limit: per_page,
+    search: search || undefined,
   });
 
-  const handle_toggle = useCallback(
-    async (id: string) => {
-      await toggle_mutation.mutateAsync({ id });
+  const { data: stats, isLoading: statsLoading } = trpc.blacklist.stats.useQuery();
+
+  const utils = trpc.useUtils();
+
+  const toggle = trpc.blacklist.toggle.useMutation({
+    onSuccess: () => {
+      utils.blacklist.list.invalidate();
+      utils.blacklist.stats.invalidate();
+      toast.success(t("status_updated"));
     },
-    [toggle_mutation],
-  );
-  const handle_remove = useCallback(
-    async (id: string) => {
-      await remove_mutation.mutateAsync({ id });
+    onError: (err) => toast.error(err.message),
+  });
+
+  const remove = trpc.blacklist.remove.useMutation({
+    onSuccess: () => {
+      utils.blacklist.list.invalidate();
+      utils.blacklist.stats.invalidate();
+      toast.success(t("entry_deleted"));
+      setDeleteEntry(null);
     },
-    [remove_mutation],
+    onError: (err) => toast.error(err.message),
+  });
+
+  const columns = React.useMemo<ColumnDef<BlacklistRow>[]>(
+    () => [
+      {
+        id: "select",
+        enableSorting: false,
+        enableHiding: false,
+      },
+      {
+        id: "ip_address",
+        accessorKey: "ip_address",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("ip_address")} />,
+        cell: ({ row }) => (
+          <span className="font-mono text-sm font-medium">{row.original.ip_address}</span>
+        ),
+      },
+      {
+        id: "reason",
+        accessorKey: "reason",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("reason")} />,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground line-clamp-1 max-w-xs text-sm">
+            {row.original.reason_fr ?? row.original.reason ?? "\u2014"}
+          </span>
+        ),
+      },
+      {
+        id: "is_active",
+        accessorKey: "is_active",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
+        cell: ({ row }) => (
+          <Badge variant={row.original.is_active ? "default" : "secondary"}>
+            {row.original.is_active ? t("active") : t("inactive")}
+          </Badge>
+        ),
+      },
+      {
+        id: "expires_at",
+        accessorKey: "expires_at",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("expires_at")} />,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">
+            {row.original.expires_at
+              ? formatDate(row.original.expires_at, { month: "short" })
+              : "\u2014"}
+          </span>
+        ),
+      },
+      {
+        id: "created_at",
+        accessorKey: "created_at",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at")} />,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">
+            {formatDate(row.original.created_at, { month: "short" })}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditEntry(row.original)}>
+                <Pencil className="mr-2 size-4" />
+                {t("edit_button")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => toggle.mutate({ id: row.original.id })}
+              >
+                {row.original.is_active ? (
+                  <>
+                    <PowerOff className="mr-2 size-4 text-amber-500" />
+                    {t("deactivate")}
+                  </>
+                ) : (
+                  <>
+                    <Power className="mr-2 size-4 text-emerald-500" />
+                    {t("activate")}
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setDeleteEntry(row.original)}
+              >
+                <Trash2 className="mr-2 size-4" />
+                {t("delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    [toggle, t],
   );
-  const handle_added = useCallback(() => {
-    set_dialog_open(false);
-    refetch();
-  }, [refetch]);
+
+  const items = (data?.entries ?? []) as BlacklistRow[];
+  const page_count = data?.total_pages ?? 0;
+
+  const { table } = useDataTable({
+    data: items,
+    columns: columns as ColumnDef<(typeof items)[number]>[],
+    pageCount: page_count,
+    queryKeys: { page: "blPage", perPage: "blPerPage", sort: "blSort" },
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
+  });
 
   return (
-    <QueryGuard query={{ isLoading }}>
-    <ConsolePageShell
-      title={t("title")}
-      subtitle={t("subtitle")}
-      actions={
-        <Button onClick={() => set_dialog_open(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t("block_ip_button")}
-        </Button>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={
+        <ConsolePageShell
+          title={t("title")}
+          subtitle={t("subtitle")}
+          actions={
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("block_ip_button")}
+            </Button>
+          }
+        >
+          <DataTableSkeleton columnCount={6} rowCount={10} filterCount={1} />
+        </ConsolePageShell>
       }
     >
-      <BlacklistAddDialog
-        open={dialog_open}
-        on_open_change={set_dialog_open}
-        on_added={handle_added}
-      />
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldBan className="h-5 w-5" />
-            {t("blocked_ips_title")}
-          </CardTitle>
-          <CardDescription>
-            {t("blocked_ips_description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p className="text-muted-foreground py-4 text-sm">{t("loading_blacklist")}</p>
-          ) : !data?.entries || data.entries.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-sm">
-              {t("no_blocked_ips")}
-            </p>
-          ) : (
-            <>
-              <BlacklistTable
-                entries={data.entries}
-                on_toggle={handle_toggle}
-                on_remove={handle_remove}
+      <>
+        <ConsolePageShell
+          title={t("title")}
+          subtitle={t("subtitle")}
+          actions={
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("block_ip_button")}
+            </Button>
+          }
+          stats={
+            <StatsGrid
+              loading={statsLoading}
+              items={[
+                { label: t("stat_total"), value: stats?.total ?? 0, icon: ShieldBan, color: "info" },
+                { label: t("stat_active"), value: stats?.active ?? 0, icon: CheckCircle2, color: "success" },
+                { label: t("stat_inactive"), value: stats?.inactive ?? 0, icon: XCircle, color: "default" },
+                { label: t("stat_expiring_soon"), value: stats?.expiring_soon ?? 0, icon: Clock, color: "warning" },
+              ]}
+            />
+          }
+        >
+          <DataTable table={table}>
+            <DataTableAdvancedToolbar table={table}>
+              <Input
+                placeholder={t("search_placeholder")}
+                value={search || ""}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+                className="max-w-sm"
               />
-              {data.total_pages > 1 && (
-                <div className="mt-4 flex items-center justify-between">
-                    <p className="text-muted-foreground text-sm">
-                      {t("page_info", { page: data.page, total: data.total_pages, count: data.total })}
-                    </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    >
-                      {t("previous")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page >= data.total_pages}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      {t("next")}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </ConsolePageShell>
+              <DataTableSortList table={table} />
+            </DataTableAdvancedToolbar>
+          </DataTable>
+        </ConsolePageShell>
+
+        <BlacklistAddDialog
+          open={create_open}
+          on_open_change={setCreateOpen}
+        />
+
+        <BlacklistEditDialog
+          open={!!edit_entry}
+          on_open_change={(v) => {
+            if (!v) setEditEntry(null);
+          }}
+          entry={edit_entry}
+        />
+
+        <Dialog open={!!delete_entry} onOpenChange={(v) => { if (!v) setDeleteEntry(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("confirm_delete_title")}</DialogTitle>
+              <DialogDescription>
+                {t("confirm_delete_description", { ip: delete_entry?.ip_address ?? "" })}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteEntry(null)}>
+                {t("cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => delete_entry && remove.mutate({ id: delete_entry.id })}
+                disabled={remove.isPending}
+              >
+                {remove.isPending ? t("deleting") : t("delete")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     </QueryGuard>
   );
 }

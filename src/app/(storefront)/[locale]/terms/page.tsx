@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { APP_NAME } from "@/constants";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -59,7 +60,7 @@ export default async function TermsPage({ params }: Props) {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                {t(article.contentKey)}
+                {t(article.contentKey, { appName: APP_NAME })}
               </p>
             </CardContent>
           </Card>

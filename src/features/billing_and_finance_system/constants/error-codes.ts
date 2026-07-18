@@ -10,6 +10,15 @@ export const INVOICE_ERROR = {
       ar: "الفاتورة غير موجودة",
     },
   },
+  FORBIDDEN: {
+    code: "INVOICE_FORBIDDEN",
+    status: 403,
+    message: {
+      fr: "Vous n'avez pas l'autorisation d'accéder à cette facture",
+      en: "You are not authorized to access this invoice",
+      ar: "ليس لديك صلاحية الوصول إلى هذه الفاتورة",
+    },
+  },
   ORDER_NOT_FOUND: {
     code: "INVOICE_ORDER_NOT_FOUND",
     status: 404,
@@ -71,6 +80,15 @@ export const INVOICE_ERROR = {
       fr: "Échec de la génération du numéro de facture",
       en: "Failed to generate invoice number",
       ar: "فشل توليد رقم الفاتورة",
+    },
+  },
+  CREATION_FAILED: {
+    code: "INVOICE_CREATION_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de la création de la facture",
+      en: "Failed to create invoice",
+      ar: "فشل إنشاء الفاتورة",
     },
   },
   PDF_GENERATION_FAILED: {

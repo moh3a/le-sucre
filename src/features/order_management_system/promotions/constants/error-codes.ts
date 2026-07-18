@@ -73,6 +73,33 @@ export const PROMOTION_ERROR = {
       ar: "قاعدة الترويج غير صالحة",
     },
   },
+  SLUG_REQUIRED: {
+    code: "PROMOTION_SLUG_REQUIRED",
+    status: 400,
+    message: {
+      fr: "Le slug est requis",
+      en: "Slug is required",
+      ar: "المعرّف مطلوب",
+    },
+  },
+  NAME_REQUIRED: {
+    code: "PROMOTION_NAME_REQUIRED",
+    status: 400,
+    message: {
+      fr: "Le nom est requis",
+      en: "Name is required",
+      ar: "الاسم مطلوب",
+    },
+  },
+  DB_INSERT_FAILED: {
+    code: "PROMOTION_DB_INSERT_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de l'enregistrement de la promotion",
+      en: "Failed to save the promotion",
+      ar: "فشل في حفظ الترويج",
+    },
+  },
   SCHEDULER_FLASH_NOT_FOUND: {
     code: "PROMOTION_SCHEDULER_FLASH_NOT_FOUND",
     status: 404,

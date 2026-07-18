@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORLA — Pattern Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Orla+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* ========================================
+       PAGE LAYOUT
+       ======================================== */
+    .page { max-width: 1200px; margin: 0 auto; padding: 48px 32px 96px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+    .page-title { font-family: "Orla Serif", Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.15; letter-spacing: -0.02em; color: var(--foreground); }
+    .page-subtitle { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 4px; }
+    .theme-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-family: inherit; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background 150ms ease; }
+    .theme-toggle:hover { background: var(--secondary); }
+    .theme-toggle:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+    .section { margin-bottom: 56px; }
+    .section-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 8px; }
+    .section-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.44rem; line-height: 1.2; letter-spacing: -0.015em; color: var(--foreground); margin-bottom: 24px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+
+    /* ========================================
+       SHARED: BUTTONS
+       ======================================== */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 16px; font-family: "Montserrat", sans-serif; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.01em; border: none; border-radius: var(--radius-full); cursor: pointer; transition: all 0.15s; white-space: nowrap; line-height: 1; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-sm { height: 32px; padding: 0 12px; font-size: 0.8125rem; }
+    .btn-md { height: 36px; padding: 0 16px; }
+    .btn-lg { height: 40px; padding: 0 24px; font-size: 0.9375rem; }
+    .btn-icon { width: 36px; padding: 0; }
+    .btn-icon-sm { width: 32px; padding: 0; }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+    .btn-primary:hover { background: oklch(0.80 0.199 91.936); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .btn-secondary:hover { background: oklch(0.94 0.035 95); }
+    .btn-outline { background: oklch(0.90 0.015 85 / 0.3); color: var(--foreground); border: 1px solid var(--border); }
+    .btn-outline:hover { background: oklch(0.90 0.015 85 / 0.5); }
+    .btn-ghost { background: transparent; color: var(--foreground); }
+    .btn-ghost:hover { background: var(--muted); }
+    .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+    .btn-destructive:hover { opacity: 0.9; }
+    .btn-destructive:active { opacity: 0.85; transform: scale(0.97); }
+    .btn-link { background: transparent; color: var(--primary); text-decoration: underline; text-underline-offset: 4px; }
+    .btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+    /* ========================================
+       SHARED: BADGES
+       ======================================== */
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-family: "Montserrat", sans-serif; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.02em; padding: 2px 8px; border-radius: var(--radius-full); white-space: nowrap; line-height: 1.5; border: 1px solid transparent; }
+    .badge-primary { background: var(--primary); color: var(--primary-foreground); }
+    .badge-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .badge-accent { background: var(--accent); color: var(--accent-foreground); }
+    .badge-outline { background: transparent; color: var(--foreground); border-color: var(--border); }
+    .badge-success { background: oklch(0.65 0.17 145 / 0.1); color: var(--success); border-color: oklch(0.65 0.17 145 / 0.2); }
+    .badge-warning { background: oklch(0.82 0.16 80 / 0.1); color: var(--warning-foreground); border-color: oklch(0.82 0.16 80 / 0.2); }
+    .badge-destructive { background: oklch(0.577 0.245 27.325 / 0.1); color: var(--destructive); border-color: oklch(0.577 0.245 27.325 / 0.2); }
+    .badge-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ========================================
+       SHARED: CHECKBOX
+       ======================================== */
+    .checkbox { width: 16px; height: 16px; border: 2px solid var(--input); border-radius: 5px; background: var(--background); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+    .checkbox.checked { background: var(--primary); border-color: var(--primary); }
+    .checkbox svg { display: none; width: 10px; height: 10px; color: var(--primary-foreground); }
+    .checkbox.checked svg { display: block; }
+
+    /* ========================================
+       SHARED: INPUT / SELECT
+       ======================================== */
+    .input { display: block; width: 100%; height: 36px; padding: 0 12px; font-family: "Montserrat", sans-serif; font-size: 0.8125rem; color: var(--foreground); background: var(--background); border: 1px solid var(--input); border-radius: var(--radius-md); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .input:focus { border-color: var(--ring); box-shadow: 0 0 0 2px oklch(0.852 0.199 91.936 / 0.2); }
+    .input::placeholder { color: var(--muted-foreground); }
+    .input-lg { height: 40px; font-size: 0.875rem; }
+    .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8460' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+    .label { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--foreground); margin-bottom: 4px; }
+    .label-sm { font-size: 0.75rem; }
+    .hint { font-size: 0.75rem; color: var(--muted-foreground); margin-top: 4px; }
+    .error-text { font-size: 0.75rem; color: var(--destructive); margin-top: 4px; }
+    .input-error { border-color: var(--destructive); }
+    .input-error:focus { box-shadow: 0 0 0 2px oklch(0.577 0.245 27.325 / 0.2); }
+
+    /* ========================================
+       SHARED: ACTION BAR
+       ======================================== */
+    .action-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+    .action-bar-count { font-size: 0.8125rem; font-weight: 500; color: var(--foreground); white-space: nowrap; }
+    .action-bar-count strong { font-weight: 700; }
+    .action-bar-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+    .action-bar-actions { display: flex; gap: 6px; margin-left: auto; }
+
+    /* ========================================
+       01: DATA TABLE
+       ======================================== */
+    .dt-container { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .dt-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .dt-toolbar-left, .dt-toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .dt-search { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: border-color 0.15s; }
+    .dt-search:focus-within { border-color: var(--ring); box-shadow: 0 0 0 2px oklch(0.852 0.199 91.936 / 0.2); }
+    .dt-search svg { color: var(--muted-foreground); flex-shrink: 0; }
+    .dt-search-input { border: none; background: none; outline: none; font-family: "Montserrat", sans-serif; font-size: 0.8125rem; color: var(--foreground); width: 200px; }
+    .dt-search-input::placeholder { color: var(--muted-foreground); }
+    .dt-filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-family: "Montserrat", sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--foreground); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .dt-filter-btn:hover { background: var(--muted); }
+    .dt-filter-popover { position: absolute; top: calc(100% + 4px); left: 0; min-width: 180px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 8px; display: none; z-index: 50; }
+    .dt-filter-popover.open { display: block; }
+    .dt-filter-popover-title { font-size: 0.75rem; font-weight: 600; color: var(--muted-foreground); padding: 4px 8px 6px; letter-spacing: 0.02em; }
+    .dt-filter-option { display: flex; align-items: center; gap: 8px; padding: 6px 8px; font-size: 0.8125rem; color: var(--foreground); border-radius: var(--radius-sm); cursor: pointer; transition: background 0.1s; }
+    .dt-filter-option:hover { background: var(--muted); }
+    .dt-filter-option input[type="checkbox"] { accent-color: var(--primary); }
+    .dt-col-vis-wrapper { position: relative; }
+    .dt-col-vis-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-family: "Montserrat", sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--foreground); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; }
+    .dt-col-vis-btn:hover { background: var(--muted); }
+    .dt-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .dt-table th { text-align: left; padding: 10px 14px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.02em; color: var(--muted-foreground); background: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; user-select: none; }
+    .dt-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .dt-table tr:last-child td { border-bottom: none; }
+    .dt-table tr:hover td { background: oklch(0.955 0.012 85 / 0.5); }
+    .dt-product { display: flex; align-items: center; gap: 10px; }
+    .dt-product-thumb { width: 36px; height: 36px; border-radius: var(--radius-md); flex-shrink: 0; }
+    .dt-product-name { font-weight: 500; color: var(--foreground); }
+    .dt-product-sku { font-size: 0.6875rem; color: var(--muted-foreground); }
+    .dt-pagination { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 0.8125rem; color: var(--muted-foreground); flex-wrap: wrap; gap: 12px; }
+    .dt-pagination-controls { display: flex; align-items: center; gap: 16px; }
+    .dt-pagination-size { display: flex; align-items: center; gap: 8px; }
+    .dt-pagination-select { padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-family: "Montserrat", sans-serif; font-size: 0.8125rem; color: var(--foreground); cursor: pointer; }
+    .dt-pagination-nav { display: flex; align-items: center; gap: 4px; }
+    .dt-pagination-page { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 500; color: var(--foreground); cursor: pointer; transition: background 0.15s; }
+    .dt-pagination-page:hover { background: var(--muted); }
+    .dt-pagination-page.active { background: var(--primary); color: var(--primary-foreground); }
+
+    /* ========================================
+       03–05: NAVIGATION
+       ======================================== */
+    .top-nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .top-nav-logo { font-family: "Orla Serif", Georgia, serif; font-size: 1.25rem; font-weight: 400; color: var(--foreground); text-decoration: none; letter-spacing: -0.02em; }
+    .top-nav-logo span { color: var(--accent); }
+    .top-nav-links { display: flex; gap: 4px; }
+    .top-nav-link { font-family: "Montserrat", sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); text-decoration: none; padding: 6px 12px; border-radius: var(--radius-full); transition: all 0.15s; border: none; background: none; cursor: pointer; }
+    .top-nav-link:hover { color: var(--foreground); background: var(--muted); }
+    .top-nav-actions { display: flex; align-items: center; gap: 8px; }
+    .top-nav-cart { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-full); background: transparent; border: none; color: var(--foreground); cursor: pointer; transition: background 0.15s; }
+    .top-nav-cart:hover { background: var(--muted); }
+    .top-nav-cart svg { width: 18px; height: 18px; }
+    .top-nav-cart-badge { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: var(--accent-foreground); font-size: 0.5625rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .top-nav-search { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--muted); color: var(--muted-foreground); font-size: 0.8125rem; cursor: pointer; transition: border-color 0.15s; min-width: 200px; }
+    .top-nav-search:hover { border-color: var(--foreground); }
+    .top-nav-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 220px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); padding: 6px; display: none; z-index: 50; }
+    #account-menu-btn:hover + .top-nav-dropdown, .top-nav-dropdown:hover { display: block; }
+    .top-nav-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 0.8125rem; font-weight: 500; color: var(--foreground); border-radius: var(--radius-sm); cursor: pointer; transition: background 0.1s; white-space: nowrap; }
+    .top-nav-dropdown-item:hover { background: var(--muted); }
+    .top-nav-dropdown-sep { height: 1px; background: var(--border); margin: 4px 0; }
+    .bottom-nav { display: flex; align-items: center; justify-content: space-around; height: 60px; background: var(--card); border-top: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 -2px 8px oklch(0 0 0 / 0.06); }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 8px; color: var(--muted-foreground); text-decoration: none; font-size: 0.625rem; font-weight: 500; border-radius: var(--radius-lg); transition: color 0.15s; border: none; background: none; cursor: pointer; }
+    .bottom-nav-item:hover { color: var(--foreground); }
+    .bottom-nav-item.active { color: var(--primary); }
+    .bottom-nav-item svg { width: 20px; height: 20px; }
+    .side-nav { width: 240px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .side-nav-section { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); padding: 8px 12px 4px; margin-top: 8px; }
+    .side-nav-section:first-child { margin-top: 0; }
+    .side-nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); text-decoration: none; border-radius: var(--radius-lg); transition: all 0.15s; border: none; background: none; cursor: pointer; width: 100%; text-align: left; }
+    .side-nav-item:hover { color: var(--foreground); background: var(--muted); }
+    .side-nav-item.active { color: var(--foreground); background: var(--muted); font-weight: 600; }
+    .side-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .side-nav-badge { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--radius-full); background: var(--accent); color: var(--accent-foreground); font-size: 0.625rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .side-nav-user { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-lg); cursor: pointer; transition: background 0.15s; }
+    .side-nav-user:hover { background: var(--muted); }
+    .side-nav-user-avatar { width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .side-nav-user-info { display: flex; flex-direction: column; min-width: 0; }
+    .side-nav-user-name { font-size: 0.8125rem; font-weight: 500; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .side-nav-user-role { font-size: 0.6875rem; color: var(--muted-foreground); }
+
+    /* ========================================
+       06: LOGIN FLOWS
+       ======================================== */
+    .login-card { max-width: 400px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-md); }
+    .login-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.44rem; text-align: center; margin-bottom: 4px; }
+    .login-subtitle { font-size: 0.8125rem; color: var(--muted-foreground); text-align: center; margin-bottom: 24px; }
+    .login-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; font-size: 0.75rem; color: var(--muted-foreground); }
+    .login-divider::before, .login-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 40px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-family: "Montserrat", sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--foreground); cursor: pointer; transition: background 0.15s; }
+    .social-btn:hover { background: var(--muted); }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row > * { flex: 1; }
+    .form-check { display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; color: var(--foreground); }
+    .form-check input { accent-color: var(--primary); }
+    .form-link { font-size: 0.8125rem; color: var(--primary); text-decoration: none; font-weight: 500; }
+    .form-link:hover { text-decoration: underline; }
+    .form-footer { text-align: center; margin-top: 20px; font-size: 0.8125rem; color: var(--muted-foreground); }
+
+    /* ========================================
+       08: PRODUCT CARD
+       ======================================== */
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .product-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; position: relative; }
+    .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .product-card-img { width: 100%; aspect-ratio: 1; background: var(--secondary); position: relative; }
+    .product-card-badges { position: absolute; top: 10px; left: 10px; display: flex; gap: 4px; }
+    .product-card-wishlist { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--card); border: none; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; color: var(--muted-foreground); }
+    .product-card-wishlist:hover { background: var(--muted); color: var(--accent); }
+    .product-card-body { padding: 14px; }
+    .product-card-category { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 4px; }
+    .product-card-title { font-size: 0.875rem; font-weight: 500; color: var(--foreground); margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .product-card-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+    .product-card-stars { display: flex; gap: 1px; color: var(--warning); font-size: 0.75rem; }
+    .product-card-rating-count { font-size: 0.6875rem; color: var(--muted-foreground); }
+    .product-card-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
+    .product-card-price-current { font-size: 1rem; font-weight: 600; color: var(--foreground); }
+    .product-card-price-old { font-size: 0.8125rem; color: var(--muted-foreground); text-decoration: line-through; }
+    .product-card-actions { display: flex; gap: 8px; }
+    .product-card-actions .btn { flex: 1; }
+
+    /* ========================================
+       09: PRODUCT SEARCH
+       ======================================== */
+    .search-container { max-width: 640px; margin: 0 auto; }
+    .search-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-full); transition: border-color 0.15s; }
+    .search-bar:focus-within { border-color: var(--ring); }
+    .search-bar svg { color: var(--muted-foreground); flex-shrink: 0; }
+    .search-bar input { flex: 1; border: none; background: none; outline: none; font-family: "Montserrat", sans-serif; font-size: 0.9375rem; color: var(--foreground); }
+    .search-bar input::placeholder { color: var(--muted-foreground); }
+    .search-results { margin-top: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .search-section-title { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); padding: 12px 16px 6px; }
+    .search-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; transition: background 0.1s; }
+    .search-item:hover { background: var(--muted); }
+    .search-item-thumb { width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--secondary); flex-shrink: 0; }
+    .search-item-name { font-size: 0.8125rem; font-weight: 500; color: var(--foreground); }
+    .search-item-meta { font-size: 0.6875rem; color: var(--muted-foreground); }
+    .search-item-price { font-size: 0.8125rem; font-weight: 600; color: var(--foreground); margin-left: auto; }
+
+    /* ========================================
+       10: PRODUCT DETAILS
+       ======================================== */
+    .pd-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .pd-gallery { display: flex; flex-direction: column; gap: 12px; }
+    .pd-main-img { width: 100%; aspect-ratio: 1; background: var(--secondary); border-radius: var(--radius-lg); }
+    .pd-thumbs { display: flex; gap: 8px; }
+    .pd-thumb { width: 64px; height: 64px; border-radius: var(--radius-md); background: var(--muted); border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+    .pd-thumb.active, .pd-thumb:hover { border-color: var(--primary); }
+    .pd-info { display: flex; flex-direction: column; }
+    .pd-breadcrumb { font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 12px; }
+    .pd-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.6rem; line-height: 1.2; margin-bottom: 8px; }
+    .pd-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 0.8125rem; }
+    .pd-price { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; }
+    .pd-desc { font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.6; margin-bottom: 24px; }
+    .pd-qty { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .pd-qty-label { font-size: 0.8125rem; font-weight: 500; }
+    .pd-variant { margin-bottom: 20px; }
+    .pd-variant-label { font-size: 0.8125rem; font-weight: 500; margin-bottom: 8px; }
+    .pd-variant-options { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pd-variant-option { padding: 6px 16px; border: 1px solid var(--border); border-radius: var(--radius-full); background: var(--card); font-family: "Montserrat", sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); cursor: pointer; transition: all 0.15s; }
+    .pd-variant-option:hover { border-color: var(--foreground); color: var(--foreground); }
+    .pd-variant-option.active { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .pd-qty-label { font-size: 0.8125rem; font-weight: 500; }
+    .pd-qty-control { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .pd-qty-btn { width: 36px; height: 36px; border: none; background: var(--muted); cursor: pointer; font-size: 1rem; color: var(--foreground); transition: background 0.15s; }
+    .pd-qty-btn:hover { background: var(--secondary); }
+    .pd-qty-value { width: 48px; text-align: center; font-size: 0.875rem; font-weight: 600; border: none; background: var(--background); }
+    .pd-actions { display: flex; gap: 10px; margin-bottom: 24px; }
+    .pd-actions .btn { flex: 1; }
+    .pd-meta { font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.8; }
+
+    /* ========================================
+       11–12: ORDERS
+       ======================================== */
+    .orders-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .orders-table th { text-align: left; padding: 10px 14px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.02em; color: var(--muted-foreground); background: var(--muted); border-bottom: 1px solid var(--border); }
+    .orders-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .orders-table tr:last-child td { border-bottom: none; }
+    .orders-table tr:hover td { background: oklch(0.955 0.012 85 / 0.5); }
+    .order-detail { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+    .order-detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .order-timeline { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+    .order-timeline-item { display: flex; gap: 12px; padding: 12px 0; position: relative; }
+    .order-timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary); flex-shrink: 0; margin-top: 3px; }
+    .order-timeline-dot.pending { background: var(--muted); border: 2px solid var(--border); }
+    .order-timeline-content { flex: 1; }
+    .order-timeline-title { font-size: 0.8125rem; font-weight: 500; }
+    .order-timeline-date { font-size: 0.75rem; color: var(--muted-foreground); }
+
+    /* ========================================
+       13: CHECKOUT
+       ======================================== */
+    .checkout-grid { display: grid; grid-template-columns: 1fr 380px; gap: 32px; }
+    .checkout-steps { display: flex; gap: 0; margin-bottom: 32px; }
+    .checkout-step { display: flex; align-items: center; gap: 8px; padding: 12px 16px; font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); border-bottom: 2px solid transparent; flex: 1; }
+    .checkout-step.active { color: var(--foreground); border-bottom-color: var(--primary); font-weight: 600; }
+    .checkout-step.completed { color: var(--success); }
+    .checkout-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; }
+    .checkout-step.active .checkout-step-num { background: var(--primary); color: var(--primary-foreground); }
+    .checkout-step.completed .checkout-step-num { background: var(--success); color: var(--success-foreground); }
+    .checkout-summary { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; position: sticky; top: 24px; }
+    .checkout-summary-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.15rem; margin-bottom: 16px; }
+    .checkout-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .checkout-item:last-child { border-bottom: none; }
+    .checkout-item-thumb { width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--secondary); flex-shrink: 0; }
+    .checkout-item-name { font-size: 0.8125rem; font-weight: 500; }
+    .checkout-item-meta { font-size: 0.6875rem; color: var(--muted-foreground); }
+    .checkout-item-price { font-size: 0.8125rem; font-weight: 600; margin-left: auto; white-space: nowrap; }
+    .checkout-totals { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .checkout-total-row { display: flex; justify-content: space-between; font-size: 0.8125rem; padding: 4px 0; }
+    .checkout-total-row.total { font-weight: 700; font-size: 1rem; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 8px; }
+
+    /* ========================================
+       14: CART
+       ======================================== */
+    .cart-grid { display: grid; grid-template-columns: 1fr 340px; gap: 32px; }
+    .cart-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-img { width: 80px; height: 80px; border-radius: var(--radius-md); background: var(--secondary); flex-shrink: 0; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 0.875rem; font-weight: 500; margin-bottom: 4px; }
+    .cart-item-meta { font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 8px; }
+    .cart-item-bottom { display: flex; align-items: center; justify-content: space-between; }
+    .cart-item-price { font-size: 0.9375rem; font-weight: 600; }
+    .cart-summary { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; position: sticky; top: 24px; }
+
+    /* ========================================
+       15: WISHLIST
+       ======================================== */
+    .wishlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+
+    /* ========================================
+       17: CAMPAIGNS
+       ======================================== */
+    .campaign-banner { position: relative; border-radius: var(--radius-xl); overflow: hidden; padding: 48px 40px; background: linear-gradient(135deg, var(--accent), oklch(0.42 0.19 350)); color: var(--accent-foreground); }
+    .campaign-banner-title { font-family: "Orla Serif", Georgia, serif; font-size: clamp(1.44rem, 2.5vw, 2rem); margin-bottom: 8px; }
+    .campaign-banner-desc { font-size: 0.9375rem; opacity: 0.9; margin-bottom: 20px; max-width: 480px; }
+    .campaign-countdown { display: flex; gap: 12px; margin-top: 20px; }
+    .campaign-countdown-unit { text-align: center; }
+    .campaign-countdown-value { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: var(--radius-lg); background: oklch(1 0 0 / 0.15); font-size: 1.25rem; font-weight: 700; backdrop-filter: blur(8px); }
+    .campaign-countdown-label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; opacity: 0.8; }
+    .promo-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; align-items: center; gap: 16px; }
+    .promo-icon { width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--primary); color: var(--primary-foreground); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .promo-title { font-size: 0.875rem; font-weight: 600; }
+    .promo-desc { font-size: 0.75rem; color: var(--muted-foreground); margin-top: 2px; }
+    .promo-code { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 4px 10px; background: var(--muted); border-radius: var(--radius-sm); font-family: "Geist Mono", ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; }
+
+    /* ========================================
+       19: COMPARE
+       ======================================== */
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .compare-table th { padding: 12px 16px; text-align: center; font-weight: 600; background: var(--muted); border-bottom: 1px solid var(--border); }
+    .compare-table th:first-child { text-align: left; min-width: 140px; }
+    .compare-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); text-align: center; }
+    .compare-table td:first-child { text-align: left; font-weight: 500; color: var(--muted-foreground); }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-img { width: 80px; height: 80px; border-radius: var(--radius-md); background: var(--secondary); margin: 0 auto 8px; }
+
+    /* ========================================
+       20: CATEGORIES
+       ======================================== */
+    .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .category-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; text-decoration: none; transition: box-shadow 0.2s, transform 0.2s; }
+    .category-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .category-card-img { width: 100%; aspect-ratio: 4/3; background: var(--secondary); }
+    .category-card-body { padding: 12px 14px; }
+    .category-card-name { font-size: 0.875rem; font-weight: 600; color: var(--foreground); }
+    .category-card-count { font-size: 0.75rem; color: var(--muted-foreground); margin-top: 2px; }
+
+    /* ========================================
+       21: CATEGORY PRODUCTS
+       ======================================== */
+    .cp-header { margin-bottom: 24px; }
+    .cp-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.6rem; margin-bottom: 8px; }
+    .cp-subcategories { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .cp-subcat { padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--card); font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+    .cp-subcat:hover, .cp-subcat.active { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .cp-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+
+    /* ========================================
+       FOCUS & ACCESSIBILITY
+       ======================================== */
+    .side-nav-item:focus-visible, .top-nav-link:focus-visible, .bottom-nav-item:focus-visible, .top-nav-cart:focus-visible, .dt-filter-btn:focus-visible, .dt-col-vis-btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+    /* ========================================
+       RESPONSIVE
+       ======================================== */
+    @media (max-width: 768px) {
+      .page { padding: 24px 16px 64px; }
+      .pd-container, .checkout-grid, .cart-grid { grid-template-columns: 1fr; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+      .compare-table { font-size: 0.75rem; }
+      .compare-table th, .compare-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page" data-od-id="pattern-library">
+
+    <!-- Header -->
+    <header class="page-header" data-od-id="pl-header">
+      <div>
+        <h1 class="page-title">Pattern Library</h1>
+        <p class="page-subtitle">ORLA — Reusable ecommerce patterns &amp; layouts</p>
+      </div>
+      <button class="theme-toggle" onclick="document.documentElement.classList.toggle('dark')" aria-label="Toggle dark mode" data-od-id="pl-theme-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        Toggle theme
+      </button>
+    </header>
+
+    <!-- ==================== 01 · DATA TABLE ==================== -->
+    <section class="section" data-od-id="pl-01-data-table">
+      <div class="section-label">01 · Admin · Data</div>
+      <h2 class="section-title">Data Table</h2>
+      <div class="dt-container" id="dt-demo">
+        <div class="dt-toolbar">
+          <div class="dt-toolbar-left">
+            <div class="dt-search">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Rechercher un produit..." class="dt-search-input">
+            </div>
+            <div style="position:relative;"><button class="dt-filter-btn">Catégorie <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button></div>
+            <div style="position:relative;"><button class="dt-filter-btn">Statut <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button></div>
+          </div>
+          <div class="dt-toolbar-right">
+            <button class="dt-col-vis-btn">Colonnes <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          </div>
+        </div>
+        <div class="action-bar dt-action-bar" style="border-radius:0;box-shadow:none;border-bottom:1px solid var(--border);">
+          <div class="action-bar-count"><strong>2</strong> produit(s) sélectionné(s)</div>
+          <div class="action-bar-divider"></div>
+          <div class="action-bar-actions">
+            <button class="btn btn-sm btn-outline">Exporter</button>
+            <button class="btn btn-sm btn-outline">Dupliquer</button>
+            <button class="btn btn-sm btn-destructive">Supprimer</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="dt-table">
+            <caption class="sr-only">Produits du catalogue</caption>
+            <thead><tr>
+              <th scope="col" style="width:40px"><div class="checkbox checked"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></th>
+              <th scope="col">Produit</th><th scope="col">Catégorie</th><th scope="col">Prix</th><th scope="col">Stock</th><th scope="col">Statut</th><th scope="col">Date</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><div class="checkbox checked"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></td><td><div class="dt-product"><div class="dt-product-thumb" style="background:var(--secondary)"></div><div><div class="dt-product-name">Moule Silicone 12 Cavités</div><div class="dt-product-sku">SKU: OUT-001</div></div></div></td><td>Outils</td><td style="font-variant-numeric:tabular-nums">2 500 DA</td><td style="font-variant-numeric:tabular-nums">142</td><td><span class="badge badge-success badge-dot">En stock</span></td><td>12 janv. 2025</td></tr>
+              <tr><td><div class="checkbox checked"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></td><td><div class="dt-product"><div class="dt-product-thumb" style="background:var(--primary)"></div><div><div class="dt-product-name">Farine T55 Bio 1kg</div><div class="dt-product-sku">SKU: ING-014</div></div></div></td><td>Ingrédients</td><td style="font-variant-numeric:tabular-nums">380 DA</td><td style="font-variant-numeric:tabular-nums">89</td><td><span class="badge badge-success badge-dot">En stock</span></td><td>3 fév. 2025</td></tr>
+              <tr><td><div class="checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></td><td><div class="dt-product"><div class="dt-product-thumb" style="background:var(--muted)"></div><div><div class="dt-product-name">Boîte Kraft 20×20×10</div><div class="dt-product-sku">SKU: PKG-007</div></div></div></td><td>Packaging</td><td style="font-variant-numeric:tabular-nums">150 DA</td><td style="font-variant-numeric:tabular-nums">12</td><td><span class="badge badge-warning badge-dot">Stock bas</span></td><td>18 mars 2025</td></tr>
+              <tr><td><div class="checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></td><td><div class="dt-product"><div class="dt-product-thumb" style="background:var(--accent)"></div><div><div class="dt-product-name">Colorant Alimentaire Set 6</div><div class="dt-product-sku">SKU: ING-032</div></div></div></td><td>Ingrédients</td><td style="font-variant-numeric:tabular-nums">850 DA</td><td style="font-variant-numeric:tabular-nums">0</td><td><span class="badge badge-destructive badge-dot">Épuisé</span></td><td>2 avr. 2025</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dt-pagination">
+          <div class="dt-pagination-info">4 produit(s)</div>
+          <div class="dt-pagination-controls">
+            <div class="dt-pagination-size"><span>Lignes par page</span><select class="dt-pagination-select"><option>10</option><option>20</option></select></div>
+            <div class="dt-pagination-nav">
+              <button class="btn btn-sm btn-ghost btn-icon-sm" disabled aria-label="Précédente"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+              <span class="dt-pagination-page active">1</span>
+              <button class="btn btn-sm btn-ghost btn-icon-sm" disabled aria-label="Suivante"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 02 · ACTION BAR ==================== -->
+    <section class="section" data-od-id="pl-02-action-bar">
+      <div class="section-label">02 · Admin · Data</div>
+      <h2 class="section-title">Action Bar</h2>
+      <div class="action-bar" style="margin-bottom:12px;">
+        <div class="action-bar-count"><strong>3</strong> produits sélectionnés</div>
+        <div class="action-bar-divider"></div>
+        <div class="action-bar-actions"><button class="btn btn-sm btn-outline">Exporter</button><button class="btn btn-sm btn-outline">Dupliquer</button><button class="btn btn-sm btn-destructive">Supprimer</button></div>
+      </div>
+      <div class="action-bar">
+        <div class="action-bar-count"><strong>12</strong> commandes sélectionnées</div>
+        <div class="action-bar-divider"></div>
+        <div class="action-bar-actions"><button class="btn btn-sm btn-outline">Changer le statut</button><button class="btn btn-sm btn-outline">Imprimer</button><button class="btn btn-sm btn-destructive">Annuler</button></div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 03 · TOP NAVIGATION ==================== -->
+    <section class="section" data-od-id="pl-03-top-nav">
+      <div class="section-label">03 · Navigation</div>
+      <h2 class="section-title">Top Navigation</h2>
+      <div class="top-nav" style="margin-bottom:16px;">
+        <a href="#" class="top-nav-logo">OR<span>LA</span></a>
+        <div class="top-nav-links">
+          <a href="#" class="top-nav-link">Catégories</a>
+          <a href="#" class="top-nav-link">Promotions</a>
+          <a href="#" class="top-nav-link">Nouveautés</a>
+          <a href="#" class="top-nav-link">Meilleures ventes</a>
+        </div>
+        <div class="top-nav-actions">
+          <div class="top-nav-search"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Rechercher des produits...</span></div>
+          <button class="btn btn-sm btn-ghost btn-icon-sm" aria-label="Liste de souhaits"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+          <button class="top-nav-cart" aria-label="Panier"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span class="top-nav-cart-badge">3</span></button>
+          <div style="position:relative;"><button class="btn btn-sm btn-ghost btn-icon-sm" id="account-menu-btn" aria-label="Mon compte"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+            <div class="top-nav-dropdown"><div class="top-nav-dropdown-item">Mon compte</div><div class="top-nav-dropdown-item">Mes commandes</div><div class="top-nav-dropdown-item">Ma liste de souhaits</div><div class="top-nav-dropdown-sep"></div><div class="top-nav-dropdown-item" style="color:var(--accent)">Administration</div><div class="top-nav-dropdown-sep"></div><div class="top-nav-dropdown-item" style="color:var(--destructive)">Déconnexion</div></div>
+          </div>
+          <button class="btn btn-sm btn-ghost btn-icon-sm" aria-label="Thème"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+        </div>
+      </div>
+      <h3 style="font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:10px;">Mobile variant</h3>
+      <div class="top-nav">
+        <button class="btn btn-sm btn-ghost btn-icon-sm" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+        <a href="#" class="top-nav-logo">OR<span>LA</span></a>
+        <div class="top-nav-actions">
+          <button class="btn btn-sm btn-ghost btn-icon-sm" aria-label="Rechercher"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+          <button class="top-nav-cart" aria-label="Panier"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span class="top-nav-cart-badge">3</span></button>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 04 · BOTTOM NAVIGATION ==================== -->
+    <section class="section" data-od-id="pl-04-bottom-nav">
+      <div class="section-label">04 · Navigation</div>
+      <h2 class="section-title">Bottom Navigation</h2>
+      <div style="max-width:375px;">
+        <div class="bottom-nav">
+          <button class="bottom-nav-item active" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Accueil</button>
+          <button class="bottom-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>Catégories</button>
+          <button class="bottom-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Rechercher</button>
+          <button class="bottom-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>Panier</button>
+          <button class="bottom-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mon compte</button>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 05 · SIDE NAVIGATION ==================== -->
+    <section class="section" data-od-id="pl-05-side-nav">
+      <div class="section-label">05 · Navigation</div>
+      <h2 class="section-title">Side Navigation</h2>
+      <div class="side-nav" style="max-height:500px;overflow-y:auto;">
+        <div class="side-nav-item active" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Tableau de bord</div>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Analytiques</button>
+        <div class="side-nav-section" style="margin-top:12px;">Catalogue</div>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Produits</button>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>Catégories</button>
+        <div class="side-nav-section" style="margin-top:12px;">Commandes</div>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Commandes <span class="side-nav-badge">12</span></button>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</button>
+        <div class="side-nav-section" style="margin-top:12px;">Marketing</div>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Promotions</button>
+        <button class="side-nav-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Campagnes</button>
+        <div style="border-top:1px solid var(--border);margin:12px 0 8px;"></div>
+        <div class="side-nav-user"><div class="side-nav-user-avatar">AM</div><div class="side-nav-user-info"><div class="side-nav-user-name">Amina Meziane</div><div class="side-nav-user-role">Admin</div></div></div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 06 · LOGIN FLOWS ==================== -->
+    <section class="section" data-od-id="pl-06-login">
+      <div class="section-label">06 · Auth</div>
+      <h2 class="section-title">Login Flows</h2>
+      <div class="login-card">
+        <h3 class="login-title">Bienvenue</h3>
+        <p class="login-subtitle">Connectez-vous à votre compte ORLA</p>
+        <div class="form-group"><label class="label">Email</label><input type="email" class="input" placeholder="votre@email.com"></div>
+        <div class="form-group"><label class="label">Mot de passe</label><input type="password" class="input" placeholder="••••••••"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <label class="form-check"><input type="checkbox" checked> Se souvenir de moi</label>
+          <a href="#" class="form-link">Mot de passe oublié ?</a>
+        </div>
+        <button class="btn btn-primary btn-lg" style="width:100%">Se connecter</button>
+        <div class="login-divider">ou</div>
+        <button class="social-btn"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continuer avec Google</button>
+        <p class="form-footer">Pas encore de compte ? <a href="#" class="form-link">Créer un compte</a></p>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 07 · FORM LAYOUTS ==================== -->
+    <section class="section" data-od-id="pl-07-forms">
+      <div class="section-label">07 · Forms</div>
+      <h2 class="section-title">Form Layouts</h2>
+      <div style="max-width:640px;">
+        <div class="form-group"><label class="label">Nom du produit</label><input type="text" class="input" placeholder="Ex: Moule Silicone Rond"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="label">Prix (DA)</label><input type="number" class="input" placeholder="0"></div>
+          <div class="form-group"><label class="label">Stock</label><input type="number" class="input" placeholder="0"></div>
+        </div>
+        <div class="form-group"><label class="label">Catégorie</label><select class="input select"><option>Sélectionner...</option><option>Outils</option><option>Ingrédients</option><option>Packaging</option></select></div>
+        <div class="form-group"><label class="label">Description</label><textarea class="input" rows="3" style="height:auto;padding:8px 12px;resize:vertical" placeholder="Décrivez le produit..."></textarea></div>
+        <div class="form-group"><label class="label input-error">Email professionnel</label><input type="email" class="input input-error" value="invalid@"><p class="error-text">Adresse email invalide</p></div>
+        <div class="form-group"><label class="label">Code promo</label><input type="text" class="input" placeholder="Entrez le code"><p class="hint">Optionnel — applique une réduction au panier</p></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;"><button class="btn btn-outline">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 08 · PRODUCT CARD ==================== -->
+    <section class="section" data-od-id="pl-08-product-card">
+      <div class="section-label">08 · Product</div>
+      <h2 class="section-title">Product Card</h2>
+      <div class="product-grid">
+        <div class="product-card">
+          <div class="product-card-img"><div class="product-card-badges"><span class="badge badge-primary">Nouveau</span></div><button class="product-card-wishlist" aria-label="Ajouter aux favoris"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button></div>
+          <div class="product-card-body"><div class="product-card-category">Outils</div><div class="product-card-title">Moule Silicone 12 Cavités – Forme Rond</div><div class="product-card-rating"><div class="product-card-stars">★★★★★</div><span class="product-card-rating-count">(24)</span></div><div class="product-card-price"><span class="product-card-price-current">2 500 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div>
+        </div>
+        <div class="product-card">
+          <div class="product-card-img"><div class="product-card-badges"><span class="badge badge-accent">-20%</span></div><button class="product-card-wishlist" aria-label="Ajouter aux favoris"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button></div>
+          <div class="product-card-body"><div class="product-card-category">Ingrédients</div><div class="product-card-title">Extrait de Vanille Madagascar 100ml</div><div class="product-card-rating"><div class="product-card-stars">★★★★☆</div><span class="product-card-rating-count">(18)</span></div><div class="product-card-price"><span class="product-card-price-current">1 600 DA</span><span class="product-card-price-old">2 000 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div>
+        </div>
+        <div class="product-card">
+          <div class="product-card-img"><button class="product-card-wishlist" aria-label="Ajouter aux favoris"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button></div>
+          <div class="product-card-body"><div class="product-card-category">Packaging</div><div class="product-card-title">Boîte Kraft Premium 25×25×12</div><div class="product-card-rating"><div class="product-card-stars">★★★★★</div><span class="product-card-rating-count">(42)</span></div><div class="product-card-price"><span class="product-card-price-current">280 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div>
+        </div>
+        <div class="product-card">
+          <div class="product-card-img"><div class="product-card-badges"><span class="badge badge-destructive">Épuisé</span></div></div>
+          <div class="product-card-body"><div class="product-card-category">Outils</div><div class="product-card-title">Machine à Macarons Pro 36 Cavités</div><div class="product-card-rating"><div class="product-card-stars">★★★★★</div><span class="product-card-rating-count">(8)</span></div><div class="product-card-price"><span class="product-card-price-current">45 000 DA</span></div><div class="product-card-actions"><button class="btn btn-outline btn-sm" disabled>Épuisé</button></div></div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 09 · PRODUCT SEARCH ==================== -->
+    <section class="section" data-od-id="pl-09-search">
+      <div class="section-label">09 · Product</div>
+      <h2 class="section-title">Product Search</h2>
+      <div class="search-container">
+        <div class="search-bar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" placeholder="Rechercher moule, farine, packaging...">
+        </div>
+        <div class="search-results">
+          <div class="search-section-title">Produits populaires</div>
+          <div class="search-item"><div class="search-item-thumb"></div><div><div class="search-item-name">Moule Silicone 12 Cavités</div><div class="search-item-meta">Outils · 142 en stock</div></div><div class="search-item-price">2 500 DA</div></div>
+          <div class="search-item"><div class="search-item-thumb" style="background:var(--primary)"></div><div><div class="search-item-name">Farine T55 Bio 1kg</div><div class="search-item-meta">Ingrédients · 89 en stock</div></div><div class="search-item-price">380 DA</div></div>
+          <div class="search-section-title">Catégories</div>
+          <div class="search-item"><div class="search-item-thumb" style="background:var(--accent);border-radius:var(--radius-full)"></div><div><div class="search-item-name">Outils de pâtisserie</div><div class="search-item-meta">48 produits</div></div></div>
+          <div class="search-item"><div class="search-item-thumb" style="background:var(--success);border-radius:var(--radius-full)"></div><div><div class="search-item-name">Ingrédients</div><div class="search-item-meta">36 produits</div></div></div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 10 · PRODUCT DETAILS ==================== -->
+    <section class="section" data-od-id="pl-10-product-details">
+      <div class="section-label">10 · Product</div>
+      <h2 class="section-title">Product Details</h2>
+      <div class="pd-container">
+        <div class="pd-gallery">
+          <div class="pd-main-img"></div>
+          <div class="pd-thumbs"><div class="pd-thumb active"></div><div class="pd-thumb"></div><div class="pd-thumb"></div><div class="pd-thumb"></div></div>
+        </div>
+        <div class="pd-info">
+          <div class="pd-breadcrumb">Accueil &rsaquo; Outils &rsaquo; Moules</div>
+          <h1 class="pd-title">Moule Silicone 12 Cavités</h1>
+          <div class="pd-rating"><span style="color:var(--warning)">★★★★★</span> <span style="font-size:0.8125rem;color:var(--muted-foreground)">(24 avis)</span></div>
+          <div class="pd-price">2 500 DA</div>
+          <div class="pd-variant">
+            <div class="pd-variant-label">Taille</div>
+            <div class="pd-variant-options">
+              <button class="pd-variant-option">6 cavités</button>
+              <button class="pd-variant-option active">12 cavités</button>
+              <button class="pd-variant-option">24 cavités</button>
+            </div>
+          </div>
+          <p class="pd-desc">Moule en silicone de qualité alimentaire, 12 cavités rondes. Résistant à la chaleur (jusqu'à 230°C), flexible et facile à démouler. Idéal pour macarons, friandises et petits gâteaux.</p>
+          <div class="pd-qty">
+            <span class="pd-qty-label">Quantité</span>
+            <div class="pd-qty-control"><button class="pd-qty-btn">−</button><input type="text" class="pd-qty-value" value="1" readonly><button class="pd-qty-btn">+</button></div>
+          </div>
+          <div class="pd-actions"><button class="btn btn-primary btn-lg">Ajouter au panier</button><button class="btn btn-outline btn-lg" aria-label="Favoris"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button></div>
+          <div class="pd-meta">SKU: OUT-001 · Catégorie: Outils · Livraison gratuite à partir de 5 000 DA</div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 11 · ORDERS LIST ==================== -->
+    <section class="section" data-od-id="pl-11-orders">
+      <div class="section-label">11 · Storefront · Orders</div>
+      <h2 class="section-title">My Orders</h2>
+      <div style="overflow-x:auto;">
+        <table class="orders-table">
+          <thead><tr><th>Commande</th><th>Date</th><th>Statut</th><th>Total</th><th>Articles</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500">#2847</td><td>15 janv. 2025</td><td><span class="badge badge-success badge-dot">Livrée</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600">12 500 DA</td><td>5</td></tr>
+            <tr><td style="font-weight:500">#2831</td><td>3 janv. 2025</td><td><span class="badge badge-success badge-dot">Livrée</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600">3 200 DA</td><td>2</td></tr>
+            <tr><td style="font-weight:500">#2809</td><td>18 déc. 2024</td><td><span class="badge badge-success badge-dot">Livrée</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600">8 750 DA</td><td>4</td></tr>
+            <tr><td style="font-weight:500">#2784</td><td>2 déc. 2024</td><td><span class="badge badge-destructive badge-dot">Annulée</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600">1 900 DA</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 12 · ORDER DETAILS ==================== -->
+    <section class="section" data-od-id="pl-12-order-detail">
+      <div class="section-label">12 · Orders</div>
+      <h2 class="section-title">Order Details</h2>
+      <div class="order-detail">
+        <div class="order-detail-header">
+          <div><h3 style="font-size:1rem;font-weight:600;">Commande #2847</h3><p style="font-size:0.75rem;color:var(--muted-foreground);">Passée le 15 janvier 2025</p></div>
+          <span class="badge badge-success badge-dot">Livrée</span>
+        </div>
+        <div class="order-timeline">
+          <div class="order-timeline-item"><div class="order-timeline-dot"></div><div class="order-timeline-content"><div class="order-timeline-title">Commande confirmée</div><div class="order-timeline-date">15 janv. 2025, 10:30</div></div></div>
+          <div class="order-timeline-item"><div class="order-timeline-dot"></div><div class="order-timeline-content"><div class="order-timeline-title">Paiement reçu</div><div class="order-timeline-date">15 janv. 2025, 10:31</div></div></div>
+          <div class="order-timeline-item"><div class="order-timeline-dot"></div><div class="order-timeline-content"><div class="order-timeline-title">En préparation</div><div class="order-timeline-date">16 janv. 2025, 09:00</div></div></div>
+          <div class="order-timeline-item"><div class="order-timeline-dot"></div><div class="order-timeline-content"><div class="order-timeline-title">Expédiée</div><div class="order-timeline-date">17 janv. 2025, 14:20</div></div></div>
+          <div class="order-timeline-item"><div class="order-timeline-dot"></div><div class="order-timeline-content"><div class="order-timeline-title">Livrée</div><div class="order-timeline-date">19 janv. 2025, 11:45</div></div></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="orders-table">
+            <thead><tr><th>Produit</th><th>Prix</th><th>Qté</th><th>Total</th></tr></thead>
+            <tbody>
+              <tr><td><div class="dt-product"><div class="dt-product-thumb" style="background:var(--secondary)"></div><div class="dt-product-name">Moule Silicone 12 Cavités</div></div></td><td>2 500 DA</td><td>2</td><td style="font-weight:600">5 000 DA</td></tr>
+              <tr><td><div class="dt-product"><div class="dt-product-thumb" style="background:var(--primary)"></div><div class="dt-product-name">Farine T55 Bio 1kg</div></div></td><td>380 DA</td><td>3</td><td style="font-weight:600">1 140 DA</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:24px;font-size:0.8125rem;">
+          <div><strong>Livraison:</strong> 14 Lot Riadh, Alger</div>
+          <div><strong>Paiement:</strong> Carte bancaire •••• 4242</div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 13 · CHECKOUT ==================== -->
+    <section class="section" data-od-id="pl-13-checkout">
+      <div class="section-label">13 · Checkout</div>
+      <h2 class="section-title">Checkout</h2>
+      <div class="checkout-steps">
+        <div class="checkout-step completed"><span class="checkout-step-num">✓</span> Panier</div>
+        <div class="checkout-step active"><span class="checkout-step-num">2</span> Livraison</div>
+        <div class="checkout-step"><span class="checkout-step-num">3</span> Paiement</div>
+        <div class="checkout-step"><span class="checkout-step-num">4</span> Confirmation</div>
+      </div>
+      <div class="checkout-grid">
+        <div>
+          <h3 style="font-size:1rem;font-weight:600;margin-bottom:16px;">Adresse de livraison</h3>
+          <div class="form-group"><label class="label">Nom complet</label><input type="text" class="input" value="Amina Meziane"></div>
+          <div class="form-group"><label class="label">Adresse</label><input type="text" class="input" value="14 Lot Riadh, Bab Ezzouar"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="label">Ville</label><input type="text" class="input" value="Alger"></div>
+            <div class="form-group"><label class="label">Code postal</label><input type="text" class="input" value="16028"></div>
+          </div>
+          <div class="form-group"><label class="label">Téléphone</label><input type="tel" class="input" value="+213 555 12 34 56"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;"><button class="btn btn-outline">Retour</button><button class="btn btn-primary">Continuer vers le paiement</button></div>
+        </div>
+        <div class="checkout-summary">
+          <h3 class="checkout-summary-title">Récapitulatif</h3>
+          <div class="checkout-item"><div class="checkout-item-thumb"></div><div><div class="checkout-item-name">Moule Silicone 12 Cavités</div><div class="checkout-item-meta">Qté: 2</div></div><div class="checkout-item-price">5 000 DA</div></div>
+          <div class="checkout-item"><div class="checkout-item-thumb" style="background:var(--primary)"></div><div><div class="checkout-item-name">Farine T55 Bio 1kg</div><div class="checkout-item-meta">Qté: 3</div></div><div class="checkout-item-price">1 140 DA</div></div>
+          <div class="checkout-totals">
+            <div class="checkout-total-row"><span>Sous-total</span><span>6 140 DA</span></div>
+            <div class="checkout-total-row"><span>Livraison</span><span style="color:var(--success)">Gratuite</span></div>
+            <div class="checkout-total-row total"><span>Total</span><span>6 140 DA</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 14 · CART ==================== -->
+    <section class="section" data-od-id="pl-14-cart">
+      <div class="section-label">14 · Cart</div>
+      <h2 class="section-title">Cart</h2>
+      <div class="cart-grid">
+        <div>
+          <div class="cart-item">
+            <div class="cart-item-img"></div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">Moule Silicone 12 Cavités</div>
+              <div class="cart-item-meta">Outils · Forme Rond</div>
+              <div class="cart-item-bottom">
+                <div class="pd-qty-control"><button class="pd-qty-btn">−</button><input type="text" class="pd-qty-value" value="2" readonly><button class="pd-qty-btn">+</button></div>
+                <div class="cart-item-price">5 000 DA</div>
+              </div>
+            </div>
+          </div>
+          <div class="cart-item">
+            <div class="cart-item-img" style="background:var(--primary)"></div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">Farine T55 Bio 1kg</div>
+              <div class="cart-item-meta">Ingrédients · Bio</div>
+              <div class="cart-item-bottom">
+                <div class="pd-qty-control"><button class="pd-qty-btn">−</button><input type="text" class="pd-qty-value" value="3" readonly><button class="pd-qty-btn">+</button></div>
+                <div class="cart-item-price">1 140 DA</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cart-summary">
+          <h3 class="checkout-summary-title">Récapitulatif</h3>
+          <div class="checkout-totals">
+            <div class="checkout-total-row"><span>Sous-total (5 articles)</span><span>6 140 DA</span></div>
+            <div class="checkout-total-row"><span>Livraison</span><span style="color:var(--success)">Gratuite</span></div>
+            <div class="checkout-total-row total"><span>Total</span><span>6 140 DA</span></div>
+          </div>
+          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px;">Passer la commande</button>
+          <div style="text-align:center;margin-top:12px;"><a href="#" class="form-link" style="font-size:0.8125rem;">Continuer les achats</a></div>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 15 · WISHLIST ==================== -->
+    <section class="section" data-od-id="pl-15-wishlist">
+      <div class="section-label">15 · Saved</div>
+      <h2 class="section-title">Wishlist</h2>
+      <div class="wishlist-grid">
+        <div class="product-card"><div class="product-card-img"></div><div class="product-card-body"><div class="product-card-category">Outils</div><div class="product-card-title">Kit Décoration Gâteau 24 pièces</div><div class="product-card-price"><span class="product-card-price-current">4 200 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button><button class="btn btn-ghost btn-sm" style="color:var(--destructive)">Retirer</button></div></div></div>
+        <div class="product-card"><div class="product-card-img" style="background:var(--accent)"></div><div class="product-card-body"><div class="product-card-category">Ingrédients</div><div class="product-card-title">Colorant Alimentaire Set 6</div><div class="product-card-price"><span class="product-card-price-current">850 DA</span></div><div class="product-card-actions"><button class="btn btn-outline btn-sm" disabled>Épuisé</button><button class="btn btn-ghost btn-sm" style="color:var(--destructive)">Retirer</button></div></div></div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 16 · SAVED PRODUCTS ==================== -->
+    <section class="section" data-od-id="pl-16-saved">
+      <div class="section-label">16 · Saved</div>
+      <h2 class="section-title">Saved Products</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;gap:16px;align-items:center;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);">
+          <div style="width:64px;height:64px;border-radius:var(--radius-md);background:var(--secondary);flex-shrink:0;"></div>
+          <div style="flex:1;"><div style="font-weight:500;font-size:0.875rem;">Moule Silicone 12 Cavités</div><div style="font-size:0.75rem;color:var(--muted-foreground);">Ajouté le 10 janv. 2025</div></div>
+          <div style="font-weight:600;">2 500 DA</div>
+          <button class="btn btn-primary btn-sm">Ajouter au panier</button>
+          <button class="btn btn-ghost btn-icon-sm" style="color:var(--destructive)" aria-label="Supprimer"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+        </div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 17 · CAMPAIGNS ==================== -->
+    <section class="section" data-od-id="pl-17-campaigns">
+      <div class="section-label">17 · Marketing</div>
+      <h2 class="section-title">Campaigns &amp; Promotions</h2>
+      <div class="campaign-banner" style="margin-bottom:24px;">
+        <h3 class="campaign-banner-title">Soldes d'hiver — Jusqu'à -30%</h3>
+        <p class="campaign-banner-desc">Profitez de réductions exceptionnelles sur toute la gamme d'outils et d'ingrédients.</p>
+        <button class="btn btn-primary" style="background:var(--card);color:var(--foreground);">Voir les offres</button>
+        <div class="campaign-countdown">
+          <div class="campaign-countdown-unit"><div class="campaign-countdown-value">02</div><div class="campaign-countdown-label">Jours</div></div>
+          <div class="campaign-countdown-unit"><div class="campaign-countdown-value">14</div><div class="campaign-countdown-label">Heures</div></div>
+          <div class="campaign-countdown-unit"><div class="campaign-countdown-value">36</div><div class="campaign-countdown-label">Min</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+        <div class="promo-card"><div class="promo-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><div><div class="promo-title">Livraison gratuite</div><div class="promo-desc">Pour toute commande supérieure à 5 000 DA</div></div></div>
+        <div class="promo-card"><div class="promo-icon" style="background:var(--accent);color:var(--accent-foreground)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="promo-title">Parrainage</div><div class="promo-desc">Offrez 500 DA à un ami, recevez 500 DA</div><div class="promo-code">PARRAIN500</div></div></div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 18 · RECENTLY VIEWED ==================== -->
+    <section class="section" data-od-id="pl-18-recent">
+      <div class="section-label">18 · Discovery</div>
+      <h2 class="section-title">Recently Viewed</h2>
+      <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;">
+        <div style="min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;flex-shrink:0;"><div style="height:120px;background:var(--secondary)"></div><div style="padding:10px 12px;"><div style="font-size:0.8125rem;font-weight:500;">Moule Silicone</div><div style="font-size:0.75rem;font-weight:600;margin-top:4px;">2 500 DA</div></div></div>
+        <div style="min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;flex-shrink:0;"><div style="height:120px;background:var(--primary)"></div><div style="padding:10px 12px;"><div style="font-size:0.8125rem;font-weight:500;">Farine T55 Bio</div><div style="font-size:0.75rem;font-weight:600;margin-top:4px;">380 DA</div></div></div>
+        <div style="min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;flex-shrink:0;"><div style="height:120px;background:var(--accent)"></div><div style="padding:10px 12px;"><div style="font-size:0.8125rem;font-weight:500;">Colorant Set</div><div style="font-size:0.75rem;font-weight:600;margin-top:4px;">850 DA</div></div></div>
+        <div style="min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;flex-shrink:0;"><div style="height:120px;background:var(--muted)"></div><div style="padding:10px 12px;"><div style="font-size:0.8125rem;font-weight:500;">Boîte Kraft</div><div style="font-size:0.75rem;font-weight:600;margin-top:4px;">150 DA</div></div></div>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 19 · COMPARE PRODUCTS ==================== -->
+    <section class="section" data-od-id="pl-19-compare">
+      <div class="section-label">19 · Product</div>
+      <h2 class="section-title">Compare Products</h2>
+      <div style="overflow-x:auto;">
+        <table class="compare-table">
+          <thead><tr><th></th><th><div class="compare-img"></div>Moule Silicone 12C</th><th><div class="compare-img" style="background:var(--primary)"></div>Moule Silicone 6C</th><th><div class="compare-img" style="background:var(--accent)"></div>Moule Métal 12C</th></tr></thead>
+          <tbody>
+            <tr><td>Prix</td><td style="font-weight:600">2 500 DA</td><td style="font-weight:600">1 800 DA</td><td style="font-weight:600">3 200 DA</td></tr>
+            <tr><td>Matériau</td><td>Silicone</td><td>Silicone</td><td>Aluminium</td></tr>
+            <tr><td>Cavités</td><td>12</td><td>6</td><td>12</td></tr>
+            <tr><td>Temp. max</td><td>230°C</td><td>230°C</td><td>260°C</td></tr>
+            <tr><td>Démoulage</td><td><span class="badge badge-success">Facile</span></td><td><span class="badge badge-success">Facile</span></td><td><span class="badge badge-warning">Moyen</span></td></tr>
+            <tr><td>Disponibilité</td><td><span class="badge badge-success badge-dot">En stock</span></td><td><span class="badge badge-success badge-dot">En stock</span></td><td><span class="badge badge-warning badge-dot">Stock bas</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 20 · CATEGORIES ==================== -->
+    <section class="section" data-od-id="pl-20-categories">
+      <div class="section-label">20 · Navigation</div>
+      <h2 class="section-title">Categories</h2>
+      <div class="category-grid">
+        <a href="#" class="category-card"><div class="category-card-img"></div><div class="category-card-body"><div class="category-card-name">Outils</div><div class="category-card-count">48 produits</div></div></a>
+        <a href="#" class="category-card"><div class="category-card-img" style="background:var(--primary)"></div><div class="category-card-body"><div class="category-card-name">Ingrédients</div><div class="category-card-count">36 produits</div></div></a>
+        <a href="#" class="category-card"><div class="category-card-img" style="background:var(--muted)"></div><div class="category-card-body"><div class="category-card-name">Packaging</div><div class="category-card-count">24 produits</div></div></a>
+        <a href="#" class="category-card"><div class="category-card-img" style="background:var(--accent)"></div><div class="category-card-body"><div class="category-card-name">Décoration</div><div class="category-card-count">18 produits</div></div></a>
+        <a href="#" class="category-card"><div class="category-card-img" style="background:var(--success)"></div><div class="category-card-body"><div class="category-card-name">Machines</div><div class="category-card-count">12 produits</div></div></a>
+      </div>
+    </section>
+    <hr class="divider">
+
+    <!-- ==================== 21 · CATEGORY PRODUCTS ==================== -->
+    <section class="section" data-od-id="pl-21-category-products">
+      <div class="section-label">21 · Navigation</div>
+      <h2 class="section-title">Category Products</h2>
+      <div class="cp-header">
+        <div class="pd-breadcrumb">Accueil &rsaquo; Catégories</div>
+        <h3 class="cp-title">Outils de pâtisserie</h3>
+        <div class="cp-subcategories">
+          <a href="#" class="cp-subcat active">Tous</a>
+          <a href="#" class="cp-subcat">Moules</a>
+          <a href="#" class="cp-subcat">Ustensiles</a>
+          <a href="#" class="cp-subcat">Machines</a>
+          <a href="#" class="cp-subcat">Accessoires</a>
+        </div>
+        <div class="cp-filters">
+          <button class="btn btn-sm btn-outline">Prix ▾</button>
+          <button class="btn btn-sm btn-outline">Disponibilité ▾</button>
+          <button class="btn btn-sm btn-outline">Note ▾</button>
+        </div>
+      </div>
+      <div class="product-grid">
+        <div class="product-card"><div class="product-card-img"></div><div class="product-card-body"><div class="product-card-category">Moules</div><div class="product-card-title">Moule Silicone 12 Cavités</div><div class="product-card-price"><span class="product-card-price-current">2 500 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div></div>
+        <div class="product-card"><div class="product-card-img" style="background:var(--primary)"></div><div class="product-card-body"><div class="product-card-category">Ustensiles</div><div class="product-card-title">Spatule Silicone 30cm</div><div class="product-card-price"><span class="product-card-price-current">650 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div></div>
+        <div class="product-card"><div class="product-card-img" style="background:var(--muted)"></div><div class="product-card-body"><div class="product-card-category">Machines</div><div class="product-card-title">Batteur Professionnel 5L</div><div class="product-card-price"><span class="product-card-price-current">18 000 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div></div>
+        <div class="product-card"><div class="product-card-img" style="background:var(--accent)"></div><div class="product-card-body"><div class="product-card-category">Accessoires</div><div class="product-card-title">Thermomètre Digital</div><div class="product-card-price"><span class="product-card-price-current">1 200 DA</span></div><div class="product-card-actions"><button class="btn btn-primary btn-sm">Ajouter au panier</button></div></div></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.checkbox').forEach(function(el) {
+      el.addEventListener('click', function() { this.classList.toggle('checked'); });
+    });
+  </script>
+</body>
+</html>

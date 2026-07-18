@@ -1,8 +1,12 @@
 "use client";
 
 import {
-  User,
-  Mail,
+  useCallback,
+  useMemo,
+} from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { z } from "zod";
+import {
   ShoppingCart,
   Package,
   Calendar,
@@ -20,6 +24,8 @@ import {
   StickyNote,
   HeadphonesIcon,
   Bell,
+  Heart,
+  Bookmark,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -29,12 +35,17 @@ import { trpc } from "@/components/providers/app-providers";
 import { StatsGrid } from "@/components/console/stats-grid";
 import type { StatItem } from "@/components/console/stats-grid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomerContactsTab } from "./customer-contacts-tab";
 import { CustomerNotesTab } from "./customer-notes-tab";
 import { CustomerSupportTab } from "./customer-support-tab";
 import { CustomerFollowupsTab } from "./customer-followups-tab";
+import { CustomerWishlistsTab } from "./customer-wishlists-tab";
+import { CustomerSavedItemsTab } from "./customer-saved-items-tab";
+import { CustomerFavoritesTab } from "./customer-favorites-tab";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
@@ -63,6 +74,21 @@ const RETURN_STATUS_BADGE_VARIANTS: Record<string, "default" | "secondary" | "de
   completed: "default",
   cancelled: "outline",
 };
+
+const customer_tab_schema = z.enum([
+  "orders",
+  "carts",
+  "reviews",
+  "returns",
+  "promos",
+  "contacts",
+  "notes",
+  "support",
+  "followups",
+  "wishlists",
+  "saved_items",
+  "favorites",
+]);
 
 function CartItemRow({
   item,
@@ -431,211 +457,281 @@ function PromoRedemptionCard({ redemption }: { redemption: Record<string, unknow
 
 export function CustomerDetailTabs({ user_id }: CustomerDetailTabsProps) {
   const t = useTranslations("orders");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const parsed = customer_tab_schema.safeParse(searchParams.get("tab"));
+  const active_tab = parsed.success ? parsed.data : "orders";
+
+  const on_tab_change = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", value);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
+
   const { data, isLoading } = trpc.customers.adminGetFullDetail.useQuery({ user_id });
 
-  if (!data) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <User className="text-muted-foreground mb-4 h-12 w-12" />
-        <p className="text-muted-foreground text-lg">{t("customer_not_found")}</p>
-      </div>
-    );
-  }
+  const customer = data?.customer;
+  const orders = data?.orders ?? [];
+  const carts = data?.carts ?? [];
+  const reviews = data?.reviews ?? [];
+  const return_requests = data?.return_requests ?? [];
+  const promo_redemptions = data?.promo_redemptions ?? [];
+  const wishlists = data?.wishlists ?? [];
+  const favorites = data?.favorites ?? { items: [], total: 0 };
+  const saved_items = data?.saved_items ?? [];
 
-  const { customer, carts, orders, reviews, return_requests, promo_redemptions } = data;
+  const tab_counts = useMemo(() => {
+    if (!data) return { orders: 0, carts: 0, reviews: 0, returns: 0, promos: 0, wishlists: 0, saved: 0, favorites: 0 };
+    return {
+      orders: data.orders.length,
+      carts: data.carts.length,
+      reviews: data.reviews.length,
+      returns: data.return_requests.length,
+      promos: data.promo_redemptions.length,
+      wishlists: data.wishlists.length,
+      saved: data.saved_items.length,
+      favorites: data.favorites.items?.length ?? 0,
+    };
+  }, [data]);
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<div className="space-y-4"><Skeleton className="h-8 w-64" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => (<Skeleton key={i} className="h-[88px] rounded-lg" />))}</div></div>}>
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-4">
-          <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
-            <User className="h-7 w-7" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold">{customer.name ?? t("client_fallback")}</h1>
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Mail className="h-3.5 w-3.5" />
-              {customer.email}
-            </div>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-64" />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-[88px] rounded-lg" />
+            ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant={
-              customer.segment === "vip"
-                ? "default"
+      }
+    >
+      {customer && (
+        <ConsolePageShell
+          back_href="/console/customers"
+          title={customer.name ?? t("client_fallback")}
+          subtitle={customer.email}
+          actions={
+            <Badge
+              variant={
+                customer.segment === "vip"
+                  ? "default"
+                  : customer.segment === "repeat"
+                    ? "secondary"
+                    : "outline"
+              }
+              className="text-sm"
+            >
+              {customer.segment === "vip"
+                ? t("vip")
                 : customer.segment === "repeat"
-                  ? "secondary"
-                  : "outline"
-            }
-            className="text-sm"
-          >
-            {customer.segment === "vip"
-              ? t("vip")
-              : customer.segment === "repeat"
-                ? t("repeat")
-                : t("new")}
-          </Badge>
-        </div>
-      </div>
+                  ? t("repeat")
+                  : t("new")}
+            </Badge>
+          }
+          stats={
+            <>
+              <StatsGrid
+                items={
+                  [
+                    {
+                      label: t("total_orders"),
+                      value: customer.total_orders,
+                      icon: ShoppingCart,
+                    },
+                    {
+                      label: t("total_spent"),
+                      value: `${Number(customer.total_spent).toLocaleString("fr-FR")} DZD`,
+                      icon: CreditCard,
+                    },
+                    {
+                      label: t("avg_order_value"),
+                      value: `${Number(customer.average_order_value).toLocaleString("fr-FR")} DZD`,
+                      icon: TrendingUp,
+                    },
+                    {
+                      label: t("lifetime_value"),
+                      value: `${Number(customer.lifetime_value).toLocaleString("fr-FR")} DZD`,
+                      icon: Package,
+                    },
+                  ] satisfies StatItem[]
+                }
+              />
+              <div className="text-muted-foreground flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {t("registered_on")} {formatDate(customer.created_at)}
+                </div>
+                {customer.last_order_at && (
+                  <div className="flex items-center gap-1.5">
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                    {t("last_order_on")} {formatDate(customer.last_order_at)}
+                  </div>
+                )}
+              </div>
+            </>
+          }
+        >
+          <Tabs value={active_tab} onValueChange={on_tab_change}>
+            <TabsList className="flex flex-wrap">
+              <TabsTrigger value="orders" className="gap-2">
+                <Package className="h-4 w-4" />
+                {t("orders_tab")} ({tab_counts.orders})
+              </TabsTrigger>
+              <TabsTrigger value="carts" className="gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                {t("carts_tab")} ({tab_counts.carts})
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="gap-2">
+                <Star className="h-4 w-4" />
+                {t("reviews_tab")} ({tab_counts.reviews})
+              </TabsTrigger>
+              <TabsTrigger value="returns" className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                {t("returns_tab")} ({tab_counts.returns})
+              </TabsTrigger>
+              <TabsTrigger value="promos" className="gap-2">
+                <Gift className="h-4 w-4" />
+                {t("promos_tab")} ({tab_counts.promos})
+              </TabsTrigger>
+              <TabsTrigger value="contacts" className="gap-2">
+                <Phone className="h-4 w-4" />
+                {t("contacts_tab")}
+              </TabsTrigger>
+              <TabsTrigger value="notes" className="gap-2">
+                <StickyNote className="h-4 w-4" />
+                {t("notes_tab")}
+              </TabsTrigger>
+              <TabsTrigger value="support" className="gap-2">
+                <HeadphonesIcon className="h-4 w-4" />
+                {t("support_tab")}
+              </TabsTrigger>
+              <TabsTrigger value="followups" className="gap-2">
+                <Bell className="h-4 w-4" />
+                {t("followups_tab")}
+              </TabsTrigger>
+              <TabsTrigger value="wishlists" className="gap-2">
+                <Heart className="h-4 w-4" />
+                {t("wishlists_tab")} ({tab_counts.wishlists})
+              </TabsTrigger>
+              <TabsTrigger value="saved_items" className="gap-2">
+                <Bookmark className="h-4 w-4" />
+                {t("saved_tab")} ({tab_counts.saved})
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="gap-2">
+                <Heart className="h-4 w-4 fill-red-500" />
+                {t("favorites_tab")} ({tab_counts.favorites})
+              </TabsTrigger>
+            </TabsList>
 
-      <StatsGrid
-        items={
-          [
-            {
-              label: t("total_orders"),
-              value: customer.total_orders,
-              icon: ShoppingCart,
-            },
-            {
-              label: t("total_spent"),
-              value: `${Number(customer.total_spent).toLocaleString("fr-FR")} DZD`,
-              icon: CreditCard,
-            },
-            {
-              label: t("avg_order_value"),
-              value: `${Number(customer.average_order_value).toLocaleString("fr-FR")} DZD`,
-              icon: TrendingUp,
-            },
-            {
-              label: t("lifetime_value"),
-              value: `${Number(customer.lifetime_value).toLocaleString("fr-FR")} DZD`,
-              icon: Package,
-            },
-          ] satisfies StatItem[]
-        }
-      />
+            <Separator className="my-4" />
 
-      <div className="text-muted-foreground flex items-center gap-4 text-sm">
-        <div className="flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5" />
-          {t("registered_on")} {formatDate(customer.created_at)}
-        </div>
-        {customer.last_order_at && (
-          <div className="flex items-center gap-1.5">
-            <ShoppingCart className="h-3.5 w-3.5" />
-            {t("last_order_on")} {formatDate(customer.last_order_at)}
-          </div>
-        )}
-      </div>
+            <TabsContent value="orders" className="space-y-3">
+              {orders.length === 0 ? (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+                  <Package className="mb-2 h-10 w-10" />
+                  <p>{t("no_orders")}</p>
+                </div>
+              ) : (
+                orders.map((order) => <OrderCard key={order.id} order={order} />)
+              )}
+            </TabsContent>
 
-      <Tabs defaultValue="orders" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="orders" className="gap-2">
-            <Package className="h-4 w-4" />
-            {t("orders_tab")} ({orders.length})
-          </TabsTrigger>
-          <TabsTrigger value="carts" className="gap-2">
-            <ShoppingCart className="h-4 w-4" />
-            {t("carts_tab")} ({carts.length})
-          </TabsTrigger>
-          <TabsTrigger value="reviews" className="gap-2">
-            <Star className="h-4 w-4" />
-            {t("reviews_tab")} ({reviews.length})
-          </TabsTrigger>
-          <TabsTrigger value="returns" className="gap-2">
-            <RotateCcw className="h-4 w-4" />
-            {t("returns_tab")} ({return_requests.length})
-          </TabsTrigger>
-          <TabsTrigger value="promos" className="gap-2">
-            <Gift className="h-4 w-4" />
-            {t("promos_tab")} ({promo_redemptions.length})
-          </TabsTrigger>
-          <TabsTrigger value="contacts" className="gap-2">
-            <Phone className="h-4 w-4" />
-            {t("contacts_tab")}
-          </TabsTrigger>
-          <TabsTrigger value="notes" className="gap-2">
-            <StickyNote className="h-4 w-4" />
-            {t("notes_tab")}
-          </TabsTrigger>
-          <TabsTrigger value="support" className="gap-2">
-            <HeadphonesIcon className="h-4 w-4" />
-            {t("support_tab")}
-          </TabsTrigger>
-          <TabsTrigger value="followups" className="gap-2">
-            <Bell className="h-4 w-4" />
-            {t("followups_tab")}
-          </TabsTrigger>
-        </TabsList>
+            <TabsContent value="carts" className="space-y-3">
+              {carts.length === 0 ? (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+                  <ShoppingCart className="mb-2 h-10 w-10" />
+                  <p>{t("no_carts")}</p>
+                </div>
+              ) : (
+                carts.map((cart) => <CartCard key={cart.id} cart={cart} />)
+              )}
+            </TabsContent>
 
-        <TabsContent value="orders" className="space-y-3">
-          {orders.length === 0 ? (
-            <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-              <Package className="mb-2 h-10 w-10" />
-              <p>{t("no_orders")}</p>
-            </div>
-          ) : (
-            orders.map((order) => <OrderCard key={order.id} order={order} />)
-          )}
-        </TabsContent>
+            <TabsContent value="reviews" className="space-y-3">
+              {reviews.length === 0 ? (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+                  <MessageSquare className="mb-2 h-10 w-10" />
+                  <p>{t("no_reviews")}</p>
+                </div>
+              ) : (
+                reviews.map((review) => (
+                  <ReviewCard
+                    key={review.id as string}
+                    review={review as unknown as Record<string, unknown>}
+                  />
+                ))
+              )}
+            </TabsContent>
 
-        <TabsContent value="carts" className="space-y-3">
-          {carts.length === 0 ? (
-            <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-              <ShoppingCart className="mb-2 h-10 w-10" />
-              <p>{t("no_carts")}</p>
-            </div>
-          ) : (
-            carts.map((cart) => <CartCard key={cart.id} cart={cart} />)
-          )}
-        </TabsContent>
+            <TabsContent value="returns" className="space-y-3">
+              {return_requests.length === 0 ? (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+                  <RotateCcw className="mb-2 h-10 w-10" />
+                  <p>{t("no_return_requests")}</p>
+                </div>
+              ) : (
+                return_requests.map((req) => (
+                  <ReturnRequestCard
+                    key={req.id as string}
+                    request={req as unknown as Record<string, unknown>}
+                  />
+                ))
+              )}
+            </TabsContent>
 
-        <TabsContent value="reviews" className="space-y-3">
-          {reviews.length === 0 ? (
-            <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-              <MessageSquare className="mb-2 h-10 w-10" />
-              <p>{t("no_reviews")}</p>
-            </div>
-          ) : (
-            reviews.map((review) => <ReviewCard key={review.id as string} review={review as unknown as Record<string, unknown>} />)
-          )}
-        </TabsContent>
+            <TabsContent value="promos" className="space-y-3">
+              {promo_redemptions.length === 0 ? (
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+                  <Gift className="mb-2 h-10 w-10" />
+                  <p>{t("no_promotions_used")}</p>
+                </div>
+              ) : (
+                promo_redemptions.map((red) => (
+                  <PromoRedemptionCard
+                    key={red.id as string}
+                    redemption={red as unknown as Record<string, unknown>}
+                  />
+                ))
+              )}
+            </TabsContent>
 
-        <TabsContent value="returns" className="space-y-3">
-          {return_requests.length === 0 ? (
-            <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-              <RotateCcw className="mb-2 h-10 w-10" />
-              <p>{t("no_return_requests")}</p>
-            </div>
-          ) : (
-            return_requests.map((req) => (
-              <ReturnRequestCard key={req.id as string} request={req as unknown as Record<string, unknown>} />
-            ))
-          )}
-        </TabsContent>
+            <TabsContent value="contacts">
+              <CustomerContactsTab user_id={user_id} />
+            </TabsContent>
 
-        <TabsContent value="promos" className="space-y-3">
-          {promo_redemptions.length === 0 ? (
-            <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-              <Gift className="mb-2 h-10 w-10" />
-              <p>{t("no_promotions_used")}</p>
-            </div>
-          ) : (
-            promo_redemptions.map((red) => (
-              <PromoRedemptionCard key={red.id as string} redemption={red as unknown as Record<string, unknown>} />
-            ))
-          )}
-        </TabsContent>
+            <TabsContent value="notes">
+              <CustomerNotesTab user_id={user_id} />
+            </TabsContent>
 
-        <TabsContent value="contacts">
-          <CustomerContactsTab user_id={user_id} />
-        </TabsContent>
+            <TabsContent value="support">
+              <CustomerSupportTab user_id={user_id} />
+            </TabsContent>
 
-        <TabsContent value="notes">
-          <CustomerNotesTab user_id={user_id} />
-        </TabsContent>
+            <TabsContent value="followups">
+              <CustomerFollowupsTab user_id={user_id} />
+            </TabsContent>
 
-        <TabsContent value="support">
-          <CustomerSupportTab user_id={user_id} />
-        </TabsContent>
+            <TabsContent value="wishlists" className="space-y-3">
+              <CustomerWishlistsTab wishlists={wishlists} />
+            </TabsContent>
 
-        <TabsContent value="followups">
-          <CustomerFollowupsTab user_id={user_id} />
-        </TabsContent>
-      </Tabs>
-    </div>
+            <TabsContent value="saved_items" className="space-y-3">
+              <CustomerSavedItemsTab saved_items={saved_items} />
+            </TabsContent>
+
+            <TabsContent value="favorites" className="space-y-3">
+              <CustomerFavoritesTab favorites={favorites} />
+            </TabsContent>
+          </Tabs>
+        </ConsolePageShell>
+      )}
     </QueryGuard>
   );
 }

@@ -25,7 +25,7 @@ export function AnalyticsDashboardClient() {
         <CardTitle>{t("overview_title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <AnalyticsKpiCards totals={data.totals} repeat={data.repeat} />
+        <AnalyticsKpiCards totals={data.totals} repeat={data.repeat} funnel={data.funnel} />
         <LineChart
           title={t("revenue_30_days")}
           description={t("revenue_description")}

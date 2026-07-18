@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { create_trpc_router } from "@/lib/trpc/router";
 import {
   admin_procedure,
   storefront_procedure,
 } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { invoice_service } from "../services/invoice.service";
+import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { INVOICE_ERROR } from "../constants/error-codes";
 import {
   query_invoices_schema,
   generate_invoice_schema,
@@ -34,16 +35,10 @@ export const invoice_router = create_trpc_router({
       const user_id = ctx.user.id;
       const invoice = await invoice_service.find_by_id(input.id);
       if (!invoice) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Facture introuvable",
-        });
+        throw_error(INVOICE_ERROR.NOT_FOUND);
       }
       if (invoice.user_id !== user_id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Vous n'avez pas l'autorisation d'accéder à cette facture",
-        });
+        throw_error(INVOICE_ERROR.FORBIDDEN);
       }
       return invoice;
     }),
@@ -58,42 +53,23 @@ export const invoice_router = create_trpc_router({
     .query(async ({ input }) => {
       const invoice = await invoice_service.find_by_id(input.id);
       if (!invoice) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Facture introuvable",
-        });
+        throw_error(INVOICE_ERROR.NOT_FOUND);
       }
       return invoice;
     }),
 
   generate_invoice: admin_procedure.input(generate_invoice_schema).mutation(async ({ input }) => {
-    try {
-      return await invoice_service.generate_order_invoice(input.order_id);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: msg || "Impossible de générer la facture de la commande",
-      });
-    }
+    return await invoice_service.generate_order_invoice(input.order_id);
   }),
 
   generate_refund_invoice: admin_procedure
     .input(refund_invoice_schema)
     .mutation(async ({ input }) => {
-      try {
-        return await invoice_service.generate_refund_invoice({
-          order_id: input.order_id,
-          refund_items: input.refund_items,
-          notes: input.notes,
-        });
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: msg || "Impossible de générer la facture de remboursement",
-        });
-      }
+      return await invoice_service.generate_refund_invoice({
+        order_id: input.order_id,
+        refund_items: input.refund_items,
+        notes: input.notes,
+      });
     }),
 
   generate_credit_note: admin_procedure
@@ -105,47 +81,23 @@ export const invoice_router = create_trpc_router({
       }),
     )
     .mutation(async ({ input }) => {
-      try {
-        return await invoice_service.generate_credit_note({
-          order_id: input.order_id,
-          amount: input.amount,
-          notes: input.notes,
-        });
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: msg || "Impossible de générer la note de crédit",
-        });
-      }
+      return await invoice_service.generate_credit_note({
+        order_id: input.order_id,
+        amount: input.amount,
+        notes: input.notes,
+      });
     }),
 
   void_invoice: admin_procedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ input }) => {
-      try {
-        return await invoice_service.void_invoice(input.id);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: msg || "Impossible d'annuler la facture",
-        });
-      }
+      return await invoice_service.void_invoice(input.id);
     }),
 
   mark_as_paid: admin_procedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ input }) => {
-      try {
-        return await invoice_service.mark_as_paid(input.id);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: msg || "Impossible de marquer la facture comme payée",
-        });
-      }
+      return await invoice_service.mark_as_paid(input.id);
     }),
 
   list_by_order: admin_procedure

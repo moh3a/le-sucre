@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
-import { admin_procedure, permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
+import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { ip_blacklist_service } from "@/features/ip_blacklist/services/blacklist.service";
 import { BLACKLIST_PERMISSIONS } from "@/features/ip_blacklist/constants";
 import {
@@ -11,6 +10,10 @@ import {
 } from "@/features/ip_blacklist/validators/blacklist.validator";
 
 export const blacklist_router = create_trpc_router({
+  stats: permission_procedure(BLACKLIST_PERMISSIONS.view).query(async () => {
+    return ip_blacklist_service.stats();
+  }),
+
   list: permission_procedure(BLACKLIST_PERMISSIONS.view).input(list_blacklist_schema).query(async ({ input }) => {
     return ip_blacklist_service.list(input);
   }),

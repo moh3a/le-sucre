@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORLA — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       ORLA DESIGN SYSTEM — CSS TOKENS
+       shadcn/ui radix-maia · Tailwind v4
+       ======================================== */
+
+    /* --- Light Theme (Default) --- */
+    :root {
+      /* Background & Foreground */
+      --background: oklch(0.985 0.008 80);
+      --foreground: oklch(0.22 0.025 80);
+
+      /* Card & Popover */
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.22 0.025 80);
+      --popover: oklch(1 0 0);
+      --popover-foreground: oklch(0.22 0.025 80);
+
+      /* Primary — Lemon Lime */
+      --primary: oklch(0.852 0.199 91.936);
+      --primary-foreground: oklch(0.25 0.045 80);
+
+      /* Secondary — Lemon Chiffon */
+      --secondary: oklch(0.97 0.035 95);
+      --secondary-foreground: oklch(0.30 0.04 85);
+
+      /* Muted */
+      --muted: oklch(0.955 0.012 85);
+      --muted-foreground: oklch(0.50 0.025 80);
+
+      /* Accent — Crimson Violet */
+      --accent: oklch(0.35 0.20 350);
+      --accent-foreground: oklch(0.97 0.01 350);
+
+      /* Destructive */
+      --destructive: oklch(0.577 0.245 27.325);
+      --destructive-foreground: oklch(0.985 0 0);
+
+      /* Semantic */
+      --success: oklch(0.65 0.17 145);
+      --success-foreground: oklch(0.985 0 0);
+      --warning: oklch(0.82 0.16 80);
+      --warning-foreground: oklch(0.25 0.04 80);
+      --info: oklch(0.60 0.12 240);
+      --info-foreground: oklch(0.985 0 0);
+
+      /* Borders & Ring */
+      --border: oklch(0.90 0.015 85);
+      --input: oklch(0.90 0.015 85);
+      --ring: oklch(0.852 0.199 91.936);
+
+      /* Charts */
+      --chart-1: oklch(0.90 0.18 98);
+      --chart-2: oklch(0.80 0.18 86);
+      --chart-3: oklch(0.68 0.16 76);
+      --chart-4: oklch(0.55 0.14 66);
+      --chart-5: oklch(0.48 0.11 62);
+
+      /* Brand Extras */
+      --crimson-violet: #700145;
+      --cream: #fff3e3;
+      --chiffon: #f9f7be;
+      --olive: #4d4c20;
+      --lemon-lime: #c8d152;
+
+      /* Radius */
+      --radius: 0.625rem;
+      --radius-sm: calc(var(--radius) * 0.6);
+      --radius-md: calc(var(--radius) * 0.8);
+      --radius-lg: var(--radius);
+      --radius-xl: calc(var(--radius) * 1.4);
+      --radius-2xl: calc(var(--radius) * 1.8);
+      --radius-full: 9999px;
+
+      /* Shadows */
+      --shadow-xs: 0 1px 2px oklch(0.22 0.025 80 / 0.05);
+      --shadow-sm: 0 1px 3px oklch(0.22 0.025 80 / 0.08), 0 1px 2px oklch(0.22 0.025 80 / 0.04);
+      --shadow-md: 0 4px 6px oklch(0.22 0.025 80 / 0.06), 0 2px 4px oklch(0.22 0.025 80 / 0.04);
+      --shadow-lg: 0 10px 15px oklch(0.22 0.025 80 / 0.06), 0 4px 6px oklch(0.22 0.025 80 / 0.03);
+      --shadow-xl: 0 20px 25px oklch(0.22 0.025 80 / 0.08), 0 8px 10px oklch(0.22 0.025 80 / 0.03);
+
+      /* Sidebar */
+      --sidebar: oklch(0.975 0.008 85);
+      --sidebar-foreground: oklch(0.22 0.025 80);
+      --sidebar-primary: oklch(0.852 0.199 91.936);
+      --sidebar-primary-foreground: oklch(0.25 0.045 80);
+      --sidebar-accent: oklch(0.955 0.012 85);
+      --sidebar-accent-foreground: oklch(0.22 0.025 80);
+      --sidebar-border: oklch(0.90 0.015 85);
+    }
+
+    /* --- Dark Theme --- */
+    .dark {
+      --background: oklch(0.18 0.015 80);
+      --foreground: oklch(0.955 0.012 85);
+
+      --card: oklch(0.22 0.02 80);
+      --card-foreground: oklch(0.955 0.012 85);
+      --popover: oklch(0.22 0.02 80);
+      --popover-foreground: oklch(0.955 0.012 85);
+
+      --primary: oklch(0.87 0.19 92);
+      --primary-foreground: oklch(0.20 0.03 80);
+
+      --secondary: oklch(0.28 0.025 85);
+      --secondary-foreground: oklch(0.92 0.02 90);
+
+      --muted: oklch(0.26 0.02 80);
+      --muted-foreground: oklch(0.65 0.02 85);
+
+      --accent: oklch(0.42 0.19 350);
+      --accent-foreground: oklch(0.97 0.01 350);
+
+      --destructive: oklch(0.65 0.22 25);
+      --destructive-foreground: oklch(0.15 0 0);
+
+      --success: oklch(0.72 0.17 145);
+      --success-foreground: oklch(0.15 0 0);
+      --warning: oklch(0.85 0.16 80);
+      --warning-foreground: oklch(0.20 0.03 80);
+      --info: oklch(0.65 0.12 240);
+      --info-foreground: oklch(0.15 0 0);
+
+      --border: oklch(1 0 0 / 12%);
+      --input: oklch(1 0 0 / 15%);
+      --ring: oklch(0.87 0.19 92);
+
+      --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.2);
+      --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.25), 0 1px 2px oklch(0 0 0 / 0.15);
+      --shadow-md: 0 4px 6px oklch(0 0 0 / 0.2), 0 2px 4px oklch(0 0 0 / 0.12);
+      --shadow-lg: 0 10px 15px oklch(0 0 0 / 0.2), 0 4px 6px oklch(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px oklch(0 0 0 / 0.25), 0 8px 10px oklch(0 0 0 / 0.1);
+
+      --sidebar: oklch(0.20 0.02 80);
+      --sidebar-foreground: oklch(0.955 0.012 85);
+      --sidebar-primary: oklch(0.87 0.19 92);
+      --sidebar-primary-foreground: oklch(0.20 0.03 80);
+      --sidebar-accent: oklch(0.26 0.02 80);
+      --sidebar-accent-foreground: oklch(0.955 0.012 85);
+      --sidebar-border: oklch(1 0 0 / 10%);
+    }
+
+    /* ========================================
+       BASE RESET & TYPOGRAPHY
+       ======================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--foreground);
+      background: var(--background);
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body { padding: 0; min-height: 100vh; }
+
+    ::selection { background: var(--primary); color: var(--primary-foreground); }
+
+    /* ========================================
+       LAYOUT
+       ======================================== */
+    .ds-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 32px 96px;
+    }
+
+    .ds-section {
+      margin-bottom: 64px;
+    }
+
+    .ds-section-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .ds-section-title {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(1.44rem, 2.5vw, 2rem);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: var(--foreground);
+      margin-bottom: 32px;
+    }
+
+    .ds-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ========================================
+       HEADER
+       ======================================== */
+    .ds-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 64px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ds-logo {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(2.4rem, 4vw, 3.5rem);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      color: var(--foreground);
+    }
+
+    .ds-logo span {
+      color: var(--accent);
+    }
+
+    .ds-subtitle {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--muted-foreground);
+      margin-top: 8px;
+      letter-spacing: 0.01em;
+    }
+
+    .ds-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ========================================
+       THEME TOGGLE
+       ======================================== */
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--card);
+      color: var(--foreground);
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .theme-toggle:hover {
+      background: var(--secondary);
+      border-color: var(--muted-foreground);
+    }
+
+    .theme-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       COLOR PALETTE
+       ======================================== */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .color-swatch {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .color-swatch-fill {
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px 14px;
+    }
+
+    .color-swatch-fill span {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      backdrop-filter: blur(8px);
+    }
+
+    .color-swatch-info {
+      padding: 12px 14px;
+    }
+
+    .color-swatch-name {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 2px;
+    }
+
+    .color-swatch-token {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 400;
+      color: var(--muted-foreground);
+    }
+
+    .color-swatch-hex {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      margin-top: 4px;
+    }
+
+    /* ========================================
+       TYPOGRAPHY SHOWCASE
+       ======================================== */
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .type-row:last-child { border-bottom: none; }
+
+    .type-meta {
+      flex-shrink: 0;
+      width: 220px;
+    }
+
+    .type-role {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    .type-spec {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 400;
+      color: var(--muted-foreground);
+      margin-top: 2px;
+    }
+
+    .type-sample {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .type-display {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(2.4rem, 4vw, 3.5rem);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      color: var(--foreground);
+    }
+
+    .type-h1 {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--foreground);
+    }
+
+    .type-h2 {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(1.44rem, 2.5vw, 2rem);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: var(--foreground);
+    }
+
+    .type-h3 {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(1.15rem, 2vw, 1.6rem);
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--foreground);
+    }
+
+    .type-h4 {
+      font-family: "Montserrat", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--foreground);
+    }
+
+    .type-h5 {
+      font-family: "Montserrat", sans-serif;
+      font-size: 1.125rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--foreground);
+    }
+
+    .type-body-lg {
+      font-family: "Montserrat", sans-serif;
+      font-size: 1.125rem;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--foreground);
+    }
+
+    .type-body {
+      font-family: "Montserrat", sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--foreground);
+    }
+
+    .type-body-sm {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      color: var(--foreground);
+    }
+
+    .type-caption {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      color: var(--muted-foreground);
+    }
+
+    .type-overline {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      line-height: 1.5;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--foreground);
+    }
+
+    /* ========================================
+       BUTTONS
+       ======================================== */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn-row-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      width: 100%;
+      margin-bottom: -4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: "Montserrat", sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.01em;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 2px;
+    }
+
+    .btn-sm { height: 32px; padding: 0 12px; border-radius: var(--radius-sm); font-size: 0.8125rem; }
+    .btn-md { height: 36px; padding: 0 16px; border-radius: var(--radius-md); }
+    .btn-lg { height: 40px; padding: 0 24px; border-radius: var(--radius-md); font-size: 0.9375rem; }
+    .btn-xl { height: 48px; padding: 0 32px; border-radius: var(--radius-lg); font-size: 1rem; }
+
+    .btn-default { background: var(--primary); color: var(--primary-foreground); }
+    .btn-default:hover { background: oklch(0.80 0.199 91.936); }
+
+    .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .btn-secondary:hover { background: oklch(0.94 0.035 95); }
+
+    .btn-outline { background: transparent; color: var(--foreground); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--secondary); }
+
+    .btn-ghost { background: transparent; color: var(--foreground); }
+    .btn-ghost:hover { background: var(--secondary); }
+
+    .btn-accent { background: var(--accent); color: var(--accent-foreground); }
+    .btn-accent:hover { background: oklch(0.30 0.20 350); }
+
+    .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+    .btn-destructive:hover { opacity: 0.9; }
+
+    .btn-link { background: transparent; color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+    .btn-link:hover { opacity: 0.8; }
+
+    .btn:disabled, .btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ========================================
+       CARDS
+       ======================================== */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.15s;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--foreground);
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--muted-foreground);
+    }
+
+    .card-stat {
+      font-family: "Orla Serif", Georgia, serif;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--foreground);
+      margin-top: 12px;
+    }
+
+    .card-stat-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      margin-top: 4px;
+    }
+
+    /* ========================================
+       BADGES
+       ======================================== */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .badge-default { background: var(--primary); color: var(--primary-foreground); }
+    .badge-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .badge-accent { background: var(--accent); color: var(--accent-foreground); }
+    .badge-outline { background: transparent; color: var(--foreground); border: 1px solid var(--border); }
+    .badge-success { background: var(--success); color: var(--success-foreground); }
+    .badge-warning { background: var(--warning); color: var(--warning-foreground); }
+    .badge-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+
+    /* ========================================
+       FORM INPUTS
+       ======================================== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--foreground);
+    }
+
+    .form-hint {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted-foreground);
+    }
+
+    .form-input {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--input);
+      border-radius: var(--radius-md);
+      background: var(--background);
+      color: var(--foreground);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-input::placeholder { color: var(--muted-foreground); }
+
+    .form-input:focus {
+      border-color: var(--ring);
+      box-shadow: 0 0 0 2px oklch(0.852 0.199 91.936 / 0.2);
+    }
+
+    .form-input-lg {
+      height: 40px;
+      font-size: 0.9375rem;
+    }
+
+    .form-textarea {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 8px 12px;
+      border: 1px solid var(--input);
+      border-radius: var(--radius-md);
+      background: var(--background);
+      color: var(--foreground);
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-textarea:focus {
+      border-color: var(--ring);
+      box-shadow: 0 0 0 2px oklch(0.852 0.199 91.936 / 0.2);
+    }
+
+    .form-select {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      height: 36px;
+      padding: 0 32px 0 12px;
+      border: 1px solid var(--input);
+      border-radius: var(--radius-md);
+      background: var(--background);
+      color: var(--foreground);
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8460' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .form-select:focus {
+      border-color: var(--ring);
+      box-shadow: 0 0 0 2px oklch(0.852 0.199 91.936 / 0.2);
+    }
+
+    /* Checkbox / Switch */
+    .form-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .form-check-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--input);
+      border-radius: var(--radius-sm);
+      background: var(--background);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .form-check-box.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .form-check-box.checked svg {
+      display: block;
+    }
+
+    .form-check-box svg {
+      display: none;
+      width: 12px;
+      height: 12px;
+      color: var(--primary-foreground);
+    }
+
+    .form-check-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--foreground);
+    }
+
+    .switch {
+      width: 40px;
+      height: 22px;
+      border-radius: var(--radius-full);
+      background: var(--input);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s;
+    }
+
+    .switch.active {
+      background: var(--primary);
+    }
+
+    .switch.active::after {
+      transform: translateX(18px);
+    }
+
+    /* ========================================
+       SPACING SCALE
+       ======================================== */
+    .spacing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .spacing-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      width: 80px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .spacing-bar {
+      height: 24px;
+      background: var(--primary);
+      border-radius: var(--radius-sm);
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+
+    .spacing-bar:hover { opacity: 1; }
+
+    .spacing-value {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      flex-shrink: 0;
+    }
+
+    /* ========================================
+       RADIUS SCALE
+       ======================================== */
+    .radius-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .radius-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .radius-box {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+
+    .radius-box:hover { opacity: 1; }
+
+    .radius-label {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+    }
+
+    /* ========================================
+       CHART PALETTE
+       ======================================== */
+    .chart-colors {
+      display: flex;
+      gap: 8px;
+      height: 48px;
+    }
+
+    .chart-color-bar {
+      flex: 1;
+      border-radius: var(--radius-sm);
+      transition: opacity 0.15s;
+    }
+
+    .chart-color-bar:hover { opacity: 0.8; }
+
+    /* ========================================
+       TABLE PREVIEW
+       ======================================== */
+    .ds-table-wrapper {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .ds-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.875rem;
+    }
+
+    .ds-table th {
+      text-align: left;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.02em;
+      color: var(--muted-foreground);
+      background: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ds-table td {
+      padding: 10px 16px;
+      color: var(--foreground);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ds-table tr:last-child td { border-bottom: none; }
+
+    .ds-table tr:hover td { background: var(--muted); }
+
+    /* ========================================
+       ELEVATION
+       ======================================== */
+    .elevation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+    }
+
+    .elevation-box {
+      height: 80px;
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted-foreground);
+    }
+
+    .elevation-flat { box-shadow: none; border: 1px solid var(--border); }
+    .elevation-xs { box-shadow: var(--shadow-xs); }
+    .elevation-sm { box-shadow: var(--shadow-sm); }
+    .elevation-md { box-shadow: var(--shadow-md); }
+    .elevation-lg { box-shadow: var(--shadow-lg); }
+    .elevation-xl { box-shadow: var(--shadow-xl); }
+
+    /* ========================================
+       RESPONSIVE
+       ======================================== */
+    @media (max-width: 768px) {
+      .ds-container { padding: 32px 16px 64px; }
+      .ds-header { flex-direction: column; gap: 16px; }
+      .type-meta { width: 140px; }
+      .color-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .card-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ds-container" data-od-id="design-system">
+
+    <!-- HEADER -->
+    <header class="ds-header" data-od-id="ds-header">
+      <div>
+        <div class="ds-logo">ORLA <span>Design System</span></div>
+        <div class="ds-subtitle">Ecommerce platform tokens &middot; Storefront + Admin Dashboard</div>
+      </div>
+      <div class="ds-header-actions">
+        <button class="theme-toggle" id="theme-toggle" data-od-id="theme-toggle" aria-label="Toggle theme">
+          <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <span id="theme-label">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============================
+         SECTION: COLOR PALETTE
+         ============================ -->
+    <section class="ds-section" data-od-id="section-colors">
+      <div class="ds-section-label">01 &mdash; Color</div>
+      <h2 class="ds-section-title">Palette</h2>
+
+      <h3 style="font-family:'Montserrat',sans-serif;font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:12px;">Brand Colors</h3>
+      <div class="color-grid" style="margin-bottom:32px;">
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:#c8d152;"><span style="background:oklch(0.25 0.045 80);color:#c8d152;">PRIMARY</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Lemon Lime</div>
+            <div class="color-swatch-token">--primary</div>
+            <div class="color-swatch-hex">#c8d152 &middot; oklch(0.852 0.199 91.9)</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:#f9f7be;"><span style="background:oklch(0.30 0.04 85);color:#f9f7be;">SECONDARY</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Lemon Chiffon</div>
+            <div class="color-swatch-token">--secondary</div>
+            <div class="color-swatch-hex">#f9f7be &middot; oklch(0.97 0.035 95)</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:#4d4c20;"><span style="background:rgba(255,255,255,0.9);color:#4d4c20;">OLIVE</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Olive Leaf</div>
+            <div class="color-swatch-token">--olive</div>
+            <div class="color-swatch-hex">#4d4c20 &middot; oklch(0.32 0.045 85)</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:#fff3e3;border-bottom:1px solid var(--border);"><span style="background:oklch(0.35 0.20 350);color:#fff3e3;">CREAM</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Cream</div>
+            <div class="color-swatch-token">--cream</div>
+            <div class="color-swatch-hex">#fff3e3 &middot; oklch(0.97 0.015 75)</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:#700145;"><span style="background:rgba(255,255,255,0.9);color:#700145;">ACCENT</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Crimson Violet</div>
+            <div class="color-swatch-token">--accent</div>
+            <div class="color-swatch-hex">#700145 &middot; oklch(0.35 0.20 350)</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Montserrat',sans-serif;font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:12px;">Semantic Tokens</h3>
+      <div class="color-grid" style="margin-bottom:32px;">
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--background);border-bottom:1px solid var(--border);"><span style="background:var(--foreground);color:var(--background);">BG</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Background</div>
+            <div class="color-swatch-token">--background</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--card);border-bottom:1px solid var(--border);"><span style="background:var(--card-foreground);color:var(--card);">CARD</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Card</div>
+            <div class="color-swatch-token">--card</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--muted);"><span style="background:var(--muted-foreground);color:var(--muted);">MUTED</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Muted</div>
+            <div class="color-swatch-token">--muted</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--success);"><span style="background:var(--success-foreground);color:var(--success);">SUCCESS</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Success</div>
+            <div class="color-swatch-token">--success</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--warning);"><span style="background:var(--warning-foreground);color:var(--warning);">WARNING</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Warning</div>
+            <div class="color-swatch-token">--warning</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--info);"><span style="background:var(--info-foreground);color:var(--info);">INFO</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Info</div>
+            <div class="color-swatch-token">--info</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch-fill" style="background:var(--destructive);"><span style="background:var(--destructive-foreground);color:var(--destructive);">ERROR</span></div>
+          <div class="color-swatch-info">
+            <div class="color-swatch-name">Destructive</div>
+            <div class="color-swatch-token">--destructive</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Montserrat',sans-serif;font-size:0.8125rem;font-weight:600;color:var(--muted-foreground);margin-bottom:12px;">Chart Palette</h3>
+      <div class="chart-colors">
+        <div class="chart-color-bar" style="background:var(--chart-1);" title="Chart 1"></div>
+        <div class="chart-color-bar" style="background:var(--chart-2);" title="Chart 2"></div>
+        <div class="chart-color-bar" style="background:var(--chart-3);" title="Chart 3"></div>
+        <div class="chart-color-bar" style="background:var(--chart-4);" title="Chart 4"></div>
+        <div class="chart-color-bar" style="background:var(--chart-5);" title="Chart 5"></div>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: TYPOGRAPHY
+         ============================ -->
+    <section class="ds-section" data-od-id="section-typography">
+      <div class="ds-section-label">02 &mdash; Typography</div>
+      <h2 class="ds-section-title">Type Scale</h2>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Display</div>
+          <div class="type-spec">Orla Serif 400 &middot; 38–56px &middot; -0.025em</div>
+        </div>
+        <div class="type-sample type-display">Pâtisserie Algérienne</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Heading 1</div>
+          <div class="type-spec">Orla Serif 400 &middot; 29–40px &middot; -0.02em</div>
+        </div>
+        <div class="type-sample type-h1">Outils de Boulangerie</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Heading 2</div>
+          <div class="type-spec">Orla Serif 400 &middot; 23–32px &middot; -0.015em</div>
+        </div>
+        <div class="type-sample type-h2">Ingrédients &amp; Packaging</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Heading 3</div>
+          <div class="type-spec">Orla Serif 400 &middot; 18–26px &middot; -0.01em</div>
+        </div>
+        <div class="type-sample type-h3">Catégories Populaires</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Heading 4</div>
+          <div class="type-spec">Montserrat 600 &middot; 20px</div>
+        </div>
+        <div class="type-sample type-h4">Gâteaux &amp; Tartes</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Heading 5</div>
+          <div class="type-spec">Montserrat 600 &middot; 18px</div>
+        </div>
+        <div class="type-sample type-h5">Produits Vedettes</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Body Large</div>
+          <div class="type-spec">Montserrat 400 &middot; 18px &middot; 1.6</div>
+        </div>
+        <div class="type-sample type-body-lg">Découvrez notre sélection d'outils professionnels pour la pâtisserie algérienne.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Body</div>
+          <div class="type-spec">Montserrat 400 &middot; 16px &middot; 1.6</div>
+        </div>
+        <div class="type-sample type-body">Nous proposons une large gamme d'ingrédients et d'ustensiles pour tous vos besoins en pâtisserie.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Body Small</div>
+          <div class="type-spec">Montserrat 400 &middot; 14px &middot; +0.01em</div>
+        </div>
+        <div class="type-sample type-body-sm">Livraison gratuite pour les commandes supérieure à 5000 DA</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Caption</div>
+          <div class="type-spec">Montserrat 500 &middot; 12px &middot; +0.02em</div>
+        </div>
+        <div class="type-sample type-caption">Ajouté au panier il y a 2 minutes</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-role">Overline</div>
+          <div class="type-spec">Montserrat 600 &middot; 11px &middot; +0.08em &middot; UPPERCASE</div>
+        </div>
+        <div class="type-sample type-overline">Nouveau Arrivage</div>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: BUTTONS
+         ============================ -->
+    <section class="ds-section" data-od-id="section-buttons">
+      <div class="ds-section-label">03 &mdash; Components</div>
+      <h2 class="ds-section-title">Buttons</h2>
+
+      <div class="btn-row">
+        <div class="btn-row-label">Variants</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-md btn-default">Ajouter au Panier</button>
+        <button class="btn btn-md btn-secondary">Sauvegarder</button>
+        <button class="btn btn-md btn-outline">Annuler</button>
+        <button class="btn btn-md btn-ghost">Ghost</button>
+        <button class="btn btn-md btn-accent">Commander</button>
+        <button class="btn btn-md btn-destructive">Supprimer</button>
+        <button class="btn btn-md btn-link">En savoir plus</button>
+      </div>
+
+      <div class="btn-row" style="margin-top:24px;">
+        <div class="btn-row-label">Sizes</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-default">Small</button>
+        <button class="btn btn-md btn-default">Medium</button>
+        <button class="btn btn-lg btn-default">Large</button>
+        <button class="btn btn-xl btn-default">Extra Large</button>
+      </div>
+
+      <div class="btn-row" style="margin-top:24px;">
+        <div class="btn-row-label">States</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-md btn-default">Default</button>
+        <button class="btn btn-md btn-default" disabled>Disabled</button>
+        <button class="btn btn-md btn-outline" disabled>Disabled</button>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: BADGES
+         ============================ -->
+    <section class="ds-section" data-od-id="section-badges">
+      <h2 class="ds-section-title">Badges</h2>
+
+      <div class="badge-row">
+        <span class="badge badge-default">En stock</span>
+        <span class="badge badge-secondary">Nouveau</span>
+        <span class="badge badge-accent">Promo</span>
+        <span class="badge badge-outline">Brouillon</span>
+        <span class="badge badge-success">Livré</span>
+        <span class="badge badge-warning">En attente</span>
+        <span class="badge badge-destructive">Annulé</span>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: FORMS
+         ============================ -->
+    <section class="ds-section" data-od-id="section-forms">
+      <h2 class="ds-section-title">Form Controls</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nom du produit</label>
+          <input class="form-input" type="text" placeholder="Ex: Moule à Gâteau Round">
+          <span class="form-hint">Nom tel qu'il apparaîtra sur la boutique</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie</label>
+          <select class="form-select">
+            <option>Outils de Pâtisserie</option>
+            <option>Ingrédients</option>
+            <option>Boîtes &amp; Packaging</option>
+            <option>Moules</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prix (DA)</label>
+          <input class="form-input form-input-lg" type="text" placeholder="0.00" value="2,500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" placeholder="Décrivez le produit..."></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;">
+        <label class="form-check" onclick="this.querySelector('.form-check-box').classList.toggle('checked')">
+          <div class="form-check-box checked">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="form-check-label">Actif</span>
+        </label>
+        <label class="form-check" onclick="this.querySelector('.form-check-box').classList.toggle('checked')">
+          <div class="form-check-box">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="form-check-label">Visible en boutique</span>
+        </label>
+        <button class="switch active" onclick="this.classList.toggle('active')" aria-label="Toggle"></button>
+        <span class="form-check-label">Notification email</span>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: CARDS
+         ============================ -->
+    <section class="ds-section" data-od-id="section-cards">
+      <h2 class="ds-section-title">Cards</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-label">Producteur Local</div>
+          <div class="card-title">Moule Silicone 12 Cavités</div>
+          <div class="card-desc">Moule haute qualité pour gâteaux, muffins et tartes individuelles. Résistant aux chocs thermiques.</div>
+        </div>
+        <div class="card">
+          <div class="card-label">KPI</div>
+          <div class="card-title">Chiffre d'Affaires</div>
+          <div class="card-stat">482,300 DA</div>
+          <div class="card-stat-label">+12.4% ce mois-ci</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Commande #2847</div>
+          <div class="card-title">Pending Shipment</div>
+          <div class="card-desc">3 articles &middot; Alger, 16000 &middot; Livraison Yalidine estimée 2 jours</div>
+          <div style="margin-top:12px;">
+            <span class="badge badge-warning">En attente</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: TABLE
+         ============================ -->
+    <section class="ds-section" data-od-id="section-table">
+      <h2 class="ds-section-title">Table</h2>
+
+      <div class="ds-table-wrapper">
+        <table class="ds-table">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Catégorie</th>
+              <th>Prix</th>
+              <th>Stock</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;">Moule Silicone 12 Cavités</td>
+              <td>Outils</td>
+              <td>2,500 DA</td>
+              <td>142</td>
+              <td><span class="badge badge-success">En stock</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">Farine T55 Bio 1kg</td>
+              <td>Ingrédients</td>
+              <td>380 DA</td>
+              <td>89</td>
+              <td><span class="badge badge-success">En stock</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">Boîte Kraft 20×20×10</td>
+              <td>Packaging</td>
+              <td>150 DA</td>
+              <td>12</td>
+              <td><span class="badge badge-warning">Stock bas</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">Colorant Alimentaire Set 6</td>
+              <td>Ingrédients</td>
+              <td>850 DA</td>
+              <td>0</td>
+              <td><span class="badge badge-destructive">Épuisé</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: SPACING
+         ============================ -->
+    <section class="ds-section" data-od-id="section-spacing">
+      <div class="ds-section-label">04 &mdash; Layout</div>
+      <h2 class="ds-section-title">Spacing Scale</h2>
+
+      <div class="spacing-grid">
+        <div class="spacing-row"><span class="spacing-label">0.5 (2px)</span><div class="spacing-bar" style="width:2px;"></div><span class="spacing-value">0.125rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">1 (4px)</span><div class="spacing-bar" style="width:4px;"></div><span class="spacing-value">0.25rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">2 (8px)</span><div class="spacing-bar" style="width:8px;"></div><span class="spacing-value">0.5rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">3 (12px)</span><div class="spacing-bar" style="width:12px;"></div><span class="spacing-value">0.75rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">4 (16px)</span><div class="spacing-bar" style="width:16px;"></div><span class="spacing-value">1rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">5 (20px)</span><div class="spacing-bar" style="width:20px;"></div><span class="spacing-value">1.25rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">6 (24px)</span><div class="spacing-bar" style="width:24px;"></div><span class="spacing-value">1.5rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">8 (32px)</span><div class="spacing-bar" style="width:32px;"></div><span class="spacing-value">2rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">10 (40px)</span><div class="spacing-bar" style="width:40px;"></div><span class="spacing-value">2.5rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">12 (48px)</span><div class="spacing-bar" style="width:48px;"></div><span class="spacing-value">3rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">16 (64px)</span><div class="spacing-bar" style="width:64px;"></div><span class="spacing-value">4rem</span></div>
+        <div class="spacing-row"><span class="spacing-label">20 (80px)</span><div class="spacing-bar" style="width:80px;"></div><span class="spacing-value">5rem</span></div>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: BORDER RADIUS
+         ============================ -->
+    <section class="ds-section" data-od-id="section-radius">
+      <h2 class="ds-section-title">Border Radius</h2>
+
+      <div class="radius-grid">
+        <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-sm);"></div><span class="radius-label">sm &middot; 6px</span></div>
+        <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-md);"></div><span class="radius-label">md &middot; 8px</span></div>
+        <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-lg);"></div><span class="radius-label">lg &middot; 10px</span></div>
+        <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-xl);"></div><span class="radius-label">xl &middot; 14px</span></div>
+        <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-2xl);"></div><span class="radius-label">2xl &middot; 18px</span></div>
+        <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-full);"></div><span class="radius-label">full</span></div>
+      </div>
+    </section>
+
+    <hr class="ds-divider">
+
+    <!-- ============================
+         SECTION: ELEVATION
+         ============================ -->
+    <section class="ds-section" data-od-id="section-elevation">
+      <h2 class="ds-section-title">Elevation</h2>
+
+      <div class="elevation-grid">
+        <div class="elevation-box elevation-flat">Flat</div>
+        <div class="elevation-box elevation-xs">XS</div>
+        <div class="elevation-box elevation-sm">SM</div>
+        <div class="elevation-box elevation-md">MD</div>
+        <div class="elevation-box elevation-lg">LG</div>
+        <div class="elevation-box elevation-xl">XL</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- THEME TOGGLE SCRIPT -->
+  <script>
+    (function () {
+      var toggle = document.getElementById("theme-toggle");
+      var iconSun = document.getElementById("icon-sun");
+      var iconMoon = document.getElementById("icon-moon");
+      var label = document.getElementById("theme-label");
+      var html = document.documentElement;
+
+      function setTheme(dark) {
+        if (dark) {
+          html.classList.add("dark");
+          iconSun.style.display = "none";
+          iconMoon.style.display = "block";
+          label.textContent = "Light";
+        } else {
+          html.classList.remove("dark");
+          iconSun.style.display = "block";
+          iconMoon.style.display = "none";
+          label.textContent = "Dark";
+        }
+      }
+
+      toggle.addEventListener("click", function () {
+        setTheme(!html.classList.contains("dark"));
+      });
+    })();
+  </script>
+</body>

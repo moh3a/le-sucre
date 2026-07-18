@@ -80,6 +80,37 @@ export class RoleRepository {
     const rows = await this.find_permissions_by_user_id(user_id);
     return rows.some((p) => p.name === permission);
   }
+
+  async stats(): Promise<{
+    total_roles: number;
+    total_permissions: number;
+    avg_permissions_per_role: number;
+  }> {
+    const all_roles = await db.select().from(roles);
+    const all_permissions = await db.select().from(permissions);
+    const links = await db
+      .select({
+        role_name: roles.name,
+        permission_name: permissions.name,
+      })
+      .from(role_permissions)
+      .innerJoin(roles, eq(role_permissions.role_id, roles.id))
+      .innerJoin(permissions, eq(role_permissions.permission_id, permissions.id));
+
+    const permissions_per_role = all_roles.map(
+      (role) => links.filter((l) => l.role_name === role.name).length,
+    );
+    const avg_permissions =
+      permissions_per_role.length > 0
+        ? Math.round(permissions_per_role.reduce((a, b) => a + b, 0) / permissions_per_role.length)
+        : 0;
+
+    return {
+      total_roles: all_roles.length,
+      total_permissions: all_permissions.length,
+      avg_permissions_per_role: avg_permissions,
+    };
+  }
 }
 
 export const role_repository = new RoleRepository();

@@ -1,112 +1,298 @@
 "use client";
 
-import * as React from "react";
+import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ClipboardList,
+  Package,
+  Search,
+  ShieldCheck,
+  User,
+} from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+
 import { trpc } from "@/components/providers/app-providers";
-import { Input } from "@/components/ui/input";
+import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatsGrid } from "@/components/console/stats-grid";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { useDataTable } from "@/features/data-table/use-data-table";
 
-export function AgentKPIClient() {
-  const { data: kpi } = trpc.operationsWorkflows.agentKPIDashboard.useQuery({ days: 7 });
-  const { data: operators } = trpc.operationsWorkflows.agentLeaderboard.useQuery({ role: "operator", days: 7 });
+// ─── Types ────────────────────────────────────────────────────────────────
 
-  const [userId, setUserId] = React.useState("");
-  const [searchUserId, setSearchUserId] = React.useState("");
-  const { data: agentKpi, isFetching: isAgentFetching } = trpc.operationsWorkflows.agentKPI.useQuery(
-    { user_id: searchUserId, days: 30 },
-    { enabled: searchUserId.length > 0 },
-  );
+type LeaderboardRow = {
+  user_id: string;
+  orders_processed: number;
+  cases_resolved: number;
+  tasks_completed: number;
+  sla_breaches: number;
+};
 
-  function handleSearch() {
-    setSearchUserId(userId.trim());
+type AgentKPITotals = {
+  orders_processed: number;
+  orders_assigned: number;
+  cases_resolved: number;
+  tasks_completed: number;
+  calls_made: number;
+  sla_breaches: number;
+};
+
+// ─── Search Agent Dialog ──────────────────────────────────────────────────
+
+export function SearchAgentDialog() {
+  const t = useTranslations("agent_kpi");
+  const [open, setOpen] = useState(false);
+  const [user_id, setUserId] = useState("");
+
+  function handleOpen() {
+    if (!user_id.trim()) {
+      toast.error(t("fill_required"));
+      return;
+    }
+    setOpen(true);
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold">Agent KPI & Performance</h1>
-
-      {/* Rechercher un agent */}
-      <div className="rounded-lg border p-4">
-        <h2 className="mb-3 text-sm font-semibold">Rechercher un agent</h2>
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
-            <Label htmlFor="agent-search" className="mb-1 block text-xs text-gray-500">
-              ID de l&apos;agent
-            </Label>
-            <Input
-              id="agent-search"
-              placeholder="Saisir l'ID de l'agent..."
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-            />
-          </div>
-          <Button onClick={handleSearch} disabled={!userId.trim() || isAgentFetching}>
-            Voir
-          </Button>
+    <>
+      <div className="flex items-end gap-2">
+        <div className="space-y-1">
+          <Label className="text-xs">{t("agent_id_label")}</Label>
+          <Input
+            placeholder={t("agent_id_placeholder")}
+            value={user_id}
+            onChange={(e) => setUserId(e.target.value)}
+            className="w-64"
+          />
         </div>
+        <Button onClick={handleOpen} disabled={!user_id.trim()}>
+          <Search className="mr-1 size-4" />
+          {t("search_button")}
+        </Button>
       </div>
 
-      {/* Per-user KPI */}
-      {searchUserId && agentKpi && (
-        <div className="rounded-lg border p-4">
-          <h2 className="mb-3 text-sm font-semibold">
-            KPI — {searchUserId.slice(0, 16)}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Commandes traitées" value={agentKpi.totals.orders_processed} />
-            <StatCard label="Commandes assignées" value={agentKpi.totals.orders_assigned} />
-            <StatCard label="Cas résolus" value={agentKpi.totals.cases_resolved} />
-            <StatCard label="Tâches complétées" value={agentKpi.totals.tasks_completed} />
-          </div>
-          {agentKpi.days_covered > 0 && (
-            <p className="mt-2 text-xs text-gray-400">
-              {agentKpi.days_covered} jour(s) de données · Temps de réponse moyen :{" "}
-              {Math.round(agentKpi.avg_response_time_minutes)} min
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Dashboard summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Commandes traitées (7j)" value={kpi?.total_orders_processed ?? 0} />
-        <StatCard label="Cas résolus (7j)" value={kpi?.total_cases_resolved ?? 0} />
-        <StatCard label="Tâches complétées (7j)" value={kpi?.total_tasks_completed ?? 0} />
-        <StatCard label="SLA dépassés (7j)" value={kpi?.total_sla_breaches ?? 0} />
-      </div>
-
-      {/* Leaderboard */}
-      <div className="rounded-lg border">
-        <h2 className="border-b bg-gray-50 px-4 py-2 font-semibold text-sm">Classement des agents</h2>
-        <div className="divide-y">
-          {operators?.map((op, i) => (
-            <div key={op.user_id} className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
-                <span className={`w-6 text-center text-sm font-bold ${i === 0 ? "text-yellow-500" : i === 1 ? "text-gray-400" : i === 2 ? "text-orange-500" : "text-gray-300"}`}>
-                  #{i + 1}
-                </span>
-                <span className="text-sm font-medium">{op.user_id.slice(0, 12)}</span>
-              </div>
-              <div className="flex gap-4 text-xs">
-                <span>{op.orders_processed} cmd</span>
-                <span>{op.cases_resolved} cas</span>
-                <span>{op.tasks_completed} tâches</span>
-                {op.sla_breaches > 0 && <span className="text-red-500">{op.sla_breaches} ⚠</span>}
-              </div>
-            </div>
-          ))}
-          {(!operators || operators.length === 0) && <p className="p-4 text-sm text-gray-400">Aucune donnée</p>}
-        </div>
-      </div>
-    </div>
+      <AgentDetailDialog user_id={user_id} open={open} onOpenChange={setOpen} />
+    </>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function AgentDetailDialog({
+  user_id,
+  open,
+  onOpenChange,
+}: {
+  user_id: string;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const t = useTranslations("agent_kpi");
+
+  const { data: agentKpi, isLoading } = trpc.operationsWorkflows.agentKPI.useQuery(
+    { user_id, days: 30 },
+    { enabled: open && user_id.length > 0 },
+  );
+
   return (
-    <div className="rounded-lg border p-4 text-center">
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{label}</p>
-    </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{t("agent_detail_title", { id: user_id.slice(0, 12) })}</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">{t("loading")}</div>
+        ) : agentKpi ? (
+          <div className="space-y-4">
+            <StatsGrid
+              items={[
+                { label: t("stat_orders_processed"), value: agentKpi.totals.orders_processed, icon: Package, color: "info" },
+                { label: t("stat_orders_assigned"), value: agentKpi.totals.orders_assigned, icon: ClipboardList, color: "info" },
+                { label: t("stat_cases_resolved"), value: agentKpi.totals.cases_resolved, icon: CheckCircle2, color: "success" },
+                { label: t("stat_tasks_completed"), value: agentKpi.totals.tasks_completed, icon: CheckCircle2, color: "success" },
+              ]}
+            />
+            <Separator />
+            <div className="grid grid-cols-3 gap-4 text-center text-sm">
+              <div>
+                <p className="text-2xl font-bold">{agentKpi.days_covered}</p>
+                <p className="text-xs text-muted-foreground">{t("days_covered")}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{Math.round(agentKpi.avg_response_time_minutes)} min</p>
+                <p className="text-xs text-muted-foreground">{t("avg_response_time")}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{agentKpi.totals.sla_breaches}</p>
+                <p className="text-xs text-muted-foreground">{t("sla_breaches")}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="py-8 text-center text-sm text-muted-foreground">{t("no_data")}</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Main Client Component ────────────────────────────────────────────────
+
+export function AgentKPIClient() {
+  const t = useTranslations("agent_kpi");
+
+  const {
+    data: dashboard,
+    isLoading: dashLoading,
+    error: dashError,
+  } = trpc.operationsWorkflows.agentKPIDashboard.useQuery({ days: 7 });
+
+  const {
+    data: operators,
+    isLoading: lbLoading,
+    error: lbError,
+  } = trpc.operationsWorkflows.agentLeaderboard.useQuery({ role: "operator", days: 7 });
+
+  const isLoading = dashLoading || lbLoading;
+  const error = dashError || lbError;
+
+  const leaderboardRows: LeaderboardRow[] = useMemo(
+    () => (operators as LeaderboardRow[]) ?? [],
+    [operators],
+  );
+
+  const kpi = useMemo(() => ({
+    orders: dashboard?.total_orders_processed ?? 0,
+    cases: dashboard?.total_cases_resolved ?? 0,
+    tasks: dashboard?.total_tasks_completed ?? 0,
+    breaches: dashboard?.total_sla_breaches ?? 0,
+  }), [dashboard]);
+
+  const columns = useMemo<ColumnDef<LeaderboardRow>[]>(
+    () => [
+      {
+        id: "rank",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("rank")} />
+        ),
+        cell: ({ row }) => {
+          const rank = row.index + 1;
+          let color = "text-muted-foreground";
+          if (rank === 1) color = "text-yellow-500";
+          else if (rank === 2) color = "text-gray-400";
+          else if (rank === 3) color = "text-orange-500";
+          return (
+            <span className={`font-bold tabular-nums ${color}`}>
+              #{rank}
+            </span>
+          );
+        },
+        sortingFn: (a, b) => a.index - b.index,
+      },
+      {
+        accessorKey: "user_id",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("agent")} />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs">{row.original.user_id.slice(0, 12)}</span>
+        ),
+      },
+      {
+        accessorKey: "orders_processed",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("orders_processed")} />
+        ),
+        cell: ({ row }) => (
+          <span className="tabular-nums font-medium">{row.original.orders_processed}</span>
+        ),
+      },
+      {
+        accessorKey: "cases_resolved",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("cases_resolved")} />
+        ),
+        cell: ({ row }) => (
+          <span className="tabular-nums">{row.original.cases_resolved}</span>
+        ),
+      },
+      {
+        accessorKey: "tasks_completed",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("tasks_completed")} />
+        ),
+        cell: ({ row }) => (
+          <span className="tabular-nums">{row.original.tasks_completed}</span>
+        ),
+      },
+      {
+        accessorKey: "sla_breaches",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("sla_breaches")} />
+        ),
+        cell: ({ row }) => {
+          const breaches = row.original.sla_breaches;
+          return (
+            <span className={`tabular-nums ${breaches > 0 ? "font-bold text-red-600" : ""}`}>
+              {breaches}
+            </span>
+          );
+        },
+      },
+    ],
+    [t],
+  );
+
+  const { table } = useDataTable({
+    data: leaderboardRows,
+    columns,
+    pageCount: 1,
+    queryKeys: {
+      page: "akpiPage",
+      perPage: "akpiPerPage",
+      sort: "akpiSort",
+    },
+    getRowId: (row) => row.user_id,
+  });
+
+  return (
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={<DataTableSkeleton columnCount={6} rowCount={10} />}
+    >
+      <div className="space-y-4">
+        <StatsGrid
+          loading={isLoading}
+          items={[
+            { label: t("stats_orders_processed"), value: kpi.orders, icon: Package, color: "info" },
+            { label: t("stats_cases_resolved"), value: kpi.cases, icon: ShieldCheck, color: "success" },
+            { label: t("stats_tasks_completed"), value: kpi.tasks, icon: CheckCircle2, color: "success" },
+            { label: t("stats_sla_breaches"), value: kpi.breaches, icon: AlertTriangle, color: "error" },
+          ]}
+        />
+
+        <DataTable table={table}>
+          <DataTableAdvancedToolbar table={table}>
+            <DataTableSortList table={table} />
+          </DataTableAdvancedToolbar>
+        </DataTable>
+      </div>
+    </QueryGuard>
   );
 }

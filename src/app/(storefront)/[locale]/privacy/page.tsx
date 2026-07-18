@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { APP_NAME } from "@/constants";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -40,7 +41,7 @@ export default async function PrivacyPage({ params }: Props) {
 
       <section className="text-center">
         <p className="text-muted-foreground mx-auto max-w-2xl text-sm leading-relaxed text-balance">
-          {t("intro")}
+          {t("intro", { appName: APP_NAME })}
         </p>
       </section>
 

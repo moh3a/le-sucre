@@ -15,8 +15,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { trpc } from "@/components/providers/app-providers";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
 import { QueryGuard } from "@/components/query-guard";
 
 export function GenerateInvoiceDialog() {
@@ -38,6 +38,7 @@ export function GenerateInvoiceDialog() {
 
   function handle_submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!order_id) return;
     generate.mutate({ order_id });
   }
 
@@ -60,7 +61,7 @@ export function GenerateInvoiceDialog() {
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
             <Label>{t("order_id_label")}</Label>
-            <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
+            <OrderCombobox value={order_id} onValueChange={(val) => setOrderId(val ?? "")} />
           </div>
           <Button type="submit" className="w-full" disabled={generate.isPending}>
             <FileText />

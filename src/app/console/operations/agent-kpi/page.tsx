@@ -1,7 +1,20 @@
-import { AgentKPIClient } from "@/features/operations_workflows/components/agent-kpi-client";
+"use client";
 
-export const metadata = { title: "Agent KPI" };
+import { useTranslations } from "next-intl";
 
-export default function Page() {
-  return <AgentKPIClient />;
+import { ConsolePageShell } from "@/components/console/console-page-shell";
+import { SearchAgentDialog, AgentKPIClient } from "@/features/operations_workflows/components/agent-kpi-client";
+
+export default function AgentKPIPage() {
+  const t = useTranslations("agent_kpi");
+
+  return (
+    <ConsolePageShell
+      title={t("title")}
+      subtitle={t("subtitle")}
+      actions={<SearchAgentDialog />}
+    >
+      <AgentKPIClient />
+    </ConsolePageShell>
+  );
 }

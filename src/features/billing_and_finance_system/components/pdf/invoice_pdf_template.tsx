@@ -54,7 +54,7 @@ interface CompanyInfo {
 }
 
 const default_company: CompanyInfo = {
-  name: "LE SUCRE E-COMMERCE",
+  name: "ORLA",
   address: "123 Rue de la Liberté, Alger, Algérie",
   vat_number: "AI-198273645000",
   email: "contact@lesucre.dz",

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" data-od-id="design-tokens">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORLA — Design Tokens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Orla+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* --- Page Layout --- */
+    .page { max-width: 1200px; margin: 0 auto; padding: 48px 32px 96px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+    .page-title { font-family: "Orla Serif", Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.15; letter-spacing: -0.02em; color: var(--foreground); }
+    .page-subtitle { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 4px; letter-spacing: 0.01em; }
+
+    /* Dark Mode Toggle */
+    .theme-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-family: inherit; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background 150ms ease, border-color 150ms ease; }
+    .theme-toggle:hover { background: var(--secondary); }
+    .theme-toggle:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+    .theme-toggle .icon-sun, .dark .theme-toggle .icon-moon { display: inline; }
+    .theme-toggle .icon-moon, .dark .theme-toggle .icon-sun { display: none; }
+    .dark .theme-toggle .icon-moon { display: inline; }
+    .dark .theme-toggle .icon-sun { display: none; }
+
+    /* Sections */
+    .section { margin-bottom: 56px; }
+    .section-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 8px; }
+    .section-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.44rem; line-height: 1.2; letter-spacing: -0.015em; color: var(--foreground); margin-bottom: 24px; }
+
+    /* Color Swatches */
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .swatch { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: var(--card); }
+    .swatch-color { height: 80px; position: relative; }
+    .swatch-color::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.06)); }
+    .swatch-info { padding: 12px 14px; }
+    .swatch-name { font-size: 0.8125rem; font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
+    .swatch-token { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); word-break: break-all; }
+    .swatch-hex { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); margin-top: 2px; }
+    .swatch-role { font-size: 0.6875rem; color: var(--muted-foreground); margin-top: 4px; font-style: italic; }
+
+    /* Dual Swatch (Light + Dark) */
+    .dual-swatch { display: grid; grid-template-columns: 1fr 1fr; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: var(--card); }
+    .dual-swatch-half { position: relative; }
+    .dual-swatch-color { height: 64px; }
+    .dual-swatch-label { font-size: 0.625rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 12px; color: var(--muted-foreground); background: var(--card); border-top: 1px solid var(--border); }
+    .dual-swatch-info { grid-column: 1 / -1; padding: 10px 14px; border-top: 1px solid var(--border); }
+    .dual-swatch-name { font-size: 0.8125rem; font-weight: 600; color: var(--foreground); }
+    .dual-swatch-token { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); margin-top: 2px; }
+
+    /* Typography Scale */
+    .type-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .type-row:last-child { border-bottom: none; }
+    .type-meta { flex: 0 0 200px; }
+    .type-role { font-size: 0.8125rem; font-weight: 600; color: var(--foreground); }
+    .type-spec { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); margin-top: 2px; line-height: 1.5; }
+    .type-sample { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--foreground); }
+
+    /* Spacing Scale */
+    .spacing-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; }
+    .spacing-label { flex: 0 0 120px; font-size: 0.75rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); }
+    .spacing-bar { height: 24px; background: var(--primary); border-radius: var(--radius-sm); opacity: 0.7; transition: opacity 150ms ease; }
+    .spacing-bar:hover { opacity: 1; }
+    .spacing-value { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); flex: 0 0 80px; }
+
+    /* Radius Scale */
+    .radius-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+    .radius-item { text-align: center; }
+    .radius-box { width: 100%; aspect-ratio: 1; background: var(--primary); opacity: 0.25; border: 2px solid var(--primary); margin-bottom: 8px; transition: opacity 150ms ease; }
+    .radius-box:hover { opacity: 0.45; }
+    .radius-name { font-size: 0.75rem; font-weight: 600; color: var(--foreground); }
+    .radius-value { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); margin-top: 2px; }
+
+    /* Shadow Elevation */
+    .shadow-row { display: flex; align-items: center; gap: 24px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .shadow-row:last-child { border-bottom: none; }
+    .shadow-label { flex: 0 0 160px; }
+    .shadow-name { font-size: 0.8125rem; font-weight: 600; color: var(--foreground); }
+    .shadow-level { font-size: 0.6875rem; color: var(--muted-foreground); margin-top: 2px; }
+    .shadow-preview { flex: 1; height: 64px; background: var(--card); border-radius: var(--radius-lg); transition: transform 200ms ease; }
+    .shadow-preview:hover { transform: scale(1.02); }
+
+    /* Chart Colors */
+    .chart-bar { display: flex; gap: 4px; height: 48px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; }
+    .chart-bar-segment { flex: 1; transition: flex 200ms ease; }
+    .chart-bar-segment:hover { flex: 1.5; }
+    .chart-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+    .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--muted-foreground); }
+    .chart-legend-dot { width: 10px; height: 10px; border-radius: var(--radius-full); }
+
+    /* Duration Scale */
+    .duration-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .duration-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--card); }
+    .duration-dot { width: 12px; height: 12px; border-radius: var(--radius-full); background: var(--primary); animation: pulse 2s ease-in-out infinite; }
+    .duration-name { font-size: 0.75rem; font-weight: 600; color: var(--foreground); }
+    .duration-value { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); }
+
+    /* Token Table */
+    .token-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+    .token-table th { text-align: left; font-weight: 600; color: var(--foreground); padding: 8px 12px; border-bottom: 2px solid var(--border); font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .token-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--foreground); vertical-align: top; }
+    .token-table td:first-child { font-family: "Geist Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--muted-foreground); white-space: nowrap; }
+    .token-table tr:hover td { background: var(--secondary); }
+
+    /* Copy Button */
+    .copy-btn { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground); font-family: inherit; font-size: 0.625rem; cursor: pointer; transition: all 150ms ease; }
+    .copy-btn:hover { background: var(--secondary); color: var(--foreground); border-color: var(--foreground); }
+    .copy-btn.copied { background: var(--success); color: var(--success-foreground); border-color: var(--success); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page { padding: 24px 16px 64px; }
+      .swatch-grid { grid-template-columns: 1fr; }
+      .type-row { flex-direction: column; gap: 8px; }
+      .type-meta { flex: none; }
+      .type-sample { white-space: normal; }
+      .shadow-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .shadow-label { flex: none; }
+      .shadow-preview { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header -->
+    <header class="page-header" data-od-id="dt-header">
+      <div>
+        <h1 class="page-title">Design Tokens</h1>
+        <p class="page-subtitle">ORLA — shadcn/ui radix-maia · OKLCH color system</p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" data-od-id="dt-theme-toggle">
+        <span class="icon-sun">&#9788;</span>
+        <span class="icon-moon">&#9790;</span>
+        <span class="theme-label">Toggle theme</span>
+      </button>
+    </header>
+
+    <!-- ==================== 01 · COLOR PALETTE ==================== -->
+    <section class="section" data-od-id="dt-01-colors">
+      <p class="section-label">01 · Foundation</p>
+      <h2 class="section-title">Color Palette</h2>
+      <div class="swatch-grid" id="color-swatches"></div>
+    </section>
+
+    <!-- ==================== 02 · SIDEBAR TOKENS ==================== -->
+    <section class="section" data-od-id="dt-02-sidebar">
+      <p class="section-label">02 · Foundation</p>
+      <h2 class="section-title">Sidebar Tokens</h2>
+      <div class="swatch-grid" id="sidebar-swatches"></div>
+    </section>
+
+    <!-- ==================== 03 · CHART COLORS ==================== -->
+    <section class="section" data-od-id="dt-03-charts">
+      <p class="section-label">03 · Foundation</p>
+      <h2 class="section-title">Chart Colors</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">Sequential Lemon Lime &rarr; Olive scale for data visualization. Shared across light and dark themes.</p>
+      <div class="chart-bar" id="chart-bar"></div>
+      <div class="chart-legend" id="chart-legend"></div>
+    </section>
+
+    <!-- ==================== 04 · BRAND TOKENS ==================== -->
+    <section class="section" data-od-id="dt-04-brand">
+      <p class="section-label">04 · Foundation</p>
+      <h2 class="section-title">Brand Tokens</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">Exact hex values for brand-specific elements outside the semantic token system.</p>
+      <div class="swatch-grid" id="brand-swatches"></div>
+    </section>
+
+    <!-- ==================== 05 · TYPOGRAPHY ==================== -->
+    <section class="section" data-od-id="dt-05-typography">
+      <p class="section-label">05 · Primitive</p>
+      <h2 class="section-title">Typography Scale</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">Major Third scale (1.25x). Headings use Orla Serif; body/UI uses Montserrat.</p>
+      <div id="type-scale"></div>
+    </section>
+
+    <!-- ==================== 06 · SPACING ==================== -->
+    <section class="section" data-od-id="dt-06-spacing">
+      <p class="section-label">06 · Primitive</p>
+      <h2 class="section-title">Spacing Scale</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">Base unit: 4px. Multiplicative factor: 1.25x.</p>
+      <div id="spacing-scale"></div>
+    </section>
+
+    <!-- ==================== 07 · BORDER RADIUS ==================== -->
+    <section class="section" data-od-id="dt-07-radius">
+      <p class="section-label">07 · Primitive</p>
+      <h2 class="section-title">Border Radius</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">Base radius: 0.625rem (10px). Radix-maia preset uses generous rounding.</p>
+      <div class="radius-grid" id="radius-scale"></div>
+    </section>
+
+    <!-- ==================== 08 · SHADOWS ==================== -->
+    <section class="section" data-od-id="dt-08-shadows">
+      <p class="section-label">08 · Primitive</p>
+      <h2 class="section-title">Shadow Elevation</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">Five-level hierarchy from flat content to toast notifications.</p>
+      <div id="shadow-scale"></div>
+    </section>
+
+    <!-- ==================== 09 · DURATION ==================== -->
+    <section class="section" data-od-id="dt-09-duration">
+      <p class="section-label">09 · Motion</p>
+      <h2 class="section-title">Duration Scale</h2>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); margin-bottom:16px;">From micro-interactions (75ms) to page transitions (500ms).</p>
+      <div class="duration-grid" id="duration-scale"></div>
+    </section>
+
+    <!-- ==================== 10 · EASING ==================== -->
+    <section class="section" data-od-id="dt-10-easing">
+      <p class="section-label">10 · Motion</p>
+      <h2 class="section-title">Easing Curves</h2>
+      <div class="token-table-wrap">
+        <table class="token-table">
+          <thead>
+            <tr><th>Name</th><th>Value</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ease-in-out</td><td>cubic-bezier(0.4, 0, 0.2, 1)</td><td>Default for most transitions</td></tr>
+            <tr><td>ease-out</td><td>cubic-bezier(0, 0, 0.2, 1)</td><td>Entrance animations (fade-in, slide-in)</td></tr>
+            <tr><td>ease-in</td><td>cubic-bezier(0.4, 0, 1, 1)</td><td>Exit animations (fade-out, slide-out)</td></tr>
+            <tr><td>ease-spring</td><td>cubic-bezier(0.34, 1.56, 0.64, 1)</td><td>Popover/dropdown overshoot</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== 11 · Z-INDEX ==================== -->
+    <section class="section" data-od-id="dt-11-zindex">
+      <p class="section-label">11 · Layout</p>
+      <h2 class="section-title">Z-Index Stacking</h2>
+      <div class="token-table-wrap">
+        <table class="token-table">
+          <thead>
+            <tr><th>Level</th><th>Value</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Content</td><td>z-0</td><td>Default page content</td></tr>
+            <tr><td>Sticky</td><td>z-10</td><td>Sticky headers, floating labels</td></tr>
+            <tr><td>Dropdown</td><td>z-50</td><td>Dropdowns, popovers, tooltips</td></tr>
+            <tr><td>Overlay</td><td>z-50</td><td>Dialogs, sheets, drawers</td></tr>
+            <tr><td>Toast</td><td>z-[100]</td><td>Sonner toast notifications</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== 12 · BREAKPOINTS ==================== -->
+    <section class="section" data-od-id="dt-12-breakpoints">
+      <p class="section-label">12 · Layout</p>
+      <h2 class="section-title">Breakpoints</h2>
+      <div class="token-table-wrap">
+        <table class="token-table">
+          <thead>
+            <tr><th>Name</th><th>Min Width</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>sm</td><td>640px</td><td>Small tablets</td></tr>
+            <tr><td>md</td><td>768px</td><td>Tablets</td></tr>
+            <tr><td>lg</td><td>1024px</td><td>Small desktops</td></tr>
+            <tr><td>xl</td><td>1280px</td><td>Standard desktops</td></tr>
+            <tr><td>2xl</td><td>1536px</td><td>Large screens</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    /* ===== Data ===== */
+    const lightColors = [
+      { name: 'Background', token: '--background', oklch: 'oklch(0.985 0.008 80)', hex: '#faf6ed', role: 'Page background — warm cream' },
+      { name: 'Foreground', token: '--foreground', oklch: 'oklch(0.22 0.025 80)', hex: '#3a3520', role: 'Primary text — dark olive' },
+      { name: 'Card', token: '--card', oklch: 'oklch(1 0 0)', hex: '#ffffff', role: 'Card/surface background' },
+      { name: 'Primary', token: '--primary', oklch: 'oklch(0.852 0.199 91.936)', hex: '#c8d152', role: 'Lemon Lime — primary actions' },
+      { name: 'Secondary', token: '--secondary', oklch: 'oklch(0.97 0.035 95)', hex: '#f9f7be', role: 'Lemon Chiffon — secondary surfaces' },
+      { name: 'Muted', token: '--muted', oklch: 'oklch(0.955 0.012 85)', hex: '#f0edd6', role: 'Muted background' },
+      { name: 'Accent', token: '--accent', oklch: 'oklch(0.35 0.20 350)', hex: '#700145', role: 'Crimson Violet — accent/CTA' },
+      { name: 'Destructive', token: '--destructive', oklch: 'oklch(0.577 0.245 27.325)', hex: '#dc2626', role: 'Error/danger' },
+      { name: 'Success', token: '--success', oklch: 'oklch(0.65 0.17 145)', hex: '#2d9a3e', role: 'Success state' },
+      { name: 'Warning', token: '--warning', oklch: 'oklch(0.82 0.16 80)', hex: '#c8a520', role: 'Warning state' },
+      { name: 'Info', token: '--info', oklch: 'oklch(0.60 0.12 240)', hex: '#3b82f6', role: 'Info state' },
+      { name: 'Border', token: '--border', oklch: 'oklch(0.90 0.015 85)', hex: '#e2deca', role: 'Default border' },
+      { name: 'Ring', token: '--ring', oklch: 'oklch(0.852 0.199 91.936)', hex: '#c8d152', role: 'Focus ring — matches primary' },
+    ];
+
+    const darkColors = {
+      '--background': 'oklch(0.18 0.015 80)', '--foreground': 'oklch(0.955 0.012 85)',
+      '--card': 'oklch(0.22 0.02 80)', '--primary': 'oklch(0.87 0.19 92)',
+      '--secondary': 'oklch(0.28 0.025 85)', '--muted': 'oklch(0.26 0.02 80)',
+      '--accent': 'oklch(0.42 0.19 350)', '--destructive': 'oklch(0.65 0.22 25)',
+      '--success': 'oklch(0.72 0.17 145)', '--warning': 'oklch(0.85 0.16 80)',
+      '--info': 'oklch(0.65 0.12 240)', '--border': 'oklch(1 0 0 / 12%)',
+      '--ring': 'oklch(0.87 0.19 92)',
+    };
+
+    const sidebarTokens = [
+      { name: 'Sidebar', light: 'oklch(0.975 0.008 85)', dark: 'oklch(0.20 0.02 80)', token: '--sidebar' },
+      { name: 'Sidebar FG', light: 'oklch(0.22 0.025 80)', dark: 'oklch(0.955 0.012 85)', token: '--sidebar-foreground' },
+      { name: 'Sidebar Primary', light: 'oklch(0.852 0.199 91.936)', dark: 'oklch(0.87 0.19 92)', token: '--sidebar-primary' },
+      { name: 'Sidebar Accent', light: 'oklch(0.955 0.012 85)', dark: 'oklch(0.26 0.02 80)', token: '--sidebar-accent' },
+      { name: 'Sidebar Border', light: 'oklch(0.90 0.015 85)', dark: 'oklch(1 0 0 / 10%)', token: '--sidebar-border' },
+    ];
+
+    const chartColors = [
+      { token: '--chart-1', oklch: 'oklch(0.90 0.18 98)', label: 'Lightest — positive trends' },
+      { token: '--chart-2', oklch: 'oklch(0.80 0.18 86)', label: 'Lemon Lime mid' },
+      { token: '--chart-3', oklch: 'oklch(0.68 0.16 76)', label: 'Olive Lime' },
+      { token: '--chart-4', oklch: 'oklch(0.55 0.14 66)', label: 'Olive mid' },
+      { token: '--chart-5', oklch: 'oklch(0.48 0.11 62)', label: 'Deep Olive' },
+    ];
+
+    const brandTokens = [
+      { name: 'Crimson Violet', token: '--crimson-violet', hex: '#700145', role: 'Accent/CTA brand color' },
+      { name: 'Cream', token: '--cream', hex: '#fff3e3', role: 'Warm cream background' },
+      { name: 'Chiffon', token: '--chiffon', hex: '#f9f7be', role: 'Lemon Chiffon surfaces' },
+      { name: 'Olive', token: '--olive', hex: '#4d4c20', role: 'Dark olive text' },
+      { name: 'Lemon Lime', token: '--lemon-lime', hex: '#c8d152', role: 'Primary brand green' },
+    ];
+
+    const typeScale = [
+      { role: 'Display', size: 'clamp(2.4rem, 4vw, 3.5rem)', lh: '1.1', ls: '-0.025em', font: 'Orla Serif 400', sample: 'ORLA' },
+      { role: 'H1', size: 'clamp(1.8rem, 3vw, 2.5rem)', lh: '1.15', ls: '-0.02em', font: 'Orla Serif 400', sample: 'Pâtisserie Algérienne' },
+      { role: 'H2', size: 'clamp(1.44rem, 2.5vw, 2rem)', lh: '1.2', ls: '-0.015em', font: 'Orla Serif 400', sample: 'Nos Produits' },
+      { role: 'H3', size: 'clamp(1.15rem, 2vw, 1.6rem)', lh: '1.25', ls: '-0.01em', font: 'Orla Serif 400', sample: 'Catégories' },
+      { role: 'H4', size: '1.25rem', lh: '1.3', ls: '0', font: 'Montserrat 600', sample: 'Tableau de bord' },
+      { role: 'H5', size: '1.125rem', lh: '1.4', ls: '0', font: 'Montserrat 600', sample: 'Commandes récentes' },
+      { role: 'H6', size: '1rem', lh: '1.4', ls: '0', font: 'Montserrat 600', sample: 'Paramètres' },
+      { role: 'Body LG', size: '1.125rem', lh: '1.6', ls: '0', font: 'Montserrat 400', sample: 'Découvrez notre sélection d\'outils et d\'ingrédients.' },
+      { role: 'Body', size: '1rem', lh: '1.6', ls: '0', font: 'Montserrat 400', sample: 'Les meilleurs produits pour votre pâtisserie.' },
+      { role: 'Body SM', size: '0.875rem', lh: '1.5', ls: '0.01em', font: 'Montserrat 400', sample: 'Ajoutez une description pour ce produit.' },
+      { role: 'Caption', size: '0.75rem', lh: '1.5', ls: '0.02em', font: 'Montserrat 500', sample: 'Dernière mise à jour il y a 2 heures' },
+      { role: 'Overline', size: '0.6875rem', lh: '1.5', ls: '0.08em', font: 'Montserrat 600 uppercase', sample: 'INVENTAIRE' },
+    ];
+
+    const spacingScale = [
+      { name: '0', px: 0, rem: '0' },
+      { name: 'px', px: 1, rem: '0.0625' },
+      { name: '0.5', px: 2, rem: '0.125' },
+      { name: '1', px: 4, rem: '0.25' },
+      { name: '1.5', px: 6, rem: '0.375' },
+      { name: '2', px: 8, rem: '0.5' },
+      { name: '3', px: 12, rem: '0.75' },
+      { name: '4', px: 16, rem: '1' },
+      { name: '5', px: 20, rem: '1.25' },
+      { name: '6', px: 24, rem: '1.5' },
+      { name: '8', px: 32, rem: '2' },
+      { name: '10', px: 40, rem: '2.5' },
+      { name: '12', px: 48, rem: '3' },
+      { name: '16', px: 64, rem: '4' },
+      { name: '20', px: 80, rem: '5' },
+    ];
+
+    const radiusScale = [
+      { name: '--radius-sm', value: '6.25px', use: 'Badges, chips' },
+      { name: '--radius-md', value: '8px', use: 'Inputs, buttons' },
+      { name: '--radius-lg', value: '10px', use: 'Cards, dialogs' },
+      { name: '--radius-xl', value: '14px', use: 'Featured cards' },
+      { name: '--radius-2xl', value: '18px', use: 'Large cards, hero' },
+      { name: '--radius-3xl', value: '24px', use: 'Dialogs (radix-maia)' },
+      { name: '--radius-4xl', value: '26px', use: 'Overlay panels' },
+      { name: '--radius-full', value: '9999px', use: 'Pills, avatars' },
+    ];
+
+    const shadowScale = [
+      { name: 'Shadow XS', level: '1 — Flat+', css: 'var(--shadow-xs)', use: 'Subtle lift' },
+      { name: 'Shadow SM', level: '2 — Raised', css: 'var(--shadow-sm)', use: 'Cards, panels' },
+      { name: 'Shadow MD', level: '3 — Overlay', css: 'var(--shadow-md)', use: 'Dropdowns, popovers' },
+      { name: 'Shadow LG', level: '4 — Modal', css: 'var(--shadow-lg)', use: 'Dialogs, sheets' },
+      { name: 'Shadow XL', level: '5 — Toast', css: 'var(--shadow-xl)', use: 'Notifications' },
+    ];
+
+    const durationScale = [
+      { name: 'duration-75', value: '75ms', use: 'Micro-interactions' },
+      { name: 'duration-100', value: '100ms', use: 'Focus ring, hover' },
+      { name: 'duration-150', value: '150ms', use: 'Button press, input focus' },
+      { name: 'duration-200', value: '200ms', use: 'Dropdown open/close' },
+      { name: 'duration-300', value: '300ms', use: 'Dialog entrance' },
+      { name: 'duration-500', value: '500ms', use: 'Page transitions' },
+    ];
+
+    /* ===== Render ===== */
+    function oklchToColor(val) {
+      const c = document.createElement('canvas').getContext('2d');
+      c.fillStyle = val;
+      return c.fillStyle;
+    }
+
+    function renderSwatches(containerId, tokens, showDark) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = tokens.map(t => {
+        const lightBg = oklchToColor(t.oklch || t.hex);
+        if (showDark) {
+          const darkBg = oklchToColor(t.dark);
+          return `<div class="dual-swatch">
+            <div class="dual-swatch-half"><div class="dual-swatch-color" style="background:${lightBg}"></div><div class="dual-swatch-label">Light</div></div>
+            <div class="dual-swatch-half"><div class="dual-swatch-color" style="background:${darkBg}"></div><div class="dual-swatch-label">Dark</div></div>
+            <div class="dual-swatch-info"><div class="dual-swatch-name">${t.name}</div><div class="dual-swatch-token">${t.token}</div></div>
+          </div>`;
+        }
+        const bg = lightBg;
+        return `<div class="swatch">
+          <div class="swatch-color" style="background:${bg}"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">${t.name}</div>
+            <div class="swatch-token">${t.token}</div>
+            <div class="swatch-hex">${t.hex || ''}</div>
+            <div class="swatch-role">${t.role || ''}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderCharts() {
+      const bar = document.getElementById('chart-bar');
+      const legend = document.getElementById('chart-legend');
+      bar.innerHTML = chartColors.map(c => `<div class="chart-bar-segment" style="background:${oklchToColor(c.oklch)}"></div>`).join('');
+      legend.innerHTML = chartColors.map(c => `<div class="chart-legend-item"><div class="chart-legend-dot" style="background:${oklchToColor(c.oklch)}"></div>${c.token} — ${c.label}</div>`).join('');
+    }
+
+    function renderTypeScale() {
+      const el = document.getElementById('type-scale');
+      el.innerHTML = typeScale.map(t => {
+        const style = t.font.includes('uppercase')
+          ? `font-size:${t.size};line-height:${t.lh};letter-spacing:${t.ls};font-family:${t.font.replace(' uppercase','')};text-transform:uppercase;`
+          : t.font.includes('Orla')
+            ? `font-size:${t.size};line-height:${t.lh};letter-spacing:${t.ls};font-family:${t.font};`
+            : `font-size:${t.size};line-height:${t.lh};letter-spacing:${t.ls};font-family:${t.font};`;
+        return `<div class="type-row">
+          <div class="type-meta"><div class="type-role">${t.role}</div><div class="type-spec">${t.size} · ${t.font}</div></div>
+          <div class="type-sample" style="${style}">${t.sample}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderSpacing() {
+      const el = document.getElementById('spacing-scale');
+      el.innerHTML = spacingScale.map(s => `<div class="spacing-row">
+        <div class="spacing-label">${s.name} — ${s.px}px</div>
+        <div class="spacing-bar" style="width:${Math.max(s.px, 2)}px"></div>
+        <div class="spacing-value">${s.rem}rem</div>
+      </div>`).join('');
+    }
+
+    function renderRadius() {
+      const el = document.getElementById('radius-scale');
+      el.innerHTML = radiusScale.map(r => `<div class="radius-item">
+        <div class="radius-box" style="border-radius:${r.value}"></div>
+        <div class="radius-name">${r.name}</div>
+        <div class="radius-value">${r.value} — ${r.use}</div>
+      </div>`).join('');
+    }
+
+    function renderShadows() {
+      const el = document.getElementById('shadow-scale');
+      el.innerHTML = shadowScale.map(s => `<div class="shadow-row">
+        <div class="shadow-label"><div class="shadow-name">${s.name}</div><div class="shadow-level">${s.level}</div></div>
+        <div class="shadow-preview" style="box-shadow:${s.css}"></div>
+      </div>`).join('');
+    }
+
+    function renderDuration() {
+      const el = document.getElementById('duration-scale');
+      el.innerHTML = durationScale.map(d => `<div class="duration-item">
+        <div class="duration-dot" style="animation-duration:${d.value}"></div>
+        <div><div class="duration-name">${d.name}</div><div class="duration-value">${d.value} — ${d.use}</div></div>
+      </div>`).join('');
+    }
+
+    /* ===== Theme Toggle ===== */
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    /* ===== Init ===== */
+    renderSwatches('color-swatches', lightColors, true);
+    renderSwatches('sidebar-swatches', sidebarTokens, true);
+    renderCharts();
+    renderSwatches('brand-swatches', brandTokens, false);
+    renderTypeScale();
+    renderSpacing();
+    renderRadius();
+    renderShadows();
+    renderDuration();
+  </script>
+</body>
+</html>

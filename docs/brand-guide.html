@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en" data-od-id="brand-guide">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORLA — Brand Style Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Orla+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    .page { max-width: 960px; margin: 0 auto; padding: 48px 32px 96px; }
+
+    /* Header */
+    .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .page-title { font-family: "Orla Serif", Georgia, serif; font-size: clamp(2.4rem, 4vw, 3.5rem); line-height: 1.1; letter-spacing: -0.025em; color: var(--foreground); }
+    .page-subtitle { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 6px; }
+    .theme-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-family: inherit; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background 150ms ease; }
+    .theme-toggle:hover { background: var(--secondary); }
+    .theme-toggle:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+    .icon-sun, .dark .icon-moon { display: inline; }
+    .icon-moon, .dark .icon-sun { display: none; }
+    .dark .icon-moon { display: inline; }
+    .dark .icon-sun { display: none; }
+
+    /* Section */
+    .section { margin-bottom: 56px; }
+    .section-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 8px; }
+    .section-title { font-family: "Orla Serif", Georgia, serif; font-size: 1.44rem; line-height: 1.2; letter-spacing: -0.015em; color: var(--foreground); margin-bottom: 8px; }
+    .section-desc { font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 24px; max-width: 640px; }
+
+    /* Brand Identity */
+    .brand-mark { display: flex; align-items: center; gap: 24px; padding: 32px; border-radius: var(--radius-xl); background: var(--card); border: 1px solid var(--border); margin-bottom: 24px; }
+    .brand-wordmark { font-family: "Orla Serif", Georgia, serif; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.02em; color: var(--foreground); }
+    .brand-tagline { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 4px; }
+    .brand-origin { font-size: 0.8125rem; color: var(--muted-foreground); line-height: 1.7; max-width: 640px; }
+
+    /* Color Palette */
+    .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .palette-card { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: var(--card); }
+    .palette-swatch { height: 72px; position: relative; }
+    .palette-swatch::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.06)); }
+    .palette-info { padding: 12px 14px; }
+    .palette-name { font-size: 0.8125rem; font-weight: 600; color: var(--foreground); }
+    .palette-hex { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); margin-top: 2px; }
+    .palette-role { font-size: 0.6875rem; color: var(--muted-foreground); margin-top: 4px; line-height: 1.5; }
+
+    /* Usage Rules */
+    .usage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .usage-card { padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+    .usage-card.do { background: oklch(0.65 0.17 145 / 0.06); border-color: oklch(0.65 0.17 145 / 0.2); }
+    .usage-card.dont { background: oklch(0.577 0.245 27.325 / 0.06); border-color: oklch(0.577 0.245 27.325 / 0.2); }
+    .usage-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+    .usage-card.do .usage-label { color: oklch(0.55 0.17 145); }
+    .usage-card.dont .usage-label { color: oklch(0.577 0.245 27.325); }
+    .usage-text { font-size: 0.8125rem; color: var(--foreground); line-height: 1.6; }
+
+    /* Typography Examples */
+    .type-example { margin-bottom: 24px; padding: 20px 24px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--card); }
+    .type-example-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 8px; }
+    .type-example-sample { color: var(--foreground); }
+    .type-example-meta { font-size: 0.6875rem; font-family: "Geist Mono", ui-monospace, monospace; color: var(--muted-foreground); margin-top: 8px; }
+
+    /* Posture Rules */
+    .posture-list { list-style: none; counter-reset: posture; }
+    .posture-item { counter-increment: posture; display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .posture-item:last-child { border-bottom: none; }
+    .posture-num { flex: 0 0 32px; height: 32px; border-radius: var(--radius-full); background: var(--primary); color: var(--primary-foreground); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+    .posture-content { flex: 1; }
+    .posture-title { font-size: 0.875rem; font-weight: 600; color: var(--foreground); margin-bottom: 4px; }
+    .posture-desc { font-size: 0.8125rem; color: var(--muted-foreground); line-height: 1.6; }
+
+    /* Motion Principles */
+    .motion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .motion-card { padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--card); }
+    .motion-card-title { font-size: 0.875rem; font-weight: 600; color: var(--foreground); margin-bottom: 4px; }
+    .motion-card-desc { font-size: 0.8125rem; color: var(--muted-foreground); line-height: 1.6; }
+    .motion-card-demo { margin-top: 12px; height: 40px; border-radius: var(--radius-md); background: var(--primary); opacity: 0.3; }
+
+    /* Spacing Philosophy */
+    .spacing-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+    .spacing-box { padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--card); }
+    .spacing-box-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 12px; }
+    .spacing-demo { display: flex; flex-direction: column; gap: var(--spacing-demo-gap, 8px); }
+    .spacing-demo-block { height: 24px; border-radius: var(--radius-sm); background: var(--primary); opacity: 0.2; }
+
+    /* RTL */
+    .rtl-example { padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--card); margin-top: 16px; }
+    .rtl-example dir="rtl" { text-align: right; }
+
+    /* Table */
+    .token-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-top: 16px; }
+    .token-table th { text-align: left; font-weight: 600; color: var(--foreground); padding: 8px 12px; border-bottom: 2px solid var(--border); font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .token-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--foreground); vertical-align: top; }
+    .token-table tr:hover td { background: var(--secondary); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page { padding: 24px 16px 64px; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .palette-grid { grid-template-columns: 1fr; }
+      .usage-grid { grid-template-columns: 1fr; }
+      .spacing-compare { grid-template-columns: 1fr; }
+      .brand-mark { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header -->
+    <header class="page-header" data-od-id="bg-header">
+      <div>
+        <h1 class="page-title">Brand Style Guide</h1>
+        <p class="page-subtitle">ORLA — Identity, color, typography, posture</p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" data-od-id="bg-theme-toggle">
+        <span class="icon-sun">&#9788;</span>
+        <span class="icon-moon">&#9790;</span>
+        <span>Toggle theme</span>
+      </button>
+    </header>
+
+    <!-- ==================== 01 · BRAND IDENTITY ==================== -->
+    <section class="section" data-od-id="bg-01-identity">
+      <p class="section-label">01 · Identity</p>
+      <h2 class="section-title">Brand Identity</h2>
+      <div class="brand-mark">
+        <div>
+          <div class="brand-wordmark">ORLA</div>
+          <div class="brand-tagline">Pâtisserie Algérienne — Tools, Ingrédients, Packaging</div>
+        </div>
+      </div>
+      <p class="brand-origin">
+        <strong>ORLA</strong> is an Algerian ecommerce shop specializing in pastry and sweets making tools, cooking ingredients, and boxes/packaging.
+        The name evokes warmth, craft, and the golden hues of traditional Algerian pastry.
+        The brand speaks to home bakers and professionals who value quality tools and authentic ingredients.
+      </p>
+    </section>
+
+    <!-- ==================== 02 · COLOR PALETTE ==================== -->
+    <section class="section" data-od-id="bg-02-colors">
+      <p class="section-label">02 · Color</p>
+      <h2 class="section-title">Color Palette</h2>
+      <p class="section-desc">Inspired by pastry craft: warm creams, fresh citrus greens, deep olive, and a luxurious crimson-violet accent. All colors use OKLCH for perceptual uniformity.</p>
+
+      <div class="palette-grid">
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#c8d152"></div>
+          <div class="palette-info">
+            <div class="palette-name">Lemon Lime</div>
+            <div class="palette-hex">#c8d152 · oklch(0.852 0.199 92)</div>
+            <div class="palette-role">Primary actions, buttons, links, focus rings. The signature brand color.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#700145"></div>
+          <div class="palette-info">
+            <div class="palette-name">Crimson Violet</div>
+            <div class="palette-hex">#700145 · oklch(0.35 0.20 350)</div>
+            <div class="palette-role">Accent/CTA. Use sparingly — max 2x per visible screen.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#fff3e3"></div>
+          <div class="palette-info">
+            <div class="palette-name">Cream</div>
+            <div class="palette-hex">#fff3e3</div>
+            <div class="palette-role">Warm cream background. Never override to cool gray.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#f9f7be"></div>
+          <div class="palette-info">
+            <div class="palette-name">Lemon Chiffon</div>
+            <div class="palette-hex">#f9f7be · oklch(0.97 0.035 95)</div>
+            <div class="palette-role">Secondary surfaces, hover states, subtle backgrounds.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#4d4c20"></div>
+          <div class="palette-info">
+            <div class="palette-name">Olive</div>
+            <div class="palette-hex">#4d4c20</div>
+            <div class="palette-role">Dark olive text on light backgrounds.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#2d9a3e"></div>
+          <div class="palette-info">
+            <div class="palette-name">Success</div>
+            <div class="palette-hex">#2d9a3e · oklch(0.65 0.17 145)</div>
+            <div class="palette-role">Confirmations, completed states, positive feedback.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#dc2626"></div>
+          <div class="palette-info">
+            <div class="palette-name">Destructive</div>
+            <div class="palette-hex">#dc2626 · oklch(0.577 0.245 27)</div>
+            <div class="palette-role">Errors, destructive actions, danger states.</div>
+          </div>
+        </div>
+        <div class="palette-card">
+          <div class="palette-swatch" style="background:#c8a520"></div>
+          <div class="palette-info">
+            <div class="palette-name">Warning</div>
+            <div class="palette-hex">#c8a520 · oklch(0.82 0.16 80)</div>
+            <div class="palette-role">Caution states, low stock alerts.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin-bottom:12px; color:var(--foreground);">Usage Rules</h3>
+      <div class="usage-grid">
+        <div class="usage-card do">
+          <div class="usage-label">Do</div>
+          <div class="usage-text">Use Lemon Lime for primary CTAs — "Ajouter au panier", "Enregistrer", primary navigation accents.</div>
+        </div>
+        <div class="usage-card do">
+          <div class="usage-label">Do</div>
+          <div class="usage-text">Use Cream/Chiffon backgrounds to maintain warmth. The palette should feel like a pastry shop, not a hospital.</div>
+        </div>
+        <div class="usage-card do">
+          <div class="usage-label">Do</div>
+          <div class="usage-text">Use Crimson Violet for one CTA + one supplementary element per screen (badge, link, or highlight).</div>
+        </div>
+        <div class="usage-card dont">
+          <div class="usage-label">Don't</div>
+          <div class="usage-text">Never override backgrounds to cool gray or pure white. The warmth is the brand.</div>
+        </div>
+        <div class="usage-card dont">
+          <div class="usage-label">Don't</div>
+          <div class="usage-text">Don't use Crimson Violet as a general highlight — it loses impact when overused.</div>
+        </div>
+        <div class="usage-card dont">
+          <div class="usage-label">Don't</div>
+          <div class="usage-text">Don't mix Lemon Lime and Crimson Violet as competing CTAs in the same view.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 03 · TYPOGRAPHY ==================== -->
+    <section class="section" data-od-id="bg-03-typography">
+      <p class="section-label">03 · Typography</p>
+      <h2 class="section-title">Typography System</h2>
+      <p class="section-desc">Two-font system: Orla Serif for display/headings, Montserrat for body/UI. Major Third scale (1.25x).</p>
+
+      <div class="type-example">
+        <div class="type-example-label">Display / Headings — Orla Serif</div>
+        <div class="type-example-sample" style="font-family:'Orla Serif',Georgia,serif; font-size:clamp(2.4rem,4vw,3.5rem); line-height:1.1; letter-spacing:-0.025em;">
+          Pâtisserie Algérienne
+        </div>
+        <div class="type-example-meta">Orla Serif 400 · clamp(2.4rem, 4vw, 3.5rem) · line-height 1.1</div>
+      </div>
+
+      <div class="type-example">
+        <div class="type-example-label">Body / UI — Montserrat</div>
+        <div class="type-example-sample" style="font-family:'Montserrat',sans-serif; font-size:1rem; line-height:1.6;">
+          Les meilleurs outils et ingrédients pour créer des pâtisseries algériennes authentiques. Du moule à la boîte, tout est là.
+        </div>
+        <div class="type-example-meta">Montserrat 400 · 1rem · line-height 1.6</div>
+      </div>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin:24px 0 12px; color:var(--foreground);">Hierarchy Rules</h3>
+
+      <table class="token-table">
+        <thead>
+          <tr><th>Role</th><th>Font</th><th>Weight</th><th>Rule</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Display, H1, H2, H3</td><td>Orla Serif</td><td>400</td><td>All display and heading levels 1–3 use Orla Serif. Never use Montserrat for these.</td></tr>
+          <tr><td>H4, H5, H6</td><td>Montserrat</td><td>600</td><td>Subheadings use Montserrat SemiBold. These are UI headings, not display.</td></tr>
+          <tr><td>Body, Labels, UI</td><td>Montserrat</td><td>400–600</td><td>Body copy is 400. Labels, captions, secondary text use 500. Buttons/nav use 600.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="usage-grid" style="margin-top:24px;">
+        <div class="usage-card do">
+          <div class="usage-label">Do</div>
+          <div class="usage-text">Use Orla Serif for page titles, section headings, and hero text. It gives the brand its voice.</div>
+        </div>
+        <div class="usage-card dont">
+          <div class="usage-label">Don't</div>
+          <div class="usage-text">Never use serif in UI chrome: sidebar labels, button text, table headers, form labels.</div>
+        </div>
+        <div class="usage-card do">
+          <div class="usage-label">Do</div>
+          <div class="usage-text">Use font-weight 600 (SemiBold) for emphasis. Avoid 700+ — the type scale provides enough hierarchy.</div>
+        </div>
+        <div class="usage-card dont">
+          <div class="usage-label">Don't</div>
+          <div class="usage-text">Don't use Bold (700) or ExtraBold (800). The type scale and color hierarchy provide sufficient emphasis.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 04 · POSTURE RULES ==================== -->
+    <section class="section" data-od-id="bg-04-posture">
+      <p class="section-label">04 · Posture</p>
+      <h2 class="section-title">Posture Rules</h2>
+      <p class="section-desc">Six rules that define how ORLA looks and feels. These are non-negotiable.</p>
+
+      <ol class="posture-list">
+        <li class="posture-item">
+          <div class="posture-num">1</div>
+          <div class="posture-content">
+            <div class="posture-title">Warm over clinical</div>
+            <div class="posture-desc">The Cream/Lemon palette reads warm. Never override to cool gray or pure white backgrounds. The brand should feel like a pastry shop — inviting, golden, handcrafted — not a hospital or fintech app.</div>
+          </div>
+        </li>
+        <li class="posture-item">
+          <div class="posture-num">2</div>
+          <div class="posture-content">
+            <div class="posture-title">Accent restraint</div>
+            <div class="posture-desc">Crimson Violet (—accent) appears at most twice per visible screen: one primary CTA + one supplementary element (badge, link, or highlight). Overuse kills its impact.</div>
+          </div>
+        </li>
+        <li class="posture-item">
+          <div class="posture-num">3</div>
+          <div class="posture-content">
+            <div class="posture-title">Heading discipline</div>
+            <div class="posture-desc">All h1–h3 use Orla Serif. h4–h6 use Montserrat 600. Never mix serif into UI chrome (sidebar labels, button text, table headers).</div>
+          </div>
+        </li>
+        <li class="posture-item">
+          <div class="posture-num">4</div>
+          <div class="posture-content">
+            <div class="posture-title">RTL-first spacing</div>
+            <div class="posture-desc">All directional padding/margin uses logical properties (padding-inline, margin-block). No hardcoded left/right spacing. Arabic is a first-class language.</div>
+          </div>
+        </li>
+        <li class="posture-item">
+          <div class="posture-num">5</div>
+          <div class="posture-content">
+            <div class="posture-title">Dark mode is not inverted</div>
+            <div class="posture-desc">Dark mode uses deep olive backgrounds, not black. The warmth is preserved. Never use pure black (#000) or pure white (#fff) in dark mode surfaces.</div>
+          </div>
+        </li>
+        <li class="posture-item">
+          <div class="posture-num">6</div>
+          <div class="posture-content">
+            <div class="posture-title">Data density in dashboard, breathing room in storefront</div>
+            <div class="posture-desc">Admin uses tighter spacing (8–12px gaps) for data density. Storefront uses generous spacing (16–24px gaps) for browsing comfort.</div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ==================== 05 · MOTION ==================== -->
+    <section class="section" data-od-id="bg-05-motion">
+      <p class="section-label">05 · Motion</p>
+      <h2 class="section-title">Motion Principles</h2>
+      <p class="section-desc">Motion should feel purposeful and warm. Three principles guide all animation decisions.</p>
+
+      <div class="motion-grid">
+        <div class="motion-card">
+          <div class="motion-card-title">Purposeful</div>
+          <div class="motion-card-desc">Every animation must have a reason: guide attention, show relationships, or provide feedback. Decorative motion is noise.</div>
+          <div class="motion-card-demo" style="animation:pulse 2s ease-in-out infinite;"></div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-card-title">Brief</div>
+          <div class="motion-card-desc">Most transitions are 150–200ms. Only page transitions reach 300ms. Nothing should feel slow or ponderous.</div>
+          <div class="motion-card-demo" style="transition:opacity 150ms ease;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='0.3'"></div>
+        </div>
+        <div class="motion-card">
+          <div class="motion-card-title">Respectful</div>
+          <div class="motion-card-desc">prefers-reduced-motion: reduce kills all animations. Accessibility is not optional. The interface must work without motion.</div>
+          <div class="motion-card-demo" style="opacity:0.3;"></div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin:32px 0 12px; color:var(--foreground);">Duration Scale</h3>
+      <table class="token-table">
+        <thead>
+          <tr><th>Token</th><th>Duration</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>duration-75</td><td>75ms</td><td>Micro-interactions (checkbox, switch toggle)</td></tr>
+          <tr><td>duration-100</td><td>100ms</td><td>Focus ring, hover feedback, overlay backdrop</td></tr>
+          <tr><td>duration-150</td><td>150ms</td><td>Button press, input focus, tab underline</td></tr>
+          <tr><td>duration-200</td><td>200ms</td><td>Dropdown open/close, sheet slide</td></tr>
+          <tr><td>duration-300</td><td>300ms</td><td>Dialog/modal entrance</td></tr>
+          <tr><td>duration-500</td><td>500ms</td><td>Page transitions, skeleton pulse cycle</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin:32px 0 12px; color:var(--foreground);">Easing Curves</h3>
+      <table class="token-table">
+        <thead>
+          <tr><th>Name</th><th>Value</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ease-in-out</td><td>cubic-bezier(0.4, 0, 0.2, 1)</td><td>Default for most transitions</td></tr>
+          <tr><td>ease-out</td><td>cubic-bezier(0, 0, 0.2, 1)</td><td>Entrance animations (fade-in, slide-in)</td></tr>
+          <tr><td>ease-in</td><td>cubic-bezier(0.4, 0, 1, 1)</td><td>Exit animations (fade-out, slide-out)</td></tr>
+          <tr><td>ease-spring</td><td>cubic-bezier(0.34, 1.56, 0.64, 1)</td><td>Popover/dropdown overshoot</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ==================== 06 · SPACING ==================== -->
+    <section class="section" data-od-id="bg-06-spacing">
+      <p class="section-label">06 · Layout</p>
+      <h2 class="section-title">Spacing Philosophy</h2>
+      <p class="section-desc">Two spacing modes: generous for storefront browsing, tight for admin data density.</p>
+
+      <div class="spacing-compare">
+        <div class="spacing-box">
+          <div class="spacing-box-label">Storefront — Breathing Room</div>
+          <div class="spacing-demo" style="--spacing-demo-gap:16px;">
+            <div class="spacing-demo-block"></div>
+            <div class="spacing-demo-block"></div>
+            <div class="spacing-demo-block"></div>
+          </div>
+          <p style="font-size:0.75rem; color:var(--muted-foreground); margin-top:12px;">16–24px gaps · Generous padding · Product browsing comfort</p>
+        </div>
+        <div class="spacing-box">
+          <div class="spacing-box-label">Admin Dashboard — Data Density</div>
+          <div class="spacing-demo" style="--spacing-demo-gap:8px;">
+            <div class="spacing-demo-block"></div>
+            <div class="spacing-demo-block"></div>
+            <div class="spacing-demo-block"></div>
+          </div>
+          <p style="font-size:0.75rem; color:var(--muted-foreground); margin-top:12px;">8–12px gaps · Compact padding · Maximum information density</p>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin:32px 0 12px; color:var(--foreground);">Breakpoints</h3>
+      <table class="token-table">
+        <thead>
+          <tr><th>Name</th><th>Min Width</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>sm</td><td>640px</td><td>Small tablets</td></tr>
+          <tr><td>md</td><td>768px</td><td>Tablets</td></tr>
+          <tr><td>lg</td><td>1024px</td><td>Small desktops</td></tr>
+          <tr><td>xl</td><td>1280px</td><td>Standard desktops</td></tr>
+          <tr><td>2xl</td><td>1536px</td><td>Large screens</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin:32px 0 12px; color:var(--foreground);">Page Layout</h3>
+      <table class="token-table">
+        <thead>
+          <tr><th>Property</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Max content width</td><td>1280px (storefront) · 1440px (admin)</td></tr>
+          <tr><td>Page padding</td><td>16px mobile · 24px tablet · 32px desktop</td></tr>
+          <tr><td>Section vertical spacing</td><td>48px – 64px</td></tr>
+          <tr><td>Product grid</td><td>1 col mobile · 2 col tablet · 3–4 col desktop</td></tr>
+          <tr><td>Admin grid</td><td>12-column · 16px gutter</td></tr>
+          <tr><td>KPI cards</td><td>1 col mobile · 2 col tablet · 4 col desktop</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ==================== 07 · RTL ==================== -->
+    <section class="section" data-od-id="bg-07-rtl">
+      <p class="section-label">07 · Accessibility</p>
+      <h2 class="section-title">RTL Considerations</h2>
+      <p class="section-desc">Arabic is a first-class language. All spacing and layout must work bidirectionally.</p>
+
+      <table class="token-table">
+        <thead>
+          <tr><th>Rule</th><th>Implementation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Logical properties</td><td>All directional padding/margin uses <code>padding-inline</code>, <code>margin-block</code>. No hardcoded <code>left</code>/<code>right</code>.</td></tr>
+          <tr><td>Font fallback</td><td>Arabic text uses Montserrat body stack; fallback to system Arabic fonts (Noto Sans Arabic, etc.)</td></tr>
+          <tr><td>dir attribute</td><td><code>dir="rtl"</code> applied at <code>&lt;html&gt;</code> or container level</td></tr>
+          <tr><td>Radix direction</td><td><code>@radix-ui/react-direction</code> handles component-level RTL</td></tr>
+          <tr><td>Spacing mirroring</td><td>All spacing/border-direction utilities mirror automatically via Tailwind RTL support</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ==================== 08 · ELEVATION ==================== -->
+    <section class="section" data-od-id="bg-08-elevation">
+      <p class="section-label">08 · Layout</p>
+      <h2 class="section-title">Elevation Hierarchy</h2>
+      <p class="section-desc">Five-level hierarchy from flat content to toast notifications. Each level uses increasing shadow depth.</p>
+
+      <table class="token-table">
+        <thead>
+          <tr><th>Level</th><th>Shadow</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1. Flat</td><td>--shadow-xs</td><td>Background content, inline text</td></tr>
+          <tr><td>2. Raised</td><td>--shadow-sm</td><td>Cards, panels</td></tr>
+          <tr><td>3. Overlay</td><td>--shadow-md</td><td>Dropdowns, popovers</td></tr>
+          <tr><td>4. Modal</td><td>--shadow-lg</td><td>Dialogs, sheets</td></tr>
+          <tr><td>5. Toast</td><td>--shadow-xl</td><td>Notifications</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-family:'Orla Serif',Georgia,serif; font-size:1.15rem; margin:32px 0 12px; color:var(--foreground);">Overlay Pattern</h3>
+      <p style="font-size:0.8125rem; color:var(--muted-foreground); line-height:1.7; max-width:640px;">
+        All overlay components (dialog, sheet, dropdown, popover) share a backdrop: <code>bg-black/80</code> with <code>backdrop-blur-xs</code>.
+        Content panels use glassmorphism: semi-transparent background with blur layer and subtle ring border.
+        Dialogs use <code>rounded-4xl</code>; dropdowns/popovers use <code>rounded-2xl</code>.
+      </p>
+    </section>
+
+    <!-- ==================== 09 · FOCUS STATES ==================== -->
+    <section class="section" data-od-id="bg-09-focus">
+      <p class="section-label">09 · Accessibility</p>
+      <h2 class="section-title">Focus States</h2>
+      <p class="section-desc">Keyboard-first focus visibility. Mouse users don't see rings; keyboard users do.</p>
+
+      <table class="token-table">
+        <thead>
+          <tr><th>Pattern</th><th>CSS</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Standard focus</td><td><code>focus-visible:ring-[3px] focus-visible:ring-ring/50</code></td><td>All interactive elements</td></tr>
+          <tr><td>Error focus</td><td><code>aria-invalid:border-destructive</code></td><td>Form validation states</td></tr>
+          <tr><td>Focus within</td><td><code>group-data-[disabled=true]:pointer-events-none</code></td><td>Compound components</td></tr>
+        </tbody>
+      </table>
+
+      <div class="usage-grid" style="margin-top:16px;">
+        <div class="usage-card do">
+          <div class="usage-label">Do</div>
+          <div class="usage-text">Use <code>focus-visible</code> (not <code>focus</code>) so mouse clicks don't show rings. 3px ring with 50% opacity works on both light and dark backgrounds.</div>
+        </div>
+        <div class="usage-card dont">
+          <div class="usage-label">Don't</div>
+          <div class="usage-text">Never remove focus outlines entirely. Keyboard users must be able to navigate your interface.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+  </script>
+</body>
+</html>

@@ -1,136 +1,421 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Eye,
+  ShieldAlert,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { StatsGrid } from "@/components/console/stats-grid";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { useDataTable } from "@/features/data-table/use-data-table";
 
-type FraudFlag = { rule: string; reason: string; severity: "low" | "medium" | "high" };
+// ─── Types ────────────────────────────────────────────────────────────────
 
-export function FraudReviewsClient() {
+type FraudFlag = {
+  rule: string;
+  reason: string;
+  severity: "low" | "medium" | "high";
+};
+
+type FraudReviewRow = {
+  id: string;
+  order_id: string;
+  risk_score: number;
+  flags: FraudFlag[];
+  status: string;
+  reviewed_by_user_id?: string | null;
+  decision?: string | null;
+  decision_reason?: string | null;
+  reviewed_at?: string | Date | null;
+  created_at?: string | Date | null;
+};
+
+// ─── Constants ────────────────────────────────────────────────────────────
+
+const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  pending: "outline",
+  cleared: "default",
+  blocked: "destructive",
+  manual_review: "secondary",
+};
+
+const SEVERITY_VARIANT: Record<string, "destructive" | "secondary" | "outline"> = {
+  high: "destructive",
+  medium: "secondary",
+  low: "outline",
+};
+
+// ─── Screen Order Dialog ──────────────────────────────────────────────────
+
+function ScreenOrderDialogContent({ onOpenChange }: { onOpenChange: (v: boolean) => void }) {
+  const t = useTranslations("fraud_reviews");
   const utils = trpc.useUtils();
-  const { data: pending } = trpc.operationsWorkflows.fraudReviewsList.useQuery({
-    status: "pending",
-  });
-  const { data: stats } = trpc.operationsWorkflows.fraudReviewStats.useQuery();
-  const review = trpc.operationsWorkflows.fraudReview.useMutation({
-    onSuccess: () => utils.invalidate(),
-  });
-  const screenOrder = trpc.operationsWorkflows.fraudScreenOrder.useMutation();
+  const [order_id, setOrderId] = useState("");
 
-  const [orderId, setOrderId] = useState("");
+  const screen = trpc.operationsWorkflows.fraudScreenOrder.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        toast.success(t("screen_success"));
+      } else {
+        toast.error(t("screen_not_found"));
+      }
+      utils.operationsWorkflows.fraudReviewsList.invalidate();
+      utils.operationsWorkflows.fraudReviewStats.invalidate();
+      onOpenChange(false);
+      setOrderId("");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Fraud Reviews</h1>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4">
-        <div className="rounded-lg border p-4 text-center">
-          <p className="text-2xl font-bold">{stats?.pending ?? 0}</p>
-          <p className="text-xs text-gray-500">Pending</p>
-        </div>
-        <div className="rounded-lg border p-4 text-center">
-          <p className="text-2xl font-bold text-green-600">{stats?.cleared ?? 0}</p>
-          <p className="text-xs text-gray-500">Cleared</p>
-        </div>
-        <div className="rounded-lg border p-4 text-center">
-          <p className="text-2xl font-bold text-red-600">{stats?.blocked ?? 0}</p>
-          <p className="text-xs text-gray-500">Blocked</p>
-        </div>
-        <div className="rounded-lg border p-4 text-center">
-          <p className="text-2xl font-bold text-orange-600">{stats?.manual_review ?? 0}</p>
-          <p className="text-xs text-gray-500">Manual Review</p>
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <input
-          placeholder="Order ID to screen"
-          value={orderId}
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!order_id) {
+          toast.error(t("fill_required"));
+          return;
+        }
+        screen.mutate({ order_id });
+      }}
+      className="space-y-4"
+    >
+      <div className="space-y-2">
+        <Label>{t("order_id_label")}</Label>
+        <Input
+          value={order_id}
           onChange={(e) => setOrderId(e.target.value)}
-          className="flex-1 rounded border px-3 py-2 text-sm"
+          placeholder={t("order_id_placeholder")}
+          required
         />
-        <button
-          onClick={() => {
-            screenOrder.mutate({ order_id: orderId });
-            setOrderId("");
-          }}
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-        >
-          Screen Order
-        </button>
       </div>
+      <Button type="submit" className="w-full" disabled={screen.isPending}>
+        {t("screen_button")}
+      </Button>
+    </form>
+  );
+}
 
-      <div className="rounded-lg border">
-        <h2 className="border-b bg-gray-50 px-4 py-2 text-sm font-semibold">
-          Pending Reviews ({pending?.length ?? 0})
-        </h2>
-        <div className="divide-y">
-          {pending?.map((fr) => (
-            <div key={fr.id} className="space-y-2 px-4 py-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Order {fr.order_id.slice(0, 12)}</p>
-                  <p className="text-xs text-gray-500">
-                    Risk Score: {fr.risk_score} · {fr.flags?.length ?? 0} flags
-                  </p>
-                </div>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${fr.risk_score >= 70 ? "bg-red-100 text-red-700" : fr.risk_score >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}
-                >
-                  {fr.risk_score}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    review.mutate({
-                      id: fr.id,
-                      decision: "approved",
-                      decision_reason: "Looks legitimate",
-                    })
-                  }
-                  className="rounded bg-green-600 px-3 py-1 text-xs text-white"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() =>
-                    review.mutate({
-                      id: fr.id,
-                      decision: "rejected",
-                      decision_reason: "Suspicious activity",
-                    })
-                  }
-                  className="rounded bg-red-600 px-3 py-1 text-xs text-white"
-                >
-                  Reject
-                </button>
-                <button
-                  onClick={() =>
-                    review.mutate({
-                      id: fr.id,
-                      decision: "review",
-                      decision_reason: "Needs manual review",
-                    })
-                  }
-                  className="rounded bg-orange-600 px-3 py-1 text-xs text-white"
-                >
-                  Manual Review
-                </button>
-              </div>
-              {(fr.flags as FraudFlag[])?.map((flag: FraudFlag, i: number) => (
-                <p key={i} className="text-xs text-gray-400">
-                  · {flag.rule}: {flag.reason}
-                </p>
+export function ScreenOrderDialog() {
+  const t = useTranslations("fraud_reviews");
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <ShieldAlert className="mr-1 size-4" />
+          {t("screen_order")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("screen_title")}</DialogTitle>
+        </DialogHeader>
+        <ScreenOrderDialogContent onOpenChange={setOpen} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Review Decision Dialog ───────────────────────────────────────────────
+
+function ReviewDecisionDialog({
+  review,
+  decision,
+  onOpenChange,
+}: {
+  review: FraudReviewRow | null;
+  decision: "approved" | "rejected" | "review";
+  onOpenChange: (v: boolean) => void;
+}) {
+  const t = useTranslations("fraud_reviews");
+  const utils = trpc.useUtils();
+  const [reason, setReason] = useState("");
+
+  const reviewMutation = trpc.operationsWorkflows.fraudReview.useMutation({
+    onSuccess: () => {
+      toast.success(t("decision_success"));
+      utils.operationsWorkflows.fraudReviewsList.invalidate();
+      utils.operationsWorkflows.fraudReviewStats.invalidate();
+      onOpenChange(false);
+      setReason("");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  return (
+    <Dialog open={!!review} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t(`decision_${decision}_title`)}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t(`decision_${decision}_description`)}
+          </p>
+          <div className="space-y-2">
+            <Label>{t("reason_label")}</Label>
+            <Input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={t("reason_placeholder")}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t("cancel")}
+            </Button>
+            <Button
+              variant={decision === "rejected" ? "destructive" : "default"}
+              disabled={reviewMutation.isPending}
+              onClick={() => {
+                if (review) {
+                  reviewMutation.mutate({
+                    id: review.id,
+                    decision,
+                    decision_reason: reason || t(`decision_${decision}_default_reason`),
+                  });
+                }
+              }}
+            >
+              {t(`decision_${decision}_button`)}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Main Client Component ────────────────────────────────────────────────
+
+export function FraudReviewsClient() {
+  const t = useTranslations("fraud_reviews");
+  const utils = trpc.useUtils();
+
+  const { data: allReviews, isLoading, error } =
+    trpc.operationsWorkflows.fraudReviewsList.useQuery({});
+
+  const { data: stats } =
+    trpc.operationsWorkflows.fraudReviewStats.useQuery();
+
+  const [reviewTarget, setReviewTarget] = useState<FraudReviewRow | null>(null);
+  const [reviewDecision, setReviewDecision] = useState<"approved" | "rejected" | "review">("approved");
+
+  const rows: FraudReviewRow[] = useMemo(
+    () => (allReviews as FraudReviewRow[]) ?? [],
+    [allReviews],
+  );
+
+  const kpi = useMemo(() => ({
+    pending: stats?.pending ?? 0,
+    cleared: stats?.cleared ?? 0,
+    blocked: stats?.blocked ?? 0,
+    manual_review: stats?.manual_review ?? 0,
+  }), [stats]);
+
+  function openDecision(review: FraudReviewRow, decision: "approved" | "rejected" | "review") {
+    setReviewTarget(review);
+    setReviewDecision(decision);
+  }
+
+  const columns = useMemo<ColumnDef<FraudReviewRow>[]>(
+    () => [
+      {
+        accessorKey: "order_id",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("order_id")} />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs">{row.original.order_id.slice(0, 12)}</span>
+        ),
+      },
+      {
+        accessorKey: "risk_score",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("risk_score")} />
+        ),
+        cell: ({ row }) => {
+          const score = row.original.risk_score;
+          let color = "text-green-600";
+          if (score >= 70) color = "text-red-600";
+          else if (score >= 40) color = "text-yellow-600";
+          return (
+            <span className={`font-bold tabular-nums ${color}`}>
+              {score}
+            </span>
+          );
+        },
+        sortingFn: (a, b) => a.original.risk_score - b.original.risk_score,
+      },
+      {
+        id: "flags",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("flags")} />
+        ),
+        cell: ({ row }) => {
+          const flags = row.original.flags;
+          if (!flags || flags.length === 0) return "—";
+          return (
+            <div className="flex flex-wrap gap-1">
+              {flags.map((flag, i) => (
+                <Badge key={i} variant={SEVERITY_VARIANT[flag.severity] ?? "outline"} className="text-xs">
+                  {flag.rule}
+                </Badge>
               ))}
             </div>
-          ))}
-          {(!pending || pending.length === 0) && (
-            <p className="p-4 text-sm text-gray-400">No pending fraud reviews</p>
-          )}
-        </div>
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status")} />
+        ),
+        cell: ({ row }) => (
+          <Badge variant={STATUS_VARIANT[row.original.status] ?? "outline"}>
+            {t(`status_${row.original.status}`)}
+          </Badge>
+        ),
+        filterFn: "equals",
+      },
+      {
+        accessorKey: "decision",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("decision")} />
+        ),
+        cell: ({ row }) => {
+          const d = row.original.decision;
+          if (!d) return "—";
+          return (
+            <Badge variant={d === "approved" ? "default" : d === "rejected" ? "destructive" : "secondary"}>
+              {t(`decision_${d}`)}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: "created_at",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("created_at")} />
+        ),
+        cell: ({ row }) => {
+          const d = row.original.created_at;
+          if (!d) return "—";
+          return new Date(d).toLocaleDateString("fr-FR");
+        },
+      },
+      {
+        id: "actions",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("actions")} />
+        ),
+        cell: ({ row }) => {
+          const review = row.original;
+          if (review.status !== "pending") return "—";
+          return (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => openDecision(review, "approved")}
+                title={t("decision_approved")}
+              >
+                <CheckCircle2 className="size-4 text-green-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => openDecision(review, "rejected")}
+                title={t("decision_rejected")}
+              >
+                <XCircle className="size-4 text-red-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => openDecision(review, "review")}
+                title={t("decision_review")}
+              >
+                <Eye className="size-4 text-orange-600" />
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [t],
+  );
+
+  const { table } = useDataTable({
+    data: rows,
+    columns,
+    pageCount: 1,
+    queryKeys: {
+      page: "frPage",
+      perPage: "frPerPage",
+      sort: "frSort",
+    },
+    getRowId: (row) => row.id,
+  });
+
+  return (
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} />}
+    >
+      <div className="space-y-4">
+        <StatsGrid
+          loading={isLoading}
+          items={[
+            { label: t("stats_pending"), value: kpi.pending, icon: Clock, color: "warning" },
+            { label: t("stats_cleared"), value: kpi.cleared, icon: ShieldCheck, color: "success" },
+            { label: t("stats_blocked"), value: kpi.blocked, icon: XCircle, color: "error" },
+            { label: t("stats_manual_review"), value: kpi.manual_review, icon: Eye, color: "info" },
+          ]}
+        />
+
+        <DataTable table={table}>
+          <DataTableAdvancedToolbar table={table}>
+            <DataTableSortList table={table} />
+          </DataTableAdvancedToolbar>
+        </DataTable>
       </div>
-    </div>
+
+      <ReviewDecisionDialog
+        review={reviewTarget}
+        decision={reviewDecision}
+        onOpenChange={(v) => {
+          if (!v) setReviewTarget(null);
+        }}
+      />
+    </QueryGuard>
   );
 }

@@ -1,5 +1,7 @@
 import "server-only";
+
 import type { z } from "zod";
+
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { PROMOTION_ERROR } from "../constants/error-codes";
 import { promotion_repository } from "../repositories/promotion.repository";
@@ -17,6 +19,8 @@ import type {
   list_promotions_dto,
 } from "../models/promotion.dto";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { assertIsError } from "@/lib/error_handling";
+import { format } from "date-fns";
 
 export class PromotionService {
   list(input: z.infer<typeof list_promotions_dto>) {
@@ -34,22 +38,48 @@ export class PromotionService {
   }
 
   async create(input: z.infer<typeof create_promotion_dto>) {
-    const created = await promotion_repository.create({
-      ...input,
-      rules: input.rules.map((r) => ({
-        scope_type: r.scope_type,
-        scope_id: r.scope_id ?? null,
-        discount_type: r.discount_type,
-        discount_value: String(r.discount_value),
-        min_subtotal: r.min_subtotal != null ? String(r.min_subtotal) : null,
-        min_quantity: r.min_quantity ?? null,
-        max_discount_amount: r.max_discount_amount != null ? String(r.max_discount_amount) : null,
-        buy_quantity: r.buy_quantity ?? null,
-        get_quantity: r.get_quantity ?? null,
-        sort_order: r.sort_order,
-        is_active: true,
-      })),
-    });
+    if (!input.name?.trim()) throw_error(PROMOTION_ERROR.NAME_REQUIRED);
+    if (!input.slug?.trim()) throw_error(PROMOTION_ERROR.SLUG_REQUIRED);
+
+    if (input.starts_at && input.ends_at && new Date(input.starts_at) >= new Date(input.ends_at)) {
+      throw_error(PROMOTION_ERROR.DATE_RANGE_INVALID);
+    }
+
+    input.starts_at = input.starts_at
+      ? format(new Date(input.starts_at), "yyyy-MM-dd HH:mm:ss")
+      : null;
+    input.ends_at = input.ends_at ? format(new Date(input.ends_at), "yyyy-MM-dd HH:mm:ss") : null;
+
+    const existing = await promotion_repository.get_by_slug(input.slug);
+    if (existing) throw_error(PROMOTION_ERROR.SLUG_CONFLICT);
+
+    let created;
+    try {
+      created = await promotion_repository.create({
+        ...input,
+        rules: input.rules.map((r) => ({
+          scope_type: r.scope_type,
+          scope_id: r.scope_id ?? null,
+          discount_type: r.discount_type,
+          discount_value: String(r.discount_value),
+          min_subtotal: r.min_subtotal != null ? String(r.min_subtotal) : null,
+          min_quantity: r.min_quantity ?? null,
+          max_discount_amount: r.max_discount_amount != null ? String(r.max_discount_amount) : null,
+          buy_quantity: r.buy_quantity ?? null,
+          get_quantity: r.get_quantity ?? null,
+          sort_order: r.sort_order,
+          is_active: true,
+        })),
+      });
+    } catch (error: unknown) {
+      console.log(error);
+      const message = assertIsError(error).message;
+      if (message.includes("Duplicate entry") || message.includes("ER_DUP_ENTRY")) {
+        throw_error(PROMOTION_ERROR.SLUG_CONFLICT);
+      }
+      throw_error(PROMOTION_ERROR.DB_INSERT_FAILED, { original: message });
+    }
+
     await invalidate_promotion_cache();
     void audit_service.log({
       action: "promotion.create",

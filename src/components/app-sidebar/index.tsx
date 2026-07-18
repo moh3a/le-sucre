@@ -40,6 +40,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { APP_NAME } from "@/constants";
 
 import {
   Sidebar,
@@ -142,7 +143,7 @@ export function AppSidebar() {
       ],
     },
     {
-      title: t("payments_invoices"),
+      title: t("payments"),
       icon: CreditCard,
       items: [
         { title: t("payments"), url: "/console/payments", icon: CreditCard },
@@ -176,7 +177,6 @@ export function AppSidebar() {
       icon: Gauge,
       items: [
         { title: t("dashboard"), url: "/console/operations", icon: Gauge },
-        { title: t("tasks"), url: "/console/operations/tasks", icon: ListTodo },
         { title: t("sla_definitions"), url: "/console/operations/sla-definitions", icon: Clock },
         { title: t("routing_rules"), url: "/console/operations/routing-rules", icon: Route },
         {
@@ -206,7 +206,7 @@ export function AppSidebar() {
     return (
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
-          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
+          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre", { appName: APP_NAME })}</h2>
         </SidebarHeader>
         <SidebarContent>
           <p className="text-destructive px-4 text-sm">Failed to load session.</p>
@@ -227,7 +227,7 @@ export function AppSidebar() {
     <TooltipProvider>
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
-          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre")}</h2>
+          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre", { appName: APP_NAME })}</h2>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -246,6 +246,15 @@ export function AppSidebar() {
                 >
                   <ChartArea className="size-4" />
                   <span>{t("analytics")}</span>
+                </SidebarMenuButton>
+              </Link>
+              <Link href="/console/tasks">
+                <SidebarMenuButton
+                  tooltip={t("tasks")}
+                  isActive={pathname.startsWith("/console/tasks")}
+                >
+                  <ListTodo className="size-4" />
+                  <span>{t("tasks")}</span>
                 </SidebarMenuButton>
               </Link>
               {nav.map(({ icon: Icon, ...section }) =>

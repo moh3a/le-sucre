@@ -49,6 +49,44 @@ export const promotion_router = create_trpc_router({
     .input(create_bundle_dto)
     .mutation(({ input }) => promotion_service.create_bundle(input)),
 
+  promoCodes: permission_procedure(PERMISSIONS.promotions_read)
+    .input(z.object({ promotion_id: z.string().min(1).max(255) }))
+    .query(({ input }) => promotion_repository.list_promo_codes(input.promotion_id)),
+
+  flashSales: permission_procedure(PERMISSIONS.promotions_read)
+    .input(z.object({ promotion_id: z.string().min(1).max(255) }))
+    .query(({ input }) => promotion_repository.list_flash_sales_with_items(input.promotion_id)),
+
+  bundles: permission_procedure(PERMISSIONS.promotions_read)
+    .input(z.object({ promotion_id: z.string().min(1).max(255) }))
+    .query(({ input }) => promotion_repository.list_bundles_with_items(input.promotion_id)),
+
+  redemptions: permission_procedure(PERMISSIONS.promotions_read)
+    .input(
+      z.object({
+        promotion_id: z.string().min(1).max(255),
+        page: z.coerce.number().int().min(1).default(1),
+        limit: z.coerce.number().int().min(1).max(100).default(20),
+      }),
+    )
+    .query(({ input }) => promotion_repository.list_redemptions(input.promotion_id, input.page, input.limit)),
+
+  detailStats: permission_procedure(PERMISSIONS.promotions_read)
+    .input(z.object({ promotion_id: z.string().min(1).max(255) }))
+    .query(({ input }) => promotion_repository.detail_stats(input.promotion_id)),
+
+  ordersByPromotion: permission_procedure(PERMISSIONS.promotions_read)
+    .input(
+      z.object({
+        promotion_id: z.string().min(1).max(255),
+        page: z.coerce.number().int().min(1).default(1),
+        limit: z.coerce.number().int().min(1).max(100).default(20),
+      }),
+    )
+    .query(({ input }) =>
+      promotion_repository.list_orders_by_promotion(input.promotion_id, input.page, input.limit),
+    ),
+
   validateCode: public_procedure.input(validate_promo_code_dto).mutation(({ input, ctx }) =>
     cart_discount_service.apply({
       lines: input.lines,

@@ -1,64 +1,94 @@
 "use client";
 
-import { Search } from "lucide-react";
+import * as React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Search, Download } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
+import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
+import { useDataTable } from "@/features/data-table/use-data-table";
+import { Button } from "@/components/ui/button";
+
+type SearchRow = {
+  query: string;
+  count: number;
+};
 
 export function AnalyticsSearches({ from, to }: { from: string; to: string }) {
-  const { data, isLoading } = trpc.analytics.searchAnalytics.useQuery({ from, to });
+  const t = useTranslations("analytics");
+  const { data, isLoading } = trpc.analytics.searchAnalytics.useQuery({ from, to, limit: 50 });
 
-  if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
+  const columns = React.useMemo<ColumnDef<SearchRow>[]>(
+    () => [
+      {
+        id: "query",
+        accessorKey: "query",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_search_query")} />
+        ),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2 font-medium">
+            <Search className="text-muted-foreground size-4" />
+            <span>{row.original.query}</span>
+          </div>
+        ),
+      },
+      {
+        id: "count",
+        accessorKey: "count",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_search_volume")} />
+        ),
+        cell: ({ row }) => row.original.count.toLocaleString("fr-FR"),
+      },
+    ],
+    [t],
+  );
+
+  const items = (data?.top_searches ?? []) as SearchRow[];
+
+  const { table } = useDataTable({
+    data: items,
+    columns,
+    pageCount: 1,
+    queryKeys: { page: "srPage", perPage: "srPerPage", sort: "srSort" },
+    getRowId: (row) => row.query,
+  });
+
+  function handleExport() {
+    const rows = table.getFilteredRowModel().rows;
+    const header = [t("col_search_query"), t("col_search_volume")].join(",");
+    const csvRows = rows.map((r) => `"${r.original.query}",${r.original.count}`);
+    const blob = new Blob([header, "\n", ...csvRows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analytics-searches-${from}-${to}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <QueryGuard
       query={{ isLoading }}
-      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+      loadingFallback={<DataTableSkeleton columnCount={2} rowCount={10} />}
     >
-      <Card>
-      <CardHeader>
-        <CardTitle>Recherches Populaires</CardTitle>
-        <CardDescription>Mots-clés recherchés par vos clients</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="relative w-full overflow-auto">
-          <table className="w-full caption-bottom text-sm">
-            <thead>
-              <tr className="hover:bg-muted/50 border-b transition-colors">
-                <th className="text-muted-foreground h-10 px-4 text-left align-middle font-medium">
-                  Terme de recherche
-                </th>
-                <th className="text-muted-foreground h-10 px-4 text-right align-middle font-medium">
-                  Volume de recherche
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:last-child]:border-0">
-              {data.top_searches.length === 0 ? (
-                <tr>
-                  <td colSpan={2} className="text-muted-foreground p-4 text-center">
-                    Aucun mot-clé recherché.
-                  </td>
-                </tr>
-              ) : (
-                data.top_searches.map((s) => (
-                  <tr key={s.query} className="hover:bg-muted/50 border-b transition-colors">
-                    <td className="flex items-center gap-2 p-4 align-middle font-medium">
-                      <Search className="text-muted-foreground h-4 w-4" />
-                      <span>{s.query}</span>
-                    </td>
-                    <td className="p-4 text-right align-middle font-medium">
-                      {s.count.toLocaleString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-      </Card>
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="mr-1 size-4" />
+            {t("export_csv")}
+          </Button>
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+      </DataTable>
     </QueryGuard>
   );
 }

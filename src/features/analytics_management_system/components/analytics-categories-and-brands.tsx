@@ -1,118 +1,181 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import * as React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
+import { DataTable } from "@/features/data-table/components/data-table";
+import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
+import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
+import { useDataTable } from "@/features/data-table/use-data-table";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { format_currency } from "@/lib/format";
 
-export function AnalyticsCategoriesBrands({ from, to }: { from: string; to: string }) {
-  const { data, isLoading } = trpc.analytics.products.useQuery({ from, to });
+type CategoryRow = {
+  category_id: string;
+  revenue: string;
+  views: number;
+};
 
-  if (!data) return <p className="text-muted-foreground text-sm">Aucune donnée disponible.</p>;
+type BrandRow = {
+  brand_id: string;
+  revenue: string;
+  views: number;
+};
+
+function CategoryTable({
+  data,
+  isLoading,
+  t,
+}: {
+  data: CategoryRow[];
+  isLoading: boolean;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const columns = React.useMemo<ColumnDef<CategoryRow>[]>(
+    () => [
+      {
+        id: "category_id",
+        accessorKey: "category_id",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_category")} />
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.category_id || t("no_category")}</span>
+        ),
+      },
+      {
+        id: "views",
+        accessorKey: "views",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_views")} />
+        ),
+        cell: ({ row }) => row.original.views.toLocaleString("fr-FR"),
+      },
+      {
+        id: "revenue",
+        accessorKey: "revenue",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_revenue")} />
+        ),
+        cell: ({ row }) => (
+          <Badge variant="secondary">
+            {format_currency(Number(row.original.revenue), "DZD", 0)}
+          </Badge>
+        ),
+      },
+    ],
+    [t],
+  );
+
+  const { table } = useDataTable({
+    data,
+    columns,
+    pageCount: 1,
+    queryKeys: { page: "catPage", perPage: "catPerPage", sort: "catSort" },
+    getRowId: (row) => row.category_id,
+  });
 
   return (
     <QueryGuard
       query={{ isLoading }}
-      loadingFallback={<p className="text-muted-foreground text-sm">Chargement…</p>}
+      loadingFallback={<DataTableSkeleton columnCount={3} rowCount={5} />}
     >
-      <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Top Catégories</CardTitle>
-          <CardDescription>Les catégories générant le plus de revenus</CardDescription>
+          <CardTitle>{t("top_categories")}</CardTitle>
+          <CardDescription>{t("top_categories_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="relative w-full overflow-auto">
-            <table className="w-full caption-bottom text-sm">
-              <thead>
-                <tr className="hover:bg-muted/50 border-b transition-colors">
-                  <th className="text-muted-foreground h-10 px-2 text-left align-middle font-medium">
-                    Catégorie ID
-                  </th>
-                  <th className="text-muted-foreground h-10 px-2 text-right align-middle font-medium">
-                    Vues
-                  </th>
-                  <th className="text-muted-foreground h-10 px-2 text-right align-middle font-medium">
-                    Revenus
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="[&_tr:last-child]:border-0">
-                {data.categories.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="text-muted-foreground p-4 text-center">
-                      Aucune donnée.
-                    </td>
-                  </tr>
-                ) : (
-                  data.categories.map((c) => (
-                    <tr
-                      key={c.category_id}
-                      className="hover:bg-muted/50 border-b transition-colors"
-                    >
-                      <td className="p-2 align-middle font-medium">
-                        {c.category_id || "Sans catégorie"}
-                      </td>
-                      <td className="p-2 text-right align-middle">{c.views.toLocaleString()}</td>
-                      <td className="text-crimson-violet p-2 text-right align-middle font-medium">
-                        {format_currency(Number(c.revenue || 0))}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable table={table} />
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Marques</CardTitle>
-          <CardDescription>Les marques générant le plus de revenus</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative w-full overflow-auto">
-            <table className="w-full caption-bottom text-sm">
-              <thead>
-                <tr className="hover:bg-muted/50 border-b transition-colors">
-                  <th className="text-muted-foreground h-10 px-2 text-left align-middle font-medium">
-                    Marque ID
-                  </th>
-                  <th className="text-muted-foreground h-10 px-2 text-right align-middle font-medium">
-                    Vues
-                  </th>
-                  <th className="text-muted-foreground h-10 px-2 text-right align-middle font-medium">
-                    Revenus
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="[&_tr:last-child]:border-0">
-                {data.brands.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="text-muted-foreground p-4 text-center">
-                      Aucune donnée.
-                    </td>
-                  </tr>
-                ) : (
-                  data.brands.map((b) => (
-                    <tr key={b.brand_id} className="hover:bg-muted/50 border-b transition-colors">
-                      <td className="p-2 align-middle font-medium">
-                        {b.brand_id || "Sans marque"}
-                      </td>
-                      <td className="p-2 text-right align-middle">{b.views.toLocaleString()}</td>
-                      <td className="text-crimson-violet p-2 text-right align-middle font-medium">
-                        {format_currency(Number(b.revenue || 0))}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-      </div>
     </QueryGuard>
+  );
+}
+
+function BrandTable({
+  data,
+  isLoading,
+  t,
+}: {
+  data: BrandRow[];
+  isLoading: boolean;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const columns = React.useMemo<ColumnDef<BrandRow>[]>(
+    () => [
+      {
+        id: "brand_id",
+        accessorKey: "brand_id",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_brand")} />
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.brand_id || t("no_brand")}</span>
+        ),
+      },
+      {
+        id: "views",
+        accessorKey: "views",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_views")} />
+        ),
+        cell: ({ row }) => row.original.views.toLocaleString("fr-FR"),
+      },
+      {
+        id: "revenue",
+        accessorKey: "revenue",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("col_revenue")} />
+        ),
+        cell: ({ row }) => (
+          <Badge variant="secondary">
+            {format_currency(Number(row.original.revenue), "DZD", 0)}
+          </Badge>
+        ),
+      },
+    ],
+    [t],
+  );
+
+  const { table } = useDataTable({
+    data,
+    columns,
+    pageCount: 1,
+    queryKeys: { page: "brPage", perPage: "brPerPage", sort: "brSort" },
+    getRowId: (row) => row.brand_id,
+  });
+
+  return (
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={3} rowCount={5} />}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("top_brands")}</CardTitle>
+          <CardDescription>{t("top_brands_desc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable table={table} />
+        </CardContent>
+      </Card>
+    </QueryGuard>
+  );
+}
+
+export function AnalyticsCategoriesBrands({ from, to }: { from: string; to: string }) {
+  const t = useTranslations("analytics");
+  const { data, isLoading } = trpc.analytics.products.useQuery({ from, to, limit: 50, sort: "revenue" });
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <CategoryTable data={data?.categories ?? []} isLoading={isLoading} t={t} />
+      <BrandTable data={data?.brands ?? []} isLoading={isLoading} t={t} />
+    </div>
   );
 }
