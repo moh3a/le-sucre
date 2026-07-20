@@ -46,6 +46,7 @@ import { toast } from "sonner";
 import { BrandFormDialog } from "./brand-form-dialog";
 import type { BrandRecord } from "../types";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { formatDate } from "@/lib/format";
 
 function BrandRowActions({
@@ -58,14 +59,17 @@ function BrandRowActions({
   const t = useTranslations("brands");
   const utils = trpc.useUtils();
   const [delete_open, set_delete_open] = React.useState(false);
+  const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.brands.delete.useMutation({
     onSuccess: async () => {
-      await utils.brands.list.invalidate();
-      await utils.brands.active.invalidate();
-      await utils.brands.stats.invalidate();
-      toast.success(t("delete_success"));
       set_delete_open(false);
+      execute_with_undo({
+        description: brand.name,
+        execute: () => utils.brands.list.invalidate(),
+        rollback: () => utils.brands.list.invalidate(),
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => toast.error(err.message),
   });

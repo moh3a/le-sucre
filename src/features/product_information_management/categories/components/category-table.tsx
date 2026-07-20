@@ -36,6 +36,7 @@ import {
 import { CategoryFormDialog } from "@/features/product_information_management/categories/components/category-form-dialog";
 import type { CategoryRecord } from "@/features/product_information_management/categories/types";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { formatDate } from "@/lib/format";
 
 function CategoryRowActions({
@@ -49,13 +50,17 @@ function CategoryRowActions({
   const tc = useTranslations("common");
   const utils = trpc.useUtils();
   const [delete_open, set_delete_open] = React.useState(false);
+  const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.categories.delete.useMutation({
     onSuccess: async () => {
       set_delete_open(false);
-      await utils.categories.list.invalidate();
-      await utils.categories.tree.invalidate();
-      toast.success(t("category_deleted"));
+      execute_with_undo({
+        description: category.name,
+        execute: () => utils.categories.tree.invalidate(),
+        rollback: () => utils.categories.tree.invalidate(),
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => toast.error(err.message),
   });

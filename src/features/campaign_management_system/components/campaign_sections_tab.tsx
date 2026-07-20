@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,7 @@ type SectionFormState = {
 export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps) {
   const t = useTranslations("campaigns");
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
   const [selectedSection, setSelectedSection] = useState<SectionRow | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -96,9 +98,17 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
   });
 
   const delete_section = trpc.campaigns.deleteSection.useMutation({
-    onSuccess: () => {
-      toast.success(t("section_deleted"));
-      utils.campaigns.byId.invalidate({ id: campaign_id });
+    onSuccess: (_data, variables) => {
+      execute_with_undo({
+        description: variables.id,
+        execute: async () => {
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        rollback: async () => {
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => toast.error(err.message),
   });

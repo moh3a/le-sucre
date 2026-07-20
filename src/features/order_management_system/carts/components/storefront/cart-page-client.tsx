@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Card } from "@/components/ui/card";
@@ -23,17 +25,19 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
   const t = useTranslations("cart");
   const router = useRouter();
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   const cartQuery = trpc.cart.getCart.useQuery(
     { cart_id: cartId ?? "", locale },
     { enabled: !!cartId },
   );
   const updateMut = trpc.cart.updateItem.useMutation({
-    onSuccess: () => utils.cart.getCart.invalidate(),
+    onSuccess: () => {
+      utils.cart.getCart.invalidate();
+      toast.success(t("item_updated"));
+    },
   });
-  const removeMut = trpc.cart.removeItem.useMutation({
-    onSuccess: () => utils.cart.getCart.invalidate(),
-  });
+  const removeMut = trpc.cart.removeItem.useMutation();
   const savedQuery = trpc.wishlistManagement.saveForLater.list.useQuery({ page: 1, limit: 50 });
   const trendingQuery = trpc.recommendations.trending.useQuery({
     locale: locale as "fr" | "en" | "ar",
@@ -77,7 +81,20 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
 
   async function handleRemove(itemId: string) {
     if (!cartId) return;
-    removeMut.mutate({ cart_id: cartId, item_id: itemId });
+    const item = items.find((i) => i.id === itemId);
+    removeMut.mutate(
+      { cart_id: cartId, item_id: itemId },
+      {
+        onSuccess: () => {
+          execute_with_undo({
+            description: item?.product_name ?? "Article",
+            execute: () => utils.cart.getCart.invalidate(),
+            rollback: () => utils.cart.getCart.invalidate(),
+            undoTimeoutMs: 8_000,
+          });
+        },
+      },
+    );
   }
 
   function handleApplyPromo(code: string) {

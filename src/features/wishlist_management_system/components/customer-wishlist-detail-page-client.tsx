@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { cn } from "@/lib/utils";
 import {
   Empty,
@@ -46,15 +47,23 @@ export function CustomerWishlistDetailPageClient({ wishlistId }: { wishlistId: s
   });
   const removeItemMut = trpc.wishlistManagement.wishlists.removeItem.useMutation();
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   async function handleRemove(itemId: string) {
-    try {
-      await removeItemMut.mutateAsync({ id: itemId });
-      toast.success(t("item_removed"));
-      utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
-    } catch {
-      toast.error(t("item_removed"));
-    }
+    const item = itemsData?.items?.find((i: WishlistWithProduct) => i.id === itemId);
+    const itemName = (item as WishlistWithProduct | undefined)?.product?.translations?.[0]?.name ?? (item as WishlistWithProduct | undefined)?.product_id ?? itemId;
+
+    await execute_with_undo({
+      description: itemName,
+      execute: async () => {
+        await removeItemMut.mutateAsync({ id: itemId });
+        await utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
+      },
+      rollback: async () => {
+        await utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
+      },
+      undoTimeoutMs: 8_000,
+    });
   }
 
   if (isLoading) {

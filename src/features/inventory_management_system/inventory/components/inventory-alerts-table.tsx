@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import * as React from "react";
+import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -23,10 +24,18 @@ type AlertRow = {
 export function InventoryAlertsTable() {
   const utils = trpc.useUtils();
   const ack = trpc.forecast.ackAlert.useMutation({
-    onSuccess: () => utils.forecast.alerts.invalidate(),
+    onSuccess: () => {
+      utils.forecast.alerts.invalidate();
+      toast.success("Alerte accusée de réception");
+    },
+    onError: (err) => toast.error(err.message),
   });
   const resolve = trpc.forecast.resolveAlert.useMutation({
-    onSuccess: () => utils.forecast.alerts.invalidate(),
+    onSuccess: () => {
+      utils.forecast.alerts.invalidate();
+      toast.success("Alerte résolue");
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const columns = React.useMemo<ColumnDef<AlertRow>[]>(

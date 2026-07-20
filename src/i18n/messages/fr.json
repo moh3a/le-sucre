@@ -214,7 +214,10 @@
     "quantity_decrease": "-",
     "quantity_increase": "+",
     "suggested_item": "Article suggéré {count}",
-    "empty_icon": "🛒"
+    "empty_icon": "🛒",
+    "item_updated": "Article mis à jour.",
+    "item_removed": "Article retiré du panier.",
+    "promo_applied": "Code promo appliqué."
   },
   "category": {
     "not_found": "Catégorie non trouvée",
@@ -1132,7 +1135,30 @@
     "request_timed_out": "La requête a expiré.",
     "slow_connection": "Connexion lente détectée.",
     "pending_changes": "Modifications en attente",
-    "operation_blocked_offline": "Cette action n'est pas disponible hors ligne."
+    "operation_blocked_offline": "Cette action n'est pas disponible hors ligne.",
+    "undo": "Annuler",
+    "action_completed": "Action effectuée",
+    "action_reverted": "Action annulée",
+    "action_failed": "L'action a échoué",
+    "action_failed_description": "Une erreur est survenue. Veuillez réessayer.",
+    "retry_or_refresh": "Vous pouvez réessayer ou actualiser la page.",
+    "deleted": "Supprimé",
+    "removed": "Retiré",
+    "updated": "Mis à jour",
+    "created": "Créé",
+    "saved": "Enregistré",
+    "item_deleted": "Article supprimé avec succès.",
+    "item_removed": "Article retiré avec succès.",
+    "item_updated": "Article mis à jour avec succès.",
+    "item_created": "Article créé avec succès.",
+    "item_saved": "Article enregistré avec succès.",
+    "undo_delete": "Supprimer",
+    "undo_remove": "Retirer",
+    "undo_update": "Modifier",
+    "bulk_deleted": "{count} éléments supprimés.",
+    "bulk_action_completed": "Action groupée effectuée.",
+    "status_updated": "Statut mis à jour.",
+    "toggle_updated": "Paramètre modifié."
   },
   "data_table": {
     "no_results": "Aucun résultat.",

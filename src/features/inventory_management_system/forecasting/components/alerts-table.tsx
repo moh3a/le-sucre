@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Check, Eye, MoreHorizontal } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 import { QueryGuard } from "@/components/query-guard";
@@ -128,14 +129,18 @@ export function AlertsTable({ status }: { status?: string }) {
     onSuccess: () => {
       utils.forecast.alerts.invalidate();
       utils.forecast.alertStats.invalidate();
+      toast.success("Alerte accusée de réception");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const resolveMutation = trpc.forecast.resolveAlert.useMutation({
     onSuccess: () => {
       utils.forecast.alerts.invalidate();
       utils.forecast.alertStats.invalidate();
+      toast.success("Alerte résolue");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const severityOptions: Option[] = [

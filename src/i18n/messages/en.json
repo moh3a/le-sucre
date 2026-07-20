@@ -214,7 +214,10 @@
     "quantity_decrease": "-",
     "quantity_increase": "+",
     "suggested_item": "Suggested item {count}",
-    "empty_icon": "🛒"
+    "empty_icon": "🛒",
+    "item_updated": "Item updated.",
+    "item_removed": "Item removed from cart.",
+    "promo_applied": "Promo code applied."
   },
   "category": {
     "not_found": "Category not found",
@@ -956,7 +959,30 @@
     "request_timed_out": "Request timed out.",
     "slow_connection": "Slow connection detected.",
     "pending_changes": "Pending changes",
-    "operation_blocked_offline": "This action is not available offline."
+    "operation_blocked_offline": "This action is not available offline.",
+    "undo": "Undo",
+    "action_completed": "Action completed",
+    "action_reverted": "Action reverted",
+    "action_failed": "Action failed",
+    "action_failed_description": "An error occurred. Please try again.",
+    "retry_or_refresh": "You can retry or refresh the page.",
+    "deleted": "Deleted",
+    "removed": "Removed",
+    "updated": "Updated",
+    "created": "Created",
+    "saved": "Saved",
+    "item_deleted": "Item deleted successfully.",
+    "item_removed": "Item removed successfully.",
+    "item_updated": "Item updated successfully.",
+    "item_created": "Item created successfully.",
+    "item_saved": "Item saved successfully.",
+    "undo_delete": "Delete",
+    "undo_remove": "Remove",
+    "undo_update": "Edit",
+    "bulk_deleted": "{count} items deleted.",
+    "bulk_action_completed": "Bulk action completed.",
+    "status_updated": "Status updated.",
+    "toggle_updated": "Setting updated."
   },
   "data_table": {
     "no_results": "No results.",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Package, Truck } from "lucide-react";
+import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -31,14 +32,18 @@ export function ProductInventoryPanel({ product_id }: ProductInventoryPanelProps
     onSuccess: async () => {
       await utils.inventory.listByProduct.invalidate({ product_id, warehouse_id: "default" });
       await utils.variants.listSkus.invalidate({ product_id });
+      toast.success(t("stock_updated"));
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const receive = trpc.inventory.receiveStock.useMutation({
     onSuccess: async () => {
       await utils.inventory.listByProduct.invalidate({ product_id, warehouse_id: "default" });
       await utils.variants.listSkus.invalidate({ product_id });
+      toast.success(t("stock_received"));
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const [drafts, set_drafts] = useState<Record<string, { set_qty: string; receive_qty: string }>>(

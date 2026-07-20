@@ -62,6 +62,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { XCircle } from "lucide-react";
 import { formatDate } from "@/lib/format";
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { ProductStatusBadge } from "./product-status-badge";
 
 type ProductRow = {
@@ -281,12 +282,21 @@ function ProductRowActions({ row }: { row: ProductRow }) {
   const tc = useTranslations("common");
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.products.delete.useMutation({
     onSuccess: () => {
-      utils.products.adminList.invalidate();
       setDeleteOpen(false);
-      toast.success(t("delete_confirm_title"));
+      execute_with_undo({
+        description: row.name ?? row.id,
+        execute: async () => {
+          await utils.products.adminList.invalidate();
+        },
+        rollback: () => {
+          utils.products.adminList.invalidate();
+        },
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => toast.error(err.message),
   });
@@ -369,6 +379,7 @@ export function ProductDataTable() {
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("");
   const [bulkDeleteOpen, setBulkDeleteOpen] = React.useState(false);
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   const columns = React.useMemo<ColumnDef<ProductRow>[]>(
     () => [
@@ -526,7 +537,6 @@ export function ProductDataTable() {
 
   const bulk = trpc.products.bulkAction.useMutation({
     onSuccess: (_result, variables) => {
-      utils.products.adminList.invalidate();
       setAssignCategoryOpen(false);
       setSelectedCategoryId("");
       const action_labels: Record<string, string> = {
@@ -535,7 +545,22 @@ export function ProductDataTable() {
         delete: t("delete"),
         assign_category: t("assign_category"),
       };
-      toast.success(`${action_labels[variables.action] ?? tc("actions")} — ${variables.product_ids.length} ${t("selected_count").replace("{count}", "")}`);
+      const count = variables.product_ids.length;
+      if (variables.action === "delete") {
+        execute_with_undo({
+          description: `${count} ${t("selected_count").replace("{count}", "")}`,
+          execute: async () => {
+            await utils.products.adminList.invalidate();
+          },
+          rollback: () => {
+            utils.products.adminList.invalidate();
+          },
+          undoTimeoutMs: 8_000,
+        });
+      } else {
+        utils.products.adminList.invalidate();
+        toast.success(`${action_labels[variables.action] ?? tc("actions")} — ${count} ${t("selected_count").replace("{count}", "")}`);
+      }
     },
     onError: (err) => toast.error(err.message),
   });

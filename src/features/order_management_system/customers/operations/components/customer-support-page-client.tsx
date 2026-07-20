@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Headphones, Loader2, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,9 @@ export function CustomerSupportPageClient() {
       setDescription("");
       setCategory("general");
       setOrderId("");
+      toast.success("Cas créé avec succès");
     },
+    onError: (err) => toast.error(err.message),
   });
   const utils = trpc.useUtils();
 

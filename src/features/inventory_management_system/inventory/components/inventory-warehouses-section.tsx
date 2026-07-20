@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/components/providers/app-providers";
+import { getQueryKey } from "@trpc/react-query";
+import { useOptimisticToggle } from "@/hooks/use-optimistic-mutation";
 import { formatDate } from "@/lib/format";
 import { InventoryWarehouseDialog } from "./inventory-warehouse-dialog";
 import type { WarehouseRow } from "../../warehouses/types";
@@ -23,6 +25,7 @@ export function InventoryWarehousesSection() {
 
   const { data, isLoading } = trpc.warehouses.list.useQuery({ page, limit: 50, include_inactive: true });
   const utils = trpc.useUtils();
+  const { toggle: optimisticToggle } = useOptimisticToggle();
 
   const toggle_active = trpc.warehouses.update.useMutation({
     onSuccess: async () => {
@@ -97,7 +100,13 @@ export function InventoryWarehousesSection() {
                           size="icon"
                           className="h-8 w-8"
                           onClick={() =>
-                            toggle_active.mutate({ id: wh.id, is_active: !wh.is_active })
+                            optimisticToggle({
+                              query_key: getQueryKey(trpc.warehouses.list, { page, limit: 50, include_inactive: true }, "query"),
+                              updater: (old: { items: WarehouseRow[] } | undefined) => old ? { ...old, items: old.items.map((w) => w.id === wh.id ? { ...w, is_active: !wh.is_active } : w) } : { items: [] as WarehouseRow[] },
+                              mutate: () => toggle_active.mutateAsync({ id: wh.id, is_active: !wh.is_active }),
+                              success_key: "toggle_updated",
+                              error_key: "action_failed",
+                            })
                           }
                         >
                           <XCircle className="h-4 w-4" />

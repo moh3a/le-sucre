@@ -49,13 +49,25 @@ export function PaymentDetailClient({ paymentId }: { paymentId: string }) {
   );
 
   const captureMutation = trpc.payments.adminCapture.useMutation({
-    onSuccess: () => utils.payments.adminGet.invalidate(),
+    onSuccess: () => {
+      utils.payments.adminGet.invalidate();
+      toast.success("Paiement capturé");
+    },
+    onError: (err) => toast.error(err.message),
   });
   const cancelMutation = trpc.payments.adminCancel.useMutation({
-    onSuccess: () => utils.payments.adminGet.invalidate(),
+    onSuccess: () => {
+      utils.payments.adminGet.invalidate();
+      toast.success("Paiement annulé");
+    },
+    onError: (err) => toast.error(err.message),
   });
   const retryMutation = trpc.payments.adminRetry.useMutation({
-    onSuccess: () => utils.payments.adminGet.invalidate(),
+    onSuccess: () => {
+      utils.payments.adminGet.invalidate();
+      toast.success("Paiement relancé");
+    },
+    onError: (err) => toast.error(err.message),
   });
   const retryAllFailedMutation = trpc.payments.adminRetryFailed.useMutation({
     onSuccess: () => {

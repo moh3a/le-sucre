@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { useUndoAction } from "@/hooks/use-undo-action";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -98,6 +99,7 @@ type BulkStockFormValues = z.infer<typeof bulk_stock_schema>;
 export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTableProps) {
   const t = useTranslations("variants");
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   const { data, isLoading } = trpc.variants.listSkus.useQuery({ product_id });
   const { data: config } = trpc.variants.getConfig.useQuery({ product_id });
@@ -117,9 +119,17 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
   });
   const delete_sku = trpc.variants.deleteSku.useMutation({
     onSuccess: async () => {
-      toast.success(t("sku_deleted"));
+      execute_with_undo({
+        description: delete_target?.code ?? "",
+        execute: async () => {
+          await invalidate();
+        },
+        rollback: async () => {
+          await invalidate();
+        },
+        undoTimeoutMs: 8_000,
+      });
       set_delete_target(null);
-      await invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -145,8 +155,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     onSuccess: async () => {
       setRowSelection({});
       set_bulk_delete_dialog_open(false);
-      toast.success(t("bulk_delete_success"));
-      await invalidate();
+      execute_with_undo({
+        description: `${selected_ids.length} SKUs`,
+        execute: async () => {
+          await invalidate();
+        },
+        rollback: async () => {
+          await invalidate();
+        },
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => {
       set_bulk_delete_dialog_open(false);

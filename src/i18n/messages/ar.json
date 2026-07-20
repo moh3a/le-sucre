@@ -214,7 +214,10 @@
     "quantity_decrease": "-",
     "quantity_increase": "+",
     "suggested_item": "منتج مقترح {count}",
-    "empty_icon": "🛒"
+    "empty_icon": "🛒",
+    "item_updated": "تم تحديث العنصر.",
+    "item_removed": "تمت إزالة العنصر من السلة.",
+    "promo_applied": "تم تطبيق كود الخصم."
   },
   "category": {
     "not_found": "التصنيف غير موجود",
@@ -875,7 +878,30 @@
     "request_timed_out": "انتهت مهلة الطلب.",
     "slow_connection": "تم اكتشاف اتصال بطيء.",
     "pending_changes": "التغييرات المعلقة",
-    "operation_blocked_offline": "هذا الإجراء غير متاح بدون اتصال."
+    "operation_blocked_offline": "هذا الإجراء غير متاح بدون اتصال.",
+    "undo": "تراجع",
+    "action_completed": "تم تنفيذ الإجراء",
+    "action_reverted": "تم التراجع عن الإجراء",
+    "action_failed": "فشل الإجراء",
+    "action_failed_description": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "retry_or_refresh": "يمكنك إعادة المحاولة أو تحديث الصفحة.",
+    "deleted": "تم الحذف",
+    "removed": "تمت الإزالة",
+    "updated": "تم التحديث",
+    "created": "تم الإنشاء",
+    "saved": "تم الحفظ",
+    "item_deleted": "تم حذف العنصر بنجاح.",
+    "item_removed": "تمت إزالة العنصر بنجاح.",
+    "item_updated": "تم تحديث العنصر بنجاح.",
+    "item_created": "تم إنشاء العنصر بنجاح.",
+    "item_saved": "تم حفظ العنصر بنجاح.",
+    "undo_delete": "حذف",
+    "undo_remove": "إزالة",
+    "undo_update": "تعديل",
+    "bulk_deleted": "تم حذف {count} عناصر.",
+    "bulk_action_completed": "تم تنفيذ الإجراء الجماعي.",
+    "status_updated": "تم تحديث الحالة.",
+    "toggle_updated": "تم تحديث الإعداد."
   },
   "data_table": {
     "no_results": "لا توجد نتائج.",

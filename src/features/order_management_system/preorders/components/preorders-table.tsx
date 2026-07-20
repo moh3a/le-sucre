@@ -6,6 +6,7 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Calendar, Download, ExternalLink, MoreHorizontal, XCircle } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { toast } from "sonner";
 
 import { useTranslations } from "next-intl";
 import { QueryGuard } from "@/components/query-guard";
@@ -166,7 +167,9 @@ export function PreordersTable() {
     onSuccess: () => {
       utils.preorders.adminListAllocations.invalidate();
       setEtaDialog(null);
+      toast.success("Date de disponibilité mise à jour");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const { data, isLoading } = trpc.preorders.adminListAllocations.useQuery({

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, MapPin, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { useUndoAction } from "@/hooks/use-undo-action";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export function AddressFormCard({
 }) {
   const t = useTranslations("addresses");
   const [open, setOpen] = useState(false);
+  const { execute_with_undo } = useUndoAction();
   const createAddress = trpc.profile.createAddress.useMutation({
     onSuccess: () => {
       toast.success(t("address_added"));
@@ -65,9 +67,17 @@ export function AddressFormCard({
   });
   const deleteAddress = trpc.profile.deleteAddress.useMutation({
     onSuccess: () => {
-      toast.success(t("address_deleted"));
-      onDeleted();
       setOpen(false);
+      execute_with_undo({
+        description: address?.label ?? address?.address_line_1 ?? "",
+        execute: () => {
+          onDeleted();
+        },
+        rollback: () => {
+          onDeleted();
+        },
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => toast.error(err.message),
   });

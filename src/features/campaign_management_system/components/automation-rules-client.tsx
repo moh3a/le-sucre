@@ -5,6 +5,7 @@ import { QueryGuard } from "@/components/query-guard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useUndoAction } from "@/hooks/use-undo-action";
 
 const TRIGGER_OPTIONS = [
   "campaign.activated",
@@ -74,8 +75,21 @@ export function AutomationRulesClient() {
   const toggle = trpc.campaigns.automationRuleToggle.useMutation({
     onSuccess: () => rulesQuery.refetch(),
   });
+  const { execute_with_undo } = useUndoAction();
   const del = trpc.campaigns.automationRuleDelete.useMutation({
-    onSuccess: () => rulesQuery.refetch(),
+    onSuccess: (_data, variables) => {
+      const rule = rulesQuery.data?.find((r) => r.id === variables.id);
+      execute_with_undo({
+        description: rule?.name ?? variables.id,
+        execute: async () => {
+          await rulesQuery.refetch();
+        },
+        rollback: async () => {
+          await rulesQuery.refetch();
+        },
+        undoTimeoutMs: 8_000,
+      });
+    },
   });
 
   const [showForm, setShowForm] = useState(false);

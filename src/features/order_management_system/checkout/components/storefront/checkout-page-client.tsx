@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth/client";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -74,15 +75,19 @@ export function CheckoutPageClient({ cartId, locale }: CheckoutPageClientProps) 
         discount_label: first?.label ?? "Réduction",
         discount_amount: Number(promoData.discount_total ?? 0),
       });
+      toast.success("Code promo appliqué");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const placeOrder = trpc.checkout.place.useMutation({
     onSuccess: (result) => {
       if (result) {
+        toast.success("Commande passée avec succès");
         router.push(`/account/orders/${result.order.id}`);
       }
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const items = useMemo(() => cartQuery.data?.items ?? [], [cartQuery.data?.items]);

@@ -49,6 +49,8 @@ import { StatsGrid } from "@/components/console/stats-grid";
 import { formatDate } from "@/lib/format";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
+import { getQueryKey } from "@trpc/react-query";
+import { useOptimisticToggle } from "@/hooks/use-optimistic-mutation";
 
 type FeatureFlagRow = {
   id: string;
@@ -294,6 +296,7 @@ export function FeatureFlagListPage() {
   const { data: stats, isLoading: statsLoading } = trpc.featureFlags.stats.useQuery();
 
   const utils = trpc.useUtils();
+  const { toggle: optimisticToggle } = useOptimisticToggle();
 
   const toggle = trpc.featureFlags.toggle.useMutation({
     onSuccess: () => {
@@ -340,7 +343,15 @@ export function FeatureFlagListPage() {
           <div className="flex items-center gap-2">
             <Switch
               checked={row.original.enabled}
-              onCheckedChange={(checked) => toggle.mutate({ id: row.original.id, enabled: checked })}
+              onCheckedChange={(checked) =>
+                optimisticToggle({
+                  query_key: getQueryKey(trpc.featureFlags.list, { page, limit: per_page, search: search || undefined }, "query"),
+                  updater: (old: { items: FeatureFlagRow[] } | undefined) => old ? { ...old, items: old.items.map((f) => f.id === row.original.id ? { ...f, enabled: checked } : f) } : { items: [] as FeatureFlagRow[] },
+                  mutate: () => toggle.mutateAsync({ id: row.original.id, enabled: checked }),
+                  success_key: "toggle_updated",
+                  error_key: "action_failed",
+                })
+              }
             />
             <Badge variant={row.original.enabled ? "default" : "secondary"} className="text-xs">
               {row.original.enabled ? t("enabled_badge") : t("disabled_badge")}
@@ -382,7 +393,15 @@ export function FeatureFlagListPage() {
                 {t("edit_button")}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => toggle.mutate({ id: row.original.id, enabled: !row.original.enabled })}
+                onClick={() =>
+                  optimisticToggle({
+                    query_key: getQueryKey(trpc.featureFlags.list, { page, limit: per_page, search: search || undefined }, "query"),
+                    updater: (old: { items: FeatureFlagRow[] } | undefined) => old ? { ...old, items: old.items.map((f) => f.id === row.original.id ? { ...f, enabled: !row.original.enabled } : f) } : { items: [] as FeatureFlagRow[] },
+                    mutate: () => toggle.mutateAsync({ id: row.original.id, enabled: !row.original.enabled }),
+                    success_key: "toggle_updated",
+                    error_key: "action_failed",
+                  })
+                }
               >
                 {row.original.enabled ? (
                   <>
@@ -409,7 +428,7 @@ export function FeatureFlagListPage() {
         ),
       },
     ],
-    [toggle, t],
+    [optimisticToggle, toggle, t],
   );
 
   const items = (data?.items ?? []) as FeatureFlagRow[];

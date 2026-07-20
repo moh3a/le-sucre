@@ -28,6 +28,8 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
+import { getQueryKey } from "@trpc/react-query";
+import { useOptimisticToggle } from "@/hooks/use-optimistic-mutation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,6 +84,7 @@ export function BlacklistPageClient() {
   const { data: stats, isLoading: statsLoading } = trpc.blacklist.stats.useQuery();
 
   const utils = trpc.useUtils();
+  const { toggle: optimisticToggle } = useOptimisticToggle();
 
   const toggle = trpc.blacklist.toggle.useMutation({
     onSuccess: () => {
@@ -174,7 +177,15 @@ export function BlacklistPageClient() {
                 {t("edit_button")}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => toggle.mutate({ id: row.original.id })}
+                onClick={() =>
+                  optimisticToggle({
+                    query_key: getQueryKey(trpc.blacklist.list, { page, limit: per_page, search: search || undefined }, "query"),
+                    updater: (old: { entries: BlacklistRow[] } | undefined) => old ? { ...old, entries: old.entries.map((e) => e.id === row.original.id ? { ...e, is_active: !e.is_active } : e) } : { entries: [] as BlacklistRow[] },
+                    mutate: () => toggle.mutateAsync({ id: row.original.id }),
+                    success_key: "toggle_updated",
+                    error_key: "action_failed",
+                  })
+                }
               >
                 {row.original.is_active ? (
                   <>
@@ -201,7 +212,7 @@ export function BlacklistPageClient() {
         ),
       },
     ],
-    [toggle, t],
+    [optimisticToggle, toggle, t],
   );
 
   const items = (data?.entries ?? []) as BlacklistRow[];

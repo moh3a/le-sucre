@@ -17,6 +17,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,7 @@ type BannerFormState = {
 export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
   const t = useTranslations("campaigns");
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
   const [selectedBanner, setSelectedBanner] = useState<BannerRow | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -92,9 +94,17 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
   });
 
   const delete_banner = trpc.campaigns.deleteBanner.useMutation({
-    onSuccess: () => {
-      toast.success(t("banner_deleted"));
-      utils.campaigns.byId.invalidate({ id: campaign_id });
+    onSuccess: (_data, variables) => {
+      execute_with_undo({
+        description: variables.id,
+        execute: async () => {
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        rollback: async () => {
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        undoTimeoutMs: 8_000,
+      });
     },
     onError: (err) => toast.error(err.message),
   });

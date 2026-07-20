@@ -35,6 +35,7 @@ import { DataTableSortList } from "@/features/data-table/components/data-table-s
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
 import { DataTableSkeleton } from "@/features/data-table/components/data-table-skeleton";
 import { useDataTable } from "@/features/data-table/use-data-table";
+import { useUndoAction } from "@/hooks/use-undo-action";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -328,11 +329,21 @@ function DeleteRuleDialog({
 }) {
   const t = useTranslations("routing_rules");
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   const del = trpc.operationsWorkflows.routingRuleDelete.useMutation({
     onSuccess: () => {
+      execute_with_undo({
+        description: rule?.name ?? rule?.id ?? "",
+        execute: async () => {
+          await utils.operationsWorkflows.routingRulesList.invalidate();
+        },
+        rollback: async () => {
+          await utils.operationsWorkflows.routingRulesList.invalidate();
+        },
+        undoTimeoutMs: 8_000,
+      });
       toast.success(t("delete_success"));
-      utils.operationsWorkflows.routingRulesList.invalidate();
       onOpenChange(false);
     },
     onError: (err) => toast.error(err.message),

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Bookmark, Plus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useUndoAction } from "@/hooks/use-undo-action";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -31,9 +32,24 @@ export function CustomerCollectionsPageClient() {
     page: 1,
     limit: 50,
   });
-  const createMut = trpc.wishlistManagement.collections.create.useMutation();
-  const deleteMut = trpc.wishlistManagement.collections.delete.useMutation();
+  const { execute_with_undo } = useUndoAction();
   const utils = trpc.useUtils();
+  const createMut = trpc.wishlistManagement.collections.create.useMutation();
+  const deleteMut = trpc.wishlistManagement.collections.delete.useMutation({
+    onSuccess: () => {
+      execute_with_undo({
+        description: deleteTarget?.name ?? "",
+        execute: () => {
+          utils.wishlistManagement.collections.list.invalidate();
+        },
+        rollback: () => {
+          utils.wishlistManagement.collections.list.invalidate();
+        },
+        undoTimeoutMs: 8_000,
+      });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   async function handleCreate() {
     if (!newName.trim()) return;
@@ -48,13 +64,7 @@ export function CustomerCollectionsPageClient() {
   }
 
   async function handleDelete(id: string) {
-    try {
-      await deleteMut.mutateAsync({ id });
-      toast.success(t("collection_deleted"));
-      utils.wishlistManagement.collections.list.invalidate();
-    } catch {
-      toast.error(t("collection_deleted"));
-    }
+    await deleteMut.mutateAsync({ id });
   }
 
   return (
@@ -134,9 +144,9 @@ export function CustomerCollectionsPageClient() {
             <AlertDialogCancel>{t("edit")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
+              onClick={async () => {
                 if (deleteTarget) {
-                  handleDelete(deleteTarget.id);
+                  await handleDelete(deleteTarget.id);
                   setDeleteTarget(null);
                 }
               }}

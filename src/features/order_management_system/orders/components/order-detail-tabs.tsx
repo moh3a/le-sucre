@@ -63,7 +63,13 @@ type EditableItem = {
 export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const t = useTranslations("orders");
   const { data, isLoading, refetch } = trpc.orders.adminGet.useQuery({ order_id });
-  const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => refetch() });
+  const transition = trpc.orders.adminTransition.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success(t("status_changed"));
+    },
+    onError: (err) => toast.error(t("error_prefix", { message: err.message })),
+  });
   const STATUS_OPTIONS = STATUS_OPTIONS_VALUES.map((value) => ({
     value,
     label: t(`status_${value}`),

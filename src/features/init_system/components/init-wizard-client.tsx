@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CircleAlert, CheckCircle2, Database, Shield, User, Sparkles, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -67,26 +68,38 @@ export function InitWizardClient() {
   const runMigrations = trpc.init.runMigrations.useMutation({
     onSuccess: () => {
       setError(null);
+      toast.success("Migrations effectuées");
       advance("database");
     },
-    onError: (e) => setError(e.message),
+    onError: (e) => {
+      setError(e.message);
+      toast.error(e.message);
+    },
   });
 
   const createAdmin = trpc.init.createAdmin.useMutation({
     onSuccess: (data) => {
       setAdminUserId(data.user_id);
       setError(null);
+      toast.success("Compte admin créé");
       advance("admin");
     },
-    onError: (e) => setError(e.message),
+    onError: (e) => {
+      setError(e.message);
+      toast.error(e.message);
+    },
   });
 
   const seedRbac = trpc.init.seedRbac.useMutation({
     onSuccess: () => {
       setError(null);
+      toast.success("Rôles et permissions configurés");
       advance("seed");
     },
-    onError: (e) => setError(e.message),
+    onError: (e) => {
+      setError(e.message);
+      toast.error(e.message);
+    },
   });
 
   const ensureStatus = trpc.init.ensureStatus.useMutation({});

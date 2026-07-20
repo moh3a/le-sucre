@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Trash2, LinkIcon, Check, Download, FileVideo, FileText, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useUndoAction } from "@/hooks/use-undo-action";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
   const [page, set_page] = useState(1);
   const [copied_id, set_copied_id] = useState<string | null>(null);
   const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
 
   const { data, isLoading } = trpc.media.list.useQuery({
     search,
@@ -66,8 +68,18 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
 
   const delete_media = trpc.media.delete.useMutation({
     onSuccess: () => {
-      utils.media.list.invalidate();
-      utils.media.stats.invalidate();
+      execute_with_undo({
+        description: delete_media.variables?.id ?? "media",
+        execute: async () => {
+          await utils.media.list.invalidate();
+          await utils.media.stats.invalidate();
+        },
+        rollback: () => {
+          utils.media.list.invalidate();
+          utils.media.stats.invalidate();
+        },
+        undoTimeoutMs: 8_000,
+      });
     },
   });
 
