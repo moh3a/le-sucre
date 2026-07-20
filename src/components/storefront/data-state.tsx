@@ -1,7 +1,11 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { CircleAlert, PackageOpen } from "lucide-react";
+import { CircleAlert, PackageOpen, RefreshCw } from "lucide-react";
 import {
   Empty,
   EmptyHeader,
@@ -31,8 +35,20 @@ interface DataStateProps {
   errorTitle?: string;
   /** Icon for empty state */
   emptyIcon?: ReactNode;
+  /** Called when retry button is clicked */
+  onRetry?: () => void;
   /** Children rendered on success (not loading, no error, not empty) */
   children: ReactNode;
+}
+
+function extract_error_message(error: unknown): string {
+  if (!error) return "";
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const err = error as Record<string, unknown>;
+    if (typeof err.message === "string") return err.message;
+  }
+  return "";
 }
 
 export function DataState({
@@ -42,12 +58,15 @@ export function DataState({
   emptyState,
   loadingState,
   errorState,
-  emptyTitle = "Aucune donnée",
-  emptyDescription = "Aucun élément à afficher pour le moment.",
-  errorTitle = "Erreur",
+  emptyTitle,
+  emptyDescription,
+  errorTitle,
   emptyIcon,
+  onRetry,
   children,
 }: DataStateProps) {
+  const t = useTranslations("common");
+
   if (isLoading) {
     return (
       loadingState ?? (
@@ -64,11 +83,24 @@ export function DataState({
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
-            <div className="flex flex-col gap-1">
-              <AlertTitle>{errorTitle}</AlertTitle>
-              <AlertDescription>
-                {error instanceof Error ? error.message : "Une erreur inattendue est survenue"}
-              </AlertDescription>
+            <div className="flex flex-col gap-2">
+              <div>
+                <AlertTitle>{errorTitle ?? t("error")}</AlertTitle>
+                <AlertDescription>
+                  {extract_error_message(error) || t("error_description")}
+                </AlertDescription>
+              </div>
+              {onRetry && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 self-start"
+                  onClick={onRetry}
+                >
+                  <RefreshCw className="size-3.5" />
+                  {t("retry")}
+                </Button>
+              )}
             </div>
           </Alert>
         </div>
@@ -84,7 +116,7 @@ export function DataState({
             <EmptyMedia variant="icon">
               {emptyIcon ?? <PackageOpen className="size-6" />}
             </EmptyMedia>
-            <EmptyTitle>{emptyTitle}</EmptyTitle>
+            <EmptyTitle>{emptyTitle ?? t("no_results")}</EmptyTitle>
             {emptyDescription && <EmptyDescription>{emptyDescription}</EmptyDescription>}
           </EmptyHeader>
         </Empty>

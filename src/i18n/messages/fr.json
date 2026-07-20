@@ -1118,7 +1118,13 @@
     "session_expired_description": "Votre session a expiré ou vous n'êtes pas connecté. Veuillez vous reconnecter.",
     "unexpected_error": "Une erreur inattendue est survenue",
     "error": "Erreur",
-    "updating": "Mise à jour…"
+    "updating": "Mise à jour…",
+    "retry": "Réessayer",
+    "retrying": "Nouvelle tentative…",
+    "error_description": "Une erreur est survenue lors du chargement des données.",
+    "go_back": "Retour",
+    "continue_editing": "Continuer l'édition",
+    "something_went_wrong": "Quelque chose s'est mal passé"
   },
   "data_table": {
     "no_results": "Aucun résultat.",

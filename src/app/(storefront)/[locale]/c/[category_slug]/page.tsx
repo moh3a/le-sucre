@@ -90,13 +90,26 @@ export async function generateMetadata({ params }: Props) {
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { locale, category_slug } = await params;
   const t = await getTranslations({ locale, namespace: "layout" });
-  const category = await getCategory(category_slug);
+
+  let category: Awaited<ReturnType<typeof getCategory>>;
+  try {
+    category = await getCategory(category_slug);
+  } catch {
+    notFound();
+  }
   if (!category) notFound();
 
-  const [subcategories, brandsForCategory] = await Promise.all([
-    getSubcategories(category.id),
-    getBrandsForCategory(category.id, category.path),
-  ]);
+  let subcategories: Awaited<ReturnType<typeof getSubcategories>> = [];
+  let brandsForCategory: Awaited<ReturnType<typeof getBrandsForCategory>> = [];
+  try {
+    [subcategories, brandsForCategory] = await Promise.all([
+      getSubcategories(category.id),
+      getBrandsForCategory(category.id, category.path),
+    ]);
+  } catch {
+    subcategories = [];
+    brandsForCategory = [];
+  }
 
   const sp = await searchParams;
   const filters = parse_catalog_search_params(sp);

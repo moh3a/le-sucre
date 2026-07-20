@@ -12,8 +12,25 @@ export const trpc = createTRPCReact<AppRouter>({
   abortOnUnmount: true,
 });
 
+function create_query_client() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 3,
+        retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30_000),
+        staleTime: 30_000,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+}
+
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const [query_client] = useState(() => new QueryClient());
+  const [query_client] = useState(create_query_client);
   const [trpc_client] = useState(() =>
     trpc.createClient({
       links: [
@@ -22,9 +39,6 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           transformer: superjson,
         }),
         loggerLink({
-          // enabled: (opts) =>
-          //   process.env.NODE_ENV === "development" ||
-          //   (opts.direction === "down" && opts.result instanceof Error),
           enabled: () => true,
         }),
       ],

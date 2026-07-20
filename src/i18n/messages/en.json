@@ -942,7 +942,13 @@
     "session_expired_description": "Your session has expired or you are not logged in. Please log in again.",
     "unexpected_error": "An unexpected error occurred",
     "error": "Error",
-    "updating": "Updating…"
+    "updating": "Updating…",
+    "retry": "Retry",
+    "retrying": "Retrying…",
+    "error_description": "An error occurred while loading data.",
+    "go_back": "Go back",
+    "continue_editing": "Continue editing",
+    "something_went_wrong": "Something went wrong"
   },
   "data_table": {
     "no_results": "No results.",

@@ -85,14 +85,25 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
   const { locale, category_slug, subcategory_slug } = await params;
   const t = await getTranslations({ locale, namespace: "layout" });
 
-  const [category, subcategory] = await Promise.all([
-    getCategoryBySlug(category_slug),
-    getCategoryBySlug(subcategory_slug),
-  ]);
+  let category: Awaited<ReturnType<typeof getCategoryBySlug>>;
+  let subcategory: Awaited<ReturnType<typeof getCategoryBySlug>>;
+  try {
+    [category, subcategory] = await Promise.all([
+      getCategoryBySlug(category_slug),
+      getCategoryBySlug(subcategory_slug),
+    ]);
+  } catch {
+    notFound();
+  }
 
   if (!category || !subcategory) notFound();
 
-  const brandsForCategory = await getBrandsForCategory(subcategory.id, subcategory.path);
+  let brandsForCategory: Awaited<ReturnType<typeof getBrandsForCategory>> = [];
+  try {
+    brandsForCategory = await getBrandsForCategory(subcategory.id, subcategory.path);
+  } catch {
+    brandsForCategory = [];
+  }
 
   const sp = await searchParams;
   const filters = parse_catalog_search_params(sp);

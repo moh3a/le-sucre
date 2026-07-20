@@ -861,7 +861,13 @@
     "session_expired_description": "انتهت صلاحية جلستك أو لم تقم بتسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.",
     "unexpected_error": "حدث خطأ غير متوقع",
     "error": "خطأ",
-    "updating": "جارٍ التحديث…"
+    "updating": "جارٍ التحديث…",
+    "retry": "إعادة المحاولة",
+    "retrying": "جارٍ إعادة المحاولة…",
+    "error_description": "حدث خطأ أثناء تحميل البيانات.",
+    "go_back": "رجوع",
+    "continue_editing": "متابعة التحرير",
+    "something_went_wrong": "حدث خطأ ما"
   },
   "data_table": {
     "no_results": "لا توجد نتائج.",

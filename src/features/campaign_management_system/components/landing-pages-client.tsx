@@ -1,6 +1,8 @@
 "use client";
 
 import { trpc } from "@/components/providers/app-providers";
+import { QueryGuard } from "@/components/query-guard";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 type LandingPageItem = {
@@ -10,47 +12,67 @@ type LandingPageItem = {
   status: string;
 };
 
+function LandingPagesSkeleton() {
+  return (
+    <div className="rounded-lg border">
+      <div className="divide-y">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center justify-between px-4 py-3">
+            <div className="space-y-1">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function LandingPagesClient() {
-  const { data: pages } = trpc.campaigns.landingPagesAdmin.useQuery();
+  const query = trpc.campaigns.landingPagesAdmin.useQuery();
 
   return (
     <div className="space-y-6 p-6">
       <h1 className="text-2xl font-bold">Landing Pages</h1>
-      <p className="text-sm text-gray-500">Manage campaign landing pages.</p>
+      <p className="text-muted-foreground text-sm">Manage campaign landing pages.</p>
 
-      <div className="rounded-lg border">
-        <div className="divide-y">
-          {pages?.items?.map((p: LandingPageItem) => (
-            <div key={p.id} className="flex items-center justify-between px-4 py-3">
-              <div>
-                <Link
-                  href={`/console/campaigns/${p.id}`}
-                  className="text-sm font-medium text-blue-600 hover:underline"
-                >
-                  {p.name}
-                </Link>
-                <p className="text-xs text-gray-500">
-                  /{p.slug} · {p.status}
-                </p>
+      <QueryGuard query={query} loadingFallback={<LandingPagesSkeleton />}>
+        <div className="rounded-lg border">
+          <div className="divide-y">
+            {query.data?.items?.map((p: LandingPageItem) => (
+              <div key={p.id} className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <Link
+                    href={`/console/campaigns/${p.id}`}
+                    className="text-sm font-medium text-blue-600 hover:underline"
+                  >
+                    {p.name}
+                  </Link>
+                  <p className="text-muted-foreground text-xs">
+                    /{p.slug} · {p.status}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${statusColor(p.status)}`}>
+                    {p.status}
+                  </span>
+                  <Link
+                    href={`/console/campaigns/${p.id}`}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    Edit
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`rounded-full px-2 py-0.5 text-xs ${statusColor(p.status)}`}>
-                  {p.status}
-                </span>
-                <Link
-                  href={`/console/campaigns/${p.id}`}
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  Edit
-                </Link>
-              </div>
-            </div>
-          ))}
-          {(!pages || pages.items?.length === 0) && (
-            <p className="p-4 text-sm text-gray-400">No landing pages</p>
-          )}
+            ))}
+            {query.data?.items?.length === 0 && (
+              <p className="text-muted-foreground p-4 text-sm">No landing pages</p>
+            )}
+          </div>
         </div>
-      </div>
+      </QueryGuard>
     </div>
   );
 }

@@ -28,7 +28,12 @@ export default async function CategoriesPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "category" });
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
-  const tree = await category_service.get_full_tree(true);
+  let tree: Awaited<ReturnType<typeof category_service.get_full_tree>> = [];
+  try {
+    tree = await category_service.get_full_tree(true);
+  } catch {
+    tree = [];
+  }
 
   const totalCategories = tree.length;
   const featuredCategories = tree.slice(0, 4);
