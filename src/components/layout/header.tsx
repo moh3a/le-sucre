@@ -1,7 +1,7 @@
 "use client";
 
 import { Home, LayoutGrid, Search, ShoppingCart, User, LogIn } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
@@ -24,12 +24,15 @@ import { QueryGuard } from "@/components/query-guard";
 import { AuthSheet } from "@/features/authentication_and_authorization/auth/components/auth-sheet";
 import { cn } from "@/lib/utils";
 import { CatalogSearchBar } from "@/features/product_information_management/catalog_discovery/components/catalog-search-bar";
+import { MegaMenuDesktop } from "@/components/layout/mega-menu";
+import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 
 interface HeaderProps {
   locale?: string;
+  categories?: CategoryTreeNode[];
 }
 
-export function Header({ locale = "fr" }: HeaderProps) {
+export function Header({ locale = "fr", categories = [] }: HeaderProps) {
   const t = useTranslations("layout");
   const pathname = usePathname();
   const router = useRouter();
@@ -78,8 +81,8 @@ export function Header({ locale = "fr" }: HeaderProps) {
               </div>
               <div className="flex items-center gap-1">
                 <Skeleton className="hidden h-8 w-8 rounded-md md:block" />
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <div className="hidden items-center gap-1 md:flex">
+                <Skeleton className="hidden h-8 w-8 rounded-full md:block" />
+                <div className="flex items-center gap-1">
                   <Skeleton className="h-8 w-8 rounded-md" />
                   <Skeleton className="h-8 w-[70px] rounded-md" />
                 </div>
@@ -111,20 +114,12 @@ export function Header({ locale = "fr" }: HeaderProps) {
               </span>
             </Link>
             {/* Desktop nav links */}
-            <nav className="hidden items-center gap-6 md:flex">
-              <Link
-                href="/categories"
-                className={cn(
-                  "hover:text-brand-olive-leaf text-sm font-medium transition-colors",
-                  isActive("/categories") ? "text-brand-olive-leaf" : "text-muted-foreground",
-                )}
-              >
-                {t("categories")}
-              </Link>
+            <nav className="hidden items-center gap-2 md:flex">
+              <MegaMenuDesktop categories={categories} locale={locale} />
               <Link
                 href="/promotions"
                 className={cn(
-                  "hover:text-brand-olive-leaf text-sm font-medium transition-colors",
+                  "hover:text-brand-olive-leaf rounded-2xl px-4 py-2 text-sm font-medium transition-colors",
                   isActive("/promotions") ? "text-brand-olive-leaf" : "text-muted-foreground",
                 )}
               >
@@ -148,80 +143,82 @@ export function Header({ locale = "fr" }: HeaderProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-1">
-            {/* Cart */}
-            <Button variant="ghost" size="icon" asChild className="relative shrink-0">
+            {/* Cart — desktop only */}
+            <Button variant="ghost" size="icon" asChild className="relative hidden shrink-0 md:inline-flex">
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
-                <Badge className="bg-brand-crimson-violet absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-0 p-0 text-xs text-white">
+                <Badge className="bg-brand-crimson-violet text-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-0 p-0 text-xs">
                   0
                 </Badge>
               </Link>
             </Button>
 
-            {/* Account */}
-            {session?.user?.isAnonymous ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/orders">{t("my_orders")}</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account">{t("my_account")}</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-brand-olive-leaf font-medium"
-                    onClick={() => setAuthSheetOpen(true)}
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    {t("sign_in_sign_up") || "Se connecter / S'inscrire"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/account">{t("my_account")}</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/orders">{t("my_orders")}</Link>
-                  </DropdownMenuItem>
-                  {session.user?.role === "admin" && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/console">{t("administration")}</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-destructive"
-                    onClick={() => authClient.signOut()}
-                  >
-                    {t("sign_out")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
+            {/* Account — desktop only */}
+            <div className="hidden md:block">
+              {session?.user?.isAnonymous ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="shrink-0">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuItem asChild>
+                      <Link href="/account/orders">{t("my_orders")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/account">{t("my_account")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-brand-olive-leaf font-medium"
+                      onClick={() => setAuthSheetOpen(true)}
+                    >
+                      <LogIn className="mr-2 h-4 w-4" />
+                      {t("sign_in_sign_up") || "Se connecter / S'inscrire"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : session ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="shrink-0 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/account">{t("my_account")}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/account/orders">{t("my_orders")}</Link>
+                    </DropdownMenuItem>
+                    {session.user?.role === "admin" && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/console">{t("administration")}</Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => authClient.signOut()}
+                    >
+                      {t("sign_out")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+            </div>
 
             <AuthSheet open={authSheetOpen} onOpenChange={setAuthSheetOpen} />
 
-            {/* Theme toggle & locale selector — desktop only */}
-            <div className="hidden items-center gap-1 md:flex">
+            {/* Theme toggle & locale selector — both mobile and desktop */}
+            <div className="flex items-center gap-1">
               <ThemeToggle />
               <LocaleSelector />
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   parseAsArrayOf,
   parseAsBoolean,
@@ -22,18 +23,42 @@ import type { CatalogSort } from "../types";
 import type { CatalogSearchInput, CatalogFacetsInput } from "../models/search.dto";
 import type { AppLocale } from "@/i18n/config";
 
+interface SubcategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
+interface BrandCardItem {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+}
+
 interface CatalogSearchPageClientProps {
   locale: AppLocale;
   initial?: Partial<CatalogSearchInput>;
   category_id?: string;
+  category_slug?: string;
   category_name?: string;
+  category_description?: string | null;
+  subcategories?: SubcategoryItem[];
+  brands?: BrandCardItem[];
+  header?: React.ReactNode;
 }
 
 export function CatalogSearchPageClient({
   locale,
   initial,
   category_id,
+  category_slug,
   category_name,
+  category_description,
+  subcategories = [],
+  brands = [],
+  header,
 }: CatalogSearchPageClientProps) {
   const t = useTranslations("catalog");
 
@@ -108,6 +133,8 @@ export function CatalogSearchPageClient({
   return (
     <QueryGuard query={search_query} loadingFallback={<SearchPageSkeleton />}>
       <div className="container mx-auto min-h-screen px-4 py-6">
+        {header}
+
         {/* Header: title + sort + mobile filter */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -156,6 +183,81 @@ export function CatalogSearchPageClient({
             />
           </div>
         </div>
+
+        {/* Category description */}
+        {!params.q && category_description && (
+          <p className="text-muted-foreground mb-6 max-w-3xl text-sm leading-relaxed">
+            {category_description}
+          </p>
+        )}
+
+        {/* Subcategories + Brands cards */}
+        {!params.q && (subcategories.length > 0 || brands.length > 0) && (
+          <div className="mb-8 space-y-6">
+            {subcategories.length > 0 && (
+              <div>
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("subcategories")}
+                </h2>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {subcategories.map((sub) => (
+                    <Link
+                      key={sub.id}
+                      href={`/c/${category_slug}/${sub.slug}`}
+                      className="group flex items-center gap-3 rounded-2xl border p-3 transition-colors hover:bg-muted"
+                    >
+                      <div className="bg-muted group-hover:bg-background flex size-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold uppercase text-muted-foreground transition-colors">
+                        {sub.name.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{sub.name}</p>
+                        {sub.description && (
+                          <p className="text-muted-foreground truncate text-xs">{sub.description}</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {brands.length > 0 && (
+              <div>
+                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("brands")}
+                </h2>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {brands.map((brand) => (
+                    <button
+                      key={brand.id}
+                      type="button"
+                      onClick={() => setParams({ brand: [brand.id], page: 1 })}
+                      className={`group flex items-center gap-3 rounded-2xl border p-3 transition-colors hover:bg-muted ${
+                        params.brand.includes(brand.id) ? "border-primary bg-muted" : ""
+                      }`}
+                    >
+                      <div className="bg-muted group-hover:bg-background flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors">
+                        {brand.logo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={brand.logo_url}
+                            alt={brand.name}
+                            className="size-7 object-contain"
+                          />
+                        ) : (
+                          <span className="text-xs font-bold uppercase text-muted-foreground">
+                            {brand.name.slice(0, 2)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-sm font-medium">{brand.name}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex gap-8">
           {/* Desktop sidebar */}

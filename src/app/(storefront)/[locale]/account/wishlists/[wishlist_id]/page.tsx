@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 import { CustomerWishlistDetailPageClient } from "@/features/wishlist_management_system/components/customer-wishlist-detail-page-client";
 
@@ -13,8 +14,14 @@ export async function generateMetadata({ params }: Props) {
 export default async function CustomerWishlistDetailPage({
   params,
 }: {
-  params: Promise<{ wishlist_id: string }>;
+  params: Promise<{ locale: string; wishlist_id: string }>;
 }) {
-  const { wishlist_id } = await params;
-  return <CustomerWishlistDetailPageClient wishlistId={wishlist_id} />;
+  const { locale, wishlist_id } = await params;
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  return (
+    <>
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("my_wishlists"), href: "/account/wishlists" }, { label: tBc("detail") }]} />
+      <CustomerWishlistDetailPageClient wishlistId={wishlist_id} />
+    </>
+  );
 }

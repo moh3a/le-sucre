@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { CustomerSupportPageClient } from "@/features/order_management_system/customers/operations/components/customer-support-page-client";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -9,6 +10,13 @@ export async function generateMetadata({ params }: Props) {
   return { title: t("title") };
 }
 
-export default function SupportPage() {
-  return <CustomerSupportPageClient />;
+export default async function SupportPage({ params }: Props) {
+  const { locale } = await params;
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  return (
+    <>
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("support") }]} />
+      <CustomerSupportPageClient />
+    </>
+  );
 }

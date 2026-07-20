@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { FlashSalesContent } from "./flash-sales-client";
 import type { AppLocale } from "@/i18n/config";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = {
   params: Promise<{ locale: AppLocale }>;
@@ -14,5 +15,11 @@ export async function generateMetadata({ params }: Props): Promise<import("next"
 
 export default async function FlashSalesPage({ params }: Props) {
   const { locale } = await params;
-  return <FlashSalesContent locale={locale} />;
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  return (
+    <>
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("flash_sales") }]} />
+      <FlashSalesContent locale={locale} />
+    </>
+  );
 }

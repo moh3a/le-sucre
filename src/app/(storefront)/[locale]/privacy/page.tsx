@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { APP_NAME } from "@/constants";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -29,9 +30,11 @@ export async function generateMetadata({ params }: Props): Promise<import("next"
 export default async function PrivacyPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "privacy" });
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("privacy") }]} />
       <section className="text-center">
         <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground text-sm">{t("subtitle")}</p>

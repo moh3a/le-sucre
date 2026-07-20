@@ -12,7 +12,7 @@ export async function Footer() {
       title: t("boutique_title"),
       links: [
         { href: "/search", label: t("all_products") },
-        { href: "/brands", label: t("categories") },
+        { href: "/categories", label: t("categories") },
         { href: "/promotions", label: t("promotions") },
         { href: "/new-arrivals", label: t("new_arrivals") },
       ],

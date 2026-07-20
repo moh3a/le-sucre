@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { product_service } from "@/features/product_information_management/products/services/product.service";
 import { ProductDetailClient } from "./product-detail-client";
 import { AppLocale } from "@/i18n/config";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = {
   params: Promise<{ locale: string; product_slug: string }>;
@@ -23,5 +24,11 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ProductDetailPage({ params }: Props) {
   const { locale, product_slug } = await params;
-  return <ProductDetailClient slug={product_slug} locale={locale as AppLocale} />;
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  return (
+    <>
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("detail") }]} />
+      <ProductDetailClient slug={product_slug} locale={locale as AppLocale} />
+    </>
+  );
 }

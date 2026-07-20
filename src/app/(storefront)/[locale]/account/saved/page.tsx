@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 import { CustomerSavedItemsPageClient } from "@/features/wishlist_management_system/components/customer-saved-items-page-client";
 
@@ -11,6 +12,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t("saved_title") };
 }
 
-export default function CustomerSavedItemsPage() {
-  return <CustomerSavedItemsPageClient />;
+export default async function CustomerSavedItemsPage({ params }: Props) {
+  const { locale } = await params;
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  return (
+    <>
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("saved") }]} />
+      <CustomerSavedItemsPageClient />
+    </>
+  );
 }

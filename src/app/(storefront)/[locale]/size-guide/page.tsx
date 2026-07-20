@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Ruler } from "lucide-react";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type RowData = {
   labelKey: string;
@@ -54,9 +55,11 @@ export async function generateMetadata({ params }: Props): Promise<import("next"
 export default async function SizeGuidePage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "sizeGuide" });
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("size_guide") }]} />
       <section className="text-center">
         <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg text-balance leading-relaxed">

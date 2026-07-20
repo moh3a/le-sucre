@@ -7,6 +7,9 @@ import { ProductRating } from "@/features/product_information_management/product
 import type { ReviewItem } from "@/components/storefront/types";
 import { Star } from "lucide-react";
 
+const MIN_REVIEWS = 3;
+const MIN_RATING = 3;
+
 interface ProductReviewsProps {
   title?: string;
   reviews?: ReviewItem[];
@@ -20,13 +23,19 @@ export function ProductReviews({
   isLoading,
   error,
 }: ProductReviewsProps) {
+  const qualifying = reviews.filter((r) => r.rating >= MIN_RATING);
+
+  if (!isLoading && !error && qualifying.length < MIN_REVIEWS) {
+    return null;
+  }
+
   return (
     <section className="space-y-6">
       <h2 className="text-2xl font-bold">{title}</h2>
       <DataState
         isLoading={isLoading}
         error={error}
-        isEmpty={!reviews.length}
+        isEmpty={!qualifying.length}
         loadingState={
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
@@ -49,7 +58,7 @@ export function ProductReviews({
         }
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {reviews.map((review) => (
+          {qualifying.map((review) => (
             <Card key={review.id} className="space-y-2 p-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{review.author_name}</span>

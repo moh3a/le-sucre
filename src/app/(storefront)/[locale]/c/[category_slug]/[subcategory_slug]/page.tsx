@@ -1,21 +1,22 @@
 import { getTranslations } from "next-intl/server";
+import { eq, or, and, inArray, sql, desc } from "drizzle-orm";
+import { notFound } from "next/navigation";
+
 import { CatalogSearchPageClient } from "@/features/product_information_management/catalog_discovery/components/catalog-search-page-client";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 import { parse_catalog_search_params } from "@/features/product_information_management/catalog_discovery/helpers/catalog-url.helper";
-import { db } from "@/lib/db";
 import { categories } from "@/features/product_information_management/categories/schema";
 import { products } from "@/features/product_information_management/products/schema";
 import { brands } from "@/features/product_information_management/brands/schema";
-import { eq, or, and, inArray, sql, desc } from "drizzle-orm";
-import { notFound } from "next/navigation";
 import type { AppLocale } from "@/i18n/config";
+import { db } from "@/lib/db";
 
 type Props = {
-  params: Promise<{ locale: string; category_slug: string }>;
+  params: Promise<{ locale: string; category_slug: string; subcategory_slug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-async function getCategory(slug: string) {
+async function getCategoryBySlug(slug: string) {
   const [row] = await db
     .select({
       id: categories.id,
@@ -29,19 +30,6 @@ async function getCategory(slug: string) {
     .limit(1);
 
   return row ?? null;
-}
-
-async function getSubcategories(categoryId: string) {
-  return db
-    .select({
-      id: categories.id,
-      name: categories.name,
-      slug: categories.slug,
-      description: categories.description,
-    })
-    .from(categories)
-    .where(and(eq(categories.parent_id, categoryId), eq(categories.is_active, true)))
-    .orderBy(categories.sort_order);
 }
 
 async function getBrandsForCategory(categoryId: string, categoryPath: string) {
@@ -68,53 +56,61 @@ async function getBrandsForCategory(categoryId: string, categoryPath: string) {
     })
     .from(products)
     .innerJoin(brands, eq(brands.id, products.brand_id))
-    .where(and(inArray(products.category_id, descendantIds), eq(products.status, "published"), eq(brands.is_active, true)))
+    .where(
+      and(
+        inArray(products.category_id, descendantIds),
+        eq(products.status, "published"),
+        eq(brands.is_active, true),
+      ),
+    )
     .groupBy(brands.id, brands.name, brands.slug)
     .orderBy(desc(sql<number>`COUNT(*)`))
     .limit(20);
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { locale, category_slug } = await params;
+  const { locale, subcategory_slug } = await params;
   const t = await getTranslations({ locale, namespace: "category" });
-  const category = await getCategory(category_slug);
-  if (!category) return { title: t("not_found") };
+  const subcategory = await getCategoryBySlug(subcategory_slug);
+  if (!subcategory) return { title: t("not_found") };
 
   return {
-    title: category.name,
-    description: category.description ?? t("meta_description", { name: category.name }),
+    title: subcategory.name,
+    description: subcategory.description ?? t("meta_description", { name: subcategory.name }),
     robots: { index: true, follow: true },
   };
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const { locale, category_slug } = await params;
+export default async function SubcategoryPage({ params, searchParams }: Props) {
+  const { locale, category_slug, subcategory_slug } = await params;
   const t = await getTranslations({ locale, namespace: "layout" });
-  const category = await getCategory(category_slug);
-  if (!category) notFound();
 
-  const [subcategories, brandsForCategory] = await Promise.all([
-    getSubcategories(category.id),
-    getBrandsForCategory(category.id, category.path),
+  const [category, subcategory] = await Promise.all([
+    getCategoryBySlug(category_slug),
+    getCategoryBySlug(subcategory_slug),
   ]);
+
+  if (!category || !subcategory) notFound();
+
+  const brandsForCategory = await getBrandsForCategory(subcategory.id, subcategory.path);
 
   const sp = await searchParams;
   const filters = parse_catalog_search_params(sp);
 
   const breadcrumbs = [
     { label: t("home"), href: "/" },
-    { label: category.name },
+    { label: category.name, href: `/c/${category.slug}` },
+    { label: subcategory.name },
   ];
 
   return (
     <CatalogSearchPageClient
       locale={locale as AppLocale}
       initial={filters}
-      category_id={category.id}
-      category_slug={category.slug}
-      category_name={category.name}
-      category_description={category.description}
-      subcategories={subcategories}
+      category_id={subcategory.id}
+      category_slug={subcategory.slug}
+      category_name={subcategory.name}
+      category_description={subcategory.description}
       brands={brandsForCategory}
       header={<StorefrontBreadcrumbs items={breadcrumbs} />}
     />

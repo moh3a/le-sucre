@@ -348,17 +348,23 @@ export function ProductDetailClient({ slug, locale }: Props) {
               {t("specifications")}
             </TabsTrigger>
           )}
-          <TabsTrigger
-            value="reviews"
-            className="data-[state=active]:border-crimson-violet rounded-none data-[state=active]:border-b-2"
-          >
-            {t("reviews_section")}
-            {review_summary && (
-              <span className="text-muted-foreground ml-1 text-xs">
-                ({review_summary.review_count})
-              </span>
-            )}
-          </TabsTrigger>
+          {(() => {
+            const qualifying = (reviews_query.data?.items as Array<{ rating: number }> ?? []).filter(
+              (r) => r.rating >= 3,
+            );
+            if (qualifying.length < 3) return null;
+            return (
+              <TabsTrigger
+                value="reviews"
+                className="data-[state=active]:border-crimson-violet rounded-none data-[state=active]:border-b-2"
+              >
+                {t("reviews_section")}
+                <span className="text-muted-foreground ml-1 text-xs">
+                  ({qualifying.length})
+                </span>
+              </TabsTrigger>
+            );
+          })()}
         </TabsList>
 
         <TabsContent value="description" className="pt-6">
@@ -724,14 +730,14 @@ function ReviewsSection({
     );
   }
 
-  const reviews = (query.data?.items ?? []) as Array<{
+  const reviews = (query.data?.items as Array<{
     id: string;
     author_name: string;
     rating: number;
     title: string | null;
     body: string;
     created_at: string;
-  }>;
+  }> ?? []).filter((r) => r.rating >= 3);
 
   if (!reviews.length) {
     return (

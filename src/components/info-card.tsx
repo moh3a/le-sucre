@@ -13,7 +13,7 @@ export function InfoCard({ icon, title, description, className }: InfoCardProps)
     <Card
       className={cn(
         "flex items-center gap-4 bg-linear-to-br p-6",
-        "from-lemon-chiffon/30 to-cream/50",
+        "from-lemon-chiffon/10 to-cream/10",
         className,
       )}
     >

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { CatalogSearchPageClient } from "@/features/product_information_management/catalog_discovery/components/catalog-search-page-client";
 import { parse_catalog_search_params } from "@/features/product_information_management/catalog_discovery/helpers/catalog-url.helper";
 import type { AppLocale } from "@/i18n/config";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -23,5 +24,11 @@ export default async function SearchPage({ params, searchParams }: Props) {
   const { locale } = await params;
   const sp = await searchParams;
   const filters = parse_catalog_search_params(sp);
-  return <CatalogSearchPageClient locale={locale as AppLocale} initial={filters} />;
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  return (
+    <>
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("search") }]} />
+      <CatalogSearchPageClient locale={locale as AppLocale} initial={filters} />
+    </>
+  );
 }

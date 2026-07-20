@@ -6,6 +6,7 @@ import "@/app/globals.css";
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ConsoleBreadcrumb } from "@/components/console/console-breadcrumb";
 import { auth } from "@/lib/auth";
 import { AuthorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
 import { InitService } from "@/features/init_system/services/init.service";
@@ -34,7 +35,10 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       <AppSidebar />
       <SidebarInset>
         <main>
-          <SidebarTrigger />
+          <div className="flex items-center gap-2 px-6 pt-4 pb-2">
+            <SidebarTrigger />
+            <ConsoleBreadcrumb />
+          </div>
           {children}
         </main>
       </SidebarInset>

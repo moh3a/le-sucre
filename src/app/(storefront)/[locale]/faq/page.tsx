@@ -10,6 +10,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Link } from "@/i18n/navigation";
+import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -35,9 +36,11 @@ export async function generateMetadata({ params }: Props): Promise<import("next"
 export default async function FaqPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "faq" });
+  const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
+      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("faq") }]} />
       <section className="text-center">
         <h1 className="mb-4 text-balance text-4xl font-bold">{t("heading")}</h1>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg text-balance leading-relaxed">
