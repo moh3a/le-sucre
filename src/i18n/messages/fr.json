@@ -295,7 +295,8 @@
     "tab_profile": "Profil",
     "tab_addresses": "Adresses",
     "tab_security": "Sécurité",
-    "tab_activity": "Activité"
+    "tab_activity": "Activité",
+    "error_unknown": "Une erreur est survenue. Veuillez réessayer."
   },
   "categories": {
     "title": "Catégories",
@@ -1124,7 +1125,14 @@
     "error_description": "Une erreur est survenue lors du chargement des données.",
     "go_back": "Retour",
     "continue_editing": "Continuer l'édition",
-    "something_went_wrong": "Quelque chose s'est mal passé"
+    "something_went_wrong": "Quelque chose s'est mal passé",
+    "you_are_offline": "Vous êtes hors ligne.",
+    "connection_restored": "Connexion rétablie.",
+    "server_unavailable": "Le serveur est indisponible.",
+    "request_timed_out": "La requête a expiré.",
+    "slow_connection": "Connexion lente détectée.",
+    "pending_changes": "Modifications en attente",
+    "operation_blocked_offline": "Cette action n'est pas disponible hors ligne."
   },
   "data_table": {
     "no_results": "Aucun résultat.",
@@ -1818,7 +1826,16 @@
     "availability_date": "Date de disponibilité",
     "cancel": "Annuler",
     "selected_count": "{count} sélectionné(s)",
-    "export": "Exporter"
+    "export": "Exporter",
+    "storefront_error": "Une erreur est survenue. Veuillez réessayer.",
+    "storefront_product_default": "Produit",
+    "storefront_available_on": "Disponible le :",
+    "storefront_deposit_required": "Acompte de {percent}% requis",
+    "storefront_email_label": "E-mail",
+    "storefront_quantity_label": "Quantité",
+    "storefront_submit": "Confirmer la précommande",
+    "storefront_button": "Précommander",
+    "storefront_description": "Soyez le premier à recevoir ce produit dès sa sortie."
   },
   "carts": {
     "status_column": "Statut",

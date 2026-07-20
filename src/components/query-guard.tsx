@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { CircleAlert, RefreshCw } from "lucide-react";
+import { CircleAlert, RefreshCw, WifiOff, AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -79,6 +79,45 @@ function is_unauthorized(error: unknown): boolean {
   return false;
 }
 
+function is_timeout_error(error: unknown): boolean {
+  if (!error) return false;
+  if (error instanceof Error && error.message === "REQUEST_TIMEOUT") return true;
+
+  if (typeof error === "object" && error !== null) {
+    const err = error as Record<string, unknown>;
+    if (err.message === "REQUEST_TIMEOUT") return true;
+
+    const data = err.data;
+    if (data && typeof data === "object") {
+      const d = data as Record<string, unknown>;
+      if (d.httpStatus === 408) return true;
+      if (d.httpStatus === 504) return true;
+      if (d.code === "TIMEOUT") return true;
+    }
+  }
+
+  return false;
+}
+
+function is_backend_unavailable(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const err = error as Record<string, unknown>;
+  const data = err.data;
+
+  if (data && typeof data === "object") {
+    const d = data as Record<string, unknown>;
+    if (d.httpStatus === 502) return true;
+    if (d.httpStatus === 503) return true;
+    if (d.httpStatus === 504) return true;
+    if (d.code === "BAD_GATEWAY") return true;
+    if (d.code === "SERVICE_UNAVAILABLE") return true;
+    if (d.code === "GATEWAY_TIMEOUT") return true;
+  }
+
+  return false;
+}
+
 function QueryGuard({
   children,
   query,
@@ -97,6 +136,8 @@ function QueryGuard({
   const isFetching = query?.isFetching ?? false;
   const error = query?.error ?? mutation?.error ?? session?.error ?? null;
   const isUnauthorized = is_unauthorized(error);
+  const isTimeout = is_timeout_error(error);
+  const isBackendDown = is_backend_unavailable(error);
 
   const handleRetry = useCallback(() => {
     if (query?.refetch) {
@@ -104,7 +145,9 @@ function QueryGuard({
     }
   }, [query?.refetch]);
 
-  const errorMessage = extract_error_message(error) || t("unexpected_error");
+  const handleRefresh = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   if (isUnauthorized) {
     return (
@@ -122,6 +165,88 @@ function QueryGuard({
     );
   }
 
+  if (isTimeout) {
+    return (
+      <div className={cn("p-6", className)}>
+        <Alert variant="destructive" className="w-full">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <div className="flex flex-col gap-2">
+            <div>
+              <AlertTitle>{t("request_timed_out")}</AlertTitle>
+              <AlertDescription>{extract_error_message(error)}</AlertDescription>
+            </div>
+            <div className="flex gap-2">
+              {query?.refetch && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleRetry}
+                >
+                  <RefreshCw className="size-3.5" />
+                  {t("retry")}
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleRefresh}
+              >
+                {t("refresh")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleRetry}
+              >
+                {t("continue_editing")}
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (isBackendDown) {
+    return (
+      <div className={cn("p-6", className)}>
+        <Alert variant="destructive" className="w-full">
+          <WifiOff className="mt-0.5 size-4 shrink-0" />
+          <div className="flex flex-col gap-2">
+            <div>
+              <AlertTitle>{t("server_unavailable")}</AlertTitle>
+              <AlertDescription>{extract_error_message(error)}</AlertDescription>
+            </div>
+            <div className="flex gap-2">
+              {query?.refetch && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleRetry}
+                >
+                  <RefreshCw className="size-3.5" />
+                  {t("retry")}
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleRefresh}
+              >
+                {t("refresh")}
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className={cn("p-6", className)}>
@@ -130,7 +255,9 @@ function QueryGuard({
           <div className="flex flex-col gap-2">
             <div>
               <AlertTitle>{t("error")}</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
+              <AlertDescription>
+                {extract_error_message(error) || t("error_description")}
+              </AlertDescription>
             </div>
             {query?.refetch && (
               <Button

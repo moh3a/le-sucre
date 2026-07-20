@@ -862,7 +862,8 @@
     "tab_profile": "Profile",
     "tab_addresses": "Addresses",
     "tab_security": "Security",
-    "tab_activity": "Activity"
+    "tab_activity": "Activity",
+    "error_unknown": "An error occurred. Please try again."
   },
   "home": {
     "title": "Home",
@@ -948,7 +949,14 @@
     "error_description": "An error occurred while loading data.",
     "go_back": "Go back",
     "continue_editing": "Continue editing",
-    "something_went_wrong": "Something went wrong"
+    "something_went_wrong": "Something went wrong",
+    "you_are_offline": "You are offline.",
+    "connection_restored": "Connection restored.",
+    "server_unavailable": "Unable to reach the server.",
+    "request_timed_out": "Request timed out.",
+    "slow_connection": "Slow connection detected.",
+    "pending_changes": "Pending changes",
+    "operation_blocked_offline": "This action is not available offline."
   },
   "data_table": {
     "no_results": "No results.",
@@ -1623,7 +1631,16 @@
     "export": "Export",
     "stats_pending": "Pending",
     "stats_confirmed": "Confirmed",
-    "stats_fulfilled": "Fulfilled"
+    "stats_fulfilled": "Fulfilled",
+    "storefront_error": "An error occurred. Please try again.",
+    "storefront_product_default": "Product",
+    "storefront_available_on": "Available on:",
+    "storefront_deposit_required": "{percent}% deposit required",
+    "storefront_email_label": "Email",
+    "storefront_quantity_label": "Quantity",
+    "storefront_submit": "Confirm pre-order",
+    "storefront_button": "Pre-order",
+    "storefront_description": "Be the first to receive this product when it launches."
   },
   "carts": {
     "status_column": "Status",

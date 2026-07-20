@@ -119,7 +119,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       onSuccess?.();
       router.refresh();
     } catch {
-      setSignInError(t("error_unknown") || "Une erreur est survenue");
+      setSignInError(t("error_unknown"));
     } finally {
       setSignInLoading(false);
     }

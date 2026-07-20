@@ -7,6 +7,10 @@ import superjson from "superjson";
 import { useState } from "react";
 
 import type { AppRouter } from "@/lib/trpc/server";
+import { NetworkProvider } from "@/components/network/network-provider";
+import { ConnectionBanner } from "@/components/network/connection-banner";
+import { create_network_link } from "@/components/network/network-aware-link";
+import { get_network_listeners } from "@/components/network/network-store";
 
 export const trpc = createTRPCReact<AppRouter>({
   abortOnUnmount: true,
@@ -21,9 +25,11 @@ function create_query_client() {
         staleTime: 30_000,
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
+        networkMode: "online",
       },
       mutations: {
         retry: false,
+        networkMode: "online",
       },
     },
   });
@@ -34,6 +40,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const [trpc_client] = useState(() =>
     trpc.createClient({
       links: [
+        create_network_link({
+          timeout_ms: 30_000,
+          on_timeout: () => get_network_listeners().on_timeout?.(),
+          on_backend_unavailable: () =>
+            get_network_listeners().on_backend_unavailable?.(),
+          on_request_failed: () => get_network_listeners().on_request_failed?.(),
+        }),
         httpBatchLink({
           url: "/api/trpc",
           transformer: superjson,
@@ -46,8 +59,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <trpc.Provider client={trpc_client} queryClient={query_client}>
-      <QueryClientProvider client={query_client}>{children}</QueryClientProvider>
-    </trpc.Provider>
+    <NetworkProvider>
+      <trpc.Provider client={trpc_client} queryClient={query_client}>
+        <QueryClientProvider client={query_client}>
+          <ConnectionBanner />
+          {children}
+        </QueryClientProvider>
+      </trpc.Provider>
+    </NetworkProvider>
   );
 }

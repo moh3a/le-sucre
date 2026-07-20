@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -36,6 +37,7 @@ export function PreorderDialog({
   onSubmit,
   isSubmitting,
 }: PreorderDialogProps) {
+  const t = useTranslations("preorders");
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -51,26 +53,26 @@ export function PreorderDialog({
           <Skeleton className="h-10 w-full rounded-md" />
         </div>
       ) : error ? (
-        <p className="text-destructive text-sm">Une erreur est survenue. Veuillez réessayer.</p>
+        <p className="text-destructive text-sm">{t("storefront_error")}</p>
       ) : (
         <>
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">{skuLabel}</p>
-            <p className="font-medium">{productName ?? "Produit"}</p>
+            <p className="font-medium">{productName ?? t("storefront_product_default")}</p>
           </div>
           {estimatedDate && (
             <p className="text-sm">
-              <span className="text-muted-foreground">Disponible le :</span>{" "}
+              <span className="text-muted-foreground">{t("storefront_available_on")}</span>{" "}
               <span className="font-medium">{estimatedDate}</span>
             </p>
           )}
           {depositPercent < 100 && (
             <p className="text-sm text-muted-foreground">
-              Acompte de {depositPercent}% requis
+              {t("storefront_deposit_required", { percent: depositPercent })}
             </p>
           )}
           <div className="space-y-2">
-            <label htmlFor="preorder-email" className="text-sm font-medium">Email</label>
+            <label htmlFor="preorder-email" className="text-sm font-medium">{t("storefront_email_label")}</label>
             <Input
               id="preorder-email"
               type="email"
@@ -80,7 +82,7 @@ export function PreorderDialog({
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="preorder-qty" className="text-sm font-medium">Quantité</label>
+            <label htmlFor="preorder-qty" className="text-sm font-medium">{t("storefront_quantity_label")}</label>
             <Input
               id="preorder-qty"
               type="number"
@@ -95,7 +97,7 @@ export function PreorderDialog({
             disabled={!email || isSubmitting}
             onClick={() => { onSubmit?.({ email, quantity }); setOpen(false); }}
           >
-            {isSubmitting ? "..." : "Confirmer la précommande"}
+            {isSubmitting ? "..." : t("storefront_submit")}
           </Button>
         </>
       )}
@@ -107,14 +109,14 @@ export function PreorderDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" disabled={isLoading || !!error}>
-            Précommander
+            {t("storefront_button")}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Précommander</DialogTitle>
+            <DialogTitle>{t("storefront_button")}</DialogTitle>
             <DialogDescription>
-              Soyez le premier à recevoir ce produit dès sa sortie.
+              {t("storefront_description")}
             </DialogDescription>
           </DialogHeader>
           {content}
@@ -127,14 +129,14 @@ export function PreorderDialog({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" disabled={isLoading || !!error}>
-          Précommander
+          {t("storefront_button")}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Précommander</DrawerTitle>
+          <DrawerTitle>{t("storefront_button")}</DrawerTitle>
           <DrawerDescription>
-            Soyez le premier à recevoir ce produit dès sa sortie.
+            {t("storefront_description")}
           </DrawerDescription>
         </DrawerHeader>
         <div className="p-6">{content}</div>

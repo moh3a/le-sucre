@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 export function HealthPageClient() {
   const query = trpc.health.check.useQuery(undefined, {
     refetchInterval: 30_000,
+    networkMode: "online",
   });
 
   const { data } = query;

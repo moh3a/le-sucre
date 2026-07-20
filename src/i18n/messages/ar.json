@@ -295,7 +295,8 @@
     "tab_profile": "الملف الشخصي",
     "tab_addresses": "العناوين",
     "tab_security": "الأمان",
-    "tab_activity": "النشاط"
+    "tab_activity": "النشاط",
+    "error_unknown": "حدث خطأ. يرجى المحاولة مرة أخرى."
   },
   "categories": {
     "title": "التصنيفات",
@@ -867,7 +868,14 @@
     "error_description": "حدث خطأ أثناء تحميل البيانات.",
     "go_back": "رجوع",
     "continue_editing": "متابعة التحرير",
-    "something_went_wrong": "حدث خطأ ما"
+    "something_went_wrong": "حدث خطأ ما",
+    "you_are_offline": "أنت غير متصل بالإنترنت.",
+    "connection_restored": "تمت إعادة الاتصال.",
+    "server_unavailable": "تعذر الوصول إلى الخادم.",
+    "request_timed_out": "انتهت مهلة الطلب.",
+    "slow_connection": "تم اكتشاف اتصال بطيء.",
+    "pending_changes": "التغييرات المعلقة",
+    "operation_blocked_offline": "هذا الإجراء غير متاح بدون اتصال."
   },
   "data_table": {
     "no_results": "لا توجد نتائج.",
@@ -1551,7 +1559,16 @@
     "availability_date": "تاريخ التوفر",
     "cancel": "إلغاء",
     "selected_count": "تم تحديد {count}",
-    "export": "تصدير"
+    "export": "تصدير",
+    "storefront_error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "storefront_product_default": "المنتج",
+    "storefront_available_on": "متاح في:",
+    "storefront_deposit_required": "الدفعة المقدمة بنسبة {percent}% مطلوبة",
+    "storefront_email_label": "البريد الإلكتروني",
+    "storefront_quantity_label": "الكمية",
+    "storefront_submit": "تأكيد الطلب المسبق",
+    "storefront_button": "طلب مسبق",
+    "storefront_description": "كن أول من يتلقى هذا المنتج عند إطلاقه."
   },
   "carts": {
     "status_column": "الحالة",
