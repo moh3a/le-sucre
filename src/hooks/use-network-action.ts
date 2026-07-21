@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useNetworkContext } from "@/components/network/network-provider";
 
 interface UseNetworkActionOptions {
@@ -40,11 +40,10 @@ export function useNetworkAction(options: UseNetworkActionOptions = {}): UseNetw
   const { isOffline, backend_available, register_pending } = useNetworkContext();
 
   const in_progress_ref = useRef(false);
+  const [isInProgress, setIsInProgress] = useState(false);
 
   const is_blocked =
     (disable_when_offline && isOffline) || (disable_when_backend_down && !backend_available);
-
-  const isInProgress = in_progress_ref.current;
 
   const execute = useCallback(
     async <T>(action: () => Promise<T>): Promise<T | undefined> => {
@@ -59,6 +58,7 @@ export function useNetworkAction(options: UseNetworkActionOptions = {}): UseNetw
       }
 
       in_progress_ref.current = true;
+      setIsInProgress(true);
       const unregister = register_pending();
 
       try {
@@ -66,6 +66,7 @@ export function useNetworkAction(options: UseNetworkActionOptions = {}): UseNetw
         return result;
       } finally {
         in_progress_ref.current = false;
+        setIsInProgress(false);
         unregister();
       }
     },

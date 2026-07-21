@@ -66,19 +66,6 @@ export function AddressFormCard({
     onError: (err) => toast.error(err.message),
   });
   const deleteAddress = trpc.profile.deleteAddress.useMutation({
-    onSuccess: () => {
-      setOpen(false);
-      execute_with_undo({
-        description: address?.label ?? address?.address_line_1 ?? "",
-        execute: () => {
-          onDeleted();
-        },
-        rollback: () => {
-          onDeleted();
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -253,7 +240,20 @@ export function AddressFormCard({
                     type="button"
                     variant="destructive"
                     size="sm"
-                    onClick={() => deleteAddress.mutate({ address_id: address.id })}
+                    onClick={() => {
+                      execute_with_undo({
+                        description: address?.label ?? address?.address_line_1 ?? "",
+                        execute: async () => {
+                          await deleteAddress.mutateAsync({ address_id: address.id });
+                          onDeleted();
+                        },
+                        rollback: () => {
+                          onDeleted();
+                        },
+                        undoTimeoutMs: 8_000,
+                      });
+                      setOpen(false);
+                    }}
                     disabled={is_saving}
                   >
                     <Trash2 className="mr-2 size-4" />

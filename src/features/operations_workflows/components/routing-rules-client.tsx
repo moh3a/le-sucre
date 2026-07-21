@@ -332,20 +332,6 @@ function DeleteRuleDialog({
   const { execute_with_undo } = useUndoAction();
 
   const del = trpc.operationsWorkflows.routingRuleDelete.useMutation({
-    onSuccess: () => {
-      execute_with_undo({
-        description: rule?.name ?? rule?.id ?? "",
-        execute: async () => {
-          await utils.operationsWorkflows.routingRulesList.invalidate();
-        },
-        rollback: async () => {
-          await utils.operationsWorkflows.routingRulesList.invalidate();
-        },
-        undoTimeoutMs: 8_000,
-      });
-      toast.success(t("delete_success"));
-      onOpenChange(false);
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -364,7 +350,20 @@ function DeleteRuleDialog({
             variant="destructive"
             disabled={del.isPending}
             onClick={() => {
-              if (rule) del.mutate({ id: rule.id });
+              if (rule) {
+                execute_with_undo({
+                  description: rule.name ?? rule.id ?? "",
+                  execute: async () => {
+                    await del.mutateAsync({ id: rule.id });
+                    await utils.operationsWorkflows.routingRulesList.invalidate();
+                  },
+                  rollback: async () => {
+                    await utils.operationsWorkflows.routingRulesList.invalidate();
+                  },
+                  undoTimeoutMs: 8_000,
+                });
+                onOpenChange(false);
+              }
             }}
           >
             {t("delete_button")}

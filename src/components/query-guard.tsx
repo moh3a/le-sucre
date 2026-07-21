@@ -8,6 +8,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import {
+  extract_error_message,
+  is_unauthorized,
+  is_timeout_error,
+  is_backend_unavailable,
+} from "@/lib/error-detection";
 
 interface QueryGuardProps {
   children: React.ReactNode;
@@ -38,84 +44,6 @@ interface QueryGuardProps {
   showRefetchLoader?: boolean;
   /** Additional class names for the wrapper */
   className?: string;
-}
-
-function extract_error_message(error: unknown): string {
-  if (!error) return "";
-  if (error instanceof Error) return error.message;
-
-  if (typeof error === "object" && error !== null) {
-    const err = error as Record<string, unknown>;
-
-    if (typeof err.message === "string") return err.message;
-
-    const data = err.data;
-    if (data && typeof data === "object") {
-      const d = data as Record<string, unknown>;
-      if (typeof d.message === "string") return d.message;
-      if (d.messages && typeof d.messages === "object") {
-        const msgs = d.messages as Record<string, string>;
-        const first = Object.values(msgs)[0];
-        if (typeof first === "string") return first;
-      }
-    }
-  }
-
-  return "";
-}
-
-function is_unauthorized(error: unknown): boolean {
-  if (!error || typeof error !== "object") return false;
-
-  const err = error as Record<string, unknown>;
-  const data = err.data;
-
-  if (data && typeof data === "object") {
-    const d = data as Record<string, unknown>;
-    if (d.code === "UNAUTHORIZED") return true;
-    if (d.httpStatus === 401) return true;
-  }
-
-  return false;
-}
-
-function is_timeout_error(error: unknown): boolean {
-  if (!error) return false;
-  if (error instanceof Error && error.message === "REQUEST_TIMEOUT") return true;
-
-  if (typeof error === "object" && error !== null) {
-    const err = error as Record<string, unknown>;
-    if (err.message === "REQUEST_TIMEOUT") return true;
-
-    const data = err.data;
-    if (data && typeof data === "object") {
-      const d = data as Record<string, unknown>;
-      if (d.httpStatus === 408) return true;
-      if (d.httpStatus === 504) return true;
-      if (d.code === "TIMEOUT") return true;
-    }
-  }
-
-  return false;
-}
-
-function is_backend_unavailable(error: unknown): boolean {
-  if (!error || typeof error !== "object") return false;
-
-  const err = error as Record<string, unknown>;
-  const data = err.data;
-
-  if (data && typeof data === "object") {
-    const d = data as Record<string, unknown>;
-    if (d.httpStatus === 502) return true;
-    if (d.httpStatus === 503) return true;
-    if (d.httpStatus === 504) return true;
-    if (d.code === "BAD_GATEWAY") return true;
-    if (d.code === "SERVICE_UNAVAILABLE") return true;
-    if (d.code === "GATEWAY_TIMEOUT") return true;
-  }
-
-  return false;
 }
 
 function QueryGuard({

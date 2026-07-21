@@ -38,16 +38,20 @@ export function CustomerFavoritesPageClient() {
   const utils = trpc.useUtils();
   const { execute_with_undo } = useUndoAction();
 
-  async function handleRemove(id: string) {
+  function handleRemove(id: string) {
     setPendingId(id);
     try {
-      await removeMut.mutateAsync({ id });
       const fav = query.data?.items?.find((f: { id: string }) => f.id === id);
       const name = fav?.product_id ?? fav?.brand_id ?? fav?.category_id ?? id;
       execute_with_undo({
         description: name,
-        execute: () => utils.wishlistManagement.favorites.list.invalidate(),
-        rollback: () => utils.wishlistManagement.favorites.list.invalidate(),
+        execute: async () => {
+          await removeMut.mutateAsync({ id });
+          await utils.wishlistManagement.favorites.list.invalidate();
+        },
+        rollback: () => {
+          utils.wishlistManagement.favorites.list.invalidate();
+        },
         undoTimeoutMs: 8_000,
       });
     } catch {

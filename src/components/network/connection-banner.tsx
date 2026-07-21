@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Wifi, WifiOff, AlertTriangle, RefreshCw } from "lucide-react";
+import { Wifi, WifiOff, AlertTriangle } from "lucide-react";
 
 import { useNetworkContext } from "@/components/network/network-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function use_connection_message() {
+function useConnectionMessage() {
   const t = useTranslations("common");
   const { isOffline, isSlow, backend_available, last_error_type } = useNetworkContext();
 
@@ -57,8 +57,8 @@ function use_connection_message() {
 
 export function ConnectionBanner() {
   const { isOnline, clear_error, mark_backend_available } = useNetworkContext();
-  const banner = use_connection_message();
-  const [visible, setVisible] = useState(false);
+  const banner = useConnectionMessage();
+  const [dismissed_key, setDismissedKey] = useState<string | null>(null);
   const [just_reconnected, setJustReconnected] = useState(false);
   const prev_offline_ref = useRef(false);
   const t = useTranslations("common");
@@ -73,17 +73,9 @@ export function ConnectionBanner() {
     prev_offline_ref.current = !isOnline;
   }, [isOnline]);
 
-  // Show/hide the banner
-  useEffect(() => {
-    if (banner) {
-      setVisible(true);
-    } else if (!just_reconnected) {
-      const timer = setTimeout(() => setVisible(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [banner, just_reconnected]);
+  const is_dismissed = banner && dismissed_key === banner.key;
 
-  if (just_reconnected && visible) {
+  if (just_reconnected) {
     return (
       <div className="bg-primary/10 border-primary/30 fixed top-0 right-0 left-0 z-[9999] border-b px-4 py-2.5 transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -96,7 +88,7 @@ export function ConnectionBanner() {
     );
   }
 
-  if (!banner || !visible) return null;
+  if (!banner || is_dismissed) return null;
 
   const Icon = banner.icon;
 
@@ -128,22 +120,16 @@ export function ConnectionBanner() {
               onClick={() => {
                 clear_error();
                 mark_backend_available();
-                setVisible(false);
+                setDismissedKey(banner.key);
               }}
             >
               {t("retry")}
             </Button>
           )}
-          {!isOnline && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1.5 text-xs"
-              onClick={() => window.location.reload()}
-            >
-              <RefreshCw className="size-3" />
-              {t("refresh")}
-            </Button>
+          {!isOnline && banner.key === "offline" && (
+            <span className="text-muted-foreground text-xs">
+              {t("will_reconnect_automatically")}
+            </span>
           )}
         </div>
       </div>

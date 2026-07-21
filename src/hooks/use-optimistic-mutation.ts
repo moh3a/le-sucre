@@ -54,8 +54,6 @@ export function useOptimisticToggle() {
       try {
         await mutate();
 
-        query_client.setQueryData<TData>(query_key, updater);
-
         const message = success_message ?? (success_key ? t(success_key as never, success_params as never) : undefined);
         if (message) {
           toast.success(message);

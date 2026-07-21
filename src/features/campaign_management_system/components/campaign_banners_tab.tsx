@@ -94,18 +94,6 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
   });
 
   const delete_banner = trpc.campaigns.deleteBanner.useMutation({
-    onSuccess: (_data, variables) => {
-      execute_with_undo({
-        description: variables.id,
-        execute: async () => {
-          await utils.campaigns.byId.invalidate({ id: campaign_id });
-        },
-        rollback: async () => {
-          await utils.campaigns.byId.invalidate({ id: campaign_id });
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -176,7 +164,17 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
   const handleDelete = async (id: string) => {
     if (confirm(t("confirm_delete_banner"))) {
-      await delete_banner.mutateAsync({ id });
+      execute_with_undo({
+        description: id,
+        execute: async () => {
+          await delete_banner.mutateAsync({ id });
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        rollback: async () => {
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        undoTimeoutMs: 8_000,
+      });
     }
   };
 

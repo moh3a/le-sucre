@@ -36,18 +36,6 @@ export function CustomerCollectionsPageClient() {
   const utils = trpc.useUtils();
   const createMut = trpc.wishlistManagement.collections.create.useMutation();
   const deleteMut = trpc.wishlistManagement.collections.delete.useMutation({
-    onSuccess: () => {
-      execute_with_undo({
-        description: deleteTarget?.name ?? "",
-        execute: () => {
-          utils.wishlistManagement.collections.list.invalidate();
-        },
-        rollback: () => {
-          utils.wishlistManagement.collections.list.invalidate();
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -63,9 +51,6 @@ export function CustomerCollectionsPageClient() {
     }
   }
 
-  async function handleDelete(id: string) {
-    await deleteMut.mutateAsync({ id });
-  }
 
   return (
     <QueryGuard query={{ isLoading, error }} loadingFallback={<CollectionsPageSkeleton />}>
@@ -144,9 +129,19 @@ export function CustomerCollectionsPageClient() {
             <AlertDialogCancel>{t("edit")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={async () => {
+              onClick={() => {
                 if (deleteTarget) {
-                  await handleDelete(deleteTarget.id);
+                  execute_with_undo({
+                    description: deleteTarget.name,
+                    execute: async () => {
+                      await deleteMut.mutateAsync({ id: deleteTarget.id });
+                      await utils.wishlistManagement.collections.list.invalidate();
+                    },
+                    rollback: () => {
+                      utils.wishlistManagement.collections.list.invalidate();
+                    },
+                    undoTimeoutMs: 8_000,
+                  });
                   setDeleteTarget(null);
                 }
               }}

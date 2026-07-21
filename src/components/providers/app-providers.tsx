@@ -59,13 +59,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <NetworkProvider>
-      <trpc.Provider client={trpc_client} queryClient={query_client}>
-        <QueryClientProvider client={query_client}>
+    <trpc.Provider client={trpc_client} queryClient={query_client}>
+      <QueryClientProvider client={query_client}>
+        <NetworkProvider>
           <ConnectionBanner />
           {children}
-        </QueryClientProvider>
-      </trpc.Provider>
-    </NetworkProvider>
+        </NetworkProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }

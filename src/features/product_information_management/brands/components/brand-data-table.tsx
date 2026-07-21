@@ -62,15 +62,6 @@ function BrandRowActions({
   const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.brands.delete.useMutation({
-    onSuccess: async () => {
-      set_delete_open(false);
-      execute_with_undo({
-        description: brand.name,
-        execute: () => utils.brands.list.invalidate(),
-        rollback: () => utils.brands.list.invalidate(),
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -111,10 +102,22 @@ function BrandRowActions({
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              disabled={delete_mutation.isPending}
-              onClick={() => void delete_mutation.mutateAsync({ id: brand.id })}
+              onClick={() => {
+                set_delete_open(false);
+                execute_with_undo({
+                  description: brand.name,
+                  execute: async () => {
+                    await delete_mutation.mutateAsync({ id: brand.id });
+                    await utils.brands.list.invalidate();
+                  },
+                  rollback: () => {
+                    utils.brands.list.invalidate();
+                  },
+                  undoTimeoutMs: 8_000,
+                });
+              }}
             >
-              {delete_mutation.isPending ? "…" : t("delete")}
+              {t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

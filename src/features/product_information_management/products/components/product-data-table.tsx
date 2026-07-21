@@ -285,19 +285,6 @@ function ProductRowActions({ row }: { row: ProductRow }) {
   const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.products.delete.useMutation({
-    onSuccess: () => {
-      setDeleteOpen(false);
-      execute_with_undo({
-        description: row.name ?? row.id,
-        execute: async () => {
-          await utils.products.adminList.invalidate();
-        },
-        rollback: () => {
-          utils.products.adminList.invalidate();
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
   const duplicate_mutation = trpc.products.duplicate.useMutation({
@@ -359,11 +346,22 @@ function ProductRowActions({ row }: { row: ProductRow }) {
             <AlertDialogCancel disabled={delete_mutation.isPending}>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              disabled={delete_mutation.isPending}
-              onClick={() => delete_mutation.mutate({ id: row.id })}
+              onClick={() => {
+                setDeleteOpen(false);
+                execute_with_undo({
+                  description: row.name ?? row.id,
+                  execute: async () => {
+                    await delete_mutation.mutateAsync({ id: row.id });
+                    await utils.products.adminList.invalidate();
+                  },
+                  rollback: () => {
+                    utils.products.adminList.invalidate();
+                  },
+                  undoTimeoutMs: 8_000,
+                });
+              }}
             >
-              {delete_mutation.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-              {delete_mutation.isPending ? tc("loading") : t("delete")}
+              {t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -539,28 +537,15 @@ export function ProductDataTable() {
     onSuccess: (_result, variables) => {
       setAssignCategoryOpen(false);
       setSelectedCategoryId("");
+      if (variables.action === "delete") return;
       const action_labels: Record<string, string> = {
         activate: t("activate"),
         deactivate: t("deactivate"),
-        delete: t("delete"),
         assign_category: t("assign_category"),
       };
       const count = variables.product_ids.length;
-      if (variables.action === "delete") {
-        execute_with_undo({
-          description: `${count} ${t("selected_count").replace("{count}", "")}`,
-          execute: async () => {
-            await utils.products.adminList.invalidate();
-          },
-          rollback: () => {
-            utils.products.adminList.invalidate();
-          },
-          undoTimeoutMs: 8_000,
-        });
-      } else {
-        utils.products.adminList.invalidate();
-        toast.success(`${action_labels[variables.action] ?? tc("actions")} — ${count} ${t("selected_count").replace("{count}", "")}`);
-      }
+      utils.products.adminList.invalidate();
+      toast.success(`${action_labels[variables.action] ?? tc("actions")} — ${count} ${t("selected_count").replace("{count}", "")}`);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -611,8 +596,18 @@ export function ProductDataTable() {
   function handleBulkDelete() {
     const ids = getSelectedIds();
     if (!ids.length) return;
-    bulk.mutate({ product_ids: ids, action: "delete" });
     setBulkDeleteOpen(false);
+    execute_with_undo({
+      description: `${ids.length} ${t("selected_count").replace("{count}", "")}`,
+      execute: async () => {
+        await bulk.mutateAsync({ product_ids: ids, action: "delete" });
+        await utils.products.adminList.invalidate();
+      },
+      rollback: () => {
+        utils.products.adminList.invalidate();
+      },
+      undoTimeoutMs: 8_000,
+    });
   }
 
   return (

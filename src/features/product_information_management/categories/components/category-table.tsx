@@ -53,15 +53,6 @@ function CategoryRowActions({
   const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.categories.delete.useMutation({
-    onSuccess: async () => {
-      set_delete_open(false);
-      execute_with_undo({
-        description: category.name,
-        execute: () => utils.categories.tree.invalidate(),
-        rollback: () => utils.categories.tree.invalidate(),
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -105,8 +96,20 @@ function CategoryRowActions({
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              disabled={delete_mutation.isPending}
-              onClick={() => delete_mutation.mutate({ id: category.id })}
+              onClick={() => {
+                set_delete_open(false);
+                execute_with_undo({
+                  description: category.name,
+                  execute: async () => {
+                    await delete_mutation.mutateAsync({ id: category.id });
+                    await utils.categories.tree.invalidate();
+                  },
+                  rollback: () => {
+                    utils.categories.tree.invalidate();
+                  },
+                  undoTimeoutMs: 8_000,
+                });
+              }}
             >
               {tc("confirm")}
             </AlertDialogAction>

@@ -118,19 +118,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     onError: (err) => toast.error(err.message),
   });
   const delete_sku = trpc.variants.deleteSku.useMutation({
-    onSuccess: async () => {
-      execute_with_undo({
-        description: delete_target?.code ?? "",
-        execute: async () => {
-          await invalidate();
-        },
-        rollback: async () => {
-          await invalidate();
-        },
-        undoTimeoutMs: 8_000,
-      });
-      set_delete_target(null);
-    },
     onError: (err) => toast.error(err.message),
   });
   const create_sku = trpc.variants.createSku.useMutation({
@@ -152,20 +139,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     onError: (err) => toast.error(err.message),
   });
   const bulk_delete = trpc.variants.bulkDeleteSku.useMutation({
-    onSuccess: async () => {
-      setRowSelection({});
-      set_bulk_delete_dialog_open(false);
-      execute_with_undo({
-        description: `${selected_ids.length} SKUs`,
-        execute: async () => {
-          await invalidate();
-        },
-        rollback: async () => {
-          await invalidate();
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => {
       set_bulk_delete_dialog_open(false);
       toast.error(err.message);
@@ -997,7 +970,18 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 disabled={delete_sku.isPending}
                 onClick={() => {
                   if (delete_target) {
-                    delete_sku.mutate({ id: delete_target.id });
+                    execute_with_undo({
+                      description: delete_target.code ?? "",
+                      execute: async () => {
+                        await delete_sku.mutateAsync({ id: delete_target.id });
+                        await invalidate();
+                      },
+                      rollback: async () => {
+                        await invalidate();
+                      },
+                      undoTimeoutMs: 8_000,
+                    });
+                    set_delete_target(null);
                   }
                 }}
               >
@@ -1022,7 +1006,21 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 disabled={bulk_delete.isPending}
-                onClick={() => bulk_delete.mutate({ ids: selected_ids })}
+                onClick={() => {
+                  setRowSelection({});
+                  set_bulk_delete_dialog_open(false);
+                  execute_with_undo({
+                    description: `${selected_ids.length} SKUs`,
+                    execute: async () => {
+                      await bulk_delete.mutateAsync({ ids: selected_ids });
+                      await invalidate();
+                    },
+                    rollback: async () => {
+                      await invalidate();
+                    },
+                    undoTimeoutMs: 8_000,
+                  });
+                }}
               >
                 {bulk_delete.isPending ? t("deleting") : t("confirm_delete")}
               </AlertDialogAction>

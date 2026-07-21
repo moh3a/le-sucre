@@ -13,6 +13,11 @@ import {
   EmptyDescription,
   EmptyMedia,
 } from "@/components/ui/empty";
+import {
+  extract_error_message,
+  is_timeout_error,
+  is_backend_unavailable,
+} from "@/lib/error-detection";
 
 interface DataStateProps {
   /** Whether data is currently loading */
@@ -39,44 +44,6 @@ interface DataStateProps {
   onRetry?: () => void;
   /** Children rendered on success (not loading, no error, not empty) */
   children: ReactNode;
-}
-
-function extract_error_message(error: unknown): string {
-  if (!error) return "";
-  if (error instanceof Error) return error.message;
-  if (typeof error === "object" && error !== null) {
-    const err = error as Record<string, unknown>;
-    if (typeof err.message === "string") return err.message;
-  }
-  return "";
-}
-
-function is_timeout_error(error: unknown): boolean {
-  if (!error) return false;
-  if (error instanceof Error && error.message === "REQUEST_TIMEOUT") return true;
-  if (typeof error === "object" && error !== null) {
-    const err = error as Record<string, unknown>;
-    if (err.message === "REQUEST_TIMEOUT") return true;
-    const data = err.data;
-    if (data && typeof data === "object") {
-      const d = data as Record<string, unknown>;
-      if (d.httpStatus === 408 || d.httpStatus === 504 || d.code === "TIMEOUT") return true;
-    }
-  }
-  return false;
-}
-
-function is_backend_unavailable(error: unknown): boolean {
-  if (!error || typeof error !== "object") return false;
-  const err = error as Record<string, unknown>;
-  const data = err.data;
-  if (data && typeof data === "object") {
-    const d = data as Record<string, unknown>;
-    if (d.httpStatus === 502 || d.httpStatus === 503 || d.httpStatus === 504) return true;
-    if (d.code === "BAD_GATEWAY" || d.code === "SERVICE_UNAVAILABLE" || d.code === "GATEWAY_TIMEOUT")
-      return true;
-  }
-  return false;
 }
 
 export function DataState({

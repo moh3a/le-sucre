@@ -4,7 +4,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ArrowLeft, Trash2, Heart } from "lucide-react";
-import { toast } from "sonner";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";

@@ -49,10 +49,10 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
 
   const handle_timeout = useCallback(() => {
     setLastErrorType("timeout");
-  }, []);
+    network.start_slow_timer();
+  }, [network.start_slow_timer]);
 
   const handle_request_failed = useCallback(() => {
-    // Only set backend_unavailable if not already offline
     if (navigator.onLine) {
       setLastErrorType((prev) => prev ?? "request_failed");
     }
@@ -74,7 +74,14 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
   const clear_error = useCallback(() => {
     setLastErrorType(null);
     setBackendAvailable(true);
-  }, []);
+    network.clear_slow_timer();
+  }, [network.clear_slow_timer]);
+
+  const mark_slow = useCallback(() => {
+    network.start_slow_timer();
+  }, [network.start_slow_timer]);
+
+  const mark_online = network.mark_online;
 
   // Register listeners with the module-level store so the tRPC link can call them
   useEffect(() => {
@@ -114,23 +121,11 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
     }
   }, [network.isOffline, query_client]);
 
-  // Warn before leaving when there are pending operations
-  useEffect(() => {
-    if (pending_count <= 0) return;
-
-    function handle_before_unload(e: BeforeUnloadEvent) {
-      e.preventDefault();
-    }
-
-    window.addEventListener("beforeunload", handle_before_unload);
-    return () => window.removeEventListener("beforeunload", handle_before_unload);
-  }, [pending_count]);
-
   const value = useMemo<NetworkContextValue>(
     () => ({
       ...network,
-      mark_slow: () => {},
-      mark_online: () => {},
+      mark_slow,
+      mark_online,
       backend_available,
       mark_backend_unavailable,
       mark_backend_available,
@@ -142,6 +137,8 @@ export function NetworkProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       network,
+      mark_slow,
+      mark_online,
       backend_available,
       mark_backend_unavailable,
       mark_backend_available,

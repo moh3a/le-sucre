@@ -76,21 +76,7 @@ export function AutomationRulesClient() {
     onSuccess: () => rulesQuery.refetch(),
   });
   const { execute_with_undo } = useUndoAction();
-  const del = trpc.campaigns.automationRuleDelete.useMutation({
-    onSuccess: (_data, variables) => {
-      const rule = rulesQuery.data?.find((r) => r.id === variables.id);
-      execute_with_undo({
-        description: rule?.name ?? variables.id,
-        execute: async () => {
-          await rulesQuery.refetch();
-        },
-        rollback: async () => {
-          await rulesQuery.refetch();
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
-  });
+  const del = trpc.campaigns.automationRuleDelete.useMutation();
 
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
@@ -207,7 +193,19 @@ export function AutomationRulesClient() {
                       {t("toggle")}
                     </button>
                     <button
-                      onClick={() => del.mutate({ id: rule.id })}
+                      onClick={() => {
+                        execute_with_undo({
+                          description: rule.name ?? rule.id,
+                          execute: async () => {
+                            await del.mutateAsync({ id: rule.id });
+                            await rulesQuery.refetch();
+                          },
+                          rollback: async () => {
+                            await rulesQuery.refetch();
+                          },
+                          undoTimeoutMs: 8_000,
+                        });
+                      }}
                       className="text-xs text-red-600 hover:underline"
                     >
                       {tc("delete")}

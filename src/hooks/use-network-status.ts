@@ -22,7 +22,13 @@ function detect_initial_status(): NetworkStatus {
   return "online";
 }
 
-export function useNetworkStatus(slowThresholdMs = DEFAULT_SLOW_THRESHOLD_MS): NetworkState {
+export interface UseNetworkStatusReturn extends NetworkState {
+  start_slow_timer: () => void;
+  clear_slow_timer: () => void;
+  mark_online: () => void;
+}
+
+export function useNetworkStatus(slowThresholdMs = DEFAULT_SLOW_THRESHOLD_MS): UseNetworkStatusReturn {
   const [status, setStatus] = useState<NetworkStatus>(detect_initial_status);
   const [lastOfflineAt, setLastOfflineAt] = useState<number | null>(null);
   const [lastOnlineAt, setLastOnlineAt] = useState<number | null>(null);
@@ -41,6 +47,11 @@ export function useNetworkStatus(slowThresholdMs = DEFAULT_SLOW_THRESHOLD_MS): N
       setStatus((prev) => (prev === "online" ? "slow" : prev));
     }, slowThresholdMs);
   }, [slowThresholdMs, clear_slow_timer]);
+
+  const mark_online = useCallback(() => {
+    clear_slow_timer();
+    setStatus("online");
+  }, [clear_slow_timer]);
 
   useEffect(() => {
     function handle_online() {
@@ -73,6 +84,9 @@ export function useNetworkStatus(slowThresholdMs = DEFAULT_SLOW_THRESHOLD_MS): N
     lastOfflineAt,
     lastOnlineAt,
     slowThresholdMs,
+    start_slow_timer,
+    clear_slow_timer,
+    mark_online,
   };
 }
 

@@ -98,18 +98,6 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
   });
 
   const delete_section = trpc.campaigns.deleteSection.useMutation({
-    onSuccess: (_data, variables) => {
-      execute_with_undo({
-        description: variables.id,
-        execute: async () => {
-          await utils.campaigns.byId.invalidate({ id: campaign_id });
-        },
-        rollback: async () => {
-          await utils.campaigns.byId.invalidate({ id: campaign_id });
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -168,7 +156,17 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
   const handleDelete = async (id: string) => {
     if (confirm(t("confirm_delete_section"))) {
-      await delete_section.mutateAsync({ id });
+      execute_with_undo({
+        description: id,
+        execute: async () => {
+          await delete_section.mutateAsync({ id });
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        rollback: async () => {
+          await utils.campaigns.byId.invalidate({ id: campaign_id });
+        },
+        undoTimeoutMs: 8_000,
+      });
     }
   };
 

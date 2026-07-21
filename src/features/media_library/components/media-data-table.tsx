@@ -66,22 +66,7 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
     page,
   });
 
-  const delete_media = trpc.media.delete.useMutation({
-    onSuccess: () => {
-      execute_with_undo({
-        description: delete_media.variables?.id ?? "media",
-        execute: async () => {
-          await utils.media.list.invalidate();
-          await utils.media.stats.invalidate();
-        },
-        rollback: () => {
-          utils.media.list.invalidate();
-          utils.media.stats.invalidate();
-        },
-        undoTimeoutMs: 8_000,
-      });
-    },
-  });
+  const delete_media = trpc.media.delete.useMutation();
 
   return (
     <QueryGuard query={{ isLoading }} loadingFallback={
@@ -210,7 +195,21 @@ export function MediaDataTable({ search }: MediaDataTableProps) {
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => delete_media.mutate({ id: item.id })}
+                            onClick={() => {
+                              execute_with_undo({
+                                description: item.original_name,
+                                execute: async () => {
+                                  await delete_media.mutateAsync({ id: item.id });
+                                  await utils.media.list.invalidate();
+                                  await utils.media.stats.invalidate();
+                                },
+                                rollback: () => {
+                                  utils.media.list.invalidate();
+                                  utils.media.stats.invalidate();
+                                },
+                                undoTimeoutMs: 8_000,
+                              });
+                            }}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             {t("delete_file")}

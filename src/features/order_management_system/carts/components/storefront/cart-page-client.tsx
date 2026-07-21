@@ -79,22 +79,20 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
     updateMut.mutate({ cart_id: cartId, item_id: itemId, quantity });
   }
 
-  async function handleRemove(itemId: string) {
+  function handleRemove(itemId: string) {
     if (!cartId) return;
     const item = items.find((i) => i.id === itemId);
-    removeMut.mutate(
-      { cart_id: cartId, item_id: itemId },
-      {
-        onSuccess: () => {
-          execute_with_undo({
-            description: item?.product_name ?? "Article",
-            execute: () => utils.cart.getCart.invalidate(),
-            rollback: () => utils.cart.getCart.invalidate(),
-            undoTimeoutMs: 8_000,
-          });
-        },
+    execute_with_undo({
+      description: item?.product_name ?? "Article",
+      execute: async () => {
+        await removeMut.mutateAsync({ cart_id: cartId, item_id: itemId });
+        await utils.cart.getCart.invalidate();
       },
-    );
+      rollback: () => {
+        utils.cart.getCart.invalidate();
+      },
+      undoTimeoutMs: 8_000,
+    });
   }
 
   function handleApplyPromo(code: string) {
