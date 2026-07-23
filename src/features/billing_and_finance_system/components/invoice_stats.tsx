@@ -5,7 +5,6 @@ import { format, startOfMonth } from "date-fns";
 
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 
 type StatusAggregate = {
   status: string;
@@ -26,7 +25,7 @@ export function InvoiceStats() {
   const start = format(startOfMonth(today), "yyyy-MM-dd");
   const end = format(today, "yyyy-MM-dd");
 
-  const { data, isFetching, isLoading, error } = trpc.invoices.get_summary.useQuery({
+  const { data, isLoading } = trpc.invoices.get_summary.useQuery({
     start_date: start,
     end_date: end,
   });
@@ -39,9 +38,8 @@ export function InvoiceStats() {
     amount_for_status(status_rows, "partially_refunded");
 
   return (
-    <QueryGuard query={{ isLoading: isFetching || isLoading, error }}>
     <StatsGrid
-      loading={isFetching || isLoading}
+      loading={isLoading}
       items={[
         {
           label: "Chiffre d'affaires (mois)",
@@ -89,6 +87,5 @@ export function InvoiceStats() {
         },
       ]}
     />
-    </QueryGuard>
   );
 }

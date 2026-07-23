@@ -1,3 +1,5 @@
+import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
+
 export const BLACKLIST_CACHE_TTL = 300; // 5 minutes
 
 export const BLACKLIST_PAGINATION = {
@@ -6,8 +8,8 @@ export const BLACKLIST_PAGINATION = {
 } as const;
 
 export const BLACKLIST_PERMISSIONS = {
-  view: "blacklist:view",
-  create: "blacklist:create",
-  update: "blacklist:update",
-  delete: "blacklist:delete",
+  view: PERMISSIONS.blacklist_view,
+  create: PERMISSIONS.blacklist_create,
+  update: PERMISSIONS.blacklist_update,
+  delete: PERMISSIONS.blacklist_delete,
 } as const;

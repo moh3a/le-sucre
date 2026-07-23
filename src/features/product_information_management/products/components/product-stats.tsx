@@ -2,17 +2,14 @@
 
 import { AlertTriangle, CheckCircle2, DollarSign, Package, ShoppingBag, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { QueryGuard } from "@/components/query-guard";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 
 export function ProductStats() {
   const t = useTranslations("products");
-  const query = trpc.products.adminStats.useQuery();
-  const { data, isLoading } = query;
+  const { data, isLoading } = trpc.products.adminStats.useQuery();
 
   return (
-    <QueryGuard query={query}>
     <StatsGrid
       loading={isLoading}
       items={[
@@ -55,6 +52,5 @@ export function ProductStats() {
         },
       ]}
     />
-    </QueryGuard>
   );
 }

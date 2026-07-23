@@ -1,10 +1,15 @@
 import "dotenv/config";
 import { db } from "@/lib/db";
 import { permissions } from "@/features/authentication_and_authorization/auth/schema";
-import { BLACKLIST_PERMISSIONS } from "@/features/ip_blacklist/constants";
+import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { logger } from "@/lib/logger";
 
-const BLACKLIST_PERMISSION_NAMES = Object.values(BLACKLIST_PERMISSIONS);
+const BLACKLIST_PERMISSION_NAMES = [
+  PERMISSIONS.blacklist_view,
+  PERMISSIONS.blacklist_create,
+  PERMISSIONS.blacklist_update,
+  PERMISSIONS.blacklist_delete,
+];
 
 async function seed_blacklist_permissions() {
   logger.info("Seeding blacklist permissions…");

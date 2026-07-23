@@ -10,8 +10,9 @@ export default async function InvoiceDetailPage({ params }: Props) {
 
   return (
     <ConsolePageShell
-      title="Détail de la facture"
-      subtitle="Consulter, télécharger et gérer la facture"
+      title="Facture"
+      subtitle="Détail et gestion de la facture"
+      back_href="/console/invoices"
     >
       <InvoiceDetailClient id={invoice_id} />
     </ConsolePageShell>

@@ -2,17 +2,15 @@
 
 import { CheckCircle2, Clock, Package, ReceiptCent, X } from "lucide-react";
 
-import { QueryGuard } from "@/components/query-guard";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 
 export function OrderStats() {
-  const { data, isFetching, isLoading } = trpc.orders.adminStats.useQuery();
+  const { data, isLoading } = trpc.orders.adminStats.useQuery();
 
   return (
-    <QueryGuard query={{ isLoading, isFetching }}>
     <StatsGrid
-      loading={isFetching || isLoading}
+      loading={isLoading}
       items={[
         {
           label: "Monthly revenue",
@@ -58,6 +56,5 @@ export function OrderStats() {
         },
       ]}
     />
-    </QueryGuard>
   );
 }

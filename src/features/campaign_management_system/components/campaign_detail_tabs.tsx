@@ -1,21 +1,15 @@
 "use client";
 
-import { Megaphone, Calendar, ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { z } from "zod";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { CampaignForm } from "./campaign_form";
 import { CampaignBannersTab } from "./campaign_banners_tab";
 import { CampaignSectionsTab } from "./campaign_sections_tab";
 import { CampaignTargetingTab } from "./campaign_targeting_tab";
 import { CampaignAnalyticsTab } from "./campaign_analytics_tab";
-import { CampaignStatusBadge } from "./campaign_status_badge";
 import { full_campaign_dto } from "@/features/campaign_management_system/models/campaign.dto";
 import type { SectionRow } from "@/features/campaign_management_system/components/campaign_sections_tab";
 import type { BannerRow } from "@/features/campaign_management_system/components/campaign_banners_tab";
@@ -30,64 +24,25 @@ type DetailTabsProps = {
 export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps) {
   const { data: campaign, isLoading } = trpc.campaigns.byId.useQuery({ id: campaign_id });
 
-  const format_date = (d?: string | null) => {
-    if (!d) return "indéfinie";
-    return format(new Date(d), "dd MMM yyyy HH:mm", { locale: fr });
-  };
-
   if (!campaign) return null;
 
   return (
     <QueryGuard query={{ isLoading }}>
-    <div className="space-y-6 p-6">
-      {/* Back button and Header */}
-      <div className="space-y-4">
-        <Link
-          href="/console/campaigns"
-          className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-xs transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Retour à la liste des campagnes
-        </Link>
-
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
-              <Megaphone className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-foreground text-2xl font-bold">{campaign.name}</h1>
-                <CampaignStatusBadge status={campaign.status} />
-                <Badge variant="outline" className="text-xs capitalize">
-                  {campaign.campaign_type}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
-                <Calendar className="h-3 w-3" />
-                Planning : du {format_date(campaign.starts_at)} au {format_date(campaign.ends_at)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Detail Tabs */}
       <Tabs defaultValue={default_tab ?? "general"} className="w-full">
-        <TabsList className="bg-muted grid w-full max-w-2xl grid-cols-5 rounded-xl p-1">
-          <TabsTrigger value="general" className="rounded-lg py-2 text-xs font-semibold">
+        <TabsList className="flex flex-wrap">
+          <TabsTrigger value="general">
             Général
           </TabsTrigger>
-          <TabsTrigger value="banners" className="rounded-lg py-2 text-xs font-semibold">
+          <TabsTrigger value="banners">
             Bannières ({campaign.banners?.length ?? 0})
           </TabsTrigger>
-          <TabsTrigger value="sections" className="rounded-lg py-2 text-xs font-semibold">
+          <TabsTrigger value="sections">
             Sections ({campaign.sections?.length ?? 0})
           </TabsTrigger>
-          <TabsTrigger value="targeting" className="rounded-lg py-2 text-xs font-semibold">
+          <TabsTrigger value="targeting">
             Ciblage ({campaign.targets?.length ?? 0})
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-lg py-2 text-xs font-semibold">
+          <TabsTrigger value="analytics">
             Analytics
           </TabsTrigger>
         </TabsList>
@@ -112,7 +67,6 @@ export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps
           <CampaignAnalyticsTab campaign_id={campaign_id} />
         </TabsContent>
       </Tabs>
-    </div>
     </QueryGuard>
   );
 }

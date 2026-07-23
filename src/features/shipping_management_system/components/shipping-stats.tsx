@@ -5,17 +5,15 @@ import { CheckCircle2, Clock, Package, RefreshCcw, Truck, XCircle } from "lucide
 
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 
 export function ShippingStats() {
   const t = useTranslations("shipping");
-  const { data, isFetching, isLoading, error } = trpc.shipping.adminStats.useQuery();
+  const { data, isLoading } = trpc.shipping.adminStats.useQuery();
 
   return (
-    <QueryGuard query={{ isLoading: isFetching || isLoading, error }}>
-      <StatsGrid
-        loading={isFetching || isLoading}
-        items={[
+    <StatsGrid
+      loading={isLoading}
+      items={[
           {
             label: t("stats_total_shipments"),
             value: data?.total ?? 0,
@@ -54,6 +52,5 @@ export function ShippingStats() {
           },
         ]}
       />
-    </QueryGuard>
   );
 }

@@ -3,18 +3,17 @@
 import { useTranslations } from "next-intl";
 import { AlertTriangle, Box, Package, PackageOpen, TrendingUpDown, Warehouse } from "lucide-react";
 
-import { QueryGuard } from "@/components/query-guard";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { trpc } from "@/components/providers/app-providers";
 
 export function InventoryStats() {
   const t = useTranslations("inventory");
-  const { data, error, isFetching, isLoading } = trpc.inventory.adminStats.useQuery();
+  const { data, isLoading } = trpc.inventory.adminStats.useQuery();
 
   return (
-    <QueryGuard query={{ isLoading: isFetching || isLoading, error }}>
-      <StatsGrid
-        items={[
+    <StatsGrid
+      loading={isLoading}
+      items={[
         {
           label: t("stock_value"),
           value: data?.total_products ?? 0,
@@ -53,6 +52,5 @@ export function InventoryStats() {
         },
       ]}
       />
-    </QueryGuard>
   );
 }

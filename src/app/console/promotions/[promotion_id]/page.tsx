@@ -12,9 +12,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PromotionDetailPage({ params }: Props) {
   const { promotion_id } = await params;
 
-  return (
-    <div className="container p-6">
-      <PromotionDetailClient promotion_id={promotion_id} />
-    </div>
-  );
+  return <PromotionDetailClient promotion_id={promotion_id} />;
 }

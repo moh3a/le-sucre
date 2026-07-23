@@ -1,4 +1,5 @@
 import "server-only";
+import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 
 const FORBIDDEN_EXPORT_CHARS = /[=+\-@\t\r\n]/;
 const MAX_EXPORT_ROWS = 10000;
@@ -37,13 +38,13 @@ export function sanitize_export_filename(filename: string): string {
 }
 
 export const EXPORT_PERMISSIONS: Record<string, string[]> = {
-  products: ["products:export"],
-  orders: ["orders:export"],
-  customers: ["customers:export"],
-  reviews: ["reviews:export"],
-  analytics: ["analytics:export"],
-  inventory: ["inventory:export"],
-} as const;
+  products: [PERMISSIONS.products_export],
+  orders: [PERMISSIONS.orders_export],
+  customers: [PERMISSIONS.customers_export],
+  reviews: [PERMISSIONS.reviews_export],
+  analytics: [PERMISSIONS.analytics_export],
+  inventory: [PERMISSIONS.inventory_export],
+};
 
 export function get_export_permission(resource: string): string | undefined {
   return EXPORT_PERMISSIONS[resource as keyof typeof EXPORT_PERMISSIONS]?.[0];

@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -117,7 +117,18 @@ function AgentDetailDialog({
           <DialogTitle>{t("agent_detail_title", { id: user_id.slice(0, 12) })}</DialogTitle>
         </DialogHeader>
         {isLoading ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">{t("loading")}</div>
+          <div className="space-y-4 p-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-[88px] rounded-lg" />
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <Skeleton className="h-16 rounded-lg" />
+              <Skeleton className="h-16 rounded-lg" />
+              <Skeleton className="h-16 rounded-lg" />
+            </div>
+          </div>
         ) : agentKpi ? (
           <div className="space-y-4">
             <StatsGrid
@@ -274,7 +285,16 @@ export function AgentKPIClient() {
   return (
     <QueryGuard
       query={{ isLoading, error }}
-      loadingFallback={<DataTableSkeleton columnCount={6} rowCount={10} />}
+      loadingFallback={
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-[88px] rounded-lg" />
+            ))}
+          </div>
+          <DataTableSkeleton columnCount={6} rowCount={10} />
+        </div>
+      }
     >
       <div className="space-y-4">
         <StatsGrid

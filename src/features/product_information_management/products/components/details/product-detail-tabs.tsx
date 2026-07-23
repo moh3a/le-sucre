@@ -44,7 +44,6 @@ export function ProductDetailTabs({ product_id }: Props) {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const fr = translations?.find((t) => t.locale === "fr");
 
   const parsed = outer_tab_schema.safeParse(searchParams.get("tab"));
   const active_tab = parsed.success ? parsed.data : "general";
@@ -63,11 +62,6 @@ export function ProductDetailTabs({ product_id }: Props) {
       <div className="space-y-6">
         {product && (
           <>
-            <div>
-              <h1 className="font-heading text-2xl font-bold">{fr?.name ?? product.slug}</h1>
-              <p className="text-muted-foreground text-sm">{t("detail_subtitle")}</p>
-            </div>
-
             <Tabs value={active_tab} onValueChange={on_tab_change}>
               <TabsList className="flex flex-wrap">
                 <TabsTrigger value="general">{t("tab_general")}</TabsTrigger>

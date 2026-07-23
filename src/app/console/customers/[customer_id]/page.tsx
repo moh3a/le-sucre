@@ -12,10 +12,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CustomerDetailPage({ params }: Props) {
   const { customer_id } = await params;
 
-  return (
-    <div className="container p-6">
-      <CustomerDetailTabs user_id={customer_id} />
-    </div>
-  );
+  return <CustomerDetailTabs user_id={customer_id} />;
 }
  
