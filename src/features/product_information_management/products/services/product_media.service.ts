@@ -9,10 +9,7 @@ import { PRODUCT_ERROR } from "../constants/error-codes";
 import { build_product_media_key, build_public_media_url, media_config } from "@/config/media";
 import { MediaRepository } from "@/features/media_library/repositories/media.repository";
 import { build_media_storage_key } from "@/features/media_library/helpers";
-
-import type { product_media_dto } from "../models/product.dto";
-import type { z } from "zod";
-import { ProductRepository } from "../repositories/product.repository";
+import { product_repository } from "../repositories/product.repository";
 
 export type MediaUploadIntent = {
   storage_key: string;
@@ -22,7 +19,7 @@ export type MediaUploadIntent = {
 
 export class ProductMediaService {
   constructor(
-    private readonly repo = new ProductRepository(),
+    private readonly repo = product_repository,
     private readonly media_repo = new MediaRepository(),
   ) {}
 
@@ -182,7 +179,9 @@ export class ProductMediaService {
       if (existing) {
         const usages = await this.media_repo.get_entity_usages("product", product_id);
         const match = usages.find(
-          (u) => u.media_id === existing.id && (u.metadata as Record<string, unknown> | null)?.product_media_id === media_id,
+          (u) =>
+            u.media_id === existing.id &&
+            (u.metadata as Record<string, unknown> | null)?.product_media_id === media_id,
         );
         if (match) {
           await this.media_repo.delete_usage(match.id);

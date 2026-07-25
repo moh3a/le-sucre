@@ -17,12 +17,13 @@ import {
   update_product_dto,
   upsert_translation_dto,
 } from "../models/product.dto";
-import { ProductRepository } from "../repositories/product.repository";
+import { product_repository } from "../repositories/product.repository";
 import { product_media_service } from "./product_media.service";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 import { indexing_service } from "../../recommendations/services/indexing.service";
 import { invalidate_recommendations_for_product } from "../../recommendations/helpers/invalidate-recommendations.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "@/features/product_information_management/constants/audit-actions";
 import { brand_service } from "@/features/product_information_management/brands/services/brand.service";
 import { review_service } from "@/features/product_reviews_management/services/review.service";
 import { variant_service } from "@/features/product_information_management/variants/services/variant.service";
@@ -75,15 +76,13 @@ function db_error_reason(err: Error): { fr: string; en: string; ar: string } {
 }
 
 export class ProductService {
-  constructor(private readonly repo = new ProductRepository()) {}
-
   async create(input: z.infer<typeof create_product_dto>) {
     const slug = input.slug ?? slugify_name(input.name);
-    if (await this.repo.find_by_slug(slug)) {
+    if (await product_repository.find_by_slug(slug)) {
       throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
     }
 
-    if ((await this.repo.count_by_sku(input.sku)) > 0) {
+    if ((await product_repository.count_by_sku(input.sku)) > 0) {
       throw_error(PRODUCT_ERROR.SKU_CONFLICT);
     }
 
@@ -92,7 +91,7 @@ export class ProductService {
 
     const id = generate_id();
 
-    await this.repo.create({
+    await product_repository.create({
       id,
       sku: input.sku,
       slug,
@@ -102,6 +101,7 @@ export class ProductService {
       offer_price: input.offer_price != null ? String(input.offer_price) : null,
       currency: input.currency,
       status: input.status,
+      has_variants: input.has_variants ?? false,
       is_featured: input.is_featured,
       metadata: input.metadata ?? {},
       seo_title: input.seo_title ?? null,
@@ -109,7 +109,7 @@ export class ProductService {
       seo_keywords: input.keywords ?? null,
     });
 
-    await this.repo.upsert_translation({
+    await product_repository.upsert_translation({
       id: generate_id(),
       product_id: id,
       locale: DEFAULT_LOCALE,
@@ -123,7 +123,7 @@ export class ProductService {
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(id);
     void audit_service.log({
-      action: "product.create",
+      action: AUDIT_ACTION.PRODUCT_CREATED,
       resource_type: "product_id",
       resource_id: id,
     });
@@ -131,34 +131,34 @@ export class ProductService {
   }
 
   async get_by_id(id: string) {
-    const productData = await this.repo.find_by_id(id);
+    const productData = await product_repository.find_by_id(id);
     if (!productData) throw_error(PRODUCT_ERROR.NOT_FOUND);
     const product = product_details_dto.parse(productData);
-    const translations = await this.repo.list_translations(id);
-    const mediaData = await this.repo.list_media(id);
+    const translations = await product_repository.list_translations(id);
+    const mediaData = await product_repository.list_media(id);
     const media = z.array(full_product_media_dto).parse(mediaData);
     return { product, translations, media };
   }
 
   async get_by_slug(slug: string, locale = DEFAULT_LOCALE) {
-    const product = await this.repo.find_by_slug(slug);
+    const product = await product_repository.find_by_slug(slug);
     if (!product) throw_error(PRODUCT_ERROR.NOT_FOUND);
     const translation =
-      (await this.repo.get_translation(product.id, locale)) ??
-      (await this.repo.get_translation(product.id, DEFAULT_LOCALE));
-    const media = await this.repo.list_media(product.id);
+      (await product_repository.get_translation(product.id, locale)) ??
+      (await product_repository.get_translation(product.id, DEFAULT_LOCALE));
+    const media = await product_repository.list_media(product.id);
     return { product, translation, media };
   }
 
   async get_storefront_by_slug(slug: string, locale = DEFAULT_LOCALE) {
-    const product = await this.repo.find_by_slug(slug);
+    const product = await product_repository.find_by_slug(slug);
     if (!product) throw_error(PRODUCT_ERROR.NOT_FOUND);
 
     const translation =
-      (await this.repo.get_translation(product.id, locale)) ??
-      (await this.repo.get_translation(product.id, DEFAULT_LOCALE));
+      (await product_repository.get_translation(product.id, locale)) ??
+      (await product_repository.get_translation(product.id, DEFAULT_LOCALE));
 
-    const media = await this.repo.list_media(product.id);
+    const media = await product_repository.list_media(product.id);
 
     const parsed = product_details_dto.parse(product);
 
@@ -210,14 +210,22 @@ export class ProductService {
   }
 
   async update(input: z.infer<typeof update_product_dto>) {
-    const current = await this.repo.find_by_id(input.id);
+    const current = await product_repository.find_by_id(input.id);
     if (!current) throw_error(PRODUCT_ERROR.NOT_FOUND);
 
-    if (input.slug && input.slug !== current.slug && (await this.repo.find_by_slug(input.slug))) {
+    if (
+      input.slug &&
+      input.slug !== current.slug &&
+      (await product_repository.find_by_slug(input.slug))
+    ) {
       throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
     }
 
-    if (input.sku && input.sku !== current.sku && (await this.repo.count_by_sku(input.sku, input.id)) > 0) {
+    if (
+      input.sku &&
+      input.sku !== current.sku &&
+      (await product_repository.count_by_sku(input.sku, input.id)) > 0
+    ) {
       throw_error(PRODUCT_ERROR.SKU_CONFLICT);
     }
 
@@ -226,7 +234,7 @@ export class ProductService {
       if (!resolved.length) throw_error(PRODUCT_ERROR.CATEGORY_NOT_FOUND);
     }
 
-    await this.repo.update(input.id, {
+    await product_repository.update(input.id, {
       ...(input.sku !== undefined && { sku: input.sku }),
       ...(input.slug !== undefined && { slug: input.slug }),
       ...(input.category_id !== undefined && { category_id: input.category_id }),
@@ -249,8 +257,8 @@ export class ProductService {
       input.description !== undefined ||
       input.keywords !== undefined
     ) {
-      const existing = await this.repo.get_translation(input.id, DEFAULT_LOCALE);
-      await this.repo.upsert_translation({
+      const existing = await product_repository.get_translation(input.id, DEFAULT_LOCALE);
+      await product_repository.upsert_translation({
         id: existing?.id ?? generate_id(),
         product_id: input.id,
         locale: DEFAULT_LOCALE,
@@ -267,7 +275,7 @@ export class ProductService {
     void indexing_service.enqueue("reindex_product", { product_id: input.id });
 
     void audit_service.log({
-      action: "product.update",
+      action: AUDIT_ACTION.PRODUCT_UPDATED,
       resource_type: "product_id",
       resource_id: input.id,
     });
@@ -276,7 +284,7 @@ export class ProductService {
 
   async upsert_translation(input: z.infer<typeof upsert_translation_dto>) {
     await this.get_by_id(input.product_id);
-    await this.repo.upsert_translation({
+    await product_repository.upsert_translation({
       id: generate_id(),
       product_id: input.product_id,
       locale: input.locale,
@@ -290,20 +298,20 @@ export class ProductService {
   }
 
   async remove(id: string) {
-    const current = await this.repo.find_by_id(id);
+    const current = await product_repository.find_by_id(id);
     if (!current) throw_error(PRODUCT_ERROR.NOT_FOUND);
 
-    if (await this.repo.has_orders(id)) {
+    if (await product_repository.has_orders(id)) {
       throw_error(PRODUCT_ERROR.HAS_ACTIVE_ORDERS);
     }
 
-    await this.repo.delete(id);
+    await product_repository.delete(id);
 
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(id);
 
     void audit_service.log({
-      action: "product.remove",
+      action: AUDIT_ACTION.PRODUCT_REMOVED,
       resource_type: "product_id",
       resource_id: id,
     });
@@ -311,14 +319,14 @@ export class ProductService {
   }
 
   async duplicate(id: string) {
-    const original = await this.repo.find_by_id(id);
+    const original = await product_repository.find_by_id(id);
     if (!original) throw_error(PRODUCT_ERROR.NOT_FOUND);
 
     const new_id = generate_id();
     const copy_slug = `${original.slug}-copie-${Date.now().toString(36)}`;
 
     const [create_err] = await tryFn(
-      this.repo.create({
+      product_repository.create({
         id: new_id,
         sku: `${original.sku}-COPY`,
         slug: copy_slug,
@@ -328,8 +336,8 @@ export class ProductService {
         offer_price: original.offer_price,
         currency: original.currency,
         status: "draft",
-        is_featured: false,
         has_variants: original.has_variants,
+        is_featured: false,
         metadata: original.metadata,
         seo_title: original.seo_title,
         seo_description: original.seo_description,
@@ -344,10 +352,10 @@ export class ProductService {
       });
     }
 
-    const translations = await this.repo.list_translations(id);
+    const translations = await product_repository.list_translations(id);
     for (const tr of translations) {
       const [tr_err] = await tryFn(
-        this.repo.upsert_translation({
+        product_repository.upsert_translation({
           id: generate_id(),
           product_id: new_id,
           locale: tr.locale,
@@ -369,7 +377,7 @@ export class ProductService {
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(new_id);
     void audit_service.log({
-      action: "product.duplicate",
+      action: AUDIT_ACTION.PRODUCT_DUPLICATED,
       resource_type: "product_id",
       resource_id: new_id,
     });
@@ -391,8 +399,8 @@ export class ProductService {
 
     let product_ids: string[] | undefined;
     if (params.search) {
-      const name_ids = await this.repo.search_ids_by_name(params.search);
-      const slug_matches = await this.repo.list({
+      const name_ids = await product_repository.search_ids_by_name(params.search);
+      const slug_matches = await product_repository.list({
         page: 1,
         limit: 1000,
         search: params.search,
@@ -414,7 +422,7 @@ export class ProductService {
       }
     }
 
-    return this.repo.list({
+    return product_repository.list({
       ...params,
       category_ids,
       product_ids,

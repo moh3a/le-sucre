@@ -156,9 +156,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
   const description = translation?.description ?? "";
   const all_media_urls = media.map((m) => m.url);
 
-  const parsed_metadata: Record<string, unknown> = product.metadata
-    ? (JSON.parse(product.metadata) as Record<string, unknown>)
-    : {};
+  const parsed_metadata: Record<string, unknown> = (product.metadata as Record<string, unknown>) ?? {};
   const specs = parsed_metadata.technical_specs as
     | Record<string, string | number | boolean>
     | undefined;

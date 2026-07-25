@@ -4,6 +4,7 @@ import type { z } from "zod";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "@/features/product_information_management/constants/audit-actions";
 import type { admin_list_products_dto, bulk_product_action_dto } from "../models/product-admin.dto";
 import { product_admin_repository } from "../repositories/product-admin.repository";
 
@@ -38,7 +39,7 @@ export class ProductAdminService {
     if (input.action === "activate") {
       await product_admin_repository.bulk_update_status(input.product_ids, "published");
       void audit_service.log({
-        action: "product.bulk_activate",
+        action: AUDIT_ACTION.PRODUCT_BULK_ACTIVATED,
         resource_type: "product_id",
         resource_id: input.product_ids[0],
         metadata: { count },
@@ -47,7 +48,7 @@ export class ProductAdminService {
     if (input.action === "deactivate") {
       await product_admin_repository.bulk_update_status(input.product_ids, "draft");
       void audit_service.log({
-        action: "product.bulk_deactivate",
+        action: AUDIT_ACTION.PRODUCT_BULK_DEACTIVATED,
         resource_type: "product_id",
         resource_id: input.product_ids[0],
         metadata: { count },
@@ -56,7 +57,7 @@ export class ProductAdminService {
     if (input.action === "delete") {
       await product_admin_repository.bulk_delete(input.product_ids);
       void audit_service.log({
-        action: "product.bulk_delete",
+        action: AUDIT_ACTION.PRODUCT_BULK_DELETED,
         resource_type: "product_id",
         resource_id: input.product_ids[0],
         metadata: { count },
@@ -65,7 +66,7 @@ export class ProductAdminService {
     if (input.action === "assign_category" && input.category_id) {
       await product_admin_repository.bulk_update_category(input.product_ids, input.category_id);
       void audit_service.log({
-        action: "product.bulk_assign_category",
+        action: AUDIT_ACTION.PRODUCT_BULK_CATEGORY_ASSIGNED,
         resource_type: "product_id",
         resource_id: input.product_ids[0],
         metadata: { count, category_id: input.category_id },

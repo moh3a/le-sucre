@@ -2,7 +2,6 @@
 
 ## TODOs
 
-- fix products repo and service
 - configure webhooks
 - single entry point for workers
 - check if every operation works

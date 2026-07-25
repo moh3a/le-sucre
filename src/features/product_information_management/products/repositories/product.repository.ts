@@ -1,5 +1,17 @@
 import "server-only";
-import { and, count, desc, eq, inArray, isNotNull, isNull, like, ne, or } from "drizzle-orm";
+import {
+  type SQL,
+  and,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  like,
+  ne,
+  or,
+} from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { products, product_translations, product_media } from "../schema";
@@ -10,16 +22,24 @@ const DEFAULT_LOCALE = "fr";
 
 export class ProductRepository {
   async find_by_id(id: string, includeDeleted = false) {
-    const filters: any[] = [eq(products.id, id)];
+    const filters: SQL[] = [eq(products.id, id)];
     if (!includeDeleted) filters.push(isNull(products.deleted_at));
-    const [row] = await db.select().from(products).where(and(...filters)).limit(1);
+    const [row] = await db
+      .select()
+      .from(products)
+      .where(and(...filters))
+      .limit(1);
     return row ?? null;
   }
 
   async find_by_slug(slug: string, includeDeleted = false) {
-    const filters: any[] = [eq(products.slug, slug)];
+    const filters: SQL[] = [eq(products.slug, slug)];
     if (!includeDeleted) filters.push(isNull(products.deleted_at));
-    const [row] = await db.select().from(products).where(and(...filters)).limit(1);
+    const [row] = await db
+      .select()
+      .from(products)
+      .where(and(...filters))
+      .limit(1);
     return row ?? null;
   }
 
@@ -36,7 +56,7 @@ export class ProductRepository {
     const { page, limit } = params;
     const offset = (page - 1) * limit;
 
-    const filters = [];
+    const filters: SQL[] = [];
     if (!params.includeDeleted) filters.push(isNull(products.deleted_at));
     if (params.status) filters.push(eq(products.status, params.status));
     if (params.brand_id) filters.push(eq(products.brand_id, params.brand_id));
@@ -94,6 +114,11 @@ export class ProductRepository {
 
   update(id: string, data: Partial<typeof products.$inferInsert>) {
     return db.update(products).set(data).where(eq(products.id, id));
+  }
+
+  /** Hard delete — use only for permanent removal (force delete / trash) */
+  async delete(id: string) {
+    return db.delete(products).where(eq(products.id, id));
   }
 
   /** Soft delete - only works on non-deleted records */
@@ -164,11 +189,7 @@ export class ProductRepository {
     };
   }
 
-  async delete_media(media_id: string, product_id: string) {
-    await db
-      .delete(product_media)
-      .where(and(eq(product_media.id, media_id), eq(product_media.product_id, product_id)));
-  }
+  // ─── Translations ──────────────────────────────────────────────────────────
 
   async list_translations(product_id: string) {
     return db
@@ -191,6 +212,46 @@ export class ProductRepository {
     return row ?? null;
   }
 
+  async upsert_translation(data: typeof product_translations.$inferInsert) {
+    const existing = await this.get_translation(data.product_id, data.locale);
+    if (existing) {
+      return db
+        .update(product_translations)
+        .set(data)
+        .where(eq(product_translations.id, existing.id));
+    }
+    return db.insert(product_translations).values(data);
+  }
+
+  // ─── Media ─────────────────────────────────────────────────────────────────
+
+  async list_media(product_id: string) {
+    return db
+      .select()
+      .from(product_media)
+      .where(eq(product_media.product_id, product_id))
+      .orderBy(product_media.sort_order);
+  }
+
+  async create_media(data: typeof product_media.$inferInsert) {
+    return db.insert(product_media).values(data);
+  }
+
+  async delete_media(media_id: string, product_id: string) {
+    await db
+      .delete(product_media)
+      .where(and(eq(product_media.id, media_id), eq(product_media.product_id, product_id)));
+  }
+
+  async clear_primary_media(product_id: string) {
+    await db
+      .update(product_media)
+      .set({ is_primary: false })
+      .where(eq(product_media.product_id, product_id));
+  }
+
+  // ─── Search / Aggregate ────────────────────────────────────────────────────
+
   async search_ids_by_name(search: string) {
     const q = `%${search}%`;
     const rows = await db
@@ -210,7 +271,7 @@ export class ProductRepository {
   }
 
   async count_by_sku(sku: string, exclude_id?: string): Promise<number> {
-    const filters = [eq(products.sku, sku)];
+    const filters: SQL[] = [eq(products.sku, sku)];
     if (exclude_id) {
       filters.push(ne(products.id, exclude_id));
     }
@@ -222,3 +283,5 @@ export class ProductRepository {
     return Number(total ?? 0);
   }
 }
+
+export const product_repository = new ProductRepository();
