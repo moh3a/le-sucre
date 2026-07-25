@@ -8,7 +8,7 @@ import {
   REFUND_TYPE,
   AUDIT_ACTION,
 } from "../constants/payment-status";
-import type { PaymentProviderName, RefundPaymentInput } from "../providers/contracts";
+import type { PaymentProviderName } from "../providers/contracts";
 import { PAYMENT_ERROR } from "../constants/error-codes";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 
@@ -63,9 +63,7 @@ export class PaymentRefundService {
       });
     }
 
-    const status = input.require_approval
-      ? REFUND_STATUS.PENDING
-      : REFUND_STATUS.APPROVED;
+    const status = input.require_approval ? REFUND_STATUS.PENDING : REFUND_STATUS.APPROVED;
 
     const refund = await this.repo.create_refund({
       transaction_id: input.transaction_id,

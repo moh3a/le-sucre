@@ -11,6 +11,7 @@ import { review_repository } from "../repositories/review.repository";
 import { product_reviews } from "../schema";
 import { db } from "@/lib/db";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { review_cache_service } from "./review-cache.service";
 
 const REPORT_AUTO_HIDE_THRESHOLD = 5;
@@ -55,7 +56,7 @@ export class ReportService {
     }
 
     void audit_service.log({
-      action: "review.report",
+      action: AUDIT_ACTION.REVIEW_REPORTED,
       resource_type: "review_id",
       resource_id: input.review_id,
     });

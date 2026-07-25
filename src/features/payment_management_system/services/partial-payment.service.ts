@@ -7,7 +7,6 @@ import { payment_processing_service } from "./payment-processing.service";
 import {
   PARTIAL_PAYMENT_TYPE,
   PARTIAL_PAYMENT_STATUS,
-  PAYMENT_TRANSACTION_STATUS,
   PAYMENT_TRANSACTION_TYPE,
   AUDIT_ACTION,
 } from "../constants/payment-status";
@@ -26,11 +25,7 @@ export class PartialPaymentService {
     currency: string;
     actor_user_id?: string;
   }) {
-    const [order] = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.id, input.order_id))
-      .limit(1);
+    const [order] = await db.select().from(orders).where(eq(orders.id, input.order_id)).limit(1);
 
     if (!order) {
       throw_error(PAYMENT_ERROR.PARTIAL_PAYMENT_NOT_ELIGIBLE, { order_id: input.order_id });
@@ -91,11 +86,7 @@ export class PartialPaymentService {
     currency: string;
     actor_user_id?: string;
   }) {
-    const [order] = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.id, input.order_id))
-      .limit(1);
+    const [order] = await db.select().from(orders).where(eq(orders.id, input.order_id)).limit(1);
 
     if (!order) {
       throw_error(PAYMENT_ERROR.PARTIAL_PAYMENT_NOT_ELIGIBLE, { order_id: input.order_id });
@@ -109,7 +100,8 @@ export class PartialPaymentService {
 
     const grand_total = Number(order.grand_total);
     const installment_amount = grand_total / input.total_installments;
-    const first_installment_amount = grand_total - installment_amount * (input.total_installments - 1);
+    const first_installment_amount =
+      grand_total - installment_amount * (input.total_installments - 1);
 
     const transaction = await payment_processing_service.process({
       order_id: input.order_id,
@@ -164,10 +156,7 @@ export class PartialPaymentService {
     return { transaction, partials };
   }
 
-  async mark_installment_paid(
-    installment_id: string,
-    provider?: PaymentProviderName,
-  ) {
+  async mark_installment_paid(installment_id: string, provider?: PaymentProviderName) {
     const partial = await this.repo.find_partial(installment_id);
     if (!partial) {
       throw_error(PAYMENT_ERROR.INSTALLMENT_NOT_FOUND, { installment_id });
@@ -209,9 +198,7 @@ export class PartialPaymentService {
     const overdue = await this.repo.find_overdue_installments();
     return overdue.map((i) => ({
       ...i,
-      days_overdue: Math.floor(
-        (Date.now() - new Date(i.due_at).getTime()) / (1000 * 60 * 60 * 24),
-      ),
+      days_overdue: Math.floor((Date.now() - new Date(i.due_at).getTime()) / (1000 * 60 * 60 * 24)),
     }));
   }
 }

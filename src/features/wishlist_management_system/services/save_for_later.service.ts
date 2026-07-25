@@ -4,6 +4,7 @@ import { z } from "zod";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { WISHLIST_ERROR } from "../constants/error-codes";
 import { WISHLIST_CACHE_KEYS } from "../constants/cache-keys";
 import { SaveForLaterRepository } from "../repositories/save_for_later.repository";
@@ -55,7 +56,7 @@ export class SaveForLaterService {
     await this.analytics.record_event(customer_id, null, input.product_id, "move_to_save_later");
 
     audit_service.log({
-      action: "save_for_later.added",
+      action: AUDIT_ACTION.SAVE_FOR_LATER_ADDED,
       resource_type: "save_for_later",
       resource_id: id,
       metadata: { product_id: input.product_id, variant_id: input.variant_id },
@@ -76,7 +77,7 @@ export class SaveForLaterService {
     await this.analytics.record_event(customer_id, null, saved.product_id, "move_from_save_later");
 
     audit_service.log({
-      action: "save_for_later.moved_to_cart",
+      action: AUDIT_ACTION.SAVE_FOR_LATER_MOVED_TO_CART,
       resource_type: "save_for_later",
       resource_id: input.id,
       metadata: { product_id: saved.product_id, quantity },

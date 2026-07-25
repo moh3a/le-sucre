@@ -4,6 +4,7 @@ import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { suppliers, supplier_products, purchase_orders, purchase_order_items } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 
 let po_counter = 1;
 
@@ -101,7 +102,7 @@ export class ProcurementService {
     }
 
     void audit_service.log({
-      action: "purchase_order.created",
+      action: AUDIT_ACTION.PURCHASE_ORDER_CREATED,
       resource_type: "purchase_order_id",
       resource_id: po_id,
       metadata: { po_number, supplier_id: input.supplier_id },
@@ -112,7 +113,7 @@ export class ProcurementService {
 
   async submit_po(id: string) {
     await db.update(purchase_orders).set({ status: "submitted" }).where(eq(purchase_orders.id, id));
-    void audit_service.log({ action: "purchase_order.submitted", resource_type: "purchase_order_id", resource_id: id });
+    void audit_service.log({ action: AUDIT_ACTION.PURCHASE_ORDER_SUBMITTED, resource_type: "purchase_order_id", resource_id: id });
     return this.get_po(id);
   }
 
@@ -121,7 +122,7 @@ export class ProcurementService {
       .update(purchase_orders)
       .set({ status: "approved", approved_by_user_id: user_id, approved_at: sql`NOW()` })
       .where(eq(purchase_orders.id, id));
-    void audit_service.log({ action: "purchase_order.approved", resource_type: "purchase_order_id", resource_id: id });
+    void audit_service.log({ action: AUDIT_ACTION.PURCHASE_ORDER_APPROVED, resource_type: "purchase_order_id", resource_id: id });
     return this.get_po(id);
   }
 
@@ -150,7 +151,7 @@ export class ProcurementService {
         .where(eq(purchase_orders.id, id));
     }
 
-    void audit_service.log({ action: "purchase_order.received", resource_type: "purchase_order_id", resource_id: id });
+    void audit_service.log({ action: AUDIT_ACTION.PURCHASE_ORDER_RECEIVED, resource_type: "purchase_order_id", resource_id: id });
     return this.get_po(id);
   }
 

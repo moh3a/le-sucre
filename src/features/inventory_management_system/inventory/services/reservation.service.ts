@@ -16,6 +16,7 @@ import {
   sync_sku_stock_denormalized,
 } from "../helpers/stock-sync.helper";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../../constants/audit-actions";
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
 import { addSeconds, format } from "date-fns";
 
@@ -70,7 +71,7 @@ export class ReservationService {
     });
 
     void audit_service.log({
-      action: "inventory.reservation.create",
+      action: AUDIT_ACTION.INVENTORY_RESERVATION_CREATED,
       resource_type: "sku_id",
       resource_id: input.sku_id,
     });
@@ -109,7 +110,7 @@ export class ReservationService {
       });
 
       void audit_service.log({
-        action: "inventory.reservation.release",
+        action: AUDIT_ACTION.INVENTORY_RESERVATION_RELEASED,
         resource_type: "reservation_id",
         resource_id: reservation_id,
       });
@@ -165,7 +166,7 @@ export class ReservationService {
 
       void forecast_index_service.enqueue("reindex_sku", { sku_id: reservation.sku_id });
       void audit_service.log({
-        action: "inventory.reservation.commit",
+        action: AUDIT_ACTION.INVENTORY_RESERVATION_COMMITTED,
         resource_type: "reservation_id",
         resource_id: reservation.id,
       });

@@ -20,6 +20,7 @@ import {
 } from "../engines/spam-guard.engine";
 import { createHash as createHashStable } from "node:crypto";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { IListProductReviews, IReviewProductSummary } from "../types";
 import { recompute_product_rating_aggregate } from "../engines/rating-aggregation.engine";
 
@@ -118,7 +119,7 @@ export class ReviewService {
     });
 
     void audit_service.log({
-      action: "review.create",
+      action: AUDIT_ACTION.REVIEW_CREATED,
       resource_type: "review_id",
       resource_id: id,
     });

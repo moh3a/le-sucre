@@ -4,6 +4,7 @@ import { z } from "zod";
 import { generate_id, slugify } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { WISHLIST_ERROR } from "../constants/error-codes";
 import { WISHLIST_CACHE_KEYS } from "../constants/cache-keys";
 import { CollectionRepository, CollectionItemRepository } from "../repositories/collection.repository";
@@ -91,7 +92,7 @@ export class CollectionService {
     await this.cache.invalidate_customer_collections(customer_id);
 
     audit_service.log({
-      action: "collection.created",
+      action: AUDIT_ACTION.COLLECTION_CREATED,
       resource_type: "collection",
       resource_id: id,
       metadata: { name: input.name },

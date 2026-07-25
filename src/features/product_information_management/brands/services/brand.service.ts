@@ -10,6 +10,7 @@ import { slugify_name } from "@/features/product_information_management/categori
 import type { create_brand_dto, update_brand_dto } from "../models/brand.dto";
 import { BrandRepository } from "../repositories/brand.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../../constants/audit-actions";
 
 export class BrandService {
   constructor(private readonly repo = new BrandRepository()) {}
@@ -30,7 +31,7 @@ export class BrandService {
       is_active: input.is_active,
     });
     void audit_service.log({
-      action: "brand.create",
+      action: AUDIT_ACTION.BRAND_CREATED,
       resource_type: "brand_id",
       resource_id: id,
     });
@@ -52,7 +53,7 @@ export class BrandService {
       ...(input.is_active !== undefined && { is_active: input.is_active }),
     });
     void audit_service.log({
-      action: "brand.update",
+      action: AUDIT_ACTION.BRAND_UPDATED,
       resource_type: "brand_id",
       resource_id: input.id,
     });
@@ -89,7 +90,7 @@ export class BrandService {
     if (product_count > 0) throw_error(BRAND_ERROR.HAS_PRODUCTS);
     await this.repo.soft_delete(id, actorUserId);
     void audit_service.log({
-      action: "brand.soft_delete",
+      action: AUDIT_ACTION.BRAND_SOFT_DELETED,
       resource_type: "brand_id",
       resource_id: id,
     });
@@ -103,7 +104,7 @@ export class BrandService {
     if (!brand.deleted_at) throw_error(BRAND_ERROR.NOT_FOUND);
     await this.repo.restore(id, actorUserId);
     void audit_service.log({
-      action: "brand.restore",
+      action: AUDIT_ACTION.BRAND_RESTORED,
       resource_type: "brand_id",
       resource_id: id,
     });
@@ -116,7 +117,7 @@ export class BrandService {
     if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
     await this.repo.force_delete(id);
     void audit_service.log({
-      action: "brand.force_delete",
+      action: AUDIT_ACTION.BRAND_FORCE_DELETED,
       resource_type: "brand_id",
       resource_id: id,
     });

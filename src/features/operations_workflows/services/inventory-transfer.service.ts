@@ -4,6 +4,7 @@ import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { inventory_transfers, inventory_transfer_items } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 
 let transfer_counter = 1;
 
@@ -46,7 +47,7 @@ export class InventoryTransferService {
     }
 
     void audit_service.log({
-      action: "inventory_transfer.created",
+      action: AUDIT_ACTION.INVENTORY_TRANSFER_CREATED,
       resource_type: "inventory_transfer_id",
       resource_id: id,
       metadata: { transfer_number, source: input.source_warehouse_id, dest: input.destination_warehouse_id },
@@ -62,7 +63,7 @@ export class InventoryTransferService {
       .where(eq(inventory_transfers.id, id));
 
     void audit_service.log({
-      action: "inventory_transfer.approved",
+      action: AUDIT_ACTION.INVENTORY_TRANSFER_APPROVED,
       resource_type: "inventory_transfer_id",
       resource_id: id,
     });
@@ -88,7 +89,7 @@ export class InventoryTransferService {
       .where(eq(inventory_transfers.id, id));
 
     void audit_service.log({
-      action: "inventory_transfer.shipped",
+      action: AUDIT_ACTION.INVENTORY_TRANSFER_SHIPPED,
       resource_type: "inventory_transfer_id",
       resource_id: id,
     });
@@ -119,7 +120,7 @@ export class InventoryTransferService {
       .where(eq(inventory_transfers.id, id));
 
     void audit_service.log({
-      action: "inventory_transfer.received",
+      action: AUDIT_ACTION.INVENTORY_TRANSFER_RECEIVED,
       resource_type: "inventory_transfer_id",
       resource_id: id,
     });
@@ -134,7 +135,7 @@ export class InventoryTransferService {
       .where(eq(inventory_transfers.id, id));
 
     void audit_service.log({
-      action: "inventory_transfer.cancelled",
+      action: AUDIT_ACTION.INVENTORY_TRANSFER_CANCELLED,
       resource_type: "inventory_transfer_id",
       resource_id: id,
     });

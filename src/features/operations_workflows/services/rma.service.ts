@@ -4,6 +4,7 @@ import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { rma_records } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 
 let rma_counter = 1;
 
@@ -36,7 +37,7 @@ export class RMAService {
     });
 
     void audit_service.log({
-      action: "rma.issued",
+      action: AUDIT_ACTION.RMA_ISSUED,
       resource_type: "rma_id",
       resource_id: id,
       metadata: { rma_number, order_id: input.order_id },
@@ -52,7 +53,7 @@ export class RMAService {
       .where(eq(rma_records.id, id));
 
     void audit_service.log({
-      action: "rma.label_generated",
+      action: AUDIT_ACTION.RMA_LABEL_GENERATED,
       resource_type: "rma_id",
       resource_id: id,
     });
@@ -67,7 +68,7 @@ export class RMAService {
       .where(eq(rma_records.id, id));
 
     void audit_service.log({
-      action: "rma.received",
+      action: AUDIT_ACTION.RMA_RECEIVED,
       resource_type: "rma_id",
       resource_id: id,
     });
@@ -92,7 +93,7 @@ export class RMAService {
       .where(eq(rma_records.id, input.id));
 
     void audit_service.log({
-      action: "rma.inspected",
+      action: AUDIT_ACTION.RMA_INSPECTED,
       resource_type: "rma_id",
       resource_id: input.id,
       metadata: { disposition: input.disposition },
@@ -108,7 +109,7 @@ export class RMAService {
       .where(eq(rma_records.id, id));
 
     void audit_service.log({
-      action: "rma.completed",
+      action: AUDIT_ACTION.RMA_COMPLETED,
       resource_type: "rma_id",
       resource_id: id,
     });

@@ -38,20 +38,13 @@ export class PaymentProcessingService {
       }
     }
 
-    const [order] = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.id, input.order_id))
-      .limit(1);
+    const [order] = await db.select().from(orders).where(eq(orders.id, input.order_id)).limit(1);
 
     if (!order) {
       throw_error(PAYMENT_ERROR.ORDER_NOT_ELIGIBLE, { order_id: input.order_id });
     }
 
-    if (
-      order.payment_status === "paid" ||
-      order.payment_status === "partially_paid"
-    ) {
+    if (order.payment_status === "paid" || order.payment_status === "partially_paid") {
       throw_error(PAYMENT_ERROR.ORDER_NOT_ELIGIBLE, {
         order_id: input.order_id,
         payment_status: order.payment_status,
@@ -90,11 +83,7 @@ export class PaymentProcessingService {
     return transaction;
   }
 
-  async capture(input: {
-    transaction_id: string;
-    amount?: number;
-    actor_user_id?: string;
-  }) {
+  async capture(input: { transaction_id: string; amount?: number; actor_user_id?: string }) {
     const transaction = await this.repo.find_transaction(input.transaction_id);
     if (!transaction) {
       throw_error(PAYMENT_ERROR.TRANSACTION_NOT_FOUND, {
@@ -148,11 +137,7 @@ export class PaymentProcessingService {
     return updated;
   }
 
-  async cancel(input: {
-    transaction_id: string;
-    reason?: string;
-    actor_user_id?: string;
-  }) {
+  async cancel(input: { transaction_id: string; reason?: string; actor_user_id?: string }) {
     const transaction = await this.repo.find_transaction(input.transaction_id);
     if (!transaction) {
       throw_error(PAYMENT_ERROR.TRANSACTION_NOT_FOUND, {
@@ -170,7 +155,11 @@ export class PaymentProcessingService {
     const updated = await this.repo.update_transaction(transaction.id, {
       status: PAYMENT_TRANSACTION_STATUS.CANCELLED,
       failure_reason: input.reason ?? null,
-      metadata: { ...transaction.metadata, cancelled_by: input.actor_user_id, cancel_reason: input.reason },
+      metadata: {
+        ...transaction.metadata,
+        cancelled_by: input.actor_user_id,
+        cancel_reason: input.reason,
+      },
     });
 
     await payment_audit_service.log({
@@ -276,10 +265,7 @@ export class PaymentProcessingService {
     return updated;
   }
 
-  async retry(input: {
-    transaction_id: string;
-    actor_user_id?: string;
-  }) {
+  async retry(input: { transaction_id: string; actor_user_id?: string }) {
     const transaction = await this.repo.find_transaction(input.transaction_id);
     if (!transaction) {
       throw_error(PAYMENT_ERROR.TRANSACTION_NOT_FOUND, {
@@ -336,9 +322,7 @@ export class PaymentProcessingService {
     }
 
     const provider = get_payment_provider(transaction.provider as PaymentProviderName);
-    const result = await provider.get_transaction_status(
-      transaction.provider_transaction_id,
-    );
+    const result = await provider.get_transaction_status(transaction.provider_transaction_id);
 
     const updated = await this.repo.update_transaction(transaction.id, {
       provider_response: result.provider_response,

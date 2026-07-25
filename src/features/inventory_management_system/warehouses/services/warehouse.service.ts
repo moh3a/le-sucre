@@ -7,6 +7,7 @@ import { WAREHOUSE_ERROR } from "../constants/error-codes";
 import { throw_error } from "../../shared/error-codes";
 import { warehouse_repository } from "../repositories/warehouse.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../../constants/audit-actions";
 
 export class WarehouseService {
   async create(input: z.infer<typeof create_warehouse_dto>) {
@@ -26,7 +27,7 @@ export class WarehouseService {
     });
 
     void audit_service.log({
-      action: "warehouse.create",
+      action: AUDIT_ACTION.WAREHOUSE_CREATED,
       resource_type: "warehouse_id",
       resource_id: warehouse.id,
     });
@@ -56,7 +57,7 @@ export class WarehouseService {
     });
 
     void audit_service.log({
-      action: "warehouse.update",
+      action: AUDIT_ACTION.WAREHOUSE_UPDATED,
       resource_type: "warehouse_id",
       resource_id: input.id,
     });

@@ -4,6 +4,7 @@ import { eq, and, asc, desc, sql, type SQL } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { payment_reconciliation } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 
 export class PaymentReconciliationService {
   async create_entry(input: {
@@ -50,7 +51,7 @@ export class PaymentReconciliationService {
       .where(eq(payment_reconciliation.id, input.id));
 
     void audit_service.log({
-      action: "payment_reconciliation.matched",
+      action: AUDIT_ACTION.PAYMENT_RECONCILIATION_MATCHED,
       resource_type: "payment_reconciliation_id",
       resource_id: input.id,
     });

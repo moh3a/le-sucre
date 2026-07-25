@@ -4,6 +4,7 @@ import { eq, and, asc } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { approval_workflows, approval_requests, approval_actions } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { approval_action } from "../constants/audit-actions";
 
 export class ApprovalWorkflowService {
   async create_workflow(input: {
@@ -58,7 +59,7 @@ export class ApprovalWorkflowService {
     });
 
     void audit_service.log({
-      action: `approval.submitted.${input.entity_type}`,
+      action: approval_action("submitted", input.entity_type),
       resource_type: input.entity_type,
       resource_id: input.entity_id,
       metadata: { request_id: id, workflow_id: workflow.id },
@@ -114,7 +115,7 @@ export class ApprovalWorkflowService {
         .where(eq(approval_requests.id, input.request_id));
 
       void audit_service.log({
-        action: `approval.approved.${request.entity_type}`,
+        action: approval_action("approved", request.entity_type),
         resource_type: request.entity_type,
         resource_id: request.entity_id,
         metadata: { request_id: input.request_id },
@@ -153,7 +154,7 @@ export class ApprovalWorkflowService {
       .where(eq(approval_requests.id, input.request_id));
 
     void audit_service.log({
-      action: `approval.rejected.${request.entity_type}`,
+      action: approval_action("rejected", request.entity_type),
       resource_type: request.entity_type,
       resource_id: request.entity_id,
       metadata: { request_id: input.request_id },

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { WISHLIST_ERROR } from "../constants/error-codes";
 import { WISHLIST_CACHE_KEYS } from "../constants/cache-keys";
 import { FavoritesRepository } from "../repositories/favorites.repository";
@@ -63,7 +64,7 @@ export class FavoritesService {
     }
 
     audit_service.log({
-      action: "favorite.added",
+      action: AUDIT_ACTION.FAVORITE_ADDED,
       resource_type: "favorite",
       resource_id: id,
       metadata: { product_id: input.product_id, brand_id: input.brand_id, category_id: input.category_id },

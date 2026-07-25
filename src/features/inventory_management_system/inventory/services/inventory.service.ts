@@ -24,6 +24,7 @@ import {
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
 import { preorder_fulfillment_service } from "@/features/order_management_system/preorders/services/preorder-fulfillment.service";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../../constants/audit-actions";
 
 export class InventoryService {
   constructor(private readonly repo = inventory_repository) {}
@@ -127,7 +128,7 @@ export class InventoryService {
     });
 
     void audit_service.log({
-      action: "inventory.adjust_stock",
+      action: AUDIT_ACTION.INVENTORY_STOCK_ADJUSTED,
       resource_type: "sku_id",
       resource_id: input.sku_id,
     });
@@ -150,7 +151,7 @@ export class InventoryService {
     });
 
     void audit_service.log({
-      action: "inventory.set_stock",
+      action: AUDIT_ACTION.INVENTORY_STOCK_SET,
       resource_type: "sku_id",
       resource_id: input.sku_id,
     });
@@ -176,7 +177,7 @@ export class InventoryService {
     void preorder_fulfillment_service.fulfill_incoming_stock(input.sku_id, input.warehouse_id);
 
     void audit_service.log({
-      action: "inventory.receive_stock",
+      action: AUDIT_ACTION.INVENTORY_STOCK_RECEIVED,
       resource_type: "sku_id",
       resource_id: input.sku_id,
     });

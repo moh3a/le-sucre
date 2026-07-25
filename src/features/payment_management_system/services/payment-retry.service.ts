@@ -10,9 +10,7 @@ export class PaymentRetryService {
     const all = await this.repo.list_transactions(1, 1000, {
       status: PAYMENT_TRANSACTION_STATUS.FAILED,
     });
-    return all.items.filter(
-      (t) => t.retry_count < max_retries,
-    );
+    return all.items.filter((t) => t.retry_count < max_retries);
   }
 
   async find_stuck_payments(hours_threshold = 2) {

@@ -4,6 +4,7 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { PROFILE_ERROR } from "@/features/authentication_and_authorization/profile/constants/error-codes";
 import { profile_repository } from "@/features/authentication_and_authorization/profile/repositories/profile.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "@/features/authentication_and_authorization/constants/audit-actions";
 import type { UserProfileInsert } from "@/features/authentication_and_authorization/profile/types";
 import type { CreateAddressInput, UpdateAddressInput } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
 
@@ -24,7 +25,7 @@ export class ProfileService {
 
     await audit_service.log({
       actor_user_id: user_id,
-      action: "profile.initialized",
+      action: AUDIT_ACTION.PROFILE_INITIALIZED,
       resource_type: "user_profile",
       resource_id: profile.id,
     });
@@ -37,7 +38,7 @@ export class ProfileService {
 
     await audit_service.log({
       actor_user_id: user_id,
-      action: "profile.updated",
+      action: AUDIT_ACTION.PROFILE_UPDATED,
       resource_type: "user_profile",
       resource_id: profile.id,
       metadata: { updated_fields: Object.keys(data) },
@@ -66,7 +67,7 @@ export class ProfileService {
 
     await audit_service.log({
       actor_user_id: user_id,
-      action: "address.created",
+      action: AUDIT_ACTION.ADDRESS_CREATED,
       resource_type: "user_address",
       resource_id: address.id,
       metadata: { label: data.label },
@@ -87,7 +88,7 @@ export class ProfileService {
 
     await audit_service.log({
       actor_user_id: user_id,
-      action: "address.updated",
+      action: AUDIT_ACTION.ADDRESS_UPDATED,
       resource_type: "user_address",
       resource_id: address_id,
       metadata: { updated_fields: Object.keys(data) },
@@ -104,7 +105,7 @@ export class ProfileService {
 
     await audit_service.log({
       actor_user_id: user_id,
-      action: "address.deleted",
+      action: AUDIT_ACTION.ADDRESS_DELETED,
       resource_type: "user_address",
       resource_id: address_id,
     });
@@ -120,7 +121,7 @@ export class ProfileService {
 
     await audit_service.log({
       actor_user_id: user_id,
-      action: "address.set_default",
+      action: AUDIT_ACTION.ADDRESS_SET_DEFAULT,
       resource_type: "user_address",
       resource_id: address_id,
       metadata: { type },

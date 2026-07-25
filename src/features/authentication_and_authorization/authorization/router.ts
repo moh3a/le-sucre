@@ -5,6 +5,7 @@ import { permission_procedure } from "@/features/authentication_and_authorizatio
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "@/features/authentication_and_authorization/constants/audit-actions";
 
 export const authorization_router = create_trpc_router({
   stats: permission_procedure(PERMISSIONS.roles_manage).query(() =>
@@ -26,7 +27,7 @@ export const authorization_router = create_trpc_router({
       await role_repository.replace_role_permissions(input.role_name, input.permissions);
       await audit_service.log({
         actor_user_id: ctx.user.id,
-        action: "role.permissions.updated",
+        action: AUDIT_ACTION.ROLE_PERMISSIONS_UPDATED,
         resource_type: "role",
         resource_id: input.role_name,
         metadata: input,

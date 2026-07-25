@@ -6,6 +6,7 @@ import { order_routing_rules } from "../schema";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { order_assignments } from "@/features/order_management_system/orders/operations/schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 
 export class OrderRoutingService {
   async create_rule(input: {
@@ -66,7 +67,7 @@ export class OrderRoutingService {
         await this._record_assignment(order_id, assign_to, rule.id);
 
         void audit_service.log({
-          action: "order.routed",
+          action: AUDIT_ACTION.ORDER_ROUTED,
           resource_type: "order_id",
           resource_id: order_id,
           metadata: { rule_id: rule.id, assigned_to: assign_to },

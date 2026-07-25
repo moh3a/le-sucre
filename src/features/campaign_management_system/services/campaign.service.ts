@@ -4,6 +4,7 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { CAMPAIGN_ERROR } from "../constants/error-codes";
 import { slugify } from "@/lib/utils";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION, campaign_status_action } from "../constants/audit-actions";
 import { campaign_repository } from "../repositories/campaign.repository";
 import { campaign_scheduler_service } from "./campaign_scheduler.service";
 import { campaign_cache } from "./campaign_cache.service";
@@ -74,7 +75,7 @@ export class CampaignService {
     await campaign_cache.invalidate_all_sections();
 
     void audit_service.log({
-      action: "campaign.create",
+      action: AUDIT_ACTION.CAMPAIGN_CREATED,
       resource_type: "campaign_id",
       resource_id: campaign?.id,
     });
@@ -140,7 +141,7 @@ export class CampaignService {
     await campaign_cache.invalidate(input.id);
 
     void audit_service.log({
-      action: "campaign.update",
+      action: AUDIT_ACTION.CAMPAIGN_UPDATED,
       resource_type: "campaign_id",
       resource_id: input.id,
     });
@@ -166,7 +167,7 @@ export class CampaignService {
     await campaign_cache.invalidate(input.id);
 
     void audit_service.log({
-      action: `campaign.status.${input.status}`,
+      action: campaign_status_action(input.status),
       resource_type: "campaign_id",
       resource_id: input.id,
     });

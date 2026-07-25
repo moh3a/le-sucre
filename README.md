@@ -2,7 +2,8 @@
 
 ## TODOs
 
-- audit actions for each feature
+- fix products repo and service
+- configure webhooks
 - single entry point for workers
 - check if every operation works
 

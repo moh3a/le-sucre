@@ -11,11 +11,7 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 export class PaymentWebhookService {
   constructor(private readonly repo = payment_repository) {}
 
-  async handle_provider_webhook(
-    provider: PaymentProviderName,
-    headers: Headers,
-    raw_body: string,
-  ) {
+  async handle_provider_webhook(provider: PaymentProviderName, headers: Headers, raw_body: string) {
     const adapter = get_payment_provider(provider);
 
     if (adapter.verify_webhook) {
@@ -70,7 +66,11 @@ export class PaymentWebhookService {
       action: AUDIT_ACTION.WEBHOOK_PROCESSED,
       resource_type: "webhook",
       resource_id: `${provider}_${event.provider_transaction_id ?? Date.now()}`,
-      metadata: { provider, event_type: event.event_type, transaction_id: event.provider_transaction_id },
+      metadata: {
+        provider,
+        event_type: event.event_type,
+        transaction_id: event.provider_transaction_id,
+      },
     });
 
     return { received: true, event };

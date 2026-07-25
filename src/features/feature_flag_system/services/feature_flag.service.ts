@@ -4,6 +4,7 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { FEATURE_FLAG_ERROR } from "../constants/error-codes";
 import { feature_flag_repository } from "../repositories/feature_flag.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { redis } from "@/lib/redis";
 import type {
   create_feature_flag_dto,
@@ -42,7 +43,7 @@ export class FeatureFlagService {
     await this.invalidate_cache(input.key);
 
     void audit_service.log({
-      action: "feature_flag.create",
+      action: AUDIT_ACTION.FEATURE_FLAG_CREATED,
       resource_type: "feature_flag",
       resource_id: id,
     });
@@ -63,7 +64,7 @@ export class FeatureFlagService {
     await this.invalidate_cache(existing.key);
 
     void audit_service.log({
-      action: "feature_flag.update",
+      action: AUDIT_ACTION.FEATURE_FLAG_UPDATED,
       resource_type: "feature_flag",
       resource_id: input.id,
     });
@@ -79,7 +80,7 @@ export class FeatureFlagService {
     await this.invalidate_cache(existing.key);
 
     void audit_service.log({
-      action: input.enabled ? "feature_flag.enable" : "feature_flag.disable",
+      action: input.enabled ? AUDIT_ACTION.FEATURE_FLAG_ENABLED : AUDIT_ACTION.FEATURE_FLAG_DISABLED,
       resource_type: "feature_flag",
       resource_id: input.id,
     });
@@ -95,7 +96,7 @@ export class FeatureFlagService {
     await this.invalidate_cache(existing.key);
 
     void audit_service.log({
-      action: "feature_flag.delete",
+      action: AUDIT_ACTION.FEATURE_FLAG_DELETED,
       resource_type: "feature_flag",
       resource_id: id,
     });

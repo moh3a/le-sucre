@@ -13,6 +13,7 @@ import {
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { authorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "@/features/authentication_and_authorization/constants/audit-actions";
 import { user_repository } from "./repositories/user.repository";
 
 export class AuthService {
@@ -31,7 +32,7 @@ export class AuthService {
     await role_repository.assign_role(user_id, ROLE_NAMES.customer);
     await audit_service.log({
       actor_user_id: user_id,
-      action: "auth.register.customer",
+      action: AUDIT_ACTION.AUTH_REGISTER_CUSTOMER,
       resource_type: "user",
       resource_id: user_id,
     });
@@ -42,7 +43,7 @@ export class AuthService {
     await role_repository.assign_role(user_id, role_name);
     await audit_service.log({
       actor_user_id,
-      action: "auth.staff_role.assigned",
+      action: AUDIT_ACTION.AUTH_STAFF_ROLE_ASSIGNED,
       resource_type: "user",
       resource_id: user_id,
       metadata: { role_name },
@@ -60,7 +61,7 @@ export class AuthService {
   async record_login_success(user_id: string, meta?: { ip_address?: string; user_agent?: string }) {
     await audit_service.log({
       actor_user_id: user_id,
-      action: "auth.login.success",
+      action: AUDIT_ACTION.AUTH_LOGIN_SUCCESS,
       resource_type: "user",
       resource_id: user_id,
       ...meta,
@@ -71,7 +72,7 @@ export class AuthService {
     const user = await user_repository.find_by_email(email);
     await audit_service.log({
       actor_user_id: user?.id,
-      action: "auth.login.failure",
+      action: AUDIT_ACTION.AUTH_LOGIN_FAILURE,
       metadata: { email, ...meta },
     });
   }
@@ -79,7 +80,7 @@ export class AuthService {
   async record_logout(user_id: string) {
     await audit_service.log({
       actor_user_id: user_id,
-      action: "auth.logout",
+      action: AUDIT_ACTION.AUTH_LOGOUT,
       resource_type: "user",
       resource_id: user_id,
     });

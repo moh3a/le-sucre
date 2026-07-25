@@ -4,6 +4,7 @@ import { z } from "zod";
 import { generate_id, slugify } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { WISHLIST_ERROR } from "../constants/error-codes";
 import { WISHLIST_CACHE_KEYS } from "../constants/cache-keys";
 import { WishlistRepository } from "../repositories/wishlist.repository";
@@ -37,7 +38,8 @@ export class WishlistService {
 
   async list(customer_id: string, input: z.infer<typeof list_wishlists_dto>) {
     const cache_key = WISHLIST_CACHE_KEYS.wishlist.by_customer(customer_id);
-    const cached = await this.cache.get<Awaited<ReturnType<WishlistRepository["list_by_customer"]>>>(cache_key);
+    const cached =
+      await this.cache.get<Awaited<ReturnType<WishlistRepository["list_by_customer"]>>>(cache_key);
     if (cached) return cached;
 
     const result = await this.repo.list_by_customer(customer_id, input.page, input.limit);
@@ -94,7 +96,7 @@ export class WishlistService {
     await this.analytics.record_event(customer_id, wishlist_id, null, "wishlist_created");
 
     audit_service.log({
-      action: "wishlist.created",
+      action: AUDIT_ACTION.WISHLIST_CREATED,
       resource_type: "wishlist",
       resource_id: wishlist_id,
       metadata: { name: input.name },
@@ -132,7 +134,7 @@ export class WishlistService {
     await this.cache.invalidate_customer_wishlists(customer_id);
 
     audit_service.log({
-      action: "wishlist.updated",
+      action: AUDIT_ACTION.WISHLIST_UPDATED,
       resource_type: "wishlist",
       resource_id: input.id,
     });
@@ -152,7 +154,7 @@ export class WishlistService {
     this.analytics.record_event(customer_id, id, null, "wishlist_deleted");
 
     audit_service.log({
-      action: "wishlist.deleted",
+      action: AUDIT_ACTION.WISHLIST_DELETED,
       resource_type: "wishlist",
       resource_id: id,
       metadata: { name: wishlist.name },
@@ -200,10 +202,15 @@ export class WishlistService {
 
     await this.repo.increment_item_count(input.wishlist_id);
     await this.cache.invalidate_wishlist(input.wishlist_id);
-    await this.analytics.record_event(customer_id, input.wishlist_id, input.product_id, "add_to_wishlist");
+    await this.analytics.record_event(
+      customer_id,
+      input.wishlist_id,
+      input.product_id,
+      "add_to_wishlist",
+    );
 
     audit_service.log({
-      action: "wishlist.item.added",
+      action: AUDIT_ACTION.WISHLIST_ITEM_ADDED,
       resource_type: "wishlist_item",
       resource_id: item_id,
       metadata: { wishlist_id: input.wishlist_id, product_id: input.product_id },
@@ -215,7 +222,8 @@ export class WishlistService {
     if (!item) throw_error(WISHLIST_ERROR.ITEM_NOT_FOUND);
 
     const wishlist = await this.repo.find_by_id(item.wishlist_id);
-    if (!wishlist || wishlist.customer_id !== customer_id) throw_error(WISHLIST_ERROR.ACCESS_DENIED);
+    if (!wishlist || wishlist.customer_id !== customer_id)
+      throw_error(WISHLIST_ERROR.ACCESS_DENIED);
 
     const update_data: Record<string, unknown> = {};
     if (input.quantity !== undefined) update_data.quantity = input.quantity;
@@ -232,15 +240,21 @@ export class WishlistService {
     if (!item) throw_error(WISHLIST_ERROR.ITEM_NOT_FOUND);
 
     const wishlist = await this.repo.find_by_id(item.wishlist_id);
-    if (!wishlist || wishlist.customer_id !== customer_id) throw_error(WISHLIST_ERROR.ACCESS_DENIED);
+    if (!wishlist || wishlist.customer_id !== customer_id)
+      throw_error(WISHLIST_ERROR.ACCESS_DENIED);
 
     await this.item_repo.delete(item_id);
     await this.repo.decrement_item_count(item.wishlist_id);
     await this.cache.invalidate_wishlist(item.wishlist_id);
-    await this.analytics.record_event(customer_id, item.wishlist_id, item.product_id!, "remove_from_wishlist");
+    await this.analytics.record_event(
+      customer_id,
+      item.wishlist_id,
+      item.product_id!,
+      "remove_from_wishlist",
+    );
 
     audit_service.log({
-      action: "wishlist.item.removed",
+      action: AUDIT_ACTION.WISHLIST_ITEM_REMOVED,
       resource_type: "wishlist_item",
       resource_id: item_id,
     });
@@ -251,10 +265,12 @@ export class WishlistService {
     if (!item) throw_error(WISHLIST_ERROR.ITEM_NOT_FOUND);
 
     const from_wishlist = await this.repo.find_by_id(input.from_wishlist_id);
-    if (!from_wishlist || from_wishlist.customer_id !== customer_id) throw_error(WISHLIST_ERROR.ACCESS_DENIED);
+    if (!from_wishlist || from_wishlist.customer_id !== customer_id)
+      throw_error(WISHLIST_ERROR.ACCESS_DENIED);
 
     const to_wishlist = await this.repo.find_by_id(input.to_wishlist_id);
-    if (!to_wishlist || to_wishlist.customer_id !== customer_id) throw_error(WISHLIST_ERROR.ACCESS_DENIED);
+    if (!to_wishlist || to_wishlist.customer_id !== customer_id)
+      throw_error(WISHLIST_ERROR.ACCESS_DENIED);
 
     const existing = await this.item_repo.find_by_wishlist_and_product(
       input.to_wishlist_id,
@@ -295,7 +311,12 @@ export class WishlistService {
         notes: item.notes ?? null,
       });
       await this.repo.increment_item_count(input.wishlist_id);
-      await this.analytics.record_event(customer_id, input.wishlist_id, item.product_id, "add_to_wishlist");
+      await this.analytics.record_event(
+        customer_id,
+        input.wishlist_id,
+        item.product_id,
+        "add_to_wishlist",
+      );
       added.push(item_id);
     }
 
@@ -313,12 +334,10 @@ export class WishlistService {
       throw_error(WISHLIST_ERROR.ACCESS_DENIED);
     }
 
-    return this.item_repo.list_by_wishlist(
-      input.wishlist_id,
-      input.page,
-      input.limit,
-      { priority: input.priority, is_purchased: input.is_purchased },
-    );
+    return this.item_repo.list_by_wishlist(input.wishlist_id, input.page, input.limit, {
+      priority: input.priority,
+      is_purchased: input.is_purchased,
+    });
   }
 
   async get_stats(customer_id: string): Promise<{
@@ -327,9 +346,7 @@ export class WishlistService {
     total_purchased: number;
     conversion_rate: number;
   }> {
-    const [items] = await Promise.all([
-      this.item_repo.get_total_saved_by_customer(customer_id),
-    ]);
+    const [items] = await Promise.all([this.item_repo.get_total_saved_by_customer(customer_id)]);
     const purchased = await this.item_repo.get_customer_purchased_count(customer_id);
     const wishlist_count = await this.repo.count_by_customer(customer_id);
 

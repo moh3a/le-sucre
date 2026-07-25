@@ -5,6 +5,7 @@ import { eq, and, gte, lte, asc, desc, sql } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { sla_definitions, sla_tracking } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 
 export type SLAEntityType = "support_case" | "task" | "order_escalation";
 
@@ -75,7 +76,7 @@ export class SLAEngineService {
       .where(eq(sla_tracking.id, track.id));
 
     void audit_service.log({
-      action: "sla.resolved",
+      action: AUDIT_ACTION.SLA_RESOLVED,
       resource_type: entity_type,
       resource_id: entity_id,
       metadata: { sla_tracking_id: track.id },
@@ -123,7 +124,7 @@ export class SLAEngineService {
         });
 
         void audit_service.log({
-          action: "sla.escalated",
+          action: AUDIT_ACTION.SLA_ESCALATED,
           resource_type: track.entity_type,
           resource_id: track.entity_id,
           metadata: { sla_tracking_id: track.id, count: track.escalation_count + 1 },

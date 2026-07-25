@@ -16,6 +16,7 @@ import {
 import type { ErrorDef } from "@/features/inventory_management_system/shared/error-codes";
 import { MediaRepository } from "../repositories/media.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import {
   optimize_image,
   generate_blur_placeholder,
@@ -214,7 +215,7 @@ export class MediaService {
     await this.repo.create(safe_record);
 
     void audit_service.log({
-      action: "media.upload",
+      action: AUDIT_ACTION.MEDIA_UPLOADED,
       resource_type: "media_id",
       resource_id: id,
       metadata: {
@@ -297,7 +298,7 @@ export class MediaService {
     await this.repo.delete(id);
 
     void audit_service.log({
-      action: "media.delete",
+      action: AUDIT_ACTION.MEDIA_DELETED,
       resource_type: "media_id",
       resource_id: id,
       metadata: {
@@ -358,7 +359,7 @@ export class MediaService {
     });
 
     void audit_service.log({
-      action: "media.attach",
+      action: AUDIT_ACTION.MEDIA_ATTACHED,
       resource_type: input.entity_type,
       resource_id: input.entity_id,
       metadata: { media_id, field: input.field },
@@ -374,7 +375,7 @@ export class MediaService {
     await this.repo.delete_usage(usage_id);
 
     void audit_service.log({
-      action: "media.detach",
+      action: AUDIT_ACTION.MEDIA_DETACHED,
       resource_type: "media_usage",
       resource_id: usage_id,
     });

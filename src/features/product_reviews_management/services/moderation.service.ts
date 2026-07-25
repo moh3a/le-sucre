@@ -9,6 +9,7 @@ import { review_cache_service } from "./review-cache.service";
 import { recompute_product_rating_aggregate } from "../engines/rating-aggregation.engine";
 import { REVIEW_STATUS } from "../constants/review-status";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION } from "../constants/audit-actions";
 import { format } from "date-fns";
 
 export class ModerationService {
@@ -39,7 +40,7 @@ export class ModerationService {
 
     await review_cache_service.invalidate_product(review.product_id);
     void audit_service.log({
-      action: "review.moderate",
+      action: AUDIT_ACTION.REVIEW_MODERATED,
       resource_type: "review_id",
       resource_id: input.review_id,
     });

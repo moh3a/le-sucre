@@ -5,6 +5,7 @@ import { generate_id } from "@/lib/utils";
 import { fraud_reviews } from "../schema";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { AUDIT_ACTION, fraud_review_action } from "../constants/audit-actions";
 
 export interface FraudFlag {
   rule: string;
@@ -83,7 +84,7 @@ export class FraudReviewService {
 
     if (status === "pending") {
       void audit_service.log({
-        action: "fraud_review.flagged",
+        action: AUDIT_ACTION.FRAUD_REVIEW_FLAGGED,
         resource_type: "order_id",
         resource_id: order_id,
         metadata: { risk_score, flag_count: flags.length },
@@ -111,7 +112,7 @@ export class FraudReviewService {
       .where(eq(fraud_reviews.id, input.id));
 
     void audit_service.log({
-      action: `fraud_review.${input.decision}`,
+      action: fraud_review_action(input.decision),
       resource_type: "fraud_review_id",
       resource_id: input.id,
       metadata: { decision: input.decision },
