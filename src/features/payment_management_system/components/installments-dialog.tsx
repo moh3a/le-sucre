@@ -27,15 +27,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/components/providers/app-providers";
 import { formatDate } from "@/lib/utils";
-
-const PROVIDERS = [
-  { value: "stripe", label: "Stripe" },
-  { value: "paypal", label: "PayPal" },
-  { value: "chargily", label: "Chargily" },
-  { value: "satim", label: "SATIM" },
-  { value: "cib", label: "CIB" },
-  { value: "manual", label: "Manuel" },
-] as const;
+import {
+  type PaymentProvider,
+  PaymentProviders,
+} from "@/features/payment_management_system/constants";
 
 // ─── InstallmentsDialog ─────────────────────────────────────
 
@@ -48,7 +43,7 @@ export function InstallmentsDialog({ orderId, trigger }: InstallmentsDialogProps
   const t = useTranslations("payments");
   const [open, setOpen] = React.useState(false);
   const [order_id, setOrderId] = React.useState(orderId ?? "");
-  const [provider, setProvider] = React.useState("manual");
+  const [provider, setProvider] = React.useState<PaymentProvider>("manual");
   const [total_installments, setTotalInstallments] = React.useState("3");
 
   const utils = trpc.useUtils();
@@ -71,7 +66,7 @@ export function InstallmentsDialog({ orderId, trigger }: InstallmentsDialogProps
     create.mutate({
       order_id,
       type: "installment",
-      provider: provider as never,
+      provider: provider as PaymentProvider,
       total_installments: Number(total_installments),
     });
   }
@@ -89,18 +84,12 @@ export function InstallmentsDialog({ orderId, trigger }: InstallmentsDialogProps
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("installment_title")}</DialogTitle>
-          <DialogDescription>
-            {t("installment_description")}
-          </DialogDescription>
+          <DialogDescription>{t("installment_description")}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
             <Label>{t("order_id_label")}</Label>
-            <Input
-              value={order_id}
-              onChange={(e) => setOrderId(e.target.value)}
-              required
-            />
+            <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label>{t("payment_provider_label")}</Label>
@@ -109,7 +98,7 @@ export function InstallmentsDialog({ orderId, trigger }: InstallmentsDialogProps
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PROVIDERS.map((p) => (
+                {PaymentProviders.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
                     {p.label}
                   </SelectItem>
@@ -127,15 +116,9 @@ export function InstallmentsDialog({ orderId, trigger }: InstallmentsDialogProps
               onChange={(e) => setTotalInstallments(e.target.value)}
               required
             />
-            <p className="text-xs text-muted-foreground">
-              {t("installment_count_hint")}
-            </p>
+            <p className="text-muted-foreground text-xs">{t("installment_count_hint")}</p>
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={create.isPending}
-          >
+          <Button type="submit" className="w-full" disabled={create.isPending}>
             <Calendar />
             {t("create_installment_button")}
           </Button>
@@ -180,28 +163,23 @@ export function InstallmentsView({ orderId }: InstallmentsViewProps) {
 
   if (!installments || installments.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground py-4 text-center">
-        {t("installments_empty")}
-      </p>
+      <p className="text-muted-foreground py-4 text-center text-sm">{t("installments_empty")}</p>
     );
   }
 
   return (
     <div className="space-y-3">
       {installments.map((inst) => (
-        <div
-          key={inst.id}
-          className="flex items-center justify-between rounded-lg border p-4"
-        >
+        <div key={inst.id} className="flex items-center justify-between rounded-lg border p-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">
-                {t("installment_number", { number: inst.installment_number ?? 0, total: inst.total_installments ?? 0 })}
+                {t("installment_number", {
+                  number: inst.installment_number ?? 0,
+                  total: inst.total_installments ?? 0,
+                })}
               </span>
-              <Badge
-                className={INSTALLMENT_STATUS_STYLES[inst.status] ?? ""}
-                variant="outline"
-              >
+              <Badge className={INSTALLMENT_STATUS_STYLES[inst.status] ?? ""} variant="outline">
                 {inst.status === "pending"
                   ? t("installment_pending")
                   : inst.status === "paid"
@@ -211,7 +189,7 @@ export function InstallmentsView({ orderId }: InstallmentsViewProps) {
                       : inst.status}
               </Badge>
             </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
                 <DollarSign className="h-3 w-3" />
                 {new Intl.NumberFormat("fr-DZ", {
@@ -237,7 +215,7 @@ export function InstallmentsView({ orderId }: InstallmentsViewProps) {
               onClick={() =>
                 payMutation.mutate({
                   installment_id: inst.id,
-                  provider: "manual" as never,
+                  provider: "manual" as PaymentProvider,
                 })
               }
               disabled={payMutation.isPending}

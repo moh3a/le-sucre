@@ -1,7 +1,6 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { generate_id } from "@/lib/utils";
 import { payment_repository } from "../repositories/payment.repository";
 import { payment_audit_service } from "./payment-audit.service";
 import { get_payment_provider } from "../providers/provider-registry";

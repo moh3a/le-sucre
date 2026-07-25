@@ -24,15 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
-
-const PROVIDERS = [
-  { value: "stripe", label: "Stripe" },
-  { value: "paypal", label: "PayPal" },
-  { value: "chargily", label: "Chargily" },
-  { value: "satim", label: "SATIM" },
-  { value: "cib", label: "CIB" },
-  { value: "manual", label: "Manuel" },
-] as const;
+import { type PaymentProvider, PaymentProviders } from "@/features/payment_management_system/constants";
 
 interface DepositDialogProps {
   orderId?: string;
@@ -43,7 +35,7 @@ export function DepositDialog({ orderId, trigger }: DepositDialogProps) {
   const t = useTranslations("payments");
   const [open, setOpen] = React.useState(false);
   const [order_id, setOrderId] = React.useState(orderId ?? "");
-  const [provider, setProvider] = React.useState("manual");
+  const [provider, setProvider] = React.useState<PaymentProvider>("manual");
   const [deposit_percentage, setDepositPercentage] = React.useState("50");
 
   const utils = trpc.useUtils();
@@ -66,7 +58,7 @@ export function DepositDialog({ orderId, trigger }: DepositDialogProps) {
     create.mutate({
       order_id,
       type: "deposit",
-      provider: provider as never,
+      provider: provider,
       deposit_percentage: Number(deposit_percentage),
     });
   }
@@ -104,7 +96,7 @@ export function DepositDialog({ orderId, trigger }: DepositDialogProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PROVIDERS.map((p) => (
+                {PaymentProviders.map((p) => (
                   <SelectItem key={p.value} value={p.value}>
                     {p.label}
                   </SelectItem>

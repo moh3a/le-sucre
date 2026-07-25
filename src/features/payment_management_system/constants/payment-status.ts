@@ -82,16 +82,35 @@ export const PAYOUT_TYPE = {
 
 export type PayoutType = (typeof PAYOUT_TYPE)[keyof typeof PAYOUT_TYPE];
 
+export const PaymentProviders = [
+  { value: "cash", label: "Cash" },
+  { value: "cib", label: "CIB" },
+  { value: "manual", label: "Manuel" },
+  { value: "chargily", label: "Chargily" },
+  { value: "satim", label: "SATIM" },
+  { value: "stripe", label: "Stripe" },
+  { value: "paypal", label: "PayPal" },
+] as const;
+
 export const PAYMENT_PROVIDER = {
-  STRIPE: "stripe",
-  PAYPAL: "paypal",
-  CHARGILY: "chargily",
-  SATIM: "satim",
+  CASH: "cash",
   CIB: "cib",
   MANUAL: "manual",
+  CHARGILY: "chargily",
+  SATIM: "satim",
+  STRIPE: "stripe",
+  PAYPAL: "paypal",
 } as const;
 
-export const paymentProviders = ["stripe", "paypal", "chargily", "satim", "cib", "manual"] as const;
+export const paymentProviders = [
+  "cash",
+  "cib",
+  "manual",
+  "chargily",
+  "satim",
+  "stripe",
+  "paypal",
+] as const;
 export const paymentProvidersSchema = z.enum(paymentProviders);
 export type PaymentProvider = z.infer<typeof paymentProvidersSchema>;
 

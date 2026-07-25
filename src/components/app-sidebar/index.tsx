@@ -36,6 +36,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { APP_NAME } from "@/constants";
+import { ROLE_NAMES } from "@/features/authentication_and_authorization/authorization/constants/roles";
 
 import {
   Sidebar,
@@ -113,6 +114,8 @@ export function AppSidebar() {
   const pathname = usePathname();
   const t = useTranslations("nav");
 
+  const is_admin = data?.userRole === ROLE_NAMES.admin;
+
   const nav = [
     {
       title: t("catalog"),
@@ -167,34 +170,23 @@ export function AppSidebar() {
         { title: t("returns_rma"), url: "/console/returns", icon: RotateCcw, activeExact: false },
       ],
     },
-    // {
-    //   title: t("operations"),
-    //   icon: Gauge,
-    //   items: [
-    //     { title: t("dashboard"), url: "/console/operations", icon: Gauge },
-    //     { title: t("sla_definitions"), url: "/console/operations/sla-definitions", icon: Clock },
-    //     { title: t("routing_rules"), url: "/console/operations/routing-rules", icon: Route },
-    //     {
-    //       title: t("approval_workflows"),
-    //       url: "/console/operations/approval-workflows",
-    //       icon: GitBranch,
-    //     },
-    //     { title: t("fraud_reviews"), url: "/console/operations/fraud-reviews", icon: Shield },
-    //     { title: t("agent_kpi"), url: "/console/operations/agent-kpi", icon: TrendingUpDown },
-    //   ],
-    // },
-    {
-      title: t("administration"),
-      icon: ShieldCog,
-      items: [
-        { title: t("users"), url: "/console/users", icon: UsersRound },
-        { title: t("authorizations"), url: "/console/authorization", icon: ShieldCog },
-        { title: t("audit"), url: "/console/audit-logs", icon: ScrollText },
-        { title: t("feature_flags"), url: "/console/feature-flags", icon: Flag },
-        { title: t("ip_blacklist"), url: "/console/blacklist", icon: Ban },
-        { title: t("health"), url: "/console/health", icon: HeartPulse },
-      ],
-    },
+    ...(is_admin
+      ? [
+          {
+            title: t("administration"),
+            icon: ShieldCog,
+            items: [
+              { title: t("settings"), url: "/console/settings", icon: Cog },
+              { title: t("users"), url: "/console/users", icon: UsersRound },
+              { title: t("authorizations"), url: "/console/authorization", icon: ShieldCog },
+              { title: t("audit"), url: "/console/audit-logs", icon: ScrollText },
+              { title: t("feature_flags"), url: "/console/feature-flags", icon: Flag },
+              { title: t("ip_blacklist"), url: "/console/blacklist", icon: Ban },
+              { title: t("health"), url: "/console/health", icon: HeartPulse },
+            ],
+          },
+        ]
+      : []),
   ];
 
   if (error) {
@@ -315,15 +307,6 @@ export function AppSidebar() {
                   </Collapsible>
                 ),
               )}
-              <Link href="/console/settings">
-                <SidebarMenuButton
-                  tooltip={t("settings")}
-                  isActive={pathname.startsWith("/console/settings")}
-                >
-                  <Cog className="size-4" />
-                  <span>{t("settings")}</span>
-                </SidebarMenuButton>
-              </Link>
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>

@@ -91,16 +91,6 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         },
       },
       {
-        id: "customer_phone",
-        accessorKey: "customer_phone",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_phone")} />,
-        cell: ({ row }) => (
-          <span className="text-muted-foreground text-sm">
-            {row.original.customer_phone ?? "—"}
-          </span>
-        ),
-      },
-      {
         id: "status",
         accessorKey: "status",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,

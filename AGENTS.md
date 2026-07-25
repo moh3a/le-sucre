@@ -185,6 +185,7 @@ Shipping:
 
 Payments:
 
+* Cash
 * Chargily
 * SATIM
 * CIB

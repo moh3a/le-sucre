@@ -34,13 +34,13 @@ export function RecordPaymentDialog() {
   const [amount, setAmount] = React.useState("");
 
   const PROVIDERS = [
-    { value: "stripe", label: t("provider_stripe") },
-    { value: "paypal", label: t("provider_paypal") },
+    { value: "cash", label: t("provider_cod") },
+    { value: "cib", label: t("provider_cib") },
+    { value: "bank_transfer", label: t("provider_bank_transfer") },
     { value: "chargily", label: t("provider_chargily") },
     { value: "satim", label: t("provider_satim") },
-    { value: "cib", label: t("provider_cib") },
-    { value: "cod", label: t("provider_cod") },
-    { value: "bank_transfer", label: t("provider_bank_transfer") },
+    { value: "stripe", label: t("provider_stripe") },
+    { value: "paypal", label: t("provider_paypal") },
   ] as const;
 
   const utils = trpc.useUtils();

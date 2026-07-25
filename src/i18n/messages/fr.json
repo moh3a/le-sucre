@@ -2222,7 +2222,7 @@
     "provider_chargily": "Chargily",
     "provider_satim": "SATIM",
     "provider_cib": "CIB",
-    "provider_cod": "Contre-remboursement",
+    "provider_cod": "Cash on delivery",
     "provider_bank_transfer": "Virement bancaire",
     "record_title": "Enregistrer un paiement",
     "record_description": "Enregistrer un paiement manuel pour une commande.",

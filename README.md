@@ -1,4 +1,10 @@
-# Le Sucre
+# ORLA
+
+## TODOs
+
+- audit actions for each feature
+- single entry point for workers
+- check if every operation works
 
 <p align="center">
   <a href="https://github.com/your-org/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/your-org/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
