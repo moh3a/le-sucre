@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, inArray, like, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull, like, ne, or } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { products, product_translations, product_media } from "../schema";
@@ -9,13 +9,17 @@ import type { ProductStatus } from "../models/product.dto";
 const DEFAULT_LOCALE = "fr";
 
 export class ProductRepository {
-  async find_by_id(id: string) {
-    const [row] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  async find_by_id(id: string, includeDeleted = false) {
+    const filters: any[] = [eq(products.id, id)];
+    if (!includeDeleted) filters.push(isNull(products.deleted_at));
+    const [row] = await db.select().from(products).where(and(...filters)).limit(1);
     return row ?? null;
   }
 
-  async find_by_slug(slug: string) {
-    const [row] = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
+  async find_by_slug(slug: string, includeDeleted = false) {
+    const filters: any[] = [eq(products.slug, slug)];
+    if (!includeDeleted) filters.push(isNull(products.deleted_at));
+    const [row] = await db.select().from(products).where(and(...filters)).limit(1);
     return row ?? null;
   }
 
@@ -27,11 +31,13 @@ export class ProductRepository {
     brand_id?: string;
     category_ids?: string[];
     product_ids?: string[];
+    includeDeleted?: boolean;
   }) {
     const { page, limit } = params;
     const offset = (page - 1) * limit;
 
     const filters = [];
+    if (!params.includeDeleted) filters.push(isNull(products.deleted_at));
     if (params.status) filters.push(eq(products.status, params.status));
     if (params.brand_id) filters.push(eq(products.brand_id, params.brand_id));
     if (params.category_ids?.length)
@@ -90,23 +96,78 @@ export class ProductRepository {
     return db.update(products).set(data).where(eq(products.id, id));
   }
 
-  delete(id: string) {
+  /** Soft delete - only works on non-deleted records */
+  async soft_delete(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(products)
+      .set({
+        deleted_at: now,
+        ...(actorUserId ? { deleted_by: actorUserId } : {}),
+      })
+      .where(and(eq(products.id, id), isNull(products.deleted_at)));
+  }
+
+  /** Restore a soft-deleted record */
+  async restore(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(products)
+      .set({
+        deleted_at: null,
+        deleted_by: null,
+        restored_at: now,
+        ...(actorUserId ? { restored_by: actorUserId } : {}),
+      })
+      .where(and(eq(products.id, id), isNotNull(products.deleted_at)));
+  }
+
+  /** Permanently delete (force) */
+  async force_delete(id: string) {
     return db.delete(products).where(eq(products.id, id));
   }
 
-  upsert_translation(data: typeof product_translations.$inferInsert) {
-    return db
-      .insert(product_translations)
-      .values(data)
-      .onDuplicateKeyUpdate({
-        set: {
-          name: data.name,
-          description: data.description ?? null,
-          keywords: data.keywords ?? null,
-          seo_title: data.seo_title ?? null,
-          seo_description: data.seo_description ?? null,
-        },
-      });
+  /** List soft-deleted records (trash) */
+  async list_deleted(params: { page: number; limit: number }) {
+    const { page, limit } = params;
+    const offset = (page - 1) * limit;
+    const where = isNotNull(products.deleted_at);
+
+    const [items, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: products.id,
+          slug: products.slug,
+          sku: products.sku,
+          status: products.status,
+          deleted_at: products.deleted_at,
+          deleted_by: products.deleted_by,
+        })
+        .from(products)
+        .where(where)
+        .orderBy(desc(products.deleted_at))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: count() }).from(products).where(where),
+    ]);
+
+    const total_records = Number(total ?? 0);
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total_records,
+        total_pages: Math.ceil(total_records / limit) || 1,
+        has_more: page * limit < total_records,
+      },
+    };
+  }
+
+  async delete_media(media_id: string, product_id: string) {
+    await db
+      .delete(product_media)
+      .where(and(eq(product_media.id, media_id), eq(product_media.product_id, product_id)));
   }
 
   async list_translations(product_id: string) {
@@ -114,31 +175,6 @@ export class ProductRepository {
       .select()
       .from(product_translations)
       .where(eq(product_translations.product_id, product_id));
-  }
-
-  create_media(data: typeof product_media.$inferInsert) {
-    return db.insert(product_media).values(data);
-  }
-
-  async list_media(product_id: string) {
-    return db
-      .select()
-      .from(product_media)
-      .where(eq(product_media.product_id, product_id))
-      .orderBy(product_media.sort_order);
-  }
-
-  async clear_primary_media(product_id: string) {
-    await db
-      .update(product_media)
-      .set({ is_primary: false })
-      .where(eq(product_media.product_id, product_id));
-  }
-
-  async delete_media(media_id: string, product_id: string) {
-    await db
-      .delete(product_media)
-      .where(and(eq(product_media.id, media_id), eq(product_media.product_id, product_id)));
   }
 
   async get_translation(product_id: string, locale: string) {

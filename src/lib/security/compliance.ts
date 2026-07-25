@@ -12,6 +12,29 @@ export const DATA_RETENTION_DAYS = {
   logs: 14,
 };
 
+/** Retention period (in days) before soft-deleted records are permanently purged. */
+export const SOFT_DELETE_RETENTION_DAYS = {
+  products: 30,
+  categories: 30,
+  brands: 30,
+  warehouses: 30,
+  promotions: 30,
+  campaigns: 30,
+  product_reviews: 14,
+  product_skus: 30,
+  product_properties: 30,
+  property_values: 30,
+  customers: 90,
+  invoices: 365,
+  feature_flags: 7,
+  media: 30,
+  wishlists: 30,
+  /** Default retention for any entity not explicitly configured. */
+  default: 30,
+} as const;
+
+export type SoftDeleteEntityType = keyof typeof SOFT_DELETE_RETENTION_DAYS;
+
 export function get_retention_date(days: number): Date {
   const date = new Date();
   date.setDate(date.getDate() - days);

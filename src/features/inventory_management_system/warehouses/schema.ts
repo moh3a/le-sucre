@@ -1,5 +1,14 @@
 import { generate_id } from "@/lib/utils";
-import { boolean, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import {
+  boolean,
+  index,
+  mysqlTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/mysql-core";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 export const warehouses = mysqlTable(
   "warehouses",
@@ -15,6 +24,10 @@ export const warehouses = mysqlTable(
     is_active: boolean("is_active").notNull().default(true),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
-  (t) => [uniqueIndex("warehouses_slug_uidx").on(t.slug)],
+  (t) => [
+    uniqueIndex("warehouses_slug_uidx").on(t.slug),
+    index("warehouses_deleted_idx").on(t.deleted_at),
+  ],
 );

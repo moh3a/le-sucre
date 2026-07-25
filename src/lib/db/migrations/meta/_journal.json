@@ -141,6 +141,27 @@
       "when": 1783638435132,
       "tag": "0019_striped_crystal",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1784827337990,
+      "tag": "0020_strong_deadpool",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1784848832425,
+      "tag": "0021_solid_squadron_supreme",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1784851094666,
+      "tag": "0022_superb_corsair",
+      "breakpoints": true
     }
   ]
 }

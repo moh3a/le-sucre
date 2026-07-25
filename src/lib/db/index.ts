@@ -17,6 +17,7 @@ import * as payment_schema from "@/features/payment_management_system/db/schema"
 import * as wishlist_schema from "@/features/wishlist_management_system/schema";
 import * as console_schema from "@/features/console_dashboard/tasks/schema";
 import * as console_notifications_schema from "@/features/console_dashboard/notifications/schema";
+import * as console_database_schema from "@/features/console_dashboard/database/schema";
 import * as feature_flag_schema from "@/features/feature_flag_system/schema";
 import * as media_schema from "@/features/media_library/db/schema";
 import * as mfa_schema from "@/features/authentication_and_authorization/auth/mfa_schema";
@@ -46,6 +47,7 @@ export const db = drizzle(pool, {
     ...wishlist_schema,
     ...console_schema,
     ...console_notifications_schema,
+    ...console_database_schema,
     ...feature_flag_schema,
     ...media_schema,
     ...mfa_schema,

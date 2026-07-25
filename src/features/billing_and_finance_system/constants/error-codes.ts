@@ -64,6 +64,24 @@ export const INVOICE_ERROR = {
       ar: "لا يمكن إلغاء فاتورة مدفوعة",
     },
   },
+  CANNOT_DELETE_PAID: {
+    code: "INVOICE_CANNOT_DELETE_PAID",
+    status: 409,
+    message: {
+      fr: "Impossible de supprimer une facture payée",
+      en: "Cannot delete a paid invoice",
+      ar: "لا يمكن حذف فاتورة مدفوعة",
+    },
+  },
+  DELETE_FAILED: {
+    code: "INVOICE_DELETE_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de la suppression de la facture",
+      en: "Failed to delete invoice",
+      ar: "فشل حذف الفاتورة",
+    },
+  },
   ITEM_NOT_IN_ORDER: {
     code: "INVOICE_ITEM_NOT_IN_ORDER",
     status: 400,

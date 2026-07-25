@@ -15,6 +15,7 @@ import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { products } from "@/features/product_information_management/products/schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { orders } from "@/features/order_management_system/orders/schema";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 /** Master promotion campaign */
 export const promotions = mysqlTable(
@@ -37,11 +38,13 @@ export const promotions = mysqlTable(
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
   (t) => [
     uniqueIndex("promotions_slug_uidx").on(t.slug),
     index("promotions_status_schedule_idx").on(t.status, t.starts_at, t.ends_at),
     index("promotions_type_idx").on(t.promotion_type, t.status),
+    index("promotions_deleted_idx").on(t.deleted_at),
   ],
 );
 

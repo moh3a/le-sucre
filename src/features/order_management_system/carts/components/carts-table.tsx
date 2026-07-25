@@ -3,9 +3,10 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { Download, Eye, Loader2, MoreHorizontal, User, XCircle } from "lucide-react";
+import { Download, Eye, Loader2, MoreHorizontal, Trash2, User, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { toast } from "sonner";
 
 import { useTranslations } from "next-intl";
 
@@ -21,6 +22,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -31,10 +42,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useUndoAction } from "@/hooks/use-undo-action";
 
 type CartRow = {
   id: string;
@@ -96,7 +109,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -125,12 +141,19 @@ function FacetedFilter({
 
 export function CartsTable() {
   const t = useTranslations("carts");
+  const tc = useTranslations("common");
+  const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
   const [page] = useQueryState("cartPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("cartPerPage", parseAsInteger.withDefault(20));
   const [search, setSearch] = useQueryState("cartSearch", parseAsString);
   const [status, setStatus] = useQueryState("cartStatus", parseAsString);
 
   const [selectedCartId, setSelectedCartId] = React.useState<string | null>(null);
+  const [delete_cart_target, set_delete_cart_target] = React.useState<{
+    id: string;
+    label: string;
+  } | null>(null);
 
   const CART_STATUS_CONFIG: Record<
     string,
@@ -159,14 +182,16 @@ export function CartsTable() {
       {
         id: "id",
         accessorKey: "id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("cart_id_column")} />,
-        cell: ({ row }) => (
-          <span className="font-mono text-xs">{row.original.id}</span>
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("cart_id_column")} />
         ),
+        cell: ({ row }) => <span className="font-mono text-xs">{row.original.id}</span>,
       },
       {
         id: "customer",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("customer_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("customer_column")} />
+        ),
         cell: ({ row }) => {
           const name = row.original.customer_name;
           const email = row.original.customer_email;
@@ -175,7 +200,7 @@ export function CartsTable() {
           if (name) {
             return (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary-foreground">
+                <div className="bg-primary/20 text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full">
                   <User className="h-4 w-4" />
                 </div>
                 <div>
@@ -205,7 +230,11 @@ export function CartsTable() {
         id: "item_count",
         accessorKey: "item_count",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("items_column")} />,
-        cell: ({ row }) => <span className="font-semibold">{t("items_count", { count: row.original.item_count })}</span>,
+        cell: ({ row }) => (
+          <span className="font-semibold">
+            {t("items_count", { count: row.original.item_count })}
+          </span>
+        ),
       },
       {
         id: "total_price",
@@ -220,7 +249,9 @@ export function CartsTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => {
           const displayStatus = getCartStatus(row.original);
           const cfg = CART_STATUS_CONFIG[displayStatus] ?? {
@@ -233,7 +264,9 @@ export function CartsTable() {
       {
         id: "updated_at",
         accessorKey: "updated_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("activity_column")} />
+        ),
         cell: ({ row }) =>
           format(new Date(row.original.updated_at), "dd MMM yyyy HH:mm", { locale: fr }),
       },
@@ -251,12 +284,25 @@ export function CartsTable() {
                 <Eye className="mr-2 h-4 w-4" />
                 {t("view_items")}
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() =>
+                  set_delete_cart_target({
+                    id: row.original.id,
+                    label: row.original.customer_name ?? row.original.id,
+                  })
+                }
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t("delete_cart")}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const { data, isLoading } = trpc.cart.adminList.useQuery({
@@ -265,6 +311,7 @@ export function CartsTable() {
     status: status || undefined,
     search: search || undefined,
   });
+  const adminDeleteCartMutation = trpc.cart.adminDeleteCart.useMutation();
 
   const items = (data?.items ?? []) as CartRow[];
   const page_count = data?.meta.total_pages ?? 0;
@@ -279,53 +326,103 @@ export function CartsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={2} />}>
-    <>
-      <DataTable table={table}>
-        <DataTableAdvancedToolbar table={table}>
-          <Input
-            placeholder={t("search_placeholder")}
-            value={search || ""}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
-            className="max-w-sm"
-          />
-          <FacetedFilter
-            title={t("status_title")}
-            options={STATUS_OPTIONS}
-            value={status ?? undefined}
-            onChange={(val) => setStatus(val)}
-          />
-          <DataTableSortList table={table} />
-        </DataTableAdvancedToolbar>
-        {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <div className="flex items-center gap-2 border-t p-2">
-            <Badge variant="outline">
-              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-            </Badge>
-            <Button variant="ghost" size="sm" asChild>
-              <a
-                href={`/api/admin/carts/export?${new URLSearchParams({
-                  ...(search ? { search } : {}),
-                  ...(status ? { status } : {}),
-                })}`}
-                download="carts.csv"
-              >
-                <Download className="mr-1 h-4 w-4" />
-                {t("export")}
-              </a>
-            </Button>
-          </div>
-        )}
-      </DataTable>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={<DataTableSkeleton columnCount={7} rowCount={10} filterCount={2} />}
+    >
+      <>
+        <DataTable table={table}>
+          <DataTableAdvancedToolbar table={table}>
+            <Input
+              placeholder={t("search_placeholder")}
+              value={search || ""}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+              className="max-w-sm"
+            />
+            <FacetedFilter
+              title={t("status_title")}
+              options={STATUS_OPTIONS}
+              value={status ?? undefined}
+              onChange={(val) => setStatus(val)}
+            />
+            <DataTableSortList table={table} />
+          </DataTableAdvancedToolbar>
+          {table.getFilteredSelectedRowModel().rows.length > 0 && (
+            <div className="flex items-center gap-2 border-t p-2">
+              <Badge variant="outline">
+                {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+              </Badge>
+              <Button variant="ghost" size="sm" asChild>
+                <a
+                  href={`/api/admin/carts/export?${new URLSearchParams({
+                    ...(search ? { search } : {}),
+                    ...(status ? { status } : {}),
+                  })}`}
+                  download="carts.csv"
+                >
+                  <Download className="mr-1 h-4 w-4" />
+                  {t("export")}
+                </a>
+              </Button>
+            </div>
+          )}
+        </DataTable>
 
-      <CartItemsDialog
-        cartId={selectedCartId || ""}
-        open={!!selectedCartId}
-        onOpenChange={(open) => !open && setSelectedCartId(null)}
-      />
-    </>
+        <CartItemsDialog
+          cartId={selectedCartId || ""}
+          open={!!selectedCartId}
+          onOpenChange={(open) => !open && setSelectedCartId(null)}
+        />
+
+        <AlertDialog
+          open={!!delete_cart_target}
+          onOpenChange={(open) => {
+            if (!open) set_delete_cart_target(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Trash2 className="text-destructive size-5" />
+                {t("delete_cart")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("delete_cart_confirm", { name: delete_cart_target?.label ?? "" })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={() => {
+                  const target = delete_cart_target;
+                  set_delete_cart_target(null);
+                  execute_with_undo({
+                    description: target?.label ?? "",
+                    execute: async () => {
+                      await adminDeleteCartMutation.mutate({
+                        cart_id: target!.id,
+                      });
+                      await utils.cart.adminList.invalidate();
+                      await utils.cart.adminStats.invalidate();
+                      toast.success(t("cart_deleted"));
+                    },
+                    rollback: () => {
+                      utils.cart.adminList.invalidate();
+                      utils.cart.adminStats.invalidate();
+                    },
+                    undoTimeoutMs: 8_000,
+                  });
+                }}
+              >
+                {tc("confirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
     </QueryGuard>
   );
 }
@@ -338,10 +435,39 @@ interface CartItemsDialogProps {
 
 function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
   const t = useTranslations("carts");
-  const { data, isLoading } = trpc.cart.adminGetById.useQuery(
+  const tc = useTranslations("common");
+  const utils = trpc.useUtils();
+  const { execute_with_undo } = useUndoAction();
+
+  const { data, isLoading, refetch } = trpc.cart.adminGetById.useQuery(
     { cart_id: cartId },
     { enabled: open && !!cartId },
   );
+
+  const [clear_confirm_open, set_clear_confirm_open] = React.useState(false);
+  const [delete_item_target, set_delete_item_target] = React.useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const remove_item_mutation = trpc.cart.adminRemoveItem.useMutation({
+    onSuccess: () => {
+      refetch();
+      utils.cart.adminList.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const clear_cart_mutation = trpc.cart.adminClearCart.useMutation({
+    onSuccess: () => {
+      refetch();
+      utils.cart.adminList.invalidate();
+      utils.cart.adminStats.invalidate();
+      set_clear_confirm_open(false);
+      toast.success(t("cart_cleared"));
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -355,7 +481,7 @@ function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
 
         {isLoading ? (
           <div className="flex h-32 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="text-primary h-8 w-8 animate-spin" />
           </div>
         ) : !data || data.items.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center text-sm">{t("cart_empty")}</div>
@@ -363,30 +489,116 @@ function CartItemsDialog({ cartId, open, onOpenChange }: CartItemsDialogProps) {
           <div className="space-y-4 pt-2">
             <div className="max-h-[280px] divide-y overflow-y-auto pr-1">
               {data.items.map((item) => (
-                <div key={item.id} className="flex justify-between gap-4 py-2.5 text-sm">
-                  <div>
-                    <p className="font-semibold">{item.product_name}</p>
+                <div key={item.id} className="flex items-center gap-2 py-2.5 text-sm">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">{item.product_name}</p>
                     <p className="text-muted-foreground font-mono text-xs">
                       Qte: {item.quantity} &times; {Number(item.unit_price).toLocaleString("fr-FR")}{" "}
                       {item.currency}
                     </p>
                   </div>
-                  <div className="pt-1 text-right font-semibold whitespace-nowrap">
+                  <div className="text-right font-semibold whitespace-nowrap">
                     {Number(item.line_total).toLocaleString("fr-FR")} {item.currency}
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 shrink-0"
+                    disabled={remove_item_mutation.isPending}
+                    onClick={() => set_delete_item_target({ id: item.id, name: item.product_name })}
+                  >
+                    <Trash2 className="text-destructive size-3.5" />
+                  </Button>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-between border-t pt-4 text-base font-bold">
-              <span>{t("subtotal")}</span>
-              <span className="font-mono">
+            <div className="flex items-center justify-between border-t pt-4">
+              <span className="text-base font-bold">{t("subtotal")}</span>
+              <span className="font-mono text-base font-bold">
                 {Number(data.subtotal).toLocaleString("fr-FR")} {data.currency}
               </span>
             </div>
+
+            <Button
+              variant="destructive"
+              size="sm"
+              className="w-full"
+              disabled={clear_cart_mutation.isPending}
+              onClick={() => set_clear_confirm_open(true)}
+            >
+              <Trash2 className="mr-1 size-3.5" />
+              {t("clear_cart")}
+            </Button>
           </div>
         )}
       </DialogContent>
+
+      <AlertDialog open={clear_confirm_open} onOpenChange={set_clear_confirm_open}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("clear_cart")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("clear_cart_confirm")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clear_cart_mutation.isPending}>
+              {tc("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={clear_cart_mutation.isPending}
+              onClick={() => clear_cart_mutation.mutate({ cart_id: cartId })}
+            >
+              {clear_cart_mutation.isPending ? tc("deleting") : tc("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!delete_item_target}
+        onOpenChange={(open) => {
+          if (!open) set_delete_item_target(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete_item")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete_item_confirm", { name: delete_item_target?.name ?? "" })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={remove_item_mutation.isPending}>
+              {tc("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={remove_item_mutation.isPending}
+              onClick={() => {
+                const target = delete_item_target;
+                set_delete_item_target(null);
+                execute_with_undo({
+                  description: target?.name ?? "",
+                  execute: async () => {
+                    await remove_item_mutation.mutateAsync({
+                      cart_id: cartId,
+                      item_id: target!.id,
+                    });
+                    toast.success(t("item_removed"));
+                  },
+                  rollback: () => {
+                    refetch();
+                  },
+                  undoTimeoutMs: 8_000,
+                });
+              }}
+            >
+              {tc("confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

@@ -12,6 +12,7 @@ import { relations } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { orders } from "@/features/order_management_system/orders/schema";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 export const invoices = mysqlTable(
   "invoices",
@@ -50,6 +51,7 @@ export const invoices = mysqlTable(
     paid_at: timestamp("paid_at", { mode: "string" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
   (t) => [
     uniqueIndex("invoices_invoice_number_uidx").on(t.invoice_number),
@@ -58,6 +60,7 @@ export const invoices = mysqlTable(
     index("invoices_status_idx").on(t.status),
     index("invoices_type_idx").on(t.type),
     index("invoices_created_idx").on(t.created_at),
+    index("invoices_deleted_idx").on(t.deleted_at),
   ],
 );
 

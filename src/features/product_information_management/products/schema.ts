@@ -14,6 +14,7 @@ import { relations } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { categories } from "@/features/product_information_management/categories/schema";
 import { brands } from "@/features/product_information_management/brands/schema";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 export const products = mysqlTable(
   "products",
@@ -41,6 +42,7 @@ export const products = mysqlTable(
     seo_keywords: varchar("seo_keywords", { length: 512 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
   (t) => [
     uniqueIndex("products_slug_uidx").on(t.slug),
@@ -49,6 +51,7 @@ export const products = mysqlTable(
     index("products_brand_idx").on(t.brand_id),
     index("products_status_idx").on(t.status),
     index("products_price_idx").on(t.base_price),
+    index("products_deleted_idx").on(t.deleted_at),
   ],
 );
 

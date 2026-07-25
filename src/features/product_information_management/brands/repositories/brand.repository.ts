@@ -1,26 +1,37 @@
 import "server-only";
 
-import { and, count, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { brands } from "../schema";
 import { products } from "@/features/product_information_management/products/schema";
 
 export class BrandRepository {
-  async find_by_id(id: string) {
-    const [row] = await db.select().from(brands).where(eq(brands.id, id)).limit(1);
+  async find_by_id(id: string, includeDeleted = false) {
+    const filters: any[] = [eq(brands.id, id)];
+    if (!includeDeleted) filters.push(isNull(brands.deleted_at));
+    const [row] = await db.select().from(brands).where(and(...filters)).limit(1);
     return row ?? null;
   }
 
-  async find_by_slug(slug: string) {
-    const [row] = await db.select().from(brands).where(eq(brands.slug, slug)).limit(1);
+  async find_by_slug(slug: string, includeDeleted = false) {
+    const filters: any[] = [eq(brands.slug, slug)];
+    if (!includeDeleted) filters.push(isNull(brands.deleted_at));
+    const [row] = await db.select().from(brands).where(and(...filters)).limit(1);
     return row ?? null;
   }
 
-  async list(params: { page: number; limit: number; search?: string; is_active?: boolean }) {
+  async list(params: {
+    page: number;
+    limit: number;
+    search?: string;
+    is_active?: boolean;
+    includeDeleted?: boolean;
+  }) {
     const { page, limit } = params;
     const offset = (page - 1) * limit;
-    const filters: ReturnType<typeof eq>[] = [];
+    const filters: any[] = [];
+    if (!params.includeDeleted) filters.push(isNull(brands.deleted_at));
     if (params.is_active !== undefined) filters.push(eq(brands.is_active, params.is_active));
     if (params.search) {
       const q = `%${params.search}%`;
@@ -53,7 +64,11 @@ export class BrandRepository {
   }
 
   async list_active() {
-    return db.select().from(brands).where(eq(brands.is_active, true)).orderBy(brands.name);
+    return db
+      .select()
+      .from(brands)
+      .where(and(eq(brands.is_active, true), isNull(brands.deleted_at)))
+      .orderBy(brands.name);
   }
 
   async find_active_by_slug_with_product_count(slug: string) {
@@ -69,7 +84,13 @@ export class BrandRepository {
       })
       .from(brands)
       .leftJoin(products, eq(products.brand_id, brands.id))
-      .where(and(eq(brands.slug, slug), eq(brands.is_active, true)))
+      .where(
+        and(
+          eq(brands.slug, slug),
+          eq(brands.is_active, true),
+          isNull(brands.deleted_at),
+        ),
+      )
       .groupBy(brands.id)
       .limit(1);
     return row ?? null;
@@ -86,7 +107,7 @@ export class BrandRepository {
       })
       .from(brands)
       .leftJoin(products, eq(products.brand_id, brands.id))
-      .where(eq(brands.is_active, true))
+      .where(and(eq(brands.is_active, true), isNull(brands.deleted_at)))
       .groupBy(brands.id)
       .orderBy(brands.name);
     return rows;
@@ -94,8 +115,14 @@ export class BrandRepository {
 
   async count_by_active() {
     const [active_result, inactive_result] = await Promise.all([
-      db.select({ count: count() }).from(brands).where(eq(brands.is_active, true)),
-      db.select({ count: count() }).from(brands).where(eq(brands.is_active, false)),
+      db
+        .select({ count: count() })
+        .from(brands)
+        .where(and(eq(brands.is_active, true), isNull(brands.deleted_at))),
+      db
+        .select({ count: count() })
+        .from(brands)
+        .where(and(eq(brands.is_active, false), isNull(brands.deleted_at))),
     ]);
     return {
       active: Number(active_result[0].count ?? 0),
@@ -111,8 +138,71 @@ export class BrandRepository {
     return db.update(brands).set(data).where(eq(brands.id, id));
   }
 
-  delete(id: string) {
+  /** Soft delete - only works on non-deleted records */
+  async soft_delete(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(brands)
+      .set({
+        deleted_at: now,
+        ...(actorUserId ? { deleted_by: actorUserId } : {}),
+      })
+      .where(and(eq(brands.id, id), isNull(brands.deleted_at)));
+  }
+
+  /** Restore a soft-deleted record */
+  async restore(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(brands)
+      .set({
+        deleted_at: null,
+        deleted_by: null,
+        restored_at: now,
+        ...(actorUserId ? { restored_by: actorUserId } : {}),
+      })
+      .where(and(eq(brands.id, id), isNotNull(brands.deleted_at)));
+  }
+
+  /** Permanently delete (force) */
+  async force_delete(id: string) {
     return db.delete(brands).where(eq(brands.id, id));
+  }
+
+  /** List soft-deleted records (trash) */
+  async list_deleted(params: { page: number; limit: number }) {
+    const { page, limit } = params;
+    const offset = (page - 1) * limit;
+    const where = isNotNull(brands.deleted_at);
+
+    const [items, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: brands.id,
+          name: brands.name,
+          slug: brands.slug,
+          deleted_at: brands.deleted_at,
+          deleted_by: brands.deleted_by,
+        })
+        .from(brands)
+        .where(where)
+        .orderBy(desc(brands.deleted_at))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: count() }).from(brands).where(where),
+    ]);
+
+    const total_records = Number(total ?? 0);
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total_records,
+        total_pages: Math.ceil(total_records / limit) || 1,
+        has_more: page * limit < total_records,
+      },
+    };
   }
 
   async count_products_by_brand(brand_id: string) {

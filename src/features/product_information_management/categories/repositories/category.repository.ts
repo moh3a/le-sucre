@@ -1,18 +1,22 @@
 import "server-only";
 
-import { and, count, eq, like, or, sql } from "drizzle-orm";
+import { and, count, eq, isNotNull, isNull, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { categories } from "../schema";
 
 export class CategoryRepository {
-  async find_by_id(id: string) {
-    const r = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
+  async find_by_id(id: string, includeDeleted = false) {
+    const filters: any[] = [eq(categories.id, id)];
+    if (!includeDeleted) filters.push(isNull(categories.deleted_at));
+    const r = await db.select().from(categories).where(and(...filters)).limit(1);
     return r[0] ?? null;
   }
 
-  async find_by_slug(slug: string) {
-    const r = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+  async find_by_slug(slug: string, includeDeleted = false) {
+    const filters: any[] = [eq(categories.slug, slug)];
+    if (!includeDeleted) filters.push(isNull(categories.deleted_at));
+    const r = await db.select().from(categories).where(and(...filters)).limit(1);
     return r[0] ?? null;
   }
 
@@ -22,8 +26,10 @@ export class CategoryRepository {
     search?: string;
     page: number;
     limit: number;
+    includeDeleted?: boolean;
   }) {
-    const filters = [];
+    const filters: any[] = [];
+    if (!params.includeDeleted) filters.push(isNull(categories.deleted_at));
     if (params.parent_id !== undefined) {
       filters.push(
         params.parent_id === null
@@ -60,10 +66,12 @@ export class CategoryRepository {
   }
 
   async list_all_for_tree(active_only = false) {
+    const filters: any[] = [isNull(categories.deleted_at)];
+    if (active_only) filters.push(eq(categories.is_active, true));
     return await db
       .select()
       .from(categories)
-      .where(active_only ? eq(categories.is_active, true) : undefined)
+      .where(and(...filters))
       .orderBy(categories.depth, categories.sort_order);
   }
 
@@ -75,15 +83,78 @@ export class CategoryRepository {
     return await db.update(categories).set(values).where(eq(categories.id, id));
   }
 
-  async delete(id: string) {
+  /** Soft delete - only works on non-deleted records */
+  async soft_delete(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(categories)
+      .set({
+        deleted_at: now,
+        ...(actorUserId ? { deleted_by: actorUserId } : {}),
+      })
+      .where(and(eq(categories.id, id), isNull(categories.deleted_at)));
+  }
+
+  /** Restore a soft-deleted record */
+  async restore(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(categories)
+      .set({
+        deleted_at: null,
+        deleted_by: null,
+        restored_at: now,
+        ...(actorUserId ? { restored_by: actorUserId } : {}),
+      })
+      .where(and(eq(categories.id, id), isNotNull(categories.deleted_at)));
+  }
+
+  /** Permanently delete (force) */
+  async force_delete(id: string) {
     return await db.delete(categories).where(eq(categories.id, id));
+  }
+
+  /** List soft-deleted records (trash) */
+  async list_deleted(params: { page: number; limit: number }) {
+    const { page, limit } = params;
+    const offset = (page - 1) * limit;
+    const where = isNotNull(categories.deleted_at);
+
+    const [items, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: categories.id,
+          name: categories.name,
+          slug: categories.slug,
+          deleted_at: categories.deleted_at,
+          deleted_by: categories.deleted_by,
+        })
+        .from(categories)
+        .where(where)
+        .orderBy(desc(categories.deleted_at))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: count() }).from(categories).where(where),
+    ]);
+
+    const total_records = Number(total ?? 0);
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total_records,
+        total_pages: Math.ceil(total_records / limit) || 1,
+        has_more: page * limit < total_records,
+      },
+    };
   }
 
   async count_direct_children(parent_id: string) {
     return await db
       .select({ total: count() })
       .from(categories)
-      .where(eq(categories.parent_id, parent_id));
+      .where(and(eq(categories.parent_id, parent_id), isNull(categories.deleted_at)));
   }
 
   async get_stats() {
@@ -94,7 +165,8 @@ export class CategoryRepository {
         inactive: count(sql`CASE WHEN ${categories.is_active} = 0 THEN 1 ELSE NULL END`),
         root: count(sql`CASE WHEN ${categories.parent_id} IS NULL THEN 1 ELSE NULL END`),
       })
-      .from(categories);
+      .from(categories)
+      .where(isNull(categories.deleted_at));
 
     return {
       total: Number(result?.total ?? 0),

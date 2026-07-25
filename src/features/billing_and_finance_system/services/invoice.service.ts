@@ -354,6 +354,49 @@ export class InvoiceService {
   }) {
     return await this.repo.list_admin_invoices(params);
   }
+
+  async admin_delete(invoice_id: string, actorUserId?: string) {
+    const [fetch_err, invoice] = await tryFn(this.repo.find_by_id(invoice_id));
+    if (fetch_err) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    if (!invoice) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    if (invoice.status === "paid") {
+      throw_error(INVOICE_ERROR.CANNOT_DELETE_PAID);
+    }
+    await this.repo.soft_delete(invoice_id, actorUserId);
+    return { success: true };
+  }
+
+  async restore(invoice_id: string, actorUserId?: string) {
+    const [fetch_err, invoice] = await tryFn(this.repo.find_by_id(invoice_id, true));
+    if (fetch_err) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    if (!invoice) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    await this.repo.restore(invoice_id, actorUserId);
+    return this.repo.find_by_id(invoice_id);
+  }
+
+  async force_delete(invoice_id: string) {
+    const [fetch_err, invoice] = await tryFn(this.repo.find_by_id(invoice_id, true));
+    if (fetch_err) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    if (!invoice) {
+      throw_error(INVOICE_ERROR.NOT_FOUND);
+    }
+    await this.repo.force_delete(invoice_id);
+    return { success: true };
+  }
+
+  async list_deleted(params: { page: number; limit: number }) {
+    return await this.repo.list_deleted(params);
+  }
 }
 
 export const invoice_service = new InvoiceService();

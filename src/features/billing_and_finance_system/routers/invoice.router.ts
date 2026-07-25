@@ -109,4 +109,28 @@ export const invoice_router = create_trpc_router({
   get_summary: admin_procedure.input(financial_query_schema).query(async ({ input }) => {
     return await invoice_service.get_financial_summary(input.start_date, input.end_date);
   }),
+
+  adminDelete: admin_procedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      return await invoice_service.admin_delete(input.id, ctx.user.id);
+    }),
+
+  restore: admin_procedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      return await invoice_service.restore(input.id, ctx.user.id);
+    }),
+
+  forceDelete: admin_procedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      return await invoice_service.force_delete(input.id);
+    }),
+
+  trash: admin_procedure
+    .input(z.object({ page: z.number().int().min(1).default(1), limit: z.number().int().min(1).max(100).default(20) }))
+    .query(async ({ input }) => {
+      return await invoice_service.list_deleted(input);
+    }),
 });

@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 export const brands = mysqlTable(
   "brands",
@@ -24,6 +25,11 @@ export const brands = mysqlTable(
     is_active: boolean("is_active").notNull().default(true),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
-  (t) => [uniqueIndex("brands_slug_uidx").on(t.slug), index("brands_active_idx").on(t.is_active)],
+  (t) => [
+    uniqueIndex("brands_slug_uidx").on(t.slug),
+    index("brands_active_idx").on(t.is_active),
+    index("brands_deleted_idx").on(t.deleted_at),
+  ],
 );

@@ -81,18 +81,51 @@ export class BrandService {
     return brand;
   }
 
-  async remove(id: string) {
+  /** Soft delete - marks brand as deleted without removing it */
+  async remove(id: string, actorUserId?: string) {
     const brand = await this.repo.find_by_id(id);
     if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
     const product_count = await this.repo.count_products_by_brand(id);
     if (product_count > 0) throw_error(BRAND_ERROR.HAS_PRODUCTS);
-    await this.repo.delete(id);
+    await this.repo.soft_delete(id, actorUserId);
     void audit_service.log({
-      action: "brand.delete",
+      action: "brand.soft_delete",
       resource_type: "brand_id",
       resource_id: id,
     });
-    return { ok: true };
+    return { ok: true as const };
+  }
+
+  /** Restore a soft-deleted brand */
+  async restore(id: string, actorUserId?: string) {
+    const brand = await this.repo.find_by_id(id, true);
+    if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
+    if (!brand.deleted_at) throw_error(BRAND_ERROR.NOT_FOUND);
+    await this.repo.restore(id, actorUserId);
+    void audit_service.log({
+      action: "brand.restore",
+      resource_type: "brand_id",
+      resource_id: id,
+    });
+    return { ok: true as const };
+  }
+
+  /** Permanently delete - only for trash/admin */
+  async force_delete(id: string) {
+    const brand = await this.repo.find_by_id(id, true);
+    if (!brand) throw_error(BRAND_ERROR.NOT_FOUND);
+    await this.repo.force_delete(id);
+    void audit_service.log({
+      action: "brand.force_delete",
+      resource_type: "brand_id",
+      resource_id: id,
+    });
+    return { ok: true as const };
+  }
+
+  /** List soft-deleted records (trash) */
+  async list_deleted(params: { page: number; limit: number }) {
+    return this.repo.list_deleted(params);
   }
 
   async stats() {

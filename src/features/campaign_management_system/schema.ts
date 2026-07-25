@@ -15,6 +15,7 @@ import { generate_id } from "@/lib/utils";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { categories } from "@/features/product_information_management/categories/schema";
 import { brands } from "@/features/product_information_management/brands/schema";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 // ─── Campaign (master entity) ────────────────────────────────────────────────
 
@@ -83,12 +84,14 @@ export const campaigns = mysqlTable(
     }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
   (t) => [
     uniqueIndex("campaigns_slug_uidx").on(t.slug),
     index("campaigns_type_status_idx").on(t.campaign_type, t.status),
     index("campaigns_schedule_idx").on(t.status, t.starts_at, t.ends_at),
     index("campaigns_priority_idx").on(t.priority),
+    index("campaigns_deleted_idx").on(t.deleted_at),
   ],
 );
 

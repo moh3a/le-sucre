@@ -78,6 +78,10 @@ export class CartRepository {
     await db.delete(cart_items).where(eq(cart_items.cart_id, cart_id));
   }
 
+  async delete_cart(cart_id: string) {
+    await db.delete(carts).where(eq(carts.id, cart_id));
+  }
+
   async mark_converted(cart_id: string) {
     return await db.update(carts).set({ status: "converted" }).where(eq(carts.id, cart_id));
   }

@@ -36,5 +36,17 @@ export const brand_router = create_trpc_router({
     .input(update_brand_dto.pick({ id: true }))
     .mutation(({ input }) => brand_service.remove(input.id)),
 
+  restore: permission_procedure(PERMISSIONS.products_write)
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(({ input }) => brand_service.restore(input.id)),
+
+  forceDelete: permission_procedure(PERMISSIONS.products_write)
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(({ input }) => brand_service.force_delete(input.id)),
+
+  trash: permission_procedure(PERMISSIONS.products_read)
+    .input(z.object({ page: z.number().int().min(1).default(1), limit: z.number().int().min(1).max(100).default(20) }))
+    .query(({ input }) => brand_service.list_deleted(input)),
+
   stats: permission_procedure(PERMISSIONS.products_read).query(() => brand_service.stats()),
 });

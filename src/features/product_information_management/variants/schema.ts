@@ -12,6 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 import { products } from "../schema";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 // product_properties — axes per product
 export const product_properties = mysqlTable(
@@ -27,8 +28,12 @@ export const product_properties = mysqlTable(
     name: varchar("name", { length: 255 }).notNull(), // "Couleur"
     sort_order: int("sort_order").notNull().default(0),
     is_required: boolean("is_required").notNull().default(true),
+    ...softDeleteColumns,
   },
-  (t) => [uniqueIndex("product_properties_product_code_uidx").on(t.product_id, t.code)],
+  (t) => [
+    uniqueIndex("product_properties_product_code_uidx").on(t.product_id, t.code),
+    index("product_properties_deleted_idx").on(t.deleted_at),
+  ],
 );
 
 // property_values — options
@@ -47,8 +52,12 @@ export const property_values = mysqlTable(
     thumbnail_image: varchar("thumbnail_image", { length: 1024 }),
     color_hex: varchar("color_hex", { length: 7 }),
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
+    ...softDeleteColumns,
   },
-  (t) => [uniqueIndex("property_values_property_code_uidx").on(t.property_id, t.code)],
+  (t) => [
+    uniqueIndex("property_values_property_code_uidx").on(t.property_id, t.code),
+    index("property_values_deleted_idx").on(t.deleted_at),
+  ],
 );
 
 // product_skus — sellable units (millions of rows: index-heavy, narrow row)
@@ -73,12 +82,14 @@ export const product_skus = mysqlTable(
     metadata: json("metadata").$type<Record<string, unknown>>().default({}),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
   (t) => [
     uniqueIndex("product_skus_sku_code_uidx").on(t.sku_code),
     uniqueIndex("product_skus_product_signature_uidx").on(t.product_id, t.option_signature),
     index("product_skus_product_active_idx").on(t.product_id, t.is_active),
     index("product_skus_stock_idx").on(t.product_id, t.stock_available),
+    index("product_skus_deleted_idx").on(t.deleted_at),
   ],
 );
 

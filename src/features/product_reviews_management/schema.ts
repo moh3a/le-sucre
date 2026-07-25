@@ -14,6 +14,7 @@ import { generate_id } from "@/lib/utils";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { products } from "@/features/product_information_management/products/schema";
 import { orders, order_items } from "@/features/order_management_system/orders/schema";
+import { softDeleteColumns } from "@/lib/db/soft-delete-schema";
 
 export const product_reviews = mysqlTable(
   "product_reviews",
@@ -55,6 +56,7 @@ export const product_reviews = mysqlTable(
     rejected_at: timestamp("rejected_at", { mode: "string" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+    ...softDeleteColumns,
   },
   (t) => [
     uniqueIndex("product_reviews_user_product_uidx").on(t.user_id, t.product_id),
@@ -63,6 +65,7 @@ export const product_reviews = mysqlTable(
     index("product_reviews_user_created_idx").on(t.user_id, t.created_at),
     index("product_reviews_status_created_idx").on(t.status, t.created_at),
     index("product_reviews_helpful_idx").on(t.product_id, t.status, t.helpful_count),
+    index("product_reviews_deleted_idx").on(t.deleted_at),
   ],
 );
 

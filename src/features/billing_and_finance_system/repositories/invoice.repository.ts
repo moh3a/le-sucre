@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, like, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, like, or, sql, sum } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { invoices, invoice_items } from "../db/schema";
 import { orders } from "@/features/order_management_system/orders/schema";
@@ -8,11 +8,13 @@ import { users } from "@/features/authentication_and_authorization/auth/schema";
 import type { Invoice, NewInvoice, NewInvoiceItem } from "../types";
 
 export class InvoiceRepository {
-  async find_by_id(id: string) {
+  async find_by_id(id: string, includeDeleted = false) {
+    const filters: any[] = [eq(invoices.id, id)];
+    if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
     const row = await db
       .select()
       .from(invoices)
-      .where(eq(invoices.id, id))
+      .where(and(...filters))
       .limit(1)
       .then((r) => r[0] ?? null);
 
@@ -23,11 +25,13 @@ export class InvoiceRepository {
     return { ...row, items };
   }
 
-  async find_by_number(invoice_number: string) {
+  async find_by_number(invoice_number: string, includeDeleted = false) {
+    const filters: any[] = [eq(invoices.invoice_number, invoice_number)];
+    if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
     const row = await db
       .select()
       .from(invoices)
-      .where(eq(invoices.invoice_number, invoice_number))
+      .where(and(...filters))
       .limit(1)
       .then((r) => r[0] ?? null);
 
@@ -38,15 +42,17 @@ export class InvoiceRepository {
     return { ...row, items };
   }
 
-  async find_by_order_id(order_id: string) {
-    return await db.select().from(invoices).where(eq(invoices.order_id, order_id));
+  async find_by_order_id(order_id: string, includeDeleted = false) {
+    const filters: any[] = [eq(invoices.order_id, order_id)];
+    if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
+    return await db.select().from(invoices).where(and(...filters));
   }
 
   async list_by_order(order_id: string) {
     return await db
       .select()
       .from(invoices)
-      .where(eq(invoices.order_id, order_id))
+      .where(and(eq(invoices.order_id, order_id), isNull(invoices.deleted_at)))
       .orderBy(desc(invoices.created_at));
   }
 
@@ -69,7 +75,7 @@ export class InvoiceRepository {
 
   async list_customer_invoices(user_id: string, page: number, limit: number, status?: string) {
     const offset = (page - 1) * limit;
-    const conds = [eq(invoices.user_id, user_id)];
+    const conds = [eq(invoices.user_id, user_id), isNull(invoices.deleted_at)];
     if (status) {
       conds.push(eq(invoices.status, status));
     }
@@ -112,7 +118,7 @@ export class InvoiceRepository {
   }) {
     const { page, limit, status, type, order_id, search } = params;
     const offset = (page - 1) * limit;
-    const conds = [];
+    const conds: any[] = [isNull(invoices.deleted_at)];
 
     if (status) conds.push(eq(invoices.status, status));
     if (type) conds.push(eq(invoices.type, type));
@@ -201,7 +207,7 @@ export class InvoiceRepository {
         count: count(invoices.id),
       })
       .from(invoices)
-      .where(and(where_clause, eq(invoices.status, "paid")))
+      .where(and(where_clause, eq(invoices.status, "paid"), isNull(invoices.deleted_at)))
       .groupBy(invoices.created_at)
       .orderBy(invoices.created_at);
 
@@ -213,7 +219,7 @@ export class InvoiceRepository {
         total_amount: sum(invoices.grand_total),
       })
       .from(invoices)
-      .where(where_clause)
+      .where(and(where_clause, isNull(invoices.deleted_at)))
       .groupBy(invoices.status);
 
     // Document type aggregates
@@ -224,7 +230,7 @@ export class InvoiceRepository {
         total_amount: sum(invoices.grand_total),
       })
       .from(invoices)
-      .where(where_clause)
+      .where(and(where_clause, isNull(invoices.deleted_at)))
       .groupBy(invoices.type);
 
     return {
@@ -244,6 +250,74 @@ export class InvoiceRepository {
         count: Number(row.count ?? 0),
         total_amount: Number(row.total_amount ?? 0),
       })),
+    };
+  }
+
+  /** Soft delete - only works on non-deleted records */
+  async soft_delete(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(invoices)
+      .set({
+        deleted_at: now,
+        ...(actorUserId ? { deleted_by: actorUserId } : {}),
+      })
+      .where(and(eq(invoices.id, id), isNull(invoices.deleted_at)));
+  }
+
+  /** Restore a soft-deleted record */
+  async restore(id: string, actorUserId?: string) {
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    return db
+      .update(invoices)
+      .set({
+        deleted_at: null,
+        deleted_by: null,
+        restored_at: now,
+        ...(actorUserId ? { restored_by: actorUserId } : {}),
+      })
+      .where(and(eq(invoices.id, id), isNotNull(invoices.deleted_at)));
+  }
+
+  /** Permanently delete (force) */
+  async force_delete(id: string) {
+    return db.delete(invoices).where(eq(invoices.id, id));
+  }
+
+  /** List soft-deleted records (trash) */
+  async list_deleted(params: { page: number; limit: number }) {
+    const { page, limit } = params;
+    const offset = (page - 1) * limit;
+    const where = isNotNull(invoices.deleted_at);
+
+    const [items, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: invoices.id,
+          invoice_number: invoices.invoice_number,
+          grand_total: invoices.grand_total,
+          currency: invoices.currency,
+          deleted_at: invoices.deleted_at,
+          deleted_by: invoices.deleted_by,
+        })
+        .from(invoices)
+        .where(where)
+        .orderBy(desc(invoices.deleted_at))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: count() }).from(invoices).where(where),
+    ]);
+
+    const total_records = Number(total ?? 0);
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total_records,
+        total_pages: Math.ceil(total_records / limit) || 1,
+        has_more: page * limit < total_records,
+      },
     };
   }
 }

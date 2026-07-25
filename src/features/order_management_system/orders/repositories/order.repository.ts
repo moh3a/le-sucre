@@ -1,11 +1,14 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, not } from "drizzle-orm";
+import { and, count, desc, eq, inArray, not, sql } from "drizzle-orm";
 
 import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/lib/db";
 import { orders, order_items, order_adjustments, order_status_events } from "../schema";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
+import { invoices } from "@/features/billing_and_finance_system/db/schema";
+import { shipments } from "@/features/shipping_management_system/schema";
+import { payment_transactions } from "@/features/payment_management_system/db/schema";
 
 export class OrderRepository {
   async admin_list_by_product(product_id: string, page: number, limit: number) {
@@ -290,6 +293,49 @@ export class OrderRepository {
 
   async update_shipping_address(order_id: string, address: Record<string, unknown>) {
     return await db.update(orders).set({ shipping_address: address }).where(eq(orders.id, order_id));
+  }
+
+  async find_related_counts(order_id: string) {
+    const [items, adjustments, status_events, invoices_count, shipments_count, payments] =
+      await Promise.all([
+        db
+          .select({ total: count() })
+          .from(order_items)
+          .where(eq(order_items.order_id, order_id)),
+        db
+          .select({ total: count() })
+          .from(order_adjustments)
+          .where(eq(order_adjustments.order_id, order_id)),
+        db
+          .select({ total: count() })
+          .from(order_status_events)
+          .where(eq(order_status_events.order_id, order_id)),
+        db
+          .select({ total: count() })
+          .from(invoices)
+          .where(eq(invoices.order_id, order_id)),
+        db
+          .select({ total: count() })
+          .from(shipments)
+          .where(eq(shipments.order_id, order_id)),
+        db
+          .select({ total: count() })
+          .from(payment_transactions)
+          .where(eq(payment_transactions.order_id, order_id)),
+      ]);
+
+    return {
+      order_items: Number(items[0]?.total ?? 0),
+      order_adjustments: Number(adjustments[0]?.total ?? 0),
+      order_status_events: Number(status_events[0]?.total ?? 0),
+      invoices: Number(invoices_count[0]?.total ?? 0),
+      shipments: Number(shipments_count[0]?.total ?? 0),
+      payment_transactions: Number(payments[0]?.total ?? 0),
+    };
+  }
+
+  async delete_order(order_id: string) {
+    await db.delete(orders).where(eq(orders.id, order_id));
   }
 }
 

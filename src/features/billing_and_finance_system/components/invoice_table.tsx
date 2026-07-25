@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString } from "nuqs";
 import { useQueryState } from "nuqs";
-import { Download, Eye, FileText, ToggleLeft } from "lucide-react";
+import { Download, Eye, FileText, Trash2, ToggleLeft } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -46,6 +46,7 @@ const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive" | "ou
 
 export function InvoiceTable() {
   const t = useTranslations("invoices");
+  const tc = useTranslations("common");
 
   const STATUS_LABEL: Record<string, string> = {
     paid: t("status_paid"),
@@ -66,6 +67,38 @@ export function InvoiceTable() {
   const [type, setType] = useQueryState("invType", parseAsString);
   const [from, setFrom] = useQueryState("invFrom", parseAsString);
   const [to, setTo] = useQueryState("invTo", parseAsString);
+
+  const utils = trpc.useUtils();
+
+  const restore_mutation = trpc.invoices.restore.useMutation({
+    onSuccess: async () => {
+      await utils.invoices.list_invoices.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const delete_mutation = trpc.invoices.adminDelete.useMutation({
+    onSuccess: async (_data, variables) => {
+      await utils.invoices.list_invoices.invalidate();
+      toast.success(t("deleted"), {
+        description: variables.id,
+        action: {
+          label: tc("undo"),
+          onClick: async () => {
+            try {
+              await restore_mutation.mutateAsync({ id: variables.id });
+              await utils.invoices.list_invoices.invalidate();
+              toast.success(tc("action_reverted"));
+            } catch {
+              toast.error(tc("action_failed"));
+            }
+          },
+        },
+        duration: 8000,
+      });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const { data, isLoading, error } = trpc.invoices.list_invoices.useQuery({
     page,
@@ -171,6 +204,15 @@ export function InvoiceTable() {
               onClick={() => handleDownload(row.original.id, row.original.invoice_number)}
             >
               <Download className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive"
+              disabled={delete_mutation.isPending}
+              onClick={() => delete_mutation.mutate({ id: row.original.id })}
+            >
+              <Trash2 className="size-4" />
             </Button>
           </div>
         ),

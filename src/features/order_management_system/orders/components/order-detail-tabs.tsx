@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FileText, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ import { ReturnPanel } from "@/features/order_management_system/return_replaceme
 import { OrderOperationsTab } from "./order-operations-tab";
 import { OrderCommentsTab } from "./order-comments-tab";
 import { TimelineTab } from "./timeline-tab";
+import { DeleteOrderDialog } from "./delete-order-dialog";
 import {
   PAYMENT_STATUS_OPTIONS,
   ORDER_LABELS,
@@ -62,7 +64,9 @@ type EditableItem = {
 
 export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
   const t = useTranslations("orders");
+  const router = useRouter();
   const { data, isLoading, refetch } = trpc.orders.adminGet.useQuery({ order_id });
+  const [delete_open, set_delete_open] = useState(false);
   const transition = trpc.orders.adminTransition.useMutation({
     onSuccess: () => {
       refetch();
@@ -414,6 +418,15 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
               onClick={() => transition.mutate({ order_id: order.id, status: next_status })}
             >
               {t("apply")}
+            </Button>
+            <div className="flex-1" />
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => set_delete_open(true)}
+            >
+              <Trash2 className="mr-1 size-4" />
+              {t("delete")}
             </Button>
           </CardContent>
         </Card>
@@ -1010,7 +1023,15 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
       <TabsContent value="timeline">
         <TimelineTab order_id={order.id} />
       </TabsContent>
-    </Tabs>
+      </Tabs>
+
+      <DeleteOrderDialog
+        order_id={order_id}
+        order_number={data?.order?.order_number ?? order_id}
+        open={delete_open}
+        onOpenChange={set_delete_open}
+        on_deleted={() => router.push("/console/orders")}
+      />
     </QueryGuard>
   );
 }

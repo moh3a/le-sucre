@@ -206,6 +206,47 @@ export class CartService {
   async stats_admin() {
     return this.repo.stats_admin();
   }
+
+  async admin_remove_item(cart_id: string, item_id: string) {
+    const cart = await this.repo.find_by_id(cart_id);
+    if (!cart) throw_error(CART_ERROR.NOT_FOUND);
+    const item = await this.repo.find_item_by_id(item_id, cart_id);
+    if (!item) throw_error(CART_ERROR.ITEM_NOT_FOUND);
+    if (item.reservation_id) await reservation_service.release(item.reservation_id);
+    if (item.preorder_allocation_id) {
+      await preorder_allocation_service.cancel(item.preorder_allocation_id);
+    }
+    await this.repo.delete_item(item_id);
+    return this.get_cart_view(cart_id);
+  }
+
+  async admin_clear_cart(cart_id: string) {
+    const cart = await this.repo.find_by_id(cart_id);
+    if (!cart) throw_error(CART_ERROR.NOT_FOUND);
+    const items = await this.repo.list_items(cart_id);
+    for (const item of items) {
+      if (item.reservation_id) await reservation_service.release(item.reservation_id);
+      if (item.preorder_allocation_id) {
+        await preorder_allocation_service.cancel(item.preorder_allocation_id);
+      }
+    }
+    await this.repo.clear_cart(cart_id);
+    return this.get_cart_view(cart_id);
+  }
+
+  async admin_delete_cart(cart_id: string) {
+    const cart = await this.repo.find_by_id(cart_id);
+    if (!cart) throw_error(CART_ERROR.NOT_FOUND);
+    const items = await this.repo.list_items(cart_id);
+    for (const item of items) {
+      if (item.reservation_id) await reservation_service.release(item.reservation_id);
+      if (item.preorder_allocation_id) {
+        await preorder_allocation_service.cancel(item.preorder_allocation_id);
+      }
+    }
+    await this.repo.delete_cart(cart_id);
+    return { ok: true as const };
+  }
 }
 
 export const cart_service = new CartService();

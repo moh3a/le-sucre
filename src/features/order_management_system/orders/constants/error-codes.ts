@@ -145,4 +145,13 @@ export const ORDER_ERROR = {
       ar: "فشل استرداد بيانات الرسم البياني للطلبات",
     },
   },
+  DELETE_FAILED: {
+    code: "ORDER_DELETE_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de la suppression de la commande",
+      en: "Failed to delete order",
+      ar: "فشل حذف الطلب",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;

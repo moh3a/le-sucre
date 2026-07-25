@@ -61,4 +61,16 @@ export const cart_router = create_trpc_router({
   removeItem: storefront_procedure
     .input(z.object({ cart_id: z.string().min(1).max(255), item_id: z.string().min(1).max(255) }))
     .mutation(({ input }) => cart_service.remove_item(input.cart_id, input.item_id)),
+
+  adminRemoveItem: permission_procedure(PERMISSIONS.orders_write)
+    .input(z.object({ cart_id: z.string().min(1).max(255), item_id: z.string().min(1).max(255) }))
+    .mutation(({ input }) => cart_service.admin_remove_item(input.cart_id, input.item_id)),
+
+  adminClearCart: permission_procedure(PERMISSIONS.orders_write)
+    .input(z.object({ cart_id: z.string().min(1).max(255) }))
+    .mutation(({ input }) => cart_service.admin_clear_cart(input.cart_id)),
+
+  adminDeleteCart: permission_procedure(PERMISSIONS.orders_write)
+    .input(z.object({ cart_id: z.string().min(1).max(255) }))
+    .mutation(({ input }) => cart_service.admin_delete_cart(input.cart_id)),
 });

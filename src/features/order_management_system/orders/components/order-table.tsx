@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { ReceiptCent, ToggleLeft } from "lucide-react";
+import { MoreHorizontal, ReceiptCent, ToggleLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -16,9 +16,18 @@ import { useDataTable } from "@/features/data-table/use-data-table";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/format";
 import { FacetedFilter } from "@/features/data-table/components/data-table-faceted-filter-simple";
 import { DateRangeFilter } from "@/features/data-table/components/data-table-date-range-filter";
+import { DeleteOrderDialog } from "./delete-order-dialog";
 
 type OrderRow = {
   id: string;
@@ -46,6 +55,12 @@ import {
 
 export function OrderTable({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("orders");
+  const tc = useTranslations("common");
+  const [delete_target, set_delete_target] = React.useState<{
+    id: string;
+    order_number: string;
+  } | null>(null);
+
   const columns = React.useMemo<ColumnDef<OrderRow>[]>(
     () => [
       {
@@ -149,8 +164,43 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
         meta: { label: t("date_column"), icon: ReceiptCent },
       },
+      {
+        id: "actions",
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <MoreHorizontal className="size-4" />
+                <span className="sr-only">{tc("actions")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/console/orders/${row.original.id}`}>
+                  {t("view_order")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() =>
+                  set_delete_target({
+                    id: row.original.id,
+                    order_number: row.original.order_number,
+                  })
+                }
+              >
+                <Trash2 />
+                {tc("delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
     ],
-    [t],
+    [t, tc],
   );
 
   const [page] = useQueryState("ordPage", parseAsInteger.withDefault(1));
@@ -207,6 +257,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
   ];
 
   return (
+    <>
     <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={8} rowCount={compact ? 5 : 10} />}>
     <DataTable table={table}>
       {!compact ? (
@@ -244,5 +295,15 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
       ) : null}
     </DataTable>
     </QueryGuard>
+
+    <DeleteOrderDialog
+      order_id={delete_target?.id ?? ""}
+      order_number={delete_target?.order_number ?? ""}
+      open={!!delete_target}
+      onOpenChange={(open) => {
+        if (!open) set_delete_target(null);
+      }}
+    />
+    </>
   );
 }

@@ -14,6 +14,7 @@ import {
   MapPin,
   Package,
   MoreHorizontal,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -92,8 +93,10 @@ type Invoice = {
 
 export function InvoiceDetailClient({ id }: { id: string }) {
   const t = useTranslations("invoices");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
+  const utils = trpc.useUtils();
 
   const STATUS_LABEL: Record<string, string> = {
     paid: t("status_paid"),
@@ -121,6 +124,37 @@ export function InvoiceDetailClient({ id }: { id: string }) {
     onSuccess: () => {
       toast.success(t("void"));
       router.refresh();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const restore_mutation = trpc.invoices.restore.useMutation({
+    onSuccess: async () => {
+      await utils.invoices.list_invoices.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const delete_mutation = trpc.invoices.adminDelete.useMutation({
+    onSuccess: async (_data, variables) => {
+      await utils.invoices.list_invoices.invalidate();
+      toast.success(t("deleted"), {
+        description: invoice?.invoice_number ?? variables.id,
+        action: {
+          label: tc("undo"),
+          onClick: async () => {
+            try {
+              await restore_mutation.mutateAsync({ id: variables.id });
+              await utils.invoices.list_invoices.invalidate();
+              toast.success(tc("action_reverted"));
+            } catch {
+              toast.error(tc("action_failed"));
+            }
+          },
+        },
+        duration: 8000,
+      });
+      router.push("/console/invoices");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -218,6 +252,34 @@ export function InvoiceDetailClient({ id }: { id: string }) {
                     className="bg-destructive text-destructive-foreground"
                   >
                     {t("confirm")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {invoice.status === "unpaid" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="outline" className="text-destructive">
+                  <Trash2 className="mr-2 size-4" />
+                  {t("delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("delete_confirm_title")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("delete_confirm_description")}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground"
+                    disabled={delete_mutation.isPending}
+                    onClick={() => delete_mutation.mutate({ id })}
+                  >
+                    {t("delete_confirm")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

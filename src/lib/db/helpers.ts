@@ -1,4 +1,4 @@
-import { and, asc, desc, isNull, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, sql, type SQL } from "drizzle-orm";
 import { type MySqlColumn } from "drizzle-orm/mysql-core";
 import { SortOrder } from "../types";
 
@@ -27,9 +27,74 @@ export function withOrder(column: MySqlColumn, order: SortOrder = "desc") {
 // ─── Count query ──────────────────────────────────────────
 export const countSql = sql<number>`count(*)`;
 
-// ─── Soft delete filter ───────────────────────────────────
+// ─── Soft delete filters ──────────────────────────────────
+
+/** Returns active (non-deleted) records */
 export function notDeleted(deletedAtColumn: MySqlColumn): SQL {
   return isNull(deletedAtColumn);
+}
+
+/** Returns only soft-deleted records */
+export function onlyDeleted(deletedAtColumn: MySqlColumn): SQL {
+  return isNotNull(deletedAtColumn);
+}
+
+/** Returns all records regardless of delete status */
+export function withDeleted(): undefined {
+  return undefined;
+}
+
+/** Returns the active filter unless deleted records should be included */
+export function softDeleteFilter(
+  deletedAtColumn: MySqlColumn,
+  includeDeleted?: boolean,
+): SQL | undefined {
+  if (includeDeleted) return undefined;
+  return notDeleted(deletedAtColumn);
+}
+
+/** Type for soft-deletable table columns */
+export interface SoftDeletableColumns {
+  deleted_at: MySqlColumn;
+  deleted_by?: MySqlColumn;
+  restored_at?: MySqlColumn;
+  restored_by?: MySqlColumn;
+}
+
+/** Build soft delete SET clause */
+export function buildSoftDeleteSet(actorUserId?: string) {
+  return {
+    deleted_at: sql`now()`,
+    ...(actorUserId ? { deleted_by: actorUserId } : {}),
+  };
+}
+
+/** Build restore SET clause */
+export function buildRestoreSet(actorUserId?: string) {
+  return {
+    deleted_at: null,
+    deleted_by: null,
+    restored_at: sql`now()`,
+    ...(actorUserId ? { restored_by: actorUserId } : {}),
+  };
+}
+
+/** Build soft delete WHERE clause */
+export function buildSoftDeleteWhere(
+  idColumn: MySqlColumn,
+  id: string,
+  deletedAtColumn: MySqlColumn,
+): SQL | undefined {
+  return and(eq(idColumn, id), isNull(deletedAtColumn));
+}
+
+/** Build restore WHERE clause (only deleted records) */
+export function buildRestoreWhere(
+  idColumn: MySqlColumn,
+  id: string,
+  deletedAtColumn: MySqlColumn,
+): SQL | undefined {
+  return and(eq(idColumn, id), isNotNull(deletedAtColumn));
 }
 
 // ─── CUID default ─────────────────────────────────────────

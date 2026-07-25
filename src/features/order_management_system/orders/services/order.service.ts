@@ -716,6 +716,29 @@ export class OrderService {
 
     return this.repo.get_full(input.order_id);
   }
+
+  async admin_check_dependencies(order_id: string) {
+    const current = await this.repo.find_by_id(order_id);
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
+    return this.repo.find_related_counts(order_id);
+  }
+
+  async admin_delete(order_id: string, actor_user_id: string) {
+    const current = await this.repo.find_by_id(order_id);
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
+
+    await this.repo.delete_order(order_id);
+
+    void audit_service.log({
+      actor_user_id,
+      action: "order.delete",
+      resource_type: "order_id",
+      resource_id: order_id,
+      metadata: { order_number: current.order_number },
+    });
+
+    return { ok: true as const };
+  }
 }
 
 export const order_service = new OrderService();

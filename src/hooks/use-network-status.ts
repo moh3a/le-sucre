@@ -17,8 +17,6 @@ export interface NetworkState {
 const DEFAULT_SLOW_THRESHOLD_MS = 5_000;
 
 function detect_initial_status(): NetworkStatus {
-  if (typeof navigator === "undefined") return "online";
-  if (!navigator.onLine) return "offline";
   return "online";
 }
 

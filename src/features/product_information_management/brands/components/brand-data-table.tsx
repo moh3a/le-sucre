@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -34,7 +35,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -42,11 +42,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 import { BrandFormDialog } from "./brand-form-dialog";
 import type { BrandRecord } from "../types";
 import { useDataTable } from "@/features/data-table/use-data-table";
-import { useUndoAction } from "@/hooks/use-undo-action";
 import { formatDate } from "@/lib/format";
 
 function BrandRowActions({
@@ -57,11 +55,37 @@ function BrandRowActions({
   on_edit: (id: string) => void;
 }) {
   const t = useTranslations("brands");
+  const tc = useTranslations("common");
   const utils = trpc.useUtils();
   const [delete_open, set_delete_open] = React.useState(false);
-  const { execute_with_undo } = useUndoAction();
 
   const delete_mutation = trpc.brands.delete.useMutation({
+    onSuccess: async () => {
+      await utils.brands.list.invalidate();
+      toast.success(t("deleted"), {
+        description: brand.name,
+        action: {
+          label: tc("undo"),
+          onClick: async () => {
+            try {
+              await restore_mutation.mutateAsync({ id: brand.id });
+              await utils.brands.list.invalidate();
+              toast.success(t("restored"));
+            } catch {
+              toast.error(tc("action_failed"));
+            }
+          },
+        },
+        duration: 8000,
+      });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const restore_mutation = trpc.brands.restore.useMutation({
+    onSuccess: async () => {
+      await utils.brands.list.invalidate();
+    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -98,27 +122,19 @@ function BrandRowActions({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={delete_mutation.isPending}>
-              {t("cancel")}
+              {tc("cancel")}
             </AlertDialogCancel>
-            <AlertDialogAction
+            <Button
               variant="destructive"
+              disabled={delete_mutation.isPending}
               onClick={() => {
                 set_delete_open(false);
-                execute_with_undo({
-                  description: brand.name,
-                  execute: async () => {
-                    await delete_mutation.mutateAsync({ id: brand.id });
-                    await utils.brands.list.invalidate();
-                  },
-                  rollback: () => {
-                    utils.brands.list.invalidate();
-                  },
-                  undoTimeoutMs: 8_000,
-                });
+                delete_mutation.mutate({ id: brand.id });
               }}
             >
-              {t("delete")}
-            </AlertDialogAction>
+              <Trash2 className="mr-1 size-4" />
+              {delete_mutation.isPending ? tc("deleting") : t("delete")}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -16,7 +16,6 @@ import {
   Truck,
   MessageCircleCheck,
   Warehouse,
-  TrendingUpDown,
   ChartArea,
   Gauge,
   FileText,
@@ -30,10 +29,6 @@ import {
   HeartPulse,
   Image as ImageIcon,
   ExternalLink,
-  Clock,
-  Route,
-  Shield,
-  GitBranch,
   RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
@@ -172,22 +167,22 @@ export function AppSidebar() {
         { title: t("returns_rma"), url: "/console/returns", icon: RotateCcw, activeExact: false },
       ],
     },
-    {
-      title: t("operations"),
-      icon: Gauge,
-      items: [
-        { title: t("dashboard"), url: "/console/operations", icon: Gauge },
-        { title: t("sla_definitions"), url: "/console/operations/sla-definitions", icon: Clock },
-        { title: t("routing_rules"), url: "/console/operations/routing-rules", icon: Route },
-        {
-          title: t("approval_workflows"),
-          url: "/console/operations/approval-workflows",
-          icon: GitBranch,
-        },
-        { title: t("fraud_reviews"), url: "/console/operations/fraud-reviews", icon: Shield },
-        { title: t("agent_kpi"), url: "/console/operations/agent-kpi", icon: TrendingUpDown },
-      ],
-    },
+    // {
+    //   title: t("operations"),
+    //   icon: Gauge,
+    //   items: [
+    //     { title: t("dashboard"), url: "/console/operations", icon: Gauge },
+    //     { title: t("sla_definitions"), url: "/console/operations/sla-definitions", icon: Clock },
+    //     { title: t("routing_rules"), url: "/console/operations/routing-rules", icon: Route },
+    //     {
+    //       title: t("approval_workflows"),
+    //       url: "/console/operations/approval-workflows",
+    //       icon: GitBranch,
+    //     },
+    //     { title: t("fraud_reviews"), url: "/console/operations/fraud-reviews", icon: Shield },
+    //     { title: t("agent_kpi"), url: "/console/operations/agent-kpi", icon: TrendingUpDown },
+    //   ],
+    // },
     {
       title: t("administration"),
       icon: ShieldCog,
@@ -206,7 +201,9 @@ export function AppSidebar() {
     return (
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
-          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre", { appName: APP_NAME })}</h2>
+          <h2 className="font-heading px-2 text-lg font-semibold">
+            {t("le_sucre", { appName: APP_NAME })}
+          </h2>
         </SidebarHeader>
         <SidebarContent>
           <p className="text-destructive px-4 text-sm">Failed to load session.</p>
@@ -227,7 +224,9 @@ export function AppSidebar() {
     <TooltipProvider>
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
-          <h2 className="font-heading px-2 text-lg font-semibold">{t("le_sucre", { appName: APP_NAME })}</h2>
+          <h2 className="font-heading px-2 text-lg font-semibold">
+            {t("le_sucre", { appName: APP_NAME })}
+          </h2>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
