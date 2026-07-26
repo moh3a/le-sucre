@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
-import { type PaymentProvider, PaymentProviders } from "@/features/payment_management_system/constants";
+import { type PaymentProvider, PaymentProviders } from "@/features/payment_management_system/constants/payment-status";
 
 interface DepositDialogProps {
   orderId?: string;
@@ -91,7 +91,7 @@ export function DepositDialog({ orderId, trigger }: DepositDialogProps) {
           </div>
           <div className="space-y-2">
             <Label>{t("payment_provider_label")}</Label>
-            <Select value={provider} onValueChange={setProvider}>
+            <Select value={provider} onValueChange={setProvider as (value: string) => void}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

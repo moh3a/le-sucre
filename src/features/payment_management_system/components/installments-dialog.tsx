@@ -30,7 +30,7 @@ import { formatDate } from "@/lib/utils";
 import {
   type PaymentProvider,
   PaymentProviders,
-} from "@/features/payment_management_system/constants";
+} from "@/features/payment_management_system/constants/payment-status";
 
 // ─── InstallmentsDialog ─────────────────────────────────────
 
@@ -93,7 +93,7 @@ export function InstallmentsDialog({ orderId, trigger }: InstallmentsDialogProps
           </div>
           <div className="space-y-2">
             <Label>{t("payment_provider_label")}</Label>
-            <Select value={provider} onValueChange={setProvider}>
+            <Select value={provider} onValueChange={setProvider as (value: string) => void}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

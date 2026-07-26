@@ -114,7 +114,7 @@ export class ReturnReplacementService {
 
       await order_repository.create_order({
         id: new_order_id,
-        order_number: build_order_number(),
+        order_number: await build_order_number(),
         user_id: original_order.user_id,
         guest_email: original_order.guest_email,
         guest_phone: original_order.guest_phone,

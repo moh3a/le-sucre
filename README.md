@@ -2,8 +2,13 @@
 
 ## TODOs
 
-- configure webhooks
-- single entry point for workers
+- every created client should exported to hubspot with name phone number order id wilaya
+- 1 unit can be edited -> 1 unit can be 50 boxes (add unit name)
+- bulk product pricing:
+  - bulk price by product unit -> 10 units min for applying new product price
+  - bulk price by product box -> 10 boxes min for applying new product price
+- when receiving stock: can receive multiple products (each product can have multiple SKUs)
+- https://www.npmjs.com/package/yalidine
 - check if every operation works
 
 <p align="center">

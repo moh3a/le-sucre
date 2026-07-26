@@ -20,7 +20,7 @@ export const product_details_dto = z.object({
   status: product_status_enum.default("draft"),
   is_featured: z.boolean().default(false),
   has_variants: z.boolean().default(false),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  // metadata: z.record(z.string(), z.unknown()).nullish(),
   seo_title: z.string().max(255).nullish(),
   seo_description: z.string().max(500).nullish(),
   seo_keywords: z.string().max(512).nullish(),
@@ -35,7 +35,7 @@ export const create_product_dto = product_details_dto
     name: z.string().min(2).max(255),
     description: z.string().nullish(),
     keywords: z.string().max(512).nullish(),
-    metadata: z.record(z.string(), z.unknown()).optional(),
+    // metadata: z.record(z.string(), z.unknown()).optional(),
   });
 
 export const update_product_dto = create_product_dto.partial().extend({
@@ -80,7 +80,7 @@ export const product_media_dto = z.object({
   kind: z.enum(["image", "video", "document"]).default("image"),
   alt: z.string().max(255).nullish(),
   sort_order: z.number().int().min(0).default(0),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  // metadata: z.record(z.string(), z.unknown()).nullish(),
   is_primary: z.boolean().default(false),
 });
 

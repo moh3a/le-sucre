@@ -70,7 +70,7 @@ export class OrderService {
 
     const order_id = await this.repo.create_order({
       id: generate_id(),
-      order_number: build_order_number(),
+      order_number: await build_order_number(),
       user_id: input.user_id ?? null,
       guest_phone: input.user_id ? null : (input.guest_phone ?? null),
       cart_id: input.cart_id,

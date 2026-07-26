@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "le-sucre-web",
+      name: "orla-web",
       script: "node",
       args: "server.js",
       cwd: "./",
@@ -14,25 +14,16 @@ module.exports = {
       },
     },
     {
-      name: "le-sucre-worker-shipping",
+      name: "orla-worker",
       script: "tsx",
-      args: "src/lib/queue/workers/shipping.worker.ts",
+      args: "src/worker.ts",
       instances: 1,
       exec_mode: "fork",
-      max_memory_restart: "400M",
+      max_memory_restart: "500M",
       env_production: { NODE_ENV: "production" },
     },
     {
-      name: "le-sucre-worker-reservations",
-      script: "tsx",
-      args: "src/lib/queue/workers/reservation-expiry.worker.ts",
-      instances: 1,
-      exec_mode: "fork",
-      max_memory_restart: "300M",
-      env_production: { NODE_ENV: "production" },
-    },
-    {
-      name: "le-sucre-worker-blacklist-expiry",
+      name: "orla-worker-blacklist-expiry",
       script: "tsx",
       args: "src/features/ip_blacklist/scripts/expire-blacklist.ts",
       instances: 1,
