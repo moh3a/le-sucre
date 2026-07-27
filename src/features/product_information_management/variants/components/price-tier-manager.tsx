@@ -33,12 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const TIER_CHANNELS = (t: (key: string) => string) =>
-  [
-    { value: "retail", label: t("tier_channel_retail") },
-    { value: "wholesale", label: t("tier_channel_wholesale") },
-  ] as const;
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type PriceTierManagerProps = {
   skuId: string;
@@ -55,7 +50,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
     onSuccess: () => {
       utils.variants.getSku.invalidate({ id: skuId });
       toast.success(t("tier_saved"));
-      setTierChannel("retail");
       setTierMinQty(1);
       setTierPrice("");
     },
@@ -71,37 +65,14 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
     onError: (err) => toast.error(err.message),
   });
 
-  const upsertRule = trpc.variants.upsertWholesaleRule.useMutation({
-    onSuccess: () => {
-      utils.variants.getSku.invalidate({ id: skuId });
-      toast.success(t("wholesale_rule_added"));
-      setRuleMinQty(1);
-      setRuleDiscount("");
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const deleteRule = trpc.variants.deleteWholesaleRule.useMutation({
-    onSuccess: () => {
-      utils.variants.getSku.invalidate({ id: skuId });
-      set_delete_rule_target(null);
-      toast.success(t("wholesale_rule_deleted"));
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
   const [tierChannel, setTierChannel] = React.useState<"retail" | "wholesale">("retail");
   const [tierMinQty, setTierMinQty] = React.useState(1);
   const [tierPrice, setTierPrice] = React.useState("");
-
-  const [ruleMinQty, setRuleMinQty] = React.useState(1);
-  const [ruleDiscount, setRuleDiscount] = React.useState("");
 
   const [delete_tier_target, set_delete_tier_target] = React.useState<{
     channel: string;
     minQty: number;
   } | null>(null);
-  const [delete_rule_target, set_delete_rule_target] = React.useState<string | null>(null);
 
   function handleAddTier() {
     const price = parseFloat(tierPrice);
@@ -117,23 +88,10 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
     });
   }
 
-  function handleAddRule() {
-    const discount = parseFloat(ruleDiscount);
-    if (isNaN(discount) || discount < 0 || discount > 100) {
-      toast.error(t("tier_discount_invalid"));
-      return;
-    }
-    upsertRule.mutate({
-      sku_id: skuId,
-      min_quantity: ruleMinQty,
-      discount_percent: discount,
-      is_active: true,
-    });
-  }
-
   const sku = data?.sku;
   const tiers = data?.tiers ?? [];
-  const wholesaleRules = data?.wholesale_rules ?? [];
+  const retailTiers = tiers.filter((t) => t.channel === "retail");
+  const wholesaleTiers = tiers.filter((t) => t.channel === "wholesale");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -151,42 +109,30 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
           </div>
         ) : (
           <div className="space-y-6">
-            <div>
-              <h3 className="mb-2 text-sm font-semibold">{t("tier_section_title")}</h3>
-              {tiers.length === 0 ? (
-                <p className="text-muted-foreground text-sm">{t("tier_empty")}</p>
-              ) : (
-                <div className="divide-y rounded-lg border">
-                  {tiers.map((tier, i) => (
-                    <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
-                      <div>
-                        <span className="font-medium">{tier.channel}</span>
-                        <span className="text-muted-foreground ml-2">
-                          {t("tier_min_qty_label", { qty: tier.min_quantity })}
-                        </span>
-                        <span className="ml-2 font-mono">
-                          {Number(tier.price).toLocaleString("fr-FR")} {tier.currency}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 text-red-500"
-                        disabled={deletePriceTier.isPending}
-                        onClick={() =>
-                          set_delete_tier_target({
-                            channel: tier.channel,
-                            minQty: tier.min_quantity,
-                          })
-                        }
-                      >
-                        <Trash2 className="size-3.5" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Tabs defaultValue="retail">
+              <TabsList className="w-full">
+                <TabsTrigger value="retail" className="flex-1">{t("tier_channel_retail")}</TabsTrigger>
+                <TabsTrigger value="wholesale" className="flex-1">{t("tier_channel_wholesale")}</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="retail" className="space-y-4">
+                <TierList
+                  tiers={retailTiers}
+                  emptyMessage={t("tier_empty")}
+                  onDelete={(channel, minQty) => set_delete_tier_target({ channel, minQty })}
+                  isDeleting={deletePriceTier.isPending}
+                />
+              </TabsContent>
+
+              <TabsContent value="wholesale" className="space-y-4">
+                <TierList
+                  tiers={wholesaleTiers}
+                  emptyMessage={t("tier_empty")}
+                  onDelete={(channel, minQty) => set_delete_tier_target({ channel, minQty })}
+                  isDeleting={deletePriceTier.isPending}
+                />
+              </TabsContent>
+            </Tabs>
 
             <div className="space-y-3 rounded-lg border p-3">
               <h4 className="text-muted-foreground text-xs font-semibold uppercase">
@@ -203,11 +149,8 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {TIER_CHANNELS(t).map((c) => (
-                        <SelectItem key={c.value} value={c.value}>
-                          {c.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="retail">{t("tier_channel_retail")}</SelectItem>
+                      <SelectItem value="wholesale">{t("tier_channel_wholesale")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -239,89 +182,6 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
                     className="h-8 w-full"
                     onClick={handleAddTier}
                     disabled={setPriceTier.isPending}
-                  >
-                    <Plus className="mr-1 size-3.5" />
-                    {t("tier_add_button")}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-2 text-sm font-semibold">{t("wholesale_section_title")}</h3>
-              {wholesaleRules.length === 0 ? (
-                <p className="text-muted-foreground text-sm">{t("wholesale_empty")}</p>
-              ) : (
-                <div className="divide-y rounded-lg border">
-                  {wholesaleRules.map((rule) => (
-                    <div
-                      key={rule.id}
-                      className="flex items-center justify-between px-3 py-2 text-sm"
-                    >
-                      <div>
-                        <span className="font-mono">
-                          {t("tier_min_qty_label", { qty: rule.min_quantity })}
-                        </span>
-                        {rule.discount_percent && (
-                          <span className="ml-2 text-emerald-600">
-                            -{Number(rule.discount_percent).toFixed(1)}%
-                          </span>
-                        )}
-                        {rule.price && (
-                          <span className="ml-2 font-mono">
-                            {Number(rule.price).toLocaleString("fr-FR")} {rule.currency}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 text-red-500"
-                        disabled={deleteRule.isPending}
-                        onClick={() => set_delete_rule_target(rule.id)}
-                      >
-                        <Trash2 className="size-3.5" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3 rounded-lg border p-3">
-              <h4 className="text-muted-foreground text-xs font-semibold uppercase">
-                {t("wholesale_add_rule")}
-              </h4>
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <Label className="text-xs">{t("tier_min_qty_column")}</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={ruleMinQty}
-                    onChange={(e) => setRuleMinQty(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">{t("wholesale_discount_label")}</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={100}
-                    placeholder="0.0"
-                    value={ruleDiscount}
-                    onChange={(e) => setRuleDiscount(e.target.value)}
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    size="sm"
-                    className="h-8 w-full"
-                    onClick={handleAddRule}
-                    disabled={upsertRule.isPending}
                   >
                     <Plus className="mr-1 size-3.5" />
                     {t("tier_add_button")}
@@ -366,38 +226,50 @@ export function PriceTierManager({ skuId, open, onOpenChange }: PriceTierManager
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <AlertDialog
-        open={delete_rule_target !== null}
-        onOpenChange={(open) => {
-          if (!open) set_delete_rule_target(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("delete_wholesale_rule_title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("delete_wholesale_rule_description")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteRule.isPending}>
-              {t("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteRule.isPending}
-              onClick={() => {
-                if (delete_rule_target) {
-                  deleteRule.mutate({ id: delete_rule_target });
-                }
-              }}
-            >
-              {deleteRule.isPending ? t("deleting") : t("confirm_delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Dialog>
+  );
+}
+
+function TierList({
+  tiers,
+  emptyMessage,
+  onDelete,
+  isDeleting,
+}: {
+  tiers: Array<{ channel: string; min_quantity: number; price: string; currency: string }>;
+  emptyMessage: string;
+  onDelete: (channel: string, minQty: number) => void;
+  isDeleting: boolean;
+}) {
+  const t = useTranslations("variants");
+
+  if (tiers.length === 0) {
+    return <p className="text-muted-foreground text-sm">{emptyMessage}</p>;
+  }
+
+  return (
+    <div className="divide-y rounded-lg border">
+      {tiers.map((tier, i) => (
+        <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
+          <div>
+            <span className="text-muted-foreground ml-2">
+              {t("tier_min_qty_label", { qty: tier.min_quantity })}
+            </span>
+            <span className="ml-2 font-mono">
+              {Number(tier.price).toLocaleString("fr-FR")} {tier.currency}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 text-red-500"
+            disabled={isDeleting}
+            onClick={() => onDelete(tier.channel, tier.min_quantity)}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+        </div>
+      ))}
+    </div>
   );
 }

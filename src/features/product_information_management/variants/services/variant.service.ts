@@ -7,7 +7,6 @@ import { db } from "@/lib/db";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { VARIANT_ERROR } from "../constants/error-codes";
 import { products } from "@/features/product_information_management/products/schema";
-
 import type {
   create_property_dto,
   update_property_dto,

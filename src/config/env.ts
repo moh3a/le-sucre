@@ -38,6 +38,9 @@ const env_schema = z
     FORECAST_PROVIDER: z.enum(["local"]).default("local"),
     PROMOTION_PROVIDER: z.enum(["local"]).default("local"),
 
+    CRM_PROVIDER: z.enum(["none", "hubspot"]).default("none"),
+    HUBSPOT_ACCESS_TOKEN: z.string().optional(),
+
     ANALYTICS_PROVIDER: z.enum(["local"]).default("local"),
     ANALYTICS_RAW_RETENTION_DAYS: z.coerce.number().int().min(7).default(90),
     ANALYTICS_AGGREGATE_RETENTION_DAYS: z.coerce.number().int().min(30).default(730),
@@ -65,6 +68,9 @@ const env_schema = z
     }
     if (v.NODE_ENV === "production" && v.REDIS_TLS_ENABLED && !v.REDIS_URL.startsWith("rediss://")) {
       ctx.addIssue({ code: "custom", message: "REDIS_URL must use rediss:// when REDIS_TLS_ENABLED=true" });
+    }
+    if (v.CRM_PROVIDER === "hubspot" && !v.HUBSPOT_ACCESS_TOKEN) {
+      ctx.addIssue({ code: "custom", message: "HUBSPOT_ACCESS_TOKEN required when CRM_PROVIDER=hubspot" });
     }
   });
 

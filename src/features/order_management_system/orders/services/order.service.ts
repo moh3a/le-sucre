@@ -28,6 +28,7 @@ import { product_skus } from "@/features/product_information_management/variants
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
 import { invoice_service } from "@/features/billing_and_finance_system/services/invoice.service";
+import { crm_sync_service } from "@/features/crm_integration/services/crm-sync.service";
 import { order_items, orders } from "../schema";
 import { db } from "@/lib/db";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
@@ -68,9 +69,11 @@ export class OrderService {
       tax_rate: input.tax_rate,
     });
 
+    const order_number = await build_order_number();
+
     const order_id = await this.repo.create_order({
       id: generate_id(),
-      order_number: await build_order_number(),
+      order_number,
       user_id: input.user_id ?? null,
       guest_phone: input.user_id ? null : (input.guest_phone ?? null),
       cart_id: input.cart_id,
@@ -270,6 +273,19 @@ export class OrderService {
       console.error("Failed to auto-generate invoice:", err);
     });
 
+    void crm_sync_service
+      .sync_order_to_crm({
+        order_id,
+        order_number,
+        grand_total: totals.grand_total,
+        shipping_address: input.shipping_address,
+        guest_phone: input.guest_phone,
+        user_id: input.user_id,
+      })
+      .catch((err) => {
+        console.error("Failed to sync order to CRM:", err);
+      });
+
     return this.repo.get_full(order_id);
   }
 
@@ -337,9 +353,7 @@ export class OrderService {
     const cancelled_or_refunded = input.status === "cancelled" || input.status === "refunded";
 
     await this.repo.update_order_status(input.order_id, input.status, {
-      ...(cancelled_or_refunded
-        ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") }
-        : {}),
+      ...(cancelled_or_refunded ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") } : {}),
       ...(input.status === "failed_delivery" || input.status === "refunded"
         ? { fulfillment_status: "returned" }
         : {}),
@@ -531,11 +545,21 @@ export class OrderService {
     if (input.payment_status && input.payment_status !== current.payment_status) {
       changes.push(`paiement: ${current.payment_status} → ${input.payment_status}`);
     }
-    if (input.payment_provider !== undefined && input.payment_provider !== current.payment_provider) {
-      changes.push(`prestataire: ${current.payment_provider ?? "—"} → ${input.payment_provider ?? "—"}`);
+    if (
+      input.payment_provider !== undefined &&
+      input.payment_provider !== current.payment_provider
+    ) {
+      changes.push(
+        `prestataire: ${current.payment_provider ?? "—"} → ${input.payment_provider ?? "—"}`,
+      );
     }
-    if (input.payment_reference !== undefined && input.payment_reference !== current.payment_reference) {
-      changes.push(`référence: ${current.payment_reference ?? "—"} → ${input.payment_reference ?? "—"}`);
+    if (
+      input.payment_reference !== undefined &&
+      input.payment_reference !== current.payment_reference
+    ) {
+      changes.push(
+        `référence: ${current.payment_reference ?? "—"} → ${input.payment_reference ?? "—"}`,
+      );
     }
 
     if (changes.length === 0) return this.repo.get_full(input.order_id);
@@ -660,9 +684,10 @@ export class OrderService {
         .where(eq(orders.id, input.order_id));
     });
 
-    const old_qty = (
-      await this.repo.find_items_by_order(input.order_id)
-    ).reduce((s, i) => s + i.quantity, 0);
+    const old_qty = (await this.repo.find_items_by_order(input.order_id)).reduce(
+      (s, i) => s + i.quantity,
+      0,
+    );
     const new_qty = enriched_items.reduce((s, i) => s + i.quantity, 0);
     const diff = new_qty - old_qty;
 

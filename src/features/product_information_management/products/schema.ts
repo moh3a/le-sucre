@@ -11,6 +11,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
+
 import { generate_id } from "@/lib/utils";
 import { categories } from "@/features/product_information_management/categories/schema";
 import { brands } from "@/features/product_information_management/brands/schema";
@@ -52,6 +53,32 @@ export const products = mysqlTable(
     index("products_status_idx").on(t.status),
     index("products_price_idx").on(t.base_price),
     index("products_deleted_idx").on(t.deleted_at),
+  ],
+);
+
+// product_units — retail & wholesale unit definitions per product
+export const product_units = mysqlTable(
+  "product_units",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
+    product_id: varchar("product_id", { length: 255 })
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    channel: varchar("channel", { length: 32 }).notNull(), // retail | wholesale
+    unit_name: varchar("unit_name", { length: 128 }).notNull(), // "pièce", "carton", "lot"
+    pieces_per_unit: int("pieces_per_unit").notNull().default(1), // 1 for retail, N for wholesale
+    base_price: decimal("base_price", { precision: 12, scale: 2 }).notNull(),
+    offer_price: decimal("offer_price", { precision: 12, scale: 2 }),
+    currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
+    is_active: boolean("is_active").notNull().default(true),
+    created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("product_units_product_channel_uidx").on(t.product_id, t.channel),
+    index("product_units_product_idx").on(t.product_id),
   ],
 );
 
@@ -118,6 +145,14 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
   translations: many(product_translations),
   media: many(product_media),
+  units: many(product_units),
+}));
+
+export const productUnitsRelations = relations(product_units, ({ one }) => ({
+  product: one(products, {
+    fields: [product_units.product_id],
+    references: [products.id],
+  }),
 }));
 
 export const productTranslationsRelations = relations(product_translations, ({ one }) => ({

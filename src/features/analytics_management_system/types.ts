@@ -46,16 +46,18 @@ export interface IProductsAnalytics {
 
 export interface IProductDetailsAnalytics {
   product_id: string;
-  daily_series: {
-    day_key: string;
-    views: number;
-    add_to_cart: number;
-    purchases: number;
-    units_sold: number;
-    revenue: string;
-    recommendation_clicks: number;
-    conversion_rate: string | null;
-  }[] | undefined;
+  daily_series:
+    | {
+        day_key: string;
+        views: number;
+        add_to_cart: number;
+        purchases: number;
+        units_sold: number;
+        revenue: string;
+        recommendation_clicks: number;
+        conversion_rate: string | null;
+      }[]
+    | undefined;
   totals: {
     views: number;
     add_to_cart: number;

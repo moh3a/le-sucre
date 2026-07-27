@@ -11,15 +11,12 @@ import { inventory_levels } from "@/features/inventory_management_system/invento
 import { products } from "@/features/product_information_management/products/schema";
 import { order_items } from "@/features/order_management_system/orders/schema";
 import { product_properties } from "../schema";
-
 import type {
   create_sku_dto,
   update_sku_dto,
   generate_skus_dto,
   set_sku_price_tier_dto,
   delete_sku_price_tier_dto,
-  upsert_wholesale_rule_dto,
-  delete_wholesale_rule_dto,
   resolve_price_dto,
 } from "../models/variant.dto";
 import { property_repository } from "../repositories/property.repository";
@@ -29,6 +26,7 @@ import { sku_generation_engine } from "../engines/sku-generation.engine";
 import { build_option_signature, build_sku_code } from "../engines/option-signature.engine";
 import { resolve_unit_price } from "../engines/pricing.engine";
 import { get_product_price_range } from "../engines/price-aggregation.engine";
+import { product_units_repository } from "@/features/product_information_management/products/repositories/product-units.repository";
 import type { SkuListRow } from "../types";
 
 function group_sku_rows(
@@ -46,6 +44,8 @@ function group_sku_rows(
         stock_available: row.stock_available,
         base_price: row.base_price,
         offer_price: row.offer_price,
+        wholesale_base_price: row.wholesale_base_price,
+        wholesale_offer_price: row.wholesale_offer_price,
         currency: row.currency,
         options: [],
       });
@@ -104,12 +104,9 @@ export class SkuService {
     if (!sku) throw_error(SKU_ERROR.NOT_FOUND);
 
     const tiers = await pricing_repository.list_sku_price_tiers(id);
-    const wholesale_sku = await pricing_repository.list_wholesale_rules_for_sku(id);
-    const wholesale_product = await pricing_repository.list_wholesale_rules_for_product(
-      sku.product_id,
-    );
+    const units = await product_units_repository.list_by_product(sku.product_id);
 
-    return { sku, tiers, wholesale_rules: [...wholesale_sku, ...wholesale_product] };
+    return { sku, tiers, units };
   }
 
   async create(input: z.infer<typeof create_sku_dto>) {
@@ -152,6 +149,10 @@ export class SkuService {
       barcode: input.barcode ?? null,
       base_price: input.base_price != null ? String(input.base_price) : null,
       offer_price: input.offer_price != null ? String(input.offer_price) : null,
+      wholesale_base_price:
+        input.wholesale_base_price != null ? String(input.wholesale_base_price) : null,
+      wholesale_offer_price:
+        input.wholesale_offer_price != null ? String(input.wholesale_offer_price) : null,
       currency: input.currency ?? product.currency,
       is_active: input.is_active,
       metadata: input.metadata ?? {},
@@ -177,6 +178,14 @@ export class SkuService {
       }),
       ...(input.offer_price !== undefined && {
         offer_price: input.offer_price != null ? String(input.offer_price) : null,
+      }),
+      ...(input.wholesale_base_price !== undefined && {
+        wholesale_base_price:
+          input.wholesale_base_price != null ? String(input.wholesale_base_price) : null,
+      }),
+      ...(input.wholesale_offer_price !== undefined && {
+        wholesale_offer_price:
+          input.wholesale_offer_price != null ? String(input.wholesale_offer_price) : null,
       }),
       ...(input.currency !== undefined && { currency: input.currency }),
       ...(input.is_active !== undefined && { is_active: input.is_active }),
@@ -230,23 +239,6 @@ export class SkuService {
     return pricing_repository.delete_sku_price_tier(input);
   }
 
-  async upsert_wholesale_rule(input: z.infer<typeof upsert_wholesale_rule_dto>) {
-    const id = await pricing_repository.upsert_wholesale_rule({
-      product_id: input.product_id ?? null,
-      sku_id: input.sku_id ?? null,
-      min_quantity: input.min_quantity,
-      currency: input.currency,
-      price: input.price != null ? String(input.price) : null,
-      discount_percent: input.discount_percent != null ? String(input.discount_percent) : null,
-      is_active: input.is_active,
-    });
-    return { id };
-  }
-
-  async delete_wholesale_rule(input: z.infer<typeof delete_wholesale_rule_dto>) {
-    return pricing_repository.delete_wholesale_rule(input.id);
-  }
-
   async resolve_price(input: z.infer<typeof resolve_price_dto>) {
     return resolve_unit_price(input);
   }
@@ -267,6 +259,8 @@ export class SkuService {
     ids: string[];
     base_price?: number | null;
     offer_price?: number | null;
+    wholesale_base_price?: number | null;
+    wholesale_offer_price?: number | null;
     stock_available?: number;
     is_active?: boolean;
   }) {
@@ -282,6 +276,14 @@ export class SkuService {
         }),
         ...(input.offer_price !== undefined && {
           offer_price: input.offer_price != null ? String(input.offer_price) : null,
+        }),
+        ...(input.wholesale_base_price !== undefined && {
+          wholesale_base_price:
+            input.wholesale_base_price != null ? String(input.wholesale_base_price) : null,
+        }),
+        ...(input.wholesale_offer_price !== undefined && {
+          wholesale_offer_price:
+            input.wholesale_offer_price != null ? String(input.wholesale_offer_price) : null,
         }),
         ...(input.stock_available !== undefined && {
           stock_available: input.stock_available,

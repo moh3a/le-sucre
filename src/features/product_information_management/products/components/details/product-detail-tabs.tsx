@@ -41,6 +41,7 @@ export function ProductDetailTabs({ product_id }: Props) {
   const product = product_details_query.data?.product;
   const translations = product_details_query.data?.translations;
   const media = product_details_query.data?.media;
+  const units = product_details_query.data?.units;
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -81,6 +82,7 @@ export function ProductDetailTabs({ product_id }: Props) {
                     product_id={product_id}
                     product={product}
                     translations={translations}
+                    units={units}
                   />
                 )}
               </TabsContent>

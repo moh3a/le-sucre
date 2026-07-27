@@ -151,10 +151,15 @@ export function ProductDetailClient({ slug, locale }: Props) {
     );
   }
 
-  const { product, translation, media, brand, review_summary, variant_config, sku_list } = data;
+  const { product, translation, media, brand, review_summary, variant_config, sku_list, product_units } = data;
   const name = translation?.name ?? product.sku;
   const description = translation?.description ?? "";
   const all_media_urls = media.map((m) => m.url);
+
+  const retail_unit = product_units?.find((u) => u.channel === "retail");
+  const wholesale_unit = product_units?.find((u) => u.channel === "wholesale");
+  const unit_name = retail_unit?.unit_name ?? "pièce";
+  const pieces_per_unit = retail_unit?.pieces_per_unit ?? 1;
 
   const parsed_metadata: Record<string, unknown> = (product.metadata as Record<string, unknown>) ?? {};
   const specs = parsed_metadata.technical_specs as
@@ -296,6 +301,8 @@ export function ProductDetailClient({ slug, locale }: Props) {
             session={session ?? null}
             create_preorder={create_preorder}
             onAddToCart={() => {}}
+            unit_name={unit_name}
+            pieces_per_unit={pieces_per_unit}
           />
 
           <div className="flex gap-3">
@@ -545,6 +552,8 @@ function QuantityAndCartSection({
   session,
   create_preorder,
   onAddToCart,
+  unit_name,
+  pieces_per_unit,
 }: {
   quantityDefault: number;
   disabled?: boolean;
@@ -553,11 +562,14 @@ function QuantityAndCartSection({
   session: { user?: { name?: string | null; email?: string | null } } | null;
   create_preorder: { mutateAsync: (input: PreorderInput) => Promise<{ ok: boolean }>; isPending: boolean };
   onAddToCart: (quantity: number) => void;
+  unit_name?: string | null;
+  pieces_per_unit?: number;
 }) {
   const t = useTranslations("product_detail");
   const [quantity, setQuantity] = useState(quantityDefault);
   const [dialogOpen, setDialogOpen] = useState(false);
   const isOutOfStock = !disabled && !display_in_stock;
+  const showUnitInfo = (pieces_per_unit ?? 1) > 1;
 
   const preorder_form = useForm({
     resolver: zodResolver(
@@ -592,8 +604,15 @@ function QuantityAndCartSection({
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <ProductQuantitySelector value={quantity} onChange={setQuantity} />
+    <div className="space-y-3">
+      <div className="flex items-center gap-4">
+        <ProductQuantitySelector value={quantity} onChange={setQuantity} />
+        {showUnitInfo && (
+          <p className="text-muted-foreground text-xs">
+            1 {unit_name ?? "unité"} = {pieces_per_unit} {pieces_per_unit === 1 ? "pièce" : "pièces"}
+          </p>
+        )}
+      </div>
 
       {isOutOfStock && sku_id ? (
         <ResponsiveDialog open={dialogOpen} onOpenChange={setDialogOpen}>

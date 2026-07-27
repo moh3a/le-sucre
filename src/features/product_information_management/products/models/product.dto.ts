@@ -20,12 +20,22 @@ export const product_details_dto = z.object({
   status: product_status_enum.default("draft"),
   is_featured: z.boolean().default(false),
   has_variants: z.boolean().default(false),
-  // metadata: z.record(z.string(), z.unknown()).nullish(),
   seo_title: z.string().max(255).nullish(),
   seo_description: z.string().max(500).nullish(),
   seo_keywords: z.string().max(512).nullish(),
+  metadata: z.record(z.string(), z.unknown()).nullish(),
   created_at: z.string().min(1).max(255),
   updated_at: z.string().min(1).max(255),
+});
+
+export const product_unit_dto = z.object({
+  channel: z.enum(["retail", "wholesale"]),
+  unit_name: z.string().min(1).max(128),
+  pieces_per_unit: z.number().int().min(1).default(1),
+  base_price: z.coerce.number().min(0),
+  offer_price: z.coerce.number().min(0).nullish(),
+  currency: z.string().length(3).default("DZD"),
+  is_active: z.boolean().default(true),
 });
 
 export const create_product_dto = product_details_dto
@@ -35,11 +45,27 @@ export const create_product_dto = product_details_dto
     name: z.string().min(2).max(255),
     description: z.string().nullish(),
     keywords: z.string().max(512).nullish(),
-    // metadata: z.record(z.string(), z.unknown()).optional(),
+    // unit configuration
+    retail_unit_name: z.string().max(128).default("pièce"),
+    wholesale_unit_name: z.string().max(128).default("carton"),
+    wholesale_pieces_per_unit: z.number().int().min(1).default(1),
+    wholesale_base_price: z.coerce.number().min(0).nullish(),
+    wholesale_offer_price: z.coerce.number().min(0).nullish(),
   });
 
 export const update_product_dto = create_product_dto.partial().extend({
   id: z.string().min(1).max(255),
+});
+
+export const upsert_product_unit_dto = z.object({
+  product_id: z.string().min(1).max(255),
+  channel: z.enum(["retail", "wholesale"]),
+  unit_name: z.string().min(1).max(128).optional(),
+  pieces_per_unit: z.number().int().min(1).optional(),
+  base_price: z.coerce.number().min(0).optional(),
+  offer_price: z.coerce.number().min(0).nullish(),
+  currency: z.string().length(3).optional(),
+  is_active: z.boolean().optional(),
 });
 
 export const delete_media_dto = z.object({

@@ -10,8 +10,6 @@ import {
   update_sku_dto,
   set_sku_price_tier_dto,
   delete_sku_price_tier_dto,
-  upsert_wholesale_rule_dto,
-  delete_wholesale_rule_dto,
   resolve_price_dto,
 } from "../models/variant.dto";
 
@@ -41,8 +39,5 @@ export const validate_update_sku = (i: unknown) => parse(update_sku_dto, i);
 
 export const validate_set_sku_price_tier = (i: unknown) => parse(set_sku_price_tier_dto, i);
 export const validate_delete_sku_price_tier = (i: unknown) => parse(delete_sku_price_tier_dto, i);
-
-export const validate_upsert_wholesale_rule = (i: unknown) => parse(upsert_wholesale_rule_dto, i);
-export const validate_delete_wholesale_rule = (i: unknown) => parse(delete_wholesale_rule_dto, i);
 
 export const validate_resolve_price = (i: unknown) => parse(resolve_price_dto, i);

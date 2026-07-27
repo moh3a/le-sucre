@@ -8,7 +8,6 @@ import { throw_error } from "@/features/inventory_management_system/shared/error
 import { PRODUCT_ERROR } from "../constants/error-codes";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { slugify_name } from "@/features/product_information_management/categories/repositories/category-tree.engine";
-
 import {
   create_product_dto,
   product_details_dto,
@@ -18,6 +17,7 @@ import {
   upsert_translation_dto,
 } from "../models/product.dto";
 import { product_repository } from "../repositories/product.repository";
+import { product_units_repository } from "../repositories/product-units.repository";
 import { product_media_service } from "./product_media.service";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
 import { indexing_service } from "../../recommendations/services/indexing.service";
@@ -120,6 +120,20 @@ export class ProductService {
       seo_description: input.seo_description ?? null,
     });
 
+    // Create default retail + wholesale units
+    await product_units_repository.ensure_default_units(id, {
+      retail_unit_name: input.retail_unit_name ?? "pièce",
+      wholesale_unit_name: input.wholesale_unit_name ?? "carton",
+      wholesale_pieces_per_unit: input.wholesale_pieces_per_unit ?? 1,
+      base_price: String(input.base_price),
+      offer_price: input.offer_price != null ? String(input.offer_price) : null,
+      wholesale_base_price:
+        input.wholesale_base_price != null ? String(input.wholesale_base_price) : null,
+      wholesale_offer_price:
+        input.wholesale_offer_price != null ? String(input.wholesale_offer_price) : null,
+      currency: input.currency,
+    });
+
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(id);
     void audit_service.log({
@@ -137,7 +151,8 @@ export class ProductService {
     const translations = await product_repository.list_translations(id);
     const mediaData = await product_repository.list_media(id);
     const media = z.array(full_product_media_dto).parse(mediaData);
-    return { product, translations, media };
+    const units = await product_units_repository.list_by_product(id);
+    return { product, translations, media, units };
   }
 
   async get_by_slug(slug: string, locale = DEFAULT_LOCALE) {
@@ -197,6 +212,8 @@ export class ProductService {
       // SKU or variant data may be unavailable
     }
 
+    const product_units = await product_units_repository.list_by_product(product.id);
+
     return {
       product: parsed,
       translation,
@@ -206,6 +223,7 @@ export class ProductService {
       review_summary,
       variant_config,
       sku_list,
+      product_units,
     };
   }
 
@@ -268,6 +286,60 @@ export class ProductService {
         seo_title: input.seo_title ?? existing?.seo_title ?? null,
         seo_description: input.seo_description ?? existing?.seo_description ?? null,
       });
+    }
+
+    // Update retail unit if price or unit name changed
+    if (
+      input.base_price !== undefined ||
+      input.offer_price !== undefined ||
+      input.retail_unit_name !== undefined
+    ) {
+      const retail_unit = await product_units_repository.get_by_channel(input.id, "retail");
+      if (retail_unit) {
+        await product_units_repository.upsert({
+          product_id: input.id,
+          channel: "retail",
+          unit_name: input.retail_unit_name ?? retail_unit.unit_name,
+          pieces_per_unit: retail_unit.pieces_per_unit,
+          base_price: input.base_price != null ? String(input.base_price) : retail_unit.base_price,
+          offer_price:
+            input.offer_price !== undefined
+              ? input.offer_price != null
+                ? String(input.offer_price)
+                : null
+              : retail_unit.offer_price,
+          currency: input.currency ?? retail_unit.currency,
+        });
+      }
+    }
+
+    // Update wholesale unit if wholesale-specific fields changed
+    if (
+      input.wholesale_base_price !== undefined ||
+      input.wholesale_offer_price !== undefined ||
+      input.wholesale_unit_name !== undefined ||
+      input.wholesale_pieces_per_unit !== undefined
+    ) {
+      const wholesale_unit = await product_units_repository.get_by_channel(input.id, "wholesale");
+      if (wholesale_unit) {
+        await product_units_repository.upsert({
+          product_id: input.id,
+          channel: "wholesale",
+          unit_name: input.wholesale_unit_name ?? wholesale_unit.unit_name,
+          pieces_per_unit: input.wholesale_pieces_per_unit ?? wholesale_unit.pieces_per_unit,
+          base_price:
+            input.wholesale_base_price != null
+              ? String(input.wholesale_base_price)
+              : wholesale_unit.base_price,
+          offer_price:
+            input.wholesale_offer_price !== undefined
+              ? input.wholesale_offer_price != null
+                ? String(input.wholesale_offer_price)
+                : null
+              : wholesale_unit.offer_price,
+          currency: input.currency ?? wholesale_unit.currency,
+        });
+      }
     }
 
     void invalidate_catalog_cache();
@@ -372,6 +444,21 @@ export class ProductService {
           _messages: PRODUCT_ERROR.DUPLICATE_FAILED.message,
         });
       }
+    }
+
+    // Duplicate product units
+    const original_units = await product_units_repository.list_by_product(id);
+    for (const unit of original_units) {
+      await product_units_repository.upsert({
+        product_id: new_id,
+        channel: unit.channel as "retail" | "wholesale",
+        unit_name: unit.unit_name,
+        pieces_per_unit: unit.pieces_per_unit,
+        base_price: unit.base_price,
+        offer_price: unit.offer_price,
+        currency: unit.currency,
+        is_active: unit.is_active,
+      });
     }
 
     void invalidate_catalog_cache();

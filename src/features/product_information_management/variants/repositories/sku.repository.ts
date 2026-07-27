@@ -6,8 +6,10 @@ import { db } from "@/lib/db";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
 import { SKU_ERROR } from "../constants/error-codes";
-
-import { products, product_translations } from "@/features/product_information_management/products/schema";
+import {
+  products,
+  product_translations,
+} from "@/features/product_information_management/products/schema";
 import { product_properties, property_values, product_skus, sku_option_values } from "../schema";
 
 export class SkuRepository {
@@ -59,6 +61,8 @@ export class SkuRepository {
         stock_available: product_skus.stock_available,
         base_price: product_skus.base_price,
         offer_price: product_skus.offer_price,
+        wholesale_base_price: product_skus.wholesale_base_price,
+        wholesale_offer_price: product_skus.wholesale_offer_price,
         currency: product_skus.currency,
         property_code: product_properties.code,
         value_code: property_values.code,
@@ -86,6 +90,8 @@ export class SkuRepository {
     barcode?: string | null;
     base_price?: string | null;
     offer_price?: string | null;
+    wholesale_base_price?: string | null;
+    wholesale_offer_price?: string | null;
     currency?: string | null;
     is_active: boolean;
     metadata: Record<string, unknown>;
@@ -102,6 +108,8 @@ export class SkuRepository {
       barcode: input.barcode ?? null,
       base_price: input.base_price ?? null,
       offer_price: input.offer_price ?? null,
+      wholesale_base_price: input.wholesale_base_price ?? null,
+      wholesale_offer_price: input.wholesale_offer_price ?? null,
       currency: input.currency ?? null,
       is_active: input.is_active,
       stock_available: 0,
@@ -145,6 +153,8 @@ export class SkuRepository {
       barcode: string | null;
       base_price: string | null;
       offer_price: string | null;
+      wholesale_base_price: string | null;
+      wholesale_offer_price: string | null;
       currency: string | null;
       is_active: boolean;
       metadata: Record<string, unknown>;
@@ -160,6 +170,12 @@ export class SkuRepository {
         ...(input.barcode !== undefined && { barcode: input.barcode }),
         ...(input.base_price !== undefined && { base_price: input.base_price }),
         ...(input.offer_price !== undefined && { offer_price: input.offer_price }),
+        ...(input.wholesale_base_price !== undefined && {
+          wholesale_base_price: input.wholesale_base_price,
+        }),
+        ...(input.wholesale_offer_price !== undefined && {
+          wholesale_offer_price: input.wholesale_offer_price,
+        }),
         ...(input.currency !== undefined && { currency: input.currency }),
         ...(input.is_active !== undefined && { is_active: input.is_active }),
         ...(input.metadata !== undefined && { metadata: input.metadata }),
@@ -181,15 +197,14 @@ export class SkuRepository {
     input: Partial<{
       base_price: string | null;
       offer_price: string | null;
+      wholesale_base_price: string | null;
+      wholesale_offer_price: string | null;
       stock_available: number;
       is_active: boolean;
     }>,
   ) {
     if (!ids.length) return;
-    await db
-      .update(product_skus)
-      .set(input)
-      .where(inArray(product_skus.id, ids));
+    await db.update(product_skus).set(input).where(inArray(product_skus.id, ids));
   }
 
   async bulk_delete_skus(ids: string[]) {
@@ -197,12 +212,7 @@ export class SkuRepository {
     await db.delete(product_skus).where(inArray(product_skus.id, ids));
   }
 
-  async list_admin(input: {
-    page: number;
-    limit: number;
-    search?: string;
-    status?: string;
-  }) {
+  async list_admin(input: { page: number; limit: number; search?: string; status?: string }) {
     const offset = (input.page - 1) * input.limit;
     const clauses = [];
     if (input.status) {
@@ -214,7 +224,7 @@ export class SkuRepository {
           like(product_skus.sku_code, `%${input.search}%`),
           like(product_translations.name, `%${input.search}%`),
           like(product_skus.barcode, `%${input.search}%`),
-        )
+        ),
       );
     }
     const where = clauses.length ? and(...clauses) : undefined;
@@ -240,6 +250,8 @@ export class SkuRepository {
         barcode: product_skus.barcode,
         base_price: product_skus.base_price,
         offer_price: product_skus.offer_price,
+        wholesale_base_price: product_skus.wholesale_base_price,
+        wholesale_offer_price: product_skus.wholesale_offer_price,
         currency: product_skus.currency,
         is_active: product_skus.is_active,
         stock_available: product_skus.stock_available,

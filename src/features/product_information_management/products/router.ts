@@ -1,4 +1,5 @@
 import z from "zod";
+import { TRPCError } from "@trpc/server";
 // import { zfd } from "zod-form-data";
 
 import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
@@ -9,6 +10,7 @@ import {
   update_product_dto,
   list_products_dto,
   upsert_translation_dto,
+  upsert_product_unit_dto,
   product_media_dto,
   delete_media_dto,
   upload_intent_dto,
@@ -17,7 +19,7 @@ import { product_service } from "./services/product.service";
 import { product_admin_service } from "./services/product-admin.service";
 import { admin_list_products_dto, bulk_product_action_dto } from "./models/product-admin.dto";
 import { product_media_service } from "./services/product_media.service";
-import { TRPCError } from "@trpc/server";
+import { product_units_repository } from "./repositories/product-units.repository";
 
 export const product_router = create_trpc_router({
   getBySlug: public_procedure
@@ -76,11 +78,11 @@ export const product_router = create_trpc_router({
         //   alt: zfd.text(),
         //   sort_order: zfd.numeric().optional(),
         // }),
-          product_id: z.string(),
-          file: z.file(),
-          is_primary: z.boolean(),
-          alt: z.string(),
-          sort_order: z.number().optional(),
+        product_id: z.string(),
+        file: z.file(),
+        is_primary: z.boolean(),
+        alt: z.string(),
+        sort_order: z.number().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -114,4 +116,25 @@ export const product_router = create_trpc_router({
   bulkAction: permission_procedure(PERMISSIONS.products_write)
     .input(bulk_product_action_dto)
     .mutation(({ input }) => product_admin_service.bulk(input)),
+
+  // Product units (retail & wholesale)
+  listUnits: permission_procedure(PERMISSIONS.products_read)
+    .input(z.object({ product_id: z.string().min(1).max(255) }))
+    .query(({ input }) => product_units_repository.list_by_product(input.product_id)),
+
+  upsertUnit: permission_procedure(PERMISSIONS.products_write)
+    .input(upsert_product_unit_dto)
+    .mutation(async ({ input }) => {
+      const id = await product_units_repository.upsert({
+        product_id: input.product_id,
+        channel: input.channel,
+        unit_name: input.unit_name ?? input.channel,
+        pieces_per_unit: input.pieces_per_unit ?? 1,
+        base_price: input.base_price != null ? String(input.base_price) : "0",
+        offer_price: input.offer_price != null ? String(input.offer_price) : null,
+        currency: input.currency ?? "DZD",
+        is_active: input.is_active,
+      });
+      return { id };
+    }),
 });

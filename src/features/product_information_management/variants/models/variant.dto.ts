@@ -31,7 +31,11 @@ export const create_property_value_dto = z.object({
   label: z.string().min(1).max(255),
   sort_order: z.number().int().min(0).default(0),
   thumbnail_image: z.string().url().max(1024).optional().nullable(),
-  color_hex: z.string().regex(color_hex_regex, "Format hexadécimal invalide (#RRGGBB)").optional().nullable(),
+  color_hex: z
+    .string()
+    .regex(color_hex_regex, "Format hexadécimal invalide (#RRGGBB)")
+    .optional()
+    .nullable(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -50,6 +54,8 @@ export const create_sku_dto = z.object({
   barcode: z.string().max(64).optional().nullable(),
   base_price: z.coerce.number().min(0).optional().nullable(),
   offer_price: z.coerce.number().min(0).optional().nullable(),
+  wholesale_base_price: z.coerce.number().min(0).optional().nullable(),
+  wholesale_offer_price: z.coerce.number().min(0).optional().nullable(),
   currency: z.string().length(3).optional().nullable(),
   is_active: z.boolean().default(true),
   metadata: z.record(z.string(), z.unknown()).optional(),
@@ -75,27 +81,6 @@ export const delete_sku_price_tier_dto = z.object({
   sku_id: z.string().min(1).max(255),
   channel: variant_channel_enum,
   min_quantity: z.number().int().min(1),
-});
-
-export const upsert_wholesale_rule_dto = z
-  .object({
-    product_id: z.string().min(1).max(255).optional().nullable(),
-    sku_id: z.string().min(1).max(255).optional().nullable(),
-    min_quantity: z.number().int().min(1),
-    currency: z.string().length(3).default("DZD"),
-    price: z.coerce.number().min(0).optional().nullable(),
-    discount_percent: z.coerce.number().min(0).max(100).optional().nullable(),
-    is_active: z.boolean().default(true),
-  })
-  .refine((v) => Boolean(v.product_id) !== Boolean(v.sku_id), {
-    message: "Provide exactly one of product_id or sku_id",
-  })
-  .refine((v) => v.price != null || v.discount_percent != null, {
-    message: "Provide price or discount_percent",
-  });
-
-export const delete_wholesale_rule_dto = z.object({
-  id: z.string().min(1).max(255),
 });
 
 export const resolve_price_dto = z.object({

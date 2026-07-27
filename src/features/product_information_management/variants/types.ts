@@ -28,6 +28,8 @@ export type SkuRow = {
   barcode: string | null;
   base_price: string | null;
   offer_price: string | null;
+  wholesale_base_price: string | null;
+  wholesale_offer_price: string | null;
   currency: string | null;
   is_active: boolean;
   stock_available: number;
@@ -52,15 +54,18 @@ export type SkuPriceRow = {
   valid_to: string | null;
 };
 
-export type WholesaleRuleRow = {
+export type ProductUnitRow = {
   id: string;
-  product_id: string | null;
-  sku_id: string | null;
-  min_quantity: number;
-  price: string | null;
-  discount_percent: string | null;
+  product_id: string;
+  channel: VariantChannel;
+  unit_name: string;
+  pieces_per_unit: number;
+  base_price: string;
+  offer_price: string | null;
   currency: string;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 export type OptionPair = {
@@ -83,12 +88,16 @@ export type GenerateSkusResult = {
 export type PriceResolution = {
   unit_price: string;
   currency: string;
+  unit_name: string;
+  pieces_per_unit: number;
   source:
     | "sku_price_tier"
-    | "wholesale_rule_sku"
-    | "wholesale_rule_product"
+    | "sku_wholesale_offer"
+    | "sku_wholesale_base"
     | "sku_offer"
     | "sku_base"
+    | "product_unit_offer"
+    | "product_unit_base"
     | "product_offer"
     | "product_base";
 };
@@ -101,6 +110,8 @@ export type SkuListRow = {
   stock_available: number;
   base_price: string | null;
   offer_price: string | null;
+  wholesale_base_price: string | null;
+  wholesale_offer_price: string | null;
   currency: string | null;
   options: Array<{
     property_code: string | null;

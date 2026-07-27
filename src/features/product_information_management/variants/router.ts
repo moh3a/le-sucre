@@ -14,8 +14,6 @@ import {
   update_sku_dto,
   set_sku_price_tier_dto,
   delete_sku_price_tier_dto,
-  upsert_wholesale_rule_dto,
-  delete_wholesale_rule_dto,
   resolve_price_dto,
 } from "./models/variant.dto";
 import { variant_service } from "./services/variant.service";
@@ -38,8 +36,9 @@ export const variants_router = create_trpc_router({
     )
     .query(({ input }) => sku_service.list_admin(input)),
 
-  adminStats: permission_procedure(PERMISSIONS.products_read)
-    .query(() => sku_service.stats_admin()),
+  adminStats: permission_procedure(PERMISSIONS.products_read).query(() =>
+    sku_service.stats_admin(),
+  ),
 
   // Variant config
   getConfig: permission_procedure(PERMISSIONS.products_read)
@@ -101,6 +100,8 @@ export const variants_router = create_trpc_router({
         ids: z.array(z.string().min(1)),
         base_price: z.number().optional().nullable(),
         offer_price: z.number().optional().nullable(),
+        wholesale_base_price: z.number().optional().nullable(),
+        wholesale_offer_price: z.number().optional().nullable(),
         stock_available: z.number().int().min(0).optional(),
         is_active: z.boolean().optional(),
       }),
@@ -119,7 +120,7 @@ export const variants_router = create_trpc_router({
     .input(generate_skus_dto)
     .mutation(({ input }) => sku_service.generate(input)),
 
-  // Pricing
+  // Pricing — bulk tiers (works for both retail and wholesale channels)
   setSkuPriceTier: permission_procedure(PERMISSIONS.products_write)
     .input(set_sku_price_tier_dto)
     .mutation(({ input }) => sku_service.set_price_tier(input)),
@@ -127,14 +128,6 @@ export const variants_router = create_trpc_router({
   deleteSkuPriceTier: permission_procedure(PERMISSIONS.products_write)
     .input(delete_sku_price_tier_dto)
     .mutation(({ input }) => sku_service.delete_price_tier(input)),
-
-  upsertWholesaleRule: permission_procedure(PERMISSIONS.products_write)
-    .input(upsert_wholesale_rule_dto)
-    .mutation(({ input }) => sku_service.upsert_wholesale_rule(input)),
-
-  deleteWholesaleRule: permission_procedure(PERMISSIONS.products_write)
-    .input(delete_wholesale_rule_dto)
-    .mutation(({ input }) => sku_service.delete_wholesale_rule(input)),
 
   resolvePrice: permission_procedure(PERMISSIONS.products_read)
     .input(resolve_price_dto)

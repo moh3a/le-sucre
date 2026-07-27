@@ -73,8 +73,12 @@ export const product_skus = mysqlTable(
     sku_code: varchar("sku_code", { length: 128 }).notNull(),
     option_signature: varchar("option_signature", { length: 512 }).notNull(), // canonical key
     barcode: varchar("barcode", { length: 64 }),
+    // retail prices
     base_price: decimal("base_price", { precision: 12, scale: 2 }),
     offer_price: decimal("offer_price", { precision: 12, scale: 2 }),
+    // wholesale prices
+    wholesale_base_price: decimal("wholesale_base_price", { precision: 12, scale: 2 }),
+    wholesale_offer_price: decimal("wholesale_offer_price", { precision: 12, scale: 2 }),
     currency: varchar("currency", { length: 3 }),
     is_active: boolean("is_active").notNull().default(true),
     // denormalized for listing (updated by inventory sync)
@@ -128,29 +132,4 @@ export const sku_prices = mysqlTable(
     valid_to: timestamp("valid_to", { mode: "string" }),
   },
   (t) => [index("sku_prices_lookup_idx").on(t.sku_id, t.channel, t.min_quantity)],
-);
-
-// wholesale_rules — product-wide or SKU-specific bulk tiers
-export const wholesale_rules = mysqlTable(
-  "wholesale_rules",
-  {
-    id: varchar("id", { length: 255 })
-      .primaryKey()
-      .$defaultFn(() => generate_id()),
-    product_id: varchar("product_id", { length: 255 }).references(() => products.id, {
-      onDelete: "cascade",
-    }),
-    sku_id: varchar("sku_id", { length: 255 }).references(() => product_skus.id, {
-      onDelete: "cascade",
-    }),
-    min_quantity: int("min_quantity").notNull(),
-    price: decimal("price", { precision: 12, scale: 2 }),
-    discount_percent: decimal("discount_percent", { precision: 5, scale: 2 }),
-    currency: varchar("currency", { length: 3 }).notNull().default("DZD"),
-    is_active: boolean("is_active").notNull().default(true),
-  },
-  (t) => [
-    index("wholesale_rules_product_idx").on(t.product_id, t.min_quantity),
-    index("wholesale_rules_sku_idx").on(t.sku_id, t.min_quantity),
-  ],
 );

@@ -49,6 +49,11 @@ const product_form_schema = z.object({
   description_en: z.string().optional().nullable(),
   name_ar: z.string().min(1),
   description_ar: z.string().optional().nullable(),
+  retail_unit_name: z.string().max(128).default("pièce"),
+  wholesale_unit_name: z.string().max(128).default("carton"),
+  wholesale_pieces_per_unit: z.coerce.number().int().min(1).default(1),
+  wholesale_base_price: z.coerce.number().min(0).optional().nullable(),
+  wholesale_offer_price: z.coerce.number().min(0).optional().nullable(),
   keywords: z.array(z.string()),
   slug: z.string().optional(),
   status: product_status_enum,
@@ -102,6 +107,11 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
     description_en: null,
     name_ar: "",
     description_ar: null,
+    retail_unit_name: "pièce",
+    wholesale_unit_name: "carton",
+    wholesale_pieces_per_unit: 1,
+    wholesale_base_price: null,
+    wholesale_offer_price: null,
     keywords: [],
     slug: "",
     status: "draft",
@@ -141,6 +151,11 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
     const result = await create.mutateAsync({
       name: values.name,
       description: values.description,
+      retail_unit_name: values.retail_unit_name,
+      wholesale_unit_name: values.wholesale_unit_name,
+      wholesale_pieces_per_unit: values.wholesale_pieces_per_unit,
+      wholesale_base_price: values.wholesale_base_price,
+      wholesale_offer_price: values.wholesale_offer_price,
       keywords: values.keywords.join(","),
       slug: values.slug || undefined,
       status: values.status,
@@ -202,6 +217,106 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
               )}
             />
 
+            <div className="grid gap-4 md:grid-cols-2">
+              <Controller
+                name="retail_unit_name"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t("retail_unit_name")}</FieldLabel>
+                    <Input
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value || "pièce")}
+                      placeholder="pièce"
+                    />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="wholesale_unit_name"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t("wholesale_unit_name")}</FieldLabel>
+                    <Input
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value || "carton")}
+                      placeholder="carton"
+                    />
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <Controller
+                name="wholesale_pieces_per_unit"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t("wholesale_pieces_per_unit")}</FieldLabel>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={field.value}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? 1 : parseInt(e.target.value) || 1)
+                      }
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="wholesale_base_price"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t("wholesale_base_price")}</FieldLabel>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? null : parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      placeholder={t("none_placeholder")}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="wholesale_offer_price"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t("wholesale_offer_price")}</FieldLabel>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? null : parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      placeholder={t("none_placeholder")}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            </div>
+
             <Controller
               name="description"
               control={form.control}
@@ -217,7 +332,7 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
               )}
             />
 
-            <Collapsible>
+              <Collapsible>
               <CollapsibleTrigger asChild>
                 <Button type="button" variant="ghost" size="sm" className="flex items-center gap-2">
                   <ChevronRight className="size-4" />
