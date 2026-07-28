@@ -31,13 +31,74 @@ import { invoice_service } from "@/features/billing_and_finance_system/services/
 import { crm_sync_service } from "@/features/crm_integration/services/crm-sync.service";
 import { order_items, orders } from "../schema";
 import { db } from "@/lib/db";
+import { AppError } from "@/lib/error_handling";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { ORDER_ERROR } from "../constants/error-codes";
+import { CART_ERROR } from "../../carts/constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
 import { assert_order_transition } from "../order-lifecycle.engine";
 import { shipping_repository } from "@/features/shipping_management_system/repository";
+
+/**
+ * Catch non-AppError exceptions (Drizzle ORM errors, network failures, etc.)
+ * and convert them into descriptive AppError instances for the tRPC error formatter.
+ */
+function rethrow_as_order_error(error: unknown): never {
+  if (error instanceof AppError) throw error;
+
+  const raw_message = error instanceof Error ? error.message : String(error);
+
+  // Foreign key constraint — referenced entity (user, sku, etc.) doesn't exist
+  if (
+    raw_message.includes("ER_NO_REFERENCED_ROW_2") ||
+    raw_message.includes("Cannot add or update a child row") ||
+    raw_message.includes("foreign key constraint")
+  ) {
+    if (
+      raw_message.includes("user_id") ||
+      raw_message.includes("orders_ibfk")
+    ) {
+      throw_error(ORDER_ERROR.CUSTOMER_NOT_FOUND);
+    }
+    if (
+      raw_message.includes("sku_id") ||
+      raw_message.includes("product_skus")
+    ) {
+      throw_error(CART_ERROR.SKU_NOT_FOUND);
+    }
+    throw_error(ORDER_ERROR.CREATE_FAILED, {
+      detail: "Violation de contrainte — entité liée introuvable",
+    });
+  }
+
+  // Duplicate entry (e.g. idempotency key collision)
+  if (raw_message.includes("ER_DUP_ENTRY") || raw_message.includes("Duplicate entry")) {
+    throw_error(ORDER_ERROR.CREATE_FAILED, {
+      detail: "Un doublon a été détecté — veuillez réessayer",
+    });
+  }
+
+  // Not-null violation — missing required field
+  if (raw_message.includes("ER_BAD_NULL_ERROR") || raw_message.includes("cannot be null")) {
+    throw_error(ORDER_ERROR.CREATE_FAILED, {
+      detail: "Un champ obligatoire est manquant dans la requête",
+    });
+  }
+
+  // Data truncation / too long
+  if (raw_message.includes("ER_DATA_TOO_LONG") || raw_message.includes("Data too long")) {
+    throw_error(ORDER_ERROR.CREATE_FAILED, {
+      detail: "Un champ dépasse la longueur maximale autorisée",
+    });
+  }
+
+  // Generic fallback
+  throw_error(ORDER_ERROR.CREATE_FAILED, {
+    detail: `Erreur interne — ${raw_message.slice(0, 200)}`,
+  });
+}
 
 export class OrderService {
   constructor(private readonly repo = order_repository) {}
@@ -45,29 +106,30 @@ export class OrderService {
   async place_from_cart(
     input: z.infer<typeof place_order_dto> & { cart_id: string; user_id?: string | null },
   ) {
-    const existing = await this.repo.find_by_idempotency(input.idempotency_key);
-    if (existing) return this.repo.get_full(existing.id);
+    try {
+      const existing = await this.repo.find_by_idempotency(input.idempotency_key);
+      if (existing) return this.repo.get_full(existing.id);
 
-    const [cart] = await db.select().from(carts).where(eq(carts.id, input.cart_id)).limit(1);
-    if (!cart || cart.status !== "active") throw_error(ORDER_ERROR.CART_NOT_FOUND);
+      const [cart] = await db.select().from(carts).where(eq(carts.id, input.cart_id)).limit(1);
+      if (!cart || cart.status !== "active") throw_error(ORDER_ERROR.CART_NOT_FOUND);
 
-    const items = await db.select().from(cart_items).where(eq(cart_items.cart_id, input.cart_id));
-    if (!items.length) throw_error(ORDER_ERROR.INSUFFICIENT_STOCK);
+      const items = await db.select().from(cart_items).where(eq(cart_items.cart_id, input.cart_id));
+      if (!items.length) throw_error(ORDER_ERROR.INSUFFICIENT_STOCK);
 
-    const lines = items.map((i) => ({
-      sku_id: i.sku_id,
-      product_id: i.product_id,
-      quantity: i.quantity,
-      unit_price: String(i.unit_price),
-      line_total: (Number(i.unit_price) * i.quantity).toFixed(2),
-    }));
+      const lines = items.map((i) => ({
+        sku_id: i.sku_id,
+        product_id: i.product_id,
+        quantity: i.quantity,
+        unit_price: String(i.unit_price),
+        line_total: (Number(i.unit_price) * i.quantity).toFixed(2),
+      }));
 
-    const totals = await checkout_engine.compute({
-      lines,
-      discount_code: input.discount_code,
-      shipping_cost: input.shipping_cost,
-      tax_rate: input.tax_rate,
-    });
+      const totals = await checkout_engine.compute({
+        lines,
+        discount_code: input.discount_code,
+        shipping_cost: input.shipping_cost,
+        tax_rate: input.tax_rate,
+      });
 
     const order_number = await build_order_number();
 
@@ -287,6 +349,9 @@ export class OrderService {
       });
 
     return this.repo.get_full(order_id);
+    } catch (error) {
+      rethrow_as_order_error(error);
+    }
   }
 
   async list_for_customer(user_id: string, input: z.infer<typeof list_orders_dto>) {
@@ -514,25 +579,30 @@ export class OrderService {
   }
 
   async admin_create(input: z.infer<typeof admin_create_order_dto>) {
-    const cart = await cart_service.get_or_create_cart({ user_id: input.user_id });
-    if (!cart) throw_error(ORDER_ERROR.CART_NOT_FOUND);
+    try {
+      const cart = await cart_service.get_or_create_cart({ user_id: input.user_id });
+      if (!cart) throw_error(ORDER_ERROR.CART_NOT_FOUND);
 
-    for (const item of input.items) {
-      await cart_service.add_item(cart.id, { sku_id: item.sku_id, quantity: item.quantity });
+      for (const item of input.items) {
+        await cart_service.add_item(cart.id, { sku_id: item.sku_id, quantity: item.quantity });
+      }
+
+      return await this.place_from_cart({
+        cart_id: cart.id,
+        user_id: input.user_id,
+        shipping_address: input.shipping_address,
+        billing_address: input.billing_address,
+        discount_code: input.discount_code,
+        shipping_cost: input.shipping_cost,
+        tax_rate: input.tax_rate,
+        idempotency_key: `admin_${generate_id()}`,
+        payment_provider: "manual",
+        guest_phone: undefined,
+      });
+    } catch (error) {
+      console.log(error)
+      rethrow_as_order_error(error);
     }
-
-    return this.place_from_cart({
-      cart_id: cart.id,
-      user_id: input.user_id,
-      shipping_address: input.shipping_address,
-      billing_address: input.billing_address,
-      discount_code: input.discount_code,
-      shipping_cost: input.shipping_cost,
-      tax_rate: input.tax_rate,
-      idempotency_key: `admin_${generate_id()}`,
-      payment_provider: "manual",
-      guest_phone: undefined,
-    });
   }
 
   async admin_update_payment(

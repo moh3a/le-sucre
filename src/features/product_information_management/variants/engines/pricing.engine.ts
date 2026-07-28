@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { NotFoundError } from "@/lib/error_handling";
@@ -141,7 +141,7 @@ async function get_product_unit(product_id: string, channel: string) {
   const [unit] = await db
     .select()
     .from(product_units)
-    .where(eq(product_units.product_id, product_id) && eq(product_units.channel, channel))
+    .where(and(eq(product_units.product_id, product_id), eq(product_units.channel, channel)))
     .limit(1);
   return unit ?? null;
 }

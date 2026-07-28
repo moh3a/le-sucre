@@ -145,6 +145,24 @@ export const ORDER_ERROR = {
       ar: "فشل استرداد بيانات الرسم البياني للطلبات",
     },
   },
+  CUSTOMER_NOT_FOUND: {
+    code: "ORDER_CUSTOMER_NOT_FOUND",
+    status: 404,
+    message: {
+      fr: "Client introuvable. Veuillez sélectionner un client valide.",
+      en: "Customer not found. Please select a valid customer.",
+      ar: "العميل غير موجود. الرجاء تحديد عميل صالح.",
+    },
+  },
+  CREATE_FAILED: {
+    code: "ORDER_CREATE_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de la création de la commande. Veuillez réessayer.",
+      en: "Failed to create order. Please try again.",
+      ar: "فشل إنشاء الطلب. حاول مرة اخرى.",
+    },
+  },
   DELETE_FAILED: {
     code: "ORDER_DELETE_FAILED",
     status: 500,

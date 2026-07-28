@@ -7,7 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function generate_id(): string {
-  return "O-" + createId().toUpperCase();
+  // return "O-" + createId().toUpperCase();
+  return createId();
 }
 
 export function sleep(ms: number): Promise<void> {
