@@ -121,6 +121,7 @@ export class UserRepository {
     id: string,
     patch: {
       name?: string;
+      email?: string;
       image?: string | null;
       phone?: string;
       is_active?: boolean;

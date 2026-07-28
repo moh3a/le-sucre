@@ -1380,7 +1380,9 @@
     "creating": "Création…",
     "create_user_submit": "Créer l'utilisateur",
     "saving": "Enregistrement…",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "search_placeholder": "Rechercher un utilisateur…",
+    "no_results": "Aucun résultat"
   },
   "authorization": {
     "title": "Autorisations",
@@ -2020,7 +2022,18 @@
     "total_depense": "Total dépensé",
     "panier_moyen": "Panier moyen",
     "derniere_commande": "Dernière commande",
-    "inscription": "Inscrit"
+    "inscription": "Inscrit",
+    "email_optional": "E-mail (optionnel)",
+    "email_placeholder": "client@exemple.com",
+    "address_section": "Adresse (optionnel)",
+    "address_line_1": "Adresse ligne 1",
+    "address_line_1_placeholder": "Rue, numéro…",
+    "address_line_2": "Adresse ligne 2",
+    "address_line_2_placeholder": "Complément, bâtiment…",
+    "city": "Ville",
+    "state": "Wilaya",
+    "postal_code": "Code postal",
+    "no_results": "Aucun client trouvé"
   },
   "shipping": {
     "title": "Expéditions & Livraisons",

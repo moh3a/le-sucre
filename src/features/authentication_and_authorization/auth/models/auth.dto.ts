@@ -25,6 +25,12 @@ export const create_user_dto = z.object({
   phone: z.string().regex(phone_regex, phone_error),
   password: z.string().min(8).max(128),
   role: z.enum(["admin", "moderator", "operator", "delivery_person", "customer"]).default("customer"),
+  email: z.string().email().optional(),
+  address_line_1: z.string().min(1).max(500).optional(),
+  address_line_2: z.string().max(500).optional(),
+  city: z.string().min(1).max(255).optional(),
+  state: z.string().max(255).optional(),
+  postal_code: z.string().max(50).optional(),
 });
 
 export type LoginInput = z.infer<typeof login_dto>;

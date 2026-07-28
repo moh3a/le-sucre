@@ -2,13 +2,12 @@
 
 ## TODOs
 
-- format bon de commande like order id
-- when receiving stock: can receive multiple products (each product can have multiple SKUs)
+- format bon de commande, invoice, payment, like order id
 - https://www.npmjs.com/package/yalidine
 - check if every operation works
 
 <p align="center">
-  <a href="https://github.com/your-org/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/your-org/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
+  <a href="https://github.com/moh3a/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
   <img src="https://img.shields.io/badge/version-0.4.11-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-proprietary-red?style=flat-square" alt="License">
 </p>
@@ -121,7 +120,7 @@ Enterprise-grade ecommerce platform for pastry and sweets making tools, cooking 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-org/le-sucre.git
+git clone https://github.com/moh3a/le-sucre.git
 cd le-sucre
 pnpm install
 ```

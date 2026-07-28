@@ -213,6 +213,30 @@ export const admin_auth_router = create_trpc_router({
         await role_repository.assign_role(user_id, input.role);
       }
 
+      // Store custom email if provided (replacing placeholder phone-derived email)
+      if (input.email) {
+        await user_repository.update_profile(user_id, { email: input.email });
+      }
+
+      // Create default shipping address if any address field is provided
+      const has_address = input.address_line_1 || input.city;
+      if (has_address) {
+        await profile_repository.create_address(user_id, {
+          label: "home",
+          type: "both",
+          first_name: input.name.split(" ")[0] ?? input.name,
+          last_name: input.name.split(" ").slice(1).join(" ") || undefined,
+          phone: input.phone,
+          address_line_1: input.address_line_1 ?? "",
+          address_line_2: input.address_line_2 ?? undefined,
+          city: input.city ?? "",
+          state: input.state ?? undefined,
+          postal_code: input.postal_code ?? undefined,
+          country: "Algeria",
+          is_default: true,
+        });
+      }
+
       await audit_service.log({
         actor_user_id: ctx.user.id,
         action: "user.created",

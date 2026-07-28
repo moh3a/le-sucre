@@ -25,12 +25,13 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
 
 export function RecordPaymentDialog() {
   const t = useTranslations("payments");
   const [open, setOpen] = React.useState(false);
   const [order_id, setOrderId] = React.useState("");
-  const [provider, setProvider] = React.useState("stripe");
+  const [provider, setProvider] = React.useState("cash");
   const [amount, setAmount] = React.useState("");
 
   const PROVIDERS = [
@@ -50,7 +51,7 @@ export function RecordPaymentDialog() {
       toast.success(t("record_success"));
       setOpen(false);
       setOrderId("");
-      setProvider("stripe");
+      setProvider("cash");
       setAmount("");
       void utils.payments.adminList.invalidate();
       void utils.payments.adminStats.invalidate();
@@ -84,7 +85,10 @@ export function RecordPaymentDialog() {
           <form onSubmit={handle_submit} className="space-y-4">
             <div className="space-y-2">
               <Label>{t("order_id_label")}</Label>
-              <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
+              <OrderCombobox
+                value={order_id || null}
+                onValueChange={(v) => setOrderId(v ?? "")}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("amount_dzd_label")}</Label>

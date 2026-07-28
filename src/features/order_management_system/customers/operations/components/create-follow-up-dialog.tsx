@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { Phone } from "lucide-react";
+
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,21 +26,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { Plus, Phone } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { CustomerCombobox } from "@/features/order_management_system/customers/components/customer-combobox";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
+import { UserCombobox } from "@/features/authentication_and_authorization/auth/components/user-combobox";
 
 export function CreateFollowUpDialog() {
   const t = useTranslations("followups");
   const [open, setOpen] = useState(false);
-  const [userId, setUserId] = useState("");
-  const [orderId, setOrderId] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [followUpType, setFollowUpType] = useState("follow_up");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("normal");
-  const [assignedTo, setAssignedTo] = useState("");
+  const [assignedTo, setAssignedTo] = useState<string | null>(null);
   const [scheduledAt, setScheduledAt] = useState("");
 
   const utils = trpc.useUtils();
@@ -52,13 +56,13 @@ export function CreateFollowUpDialog() {
   });
 
   function reset() {
-    setUserId("");
-    setOrderId("");
+    setUserId(null);
+    setOrderId(null);
     setFollowUpType("follow_up");
     setTitle("");
     setDescription("");
     setPriority("normal");
-    setAssignedTo("");
+    setAssignedTo(null);
     setScheduledAt("");
   }
 
@@ -89,7 +93,7 @@ export function CreateFollowUpDialog() {
           {t("new_follow_up")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-150">
         <DialogHeader>
           <DialogTitle>{t("create_follow_up_title")}</DialogTitle>
           <DialogDescription>
@@ -98,9 +102,8 @@ export function CreateFollowUpDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fu_title">{t("title")} *</Label>
+            <Label>{t("title")} *</Label>
             <Input
-              id="fu_title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t("subject_placeholder")}
@@ -109,7 +112,7 @@ export function CreateFollowUpDialog() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fu_type">{t("type")}</Label>
+              <Label>{t("type")}</Label>
               <Select value={followUpType} onValueChange={setFollowUpType}>
                 <SelectTrigger>
                   <SelectValue />
@@ -122,7 +125,7 @@ export function CreateFollowUpDialog() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fu_priority">{t("priority")}</Label>
+              <Label>{t("priority")}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
@@ -138,28 +141,25 @@ export function CreateFollowUpDialog() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fu_user_id">{t("client")}</Label>
-              <Input
-                id="fu_user_id"
+              <Label>{t("client")}</Label>
+              <CustomerCombobox
                 value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                onValueChange={setUserId}
                 placeholder={t("client_id_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fu_order_id">{t("order")}</Label>
-              <Input
-                id="fu_order_id"
+              <Label>{t("order")}</Label>
+              <OrderCombobox
                 value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
+                onValueChange={setOrderId}
                 placeholder={t("order_id_placeholder")}
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="fu_description">{t("description")}</Label>
+            <Label>{t("description")}</Label>
             <Textarea
-              id="fu_description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("notes_placeholder")}
@@ -167,9 +167,8 @@ export function CreateFollowUpDialog() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fu_scheduled_at">{t("scheduled_at")} *</Label>
+              <Label>{t("scheduled_at")} *</Label>
               <Input
-                id="fu_scheduled_at"
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
@@ -177,12 +176,12 @@ export function CreateFollowUpDialog() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fu_assigned_to">{t("assigned_to")}</Label>
-              <Input
-                id="fu_assigned_to"
+              <Label>{t("assigned_to")}</Label>
+              <UserCombobox
                 value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
+                onValueChange={setAssignedTo}
                 placeholder={t("user_id_placeholder")}
+                allowedRoles={["admin", "operator", "moderator"]}
               />
             </div>
           </div>
