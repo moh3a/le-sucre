@@ -93,7 +93,7 @@ export class SkuService {
 
   async list_by_product(product_id: string) {
     const product = await this.skus.get_product(product_id);
-    if (!product) throw_error(SKU_ERROR.PRODUCT_HAS_NO_VARIANTS);
+    if (!product) return { product_id, items: [] };
 
     const rows = await this.skus.list_with_option_labels(product_id);
     return { product_id, items: group_sku_rows(rows) };

@@ -23,14 +23,22 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
-import { BrandForm } from "./brand-form";
+import { CategoryForm } from "./category-form";
+import type { CategoryTreeNode } from "../types";
 
-type BrandOption = {
+type CategoryOption = {
   id: string;
   label: string;
 };
 
-type BrandComboboxProps = {
+function flatten_categories(nodes: CategoryTreeNode[]): CategoryOption[] {
+  return nodes.flatMap((node) => [
+    { id: node.id, label: node.name },
+    ...flatten_categories(node.children ?? []),
+  ]);
+}
+
+type CategoryComboboxProps = {
   value: string | null;
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
@@ -38,50 +46,50 @@ type BrandComboboxProps = {
   canCreate?: boolean;
 };
 
-export function BrandCombobox({
+export function CategoryCombobox({
   value,
   onValueChange,
   disabled = false,
   placeholder,
   canCreate = false,
-}: BrandComboboxProps) {
-  const t = useTranslations("brands");
+}: CategoryComboboxProps) {
+  const t = useTranslations("categories");
   const [create_open, setCreateOpen] = React.useState(false);
 
-  const { data: brands_data, isLoading } = trpc.brands.active.useQuery();
+  const { data: tree, isLoading } = trpc.categories.tree.useQuery();
 
-  const brand_options = React.useMemo<BrandOption[]>(
-    () => brands_data?.map((b) => ({ id: b.id, label: b.name })) ?? [],
-    [brands_data],
+  const category_options = React.useMemo<CategoryOption[]>(
+    () => (tree ? flatten_categories(tree) : []),
+    [tree],
   );
 
-  const selected_brand = React.useMemo(
-    () => brand_options.find((b) => b.id === value) ?? null,
-    [brand_options, value],
+  const selected_category = React.useMemo(
+    () => category_options.find((c) => c.id === value) ?? null,
+    [category_options, value],
   );
 
-  function handleCreated(brand_id: string) {
-    onValueChange(brand_id);
+  function handleCreated(category_id: string) {
+    onValueChange(category_id);
     setCreateOpen(false);
   }
 
   return (
     <QueryGuard
       isLoading={isLoading}
-      loadingFallback={<Input disabled placeholder={placeholder ?? t("searchBrands")} />}
+      loadingFallback={<Input disabled placeholder={placeholder ?? t("search_placeholder")} />}
     >
       <>
         <Combobox
-          items={brand_options}
-          value={selected_brand}
+          items={category_options}
+          value={selected_category}
           onValueChange={(item) => onValueChange(item?.id ?? null)}
           itemToStringLabel={(item) => item.label}
           disabled={disabled}
         >
-          <ComboboxInput placeholder={placeholder ?? t("searchBrands")} showClear />
+          <ComboboxInput placeholder={placeholder ?? t("search_placeholder")} showClear />
           <ComboboxContent>
             <ComboboxList>
-              {(item: BrandOption) => (
+              {(item: CategoryOption) => (
                 <ComboboxItem key={item.id} value={item}>
                   {item.label}
                 </ComboboxItem>
@@ -99,7 +107,7 @@ export function BrandCombobox({
                     onClick={() => setCreateOpen(true)}
                   >
                     <PlusIcon className="size-3.5" />
-                    {t("create_brand")}
+                    {t("create_category")}
                   </Button>
                 </div>
               ) : (
@@ -114,12 +122,10 @@ export function BrandCombobox({
             <ResponsiveDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
               <ResponsiveDialogHeader>
                 <ResponsiveDialogTitle>{t("new")}</ResponsiveDialogTitle>
-                <ResponsiveDialogDescription>
-                  {t("create_brand_desc")}
-                </ResponsiveDialogDescription>
+                <ResponsiveDialogDescription>{t("new_description")}</ResponsiveDialogDescription>
               </ResponsiveDialogHeader>
-              <BrandForm
-                key="brand-combobox-create"
+              <CategoryForm
+                key="category-combobox-create"
                 mode="create"
                 onCreated={handleCreated}
                 onSuccess={() => setCreateOpen(false)}

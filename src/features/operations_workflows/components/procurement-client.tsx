@@ -34,6 +34,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { SupplierCombobox } from "./supplier-combobox";
+import { WarehouseCombobox } from "@/features/inventory_management_system/warehouses/components/warehouse-combobox";
+import { ProductCombobox } from "@/features/product_information_management/products/components/product-combobox";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";
 import { DataTableSortList } from "@/features/data-table/components/data-table-sort-list";
@@ -127,7 +130,7 @@ const PAYMENT_TERMS_VALUES = [
   "due_on_receipt",
 ] as const;
 
-function SupplierDialogContent({
+export function SupplierDialogContent({
   supplier,
   onOpenChange,
 }: {
@@ -431,7 +434,6 @@ export function SuppliersListClient() {
 export function CreatePurchaseOrderDialog() {
   const t = useTranslations("procurement");
   const utils = trpc.useUtils();
-  const { data: suppliers } = trpc.operationsWorkflows.suppliersList.useQuery();
   const [open, setOpen] = useState(false);
 
   const [supplier_id, setSupplierId] = useState("");
@@ -522,24 +524,18 @@ export function CreatePurchaseOrderDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t("supplier_required")} *</Label>
-              <Select value={supplier_id} onValueChange={setSupplierId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t("supplier_required")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {(suppliers as SupplierRow[] | undefined)?.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SupplierCombobox
+                value={supplier_id || null}
+                onValueChange={(v) => setSupplierId(v ?? "")}
+                canCreate
+                placeholder={t("supplier_required")}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("warehouse")}</Label>
-              <Input
-                value={warehouse_id}
-                onChange={(e) => setWarehouseId(e.target.value)}
+              <WarehouseCombobox
+                value={warehouse_id || null}
+                onValueChange={(v) => setWarehouseId(v ?? "")}
                 placeholder={t("warehouse_id_placeholder")}
               />
             </div>
@@ -565,10 +561,10 @@ export function CreatePurchaseOrderDialog() {
               >
                 <div className="space-y-1">
                   <Label className="text-xs">{t("product_id")}</Label>
-                  <Input
-                    value={item.product_id}
-                    onChange={(e) =>
-                      update_item(i, "product_id", e.target.value)
+                  <ProductCombobox
+                    value={item.product_id || null}
+                    onValueChange={(v) =>
+                      update_item(i, "product_id", v ?? "")
                     }
                     placeholder={t("product_id_placeholder")}
                   />

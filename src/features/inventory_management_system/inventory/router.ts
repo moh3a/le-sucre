@@ -8,6 +8,7 @@ import {
   adjust_stock_dto,
   set_stock_dto,
   receive_stock_dto,
+  batch_receive_stock_dto,
   list_movements_dto,
   create_reservation_dto,
   reservation_id_dto,
@@ -42,6 +43,10 @@ export const inventory_router = create_trpc_router({
   receiveStock: permission_procedure(PERMISSIONS.inventory_write)
     .input(receive_stock_dto)
     .mutation(({ input }) => inventory_service.receive_stock(input)),
+
+  batchReceiveStock: permission_procedure(PERMISSIONS.inventory_write)
+    .input(batch_receive_stock_dto)
+    .mutation(({ input }) => inventory_service.batch_receive_stock(input)),
 
   createReservation: permission_procedure(PERMISSIONS.inventory_write)
     .input(create_reservation_dto)

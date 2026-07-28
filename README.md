@@ -2,6 +2,7 @@
 
 ## TODOs
 
+- format bon de commande like order id
 - when receiving stock: can receive multiple products (each product can have multiple SKUs)
 - https://www.npmjs.com/package/yalidine
 - check if every operation works

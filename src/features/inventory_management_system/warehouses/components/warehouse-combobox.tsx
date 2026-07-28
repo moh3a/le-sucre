@@ -15,67 +15,54 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 
-type OrderOption = {
+type WarehouseOption = {
   id: string;
   label: string;
 };
 
-type OrderComboboxProps = {
+type WarehouseComboboxProps = {
   value: string | null;
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
   placeholder?: string;
-  canCreate?: boolean;
 };
 
-export function OrderCombobox({
+export function WarehouseCombobox({
   value,
   onValueChange,
   disabled = false,
   placeholder,
-  canCreate = false,
-}: OrderComboboxProps) {
-  const t = useTranslations("orders");
+}: WarehouseComboboxProps) {
+  const t = useTranslations("warehouses");
 
-  const { data, isLoading } = trpc.orders.adminListEnriched.useQuery({
-    page: 1,
-    limit: 100,
-  });
+  const { data: warehouses_data, isLoading } = trpc.warehouses.listAllActive.useQuery();
 
-  const order_options = React.useMemo<OrderOption[]>(() => {
-    return (
-      data?.items.map((o) => {
-        const parts: string[] = [`#${o.order_number}`];
-        const name = o.customer_name ?? undefined;
-        const phone = o.customer_phone ?? o.guest_phone ?? undefined;
-        if (name) parts.push(name);
-        if (phone) parts.push(phone);
-        return { id: o.id, label: parts.join(" — ") };
-      }) ?? []
-    );
-  }, [data]);
+  const warehouse_options = React.useMemo<WarehouseOption[]>(
+    () => warehouses_data?.map((w) => ({ id: w.id, label: w.name })) ?? [],
+    [warehouses_data],
+  );
 
-  const selected_order = React.useMemo(
-    () => order_options.find((o) => o.id === value) ?? null,
-    [order_options, value],
+  const selected_warehouse = React.useMemo(
+    () => warehouse_options.find((w) => w.id === value) ?? null,
+    [warehouse_options, value],
   );
 
   return (
     <QueryGuard
       isLoading={isLoading}
-      loadingFallback={<Input disabled placeholder={placeholder ?? t("search_orders")} />}
+      loadingFallback={<Input disabled placeholder={placeholder ?? t("select_placeholder")} />}
     >
       <Combobox
-        items={order_options}
-        value={selected_order}
+        items={warehouse_options}
+        value={selected_warehouse}
         onValueChange={(item) => onValueChange(item?.id ?? null)}
         itemToStringLabel={(item) => item.label}
         disabled={disabled}
       >
-        <ComboboxInput placeholder={placeholder ?? t("search_orders")} showClear />
+        <ComboboxInput placeholder={placeholder ?? t("select_placeholder")} showClear />
         <ComboboxContent>
           <ComboboxList>
-            {(item: OrderOption) => (
+            {(item: WarehouseOption) => (
               <ComboboxItem key={item.id} value={item}>
                 {item.label}
               </ComboboxItem>

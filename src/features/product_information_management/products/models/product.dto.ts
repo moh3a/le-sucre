@@ -23,7 +23,7 @@ export const product_details_dto = z.object({
   seo_title: z.string().max(255).nullish(),
   seo_description: z.string().max(500).nullish(),
   seo_keywords: z.string().max(512).nullish(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  // metadata: z.record(z.string(), z.unknown()).nullish(),
   created_at: z.string().min(1).max(255),
   updated_at: z.string().min(1).max(255),
 });

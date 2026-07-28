@@ -23,6 +23,7 @@ type CategoryFormProps = {
   category_id?: string;
   default_values?: Partial<CategoryFormValues>;
   onSuccess?: () => void;
+  onCreated?: (category_id: string) => void;
 };
 
 function flatten_categories(
@@ -35,17 +36,18 @@ function flatten_categories(
   ]);
 }
 
-export function CategoryForm({ mode, category_id, default_values, onSuccess }: CategoryFormProps) {
+export function CategoryForm({ mode, category_id, default_values, onSuccess, onCreated }: CategoryFormProps) {
   const t = useTranslations("categories");
   const utils = trpc.useUtils();
   const tree_query = trpc.categories.tree.useQuery();
   const { data: tree } = tree_query;
 
   const create_mutation = trpc.categories.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       await utils.categories.tree.invalidate();
       await utils.categories.list.invalidate();
       toast.success(t("category_created"));
+      onCreated?.(data.id);
       onSuccess?.();
     },
     onError: (err) => toast.error(err.message),

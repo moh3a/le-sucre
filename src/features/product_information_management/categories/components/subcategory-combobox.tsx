@@ -23,14 +23,28 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
-import { BrandForm } from "./brand-form";
+import { CategoryForm } from "./category-form";
+import type { CategoryTreeNode } from "../types";
 
-type BrandOption = {
+type SubcategoryOption = {
   id: string;
   label: string;
 };
 
-type BrandComboboxProps = {
+function flatten_subcategories(
+  nodes: CategoryTreeNode[],
+  parent_name = "",
+): SubcategoryOption[] {
+  return nodes.flatMap((node) => {
+    const display_name = parent_name ? `${node.name} — ${parent_name}` : node.name;
+    return [
+      { id: node.id, label: display_name },
+      ...flatten_subcategories(node.children ?? [], node.name),
+    ];
+  });
+}
+
+type SubcategoryComboboxProps = {
   value: string | null;
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
@@ -38,50 +52,50 @@ type BrandComboboxProps = {
   canCreate?: boolean;
 };
 
-export function BrandCombobox({
+export function SubcategoryCombobox({
   value,
   onValueChange,
   disabled = false,
   placeholder,
   canCreate = false,
-}: BrandComboboxProps) {
-  const t = useTranslations("brands");
+}: SubcategoryComboboxProps) {
+  const t = useTranslations("categories");
   const [create_open, setCreateOpen] = React.useState(false);
 
-  const { data: brands_data, isLoading } = trpc.brands.active.useQuery();
+  const { data: tree, isLoading } = trpc.categories.tree.useQuery();
 
-  const brand_options = React.useMemo<BrandOption[]>(
-    () => brands_data?.map((b) => ({ id: b.id, label: b.name })) ?? [],
-    [brands_data],
+  const subcategory_options = React.useMemo<SubcategoryOption[]>(
+    () => (tree ? flatten_subcategories(tree) : []),
+    [tree],
   );
 
-  const selected_brand = React.useMemo(
-    () => brand_options.find((b) => b.id === value) ?? null,
-    [brand_options, value],
+  const selected_subcategory = React.useMemo(
+    () => subcategory_options.find((s) => s.id === value) ?? null,
+    [subcategory_options, value],
   );
 
-  function handleCreated(brand_id: string) {
-    onValueChange(brand_id);
+  function handleCreated(category_id: string) {
+    onValueChange(category_id);
     setCreateOpen(false);
   }
 
   return (
     <QueryGuard
       isLoading={isLoading}
-      loadingFallback={<Input disabled placeholder={placeholder ?? t("searchBrands")} />}
+      loadingFallback={<Input disabled placeholder={placeholder ?? t("search_subcategory_placeholder")} />}
     >
       <>
         <Combobox
-          items={brand_options}
-          value={selected_brand}
+          items={subcategory_options}
+          value={selected_subcategory}
           onValueChange={(item) => onValueChange(item?.id ?? null)}
           itemToStringLabel={(item) => item.label}
           disabled={disabled}
         >
-          <ComboboxInput placeholder={placeholder ?? t("searchBrands")} showClear />
+          <ComboboxInput placeholder={placeholder ?? t("search_subcategory_placeholder")} showClear />
           <ComboboxContent>
             <ComboboxList>
-              {(item: BrandOption) => (
+              {(item: SubcategoryOption) => (
                 <ComboboxItem key={item.id} value={item}>
                   {item.label}
                 </ComboboxItem>
@@ -90,7 +104,7 @@ export function BrandCombobox({
             <ComboboxEmpty>
               {canCreate ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-3">
-                  <p className="text-muted-foreground text-sm">{t("no_results")}</p>
+                  <p className="text-muted-foreground text-sm">{t("no_subcategories")}</p>
                   <Button
                     type="button"
                     variant="outline"
@@ -99,11 +113,11 @@ export function BrandCombobox({
                     onClick={() => setCreateOpen(true)}
                   >
                     <PlusIcon className="size-3.5" />
-                    {t("create_brand")}
+                    {t("create_subcategory")}
                   </Button>
                 </div>
               ) : (
-                <p className="text-muted-foreground px-4 py-3 text-sm">{t("no_results")}</p>
+                <p className="text-muted-foreground px-4 py-3 text-sm">{t("no_subcategories")}</p>
               )}
             </ComboboxEmpty>
           </ComboboxContent>
@@ -114,12 +128,10 @@ export function BrandCombobox({
             <ResponsiveDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
               <ResponsiveDialogHeader>
                 <ResponsiveDialogTitle>{t("new")}</ResponsiveDialogTitle>
-                <ResponsiveDialogDescription>
-                  {t("create_brand_desc")}
-                </ResponsiveDialogDescription>
+                <ResponsiveDialogDescription>{t("new_description")}</ResponsiveDialogDescription>
               </ResponsiveDialogHeader>
-              <BrandForm
-                key="brand-combobox-create"
+              <CategoryForm
+                key="subcategory-combobox-create"
                 mode="create"
                 onCreated={handleCreated}
                 onSuccess={() => setCreateOpen(false)}

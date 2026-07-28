@@ -23,14 +23,14 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
-import { BrandForm } from "./brand-form";
+import { SupplierDialogContent } from "./procurement-client";
 
-type BrandOption = {
+type SupplierOption = {
   id: string;
   label: string;
 };
 
-type BrandComboboxProps = {
+type SupplierComboboxProps = {
   value: string | null;
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
@@ -38,50 +38,59 @@ type BrandComboboxProps = {
   canCreate?: boolean;
 };
 
-export function BrandCombobox({
+export function SupplierCombobox({
   value,
   onValueChange,
   disabled = false,
   placeholder,
   canCreate = false,
-}: BrandComboboxProps) {
-  const t = useTranslations("brands");
+}: SupplierComboboxProps) {
+  const t = useTranslations("procurement");
   const [create_open, setCreateOpen] = React.useState(false);
 
-  const { data: brands_data, isLoading } = trpc.brands.active.useQuery();
+  const { data: suppliers_data, isLoading } =
+    trpc.operationsWorkflows.suppliersList.useQuery();
 
-  const brand_options = React.useMemo<BrandOption[]>(
-    () => brands_data?.map((b) => ({ id: b.id, label: b.name })) ?? [],
-    [brands_data],
+  const supplier_options = React.useMemo<SupplierOption[]>(
+    () =>
+      (suppliers_data as Array<{ id: string; name: string }> | undefined)?.map((s) => ({
+        id: s.id,
+        label: s.name,
+      })) ?? [],
+    [suppliers_data],
   );
 
-  const selected_brand = React.useMemo(
-    () => brand_options.find((b) => b.id === value) ?? null,
-    [brand_options, value],
+  const selected_supplier = React.useMemo(
+    () => supplier_options.find((s) => s.id === value) ?? null,
+    [supplier_options, value],
   );
 
-  function handleCreated(brand_id: string) {
-    onValueChange(brand_id);
+  function handleCreated() {
     setCreateOpen(false);
   }
 
   return (
     <QueryGuard
       isLoading={isLoading}
-      loadingFallback={<Input disabled placeholder={placeholder ?? t("searchBrands")} />}
+      loadingFallback={
+        <Input disabled placeholder={placeholder ?? t("supplier_required")} />
+      }
     >
       <>
         <Combobox
-          items={brand_options}
-          value={selected_brand}
+          items={supplier_options}
+          value={selected_supplier}
           onValueChange={(item) => onValueChange(item?.id ?? null)}
           itemToStringLabel={(item) => item.label}
           disabled={disabled}
         >
-          <ComboboxInput placeholder={placeholder ?? t("searchBrands")} showClear />
+          <ComboboxInput
+            placeholder={placeholder ?? t("supplier_required")}
+            showClear
+          />
           <ComboboxContent>
             <ComboboxList>
-              {(item: BrandOption) => (
+              {(item: SupplierOption) => (
                 <ComboboxItem key={item.id} value={item}>
                   {item.label}
                 </ComboboxItem>
@@ -90,7 +99,9 @@ export function BrandCombobox({
             <ComboboxEmpty>
               {canCreate ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-3">
-                  <p className="text-muted-foreground text-sm">{t("no_results")}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("no_results")}
+                  </p>
                   <Button
                     type="button"
                     variant="outline"
@@ -99,31 +110,33 @@ export function BrandCombobox({
                     onClick={() => setCreateOpen(true)}
                   >
                     <PlusIcon className="size-3.5" />
-                    {t("create_brand")}
+                    {t("create_supplier_button")}
                   </Button>
                 </div>
               ) : (
-                <p className="text-muted-foreground px-4 py-3 text-sm">{t("no_results")}</p>
+                <p className="text-muted-foreground px-4 py-3 text-sm">
+                  {t("no_results")}
+                </p>
               )}
             </ComboboxEmpty>
           </ComboboxContent>
         </Combobox>
 
         {canCreate && (
-          <ResponsiveDialog open={create_open} onOpenChange={setCreateOpen}>
+          <ResponsiveDialog
+            open={create_open}
+            onOpenChange={setCreateOpen}
+          >
             <ResponsiveDialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
               <ResponsiveDialogHeader>
-                <ResponsiveDialogTitle>{t("new")}</ResponsiveDialogTitle>
+                <ResponsiveDialogTitle>
+                  {t("create_supplier_title")}
+                </ResponsiveDialogTitle>
                 <ResponsiveDialogDescription>
-                  {t("create_brand_desc")}
+                  {t("create_supplier_button")}
                 </ResponsiveDialogDescription>
               </ResponsiveDialogHeader>
-              <BrandForm
-                key="brand-combobox-create"
-                mode="create"
-                onCreated={handleCreated}
-                onSuccess={() => setCreateOpen(false)}
-              />
+              <SupplierDialogContent onOpenChange={handleCreated} />
             </ResponsiveDialogContent>
           </ResponsiveDialog>
         )}

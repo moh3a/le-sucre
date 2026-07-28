@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { NotFoundError } from "@/lib/error_handling";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 
 import type {
@@ -12,6 +11,7 @@ import type {
   set_stock_dto,
   receive_stock_dto,
   list_movements_dto,
+  batch_receive_stock_dto,
 } from "../models/inventory.dto";
 import { MOVEMENT_TYPES } from "../constants/movement-types";
 import { INVENTORY_ERROR } from "../constants/error-codes";
@@ -182,6 +182,71 @@ export class InventoryService {
       resource_id: input.sku_id,
     });
     return this.get_level(input.sku_id, input.warehouse_id);
+  }
+
+  async batch_receive_stock(input: z.infer<typeof batch_receive_stock_dto>) {
+    const validated_skus: Array<{ id: string; product_id: string }> = [];
+    for (const item of input.items) {
+      const sku = await this.assert_sku(item.sku_id);
+      validated_skus.push(sku);
+    }
+
+    const product_ids = new Set<string>();
+
+    await db.transaction(async (tx) => {
+      for (let i = 0; i < input.items.length; i++) {
+        const item = input.items[i];
+
+        await this.repo.ensure_level(item.sku_id, input.warehouse_id);
+        const level = await this.repo.get_level_for_update(tx, item.sku_id, input.warehouse_id);
+        if (!level) throw_error(INVENTORY_ERROR.LEVEL_NOT_FOUND, { sku_id: item.sku_id });
+
+        const new_on_hand = level.quantity_on_hand + item.quantity;
+        if (new_on_hand < 0) throw_error(INVENTORY_ERROR.NEGATIVE_STOCK, { sku_id: item.sku_id, warehouse_id: input.warehouse_id });
+        if (new_on_hand < level.quantity_reserved) {
+          throw_error(INVENTORY_ERROR.STOCK_BELOW_RESERVED, {
+            sku_id: item.sku_id,
+            on_hand: new_on_hand,
+            reserved: level.quantity_reserved,
+          });
+        }
+
+        const ok = await this.repo.update_level_optimistic(tx, level.id, level.version, {
+          quantity_on_hand: new_on_hand,
+        });
+        if (!ok) throw_error(INVENTORY_ERROR.VERSION_CONFLICT, { level_id: level.id });
+
+        await this.repo.insert_movement(tx, {
+          sku_id: item.sku_id,
+          warehouse_id: input.warehouse_id,
+          movement_type: MOVEMENT_TYPES.receive,
+          quantity_delta: item.quantity,
+          reference_type: input.reference_type ?? "batch_receive",
+          reference_id: input.reference_id ?? null,
+        });
+
+        const pid = await sync_sku_stock_denormalized(item.sku_id, tx);
+        if (pid) product_ids.add(pid);
+      }
+    });
+
+    for (const pid of product_ids) {
+      await invalidate_product_stock_cache(pid);
+    }
+
+    for (let i = 0; i < input.items.length; i++) {
+      const item = input.items[i];
+      void forecast_index_service.enqueue("reindex_sku", { sku_id: item.sku_id });
+      void preorder_fulfillment_service.fulfill_incoming_stock(item.sku_id, input.warehouse_id);
+    }
+
+    void audit_service.log({
+      action: AUDIT_ACTION.INVENTORY_STOCK_RECEIVED,
+      resource_type: "batch",
+      resource_id: `batch:${input.items.length}_items`,
+    });
+
+    return { received: input.items.length };
   }
 }
 

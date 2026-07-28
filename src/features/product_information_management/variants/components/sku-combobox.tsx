@@ -15,12 +15,13 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 
-type OrderOption = {
+type SkuOption = {
   id: string;
   label: string;
 };
 
-type OrderComboboxProps = {
+type SkuComboboxProps = {
+  product_id: string;
   value: string | null;
   onValueChange: (value: string | null) => void;
   disabled?: boolean;
@@ -28,54 +29,59 @@ type OrderComboboxProps = {
   canCreate?: boolean;
 };
 
-export function OrderCombobox({
+export function SkuCombobox({
+  product_id,
   value,
   onValueChange,
   disabled = false,
   placeholder,
   canCreate = false,
-}: OrderComboboxProps) {
-  const t = useTranslations("orders");
+}: SkuComboboxProps) {
+  const t = useTranslations("variants");
 
-  const { data, isLoading } = trpc.orders.adminListEnriched.useQuery({
-    page: 1,
-    limit: 100,
-  });
-
-  const order_options = React.useMemo<OrderOption[]>(() => {
-    return (
-      data?.items.map((o) => {
-        const parts: string[] = [`#${o.order_number}`];
-        const name = o.customer_name ?? undefined;
-        const phone = o.customer_phone ?? o.guest_phone ?? undefined;
-        if (name) parts.push(name);
-        if (phone) parts.push(phone);
-        return { id: o.id, label: parts.join(" — ") };
-      }) ?? []
-    );
-  }, [data]);
-
-  const selected_order = React.useMemo(
-    () => order_options.find((o) => o.id === value) ?? null,
-    [order_options, value],
+  const { data: sku_data, isLoading } = trpc.variants.listSkus.useQuery(
+    { product_id },
+    { enabled: !!product_id },
   );
+
+  const sku_options = React.useMemo<SkuOption[]>(() => {
+    const items = sku_data?.items ?? [];
+    return items.map((sku) => ({
+      id: sku.sku_id,
+      label:
+        sku.options.length > 0
+          ? `${sku.sku_code} — ${sku.options.map((o) => o.value_label ?? o.value_code).join(" / ")}`
+          : sku.sku_code,
+    }));
+  }, [sku_data]);
+
+  const selected_sku = React.useMemo(
+    () => sku_options.find((s) => s.id === value) ?? null,
+    [sku_options, value],
+  );
+
+  if (!product_id) {
+    return (
+      <Input disabled placeholder={placeholder ?? t("select_product_first")} />
+    );
+  }
 
   return (
     <QueryGuard
       isLoading={isLoading}
-      loadingFallback={<Input disabled placeholder={placeholder ?? t("search_orders")} />}
+      loadingFallback={<Input disabled placeholder={placeholder ?? t("loading")} />}
     >
       <Combobox
-        items={order_options}
-        value={selected_order}
+        items={sku_options}
+        value={selected_sku}
         onValueChange={(item) => onValueChange(item?.id ?? null)}
         itemToStringLabel={(item) => item.label}
         disabled={disabled}
       >
-        <ComboboxInput placeholder={placeholder ?? t("search_orders")} showClear />
+        <ComboboxInput placeholder={placeholder ?? t("search_placeholder")} showClear />
         <ComboboxContent>
           <ComboboxList>
-            {(item: OrderOption) => (
+            {(item: SkuOption) => (
               <ComboboxItem key={item.id} value={item}>
                 {item.label}
               </ComboboxItem>

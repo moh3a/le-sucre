@@ -59,3 +59,15 @@ export const commit_reservation_dto = z.object({
   id: z.string().min(1).max(255),
   order_id: z.string().min(1).max(255).optional().nullable(),
 });
+
+export const batch_receive_stock_item_dto = z.object({
+  sku_id: z.string().min(1).max(255),
+  quantity: z.number().int().min(1),
+});
+
+export const batch_receive_stock_dto = z.object({
+  warehouse_id: warehouse_id_dto,
+  items: z.array(batch_receive_stock_item_dto).min(1).max(50),
+  reference_type: z.string().max(64).optional().nullable(),
+  reference_id: z.string().max(255).optional().nullable(),
+});

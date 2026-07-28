@@ -343,7 +343,13 @@
     "tab_list": "Liste",
     "category_created": "Catégorie créée avec succès",
     "category_updated": "Catégorie mise à jour avec succès",
-    "category_deleted": "Catégorie supprimée avec succès"
+    "category_deleted": "Catégorie supprimée avec succès",
+    "search_placeholder": "Rechercher une catégorie…",
+    "no_results": "Aucune catégorie trouvée.",
+    "create_category": "Créer une catégorie",
+    "search_subcategory_placeholder": "Rechercher une sous-catégorie…",
+    "no_subcategories": "Aucune sous-catégorie trouvée.",
+    "create_subcategory": "Créer une sous-catégorie"
   },
   "products": {
     "title": "Produits & Publication",
@@ -534,7 +540,12 @@
     "orders_description": "{count} commande(s) contenant ce produit",
     "recommendation_edge_confirm": "Êtes-vous sûr de vouloir supprimer cette recommandation ?",
     "cancel": "Annuler",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "search_placeholder": "Rechercher un produit…",
+    "no_results": "Aucun produit trouvé.",
+    "create_product": "Créer un produit",
+    "new": "Nouveau produit",
+    "new_description": "Créez un nouveau produit."
   },
   "recommendations": {
     "recently_viewed": "Récemment consultés",
@@ -682,7 +693,11 @@
     "delete_tier_title": "Supprimer le palier de prix",
     "delete_tier_description": "Supprimer ce palier de prix ? Il ne s'appliquera plus aux commandes.",
     "delete_wholesale_rule_title": "Supprimer la règle de gros",
-    "delete_wholesale_rule_description": "Supprimer cette règle de gros ? Elle ne s'appliquera plus aux commandes en gros."
+    "delete_wholesale_rule_description": "Supprimer cette règle de gros ? Elle ne s'appliquera plus aux commandes en gros.",
+    "search_placeholder": "Rechercher un SKU…",
+    "no_results": "Aucun SKU trouvé.",
+    "select_product_first": "Sélectionnez d'abord un produit",
+    "loading": "Chargement…"
   },
   "inventory": {
     "title": "Stock & inventaire",
@@ -757,11 +772,27 @@
     "ok": "OK",
     "stock_recorded": "Stock enregistré avec succès",
     "record_stock_title": "Réceptionner du stock",
-    "record_stock_description": "Enregistrer une réception de stock pour un SKU.",
+    "record_stock_description": "Enregistrer une réception de stock pour un ou plusieurs produits.",
     "sku_id_label": "ID SKU",
     "quantity_label": "Quantité",
     "warehouse_optional": "Entrepôt (optionnel)",
-    "alert_status_column": "Statut"
+    "warehouse_label": "Entrepôt",
+    "items_label": "Produits à réceptionner",
+    "add_line": "Ajouter une ligne",
+    "product_label": "Produit",
+    "sku_label": "SKU",
+    "cancel": "Annuler",
+    "receiving": "Réception en cours…",
+    "receive_count": "Réceptionner ({count})",
+    "select_warehouse_placeholder": "Sélectionner un entrepôt…",
+    "no_warehouses": "Aucun entrepôt disponible",
+    "search_product_placeholder": "Rechercher un produit…",
+    "select_product_first": "Sélectionnez d'abord un produit",
+    "select_sku_placeholder": "Sélectionner un SKU…",
+    "no_results": "Aucun résultat",
+    "batch_stock_recorded": "{count} produit(s) réceptionné(s) avec succès",
+    "alert_status_column": "Statut",
+    "optional": "Optionnel"
   },
   "reviews": {
     "title": "Avis clients",
@@ -1457,6 +1488,7 @@
     "search_sku": "Rechercher un SKU…",
     "search_sku_placeholder": "Rechercher un SKU…",
     "no_results": "Aucun résultat",
+    "create_order": "Créer une commande",
     "qty_placeholder": "Qté",
     "unit_price_placeholder": "Prix unit.",
     "payment_method_placeholder": "ex: Stripe, PayPal, CIB…",
@@ -2564,7 +2596,10 @@
     "email": "Email",
     "email_placeholder": "contact@entrepot.dz",
     "created_at": "Créé le",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "search_placeholder": "Rechercher un entrepôt…",
+    "no_results": "Aucun entrepôt trouvé.",
+    "select_placeholder": "Sélectionner un entrepôt…"
   },
   "forecast": {
     "sku_code_column": "Code SKU",
@@ -4723,6 +4758,7 @@
     "tab_description_reconciliation": "Rapprochez les paiements fournisseurs et identifiez les écarts",
     "loading": "Chargement…",
     "empty": "Aucun élément",
+    "no_results": "Aucun résultat",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
