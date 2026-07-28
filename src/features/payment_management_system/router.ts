@@ -116,6 +116,10 @@ export const payment_router = create_trpc_router({
     .input(z.object({ order_id: z.string().min(1).max(255) }))
     .query(({ input }) => payment_processing_service.get_for_order(input.order_id)),
 
+  adminSearchTransactions: permission_procedure(PERMISSIONS.orders_read)
+    .input(z.object({ search: z.string().min(1).max(255), limit: z.coerce.number().int().min(1).max(100).default(20) }))
+    .query(({ input }) => payment_processing_service.search(input.search, input.limit)),
+
   // ─── Admin: Partial Payments ──────────────────────────
   adminCreateDeposit: permission_procedure(PERMISSIONS.orders_write)
     .input(create_partial_payment_dto)

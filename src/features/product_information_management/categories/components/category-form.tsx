@@ -11,6 +11,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { slugify } from "@/lib/utils";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
@@ -178,17 +179,18 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess, onC
                     <span className="text-muted-foreground text-xs">{t("refreshing")}</span>
                   </div>
                 ) : (
-                  <select
-                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                    value={field.value ?? ""}
-                    onChange={(e) => field.onChange(e.target.value || null)}
-                  >
-                    {parent_options.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parent_options.map((opt) => (
+                        <SelectItem key={opt.id} value={opt.id}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
               </Field>
             )}
@@ -231,14 +233,15 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess, onC
               render={({ field }) => (
                 <Field>
                   <FieldLabel>{t("active")}</FieldLabel>
-                  <select
-                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                    value={field.value ? "true" : "false"}
-                    onChange={(e) => field.onChange(e.target.value === "true")}
-                  >
-                    <option value="true">{t("active")}</option>
-                    <option value="false">{t("inactive")}</option>
-                  </select>
+                  <Select value={field.value ? "true" : "false"} onValueChange={(v) => field.onChange(v === "true")}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{t("active")}</SelectItem>
+                      <SelectItem value="false">{t("inactive")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               )}
             />

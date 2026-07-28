@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Loader2, Plus, Truck } from "lucide-react";
+import { Loader2, Truck } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
 
 type LogAttemptDialogProps = {
@@ -70,7 +70,13 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
     mutation.mutate({
       shipment_id: shipmentId,
       order_id: orderId,
-      status: status as "successful" | "failed" | "customer_unavailable" | "wrong_address" | "refused" | "cancelled",
+      status: status as
+        | "successful"
+        | "failed"
+        | "customer_unavailable"
+        | "wrong_address"
+        | "refused"
+        | "cancelled",
       description: description || undefined,
       next_attempt_at: nextAttemptAt || undefined,
     });
@@ -78,95 +84,93 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
 
   return (
     <QueryGuard mutation={mutation}>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Truck className="mr-2 size-4" />
-          {t("log_attempt")}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t("log_delivery_attempt")}</DialogTitle>
-          <DialogDescription>
-            {t("log_delivery_attempt_desc")}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <Truck className="mr-2 size-4" />
+            {t("log_attempt")}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-125">
+          <DialogHeader>
+            <DialogTitle>{t("log_delivery_attempt")}</DialogTitle>
+            <DialogDescription>{t("log_delivery_attempt_desc")}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="shipment_id">{t("shipment")} *</Label>
+                <Input
+                  id="shipment_id"
+                  value={shipmentId}
+                  onChange={(e) => setShipmentId(e.target.value)}
+                  placeholder={t("shipment_id_placeholder")}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order_id">{t("order")} *</Label>
+                <Input
+                  id="order_id"
+                  value={orderId}
+                  onChange={(e) => setOrderId(e.target.value)}
+                  placeholder={t("order_id_placeholder")}
+                  required
+                />
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="shipment_id">{t("shipment")} *</Label>
-              <Input
-                id="shipment_id"
-                value={shipmentId}
-                onChange={(e) => setShipmentId(e.target.value)}
-                placeholder={t("shipment_id_placeholder")}
-                required
+              <Label htmlFor="status">{t("status")} *</Label>
+              <Select value={status} onValueChange={setStatus} required>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_status")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="successful">{t("delivered")}</SelectItem>
+                  <SelectItem value="failed">{t("failed")}</SelectItem>
+                  <SelectItem value="customer_unavailable">{t("customer_unavailable")}</SelectItem>
+                  <SelectItem value="wrong_address">{t("wrong_address")}</SelectItem>
+                  <SelectItem value="refused">{t("refused")}</SelectItem>
+                  <SelectItem value="cancelled">{t("cancelled")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">{t("description")}</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("description_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="order_id">{t("order")} *</Label>
+              <Label htmlFor="next_attempt_at">{t("next_attempt")}</Label>
               <Input
-                id="order_id"
-                value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
-                placeholder={t("order_id_placeholder")}
-                required
+                id="next_attempt_at"
+                type="datetime-local"
+                value={nextAttemptAt}
+                onChange={(e) => setNextAttemptAt(e.target.value)}
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="status">{t("status")} *</Label>
-            <Select value={status} onValueChange={setStatus} required>
-              <SelectTrigger>
-                <SelectValue placeholder={t("select_status")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="successful">{t("delivered")}</SelectItem>
-                <SelectItem value="failed">{t("failed")}</SelectItem>
-                <SelectItem value="customer_unavailable">{t("customer_unavailable")}</SelectItem>
-                <SelectItem value="wrong_address">{t("wrong_address")}</SelectItem>
-                <SelectItem value="refused">{t("refused")}</SelectItem>
-                <SelectItem value="cancelled">{t("cancelled")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">{t("description")}</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("description_placeholder")}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="next_attempt_at">{t("next_attempt")}</Label>
-            <Input
-              id="next_attempt_at"
-              type="datetime-local"
-              value={nextAttemptAt}
-              onChange={(e) => setNextAttemptAt(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              {t("cancel")}
-            </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("saving")}
-                </>
-              ) : (
-                t("save")
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                {t("cancel")}
+              </Button>
+              <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t("saving")}
+                  </>
+                ) : (
+                  t("save")
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </QueryGuard>
   );
 }

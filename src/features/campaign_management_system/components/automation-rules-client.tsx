@@ -6,6 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useUndoAction } from "@/hooks/use-undo-action";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const TRIGGER_OPTIONS = [
   "campaign.activated",
@@ -119,31 +126,33 @@ export function AutomationRulesClient() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium">{t("trigger")}</label>
-              <select
-                value={trigger}
-                onChange={(e) => setTrigger(e.target.value)}
-                className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
-              >
-                {TRIGGER_OPTIONS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
+              <Select value={trigger} onValueChange={setTrigger}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TRIGGER_OPTIONS.map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">{t("action")}</label>
-              <select
-                value={action}
-                onChange={(e) => setAction(e.target.value)}
-                className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
-              >
-                {ACTION_OPTIONS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </select>
+              <Select value={action} onValueChange={setAction}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACTION_OPTIONS.map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <button

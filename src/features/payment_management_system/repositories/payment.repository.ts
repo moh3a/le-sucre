@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, gte, inArray, lt, lte, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, lt, lte, or, sql, sum } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import {
@@ -167,6 +167,38 @@ export class PaymentRepository {
         has_more: offset + limit < total_records,
       },
     };
+  }
+
+  async search_transactions(search: string, limit = 20) {
+    const pattern = `%${search}%`;
+    const items = await db
+      .select({
+        id: payment_transactions.id,
+        order_id: payment_transactions.order_id,
+        status: payment_transactions.status,
+        type: payment_transactions.type,
+        currency: payment_transactions.currency,
+        amount: payment_transactions.amount,
+        provider: payment_transactions.provider,
+        created_at: payment_transactions.created_at,
+        order_number: orders.order_number,
+        user_name: users.name,
+      })
+      .from(payment_transactions)
+      .leftJoin(orders, eq(payment_transactions.order_id, orders.id))
+      .leftJoin(users, eq(payment_transactions.user_id, users.id))
+      .where(
+        and(
+          or(
+            sql`${payment_transactions.id} LIKE ${pattern}`,
+            sql`${orders.order_number} LIKE ${pattern}`,
+            sql`${payment_transactions.provider_transaction_id} LIKE ${pattern}`,
+          ),
+        ),
+      )
+      .orderBy(desc(payment_transactions.created_at))
+      .limit(limit);
+    return items;
   }
 
   async list_transactions_for_order(order_id: string) {

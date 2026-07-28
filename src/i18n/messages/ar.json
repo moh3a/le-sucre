@@ -2040,7 +2040,9 @@
     "method": "الطريقة",
     "reference": "المرجع",
     "notes": "ملاحظات",
-    "reason": "السبب"
+    "reason": "السبب",
+    "search_transaction_placeholder": "البحث عن معاملة بواسطة المعرف أو الطلب…",
+    "no_results": "لا توجد نتائج"
   },
   "payouts": {
     "title": "مدفوعات الموردين",
@@ -2124,6 +2126,7 @@
     "type_label": "النوع",
     "type_full_refund": "استرداد كامل",
     "type_partial_refund": "استرداد جزئي",
+    "transaction_id_placeholder": "البحث عن معاملة…",
     "amount_dzd_label": "المبلغ (د.ج)",
     "reason_optional_label": "السبب (اختياري)",
     "stats_total": "إجمالي المبالغ المستردة",

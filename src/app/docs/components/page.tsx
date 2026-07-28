@@ -32,7 +32,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from "@/components/ui/command";
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
 import { Stepper, StepperItem, StepperTrigger, StepperIndicator, StepperSeparator, StepperTitle, StepperDescription, StepperContent, StepperPrev, StepperNext } from "@/components/ui/stepper";
 import { Rating, RatingItem } from "@/components/ui/rating";
@@ -44,10 +44,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import {
   Sun, Moon, Plus, Info, CircleCheck, CircleX, TriangleAlert, OctagonX,
   PackageOpen, WifiOff, RefreshCw, Loader2, CheckCircle2, XCircle,
-  MoreHorizontal, ChevronDown, Settings, User, Trash2, CreditCard,
-  Search, Command as CommandIcon, CalendarDays, Star, Upload,
-  Bold, Italic, Underline, Copy, Scissors, ClipboardPaste, Undo2, Redo2,
-  PanelLeft, PanelRightClose, Hash, AtSign, Mail, Phone,
+  MoreHorizontal, ChevronDown, Settings, User, Trash2, Command as CommandIcon,
+  Bold, Italic, Underline, Copy, Scissors, ClipboardPaste, Mail
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
@@ -73,7 +71,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 function RowLabel({ children }: { children: React.ReactNode }) {
-  return <div className="w-full text-xs font-semibold text-muted-foreground mb-[-4px]">{children}</div>;
+  return <div className="w-full text-xs font-semibold text-muted-foreground -mb-1">{children}</div>;
 }
 
 export default function ComponentsPage() {
@@ -89,7 +87,7 @@ export default function ComponentsPage() {
   const [tags, setTags] = useState(["Pâtisserie", "Moules", "Ingrédients"]);
 
   return (
-    <div className="max-w-[1200px] mx-auto px-8 py-12 pb-24">
+    <div className="max-w-300 mx-auto px-8 py-12 pb-24">
       {/* Header */}
       <header className="flex justify-between items-start mb-14 pb-6 border-b border-border">
         <div>
@@ -243,14 +241,14 @@ export default function ComponentsPage() {
         </div>
 
         <div className="mb-5">
-          <div className="flex flex-col gap-1.5 max-w-[540px]">
+          <div className="flex flex-col gap-1.5 max-w-135">
             <Label>Description</Label>
             <Textarea placeholder="Décrivez le produit..." />
           </div>
         </div>
 
         <div className="mb-5">
-          <div className="flex flex-col gap-1.5 max-w-[360px]">
+          <div className="flex flex-col gap-1.5 max-w-90">
             <Label>Input Group</Label>
             <InputGroup>
               <InputGroupAddon><Mail className="size-4" /></InputGroupAddon>
@@ -262,7 +260,7 @@ export default function ComponentsPage() {
 
         <div className="mb-5">
           <RowLabel>Tags Input</RowLabel>
-          <div className="max-w-[360px] mt-2">
+          <div className="max-w-90 mt-2">
             <TagsInput value={tags} onValueChange={setTags}>
               <TagsInputList>
                 {tags.map((tag) => (
@@ -276,7 +274,7 @@ export default function ComponentsPage() {
 
         <div className="mb-5">
           <RowLabel>Slider</RowLabel>
-          <div className="max-w-[360px] mt-2">
+          <div className="max-w-90 mt-2">
             <Slider value={sliderValue} onValueChange={setSliderValue} />
             <div className="text-xs text-muted-foreground mt-1.5">Valeur : {sliderValue[0]}</div>
           </div>
@@ -433,7 +431,7 @@ export default function ComponentsPage() {
       <section className="mb-14">
         <SectionLabel>10 &mdash; Disclosure</SectionLabel>
         <SectionTitle>Collapsible</SectionTitle>
-        <Collapsible className="max-w-[540px] border border-border rounded-lg p-4">
+        <Collapsible className="max-w-135 border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium">@pedro du compte</div>
             <CollapsibleTrigger asChild>
@@ -641,7 +639,7 @@ export default function ComponentsPage() {
       <section className="mb-14">
         <SectionLabel>18 &mdash; Navigation</SectionLabel>
         <SectionTitle>Stepper</SectionTitle>
-        <div className="max-w-[540px]">
+        <div className="max-w-135">
           <Stepper value={stepperValue} onValueChange={setStepperValue}>
             <StepperItem value="info">
               <StepperTrigger><StepperIndicator /></StepperTrigger>

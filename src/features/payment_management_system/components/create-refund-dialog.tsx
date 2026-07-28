@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
+import { TransactionCombobox } from "./transaction-combobox";
 
 export function CreateRefundDialog() {
   const t = useTranslations("refunds");
@@ -81,7 +82,11 @@ export function CreateRefundDialog() {
         <form onSubmit={handle_submit} className="space-y-4">
           <div className="space-y-2">
             <Label>{t("transaction_id_label")}</Label>
-            <Input value={transaction_id} onChange={(e) => setTransactionId(e.target.value)} required />
+            <TransactionCombobox
+              value={transaction_id}
+              onValueChange={(v) => setTransactionId(v ?? "")}
+              placeholder={t("transaction_id_placeholder")}
+            />
           </div>
           <div className="space-y-2">
             <Label>{t("type_label")}</Label>

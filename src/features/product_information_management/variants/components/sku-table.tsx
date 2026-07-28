@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -772,23 +773,26 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 properties.map((property) => (
                   <Field key={property.id}>
                     <FieldLabel>{property.name}</FieldLabel>
-                    <select
-                      className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm"
+                    <Select
                       value={manual_values[property.id] ?? ""}
-                      onChange={(e) =>
+                      onValueChange={(v) =>
                         set_manual_values((prev) => ({
                           ...prev,
-                          [property.id]: e.target.value,
+                          [property.id]: v,
                         }))
                       }
                     >
-                      <option value="">{t("select_option")}</option>
-                      {property.values.map((value) => (
-                        <option key={value.id} value={value.id}>
-                          {value.label}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t("select_option")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {property.values.map((value) => (
+                          <SelectItem key={value.id} value={value.id}>
+                            {value.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                 ))}
 

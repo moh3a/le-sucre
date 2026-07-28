@@ -12,6 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TARGET_TYPE } from "../constants/campaign_types";
 import { full_campaign_dto } from "../models/campaign.dto";
 
@@ -132,39 +139,44 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                 {/* Inclusive / Exclusive */}
                 <div className="w-[120px]">
                   <FieldLabel className="text-xs">{t("action_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={rule.is_inclusive ? "true" : "false"}
-                    onChange={(e) =>
-                      handleRuleChange(idx, "is_inclusive", e.target.value === "true")
-                    }
+                    onValueChange={(v) => handleRuleChange(idx, "is_inclusive", v === "true")}
                   >
-                    <option value="true">{t("include")}</option>
-                    <option value="false">{t("exclude")}</option>
-                  </select>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{t("include")}</SelectItem>
+                      <SelectItem value="false">{t("exclude")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Target Type */}
                 <div className="w-[180px]">
                   <FieldLabel className="text-xs">{t("target_type_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={rule.target_type}
-                    onChange={(e) => {
-                      const nextType = e.target.value;
+                    onValueChange={(nextType) => {
                       handleRuleChange(idx, "target_type", nextType);
                       handleRuleChange(idx, "target_value", "");
                       handleRuleChange(idx, "behavior_rule", "");
                     }}
                   >
-                    <option value={TARGET_TYPE.all}>{t("target_all")}</option>
-                    <option value={TARGET_TYPE.country}>{t("target_country")}</option>
-                    <option value={TARGET_TYPE.language}>{t("target_language")}</option>
-                    <option value={TARGET_TYPE.customer_group}>{t("target_customer_group")}</option>
-                    <option value={TARGET_TYPE.new_customer}>{t("target_new_customer")}</option>
-                    <option value={TARGET_TYPE.returning_customer}>{t("target_returning_customer")}</option>
-                    <option value={TARGET_TYPE.behavior}>{t("target_behavior")}</option>
-                  </select>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={TARGET_TYPE.all}>{t("target_all")}</SelectItem>
+                      <SelectItem value={TARGET_TYPE.country}>{t("target_country")}</SelectItem>
+                      <SelectItem value={TARGET_TYPE.language}>{t("target_language")}</SelectItem>
+                      <SelectItem value={TARGET_TYPE.customer_group}>{t("target_customer_group")}</SelectItem>
+                      <SelectItem value={TARGET_TYPE.new_customer}>{t("target_new_customer")}</SelectItem>
+                      <SelectItem value={TARGET_TYPE.returning_customer}>{t("target_returning_customer")}</SelectItem>
+                      <SelectItem value={TARGET_TYPE.behavior}>{t("target_behavior")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Target Value/Behavior Rule inputs based on type */}
@@ -186,16 +198,19 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                   {rule.target_type === TARGET_TYPE.language && (
                     <Field>
                       <FieldLabel className="text-xs font-semibold">{t("target_language")}</FieldLabel>
-                      <select
-                        className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
+                      <Select
                         value={rule.target_value ?? ""}
-                        onChange={(e) => handleRuleChange(idx, "target_value", e.target.value)}
+                        onValueChange={(v) => handleRuleChange(idx, "target_value", v)}
                       >
-                        <option value="">{t("select_placeholder")}</option>
-                        <option value="fr">{t("locale_fr")}</option>
-                        <option value="en">{t("locale_en")}</option>
-                        <option value="ar">{t("locale_ar")}</option>
-                      </select>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder={t("select_placeholder")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fr">{t("locale_fr")}</SelectItem>
+                          <SelectItem value="en">{t("locale_en")}</SelectItem>
+                          <SelectItem value="ar">{t("locale_ar")}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </Field>
                   )}
 
@@ -216,16 +231,19 @@ export function CampaignTargetingTab({ campaign }: TargetingTabProps) {
                     <div className="grid grid-cols-2 gap-2">
                       <Field>
                         <FieldLabel className="text-xs">{t("behavior_rule_label")}</FieldLabel>
-                        <select
-                          className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none"
+                        <Select
                           value={rule.behavior_rule ?? ""}
-                          onChange={(e) => handleRuleChange(idx, "behavior_rule", e.target.value)}
+                          onValueChange={(v) => handleRuleChange(idx, "behavior_rule", v)}
                         >
-                          <option value="">{t("select_behavior")}</option>
-                          <option value="viewed_product">{t("behavior_viewed_product")}</option>
-                          <option value="purchased_category">{t("behavior_purchased_category")}</option>
-                          <option value="cart_abandoned">{t("behavior_cart_abandoned")}</option>
-                        </select>
+                          <SelectTrigger className="h-9 text-xs">
+                            <SelectValue placeholder={t("select_behavior")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="viewed_product">{t("behavior_viewed_product")}</SelectItem>
+                            <SelectItem value="purchased_category">{t("behavior_purchased_category")}</SelectItem>
+                            <SelectItem value="cart_abandoned">{t("behavior_cart_abandoned")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </Field>
                       <Field>
                         <FieldLabel className="text-xs">

@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   PROMOTION_TYPE,
   PROMOTION_STATUS,
@@ -223,13 +224,18 @@ export function CreatePromotionDialog() {
               render={({ field }) => (
                 <Field>
                   <FieldLabel>{t("promotion_type_label")}</FieldLabel>
-                  <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                    <option value={PROMOTION_TYPE.promo_code}>{t("type_promo_code")}</option>
-                    <option value={PROMOTION_TYPE.automatic}>{t("type_automatic")}</option>
-                    <option value={PROMOTION_TYPE.flash_sale}>{t("type_flash_sale")}</option>
-                    <option value={PROMOTION_TYPE.bundle}>{t("type_bundle")}</option>
-                    <option value={PROMOTION_TYPE.customer}>{t("type_customer")}</option>
-                  </select>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={PROMOTION_TYPE.promo_code}>{t("type_promo_code")}</SelectItem>
+                      <SelectItem value={PROMOTION_TYPE.automatic}>{t("type_automatic")}</SelectItem>
+                      <SelectItem value={PROMOTION_TYPE.flash_sale}>{t("type_flash_sale")}</SelectItem>
+                      <SelectItem value={PROMOTION_TYPE.bundle}>{t("type_bundle")}</SelectItem>
+                      <SelectItem value={PROMOTION_TYPE.customer}>{t("type_customer")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               )}
             />
@@ -240,12 +246,17 @@ export function CreatePromotionDialog() {
               render={({ field }) => (
                 <Field>
                   <FieldLabel>{t("status")}</FieldLabel>
-                  <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                    <option value={PROMOTION_STATUS.draft}>{t("status_draft")}</option>
-                    <option value={PROMOTION_STATUS.scheduled}>{t("status_scheduled")}</option>
-                    <option value={PROMOTION_STATUS.active}>{t("status_active")}</option>
-                    <option value={PROMOTION_STATUS.paused}>{t("status_paused")}</option>
-                  </select>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={PROMOTION_STATUS.draft}>{t("status_draft")}</SelectItem>
+                      <SelectItem value={PROMOTION_STATUS.scheduled}>{t("status_scheduled")}</SelectItem>
+                      <SelectItem value={PROMOTION_STATUS.active}>{t("status_active")}</SelectItem>
+                      <SelectItem value={PROMOTION_STATUS.paused}>{t("status_paused")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               )}
             />
@@ -314,14 +325,19 @@ export function CreatePromotionDialog() {
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>{t("scope_label")}</FieldLabel>
-                    <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                      <option value={DISCOUNT_SCOPE.cart}>{t("scope_cart")}</option>
-                      <option value={DISCOUNT_SCOPE.category}>{t("scope_category")}</option>
-                      <option value={DISCOUNT_SCOPE.product}>{t("scope_product")}</option>
-                      <option value={DISCOUNT_SCOPE.sku}>{t("scope_sku")}</option>
-                      <option value={DISCOUNT_SCOPE.customer}>{t("scope_customer")}</option>
-                      <option value={DISCOUNT_SCOPE.shipping}>{t("scope_shipping")}</option>
-                    </select>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={DISCOUNT_SCOPE.cart}>{t("scope_cart")}</SelectItem>
+                        <SelectItem value={DISCOUNT_SCOPE.category}>{t("scope_category")}</SelectItem>
+                        <SelectItem value={DISCOUNT_SCOPE.product}>{t("scope_product")}</SelectItem>
+                        <SelectItem value={DISCOUNT_SCOPE.sku}>{t("scope_sku")}</SelectItem>
+                        <SelectItem value={DISCOUNT_SCOPE.customer}>{t("scope_customer")}</SelectItem>
+                        <SelectItem value={DISCOUNT_SCOPE.shipping}>{t("scope_shipping")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
               />
@@ -332,12 +348,17 @@ export function CreatePromotionDialog() {
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>{t("discount_type_label")}</FieldLabel>
-                    <select className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none" {...field}>
-                      <option value={DISCOUNT_TYPE.percent}>{t("discount_percent")}</option>
-                      <option value={DISCOUNT_TYPE.fixed}>{t("discount_fixed")}</option>
-                      <option value={DISCOUNT_TYPE.free_shipping}>{t("discount_free_shipping")}</option>
-                      <option value={DISCOUNT_TYPE.buy_x_get_y}>{t("discount_buy_x_get_y")}</option>
-                    </select>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={DISCOUNT_TYPE.percent}>{t("discount_percent")}</SelectItem>
+                        <SelectItem value={DISCOUNT_TYPE.fixed}>{t("discount_fixed")}</SelectItem>
+                        <SelectItem value={DISCOUNT_TYPE.free_shipping}>{t("discount_free_shipping")}</SelectItem>
+                        <SelectItem value={DISCOUNT_TYPE.buy_x_get_y}>{t("discount_buy_x_get_y")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
               />

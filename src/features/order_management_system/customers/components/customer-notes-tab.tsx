@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate } from "@/lib/format";
 import { useTranslations } from "next-intl";
 import { StickyNote, Plus, Pin, PinOff } from "lucide-react";
@@ -54,16 +55,17 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-medium">{t("internal_notes")}</h3>
-          <select
-            className="border-input bg-background ring-offset-background h-8 rounded-md border px-2 text-xs"
-            value={filter ?? ""}
-            onChange={(e) => set_filter(e.target.value || undefined)}
-          >
-            <option value="">{t("all")}</option>
-            <option value="private">{t("private")}</option>
-            <option value="operator">{t("operator")}</option>
-            <option value="follow_up">{t("follow_up")}</option>
-          </select>
+          <Select value={filter ?? ""} onValueChange={(v) => set_filter(v || undefined)}>
+            <SelectTrigger className="h-8 w-32 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__blank__">{t("all")}</SelectItem>
+              <SelectItem value="private">{t("private")}</SelectItem>
+              <SelectItem value="operator">{t("operator")}</SelectItem>
+              <SelectItem value="follow_up">{t("follow_up")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button size="sm" onClick={() => set_show_form(!show_form)}>
           <Plus className="mr-1 h-3 w-3" />
@@ -76,15 +78,16 @@ export function CustomerNotesTab({ user_id }: CustomerNotesTabProps) {
           <CardContent className="space-y-3 pt-4">
             <div className="space-y-1">
               <label className="text-xs font-medium">{t("type")}</label>
-              <select
-                className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                value={note_type}
-                onChange={(e) => set_note_type(e.target.value)}
-              >
-                <option value="private">{t("private_note")}</option>
-                <option value="operator">{t("operator_note")}</option>
-                <option value="follow_up">{t("follow_up_note")}</option>
-              </select>
+              <Select value={note_type} onValueChange={set_note_type}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="private">{t("private_note")}</SelectItem>
+                  <SelectItem value="operator">{t("operator_note")}</SelectItem>
+                  <SelectItem value="follow_up">{t("follow_up_note")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">{t("content")}</label>

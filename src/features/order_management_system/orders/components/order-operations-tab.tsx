@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate } from "@/lib/format";
 
 const ESCALATION_STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "outline"> = {
@@ -145,19 +146,19 @@ export function OrderOperationsTab({ order_id }: OrderOpsTabProps) {
             <div className="space-y-2">
               <div>
                 <Label>{t("reason")}</Label>
-                <select
-                  className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                  value={hold_reason}
-                  onChange={(e) => set_hold_reason(e.target.value)}
-                >
-                  <option value="">{t("select_reason")}</option>
-                  <option value="payment_verification">{t("payment_verification")}</option>
-                  <option value="fraud_check">{t("fraud_check")}</option>
-                  <option value="customer_request">{t("customer_request")}</option>
-                  <option value="stock_issue">{t("stock_issue")}</option>
-                  <option value="address_verification">{t("address_verification")}</option>
-                  <option value="other">{t("other")}</option>
-                </select>
+                <Select value={hold_reason} onValueChange={set_hold_reason}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder={t("select_reason")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="payment_verification">{t("payment_verification")}</SelectItem>
+                    <SelectItem value="fraud_check">{t("fraud_check")}</SelectItem>
+                    <SelectItem value="customer_request">{t("customer_request")}</SelectItem>
+                    <SelectItem value="stock_issue">{t("stock_issue")}</SelectItem>
+                    <SelectItem value="address_verification">{t("address_verification")}</SelectItem>
+                    <SelectItem value="other">{t("other")}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>{t("description_optional")}</Label>
@@ -193,31 +194,32 @@ export function OrderOperationsTab({ order_id }: OrderOpsTabProps) {
           <div className="flex items-end gap-2">
             <div className="flex-1 space-y-1">
               <Label>{t("create_escalation")}</Label>
-              <select
-                className="border-input bg-background ring-offset-background mb-1 flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                value={esc_reason}
-                onChange={(e) => set_esc_reason(e.target.value)}
-              >
-                <option value="">{t("reason")}</option>
-                <option value="payment_dispute">{t("payment_dispute")}</option>
-                <option value="customer_complaint">{t("customer_complaint")}</option>
-                <option value="delivery_issue">{t("delivery_issue")}</option>
-                <option value="technical">{t("technical")}</option>
-                <option value="other">{t("other")}</option>
-              </select>
+                <Select value={esc_reason} onValueChange={set_esc_reason}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder={t("reason")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="payment_dispute">{t("payment_dispute")}</SelectItem>
+                    <SelectItem value="customer_complaint">{t("customer_complaint")}</SelectItem>
+                    <SelectItem value="delivery_issue">{t("delivery_issue")}</SelectItem>
+                    <SelectItem value="technical">{t("technical")}</SelectItem>
+                    <SelectItem value="other">{t("other")}</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
             <div className="w-32 space-y-1">
               <Label>{t("priority")}</Label>
-              <select
-                className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                value={esc_priority}
-                onChange={(e) => set_esc_priority(e.target.value as "low" | "normal" | "high" | "urgent")}
-              >
-                <option value="low">{t("priority_low")}</option>
-                <option value="normal">{t("priority_normal")}</option>
-                <option value="high">{t("priority_high")}</option>
-                <option value="urgent">{t("priority_urgent")}</option>
-              </select>
+                <Select value={esc_priority} onValueChange={(v) => set_esc_priority(v as "low" | "normal" | "high" | "urgent")}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">{t("priority_low")}</SelectItem>
+                    <SelectItem value="normal">{t("priority_normal")}</SelectItem>
+                    <SelectItem value="high">{t("priority_high")}</SelectItem>
+                    <SelectItem value="urgent">{t("priority_urgent")}</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
             <Button
               size="sm"
@@ -277,19 +279,19 @@ export function OrderOperationsTab({ order_id }: OrderOpsTabProps) {
           <div className="flex items-end gap-2">
             <div className="flex-1 space-y-1">
               <Label>{t("request_cancellation")}</Label>
-              <select
-                className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                value={cancel_reason}
-                onChange={(e) => set_cancel_reason(e.target.value)}
-              >
-                <option value="">{t("reason")}</option>
-                <option value="customer_request">{t("customer_request")}</option>
-                <option value="payment_issue">{t("cancel_reason_payment_issue")}</option>
-                <option value="out_of_stock">{t("cancel_reason_out_of_stock")}</option>
-                <option value="fraud">{t("cancel_reason_fraud")}</option>
-                <option value="duplicate">{t("cancel_reason_duplicate")}</option>
-                <option value="other">{t("other")}</option>
-              </select>
+                <Select value={cancel_reason} onValueChange={set_cancel_reason}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder={t("reason")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer_request">{t("customer_request")}</SelectItem>
+                    <SelectItem value="payment_issue">{t("cancel_reason_payment_issue")}</SelectItem>
+                    <SelectItem value="out_of_stock">{t("cancel_reason_out_of_stock")}</SelectItem>
+                    <SelectItem value="fraud">{t("cancel_reason_fraud")}</SelectItem>
+                    <SelectItem value="duplicate">{t("cancel_reason_duplicate")}</SelectItem>
+                    <SelectItem value="other">{t("other")}</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
             <Button
               size="sm"

@@ -382,6 +382,10 @@ export class PaymentProcessingService {
     }
     return transaction;
   }
+
+  async search(search: string, limit = 20) {
+    return this.repo.search_transactions(search, limit);
+  }
 }
 
 export const payment_processing_service = new PaymentProcessingService();

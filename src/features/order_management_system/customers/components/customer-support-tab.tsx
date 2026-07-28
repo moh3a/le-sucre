@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HeadphonesIcon, Plus, RefreshCw, XCircle } from "lucide-react";
 
 const STATUS_BADGES: Record<string, "destructive" | "secondary" | "default" | "outline"> = {
@@ -92,18 +93,19 @@ export function CustomerSupportTab({ user_id }: CustomerSupportTabProps) {
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium">{t("category")}</label>
-                <select
-                  className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                  value={category}
-                  onChange={(e) => set_category(e.target.value)}
-                >
-                  <option value="general">{t("general")}</option>
-                  <option value="order">{t("order")}</option>
-                  <option value="delivery">{t("delivery")}</option>
-                  <option value="product">{t("product")}</option>
-                  <option value="payment">{t("payment")}</option>
-                  <option value="technical">{t("technical")}</option>
-                </select>
+                <Select value={category} onValueChange={set_category}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">{t("general")}</SelectItem>
+                    <SelectItem value="order">{t("order")}</SelectItem>
+                    <SelectItem value="delivery">{t("delivery")}</SelectItem>
+                    <SelectItem value="product">{t("product")}</SelectItem>
+                    <SelectItem value="payment">{t("payment")}</SelectItem>
+                    <SelectItem value="technical">{t("technical")}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-1">

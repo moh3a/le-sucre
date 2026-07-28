@@ -12,6 +12,13 @@ import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -357,19 +364,21 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>{t("campaign_type")}</FieldLabel>
-                      <select
-                        className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                        {...field}
-                      >
-                        <option value={CAMPAIGN_TYPE.homepage}>{t("type_homepage")}</option>
-                        <option value={CAMPAIGN_TYPE.seasonal}>{t("type_seasonal")}</option>
-                        <option value={CAMPAIGN_TYPE.flash_sale}>{t("type_flash_sale")}</option>
-                        <option value={CAMPAIGN_TYPE.targeted}>{t("type_targeted")}</option>
-                        <option value={CAMPAIGN_TYPE.banner}>{t("type_banner")}</option>
-                        <option value={CAMPAIGN_TYPE.category}>{t("type_category")}</option>
-                        <option value={CAMPAIGN_TYPE.brand}>{t("type_brand")}</option>
-                        <option value={CAMPAIGN_TYPE.landing_page}>{t("type_landing_page")}</option>
-                      </select>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={CAMPAIGN_TYPE.homepage}>{t("type_homepage")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.seasonal}>{t("type_seasonal")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.flash_sale}>{t("type_flash_sale")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.targeted}>{t("type_targeted")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.banner}>{t("type_banner")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.category}>{t("type_category")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.brand}>{t("type_brand")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_TYPE.landing_page}>{t("type_landing_page")}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </Field>
                   )}
                 />
@@ -380,17 +389,19 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>{tc("status")}</FieldLabel>
-                      <select
-                        className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                        {...field}
-                      >
-                        <option value={CAMPAIGN_STATUS.draft}>{t("status_draft")}</option>
-                        <option value={CAMPAIGN_STATUS.scheduled}>{t("status_scheduled")}</option>
-                        <option value={CAMPAIGN_STATUS.active}>{t("status_active")}</option>
-                        <option value={CAMPAIGN_STATUS.paused}>{t("status_paused")}</option>
-                        <option value={CAMPAIGN_STATUS.ended}>{t("status_ended")}</option>
-                        <option value={CAMPAIGN_STATUS.cancelled}>{t("status_cancelled")}</option>
-                      </select>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={CAMPAIGN_STATUS.draft}>{t("status_draft")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_STATUS.scheduled}>{t("status_scheduled")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_STATUS.active}>{t("status_active")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_STATUS.paused}>{t("status_paused")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_STATUS.ended}>{t("status_ended")}</SelectItem>
+                          <SelectItem value={CAMPAIGN_STATUS.cancelled}>{t("status_cancelled")}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </Field>
                   )}
                 />
@@ -629,15 +640,17 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
                   render={({ field }) => (
                     <Field>
                       <FieldLabel>{t("layout")}</FieldLabel>
-                      <select
-                        className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                        {...field}
-                      >
-                        <option value="full_width">{t("layout_full_width")}</option>
-                        <option value="split">{t("layout_split")}</option>
-                        <option value="card_grid">{t("layout_card_grid")}</option>
-                        <option value="carousel">{t("layout_carousel")}</option>
-                      </select>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="full_width">{t("layout_full_width")}</SelectItem>
+                          <SelectItem value="split">{t("layout_split")}</SelectItem>
+                          <SelectItem value="card_grid">{t("layout_card_grid")}</SelectItem>
+                          <SelectItem value="carousel">{t("layout_carousel")}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </Field>
                   )}
                 />
@@ -700,27 +713,27 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
               <Controller
                 name="promotion_id"
                 control={form.control}
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>{t("linked_promotion")}</FieldLabel>
-                    <select
-                      className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
-                    >
-                      <option value="">{t("no_promotion")}</option>
-                      {promotions?.items?.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} (
-                          {p.discount_type === "percentage"
-                            ? `-${p.discount_value}%`
-                            : `-${p.discount_value} DZD`}
-                          )
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                )}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{t("linked_promotion")}</FieldLabel>
+                      <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder={t("no_promotion")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {promotions?.items?.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name} (
+                              {p.discount_type === "percentage"
+                                ? `-${p.discount_value}%`
+                                : `-${p.discount_value} DZD`}
+                              )
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  )}
               />
 
               {/* Category Linkage */}

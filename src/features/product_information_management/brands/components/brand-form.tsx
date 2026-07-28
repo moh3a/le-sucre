@@ -10,6 +10,7 @@ import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MediaPickerField } from "@/features/media_library/components/media-picker-field";
 import type { MediaDTO } from "@/features/media_library/types";
 import { toast } from "sonner";
@@ -172,14 +173,18 @@ export function BrandForm({
               render={({ field }) => (
                 <Field>
                   <FieldLabel>{t("active")}</FieldLabel>
-                  <select
-                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                  <Select
                     value={field.value ? "true" : "false"}
-                    onChange={(e) => field.onChange(e.target.value === "true")}
+                    onValueChange={(v) => field.onChange(v === "true")}
                   >
-                    <option value="true">{t("status_active")}</option>
-                    <option value="false">{t("status_inactive")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{t("status_active")}</SelectItem>
+                      <SelectItem value="false">{t("status_inactive")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               )}
             />

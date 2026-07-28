@@ -2365,7 +2365,9 @@
     "method": "Méthode",
     "reference": "Référence",
     "notes": "Notes",
-    "reason": "Motif"
+    "reason": "Motif",
+    "search_transaction_placeholder": "Rechercher une transaction par ID ou commande…",
+    "no_results": "Aucun résultat"
   },
   "payouts": {
     "title": "Paiements fournisseurs",
@@ -2449,6 +2451,7 @@
     "type_label": "Type",
     "type_full_refund": "Remboursement total",
     "type_partial_refund": "Remboursement partiel",
+    "transaction_id_placeholder": "Rechercher une transaction…",
     "amount_dzd_label": "Montant (DZD)",
     "reason_optional_label": "Raison (optionnelle)",
     "stats_total": "Total remboursements",

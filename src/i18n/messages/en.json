@@ -2057,7 +2057,9 @@
     "installment_mark_paid_button": "Mark as paid",
     "error_prefix": "Error: {message}",
     "provider_placeholder": "N/A",
-    "transaction_id_placeholder": "N/A"
+    "transaction_id_placeholder": "N/A",
+    "search_transaction_placeholder": "Search transaction by ID or order…",
+    "no_results": "No results"
   },
   "payouts": {
     "title": "Payouts",
@@ -2139,6 +2141,7 @@
     "type_label": "Type",
     "type_full_refund": "Full refund",
     "type_partial_refund": "Partial refund",
+    "transaction_id_placeholder": "Search a transaction…",
     "amount_dzd_label": "Amount (DZD)",
     "reason_optional_label": "Reason (optional)",
     "stats_pending": "Pending",

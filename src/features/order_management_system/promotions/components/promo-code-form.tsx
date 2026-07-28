@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type PromoCodeFormProps = {
   promotion_id: string;
@@ -81,14 +82,18 @@ export function PromoCodeForm({ promotion_id, on_created }: PromoCodeFormProps) 
         </div>
         <div>
           <Label>{t("promo_type_label")}</Label>
-          <select
-            className="w-full rounded-md border px-3 py-2"
+          <Select
             value={discount_type}
-            onChange={(e) => set_discount_type(e.target.value as "percent" | "fixed")}
+            onValueChange={(v) => set_discount_type(v as "percent" | "fixed")}
           >
-            <option value="percent">{t("promo_type_percent")}</option>
-            <option value="fixed">{t("promo_type_fixed")}</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="percent">{t("promo_type_percent")}</SelectItem>
+              <SelectItem value="fixed">{t("promo_type_fixed")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label>{t("promo_value_label")}</Label>

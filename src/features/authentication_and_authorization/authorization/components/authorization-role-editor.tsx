@@ -101,7 +101,7 @@ export function AuthorizationRoleEditor() {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <Select value={selected_role} onValueChange={(v) => { setSelectedRole(v); setDraftPermissions([]); setPermSearch(""); }}>
-                <SelectTrigger className="w-[200px] capitalize">
+                <SelectTrigger className="w-50 capitalize">
                   <SelectValue placeholder={t("select_role_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,7 +139,7 @@ export function AuthorizationRoleEditor() {
                 {tAuth("select_none")}
               </Button>
             </div>
-            <div className="grid max-h-[400px] gap-1 overflow-y-auto rounded-lg border p-2">
+            <div className="grid max-h-100 gap-1 overflow-y-auto rounded-lg border p-2">
               {filtered_permissions.map(([key, value]) => (
                 <label
                   key={value}

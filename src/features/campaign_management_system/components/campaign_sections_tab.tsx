@@ -12,6 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -326,20 +333,24 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
               <div className="grid gap-4 md:grid-cols-3">
                 <Field className="md:col-span-2">
                   <FieldLabel>{t("section_type_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={formState.section_type}
-                    onChange={(e) => setFormState({ ...formState, section_type: e.target.value })}
+                    onValueChange={(v) => setFormState({ ...formState, section_type: v })}
                   >
-                    <option value={SECTION_TYPE.product_grid}>{t("section_type_product_grid")}</option>
-                    <option value={SECTION_TYPE.product_carousel}>{t("section_type_product_carousel")}</option>
-                    <option value={SECTION_TYPE.category_showcase}>{t("section_type_category_showcase")}</option>
-                    <option value={SECTION_TYPE.brand_showcase}>{t("section_type_brand_showcase")}</option>
-                    <option value={SECTION_TYPE.banner_row}>{t("section_type_banner_row")}</option>
-                    <option value={SECTION_TYPE.countdown}>{t("section_type_countdown")}</option>
-                    <option value={SECTION_TYPE.text_block}>{t("section_type_text_block")}</option>
-                    <option value={SECTION_TYPE.video}>{t("section_type_video")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={SECTION_TYPE.product_grid}>{t("section_type_product_grid")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.product_carousel}>{t("section_type_product_carousel")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.category_showcase}>{t("section_type_category_showcase")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.brand_showcase}>{t("section_type_brand_showcase")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.banner_row}>{t("section_type_banner_row")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.countdown}>{t("section_type_countdown")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.text_block}>{t("section_type_text_block")}</SelectItem>
+                      <SelectItem value={SECTION_TYPE.video}>{t("section_type_video")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
 
                 <Field>
@@ -366,16 +377,18 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
 
                 <Field>
                   <FieldLabel>{t("active_status_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={formState.is_active ? "true" : "false"}
-                    onChange={(e) =>
-                      setFormState({ ...formState, is_active: e.target.value === "true" })
-                    }
+                    onValueChange={(v) => setFormState({ ...formState, is_active: v === "true" })}
                   >
-                    <option value="true">{t("status_active_label")}</option>
-                    <option value="false">{t("status_inactive_label")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{t("status_active_label")}</SelectItem>
+                      <SelectItem value="false">{t("status_inactive_label")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
 
@@ -448,18 +461,21 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                     <div className="grid gap-4 md:grid-cols-2">
                       <Field>
                         <FieldLabel>{t("filter_by_category")}</FieldLabel>
-                        <select
-                          className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                        <Select
                           value={formState.config?.category_id ?? ""}
-                          onChange={(e) => handleConfigChange("category_id", e.target.value)}
+                          onValueChange={(v) => handleConfigChange("category_id", v)}
                         >
-                          <option value="">{t("all_categories")}</option>
-                          {category_options.map((opt) => (
-                            <option key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder={t("all_categories")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {category_options.map((opt) => (
+                              <SelectItem key={opt.id} value={opt.id}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </Field>
 
                       <Field>
@@ -477,36 +493,42 @@ export function CampaignSectionsTab({ campaign_id, sections }: SectionsTabProps)
                 {formState.section_type === "category_showcase" && (
                   <Field>
                     <FieldLabel>{t("target_category")}</FieldLabel>
-                    <select
-                      className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                    <Select
                       value={formState.config?.category_id ?? ""}
-                      onChange={(e) => handleConfigChange("category_id", e.target.value)}
+                      onValueChange={(v) => handleConfigChange("category_id", v)}
                     >
-                      <option value="">{t("select_category")}</option>
-                      {category_options.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder={t("select_category")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {category_options.map((opt) => (
+                          <SelectItem key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
 
                 {formState.section_type === "brand_showcase" && (
                   <Field>
                     <FieldLabel>{t("target_brand")}</FieldLabel>
-                    <select
-                      className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                    <Select
                       value={formState.config?.brand_id ?? ""}
-                      onChange={(e) => handleConfigChange("brand_id", e.target.value)}
+                      onValueChange={(v) => handleConfigChange("brand_id", v)}
                     >
-                      <option value="">{t("select_brand")}</option>
-                      {activeBrands?.map((brand) => (
-                        <option key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder={t("select_brand")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activeBrands?.map((brand) => (
+                          <SelectItem key={brand.id} value={brand.id}>
+                            {brand.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
 

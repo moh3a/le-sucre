@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDate } from "@/lib/format";
 import { Phone, Plus, CheckCircle2 } from "lucide-react";
 
@@ -70,15 +71,16 @@ export function CustomerFollowupsTab({ user_id }: CustomerFollowupsTabProps) {
           <CardContent className="space-y-3 pt-4">
             <div className="space-y-1">
               <label className="text-xs font-medium">{t("type")}</label>
-              <select
-                className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                value={fu_type}
-                onChange={(e) => set_fu_type(e.target.value)}
-              >
-                <option value="callback">{t("callback")}</option>
-                <option value="follow_up">{t("follow_up")}</option>
-                <option value="reminder">{t("reminder_auto")}</option>
-              </select>
+              <Select value={fu_type} onValueChange={set_fu_type}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="callback">{t("callback")}</SelectItem>
+                  <SelectItem value="follow_up">{t("follow_up")}</SelectItem>
+                  <SelectItem value="reminder">{t("reminder_auto")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">{t("title_field")}</label>

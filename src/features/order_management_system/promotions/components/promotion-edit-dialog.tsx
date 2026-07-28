@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
@@ -23,6 +23,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PROMOTION_STATUS } from "../constants/promotion-types";
 
 const edit_form_schema = z.object({
@@ -161,16 +168,24 @@ export function PromotionEditDialog({ open, on_open_change, promotion }: Promoti
             <div className="grid gap-4 md:grid-cols-2">
               <Field>
                 <FieldLabel>{tp("status")}</FieldLabel>
-                <select
-                  className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
-                  {...form.register("status")}
-                >
-                  <option value={PROMOTION_STATUS.draft}>{tp("status_draft")}</option>
-                  <option value={PROMOTION_STATUS.scheduled}>{tp("status_scheduled")}</option>
-                  <option value={PROMOTION_STATUS.active}>{tp("status_active")}</option>
-                  <option value={PROMOTION_STATUS.paused}>{tp("status_paused")}</option>
-                  <option value={PROMOTION_STATUS.expired}>{tp("status_expired")}</option>
-                </select>
+                <Controller
+                  name="status"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={PROMOTION_STATUS.draft}>{tp("status_draft")}</SelectItem>
+                        <SelectItem value={PROMOTION_STATUS.scheduled}>{tp("status_scheduled")}</SelectItem>
+                        <SelectItem value={PROMOTION_STATUS.active}>{tp("status_active")}</SelectItem>
+                        <SelectItem value={PROMOTION_STATUS.paused}>{tp("status_paused")}</SelectItem>
+                        <SelectItem value={PROMOTION_STATUS.expired}>{tp("status_expired")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </Field>
               <Field>
                 <FieldLabel>{tp("priority")}</FieldLabel>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { extract_error_message } from "@/lib/error-detection";
 import {
@@ -233,18 +234,18 @@ function ExportSection() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label className="mb-1.5">{t("db_select_table")}</Label>
-            <select
-              value={selectedTable}
-              onChange={(e) => setSelectedTable(e.target.value)}
-              className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-full border px-3 text-sm outline-none focus-visible:ring-[3px]"
-            >
-              <option value="">{t("db_choose_table")}</option>
-              {tables_query.data?.map((table) => (
-                <option key={table} value={table}>
-                  {table}
-                </option>
-              ))}
-            </select>
+            <Select value={selectedTable} onValueChange={setSelectedTable}>
+              <SelectTrigger className="h-9 w-full rounded-full">
+                <SelectValue placeholder={t("db_choose_table")} />
+              </SelectTrigger>
+              <SelectContent>
+                {tables_query.data?.map((table) => (
+                  <SelectItem key={table} value={table}>
+                    {table}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label className="mb-1.5">{t("db_format")}</Label>
@@ -375,18 +376,18 @@ function ImportSection() {
           <div className="space-y-3">
             <div>
               <Label className="mb-1.5">{t("db_target_table")}</Label>
-              <select
-                value={csvTable}
-                onChange={(e) => setCsvTable(e.target.value)}
-                className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-full border px-3 text-sm outline-none focus-visible:ring-[3px]"
-              >
-                <option value="">{t("db_choose_table")}</option>
-                {tables_query.data?.map((table) => (
-                  <option key={table} value={table}>
-                    {table}
-                  </option>
-                ))}
-              </select>
+              <Select value={csvTable} onValueChange={setCsvTable}>
+                <SelectTrigger className="h-9 w-full rounded-full">
+                  <SelectValue placeholder={t("db_choose_table")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tables_query.data?.map((table) => (
+                    <SelectItem key={table} value={table}>
+                      {table}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="mb-1.5">{t("db_csv_content")}</Label>

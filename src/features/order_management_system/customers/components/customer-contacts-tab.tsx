@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CONTACT_TYPE_ICONS: Record<string, React.ElementType> = {
   phone_call: Phone,
@@ -74,27 +75,29 @@ export function CustomerContactsTab({ user_id }: CustomerContactsTabProps) {
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <label className="text-xs font-medium">{t("type")}</label>
-                  <select
-                    className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                    value={contact_type}
-                    onChange={(e) => set_contact_type(e.target.value)}
-                  >
-                    <option value="phone_call">Appel téléphonique</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="sms">SMS</option>
-                    <option value="email">Email</option>
-                  </select>
+                  <Select value={contact_type} onValueChange={set_contact_type}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="phone_call">Appel téléphonique</SelectItem>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                      <SelectItem value="sms">SMS</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium">{t("direction")}</label>
-                  <select
-                    className="border-input bg-background ring-offset-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-                    value={direction}
-                    onChange={(e) => set_direction(e.target.value)}
-                  >
-                    <option value="inbound">Entrant</option>
-                    <option value="outbound">Sortant</option>
-                  </select>
+                  <Select value={direction} onValueChange={set_direction}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inbound">Entrant</SelectItem>
+                      <SelectItem value="outbound">Sortant</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-1">

@@ -21,9 +21,15 @@ import { useUndoAction } from "@/hooks/use-undo-action";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -316,33 +322,39 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
               <div className="grid gap-4 md:grid-cols-2">
                 <Field>
                   <FieldLabel>{t("banner_type_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={formState.banner_type}
-                    onChange={(e) => setFormState({ ...formState, banner_type: e.target.value })}
+                    onValueChange={(v) => setFormState({ ...formState, banner_type: v })}
                   >
-                    <option value={BANNER_TYPE.hero}>{t("banner_type_hero")}</option>
-                    <option value={BANNER_TYPE.sidebar}>{t("banner_type_sidebar")}</option>
-                    <option value={BANNER_TYPE.popup}>{t("banner_type_popup")}</option>
-                    <option value={BANNER_TYPE.inline}>{t("banner_type_inline")}</option>
-                    <option value={BANNER_TYPE.countdown_bar}>{t("banner_type_countdown_bar")}</option>
-                    <option value={BANNER_TYPE.notification_bar}>{t("banner_type_notification_bar")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={BANNER_TYPE.hero}>{t("banner_type_hero")}</SelectItem>
+                      <SelectItem value={BANNER_TYPE.sidebar}>{t("banner_type_sidebar")}</SelectItem>
+                      <SelectItem value={BANNER_TYPE.popup}>{t("banner_type_popup")}</SelectItem>
+                      <SelectItem value={BANNER_TYPE.inline}>{t("banner_type_inline")}</SelectItem>
+                      <SelectItem value={BANNER_TYPE.countdown_bar}>{t("banner_type_countdown_bar")}</SelectItem>
+                      <SelectItem value={BANNER_TYPE.notification_bar}>{t("banner_type_notification_bar")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
 
                 <Field>
                   <FieldLabel>{t("device_target_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={formState.device_target}
-                    onChange={(e) =>
-                      setFormState({ ...formState, device_target: e.target.value as DeviceTarget })
-                    }
+                    onValueChange={(v) => setFormState({ ...formState, device_target: v as DeviceTarget })}
                   >
-                    <option value="both">{t("device_all")}</option>
-                    <option value="desktop">{t("device_desktop")}</option>
-                    <option value="mobile">{t("device_mobile")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="both">{t("device_all")}</SelectItem>
+                      <SelectItem value="desktop">{t("device_desktop")}</SelectItem>
+                      <SelectItem value="mobile">{t("device_mobile")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
 
@@ -451,33 +463,34 @@ export function CampaignBannersTab({ campaign_id, banners }: BannersTabProps) {
 
                 <Field>
                   <FieldLabel>{t("link_target_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={formState.link_target}
-                    onChange={(e) =>
-                      setFormState({
-                        ...formState,
-                        link_target: e.target.value as "_self" | "_blank",
-                      })
-                    }
+                    onValueChange={(v) => setFormState({ ...formState, link_target: v as "_self" | "_blank" })}
                   >
-                    <option value="_self">{t("link_target_self")}</option>
-                    <option value="_blank">{t("link_target_blank")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_self">{t("link_target_self")}</SelectItem>
+                      <SelectItem value="_blank">{t("link_target_blank")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
 
                 <Field>
                   <FieldLabel>{t("active_status_label")}</FieldLabel>
-                  <select
-                    className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none"
+                  <Select
                     value={formState.is_active ? "true" : "false"}
-                    onChange={(e) =>
-                      setFormState({ ...formState, is_active: e.target.value === "true" })
-                    }
+                    onValueChange={(v) => setFormState({ ...formState, is_active: v === "true" })}
                   >
-                    <option value="true">{t("status_active_label")}</option>
-                    <option value="false">{t("status_inactive_label")}</option>
-                  </select>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{t("status_active_label")}</SelectItem>
+                      <SelectItem value="false">{t("status_inactive_label")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
 
