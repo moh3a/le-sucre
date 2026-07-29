@@ -3,6 +3,7 @@ import "server-only";
 import { and, desc, eq, lte } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
 import { SKU_ERROR } from "../constants/error-codes";
@@ -40,29 +41,34 @@ export class PricingRepository {
       .limit(1);
 
     if (existing.length) {
-      await db
-        .update(sku_prices)
-        .set({
-          price: input.price,
-          currency: input.currency,
-          valid_from: input.valid_from ?? null,
-          valid_to: input.valid_to ?? null,
-        })
-        .where(eq(sku_prices.id, existing[0]!.id));
+      await catch_drizzle(
+        db
+          .update(sku_prices)
+          .set({
+            price: input.price,
+            currency: input.currency,
+            valid_from: input.valid_from ?? null,
+            valid_to: input.valid_to ?? null,
+          })
+          .where(eq(sku_prices.id, existing[0]!.id)),
+      );
       return existing[0]!.id;
     }
 
     const id = generate_id();
-    await db.insert(sku_prices).values({
-      id,
-      sku_id: input.sku_id,
-      channel: input.channel,
-      min_quantity: input.min_quantity,
-      price: input.price,
-      currency: input.currency,
-      valid_from: input.valid_from ?? null,
-      valid_to: input.valid_to ?? null,
-    });
+    await catch_drizzle(
+      db.insert(sku_prices).values({
+        id,
+        sku_id: input.sku_id,
+        channel: input.channel,
+        min_quantity: input.min_quantity,
+        price: input.price,
+        currency: input.currency,
+        valid_from: input.valid_from ?? null,
+        valid_to: input.valid_to ?? null,
+      }),
+      SKU_ERROR.PRICE_TIER_CONFLICT,
+    );
     return id;
   }
 
@@ -79,7 +85,7 @@ export class PricingRepository {
       )
       .limit(1);
     if (!existing.length) throw_error(SKU_ERROR.PRICE_TIER_NOT_FOUND);
-    await db.delete(sku_prices).where(eq(sku_prices.id, existing[0]!.id));
+    await catch_drizzle(db.delete(sku_prices).where(eq(sku_prices.id, existing[0]!.id)));
     return { ok: true };
   }
 

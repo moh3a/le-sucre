@@ -3,6 +3,7 @@ import "server-only";
 import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
 import { VARIANT_ERROR } from "../constants/error-codes";
@@ -65,14 +66,17 @@ export class PropertyRepository {
     if (existing.length) throw_error(VARIANT_ERROR.SLUG_CONFLICT);
 
     const id = generate_id();
-    await db.insert(product_properties).values({
-      id,
-      product_id: input.product_id,
-      code: input.code,
-      name: input.name,
-      sort_order: input.sort_order,
-      is_required: input.is_required,
-    });
+    await catch_drizzle(
+      db.insert(product_properties).values({
+        id,
+        product_id: input.product_id,
+        code: input.code,
+        name: input.name,
+        sort_order: input.sort_order,
+        is_required: input.is_required,
+      }),
+      VARIANT_ERROR.SLUG_CONFLICT,
+    );
 
     return this.get_property(id);
   }
@@ -98,15 +102,17 @@ export class PropertyRepository {
       if (conflict.length) throw_error(VARIANT_ERROR.SLUG_CONFLICT);
     }
 
-    await db
-      .update(product_properties)
-      .set({
-        ...(input.code !== undefined && { code: input.code }),
-        ...(input.name !== undefined && { name: input.name }),
-        ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
-        ...(input.is_required !== undefined && { is_required: input.is_required }),
-      })
-      .where(eq(product_properties.id, id));
+    await catch_drizzle(
+      db
+        .update(product_properties)
+        .set({
+          ...(input.code !== undefined && { code: input.code }),
+          ...(input.name !== undefined && { name: input.name }),
+          ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
+          ...(input.is_required !== undefined && { is_required: input.is_required }),
+        })
+        .where(eq(product_properties.id, id)),
+    );
 
     return this.get_property(id);
   }
@@ -119,13 +125,19 @@ export class PropertyRepository {
     const value_ids = values.map((v) => v.id);
 
     if (value_ids.length > 0) {
-      await db
-        .delete(sku_option_values)
-        .where(inArray(sku_option_values.property_value_id, value_ids));
-      await db.delete(property_values).where(eq(property_values.property_id, id));
+      await catch_drizzle(
+        db
+          .delete(sku_option_values)
+          .where(inArray(sku_option_values.property_value_id, value_ids)),
+      );
+      await catch_drizzle(
+        db.delete(property_values).where(eq(property_values.property_id, id)),
+      );
     }
 
-    await db.delete(product_properties).where(eq(product_properties.id, id));
+    await catch_drizzle(
+      db.delete(product_properties).where(eq(product_properties.id, id)),
+    );
     return { ok: true };
   }
 
@@ -152,16 +164,19 @@ export class PropertyRepository {
     if (existing.length) throw_error(VARIANT_ERROR.VALUE_SLUG_CONFLICT);
 
     const id = generate_id();
-    await db.insert(property_values).values({
-      id,
-      property_id: input.property_id,
-      code: input.code,
-      label: input.label,
-      sort_order: input.sort_order,
-      thumbnail_image: input.thumbnail_image ?? null,
-      color_hex: input.color_hex ?? null,
-      metadata: input.metadata,
-    });
+    await catch_drizzle(
+      db.insert(property_values).values({
+        id,
+        property_id: input.property_id,
+        code: input.code,
+        label: input.label,
+        sort_order: input.sort_order,
+        thumbnail_image: input.thumbnail_image ?? null,
+        color_hex: input.color_hex ?? null,
+        metadata: input.metadata,
+      }),
+      VARIANT_ERROR.VALUE_SLUG_CONFLICT,
+    );
 
     return this.get_value(id);
   }
@@ -194,17 +209,19 @@ export class PropertyRepository {
       if (conflict.length) throw_error(VARIANT_ERROR.VALUE_SLUG_CONFLICT);
     }
 
-    await db
-      .update(property_values)
-      .set({
-        ...(input.code !== undefined && { code: input.code }),
-        ...(input.label !== undefined && { label: input.label }),
-        ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
-        ...(input.thumbnail_image !== undefined && { thumbnail_image: input.thumbnail_image }),
-        ...(input.color_hex !== undefined && { color_hex: input.color_hex }),
-        ...(input.metadata !== undefined && { metadata: input.metadata }),
-      })
-      .where(eq(property_values.id, id));
+    await catch_drizzle(
+      db
+        .update(property_values)
+        .set({
+          ...(input.code !== undefined && { code: input.code }),
+          ...(input.label !== undefined && { label: input.label }),
+          ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
+          ...(input.thumbnail_image !== undefined && { thumbnail_image: input.thumbnail_image }),
+          ...(input.color_hex !== undefined && { color_hex: input.color_hex }),
+          ...(input.metadata !== undefined && { metadata: input.metadata }),
+        })
+        .where(eq(property_values.id, id)),
+    );
 
     return this.get_value(id);
   }
@@ -213,8 +230,12 @@ export class PropertyRepository {
     const current = await this.get_value(id);
     if (!current) throw_error(VARIANT_ERROR.VALUE_NOT_FOUND);
 
-    await db.delete(sku_option_values).where(eq(sku_option_values.property_value_id, id));
-    await db.delete(property_values).where(eq(property_values.id, id));
+    await catch_drizzle(
+      db.delete(sku_option_values).where(eq(sku_option_values.property_value_id, id)),
+    );
+    await catch_drizzle(
+      db.delete(property_values).where(eq(property_values.id, id)),
+    );
     return { ok: true };
   }
 

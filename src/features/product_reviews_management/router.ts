@@ -7,6 +7,7 @@ import {
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import {
   create_review_dto,
+  admin_create_review_dto,
   list_product_reviews_dto,
   moderate_review_dto,
   admin_list_reviews_dto,
@@ -33,6 +34,10 @@ export const reviews_router = create_trpc_router({
     .mutation(({ ctx, input }) =>
       review_service.create_review(ctx.session!.user.id, input, getClientIp(ctx.req.headers)),
     ),
+
+  adminCreate: permission_procedure(PERMISSIONS.reviews_moderate)
+    .input(admin_create_review_dto)
+    .mutation(({ input }) => review_service.admin_create_review(input)),
 
   myReviews: storefront_procedure
     .input(

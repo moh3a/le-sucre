@@ -13,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -26,6 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
+import { UserCombobox } from "@/features/authentication_and_authorization/auth/components/user-combobox";
 
 export function EscalateOrderDialog() {
   const t = useTranslations("escalations");
@@ -88,13 +89,11 @@ export function EscalateOrderDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="esc_order_id">{t("order")} *</Label>
-            <Input
-              id="esc_order_id"
+            <Label>{t("order")} *</Label>
+            <OrderCombobox
               value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
+              onValueChange={(v) => setOrderId(v ?? "")}
               placeholder={t("order_id_placeholder")}
-              required
             />
           </div>
           <div className="space-y-2">
@@ -137,11 +136,11 @@ export function EscalateOrderDialog() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="esc_assigned_to">{t("assigned_to")}</Label>
-              <Input
-                id="esc_assigned_to"
+              <Label>{t("assigned_to")}</Label>
+              <UserCombobox
                 value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
+                onValueChange={(v) => setAssignedTo(v ?? "")}
+                allowedRoles={["admin", "moderator", "operator"]}
                 placeholder={t("user_id_placeholder")}
               />
             </div>

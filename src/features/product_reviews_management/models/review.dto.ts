@@ -13,6 +13,10 @@ export const create_review_dto = z.object({
   locale: z.enum(["fr", "en"]).default("fr"),
 });
 
+export const admin_create_review_dto = create_review_dto.extend({
+  user_id: z.string().min(1).max(255),
+});
+
 export const list_product_reviews_dto = z.object({
   product_id: z.string().min(1).max(255),
   page: z.coerce.number().int().min(1).default(1),

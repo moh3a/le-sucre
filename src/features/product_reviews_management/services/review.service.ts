@@ -5,9 +5,10 @@ import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { REVIEW_ERROR } from "../constants/error-codes";
 import { products } from "@/features/product_information_management/products/schema";
+import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import type { create_review_dto, list_product_reviews_dto } from "../models/review.dto";
+import type { create_review_dto, admin_create_review_dto, list_product_reviews_dto } from "../models/review.dto";
 import { review_repository } from "../repositories/review.repository";
 import { aggregate_repository } from "../repositories/aggregate.repository";
 import { review_cache_service } from "./review-cache.service";
@@ -124,6 +125,51 @@ export class ReviewService {
       resource_id: id,
     });
     return { ok: true, status: REVIEW_STATUS.pending, is_verified_purchase: is_verified };
+  }
+
+  async admin_create_review(
+    input: z.infer<typeof admin_create_review_dto>,
+  ) {
+    const [product] = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, input.product_id))
+      .limit(1);
+    if (!product) throw_error(REVIEW_ERROR.PRODUCT_NOT_FOUND);
+
+    const [customer] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, input.user_id))
+      .limit(1);
+    if (!customer) throw_error(REVIEW_ERROR.CUSTOMER_NOT_FOUND);
+
+    const content_hash = hash_text(`${input.title ?? ""}:${input.body}`);
+
+    const id = generate_id();
+    await review_repository.create({
+      id,
+      product_id: input.product_id,
+      user_id: input.user_id,
+      rating: input.rating,
+      title: input.title ?? null,
+      body: input.body,
+      status: REVIEW_STATUS.approved,
+      is_verified_purchase: false,
+      locale: input.locale ?? "fr",
+      content_hash,
+      ip_hash: null,
+      approved_at: new Date().toISOString(),
+    });
+
+    void recompute_product_rating_aggregate(input.product_id);
+
+    void audit_service.log({
+      action: AUDIT_ACTION.REVIEW_CREATED,
+      resource_type: "review_id",
+      resource_id: id,
+    });
+    return { ok: true, status: REVIEW_STATUS.approved, is_verified_purchase: false };
   }
 
   list_my_reviews(user_id: string, page = 1, limit = 20) {

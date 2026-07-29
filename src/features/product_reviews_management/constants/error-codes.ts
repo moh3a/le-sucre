@@ -100,6 +100,15 @@ export const REVIEW_ERROR = {
       ar: "فشل كتابة ذاكرة التخزين المؤقت للمراجعات",
     },
   },
+  CUSTOMER_NOT_FOUND: {
+    code: "REVIEW_CUSTOMER_NOT_FOUND",
+    status: 404,
+    message: {
+      fr: "Client introuvable",
+      en: "Customer not found",
+      ar: "العميل غير موجود",
+    },
+  },
   CACHE_INVALIDATION_FAILED: {
     code: "REVIEW_CACHE_INVALIDATION_FAILED",
     status: 500,

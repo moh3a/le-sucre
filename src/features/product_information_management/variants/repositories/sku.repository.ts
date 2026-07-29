@@ -3,6 +3,7 @@ import "server-only";
 import { and, asc, count, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
 import { SKU_ERROR } from "../constants/error-codes";
@@ -105,21 +106,24 @@ export class SkuRepository {
     if (existing) throw_error(SKU_ERROR.CODE_CONFLICT);
 
     const id = generate_id();
-    await db.insert(product_skus).values({
-      id,
-      product_id: input.product_id,
-      sku_code: input.sku_code,
-      option_signature: input.option_signature,
-      barcode: input.barcode ?? null,
-      base_price: input.base_price ?? null,
-      offer_price: input.offer_price ?? null,
-      wholesale_base_price: input.wholesale_base_price ?? null,
-      wholesale_offer_price: input.wholesale_offer_price ?? null,
-      currency: input.currency ?? null,
-      is_active: input.is_active,
-      stock_available: 0,
-      metadata: input.metadata,
-    });
+    await catch_drizzle(
+      db.insert(product_skus).values({
+        id,
+        product_id: input.product_id,
+        sku_code: input.sku_code,
+        option_signature: input.option_signature,
+        barcode: input.barcode ?? null,
+        base_price: input.base_price ?? null,
+        offer_price: input.offer_price ?? null,
+        wholesale_base_price: input.wholesale_base_price ?? null,
+        wholesale_offer_price: input.wholesale_offer_price ?? null,
+        currency: input.currency ?? null,
+        is_active: input.is_active,
+        stock_available: 0,
+        metadata: input.metadata,
+      }),
+      SKU_ERROR.CODE_CONFLICT,
+    );
 
     return this.find_by_id(id);
   }
@@ -147,7 +151,7 @@ export class SkuRepository {
     const to_insert = rows.filter((r) => !existing_set.has(r.property_value_id));
 
     if (to_insert.length) {
-      await db.insert(sku_option_values).values(to_insert);
+      await catch_drizzle(db.insert(sku_option_values).values(to_insert));
     }
   }
 
@@ -168,24 +172,26 @@ export class SkuRepository {
     const current = await this.find_by_id(id);
     if (!current) throw_error(SKU_ERROR.NOT_FOUND);
 
-    await db
-      .update(product_skus)
-      .set({
-        ...(input.sku_code !== undefined && { sku_code: input.sku_code }),
-        ...(input.barcode !== undefined && { barcode: input.barcode }),
-        ...(input.base_price !== undefined && { base_price: input.base_price }),
-        ...(input.offer_price !== undefined && { offer_price: input.offer_price }),
-        ...(input.wholesale_base_price !== undefined && {
-          wholesale_base_price: input.wholesale_base_price,
-        }),
-        ...(input.wholesale_offer_price !== undefined && {
-          wholesale_offer_price: input.wholesale_offer_price,
-        }),
-        ...(input.currency !== undefined && { currency: input.currency }),
-        ...(input.is_active !== undefined && { is_active: input.is_active }),
-        ...(input.metadata !== undefined && { metadata: input.metadata }),
-      })
-      .where(eq(product_skus.id, id));
+    await catch_drizzle(
+      db
+        .update(product_skus)
+        .set({
+          ...(input.sku_code !== undefined && { sku_code: input.sku_code }),
+          ...(input.barcode !== undefined && { barcode: input.barcode }),
+          ...(input.base_price !== undefined && { base_price: input.base_price }),
+          ...(input.offer_price !== undefined && { offer_price: input.offer_price }),
+          ...(input.wholesale_base_price !== undefined && {
+            wholesale_base_price: input.wholesale_base_price,
+          }),
+          ...(input.wholesale_offer_price !== undefined && {
+            wholesale_offer_price: input.wholesale_offer_price,
+          }),
+          ...(input.currency !== undefined && { currency: input.currency }),
+          ...(input.is_active !== undefined && { is_active: input.is_active }),
+          ...(input.metadata !== undefined && { metadata: input.metadata }),
+        })
+        .where(eq(product_skus.id, id)),
+    );
 
     return this.find_by_id(id);
   }
@@ -193,7 +199,7 @@ export class SkuRepository {
   async delete_sku(id: string) {
     const current = await this.find_by_id(id);
     if (!current) throw_error(SKU_ERROR.NOT_FOUND);
-    await db.delete(product_skus).where(eq(product_skus.id, id));
+    await catch_drizzle(db.delete(product_skus).where(eq(product_skus.id, id)));
     return { ok: true };
   }
 
@@ -208,12 +214,12 @@ export class SkuRepository {
     }>,
   ) {
     if (!ids.length) return;
-    await db.update(product_skus).set(input).where(inArray(product_skus.id, ids));
+    await catch_drizzle(db.update(product_skus).set(input).where(inArray(product_skus.id, ids)));
   }
 
   async bulk_delete_skus(ids: string[]) {
     if (!ids.length) return;
-    await db.delete(product_skus).where(inArray(product_skus.id, ids));
+    await catch_drizzle(db.delete(product_skus).where(inArray(product_skus.id, ids)));
   }
 
   async list_admin(input: { page: number; limit: number; search?: string; status?: string }) {
@@ -233,22 +239,25 @@ export class SkuRepository {
     }
     const where = clauses.length ? and(...clauses) : undefined;
 
-    const totalRes = await db
-      .select({ total: count(product_skus.id) })
-      .from(product_skus)
-      .leftJoin(products, eq(products.id, product_skus.product_id))
-      .leftJoin(
-        product_translations,
-        and(
-          eq(product_translations.product_id, products.id),
-          eq(product_translations.locale, "fr"),
-        ),
-      )
-      .where(where);
+    const totalRes = await catch_drizzle(
+      db
+        .select({ total: count(product_skus.id) })
+        .from(product_skus)
+        .leftJoin(products, eq(products.id, product_skus.product_id))
+        .leftJoin(
+          product_translations,
+          and(
+            eq(product_translations.product_id, products.id),
+            eq(product_translations.locale, "fr"),
+          ),
+        )
+        .where(where),
+    );
     const total_records = Number(totalRes[0]?.total ?? 0);
 
-    const sku_rows = await db
-      .select({
+    const sku_rows = await catch_drizzle(
+      db
+        .select({
         id: product_skus.id,
         sku_code: product_skus.sku_code,
         barcode: product_skus.barcode,
@@ -278,7 +287,7 @@ export class SkuRepository {
       .where(where)
       .orderBy(desc(product_skus.created_at))
       .limit(input.limit)
-      .offset(offset);
+      .offset(offset));
 
     const sku_ids = sku_rows.map((r) => r.id);
     let options: Array<{
@@ -291,19 +300,21 @@ export class SkuRepository {
     }> = [];
 
     if (sku_ids.length > 0) {
-      options = await db
-        .select({
-          sku_id: sku_option_values.sku_id,
-          property_code: product_properties.code,
-          value_code: property_values.code,
-          value_label: property_values.label,
-          thumbnail_image: property_values.thumbnail_image,
-          color_hex: property_values.color_hex,
-        })
-        .from(sku_option_values)
-        .innerJoin(property_values, eq(property_values.id, sku_option_values.property_value_id))
-        .innerJoin(product_properties, eq(product_properties.id, property_values.property_id))
-        .where(inArray(sku_option_values.sku_id, sku_ids));
+      options = await catch_drizzle(
+        db
+          .select({
+            sku_id: sku_option_values.sku_id,
+            property_code: product_properties.code,
+            value_code: property_values.code,
+            value_label: property_values.label,
+            thumbnail_image: property_values.thumbnail_image,
+            color_hex: property_values.color_hex,
+          })
+          .from(sku_option_values)
+          .innerJoin(property_values, eq(property_values.id, sku_option_values.property_value_id))
+          .innerJoin(product_properties, eq(product_properties.id, property_values.property_id))
+          .where(inArray(sku_option_values.sku_id, sku_ids)),
+      );
     }
 
     const options_by_sku = new Map<string, typeof options>();
@@ -335,32 +346,36 @@ export class SkuRepository {
     const stock_agg = db
       .select({
         sku_id: inventory_levels.sku_id,
-        available: sql<number>`GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)`,
+        available: sql<number>`GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)`.as("available"),
       })
       .from(inventory_levels)
       .groupBy(inventory_levels.sku_id)
       .as("stock_agg");
 
-    const counts = await db
-      .select({
-        is_active: product_skus.is_active,
-        total: count(product_skus.id),
-        total_stock: sql<number>`COALESCE(SUM(stock_agg.available), 0)`.mapWith(Number),
-      })
-      .from(product_skus)
-      .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
-      .groupBy(product_skus.is_active);
+    const counts = await catch_drizzle(
+      db
+        .select({
+          is_active: product_skus.is_active,
+          total: count(product_skus.id),
+          total_stock: sql<number>`COALESCE(SUM(stock_agg.available), 0)`.mapWith(Number),
+        })
+        .from(product_skus)
+        .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
+        .groupBy(product_skus.is_active),
+    );
 
     const activeRow = counts.find((c) => c.is_active === true);
     const inactiveRow = counts.find((c) => c.is_active === false);
 
-    const totalRes = await db
-      .select({
-        out_of_stock: count(product_skus.id),
-      })
-      .from(product_skus)
-      .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
-      .where(sql`COALESCE(stock_agg.available, 0) = 0`);
+    const totalRes = await catch_drizzle(
+      db
+        .select({
+          out_of_stock: count(product_skus.id),
+        })
+        .from(product_skus)
+        .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
+        .where(sql`COALESCE(stock_agg.available, 0) = 0`),
+    );
 
     const active_count = Number(activeRow?.total ?? 0);
     const inactive_count = Number(inactiveRow?.total ?? 0);

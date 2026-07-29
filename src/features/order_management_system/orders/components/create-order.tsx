@@ -248,40 +248,6 @@ export function CreateOrderDialog() {
 
           <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
             {/* Customer selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">{t("client")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Controller
-                  name="user_id"
-                  control={control}
-                  render={({ field }) => (
-                    <Field data-invalid={!!formState.errors.user_id}>
-                      <FieldLabel>{t("select_client")}</FieldLabel>
-                      <CustomerCombobox
-                        value={field.value || null}
-                        onValueChange={(val) => {
-                          field.onChange(val ?? "");
-                        }}
-                        placeholder={t("choose_client")}
-                      />
-                      {(selected_customer_name || profile_data?.profile) && (
-                        <FieldDescription>
-                          {selected_customer_name ||
-                            [profile_data?.profile?.first_name, profile_data?.profile?.last_name]
-                              .filter(Boolean)
-                              .join(" ")}
-                        </FieldDescription>
-                      )}
-                      {formState.errors.user_id && (
-                        <FieldError errors={[formState.errors.user_id]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </CardContent>
-            </Card>
 
             {/* Product search and add */}
             <Card>
@@ -316,9 +282,10 @@ export function CreateOrderDialog() {
                         {filtered_sku_options.slice(0, 10).map((sku) => (
                           <label
                             key={sku.sku_id}
-                            className={cn(`hover:bg-muted/40 flex cursor-pointer items-center gap-3 rounded p-2 text-sm`,
+                            className={cn(
+                              `hover:bg-muted/40 flex cursor-pointer items-center gap-3 rounded p-2 text-sm`,
                               selected_sku_id === sku.sku_id ? "bg-muted/60" : "",
-                              !sku.stock_available && "bg-muted text-muted-foreground cursor-none"
+                              !sku.stock_available && "bg-muted text-muted-foreground cursor-none",
                             )}
                           >
                             <input
@@ -355,7 +322,9 @@ export function CreateOrderDialog() {
                             value={selected_qty}
                             onChange={(e) => {
                               const parsed = parseInt(e.target.value, 10);
-                              set_selected_qty(isNaN(parsed) ? 1 : Math.max(1, Math.min(99, parsed)));
+                              set_selected_qty(
+                                isNaN(parsed) ? 1 : Math.max(1, Math.min(99, parsed)),
+                              );
                             }}
                           />
                         </div>
@@ -416,104 +385,137 @@ export function CreateOrderDialog() {
               </CardContent>
             </Card>
 
-            {/* Shipping address */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">{t("adresse_livraison")}</CardTitle>
+                <CardTitle className="text-base">{t("client")} / {t("adresse_livraison")}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-8">
+                <Controller
+                  name="user_id"
+                  control={control}
+                  render={({ field }) => (
+                    <Field data-invalid={!!formState.errors.user_id}>
+                      <FieldLabel>{t("select_client")}</FieldLabel>
+                      <CustomerCombobox
+                        value={field.value || null}
+                        onValueChange={(val) => {
+                          field.onChange(val ?? "");
+                        }}
+                        placeholder={t("choose_client")}
+                      />
+                      {(selected_customer_name || profile_data?.profile) && (
+                        <FieldDescription>
+                          {selected_customer_name ||
+                            [profile_data?.profile?.first_name, profile_data?.profile?.last_name]
+                              .filter(Boolean)
+                              .join(" ")}
+                        </FieldDescription>
+                      )}
+                      {formState.errors.user_id && (
+                        <FieldError errors={[formState.errors.user_id]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                
                 {selected_user_id && (
-                <Field>
-                  <FieldLabel>{t("saved_address")}</FieldLabel>
-                  <RadioGroupPrimitive.Root
-                    value={selected_address_id}
-                    onValueChange={(val) => {
-                      set_selected_address_id(val);
-                      const profile_name =
-                        selected_customer_name ||
-                        [profile_data?.profile?.first_name, profile_data?.profile?.last_name]
-                          .filter(Boolean)
-                          .join(" ");
-                      if (val === "__new__") {
-                        form.setValue("shipping_full_name", profile_name);
-                        form.setValue("shipping_phone", "");
-                        form.setValue("shipping_line1", "");
-                        form.setValue("shipping_line2", "");
-                        form.setValue("shipping_city", "");
-                        form.setValue("shipping_state", "");
-                        form.setValue("shipping_postal_code", "");
-                      } else {
-                        const addr = profile_data?.addresses?.find((a) => a.id === val);
-                        if (addr) {
-                          const addr_name = [addr.first_name, addr.last_name]
+                  <Field>
+                    <FieldLabel>{t("saved_address")}</FieldLabel>
+                    <RadioGroupPrimitive.Root
+                      value={selected_address_id}
+                      onValueChange={(val) => {
+                        set_selected_address_id(val);
+                        const profile_name =
+                          selected_customer_name ||
+                          [profile_data?.profile?.first_name, profile_data?.profile?.last_name]
                             .filter(Boolean)
                             .join(" ");
-                          form.setValue("shipping_full_name", addr_name || profile_name);
-                          form.setValue("shipping_phone", addr.phone ?? "");
-                          form.setValue("shipping_line1", addr.address_line_1 ?? "");
-                          form.setValue("shipping_line2", addr.address_line_2 ?? "");
-                          form.setValue("shipping_city", addr.city ?? "");
-                          form.setValue("shipping_state", addr.state ?? "");
-                          form.setValue("shipping_postal_code", addr.postal_code ?? "");
+                        if (val === "__new__") {
+                          form.setValue("shipping_full_name", profile_name);
+                          form.setValue("shipping_phone", "");
+                          form.setValue("shipping_line1", "");
+                          form.setValue("shipping_line2", "");
+                          form.setValue("shipping_city", "");
+                          form.setValue("shipping_state", "");
+                          form.setValue("shipping_postal_code", "");
+                        } else {
+                          const addr = profile_data?.addresses?.find((a) => a.id === val);
+                          if (addr) {
+                            const addr_name = [addr.first_name, addr.last_name]
+                              .filter(Boolean)
+                              .join(" ");
+                            form.setValue("shipping_full_name", addr_name || profile_name);
+                            form.setValue("shipping_phone", addr.phone ?? "");
+                            form.setValue("shipping_line1", addr.address_line_1 ?? "");
+                            form.setValue("shipping_line2", addr.address_line_2 ?? "");
+                            form.setValue("shipping_city", addr.city ?? "");
+                            form.setValue("shipping_state", addr.state ?? "");
+                            form.setValue("shipping_postal_code", addr.postal_code ?? "");
+                          }
                         }
-                      }
-                    }}
-                    className="space-y-3"
-                  >
-                    <label
-                      className={cn(
-                        "hover:bg-primary/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
-                        selected_address_id === "__new__" && "border-primary bg-primary/60 text-primary-foreground",
-                      )}
+                      }}
+                      className="space-y-3"
                     >
-                      <RadioGroupPrimitive.Item
-                        value="__new__"
-                        className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                      <label
+                        className={cn(
+                          "hover:bg-primary/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
+                          selected_address_id === "__new__" &&
+                            "border-primary bg-primary/60 text-primary-foreground",
+                        )}
                       >
-                        <RadioGroupPrimitive.Indicator>
-                          <Check className="size-3 text-primary-foreground" />
-                        </RadioGroupPrimitive.Indicator>
-                      </RadioGroupPrimitive.Item>
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-medium">{t("new_address_option")}</p>
-                        <p className="text-primary-foreground/90 text-xs">{t("new_address_description") ?? "Saisir une nouvelle adresse de livraison"}</p>
-                      </div>
-                    </label>
-                    {profile_data?.addresses?.map((addr) => {
-                      const addr_name = [addr.first_name, addr.last_name].filter(Boolean).join(" ");
-                      const label = [addr.label, addr.address_line_1, addr.city]
-                        .filter(Boolean)
-                        .join(" — ");
-                      return (
-                        <label
-                          key={addr.id}
-                          className={cn(
-                            "hover:bg-accent/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
-                            selected_address_id === addr.id && "border-primary bg-accent/30",
-                          )}
+                        <RadioGroupPrimitive.Item
+                          value="__new__"
+                          className="border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2"
                         >
-                          <RadioGroupPrimitive.Item
-                            value={addr.id}
-                            className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                          <RadioGroupPrimitive.Indicator>
+                            <Check className="text-primary-foreground size-3" />
+                          </RadioGroupPrimitive.Indicator>
+                        </RadioGroupPrimitive.Item>
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-medium">{t("new_address_option")}</p>
+                          <p className="text-primary-foreground/90 text-xs">
+                            {t("new_address_description") ??
+                              "Saisir une nouvelle adresse de livraison"}
+                          </p>
+                        </div>
+                      </label>
+                      {profile_data?.addresses?.map((addr) => {
+                        const addr_name = [addr.first_name, addr.last_name]
+                          .filter(Boolean)
+                          .join(" ");
+                        const label = [addr.label, addr.address_line_1, addr.city]
+                          .filter(Boolean)
+                          .join(" — ");
+                        return (
+                          <label
+                            key={addr.id}
+                            className={cn(
+                              "hover:bg-accent/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
+                              selected_address_id === addr.id && "border-primary bg-accent/30",
+                            )}
                           >
-                            <RadioGroupPrimitive.Indicator>
-                              <Check className="size-3 text-primary-foreground" />
-                            </RadioGroupPrimitive.Indicator>
-                          </RadioGroupPrimitive.Item>
-                          <div className="min-w-0 flex-1 space-y-0.5">
-                            <p className="truncate text-sm font-medium">{label}</p>
-                            <p className="text-muted-foreground truncate text-xs">
-                              {addr_name && `${addr_name}`}
-                              {addr.phone && ` — ${addr.phone}`}
-                              {addr.state && ` — ${addr.state}`}
-                            </p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </RadioGroupPrimitive.Root>
-                </Field>
-              )}
+                            <RadioGroupPrimitive.Item
+                              value={addr.id}
+                              className="border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2"
+                            >
+                              <RadioGroupPrimitive.Indicator>
+                                <Check className="text-primary-foreground size-3" />
+                              </RadioGroupPrimitive.Indicator>
+                            </RadioGroupPrimitive.Item>
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <p className="truncate text-sm font-medium">{label}</p>
+                              <p className="text-muted-foreground truncate text-xs">
+                                {addr_name && `${addr_name}`}
+                                {addr.phone && ` — ${addr.phone}`}
+                                {addr.state && ` — ${addr.state}`}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </RadioGroupPrimitive.Root>
+                  </Field>
+                )}
                 <div className="grid gap-4 md:grid-cols-2">
                   <Controller
                     name="shipping_full_name"

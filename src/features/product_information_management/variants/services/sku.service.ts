@@ -4,6 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { SKU_ERROR, VARIANT_ERROR } from "../constants/error-codes";
@@ -81,14 +82,16 @@ export class SkuService {
 
     if (existing.length) return;
 
-    await db.insert(inventory_levels).values({
-      id: generate_id(),
-      sku_id,
-      warehouse_id: "default",
-      quantity_on_hand: 0,
-      quantity_reserved: 0,
-      version: 0,
-    });
+    await catch_drizzle(
+      db.insert(inventory_levels).values({
+        id: generate_id(),
+        sku_id,
+        warehouse_id: "default",
+        quantity_on_hand: 0,
+        quantity_reserved: 0,
+        version: 0,
+      }),
+    );
   }
 
   async list_by_product(product_id: string) {
@@ -161,7 +164,9 @@ export class SkuService {
     await this.skus.attach_option_values(sku!.id, input.property_value_ids);
     await this.ensure_inventory_level(sku!.id);
 
-    await db.update(products).set({ has_variants: true }).where(eq(products.id, input.product_id));
+    await catch_drizzle(
+      db.update(products).set({ has_variants: true }).where(eq(products.id, input.product_id)),
+    );
 
     return this.get_by_id(sku!.id);
   }
@@ -214,7 +219,9 @@ export class SkuService {
 
   async generate(input: z.infer<typeof generate_skus_dto>) {
     const result = await sku_generation_engine.generate_for_product(input);
-    await db.update(products).set({ has_variants: true }).where(eq(products.id, input.product_id));
+    await catch_drizzle(
+      db.update(products).set({ has_variants: true }).where(eq(products.id, input.product_id)),
+    );
     return result;
   }
 

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
 import { VARIANT_ERROR } from "../constants/error-codes";
 import { products } from "@/features/product_information_management/products/schema";
@@ -49,7 +50,7 @@ export class VariantService {
 
   async enable_variants(product_id: string) {
     await this.assert_product(product_id);
-    await db.update(products).set({ has_variants: true }).where(eq(products.id, product_id));
+    await catch_drizzle(db.update(products).set({ has_variants: true }).where(eq(products.id, product_id)));
     return { ok: true };
   }
 

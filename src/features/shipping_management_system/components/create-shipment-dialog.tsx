@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
 
 const PROVIDERS = ["yalidine", "dhl", "fedex", "ups", "ems"] as const;
 
@@ -76,7 +77,10 @@ export function CreateShipmentDialog() {
           <form onSubmit={handle_submit} className="space-y-4">
             <div className="space-y-2">
               <Label>{t("order_id")}</Label>
-              <Input value={order_id} onChange={(e) => setOrderId(e.target.value)} required />
+              <OrderCombobox
+                value={order_id}
+                onValueChange={(v) => setOrderId(v ?? "")}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("provider")}</Label>

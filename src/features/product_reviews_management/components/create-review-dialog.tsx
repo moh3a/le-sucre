@@ -4,6 +4,9 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Star } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,38 +29,65 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
+import { ProductCombobox } from "@/features/product_information_management/products/components/product-combobox";
+import { CustomerCombobox } from "@/features/order_management_system/customers/components/customer-combobox";
+
+const form_schema = z.object({
+  product_id: z.string().min(1),
+  user_id: z.string().min(1),
+  rating: z.string(),
+  title: z.string().max(255).optional(),
+  body: z.string().min(20).max(5000),
+});
+
+type FormValues = z.infer<typeof form_schema>;
 
 export function CreateReviewDialog() {
   const t = useTranslations("reviews");
   const [open, setOpen] = React.useState(false);
-  const [product_id, setProductId] = React.useState("");
-  const [rating, setRating] = React.useState("5");
-  const [title, setTitle] = React.useState("");
-  const [body, setBody] = React.useState("");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(form_schema),
+    defaultValues: {
+      product_id: "",
+      user_id: "",
+      rating: "5",
+      title: "",
+      body: "",
+    },
+  });
+
+  const product_id = watch("product_id");
+  const user_id = watch("user_id");
+  const rating = watch("rating");
 
   const utils = trpc.useUtils();
 
-  const create = trpc.reviews.create.useMutation({
+  const create = trpc.reviews.adminCreate.useMutation({
     onSuccess: () => {
       toast.success(t("admin_review_created"));
       setOpen(false);
-      setProductId("");
-      setRating("5");
-      setTitle("");
-      setBody("");
+      reset();
       void utils.reviews.adminList.invalidate();
       void utils.reviews.adminStats.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
 
-  function handle_submit(e: React.FormEvent) {
-    e.preventDefault();
+  function onSubmit(values: FormValues) {
     create.mutate({
-      product_id,
-      rating: Number(rating),
-      title: title || undefined,
-      body,
+      product_id: values.product_id,
+      user_id: values.user_id,
+      rating: Number(values.rating),
+      title: values.title || undefined,
+      body: values.body,
       locale: "fr",
     });
   }
@@ -76,14 +106,35 @@ export function CreateReviewDialog() {
             <DialogTitle>{t("admin_create_title")}</DialogTitle>
             <DialogDescription>{t("admin_create_description")}</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handle_submit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label>{t("admin_product_id")}</Label>
-              <Input value={product_id} onChange={(e) => setProductId(e.target.value)} required />
+              <Label>{t("admin_product")}</Label>
+              <input type="hidden" {...register("product_id")} />
+              <ProductCombobox
+                value={product_id}
+                onValueChange={(v) => setValue("product_id", v ?? "", { shouldValidate: true })}
+              />
+              {errors.product_id && (
+                <p className="text-xs text-red-500">{errors.product_id.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>{t("admin_customer")}</Label>
+              <input type="hidden" {...register("user_id")} />
+              <CustomerCombobox
+                value={user_id}
+                onValueChange={(v) => setValue("user_id", v ?? "", { shouldValidate: true })}
+              />
+              {errors.user_id && (
+                <p className="text-xs text-red-500">{errors.user_id.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>{t("admin_rating")}</Label>
-              <Select value={rating} onValueChange={setRating}>
+              <Select
+                value={rating}
+                onValueChange={(v) => setValue("rating", v, { shouldValidate: true })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -98,11 +149,17 @@ export function CreateReviewDialog() {
             </div>
             <div className="space-y-2">
               <Label>{t("admin_title_optional")}</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+              <Input {...register("title")} />
+              {errors.title && (
+                <p className="text-xs text-red-500">{errors.title.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>{t("admin_comment")}</Label>
-              <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} required />
+              <Textarea {...register("body")} rows={4} />
+              {errors.body && (
+                <p className="text-xs text-red-500">{errors.body.message}</p>
+              )}
             </div>
             <Button type="submit" className="w-full" disabled={create.isPending}>
               <Star />

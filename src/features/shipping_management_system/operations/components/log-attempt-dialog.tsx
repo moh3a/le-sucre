@@ -12,8 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -26,6 +26,8 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Loader2, Truck } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { ShippingCombobox } from "@/features/shipping_management_system/components/shipping-combobox";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
 
 type LogAttemptDialogProps = {
   order_id?: string;
@@ -99,23 +101,19 @@ export function LogAttemptDialog({ order_id, shipment_id }: LogAttemptDialogProp
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="shipment_id">{t("shipment")} *</Label>
-                <Input
-                  id="shipment_id"
+                <Label>{t("shipment")} *</Label>
+                <ShippingCombobox
                   value={shipmentId}
-                  onChange={(e) => setShipmentId(e.target.value)}
+                  onValueChange={(v) => setShipmentId(v ?? "")}
                   placeholder={t("shipment_id_placeholder")}
-                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="order_id">{t("order")} *</Label>
-                <Input
-                  id="order_id"
+                <Label>{t("order")} *</Label>
+                <OrderCombobox
                   value={orderId}
-                  onChange={(e) => setOrderId(e.target.value)}
+                  onValueChange={(v) => setOrderId(v ?? "")}
                   placeholder={t("order_id_placeholder")}
-                  required
                 />
               </div>
             </div>

@@ -1,6 +1,7 @@
 import "server-only";
 import { and, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { products, product_translations } from "../schema";
 import { brands } from "@/features/product_information_management/brands/schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
@@ -28,53 +29,62 @@ export type AdminProductListFilters = {
 
 export class ProductAdminRepository {
   async stats() {
-    const [totals] = await db
-      .select({
-        total: count(),
-        published:
-          sql<number>`SUM(CASE WHEN ${products.status}='published' THEN 1 ELSE 0 END)`.mapWith(
-            Number,
-          ),
-        draft: sql<number>`SUM(CASE WHEN ${products.status}='draft' THEN 1 ELSE 0 END)`.mapWith(
-          Number,
-        ),
-        archived:
-          sql<number>`SUM(CASE WHEN ${products.status}='archived' THEN 1 ELSE 0 END)`.mapWith(
-            Number,
-          ),
-      })
-      .from(products);
+    const [totals] = await catch_drizzle(
+      db
+        .select({
+          total: count(),
+          published:
+            sql<number>`SUM(CASE WHEN ${products.status}='published' THEN 1 ELSE 0 END)`.mapWith(
+              Number,
+            ),
+          draft:
+            sql<number>`SUM(CASE WHEN ${products.status}='draft' THEN 1 ELSE 0 END)`.mapWith(
+              Number,
+            ),
+          archived:
+            sql<number>`SUM(CASE WHEN ${products.status}='archived' THEN 1 ELSE 0 END)`.mapWith(
+              Number,
+            ),
+        })
+        .from(products),
+    );
 
-    const [sales] = await db
-      .select({
-        revenue: sql<string>`COALESCE(SUM(${order_items.line_total}), 0)`,
-        units_sold: sql<number>`COALESCE(SUM(${order_items.quantity}), 0)`.mapWith(Number),
-      })
-      .from(order_items)
-      .innerJoin(orders, eq(orders.id, order_items.order_id))
-      .where(eq(orders.payment_status, "paid"));
+    const [sales] = await catch_drizzle(
+      db
+        .select({
+          revenue: sql<string>`COALESCE(SUM(${order_items.line_total}), 0)`,
+          units_sold: sql<number>`COALESCE(SUM(${order_items.quantity}), 0)`.mapWith(Number),
+        })
+        .from(order_items)
+        .innerJoin(orders, eq(orders.id, order_items.order_id))
+        .where(eq(orders.payment_status, "paid")),
+    );
 
-    const [reviews] = await db
-      .select({
-        avg_rating: sql<string>`COALESCE(AVG(${product_review_aggregates.average_rating}), 0)`,
-      })
-      .from(product_review_aggregates)
-      .where(sql`${product_review_aggregates.review_count} > 0`);
+    const [reviews] = await catch_drizzle(
+      db
+        .select({
+          avg_rating: sql<string>`COALESCE(AVG(${product_review_aggregates.average_rating}), 0)`,
+        })
+        .from(product_review_aggregates)
+        .where(sql`${product_review_aggregates.review_count} > 0`),
+    );
 
     const stock_agg = db
       .select({
         sku_id: inventory_levels.sku_id,
-        available: sql<number>`GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)`,
+        available: sql<number>`GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)`.as("available"),
       })
       .from(inventory_levels)
       .groupBy(inventory_levels.sku_id)
       .as("stock_agg");
 
-    const [low_stock] = await db
-      .select({ count: count() })
-      .from(product_skus)
-      .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
-      .where(and(eq(product_skus.is_active, true), sql`COALESCE(stock_agg.available, 0) <= 5`));
+    const [low_stock] = await catch_drizzle(
+      db
+        .select({ count: count() })
+        .from(product_skus)
+        .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
+        .where(and(eq(product_skus.is_active, true), sql`COALESCE(stock_agg.available, 0) <= 5`)),
+    );
 
     return {
       total_products: Number(totals?.total ?? 0),
@@ -127,64 +137,68 @@ export class ProductAdminRepository {
 
     const where = clauses.length ? and(...clauses) : undefined;
 
-    const items = await db
-      .select({
-        id: products.id,
-        slug: products.slug,
-        sku: products.sku,
-        status: products.status,
-        base_price: products.base_price,
-        is_featured: products.is_featured,
-        created_at: products.created_at,
-        name: product_translations.name,
-        category_name: categories.name,
-        brand_name: brands.name,
-        image_url: sql<string | null>`(
+    const items = await catch_drizzle(
+      db
+        .select({
+          id: products.id,
+          slug: products.slug,
+          sku: products.sku,
+          status: products.status,
+          base_price: products.base_price,
+          is_featured: products.is_featured,
+          created_at: products.created_at,
+          name: product_translations.name,
+          category_name: categories.name,
+          brand_name: brands.name,
+          image_url: sql<string | null>`(
           SELECT pm.url FROM product_media pm
           WHERE pm.product_id = ${products.id}
           ORDER BY pm.is_primary DESC, pm.sort_order ASC LIMIT 1
         )`,
-        sku_count: sql<number>`(
+          sku_count: sql<number>`(
           SELECT COUNT(*) FROM product_skus ps WHERE ps.product_id = ${products.id}
         )`.mapWith(Number),
-        current_stock: stock_expr,
-        units_sold: sql<number>`COALESCE((
+          current_stock: stock_expr,
+          units_sold: sql<number>`COALESCE((
           SELECT SUM(oi.quantity) FROM order_items oi
           INNER JOIN orders o ON o.id = oi.order_id
           WHERE oi.product_id = ${products.id} AND o.payment_status = 'paid'
         ), 0)`.mapWith(Number),
-        revenue: sql<string>`COALESCE((
+          revenue: sql<string>`COALESCE((
           SELECT SUM(oi.line_total) FROM order_items oi
           INNER JOIN orders o ON o.id = oi.order_id
           WHERE oi.product_id = ${products.id} AND o.payment_status = 'paid'
         ), '0')`,
-        review_count: sql<number>`COALESCE(${product_review_aggregates.review_count}, 0)`.mapWith(
-          Number,
-        ),
-        average_rating: sql<string>`COALESCE(${product_review_aggregates.average_rating}, '0')`,
-      })
-      .from(products)
-      .leftJoin(
-        product_translations,
-        and(
-          eq(product_translations.product_id, products.id),
-          eq(product_translations.locale, LOCALE),
-        ),
-      )
-      .leftJoin(categories, eq(categories.id, products.category_id))
-      .leftJoin(brands, eq(brands.id, products.brand_id))
-      .leftJoin(product_review_aggregates, eq(product_review_aggregates.product_id, products.id))
-      .where(where)
-      .orderBy(desc(products.created_at))
-      .limit(limit)
-      .offset(offset);
+          review_count: sql<number>`COALESCE(${product_review_aggregates.review_count}, 0)`.mapWith(
+            Number,
+          ),
+          average_rating: sql<string>`COALESCE(${product_review_aggregates.average_rating}, '0')`,
+        })
+        .from(products)
+        .leftJoin(
+          product_translations,
+          and(
+            eq(product_translations.product_id, products.id),
+            eq(product_translations.locale, LOCALE),
+          ),
+        )
+        .leftJoin(categories, eq(categories.id, products.category_id))
+        .leftJoin(brands, eq(brands.id, products.brand_id))
+        .leftJoin(product_review_aggregates, eq(product_review_aggregates.product_id, products.id))
+        .where(where)
+        .orderBy(desc(products.created_at))
+        .limit(limit)
+        .offset(offset),
+    );
 
-    const [{ total }] = await db
-      .select({ total: count() })
-      .from(products)
-      .leftJoin(product_translations, eq(product_translations.product_id, products.id))
-      .leftJoin(product_review_aggregates, eq(product_review_aggregates.product_id, products.id))
-      .where(where);
+    const [{ total }] = await catch_drizzle(
+      db
+        .select({ total: count() })
+        .from(products)
+        .leftJoin(product_translations, eq(product_translations.product_id, products.id))
+        .leftJoin(product_review_aggregates, eq(product_review_aggregates.product_id, products.id))
+        .where(where),
+    );
 
     const total_records = Number(total ?? 0);
     const total_pages = Math.max(1, Math.ceil(total_records / limit));
@@ -196,15 +210,15 @@ export class ProductAdminRepository {
   }
 
   bulk_update_status(ids: string[], status: ProductStatus) {
-    return db.update(products).set({ status }).where(inArray(products.id, ids));
+    return catch_drizzle(db.update(products).set({ status }).where(inArray(products.id, ids)));
   }
 
   bulk_update_category(ids: string[], category_id: string) {
-    return db.update(products).set({ category_id }).where(inArray(products.id, ids));
+    return catch_drizzle(db.update(products).set({ category_id }).where(inArray(products.id, ids)));
   }
 
   bulk_delete(ids: string[]) {
-    return db.delete(products).where(inArray(products.id, ids));
+    return catch_drizzle(db.delete(products).where(inArray(products.id, ids)));
   }
 }
 

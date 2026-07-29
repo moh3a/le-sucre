@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CustomerCombobox } from "@/features/order_management_system/customers/components/customer-combobox";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
+import { UserCombobox } from "@/features/authentication_and_authorization/auth/components/user-combobox";
 import {
   Select,
   SelectContent,
@@ -145,31 +148,29 @@ export function CreateSupportCaseDialog() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sc_assigned_to">{t("assigned_to")}</Label>
-              <Input
-                id="sc_assigned_to"
+              <Label>{t("assigned_to")}</Label>
+              <UserCombobox
                 value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
+                onValueChange={(v) => setAssignedTo(v ?? "")}
+                allowedRoles={["admin", "moderator", "operator"]}
                 placeholder={t("user_id_placeholder")}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sc_user_id">{t("client")}</Label>
-              <Input
-                id="sc_user_id"
+              <Label>{t("client")}</Label>
+              <CustomerCombobox
                 value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                onValueChange={(v) => setUserId(v ?? "")}
                 placeholder={t("client_id_placeholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sc_order_id">{t("order")}</Label>
-              <Input
-                id="sc_order_id"
+              <Label>{t("order")}</Label>
+              <OrderCombobox
                 value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
+                onValueChange={(v) => setOrderId(v ?? "")}
                 placeholder={t("order_id_placeholder")}
               />
             </div>

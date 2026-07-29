@@ -2,7 +2,8 @@
 
 ## TODOs
 
-- format bon de commande, invoice, payment, like order id
+- category image url
+- format task, bon de commande, invoice, payment, like order id
 - https://www.npmjs.com/package/yalidine
 - check if every operation works
 

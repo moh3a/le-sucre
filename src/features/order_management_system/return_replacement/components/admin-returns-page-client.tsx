@@ -8,6 +8,7 @@ import { trpc } from "@/components/providers/app-providers";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { AdminReturnsTable } from "./admin-returns-table";
+import { CreateReturnDialog } from "./create-return-dialog";
 
 export function ReturnsContent() {
   const t = useTranslations("return_requests");
@@ -30,6 +31,10 @@ export function ReturnsContent() {
           { label: t("stats_replacements"), value: 0, icon: ArrowLeftRight, color: "success" },
         ]}
       />
+      <div className="flex items-center justify-between">
+        <div />
+        <CreateReturnDialog />
+      </div>
       <AdminReturnsTable />
     </QueryGuard>
   );

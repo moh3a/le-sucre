@@ -3,14 +3,7 @@
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import {
-  Plus,
-  Pencil,
-  Send,
-  CheckCircle,
-  Package,
-  Trash2,
-} from "lucide-react";
+import { Plus, Pencil, Send, CheckCircle, Package, Trash2, Loader2 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { trpc } from "@/components/providers/app-providers";
@@ -19,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -123,12 +118,7 @@ function PoStatusBadge({ status }: { status: string }) {
 
 // ─── Create / Edit Supplier Dialog ────────────────────────────────────────
 
-const PAYMENT_TERMS_VALUES = [
-  "net_15",
-  "net_30",
-  "net_60",
-  "due_on_receipt",
-] as const;
+const PAYMENT_TERMS_VALUES = ["net_15", "net_30", "net_60", "due_on_receipt"] as const;
 
 export function SupplierDialogContent({
   supplier,
@@ -142,15 +132,11 @@ export function SupplierDialogContent({
   const utils = trpc.useUtils();
   const [name, setName] = useState(supplier?.name ?? "");
   const [code, setCode] = useState(supplier?.code ?? "");
-  const [contact_name, setContactName] = useState(
-    supplier?.contact_name ?? "",
-  );
+  const [contact_name, setContactName] = useState(supplier?.contact_name ?? "");
   const [email, setEmail] = useState(supplier?.email ?? "");
   const [phone, setPhone] = useState(supplier?.phone ?? "");
   const [address, setAddress] = useState(supplier?.address ?? "");
-  const [payment_terms, setPaymentTerms] = useState(
-    supplier?.payment_terms ?? "net_30",
-  );
+  const [payment_terms, setPaymentTerms] = useState(supplier?.payment_terms ?? "net_30");
   const [currency, setCurrency] = useState(supplier?.currency ?? "DZD");
 
   const create = trpc.operationsWorkflows.supplierCreate.useMutation({
@@ -301,8 +287,7 @@ export function CreateSupplierDialog() {
 
 export function SuppliersListClient() {
   const t = useTranslations("procurement");
-  const { data, isLoading, error } =
-    trpc.operationsWorkflows.suppliersList.useQuery();
+  const { data, isLoading, error } = trpc.operationsWorkflows.suppliersList.useQuery();
   const [edit_supplier, setEditSupplier] = useState<SupplierRow | null>(null);
 
   const suppliers: SupplierRow[] = useMemo(() => (data as SupplierRow[]) ?? [], [data]);
@@ -311,40 +296,27 @@ export function SuppliersListClient() {
     () => [
       {
         accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("name")} />
-        ),
-        cell: ({ row }) => (
-          <span className="font-medium">{row.original.name}</span>
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("name")} />,
+        cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
       },
       {
         accessorKey: "code",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("code")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("code")} />,
       },
       {
         accessorKey: "contact_name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("contact")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("contact")} />,
         cell: ({ row }) => row.original.contact_name ?? "—",
       },
       {
         accessorKey: "email",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("email")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("email")} />,
         cell: ({ row }) => row.original.email ?? "—",
       },
       {
         accessorKey: "payment_terms",
         header: ({ column }) => (
-          <DataTableColumnHeader
-            column={column}
-            label={t("payment_terms")}
-          />
+          <DataTableColumnHeader column={column} label={t("payment_terms")} />
         ),
         cell: ({ row }) => {
           const val = row.original.payment_terms;
@@ -354,9 +326,7 @@ export function SuppliersListClient() {
       },
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("status")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status")} />,
         cell: ({ row }) => {
           const isActive = row.original.status === "active";
           return (
@@ -368,15 +338,9 @@ export function SuppliersListClient() {
       },
       {
         id: "actions",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("actions")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("actions")} />,
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setEditSupplier(row.original)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => setEditSupplier(row.original)}>
             <Pencil className="size-4" />
           </Button>
         ),
@@ -463,26 +427,15 @@ export function CreatePurchaseOrderDialog() {
   }
 
   function add_item() {
-    setItems([
-      ...items,
-      { product_id: "", quantity: 1, unit_cost: 0 },
-    ]);
+    setItems([...items, { product_id: "", quantity: 1, unit_cost: 0 }]);
   }
 
   function remove_item(index: number) {
     setItems(items.filter((_, i) => i !== index));
   }
 
-  function update_item(
-    index: number,
-    field: string,
-    value: string | number,
-  ) {
-    setItems(
-      items.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item,
-      ),
-    );
+  function update_item(index: number, field: string, value: string | number) {
+    setItems(items.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   }
 
   function handle_submit(e: React.FormEvent) {
@@ -519,114 +472,110 @@ export function CreatePurchaseOrderDialog() {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("create_po_title")}</DialogTitle>
+          <DialogDescription>{t("create_po_description")}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handle_submit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("supplier_required")} *</Label>
-              <SupplierCombobox
-                value={supplier_id || null}
-                onValueChange={(v) => setSupplierId(v ?? "")}
-                canCreate
-                placeholder={t("supplier_required")}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("warehouse")}</Label>
-              <WarehouseCombobox
-                value={warehouse_id || null}
-                onValueChange={(v) => setWarehouseId(v ?? "")}
-                placeholder={t("warehouse_id_placeholder")}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>{t("supplier_required")} *</Label>
+            <SupplierCombobox
+              value={supplier_id || null}
+              onValueChange={(v) => setSupplierId(v ?? "")}
+              canCreate
+              placeholder={t("supplier_required")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>{t("warehouse")}</Label>
+            <WarehouseCombobox
+              value={warehouse_id || null}
+              onValueChange={(v) => setWarehouseId(v ?? "")}
+              placeholder={t("warehouse_id_placeholder")}
+            />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>{t("items")}</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={add_item}
-              >
+              <Label className="text-base font-semibold">{t("items")}</Label>
+              <Button type="button" variant="outline" size="sm" onClick={add_item}>
                 <Plus className="mr-1 size-4" />
                 {t("add_item")}
               </Button>
             </div>
+            {items.length === 0 && (
+              <p className="text-muted-foreground py-2 text-center text-sm">{t("no_items")}</p>
+            )}
             {items.map((item, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-4 gap-2 items-end"
-              >
-                <div className="space-y-1">
+              <div key={i} className="grid grid-cols-12 items-end gap-3 rounded-lg border p-3">
+                <div className="col-span-5 space-y-1">
                   <Label className="text-xs">{t("product_id")}</Label>
                   <ProductCombobox
                     value={item.product_id || null}
-                    onValueChange={(v) =>
-                      update_item(i, "product_id", v ?? "")
-                    }
+                    onValueChange={(v) => update_item(i, "product_id", v ?? "")}
                     placeholder={t("product_id_placeholder")}
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="col-span-3 space-y-1">
                   <Label className="text-xs">{t("quantity")}</Label>
                   <Input
                     type="number"
                     min="1"
                     value={item.quantity}
-                    onChange={(e) =>
-                      update_item(i, "quantity", Number(e.target.value))
-                    }
+                    onChange={(e) => update_item(i, "quantity", Number(e.target.value))}
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="col-span-3 space-y-1">
                   <Label className="text-xs">{t("unit_cost")}</Label>
                   <Input
                     type="number"
                     step="0.01"
                     min="0"
                     value={item.unit_cost}
-                    onChange={(e) =>
-                      update_item(i, "unit_cost", Number(e.target.value))
-                    }
+                    onChange={(e) => update_item(i, "unit_cost", Number(e.target.value))}
                   />
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove_item(i)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+                <div className="col-span-1 flex items-end pb-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => remove_item(i)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("expected_delivery")}</Label>
-              <Input
-                type="date"
-                value={expected_delivery_at}
-                onChange={(e) => setExpectedDeliveryAt(e.target.value)}
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <Label>{t("notes")}</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
+            <Label>{t("expected_delivery")}</Label>
+            <Input
+              type="date"
+              value={expected_delivery_at}
+              onChange={(e) => setExpectedDeliveryAt(e.target.value)}
             />
           </div>
+          <div className="space-y-2">
+            <Label>{t("notes")}</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+          </div>
 
-          <Button type="submit" className="w-full" disabled={create.isPending}>
-            {t("create_po_button")}
-          </Button>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" disabled={create.isPending}>
+              {create.isPending ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  {t("creating")}
+                </>
+              ) : (
+                t("create_po_button")
+              )}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -653,15 +602,14 @@ function ReceivePODialog({
 
   const [received_map, setReceivedMap] = useState<Record<string, number>>({});
 
-  const receive =
-    trpc.operationsWorkflows.purchaseOrderReceive.useMutation({
-      onSuccess: () => {
-        toast.success(t("receive_po_success"));
-        utils.operationsWorkflows.purchaseOrdersList.invalidate();
-        onOpenChange(false);
-      },
-      onError: (err) => toast.error(err.message),
-    });
+  const receive = trpc.operationsWorkflows.purchaseOrderReceive.useMutation({
+    onSuccess: () => {
+      toast.success(t("receive_po_success"));
+      utils.operationsWorkflows.purchaseOrdersList.invalidate();
+      onOpenChange(false);
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   function handle_submit(e: React.FormEvent) {
     e.preventDefault();
@@ -693,25 +641,14 @@ function ReceivePODialog({
           {po?.items.map((item) => {
             const remaining = item.quantity - item.received_quantity;
             return (
-              <div
-                key={item.id}
-                className="grid grid-cols-3 gap-2 items-end"
-              >
+              <div key={item.id} className="grid grid-cols-3 items-end gap-2">
                 <div className="space-y-1">
                   <Label className="text-xs">{t("product_id")}</Label>
-                  <Input
-                    value={item.product_id}
-                    readOnly
-                    className="bg-muted"
-                  />
+                  <Input value={item.product_id} readOnly className="bg-muted" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">{t("receive_remaining")}</Label>
-                  <Input
-                    value={remaining}
-                    readOnly
-                    className="bg-muted"
-                  />
+                  <Input value={remaining} readOnly className="bg-muted" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">{t("receive_quantity")}</Label>
@@ -733,15 +670,9 @@ function ReceivePODialog({
             );
           })}
           {(!po || po.items.length === 0) && (
-            <p className="text-sm text-muted-foreground">
-              {t("receive_empty")}
-            </p>
+            <p className="text-muted-foreground text-sm">{t("receive_empty")}</p>
           )}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={receive.isPending}
-          >
+          <Button type="submit" className="w-full" disabled={receive.isPending}>
             {t("receive_confirm")}
           </Button>
         </form>
@@ -754,8 +685,7 @@ function ReceivePODialog({
 
 export function PurchaseOrdersListClient() {
   const t = useTranslations("procurement");
-  const { data: pos, isLoading, error } =
-    trpc.operationsWorkflows.purchaseOrdersList.useQuery();
+  const { data: pos, isLoading, error } = trpc.operationsWorkflows.purchaseOrdersList.useQuery();
   const utils = trpc.useUtils();
   const [receive_po_id, setReceivePoId] = useState<string | null>(null);
 
@@ -775,38 +705,25 @@ export function PurchaseOrdersListClient() {
     onError: (err) => toast.error(err.message),
   });
 
-  const purchase_orders: PORow[] = useMemo(
-    () => (pos as PORow[]) ?? [],
-    [pos],
-  );
+  const purchase_orders: PORow[] = useMemo(() => (pos as PORow[]) ?? [], [pos]);
 
   const columns = useMemo<ColumnDef<PORow>[]>(
     () => [
       {
         accessorKey: "po_number",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("po_number")} />
-        ),
-        cell: ({ row }) => (
-          <span className="font-medium">{row.original.po_number}</span>
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("po_number")} />,
+        cell: ({ row }) => <span className="font-medium">{row.original.po_number}</span>,
       },
       {
         accessorKey: "total",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("po_total")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("po_total")} />,
         cell: ({ row }) => (
-          <Badge variant="secondary">
-            {format_currency(Number(row.original.total))}
-          </Badge>
+          <Badge variant="secondary">{format_currency(Number(row.original.total))}</Badge>
         ),
       },
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("po_status")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("po_status")} />,
         cell: ({ row }) => <PoStatusBadge status={row.original.status} />,
       },
       {
@@ -822,9 +739,7 @@ export function PurchaseOrdersListClient() {
       },
       {
         id: "actions",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("po_actions")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("po_actions")} />,
         cell: ({ row }) => {
           const po = row.original;
           return (
@@ -851,13 +766,8 @@ export function PurchaseOrdersListClient() {
                   {t("action_approve")}
                 </Button>
               )}
-              {(po.status === "approved" ||
-                po.status === "partially_received") && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setReceivePoId(po.id)}
-                >
+              {(po.status === "approved" || po.status === "partially_received") && (
+                <Button variant="default" size="sm" onClick={() => setReceivePoId(po.id)}>
                   <Package className="mr-1 size-4" />
                   {t("action_receive")}
                 </Button>

@@ -13,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -26,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Ban } from "lucide-react";
 import { QueryGuard } from "@/components/query-guard";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
 
 export function RequestCancellationDialog() {
   const t = useTranslations("cancellations");
@@ -82,13 +82,11 @@ export function RequestCancellationDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cn_order_id">{t("order")} *</Label>
-            <Input
-              id="cn_order_id"
+            <Label>{t("order")} *</Label>
+            <OrderCombobox
               value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
+              onValueChange={(v) => setOrderId(v ?? "")}
               placeholder={t("order_id_placeholder")}
-              required
             />
           </div>
           <div className="space-y-2">

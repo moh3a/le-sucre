@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { catch_drizzle } from "@/lib/db/drizzle-error";
 import { ConflictError, NotFoundError } from "@/lib/error_handling";
 import { generate_id } from "@/lib/utils";
 
@@ -25,12 +26,10 @@ export class SkuGenerationEngine {
     const sku_ids = skus.map((s) => s.id);
 
     if (sku_ids.length > 0) {
-      // cart_items.sku_id has onDelete: "restrict" — must be cleared first
-      await db.delete(cart_items).where(inArray(cart_items.sku_id, sku_ids));
+      await catch_drizzle(db.delete(cart_items).where(inArray(cart_items.sku_id, sku_ids)));
     }
 
-    // Everything else (sku_option_values, inventory_levels, etc.) cascades
-    await db.delete(product_skus).where(eq(product_skus.product_id, product_id));
+    await catch_drizzle(db.delete(product_skus).where(eq(product_skus.product_id, product_id)));
   }
 
   async generate_for_product(input: {
@@ -121,7 +120,7 @@ export class SkuGenerationEngine {
 
       if (!to_create.length) continue;
 
-      await db.transaction(async (tx) => {
+      await catch_drizzle(db.transaction(async (tx) => {
         const sku_inserts = to_create.map((row) => {
           const sku_id = generate_id();
           const sku_code = build_sku_code(product.sku, row.signature);
@@ -168,7 +167,7 @@ export class SkuGenerationEngine {
         );
 
         await tx.insert(sku_option_values).values(option_rows);
-      });
+      }));
 
       created += to_create.length;
     }
