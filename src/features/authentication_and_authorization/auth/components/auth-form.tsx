@@ -11,13 +11,14 @@ import { authClient } from "@/lib/auth/client";
 import { trpc } from "@/components/providers/app-providers";
 
 const phone_regex = /^\+?[\d\s\-()]{7,20}$/;
+const email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-async function resolve_phone_to_email(phone: string): Promise<string | null> {
+async function resolve_identifier_to_email(identifier: string): Promise<string | null> {
   try {
     const res = await fetch("/api/phone-auth/resolve", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({ identifier }),
       credentials: "include",
     });
     if (!res.ok) return null;
@@ -39,13 +40,14 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [tab, setTab] = useState<"signin" | "signup">("signin");
 
   // Sign in state
-  const [signInPhone, setSignInPhone] = useState("");
+  const [signInIdentifier, setSignInIdentifier] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [signInError, setSignInError] = useState("");
   const [signInLoading, setSignInLoading] = useState(false);
 
   // Sign up state
   const [signUpName, setSignUpName] = useState("");
+  const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPhone, setSignUpPhone] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signUpConfirm, setSignUpConfirm] = useState("");
@@ -53,15 +55,18 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
 
   const signUpMutation = trpc.auth.signUp.useMutation({
     onSuccess: async () => {
-      const email = await resolve_phone_to_email(signUpPhone);
-      if (email) {
-        const result = await authClient.signIn.email({
-          email,
-          password: signUpPassword,
-        });
-        if (result.error) {
-          setTab("signin");
-          return;
+      const identifier = signUpEmail || signUpPhone;
+      if (identifier) {
+        const email = await resolve_identifier_to_email(identifier);
+        if (email) {
+          const result = await authClient.signIn.email({
+            email,
+            password: signUpPassword,
+          });
+          if (result.error) {
+            setTab("signin");
+            return;
+          }
         }
       }
       reset();
@@ -74,11 +79,12 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   });
 
   function reset() {
-    setSignInPhone("");
+    setSignInIdentifier("");
     setSignInPassword("");
     setSignInError("");
     setSignInLoading(false);
     setSignUpName("");
+    setSignUpEmail("");
     setSignUpPhone("");
     setSignUpPassword("");
     setSignUpConfirm("");
@@ -89,8 +95,8 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     e.preventDefault();
     setSignInError("");
 
-    if (!phone_regex.test(signInPhone)) {
-      setSignInError(t("invalid_phone"));
+    if (!signInIdentifier) {
+      setSignInError(t("identifier_required") || "Email ou téléphone requis");
       return;
     }
     if (signInPassword.length < 8) {
@@ -100,7 +106,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
 
     setSignInLoading(true);
     try {
-      const email = await resolve_phone_to_email(signInPhone);
+      const email = await resolve_identifier_to_email(signInIdentifier);
       if (!email) {
         setSignInError(t("error_invalid"));
         return;
@@ -133,10 +139,15 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       setSignUpError(t("name_required") || "Nom requis");
       return;
     }
-    if (!phone_regex.test(signUpPhone)) {
-      setSignUpError(t("invalid_phone"));
+
+    const has_email = Boolean(signUpEmail && email_regex.test(signUpEmail));
+    const has_phone = Boolean(signUpPhone && phone_regex.test(signUpPhone));
+
+    if (!has_email && !has_phone) {
+      setSignUpError(t("identifier_required") || "Email ou téléphone requis");
       return;
     }
+
     if (signUpPassword.length < 8) {
       setSignUpError(t("password_too_short"));
       return;
@@ -148,7 +159,8 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
 
     signUpMutation.mutate({
       name: signUpName,
-      phone: signUpPhone,
+      email: has_email ? signUpEmail : undefined,
+      phone: has_phone ? signUpPhone : undefined,
       password: signUpPassword,
     });
   }
@@ -163,14 +175,14 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       <TabsContent value="signin">
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="auth-signin-phone">{t("phone")}</Label>
+            <Label htmlFor="auth-signin-identifier">{t("identifier")}</Label>
             <Input
-              id="auth-signin-phone"
-              type="tel"
-              autoComplete="tel"
-              placeholder={t("phone_placeholder")}
-              value={signInPhone}
-              onChange={(e) => setSignInPhone(e.target.value)}
+              id="auth-signin-identifier"
+              type="text"
+              autoComplete="username"
+              placeholder={t("identifier_placeholder")}
+              value={signInIdentifier}
+              onChange={(e) => setSignInIdentifier(e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -202,6 +214,17 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               placeholder="Votre nom"
               value={signUpName}
               onChange={(e) => setSignUpName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="auth-signup-email">{t("email") || "Email"}</Label>
+            <Input
+              id="auth-signup-email"
+              type="email"
+              autoComplete="email"
+              placeholder="email@exemple.com"
+              value={signUpEmail}
+              onChange={(e) => setSignUpEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">

@@ -11,6 +11,9 @@ import { ROLE_NAMES } from "@/features/authentication_and_authorization/authoriz
 import { login_protection_service } from "@/lib/security/login-protection";
 import { logger } from "@/lib/logger";
 
+function is_email(value: string): boolean {
+  return value.includes("@");
+}
 
 /**
  * Normalizes an Algerian phone number to international format (+213XXXXXXXXX).
@@ -32,14 +35,42 @@ function phone_to_email(phone: string): string {
 
 export class PhoneAuthService {
   /**
-   * Sign up with phone + password.
-   * Creates a Better Auth user with auto-generated email, stores phone on the user record.
+   * Sign up with email + password or phone + password.
    */
-  async sign_up(input: { name: string; phone: string; password: string }) {
-    const phone = normalize_phone(input.phone);
+  async sign_up(input: { name: string; email?: string; phone?: string; password: string }) {
+    const has_email = Boolean(input.email && input.email.includes("@"));
+    const has_phone = Boolean(input.phone);
+
+    if (!has_email && !has_phone) {
+      throw_error({
+        code: "AUTH_MISSING_IDENTIFIER",
+        status: 400,
+        message: {
+          fr: "Email ou téléphone requis",
+          en: "Email or phone required",
+          ar: "البريد الإلكتروني أو رقم الهاتف مطلوب",
+        },
+      });
+    }
+
+    if (has_email) {
+      const email = input.email!.trim().toLowerCase();
+      const result = await auth.api.signUpEmail({
+        body: {
+          name: input.name,
+          email,
+          password: input.password,
+          rememberMe: false,
+        },
+      });
+      await role_repository.assign_role(result.user.id, ROLE_NAMES.customer);
+      return result;
+    }
+
+    // Phone registration — generate placeholder email
+    const phone = normalize_phone(input.phone!);
     const email = phone_to_email(phone);
 
-    // Check phone uniqueness manually (Better Auth will check email uniqueness)
     const existing = await db
       .select({ id: users.id })
       .from(users)
@@ -58,7 +89,6 @@ export class PhoneAuthService {
       });
     }
 
-    // Create user via Better Auth with auto-generated email
     const result = await auth.api.signUpEmail({
       body: {
         name: input.name,
@@ -68,25 +98,54 @@ export class PhoneAuthService {
       },
     });
 
-    // Store phone on the user record
     await db.update(users).set({ phone }).where(eq(users.id, result.user.id));
-
-    // Assign customer role
     await role_repository.assign_role(result.user.id, ROLE_NAMES.customer);
 
     return result;
   }
 
   /**
-   * Sign in with phone + password.
-   * Looks up the user by phone, resolves their auto-generated email, and authenticates.
+   * Sign in with email + password or phone + password.
    */
-  async sign_in(input: { phone: string; password: string; remember_me?: boolean }) {
-    const phone = normalize_phone(input.phone);
-    const ip = "unknown"; // Default if request IP headers are not available during local service call
+  async sign_in(input: { identifier: string; password: string; remember_me?: boolean }) {
+    const ip = "unknown";
 
-    // 1. Check login attempts and lockouts
-    const login_check = await login_protection_service.check_attempt(ip, phone);
+    let userEmail: string;
+    let lookupKey: string;
+
+    if (is_email(input.identifier)) {
+      userEmail = input.identifier.trim().toLowerCase();
+      lookupKey = userEmail;
+
+      const user = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, userEmail))
+        .limit(1);
+
+      if (user.length === 0) {
+        await login_protection_service.record_failure(ip, lookupKey);
+        throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
+      }
+    } else {
+      const phone = normalize_phone(input.identifier);
+      lookupKey = phone;
+
+      const user = await db
+        .select({ id: users.id, email: users.email })
+        .from(users)
+        .where(eq(users.phone, phone))
+        .limit(1);
+
+      if (user.length === 0) {
+        await login_protection_service.record_failure(ip, lookupKey);
+        throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
+      }
+      userEmail = user[0].email;
+    }
+
+    // Login protection check
+    const login_check = await login_protection_service.check_attempt(ip, lookupKey);
     if (!login_check.allowed) {
       throw_error({
         ...AUTH_ERROR.ACCOUNT_LOCKED,
@@ -102,57 +161,57 @@ export class PhoneAuthService {
       await new Promise((resolve) => setTimeout(resolve, login_check.backoffDelayMs));
     }
 
-    const user = await db
-      .select({ id: users.id, email: users.email })
-      .from(users)
-      .where(eq(users.phone, phone))
-      .limit(1);
-
-    if (user.length === 0) {
-      // Record failed attempt to prevent enum
-      await login_protection_service.record_failure(ip, phone);
-      throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
-    }
-
     try {
-      // Sign in via Better Auth using the user's email (auto-generated from phone)
       const result = await auth.api.signInEmail({
         body: {
-          email: user[0].email,
+          email: userEmail,
           password: input.password,
           rememberMe: input.remember_me ?? false,
         },
       });
 
-      // 2. Reset failures on success
-      await login_protection_service.record_success(ip, phone, user[0].id);
-
+      await login_protection_service.record_success(ip, lookupKey, result.user.id);
       return result;
     } catch (e) {
-      logger.warn(`Failed login attempt for user`, { userId: user[0].id, error: e instanceof Error ? e.message : String(e) });
-      // 3. Record failed attempt on credentials mismatch
-      await login_protection_service.record_failure(ip, phone, user[0].id);
+      logger.warn(`Failed login attempt`, { identifier: lookupKey, error: e instanceof Error ? e.message : String(e) });
+      await login_protection_service.record_failure(ip, lookupKey);
       throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
     }
   }
 
-  /** Resolve phone to user info (for internal lookups). */
-  async find_by_phone(phone: string) {
-    const normalized = normalize_phone(phone);
+  /** Resolve phone/email to user info. */
+  async find_by_identifier(identifier: string) {
+    if (is_email(identifier)) {
+      const email = identifier.trim().toLowerCase();
+      const [user] = await db
+        .select({ id: users.id, name: users.name, email: users.email, phone: users.phone })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      return user ?? null;
+    }
+
+    const normalized = normalize_phone(identifier);
     const [user] = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        phone: users.phone,
-      })
+      .select({ id: users.id, name: users.name, email: users.email, phone: users.phone })
       .from(users)
       .where(eq(users.phone, normalized))
       .limit(1);
     return user ?? null;
   }
 
-  /** Get the current session (same as existing AuthService.get_session). */
+  /** Resolve phone to user info (backward compat). */
+  async find_by_phone(phone: string) {
+    const normalized = normalize_phone(phone);
+    const [user] = await db
+      .select({ id: users.id, name: users.name, email: users.email, phone: users.phone })
+      .from(users)
+      .where(eq(users.phone, normalized))
+      .limit(1);
+    return user ?? null;
+  }
+
+  /** Get the current session. */
   async get_session() {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) throw_error(AUTH_ERROR.SESSION_REQUIRED);

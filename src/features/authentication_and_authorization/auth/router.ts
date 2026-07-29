@@ -20,13 +20,14 @@ import { profile_repository } from "@/features/authentication_and_authorization/
 import { phone_auth_service } from "./services/phone-auth.service";
 
 export const auth_router = create_trpc_router({
-  // ─── Phone-based authentication ──────────────────────────────
+  // ─── Email/Phone-based authentication ────────────────────────
   signUp: public_procedure
     .input(register_dto)
     .mutation(async ({ ctx, input }) => {
       const result = await phone_auth_service.sign_up({
         name: input.name,
-        phone: input.phone,
+        email: input.email || undefined,
+        phone: input.phone || undefined,
         password: input.password,
       });
       await audit_service.log({
@@ -34,7 +35,7 @@ export const auth_router = create_trpc_router({
         action: "auth.register",
         resource_type: "user",
         resource_id: result.user.id,
-        metadata: { phone: input.phone },
+        metadata: { email: input.email, phone: input.phone },
       });
       return result;
     }),
@@ -43,7 +44,7 @@ export const auth_router = create_trpc_router({
     .input(login_dto)
     .mutation(async ({ ctx, input }) => {
       const result = await phone_auth_service.sign_in({
-        phone: input.phone,
+        identifier: input.identifier,
         password: input.password,
         remember_me: input.remember_me,
       });
@@ -52,9 +53,15 @@ export const auth_router = create_trpc_router({
         action: "auth.login",
         resource_type: "user",
         resource_id: result.user.id,
-        metadata: { phone: input.phone },
+        metadata: { identifier: input.identifier },
       });
       return result;
+    }),
+
+  resolveIdentifier: public_procedure
+    .input(z.object({ identifier: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      return phone_auth_service.find_by_identifier(input.identifier);
     }),
 
   resolvePhone: public_procedure

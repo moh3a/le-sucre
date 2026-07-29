@@ -11,10 +11,9 @@ import { INVENTORY_ERROR } from "../constants/error-codes";
 import { throw_error } from "../../shared/error-codes";
 import { inventory_reservations } from "../schema";
 import { inventory_repository } from "../repositories/inventory.repository";
-import {
-  invalidate_product_stock_cache,
-  sync_sku_stock_denormalized,
-} from "../helpers/stock-sync.helper";
+import { invalidate_product_stock_cache } from "../helpers/stock-cache.helper";
+import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { product_skus } from "@/features/product_information_management/variants/schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { AUDIT_ACTION } from "../../constants/audit-actions";
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
@@ -66,10 +65,10 @@ export class ReservationService {
         reference_id: id,
       });
 
-      await sync_sku_stock_denormalized(input.sku_id, tx);
       return id;
     });
 
+    void invalidate_catalog_cache();
     void audit_service.log({
       action: AUDIT_ACTION.INVENTORY_RESERVATION_CREATED,
       resource_type: "sku_id",
@@ -114,8 +113,13 @@ export class ReservationService {
         resource_type: "reservation_id",
         resource_id: reservation_id,
       });
-      const product_id = await sync_sku_stock_denormalized(reservation.sku_id, tx);
-      if (product_id) await invalidate_product_stock_cache(product_id);
+      void invalidate_catalog_cache();
+      const [sku] = await tx
+        .select({ product_id: product_skus.product_id })
+        .from(product_skus)
+        .where(eq(product_skus.id, reservation.sku_id))
+        .limit(1);
+      if (sku?.product_id) await invalidate_product_stock_cache(sku.product_id);
     });
 
     return { ok: true };
@@ -170,8 +174,13 @@ export class ReservationService {
         resource_type: "reservation_id",
         resource_id: reservation.id,
       });
-      const product_id = await sync_sku_stock_denormalized(reservation.sku_id, tx);
-      if (product_id) await invalidate_product_stock_cache(product_id);
+      void invalidate_catalog_cache();
+      const [sku] = await tx
+        .select({ product_id: product_skus.product_id })
+        .from(product_skus)
+        .where(eq(product_skus.id, reservation.sku_id))
+        .limit(1);
+      if (sku?.product_id) await invalidate_product_stock_cache(sku.product_id);
     });
 
     return { ok: true };

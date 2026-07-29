@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import { db, type DbClient } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
@@ -57,7 +57,7 @@ export class InventoryRepository {
       .select({
         sku_id: product_skus.id,
         sku_code: product_skus.sku_code,
-        stock_available: product_skus.stock_available,
+        stock_available: sql<number>`GREATEST(COALESCE(${inventory_levels.quantity_on_hand}, 0) - COALESCE(${inventory_levels.quantity_reserved}, 0), 0)`.mapWith(Number),
         quantity_on_hand: inventory_levels.quantity_on_hand,
         quantity_reserved: inventory_levels.quantity_reserved,
         warehouse_id: inventory_levels.warehouse_id,

@@ -209,12 +209,12 @@ export class InitService {
     if (already) throw_error(INIT_ERROR.ALREADY_COMPLETED);
 
     try {
-      const result = await auth.api.signUpEmail({
+      const result = await auth.api.createUser({
         body: {
           name: input.name,
           email: input.email,
           password: input.password,
-          rememberMe: false,
+          role: "admin",
         },
       });
 
@@ -223,7 +223,8 @@ export class InitService {
       await role_repository.assign_role(user_id, ROLE_NAMES.admin);
 
       return { user_id };
-    } catch {
+    } catch (error) {
+      console.log(error);
       throw_error(INIT_ERROR.ADMIN_CREATION_FAILED);
     }
   }

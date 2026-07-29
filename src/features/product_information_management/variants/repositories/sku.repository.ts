@@ -11,6 +11,7 @@ import {
   product_translations,
 } from "@/features/product_information_management/products/schema";
 import { product_properties, property_values, product_skus, sku_option_values } from "../schema";
+import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 
 export class SkuRepository {
   async get_product(product_id: string) {
@@ -58,7 +59,11 @@ export class SkuRepository {
         sku_code: product_skus.sku_code,
         option_signature: product_skus.option_signature,
         is_active: product_skus.is_active,
-        stock_available: product_skus.stock_available,
+        stock_available: sql<number>`COALESCE((
+          SELECT GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)
+          FROM ${inventory_levels}
+          WHERE ${inventory_levels.sku_id} = ${product_skus.id}
+        ), 0)`.mapWith(Number),
         base_price: product_skus.base_price,
         offer_price: product_skus.offer_price,
         wholesale_base_price: product_skus.wholesale_base_price,
@@ -199,7 +204,6 @@ export class SkuRepository {
       offer_price: string | null;
       wholesale_base_price: string | null;
       wholesale_offer_price: string | null;
-      stock_available: number;
       is_active: boolean;
     }>,
   ) {
@@ -254,7 +258,11 @@ export class SkuRepository {
         wholesale_offer_price: product_skus.wholesale_offer_price,
         currency: product_skus.currency,
         is_active: product_skus.is_active,
-        stock_available: product_skus.stock_available,
+        stock_available: sql<number>`COALESCE((
+          SELECT GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)
+          FROM ${inventory_levels}
+          WHERE ${inventory_levels.sku_id} = ${product_skus.id}
+        ), 0)`.mapWith(Number),
         product_id: product_skus.product_id,
         product_name: product_translations.name,
       })
@@ -324,13 +332,23 @@ export class SkuRepository {
   }
 
   async stats_admin() {
+    const stock_agg = db
+      .select({
+        sku_id: inventory_levels.sku_id,
+        available: sql<number>`GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)`,
+      })
+      .from(inventory_levels)
+      .groupBy(inventory_levels.sku_id)
+      .as("stock_agg");
+
     const counts = await db
       .select({
         is_active: product_skus.is_active,
         total: count(product_skus.id),
-        total_stock: sql<number>`SUM(${product_skus.stock_available})`.mapWith(Number),
+        total_stock: sql<number>`COALESCE(SUM(stock_agg.available), 0)`.mapWith(Number),
       })
       .from(product_skus)
+      .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
       .groupBy(product_skus.is_active);
 
     const activeRow = counts.find((c) => c.is_active === true);
@@ -341,7 +359,8 @@ export class SkuRepository {
         out_of_stock: count(product_skus.id),
       })
       .from(product_skus)
-      .where(eq(product_skus.stock_available, 0));
+      .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
+      .where(sql`COALESCE(stock_agg.available, 0) = 0`);
 
     const active_count = Number(activeRow?.total ?? 0);
     const inactive_count = Number(inactiveRow?.total ?? 0);

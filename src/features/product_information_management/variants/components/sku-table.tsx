@@ -307,33 +307,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     });
   }, []);
 
-  const commit_stock_inline = useCallback(
-    async (sku_id: string) => {
-      const edit = inline_edits[sku_id];
-      if (!edit || edit.stock_available === undefined) return;
-
-      await bulk_update.mutateAsync({
-        ids: [sku_id],
-        stock_available: Number(edit.stock_available),
-      });
-
-      set_inline_edits((prev) => {
-        const next = { ...prev };
-        if (next[sku_id]) {
-          const remaining = { ...next[sku_id] };
-          delete remaining.stock_available;
-          if (Object.keys(remaining).length === 0) {
-            delete next[sku_id];
-          } else {
-            next[sku_id] = remaining;
-          }
-        }
-        return next;
-      });
-    },
-    [inline_edits, bulk_update],
-  );
-
   const property_columns = useMemo<ColumnDef<SkuListRow>[]>(
     () =>
       properties.map((prop) => ({
@@ -504,42 +477,17 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
         accessorKey: "stock_available",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("stock")} />,
         cell: ({ row }) => {
-          const sku_id = row.original.sku_id;
-          const edit = inline_edits[sku_id];
-          if (edit?.stock_available !== undefined) {
-            return (
-              <div className="flex items-center gap-1">
-                <Input
-                  type="number"
-                  min={0}
-                  step="1"
-                  value={edit.stock_available}
-                  onChange={(e) => start_inline_edit(sku_id, "stock_available", e.target.value)}
-                  className="h-7 w-16 text-xs"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") commit_stock_inline(sku_id);
-                    if (e.key === "Escape") cancel_inline_edit(sku_id);
-                  }}
-                />
-                <button
-                  className="text-xs text-blue-600 hover:underline"
-                  onClick={() => commit_stock_inline(sku_id)}
-                >
-                  ✓
-                </button>
-              </div>
-            );
+          const stock = row.original.stock_available;
+          if (stock <= 0) {
+            return <Badge variant="destructive">0</Badge>;
           }
           return (
             <span
-              className="hover:bg-accent cursor-pointer rounded px-1 py-0.5"
-              onClick={() =>
-                start_inline_edit(sku_id, "stock_available", row.original.stock_available)
+              className={
+                stock < 10 ? "text-warning font-mono font-bold" : "font-mono font-semibold"
               }
-              title={t("click_to_edit_title")}
             >
-              {row.original.stock_available}
+              {stock}
             </span>
           );
         },
@@ -591,7 +539,6 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       inline_edits,
       start_inline_edit,
       commit_inline_edit,
-      commit_stock_inline,
       cancel_inline_edit,
     ],
   );
@@ -645,13 +592,21 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     await bulk_update.mutateAsync(payload as Parameters<typeof bulk_update.mutateAsync>[0]);
   }
 
+  const set_stock = trpc.inventory.setStock.useMutation({
+    onError: (err) => toast.error(err.message),
+  });
+
   async function on_save_bulk_stock() {
     const { stock } = bulk_stock_form.getValues();
     if (!stock) return;
-    await bulk_update.mutateAsync({
-      ids: selected_ids,
-      stock_available: Number(stock),
-    });
+    const qty = Number(stock);
+    for (const sku_id of selected_ids) {
+      await set_stock.mutateAsync({ sku_id, warehouse_id: "default", quantity_on_hand: qty });
+    }
+    set_bulk_stock_dialog_open(false);
+    setRowSelection({});
+    toast.success(t("bulk_update_success"));
+    await invalidate();
   }
 
   const action_bar = useMemo(
@@ -937,16 +892,16 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 type="button"
                 variant="outline"
                 onClick={() => set_bulk_stock_dialog_open(false)}
-                disabled={bulk_update.isPending}
+                disabled={set_stock.isPending}
               >
                 {t("cancel")}
               </Button>
               <Button
                 type="button"
                 onClick={on_save_bulk_stock}
-                disabled={bulk_update.isPending || !bulk_stock_form.watch("stock")}
+                disabled={set_stock.isPending || !bulk_stock_form.watch("stock")}
               >
-                {bulk_update.isPending ? t("saving") : t("set_stock")}
+                {set_stock.isPending ? t("saving") : t("set_stock")}
               </Button>
             </DialogFooter>
           </DialogContent>

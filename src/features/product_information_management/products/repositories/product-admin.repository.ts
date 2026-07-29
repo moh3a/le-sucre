@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { products, product_translations } from "../schema";
 import { brands } from "@/features/product_information_management/brands/schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
+import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 import { order_items, orders } from "@/features/order_management_system/orders/schema";
 import { product_review_aggregates } from "@/features/product_reviews_management/schema";
 import type { ProductStatus } from "../models/product.dto";
@@ -60,10 +61,20 @@ export class ProductAdminRepository {
       .from(product_review_aggregates)
       .where(sql`${product_review_aggregates.review_count} > 0`);
 
+    const stock_agg = db
+      .select({
+        sku_id: inventory_levels.sku_id,
+        available: sql<number>`GREATEST(SUM(${inventory_levels.quantity_on_hand}) - SUM(${inventory_levels.quantity_reserved}), 0)`,
+      })
+      .from(inventory_levels)
+      .groupBy(inventory_levels.sku_id)
+      .as("stock_agg");
+
     const [low_stock] = await db
       .select({ count: count() })
       .from(product_skus)
-      .where(and(eq(product_skus.is_active, true), lte(product_skus.stock_available, 5)));
+      .leftJoin(stock_agg, eq(product_skus.id, stock_agg.sku_id))
+      .where(and(eq(product_skus.is_active, true), sql`COALESCE(stock_agg.available, 0) <= 5`));
 
     return {
       total_products: Number(totals?.total ?? 0),
@@ -91,7 +102,9 @@ export class ProductAdminRepository {
       clauses.push(lte(products.base_price, String(filters.price_max)));
 
     const stock_expr = sql<number>`COALESCE((
-      SELECT SUM(ps.stock_available) FROM product_skus ps
+      SELECT GREATEST(SUM(il.quantity_on_hand) - SUM(il.quantity_reserved), 0)
+      FROM product_skus ps
+      INNER JOIN ${inventory_levels} il ON il.sku_id = ps.id
       WHERE ps.product_id = ${products.id} AND ps.is_active = 1
     ), 0)`;
 

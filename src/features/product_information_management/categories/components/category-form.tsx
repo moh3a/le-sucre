@@ -97,9 +97,10 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess, onC
 
   const pending = create_mutation.isPending || update_mutation.isPending || move_mutation.isPending;
 
+  const NONE = "__none__";
   const parent_options = tree
-    ? [{ id: "", label: "—" }, ...flatten_categories(tree)]
-    : [{ id: "", label: "—" }];
+    ? [{ id: NONE, label: "—" }, ...flatten_categories(tree)]
+    : [{ id: NONE, label: "—" }];
 
   async function on_submit(values: CategoryFormValues) {
     if (mode === "create") {
@@ -179,7 +180,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess, onC
                     <span className="text-muted-foreground text-xs">{t("refreshing")}</span>
                   </div>
                 ) : (
-                  <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)}>
+                  <Select value={field.value ?? NONE} onValueChange={(v) => field.onChange(v === NONE ? null : v)}>
                     <SelectTrigger className="h-9">
                       <SelectValue />
                     </SelectTrigger>

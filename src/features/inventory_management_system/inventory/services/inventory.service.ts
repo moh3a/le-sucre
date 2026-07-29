@@ -17,10 +17,8 @@ import { MOVEMENT_TYPES } from "../constants/movement-types";
 import { INVENTORY_ERROR } from "../constants/error-codes";
 import { throw_error } from "../../shared/error-codes";
 import { inventory_repository } from "../repositories/inventory.repository";
-import {
-  invalidate_product_stock_cache,
-  sync_sku_stock_denormalized,
-} from "../helpers/stock-sync.helper";
+import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";
+import { invalidate_product_stock_cache } from "../helpers/stock-cache.helper";
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
 import { preorder_fulfillment_service } from "@/features/order_management_system/preorders/services/preorder-fulfillment.service";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
@@ -77,10 +75,16 @@ export class InventoryService {
         reference_id: input.reference_id ?? null,
       });
 
-      return sync_sku_stock_denormalized(input.sku_id, tx);
+      const [sku] = await tx
+        .select({ product_id: product_skus.product_id })
+        .from(product_skus)
+        .where(eq(product_skus.id, input.sku_id))
+        .limit(1);
+      return sku?.product_id ?? null;
     });
 
     if (product_id) await invalidate_product_stock_cache(product_id);
+    void invalidate_catalog_cache();
   }
 
   async get_level(sku_id: string, warehouse_id: string) {
@@ -225,14 +229,19 @@ export class InventoryService {
           reference_id: input.reference_id ?? null,
         });
 
-        const pid = await sync_sku_stock_denormalized(item.sku_id, tx);
-        if (pid) product_ids.add(pid);
+        const [sku] = await tx
+          .select({ product_id: product_skus.product_id })
+          .from(product_skus)
+          .where(eq(product_skus.id, item.sku_id))
+          .limit(1);
+        if (sku?.product_id) product_ids.add(sku.product_id);
       }
     });
 
     for (const pid of product_ids) {
       await invalidate_product_stock_cache(pid);
     }
+    void invalidate_catalog_cache();
 
     for (let i = 0; i < input.items.length; i++) {
       const item = input.items[i];

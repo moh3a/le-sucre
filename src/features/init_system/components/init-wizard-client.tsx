@@ -33,8 +33,8 @@ interface StepDef {
 
 const ALL_STEPS: StepDef[] = [
   { id: "database", label: "Database", icon: Database },
-  { id: "admin", label: "Admin", icon: User },
   { id: "seed", label: "Permissions", icon: Shield },
+  { id: "admin", label: "Admin", icon: User },
   { id: "finalize", label: "Complete", icon: CheckCircle2 },
 ];
 
@@ -49,8 +49,8 @@ export function InitWizardClient() {
     if (!status) return ALL_STEPS;
     return ALL_STEPS.filter((s) => {
       if (s.id === "database" && status.tables_exist) return false;
-      if (s.id === "admin" && status.has_admin) return false;
       if (s.id === "seed" && status.has_roles) return false;
+      if (s.id === "admin" && status.has_admin) return false;
       return true;
     });
   }, [status]);
@@ -137,7 +137,7 @@ export function InitWizardClient() {
     return Object.keys(errors).length === 0;
   }, [adminForm]);
 
-  const handleSelectStep = useCallback((_value: string) => {}, []);
+  const handleSelectStep = useCallback(() => {}, []);
 
   const handleRunMigrations = () => {
     setError(null);
@@ -210,7 +210,6 @@ export function InitWizardClient() {
   }
 
   const currentStepIndex = steps.findIndex((s) => s.id === step);
-  const isLastStep = currentStepIndex === steps.length - 1;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">

@@ -261,7 +261,6 @@ export class SkuService {
     offer_price?: number | null;
     wholesale_base_price?: number | null;
     wholesale_offer_price?: number | null;
-    stock_available?: number;
     is_active?: boolean;
   }) {
     if (!input.ids.length) return { ok: true };
@@ -284,9 +283,6 @@ export class SkuService {
         ...(input.wholesale_offer_price !== undefined && {
           wholesale_offer_price:
             input.wholesale_offer_price != null ? String(input.wholesale_offer_price) : null,
-        }),
-        ...(input.stock_available !== undefined && {
-          stock_available: input.stock_available,
         }),
         ...(input.is_active !== undefined && { is_active: input.is_active }),
       });

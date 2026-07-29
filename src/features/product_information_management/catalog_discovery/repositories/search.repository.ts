@@ -9,6 +9,7 @@ import {
 } from "@/features/product_information_management/products/schema";
 import { brands } from "@/features/product_information_management/brands/schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
+import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
 import type {
   ResolvedCatalogFilters,
   CatalogProductCard,
@@ -46,10 +47,12 @@ export class SearchRepository {
       clauses.push(sql`(
         ${products.has_variants} = 0
         OR EXISTS (
-          SELECT 1 FROM product_skus ps
+          SELECT 1
+          FROM ${inventory_levels} il
+          INNER JOIN product_skus ps ON ps.id = il.sku_id
           WHERE ps.product_id = ${products.id}
             AND ps.is_active = 1
-            AND ps.stock_available > 0
+          HAVING GREATEST(SUM(il.quantity_on_hand) - SUM(il.quantity_reserved), 0) > 0
         )
       )`);
     }
@@ -100,7 +103,9 @@ export class SearchRepository {
             LIMIT 1
           )`,
           in_stock: sql<number>`CASE WHEN ${products.has_variants} = 0 THEN 1 ELSE (
-            SELECT MAX(ps.stock_available) FROM product_skus ps
+            SELECT GREATEST(SUM(il.quantity_on_hand) - SUM(il.quantity_reserved), 0)
+            FROM ${inventory_levels} il
+            INNER JOIN product_skus ps ON ps.id = il.sku_id
             WHERE ps.product_id = ${products.id} AND ps.is_active = 1
           ) END`,
           relevance_score,
