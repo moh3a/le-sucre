@@ -108,124 +108,133 @@ export function EditUser({ userId, name, email, is_active, banned, role }: EditU
   };
 
   return (
-    <QueryGuard mutation={{ isPending: update_user.isPending || assign_role.isPending, error: update_user.error ?? assign_role.error }}>
-    <ResponsiveDialog open={open} onOpenChange={setOpen}>
-      <ResponsiveDialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          {t("manage")}
-        </Button>
-      </ResponsiveDialogTrigger>
-      <ResponsiveDialogContent>
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>{t("manage_user_title")}</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>{email}</ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
+    <QueryGuard
+      mutation={{
+        isPending: update_user.isPending || assign_role.isPending,
+        error: update_user.error ?? assign_role.error,
+      }}
+    >
+      <ResponsiveDialog open={open} onOpenChange={setOpen}>
+        <ResponsiveDialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            {t("manage")}
+          </Button>
+        </ResponsiveDialogTrigger>
+        <ResponsiveDialogContent>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>{t("manage_user_title")}</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>{email}</ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
 
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto">
-          <div className="space-y-2">
-            <Label htmlFor={`name-${userId}`}>{t("name")}</Label>
-            <Input
-              id={`name-${userId}`}
-              value={form_name}
-              onChange={(e) => setFormName(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("role")}</Label>
-            <Select value={form_role} onValueChange={setFormRole}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor={`active-${userId}`}>{t("active_account")}</Label>
-            <Switch id={`active-${userId}`} checked={form_active} onCheckedChange={setFormActive} />
-          </div>
-
-          <Separator />
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <Label>{t("banned_account")}</Label>
-                <p className="text-muted-foreground text-xs">
-                  {banned ? t("currently_banned") : t("not_banned")}
-                </p>
-              </div>
-              <Switch checked={form_banned} onCheckedChange={setFormBanned} />
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor={`name-${userId}`}>{t("name")}</Label>
+              <Input
+                id={`name-${userId}`}
+                value={form_name}
+                onChange={(e) => setFormName(e.target.value)}
+              />
             </div>
 
-            {form_banned && (
+            <div className="space-y-2">
+              <Label>{t("role")}</Label>
+              <Select value={form_role} onValueChange={setFormRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLE_OPTIONS.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {r}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`active-${userId}`}>{t("active_account")}</Label>
+              <Switch
+                id={`active-${userId}`}
+                checked={form_active}
+                onCheckedChange={setFormActive}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <Label>{t("banned_account")}</Label>
+                  <p className="text-muted-foreground text-xs">
+                    {banned ? t("currently_banned") : t("not_banned")}
+                  </p>
+                </div>
+                <Switch checked={form_banned} onCheckedChange={setFormBanned} />
+              </div>
+
+              {form_banned && (
+                <div className="space-y-2">
+                  <Label htmlFor={`ban-reason-${userId}`}>{t("ban_reason")}</Label>
+                  <Input
+                    id={`ban-reason-${userId}`}
+                    value={form_ban_reason}
+                    onChange={(e) => setFormBanReason(e.target.value)}
+                    placeholder={t("optional_placeholder")}
+                  />
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor={`password-${userId}`}>{t("new_password")}</Label>
+              <Input
+                id={`password-${userId}`}
+                type="password"
+                value={form_password}
+                onChange={(e) => setFormPassword(e.target.value)}
+                placeholder={t("leave_blank_placeholder")}
+              />
+            </div>
+
+            {form_password && (
               <div className="space-y-2">
-                <Label htmlFor={`ban-reason-${userId}`}>{t("ban_reason")}</Label>
+                <Label htmlFor={`confirm-password-${userId}`}>{t("confirm_password")}</Label>
                 <Input
-                  id={`ban-reason-${userId}`}
-                  value={form_ban_reason}
-                  onChange={(e) => setFormBanReason(e.target.value)}
-                  placeholder={t("optional_placeholder")}
+                  id={`confirm-password-${userId}`}
+                  type="password"
+                  value={form_confirm_password}
+                  onChange={(e) => setFormConfirmPassword(e.target.value)}
                 />
               </div>
             )}
-          </div>
 
-          <Separator />
-
-          <div className="space-y-2">
-            <Label htmlFor={`password-${userId}`}>{t("new_password")}</Label>
-            <Input
-              id={`password-${userId}`}
-              type="password"
-              value={form_password}
-              onChange={(e) => setFormPassword(e.target.value)}
-              placeholder={t("leave_blank_placeholder")}
-            />
-          </div>
-
-          {form_password && (
-            <div className="space-y-2">
-              <Label htmlFor={`confirm-password-${userId}`}>{t("confirm_password")}</Label>
-              <Input
-                id={`confirm-password-${userId}`}
-                type="password"
-                value={form_confirm_password}
-                onChange={(e) => setFormConfirmPassword(e.target.value)}
-              />
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">{t("current_status")}</p>
+                <p className="text-muted-foreground text-xs">{email}</p>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant={is_active ? "default" : "secondary"}>
+                  {is_active ? t("active") : t("inactive")}
+                </Badge>
+                {banned && <Badge variant="destructive">{t("banned")}</Badge>}
+              </div>
             </div>
-          )}
 
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">{t("current_status")}</p>
-              <p className="text-muted-foreground text-xs">{email}</p>
-            </div>
-            <div className="flex gap-2">
-              <Badge variant={is_active ? "default" : "secondary"}>
-                {is_active ? t("active") : t("inactive")}
-              </Badge>
-              {banned && <Badge variant="destructive">{t("banned")}</Badge>}
-            </div>
+            <Button
+              className="w-full"
+              disabled={update_user.isPending || assign_role.isPending}
+              onClick={() => void on_save()}
+            >
+              {update_user.isPending ? t("saving") : t("save")}
+            </Button>
           </div>
-
-          <Button
-            className="w-full"
-            disabled={update_user.isPending || assign_role.isPending}
-            onClick={() => void on_save()}
-          >
-            {update_user.isPending ? t("saving") : t("save")}
-          </Button>
-        </div>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </QueryGuard>
   );
 }

@@ -68,9 +68,7 @@ export default function VerifyPhonePage() {
             )}
 
             {/* ERROR */}
-            {is_error && (
-              <p className="text-destructive text-sm">{error_message}</p>
-            )}
+            {is_error && <p className="text-destructive text-sm">{error_message}</p>}
 
             <Button type="submit" className="w-full" disabled={is_success}>
               {t("verify_phone")}

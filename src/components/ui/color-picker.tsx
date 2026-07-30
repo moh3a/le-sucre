@@ -724,7 +724,7 @@ function ColorPickerContent(props: React.ComponentProps<typeof PopoverContent>) 
       <ContentPrimitive
         data-slot="color-picker-content"
         {...popoverContentProps}
-        className={cn("flex w-[340px] flex-col gap-4 p-4", className)}
+        className={cn("flex w-85 flex-col gap-4 p-4", className)}
       >
         {children}
       </ContentPrimitive>
@@ -736,7 +736,7 @@ function ColorPickerContent(props: React.ComponentProps<typeof PopoverContent>) 
       data-slot="color-picker-content"
       asChild={asChild}
       {...popoverContentProps}
-      className={cn("flex w-[340px] flex-col gap-4 p-4", className)}
+      className={cn("flex w-85 flex-col gap-4 p-4", className)}
     >
       {children}
     </PopoverContent>

@@ -53,7 +53,7 @@ export function ProfileForm({
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className={i === 3 ? "sm:col-span-2 h-10" : "h-10"} />
+                <Skeleton key={i} className={i === 3 ? "h-10 sm:col-span-2" : "h-10"} />
               ))}
             </div>
             <Skeleton className="h-10 w-32" />
@@ -69,7 +69,10 @@ export function ProfileForm({
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             {fields.map((field) => (
-              <div key={field.name} className={field.fullWidth ? "sm:col-span-2 space-y-2" : "space-y-2"}>
+              <div
+                key={field.name}
+                className={field.fullWidth ? "space-y-2 sm:col-span-2" : "space-y-2"}
+              >
                 <label htmlFor={field.name} className="text-sm font-medium">
                   {field.label}
                 </label>

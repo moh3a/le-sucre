@@ -41,10 +41,7 @@ export class AuditRepository {
         .orderBy(desc(audit_logs.created_at))
         .limit(safe_limit)
         .offset(offset),
-      db
-        .select({ total: count() })
-        .from(audit_logs)
-        .where(eq(audit_logs.actor_user_id, user_id)),
+      db.select({ total: count() }).from(audit_logs).where(eq(audit_logs.actor_user_id, user_id)),
     ]);
 
     const total_records = Number(total_row[0]?.total ?? 0);
@@ -68,9 +65,7 @@ export class AuditRepository {
 
     const conditions = [];
     if (search) {
-      conditions.push(
-        like(audit_logs.action, `%${search}%`),
-      );
+      conditions.push(like(audit_logs.action, `%${search}%`));
     }
 
     const where_clause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -124,8 +119,13 @@ export class AuditRepository {
 
     const [total_result, today_result, users_result, actions_result] = await Promise.all([
       db.select({ count: count() }).from(audit_logs),
-      db.select({ count: count() }).from(audit_logs).where(sql`${audit_logs.created_at} >= ${today_start}`),
-      db.select({ count: sql<number>`COUNT(DISTINCT ${audit_logs.actor_user_id})` }).from(audit_logs),
+      db
+        .select({ count: count() })
+        .from(audit_logs)
+        .where(sql`${audit_logs.created_at} >= ${today_start}`),
+      db
+        .select({ count: sql<number>`COUNT(DISTINCT ${audit_logs.actor_user_id})` })
+        .from(audit_logs),
       db.select({ count: sql<number>`COUNT(DISTINCT ${audit_logs.action})` }).from(audit_logs),
     ]);
 

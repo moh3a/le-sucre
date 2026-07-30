@@ -124,7 +124,7 @@ export function AddressFormCard({
           </Button>
         )}
       </ResponsiveDialogTrigger>
-      <ResponsiveDialogContent className="md:min-w-[75vw] md:min-h-[75vh]">
+      <ResponsiveDialogContent className="md:min-h-[75vh] md:min-w-[75vw]">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
             {address ? t("edit_address_title") : t("new_address_title")}

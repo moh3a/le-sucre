@@ -15,7 +15,13 @@ export default async function CustomerFavoritesPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("my_favorites") }]} />
+      <StorefrontBreadcrumbs
+        items={[
+          { label: tBc("home"), href: "/" },
+          { label: tBc("my_account"), href: "/account" },
+          { label: tBc("my_favorites") },
+        ]}
+      />
       <CustomerFavoritesPageClient />
     </>
   );

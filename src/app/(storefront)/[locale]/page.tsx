@@ -1,8 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/storefront/section-header";
 import { InfoCard } from "@/components/info-card";
 import { CategoryCard } from "@/features/product_information_management/categories/components/storefront/category-card";
@@ -316,7 +317,7 @@ export default async function HomePage({ params }: Props) {
           />
           <div className="flex gap-4 overflow-x-auto pb-4">
             {trending.map((product) => (
-              <div key={product.id} className="min-w-[200px] shrink-0">
+              <div key={product.id} className="min-w-50 shrink-0">
                 <ProductCard product={product} />
               </div>
             ))}

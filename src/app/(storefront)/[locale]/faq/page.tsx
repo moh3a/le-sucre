@@ -42,8 +42,8 @@ export default async function FaqPage({ params }: Props) {
     <div className="container mx-auto space-y-12 px-4 py-8">
       <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("faq") }]} />
       <section className="text-center">
-        <h1 className="mb-4 text-balance text-4xl font-bold">{t("heading")}</h1>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg text-balance leading-relaxed">
+        <h1 className="mb-4 text-4xl font-bold text-balance">{t("heading")}</h1>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed text-balance">
           {t("subtitle")}
         </p>
       </section>
@@ -71,9 +71,7 @@ export default async function FaqPage({ params }: Props) {
                   <Accordion type="single" collapsible className="w-full">
                     {Array.from({ length: category.questions }).map((_, index) => (
                       <AccordionItem key={index} value={`${category.id}-${index}`}>
-                        <AccordionTrigger>
-                          {t(`${category.id}_q_${index + 1}`)}
-                        </AccordionTrigger>
+                        <AccordionTrigger>{t(`${category.id}_q_${index + 1}`)}</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-sm leading-relaxed">
                           {t(`${category.id}_a_${index + 1}`)}
                         </AccordionContent>

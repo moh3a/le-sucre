@@ -537,9 +537,9 @@ ring-1 ring-foreground/5
 Used for: table rows, card grids, KPI cards, product lists.
 
 ```tsx
-<Skeleton className="h-4 w-[250px]" />   // Text line
-<Skeleton className="h-8 w-[200px]" />   // Heading
-<Skeleton className="h-[120px] w-full" /> // Card placeholder
+<Skeleton className="h-4 w-62.5" />   // Text line
+<Skeleton className="h-8 w-50" />   // Heading
+<Skeleton className="h-30 w-full" /> // Card placeholder
 <Skeleton className="size-10 rounded-full" /> // Avatar
 ```
 

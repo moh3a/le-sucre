@@ -8,9 +8,7 @@ import { audit_service } from "@/features/authentication_and_authorization/autho
 import { AUDIT_ACTION } from "@/features/authentication_and_authorization/constants/audit-actions";
 
 export const authorization_router = create_trpc_router({
-  stats: permission_procedure(PERMISSIONS.roles_manage).query(() =>
-    role_repository.stats(),
-  ),
+  stats: permission_procedure(PERMISSIONS.roles_manage).query(() => role_repository.stats()),
 
   listRoles: permission_procedure(PERMISSIONS.roles_manage).query(() =>
     role_repository.list_roles_with_permissions(),

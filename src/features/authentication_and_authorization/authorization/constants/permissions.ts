@@ -220,5 +220,9 @@ export const ROLE_PERMISSION_MAP: Record<string, PermissionName[]> = {
     PERMISSIONS.shipping_read,
     PERMISSIONS.notifications_read,
   ],
-  customer: [PERMISSIONS.storefront_account, PERMISSIONS.wishlists_read, PERMISSIONS.wishlists_write],
+  customer: [
+    PERMISSIONS.storefront_account,
+    PERMISSIONS.wishlists_read,
+    PERMISSIONS.wishlists_write,
+  ],
 };

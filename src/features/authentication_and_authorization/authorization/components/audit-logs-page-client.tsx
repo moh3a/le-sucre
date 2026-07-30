@@ -4,12 +4,7 @@ import { useTranslations } from "next-intl";
 import * as React from "react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  ScrollText,
-  Users,
-  Zap,
-  CalendarClock,
-} from "lucide-react";
+import { ScrollText, Users, Zap, CalendarClock } from "lucide-react";
 
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableColumnHeader } from "@/features/data-table/components/data-table-column-header";
@@ -65,7 +60,11 @@ export function AuditLogsPageClient() {
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("date_column")} />,
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">
-            {formatDate(row.original.created_at, { month: "short", hour: "2-digit", minute: "2-digit" })}
+            {formatDate(row.original.created_at, {
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
         ),
       },
@@ -87,12 +86,11 @@ export function AuditLogsPageClient() {
       {
         id: "action",
         accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("action_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("action_column")} />
+        ),
         cell: ({ row }) => (
-          <Badge
-            variant="outline"
-            className="font-mono text-xs uppercase"
-          >
+          <Badge variant="outline" className="font-mono text-xs uppercase">
             {row.original.action}
           </Badge>
         ),
@@ -162,10 +160,7 @@ export function AuditLogsPageClient() {
     <QueryGuard
       query={{ isLoading }}
       loadingFallback={
-        <ConsolePageShell
-          title={t("title")}
-          subtitle={t("subtitle")}
-        >
+        <ConsolePageShell title={t("title")} subtitle={t("subtitle")}>
           <DataTableSkeleton columnCount={6} rowCount={10} filterCount={1} />
         </ConsolePageShell>
       }
@@ -178,9 +173,24 @@ export function AuditLogsPageClient() {
             loading={statsLoading}
             items={[
               { label: t("stat_total"), value: stats?.total ?? 0, icon: ScrollText, color: "info" },
-              { label: t("stat_today"), value: stats?.today ?? 0, icon: CalendarClock, color: "success" },
-              { label: t("stat_unique_users"), value: stats?.unique_users ?? 0, icon: Users, color: "default" },
-              { label: t("stat_unique_actions"), value: stats?.unique_actions ?? 0, icon: Zap, color: "warning" },
+              {
+                label: t("stat_today"),
+                value: stats?.today ?? 0,
+                icon: CalendarClock,
+                color: "success",
+              },
+              {
+                label: t("stat_unique_users"),
+                value: stats?.unique_users ?? 0,
+                icon: Users,
+                color: "default",
+              },
+              {
+                label: t("stat_unique_actions"),
+                value: stats?.unique_actions ?? 0,
+                icon: Zap,
+                color: "warning",
+              },
             ]}
           />
         }

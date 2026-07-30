@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+
 import { NewArrivalsContent } from "./new-arrivals-client";
 import type { AppLocale } from "@/i18n/config";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
@@ -18,7 +19,9 @@ export default async function NewArrivalsPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("new_arrivals") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("new_arrivals") }]}
+      />
       <NewArrivalsContent locale={locale} />
     </>
   );

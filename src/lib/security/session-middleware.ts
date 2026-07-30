@@ -1,7 +1,6 @@
 import "server-only";
 
 import { auth } from "@/lib/auth";
-import { session_security_service } from "@/features/authentication_and_authorization/auth/services/session-security.service";
 import { security_event_service } from "@/features/authentication_and_authorization/auth/services/security-event.service";
 import { logger } from "@/lib/logger";
 
@@ -28,7 +27,9 @@ export async function validate_session(req: Request): Promise<SessionValidationR
     const last_activity_key = `session:last_activity:${session_token}`;
     const { redis } = await import("@/lib/redis");
     const last_activity_raw = await redis.get(last_activity_key);
-    const last_activity = last_activity_raw ? parseInt(last_activity_raw, 10) : Math.floor(Date.now() / 1000);
+    const last_activity = last_activity_raw
+      ? parseInt(last_activity_raw, 10)
+      : Math.floor(Date.now() / 1000);
 
     const idle_timeout_min = Number(process.env.SESSION_IDLE_TIMEOUT_MINUTES) || 240;
     const idle_timeout_sec = idle_timeout_min * 60;

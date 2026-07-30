@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+
 import {
   Dialog,
   DialogContent,
@@ -46,12 +47,7 @@ const categories: Array<{
   },
 ];
 
-export function CookiePreferencesDialog({
-  open,
-  onOpenChange,
-  consent,
-  onSave,
-}: Props) {
+export function CookiePreferencesDialog({ open, onOpenChange, consent, onSave }: Props) {
   const t = useTranslations("cookie_consent");
   const [prefs, setPrefs] = useState<Record<CookieCategory, boolean>>({
     ...consent.categories,
@@ -75,17 +71,13 @@ export function CookiePreferencesDialog({
                 <Label htmlFor={`cookie-${cat.key}`} className="font-medium">
                   {t(cat.titleKey)}
                 </Label>
-                <p className="text-muted-foreground text-sm">
-                  {t(cat.descKey)}
-                </p>
+                <p className="text-muted-foreground text-sm">{t(cat.descKey)}</p>
               </div>
               <Switch
                 id={`cookie-${cat.key}`}
                 checked={prefs[cat.key]}
                 disabled={cat.required}
-                onCheckedChange={(checked) =>
-                  setPrefs((prev) => ({ ...prev, [cat.key]: checked }))
-                }
+                onCheckedChange={(checked) => setPrefs((prev) => ({ ...prev, [cat.key]: checked }))}
               />
             </div>
           ))}

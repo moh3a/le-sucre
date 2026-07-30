@@ -10,7 +10,10 @@ import { payment_retry_service } from "@/features/payment_management_system/serv
 import { campaign_scheduler_repository } from "@/features/campaign_management_system/repositories/campaign_scheduler.repository";
 import { campaign_repository } from "@/features/campaign_management_system/repositories/campaign.repository";
 import { campaign_cache } from "@/features/campaign_management_system/services/campaign_cache.service";
-import { CAMPAIGN_JOB_TYPE, CAMPAIGN_STATUS } from "@/features/campaign_management_system/constants/campaign_types";
+import {
+  CAMPAIGN_JOB_TYPE,
+  CAMPAIGN_STATUS,
+} from "@/features/campaign_management_system/constants/campaign_types";
 import { forecast_job_runner_service } from "@/features/inventory_management_system/forecasting/services/forecast-job-runner.service";
 import { index_job_runner_service } from "@/features/product_information_management/recommendations/services/index-job-runner.service";
 import { aggregation_job_runner_service } from "@/features/analytics_management_system/services/aggregation-job-runner.service";
@@ -108,9 +111,17 @@ async function process_preorders() {
   await preorder_fulfillment_service.fulfill_all_confirmed();
 }
 
-run_worker_loop("soft-delete-cleanup", () => soft_delete_cleanup_service.runCleanup().then(() => {}), 300_000);
+run_worker_loop(
+  "soft-delete-cleanup",
+  () => soft_delete_cleanup_service.runCleanup().then(() => {}),
+  300_000,
+);
 run_worker_loop("shipping", () => shipping_job_runner_service.run_due(25).then(() => {}), 5_000);
-run_worker_loop("reservation-expiry", () => reservation_service.expire_stale().then(() => {}), 10_000);
+run_worker_loop(
+  "reservation-expiry",
+  () => reservation_service.expire_stale().then(() => {}),
+  10_000,
+);
 run_worker_loop("payment", process_payment_jobs, 30_000);
 run_worker_loop("campaign_jobs", process_campaign_jobs, 10_000);
 run_worker_loop("inventory-forecast", () => forecast_job_runner_service.run_due(25), 10_000);

@@ -1,15 +1,11 @@
 import "server-only";
 
-import { and, eq, lt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+
 import { db } from "@/lib/db";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 import { consent_logs } from "@/features/authentication_and_authorization/auth/mfa_schema";
-import {
-  DATA_RETENTION_DAYS,
-  get_retention_date,
-  CONSENT_TYPES,
-  type ConsentType,
-} from "./compliance";
+import { DATA_RETENTION_DAYS, get_retention_date, type ConsentType } from "./compliance";
 import { generate_id } from "@/lib/utils";
 
 export class PrivacyComplianceService {

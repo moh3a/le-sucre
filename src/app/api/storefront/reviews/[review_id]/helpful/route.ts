@@ -2,10 +2,7 @@ import { json_ok, json_error } from "@/lib/http";
 import { get_storefront_identity } from "@/features/order_management_system/carts/cart-context.helper";
 import { helpful_service } from "@/features/product_reviews_management/services/helpful.service";
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ review_id: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ review_id: string }> }) {
   try {
     const identity = await get_storefront_identity(req.headers);
     if (!identity.user_id) {
@@ -20,10 +17,7 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ review_id: string }> },
-) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ review_id: string }> }) {
   try {
     const identity = await get_storefront_identity(req.headers);
     if (!identity.user_id) {

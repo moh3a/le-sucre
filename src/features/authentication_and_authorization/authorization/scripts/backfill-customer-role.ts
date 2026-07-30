@@ -1,15 +1,10 @@
 import "dotenv/config";
-import { sql, inArray, notInArray } from "drizzle-orm";
+import { sql, notInArray } from "drizzle-orm";
+
 import { create_script_db } from "@/lib/db/script-client";
 import logger from "@/lib/logger";
-import {
-  roles,
-  users,
-  user_roles,
-} from "@/features/authentication_and_authorization/auth/schema";
-import {
-  ROLE_NAMES,
-} from "@/features/authentication_and_authorization/authorization/constants/roles";
+import { roles, users, user_roles } from "@/features/authentication_and_authorization/auth/schema";
+import { ROLE_NAMES } from "@/features/authentication_and_authorization/authorization/constants/roles";
 
 const db = create_script_db();
 
@@ -23,9 +18,7 @@ async function main() {
     .limit(1);
 
   if (!customer_role) {
-    logger.error(
-      `Customer role "${ROLE_NAMES.customer}" not found. Run seed-rbac.ts first.`,
-    );
+    logger.error(`Customer role "${ROLE_NAMES.customer}" not found. Run seed-rbac.ts first.`);
     process.exit(1);
   }
 
@@ -47,9 +40,7 @@ async function main() {
     process.exit(0);
   }
 
-  logger.info(
-    `Found ${users_missing_role.length} user(s) missing the customer role:`,
-  );
+  logger.info(`Found ${users_missing_role.length} user(s) missing the customer role:`);
 
   for (const user of users_missing_role) {
     await db.insert(user_roles).values({

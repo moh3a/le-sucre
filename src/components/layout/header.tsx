@@ -84,7 +84,7 @@ export function Header({ locale = "fr", categories = [] }: HeaderProps) {
                 <Skeleton className="hidden h-8 w-8 rounded-full md:block" />
                 <div className="flex items-center gap-1">
                   <Skeleton className="h-8 w-8 rounded-md" />
-                  <Skeleton className="h-8 w-[70px] rounded-md" />
+                  <Skeleton className="h-8 w-17.5 rounded-md" />
                 </div>
               </div>
             </div>
@@ -144,7 +144,12 @@ export function Header({ locale = "fr", categories = [] }: HeaderProps) {
           {/* Right actions */}
           <div className="flex items-center gap-1">
             {/* Cart — desktop only */}
-            <Button variant="ghost" size="icon" asChild className="relative hidden shrink-0 md:inline-flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="relative hidden shrink-0 md:inline-flex"
+            >
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
                 <Badge className="bg-brand-crimson-violet text-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-0 p-0 text-xs">

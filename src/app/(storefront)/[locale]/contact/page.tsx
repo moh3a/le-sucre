@@ -17,7 +17,9 @@ export default async function ContactPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("contact") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("contact") }]}
+      />
       <ContactForm />
     </>
   );

@@ -6,6 +6,9 @@
 - format task, bon de commande, invoice, payment, like order id
 - https://www.npmjs.com/package/yalidine
 - check if every operation works
+- error: src\lib\compose-refs.ts
+- error: src\hooks\use-network-polling.ts
+- lint `features/`
 
 <p align="center">
   <a href="https://github.com/moh3a/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>

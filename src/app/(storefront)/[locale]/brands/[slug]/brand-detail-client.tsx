@@ -2,14 +2,18 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { CircleAlert, ExternalLink, PackageOpen } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CircleAlert, ExternalLink, PackageOpen } from "lucide-react";
 import { trpc } from "@/components/providers/app-providers";
-import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
+import {
+  ProductCard,
+  ProductCardSkeleton,
+} from "@/features/product_information_management/products/components/storefront/product-card";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
 import type { AppLocale } from "@/i18n/config";
 
@@ -45,9 +49,7 @@ export function BrandDetailClient({ slug, locale }: Props) {
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
             <AlertTitle>{t("brand")}</AlertTitle>
             <AlertDescription>
-              {brand_query.error instanceof Error
-                ? brand_query.error.message
-                : t("error_loading")}
+              {brand_query.error instanceof Error ? brand_query.error.message : t("error_loading")}
             </AlertDescription>
           </Alert>
         </div>
@@ -64,9 +66,7 @@ export function BrandDetailClient({ slug, locale }: Props) {
               <PackageOpen className="size-6" />
             </EmptyMedia>
             <EmptyTitle>{t("brand")}</EmptyTitle>
-            <span className="text-muted-foreground text-sm">
-              {t("error_loading")}
-            </span>
+            <span className="text-muted-foreground text-sm">{t("error_loading")}</span>
           </EmptyHeader>
         </Empty>
       </div>
@@ -89,16 +89,12 @@ export function BrandDetailClient({ slug, locale }: Props) {
               className="h-full w-full rounded-full object-cover"
             />
           ) : (
-            <span className="text-muted-foreground text-2xl font-bold">
-              {brand.name.charAt(0)}
-            </span>
+            <span className="text-muted-foreground text-2xl font-bold">{brand.name.charAt(0)}</span>
           )}
         </div>
         <div>
           <h1 className="text-3xl font-bold">{brand.name}</h1>
-          {brand.description && (
-            <p className="text-muted-foreground mt-2">{brand.description}</p>
-          )}
+          {brand.description && <p className="text-muted-foreground mt-2">{brand.description}</p>}
           {brand.website_url && (
             <Button variant="link" className="mt-1 h-auto p-0" asChild>
               <a href={brand.website_url} target="_blank" rel="noopener noreferrer">
@@ -137,9 +133,7 @@ export function BrandDetailClient({ slug, locale }: Props) {
               <CircleAlert className="mt-0.5 size-4 shrink-0" />
               <AlertTitle>{t("products")}</AlertTitle>
               <AlertDescription>
-                {products_error instanceof Error
-                  ? products_error.message
-                  : t("error_loading")}
+                {products_error instanceof Error ? products_error.message : t("error_loading")}
               </AlertDescription>
             </Alert>
           </div>
@@ -165,9 +159,7 @@ export function BrandDetailClient({ slug, locale }: Props) {
 
       {/* ABOUT BRAND */}
       <section>
-        <h2 className="mb-4 text-2xl font-bold">
-          {t("about", { brand: brand.name })}
-        </h2>
+        <h2 className="mb-4 text-2xl font-bold">{t("about", { brand: brand.name })}</h2>
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground leading-relaxed">

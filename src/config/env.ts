@@ -63,14 +63,31 @@ const env_schema = z
     if (v.NODE_ENV === "production" && !v.BETTER_AUTH_SECRET) {
       ctx.addIssue({ code: "custom", message: "BETTER_AUTH_SECRET required in production" });
     }
-    if (v.NODE_ENV === "production" && v.ALLOWED_ORIGINS && !v.ALLOWED_ORIGINS.includes(v.BETTER_AUTH_URL)) {
-      ctx.addIssue({ code: "custom", message: "ALLOWED_ORIGINS must include BETTER_AUTH_URL in production" });
+    if (
+      v.NODE_ENV === "production" &&
+      v.ALLOWED_ORIGINS &&
+      !v.ALLOWED_ORIGINS.includes(v.BETTER_AUTH_URL)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "ALLOWED_ORIGINS must include BETTER_AUTH_URL in production",
+      });
     }
-    if (v.NODE_ENV === "production" && v.REDIS_TLS_ENABLED && !v.REDIS_URL.startsWith("rediss://")) {
-      ctx.addIssue({ code: "custom", message: "REDIS_URL must use rediss:// when REDIS_TLS_ENABLED=true" });
+    if (
+      v.NODE_ENV === "production" &&
+      v.REDIS_TLS_ENABLED &&
+      !v.REDIS_URL.startsWith("rediss://")
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "REDIS_URL must use rediss:// when REDIS_TLS_ENABLED=true",
+      });
     }
     if (v.CRM_PROVIDER === "hubspot" && !v.HUBSPOT_ACCESS_TOKEN) {
-      ctx.addIssue({ code: "custom", message: "HUBSPOT_ACCESS_TOKEN required when CRM_PROVIDER=hubspot" });
+      ctx.addIssue({
+        code: "custom",
+        message: "HUBSPOT_ACCESS_TOKEN required when CRM_PROVIDER=hubspot",
+      });
     }
   });
 
@@ -81,7 +98,9 @@ try {
 } catch (err) {
   if (err instanceof z.ZodError) {
     for (const issue of err.issues) {
-      logger.error(`Environment validation failed: ${issue.message} (path: ${issue.path.join(".")})`);
+      logger.error(
+        `Environment validation failed: ${issue.message} (path: ${issue.path.join(".")})`,
+      );
     }
     if (process.env.NODE_ENV === "production") {
       process.exit(1);

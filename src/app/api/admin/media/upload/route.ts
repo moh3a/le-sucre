@@ -5,7 +5,6 @@ import {
   enforce_upload_rate_limit,
   check_user_upload_quota,
   track_upload_quota,
-  sanitize_filename,
 } from "@/features/media_library/helpers";
 import { MEDIA_ERROR, UPLOAD_LIMITS } from "@/features/media_library/constants";
 import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
@@ -29,7 +28,10 @@ export async function POST(req: Request) {
       return Response.json(
         {
           success: false,
-          error: { code: "TOO_MANY_FILES", message: `Max ${UPLOAD_LIMITS.MAX_FILES_PER_UPLOAD} files per upload.` },
+          error: {
+            code: "TOO_MANY_FILES",
+            message: `Max ${UPLOAD_LIMITS.MAX_FILES_PER_UPLOAD} files per upload.`,
+          },
         },
         { status: 400 },
       );
@@ -44,18 +46,18 @@ export async function POST(req: Request) {
       if (!quota.allowed) {
         throw_error({
           ...MEDIA_ERROR.QUOTA_EXCEEDED,
-          message: { fr: quota.reason ?? "Quota dépassé", en: quota.reason ?? "Quota exceeded", ar: "تجاوز الحد المسموح" },
+          message: {
+            fr: quota.reason ?? "Quota dépassé",
+            en: quota.reason ?? "Quota exceeded",
+            ar: "تجاوز الحد المسموح",
+          },
         });
       }
 
       const alt = (form_data.get("alt") as string | null) ?? undefined;
       const caption = (form_data.get("caption") as string | null) ?? undefined;
-      const width = form_data.get("width")
-        ? Number(form_data.get("width"))
-        : undefined;
-      const height = form_data.get("height")
-        ? Number(form_data.get("height"))
-        : undefined;
+      const width = form_data.get("width") ? Number(form_data.get("width")) : undefined;
+      const height = form_data.get("height") ? Number(form_data.get("height")) : undefined;
       const is_public = form_data.get("is_public") !== "false";
       const entity_type = form_data.get("entity_type") as string | null;
       const entity_id = form_data.get("entity_id") as string | null;

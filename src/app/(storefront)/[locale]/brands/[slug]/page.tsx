@@ -18,7 +18,13 @@ export default async function BrandDetailPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("brands"), href: "/brands" }, { label: slug.replace(/-/g, " ") }]} />
+      <StorefrontBreadcrumbs
+        items={[
+          { label: tBc("home"), href: "/" },
+          { label: tBc("brands"), href: "/brands" },
+          { label: slug.replace(/-/g, " ") },
+        ]}
+      />
       <BrandDetailClient slug={slug} locale={locale as AppLocale} />
     </>
   );

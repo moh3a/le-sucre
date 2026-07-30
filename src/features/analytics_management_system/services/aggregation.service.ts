@@ -224,7 +224,9 @@ export class AggregationService {
       await db
         .insert(analytics_funnel_daily)
         .values({ id: generate_id(), day_key: day, step, sessions })
-        .onDuplicateKeyUpdate({ set: { sessions, updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") } });
+        .onDuplicateKeyUpdate({
+          set: { sessions, updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") },
+        });
     }
   }
 

@@ -45,9 +45,7 @@ export function AdminSidebar() {
     { href: "/console/blacklist", label: t("ip_blacklist"), icon: Ban },
   ];
 
-  const bottomItems = [
-    { href: "/", label: t("view_shop"), icon: Home },
-  ];
+  const bottomItems = [{ href: "/", label: t("view_shop"), icon: Home }];
   const [collapsed, setCollapsed] = useState(false);
 
   const isActive = (href: string, exact = false) =>

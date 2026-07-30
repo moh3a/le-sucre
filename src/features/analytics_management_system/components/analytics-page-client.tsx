@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  BarChart3,
-  Download,
-  LayoutDashboard,
-  Search,
-  ShoppingBag,
-  Tag,
-} from "lucide-react";
+import { BarChart3, Download, LayoutDashboard, Search, ShoppingBag, Tag } from "lucide-react";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,12 +36,7 @@ export function AnalyticsPageClient() {
       subtitle={t("subtitle")}
       actions={
         <div className="flex items-center gap-2">
-          <AnalyticsDateRangePicker
-            from={from}
-            to={to}
-            onFromChange={setFrom}
-            onToChange={setTo}
-          />
+          <AnalyticsDateRangePicker from={from} to={to} onFromChange={setFrom} onToChange={setTo} />
           <Button variant="outline" size="sm">
             <Download className="mr-1 size-4" />
             {t("export")}

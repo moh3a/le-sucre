@@ -2,14 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useCookieConsent } from "@/hooks/use-cookie-consent";
 import { CookiePreferencesDialog } from "./cookie-preferences-dialog";
 
@@ -23,9 +18,7 @@ export function CookieSettingsSection() {
       <Card>
         <CardHeader>
           <CardTitle>{t("cookie_preferences_title")}</CardTitle>
-          <CardDescription>
-            {t("cookie_preferences_description")}
-          </CardDescription>
+          <CardDescription>{t("cookie_preferences_description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={() => setOpen(true)}>

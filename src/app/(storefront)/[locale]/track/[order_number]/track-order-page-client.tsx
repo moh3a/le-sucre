@@ -2,17 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
   Package,
   RotateCcw,
   Truck,
@@ -21,6 +10,12 @@ import {
   CircleAlert,
   SearchX,
 } from "lucide-react";
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Empty,
   EmptyHeader,
@@ -36,12 +31,7 @@ interface TrackOrderPageClientProps {
 }
 
 const STATUS_ICONS = [Package, RotateCcw, Truck, CheckCircle] as const;
-const STATUS_KEYS = [
-  "stepConfirmed",
-  "stepPreparing",
-  "stepShipped",
-  "stepDelivered",
-] as const;
+const STATUS_KEYS = ["stepConfirmed", "stepPreparing", "stepShipped", "stepDelivered"] as const;
 
 function getFulfillmentStep(status: string): number {
   switch (status) {
@@ -80,7 +70,9 @@ function getDeliveryStep(delivery_status: string | null): number {
   }
 }
 
-function getStatusBadgeVariant(status: string): "default" | "secondary" | "outline" | "destructive" {
+function getStatusBadgeVariant(
+  status: string,
+): "default" | "secondary" | "outline" | "destructive" {
   switch (status) {
     case "delivered":
     case "completed":
@@ -125,8 +117,7 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
 
   if (error) {
     const isNotFound =
-      error.data?.code === "NOT_FOUND" ||
-      error.message?.toLowerCase().includes("not found");
+      error.data?.code === "NOT_FOUND" || error.message?.toLowerCase().includes("not found");
 
     if (isNotFound) {
       return (
@@ -187,9 +178,7 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
     if (index === 0 && order.placed_at) {
       date = new Date(order.placed_at).toLocaleDateString();
     } else if (index === 3 && shipment?.delivery_status === "delivered") {
-      const deliveredEvent = tracking_events?.find(
-        (e) => e.status === "delivered",
-      );
+      const deliveredEvent = tracking_events?.find((e) => e.status === "delivered");
       if (deliveredEvent) {
         date = new Date(deliveredEvent.occurred_at).toLocaleDateString();
       }
@@ -210,7 +199,6 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
     };
   });
 
-  const addr = order.shipping_address as Record<string, unknown> | null;
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
@@ -219,9 +207,7 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
         <div className="flex items-center justify-center gap-3">
           <p className="text-muted-foreground text-lg">
             {t("orderLabel")}{" "}
-            <span className="font-mono font-semibold text-foreground">
-              #{order.order_number}
-            </span>
+            <span className="text-foreground font-mono font-semibold">#{order.order_number}</span>
           </p>
           <Badge variant={getStatusBadgeVariant(order.status)}>
             {getStatusLabel(t, order.status)}
@@ -240,7 +226,7 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
               <div key={step.label} className="relative flex gap-4 pb-8 last:pb-0">
                 {index < trackingSteps.length - 1 && (
                   <div
-                    className={`absolute left-[15px] top-10 h-full w-px ${
+                    className={`absolute top-10 left-3.75 h-full w-px ${
                       step.completed ? "bg-primary" : "bg-border"
                     }`}
                   />
@@ -324,7 +310,7 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Truck className="size-5 text-primary" />
+                  <Truck className="text-primary size-5" />
                   {t("carrierTitle")}
                 </CardTitle>
                 <CardDescription>{t("carrierDescription")}</CardDescription>
@@ -339,18 +325,12 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
                       </span>
                     </p>
                     {shipment.tracking_url && (
-                      <p className="text-muted-foreground text-xs">
-                        {t("estimatedDelivery")}
-                      </p>
+                      <p className="text-muted-foreground text-xs">{t("estimatedDelivery")}</p>
                     )}
                   </div>
                   {shipment.tracking_url && (
                     <Button variant="outline" size="sm" asChild>
-                      <a
-                        href={shipment.tracking_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={shipment.tracking_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="mr-1 size-4" />
                         {t("trackOn")}
                       </a>
@@ -360,21 +340,14 @@ export function TrackOrderPageClient({ orderNumber }: TrackOrderPageClientProps)
 
                 {tracking_events.length > 0 && (
                   <div className="mt-4 space-y-2">
-                    <h4 className="text-sm font-medium">
-                      {t("progressTitle")}
-                    </h4>
+                    <h4 className="text-sm font-medium">{t("progressTitle")}</h4>
                     {tracking_events.slice(0, 5).map((event) => (
-                      <div
-                        key={event.id}
-                        className="flex items-start gap-2 text-sm"
-                      >
-                        <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
+                      <div key={event.id} className="flex items-start gap-2 text-sm">
+                        <div className="bg-primary mt-1 size-2 shrink-0 rounded-full" />
                         <div>
                           <p className="font-medium">{event.status}</p>
                           {event.description && (
-                            <p className="text-muted-foreground text-xs">
-                              {event.description}
-                            </p>
+                            <p className="text-muted-foreground text-xs">{event.description}</p>
                           )}
                           <p className="text-muted-foreground text-xs">
                             {new Date(event.occurred_at).toLocaleString()}

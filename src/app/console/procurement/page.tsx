@@ -33,11 +33,7 @@ export default function ProcurementPage() {
   };
 
   return (
-    <ConsolePageShell
-      title={t("title")}
-      subtitle={t("subtitle")}
-      actions={actions[tab]}
-    >
+    <ConsolePageShell title={t("title")} subtitle={t("subtitle")} actions={actions[tab]}>
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           {TABS.map(({ value, icon: Icon }) => (

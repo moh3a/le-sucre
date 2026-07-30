@@ -2,10 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { CircleAlert, PackageOpen, RefreshCw, WifiOff, AlertTriangle } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { CircleAlert, PackageOpen, RefreshCw, WifiOff, AlertTriangle } from "lucide-react";
 import {
   Empty,
   EmptyHeader,

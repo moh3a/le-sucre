@@ -50,9 +50,7 @@ export const user_profiles = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [
-    uniqueIndex("user_profiles_user_id_uidx").on(table.user_id),
-  ],
+  (table) => [uniqueIndex("user_profiles_user_id_uidx").on(table.user_id)],
 );
 
 // ==========================================

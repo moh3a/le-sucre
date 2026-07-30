@@ -21,7 +21,7 @@ export function TrackOrderPageSkeleton() {
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="relative flex gap-4 pb-8 last:pb-0">
               <Skeleton className="relative z-10 size-8 shrink-0 rounded-full" />
-              <div className="min-w-0 flex-1 pt-1 space-y-1">
+              <div className="min-w-0 flex-1 space-y-1 pt-1">
                 <Skeleton className="h-4 w-40" />
                 <Skeleton className="h-3 w-24" />
               </div>

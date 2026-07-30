@@ -18,9 +18,7 @@ export const mfa_settings = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [
-    index("mfa_settings_user_idx").on(table.user_id),
-  ],
+  (table) => [index("mfa_settings_user_idx").on(table.user_id)],
 );
 
 export const mfa_backup_codes = mysqlTable(
@@ -37,9 +35,7 @@ export const mfa_backup_codes = mysqlTable(
     used_at: timestamp("used_at", { mode: "string" }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
   },
-  (table) => [
-    index("mfa_backup_codes_user_idx").on(table.user_id),
-  ],
+  (table) => [index("mfa_backup_codes_user_idx").on(table.user_id)],
 );
 
 export const consent_logs = mysqlTable(

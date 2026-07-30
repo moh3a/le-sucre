@@ -86,13 +86,13 @@ export function AnalyticsProductsTable() {
       loadingFallback={<DataTableSkeleton columnCount={4} rowCount={10} />}
     >
       <Card>
-      <CardHeader>
-        <CardTitle>Meilleures ventes</CardTitle>
-        <CardDescription>Meilleures ventes sur les 30 derniers jours</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DataTable table={table} />
-      </CardContent>
+        <CardHeader>
+          <CardTitle>Meilleures ventes</CardTitle>
+          <CardDescription>Meilleures ventes sur les 30 derniers jours</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable table={table} />
+        </CardContent>
       </Card>
     </QueryGuard>
   );

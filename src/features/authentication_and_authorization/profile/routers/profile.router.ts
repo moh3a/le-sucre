@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 import { create_trpc_router } from "@/lib/trpc/router";
-import { protected_procedure, permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
+import {
+  protected_procedure,
+  permission_procedure,
+} from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { profile_service } from "@/features/authentication_and_authorization/profile/services/profile.service";
 import {
@@ -24,11 +27,9 @@ export const profile_router = create_trpc_router({
       return profile_service.initialize_profile(ctx.user.id, input);
     }),
 
-  update: protected_procedure
-    .input(update_profile_schema)
-    .mutation(async ({ ctx, input }) => {
-      return profile_service.update_profile(ctx.user.id, input);
-    }),
+  update: protected_procedure.input(update_profile_schema).mutation(async ({ ctx, input }) => {
+    return profile_service.update_profile(ctx.user.id, input);
+  }),
 
   // ─── Addresses ────────────────────────────────────────────────
   listAddresses: protected_procedure.query(async ({ ctx }) => {
@@ -58,11 +59,7 @@ export const profile_router = create_trpc_router({
   setDefaultAddress: protected_procedure
     .input(set_default_address_schema)
     .mutation(async ({ ctx, input }) => {
-      return profile_service.set_default_address(
-        ctx.user.id,
-        input.address_id,
-        input.type,
-      );
+      return profile_service.set_default_address(ctx.user.id, input.address_id, input.type);
     }),
 });
 

@@ -1,7 +1,6 @@
 import "server-only";
 
 import { z } from "zod";
-import { logger } from "@/lib/logger";
 
 export const JOB_RETRY_LIMITS: Record<string, number> = {
   shipping_creation: 3,

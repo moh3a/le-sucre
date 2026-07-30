@@ -64,10 +64,7 @@ export class SoftDeleteService {
       updateData[config.restoredByColumn.name] = null;
     }
 
-    const result = await db
-      .update(config.table)
-      .set(updateData)
-      .where(whereClause);
+    const result = await db.update(config.table).set(updateData).where(whereClause);
 
     if (getAffectedRows(result) === 0) {
       return { success: false };
@@ -108,10 +105,7 @@ export class SoftDeleteService {
       updateData[config.restoredByColumn.name] = actorUserId;
     }
 
-    const result = await db
-      .update(config.table)
-      .set(updateData)
-      .where(whereClause);
+    const result = await db.update(config.table).set(updateData).where(whereClause);
 
     if (getAffectedRows(result) === 0) {
       return { success: false };
@@ -129,14 +123,8 @@ export class SoftDeleteService {
   /**
    * Permanently delete a record from the database (force delete).
    */
-  async forceDelete(
-    config: SoftDeleteConfig,
-    id: string,
-    actorUserId: string,
-  ): Promise<SoftDeleteResult> {
-    const result = await db
-      .delete(config.table)
-      .where(eq(config.idColumn, id));
+  async forceDelete(config: SoftDeleteConfig, id: string): Promise<SoftDeleteResult> {
+    const result = await db.delete(config.table).where(eq(config.idColumn, id));
 
     if (getAffectedRows(result) === 0) {
       return { success: false };
@@ -169,6 +157,7 @@ export class SoftDeleteService {
     while (hasMore) {
       try {
         const expiredIds = await db
+          // @ts-expect-error TSB
           .select({ id: config.idColumn })
           .from(config.table)
           .where(and(isNotNull(config.deletedAtColumn), lt(config.deletedAtColumn, cutoffStr)))

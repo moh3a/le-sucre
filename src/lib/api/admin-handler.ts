@@ -36,8 +36,15 @@ export function admin_route(handler: AdminHandler, permission?: string) {
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.adminApi);
       if (!rl.success) {
-        await authorization_audit_service.log_rate_limit_hit({ identifier: ip, action: "admin_api" });
-        return json_error(new AppError("Rate limit exceeded", "RATE_LIMIT_EXCEEDED", 429), 429, request_id);
+        await authorization_audit_service.log_rate_limit_hit({
+          identifier: ip,
+          action: "admin_api",
+        });
+        return json_error(
+          new AppError("Rate limit exceeded", "RATE_LIMIT_EXCEEDED", 429),
+          429,
+          request_id,
+        );
       }
 
       const session = await auth.api.getSession({ headers: req.headers });
@@ -112,25 +119,21 @@ export function ownership_aware_admin_route(
       const rbac = await authz.get_auth_context(session.user.id);
 
       if (ownership.type === "order") {
-        ownership_service.assert_operator_access(
-          null,
-          session.user.id,
-          rbac.roles,
-        );
+        ownership_service.assert_operator_access(null, session.user.id, rbac.roles);
       }
       if (ownership.type === "shipping") {
-        ownership_service.assert_delivery_access(
-          null,
-          session.user.id,
-          rbac.roles,
-        );
+        ownership_service.assert_delivery_access(null, session.user.id, rbac.roles);
       }
 
-      const data = await handler({ user: {
-        id: session.user.id,
-        email: session.user.email ?? "",
-        name: session.user.name ?? "",
-      }, rbac, req });
+      const data = await handler({
+        user: {
+          id: session.user.id,
+          email: session.user.email ?? "",
+          name: session.user.name ?? "",
+        },
+        rbac,
+        req,
+      });
       return json_ok(data, 200, request_id);
     } catch (e) {
       return json_error(e, undefined, request_id);

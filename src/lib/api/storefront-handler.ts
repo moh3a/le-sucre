@@ -27,7 +27,10 @@ export function storefront_route(handler: StorefrontHandler) {
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.api);
       if (!rl.success) {
-        await authorization_audit_service.log_rate_limit_hit({ identifier: ip, action: "storefront_api" });
+        await authorization_audit_service.log_rate_limit_hit({
+          identifier: ip,
+          action: "storefront_api",
+        });
         return json_error(new RateLimitError(), 429, request_id);
       }
 
@@ -50,7 +53,10 @@ export function storefront_auth_route(handler: StorefrontHandler) {
       const ip = getClientIp(req.headers);
       const rl = await rateLimit(ip, RATE_LIMITS.api);
       if (!rl.success) {
-        await authorization_audit_service.log_rate_limit_hit({ identifier: ip, action: "storefront_auth_api" });
+        await authorization_audit_service.log_rate_limit_hit({
+          identifier: ip,
+          action: "storefront_auth_api",
+        });
         return json_error(new RateLimitError(), 429, request_id);
       }
 

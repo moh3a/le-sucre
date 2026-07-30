@@ -17,7 +17,9 @@ export function extract_client_ip(reqOrHeaders: Request | Headers): string {
   );
 }
 
-export async function assert_ip_not_blacklisted(req: Request | { headers: Headers }): Promise<void> {
+export async function assert_ip_not_blacklisted(
+  req: Request | { headers: Headers },
+): Promise<void> {
   const headers = req instanceof Request ? req.headers : req.headers;
   const ip = extract_client_ip(headers);
 

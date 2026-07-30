@@ -7,10 +7,7 @@ const report_review_dto = z.object({
   reason: z.enum(["spam", "abuse", "off_topic", "fake", "other"]),
 });
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ review_id: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ review_id: string }> }) {
   try {
     const identity = await get_storefront_identity(req.headers);
     if (!identity.user_id) {

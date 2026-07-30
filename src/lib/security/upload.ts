@@ -24,10 +24,10 @@ export async function inspect_file_content(
   });
 }
 
-const EXECUTABLE_PATTERNS = [
-  /\.(exe|dll|bat|cmd|sh|bin|msi|jar|py|pl|rb|wasm)$/i,
-  /^#!/.exec.bind(null),
-];
+// const EXECUTABLE_PATTERNS = [
+//   /\.(exe|dll|bat|cmd|sh|bin|msi|jar|py|pl|rb|wasm)$/i,
+//   /^#!/.exec.bind(null),
+// ];
 
 export function is_executable_content(buffer: Uint8Array): boolean {
   const header = new TextDecoder().decode(buffer.slice(0, 100));

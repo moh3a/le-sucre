@@ -56,7 +56,9 @@ export function AuditLogsTable({ data }: { data: AuditLogRow[] }) {
       {
         id: "action",
         accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("action_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("action_column")} />
+        ),
         cell: ({ row }) => (
           <Badge
             variant="outline"

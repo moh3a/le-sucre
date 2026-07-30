@@ -17,7 +17,9 @@ export default async function BrandsPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("brands") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("brands") }]}
+      />
       <BrandsContent />
     </>
   );

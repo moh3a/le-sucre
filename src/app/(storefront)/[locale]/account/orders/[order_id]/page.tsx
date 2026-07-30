@@ -20,7 +20,14 @@ export default async function OrderDetailPage({
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("my_orders"), href: "/account/orders" }, { label: tBc("detail") }]} />
+      <StorefrontBreadcrumbs
+        items={[
+          { label: tBc("home"), href: "/" },
+          { label: tBc("my_account"), href: "/account" },
+          { label: tBc("my_orders"), href: "/account/orders" },
+          { label: tBc("detail") },
+        ]}
+      />
       <CustomerOrderDetailPageClient orderId={order_id} />
     </>
   );

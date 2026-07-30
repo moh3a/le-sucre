@@ -39,9 +39,7 @@ export function AnalyticsFunnel({ from, to }: { from: string; to: string }) {
         <CardContent>
           <div className="space-y-8 py-4">
             {funnelSteps.length === 0 ? (
-              <p className="text-muted-foreground py-6 text-center">
-                {t("funnel_empty")}
-              </p>
+              <p className="text-muted-foreground py-6 text-center">{t("funnel_empty")}</p>
             ) : (
               <div className="flex flex-col gap-6">
                 {funnelSteps.map((step, idx) => {

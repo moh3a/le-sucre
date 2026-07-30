@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { GalleryVerticalEnd } from "lucide-react";
 
@@ -45,9 +46,9 @@ export default async function ForgotPasswordPage() {
               {t("send_reset_link")}
             </Button>
             <div className="text-center text-sm">
-              <a href="/auth" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/auth" className="text-primary underline-offset-4 hover:underline">
                 {t("back_to_login")}
-              </a>
+              </Link>
             </div>
           </CardContent>
         </Card>

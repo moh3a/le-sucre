@@ -62,7 +62,6 @@ interface ThemeProviderProps {
 export function ThemeProvider({
   children,
   forcedTheme,
-  defaultTheme = "system",
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => getStoredTheme());
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => getSystemTheme());

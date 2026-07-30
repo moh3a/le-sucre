@@ -34,11 +34,7 @@ interface SimpleDataTableProps<TData> {
   pageCount?: number;
 }
 
-export function SimpleDataTable<TData>({
-  columns,
-  data,
-  pageCount,
-}: SimpleDataTableProps<TData>) {
+export function SimpleDataTable<TData>({ columns, data, pageCount }: SimpleDataTableProps<TData>) {
   const t = useTranslations("common");
 
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
@@ -97,7 +93,7 @@ export function SimpleDataTable<TData>({
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2 text-sm">
           {t("rows_per_page")}
           <Select
             value={String(pageSize)}
@@ -126,7 +122,7 @@ export function SimpleDataTable<TData>({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {t("page")} {pageIndex + 1} / {table.getPageCount()}
           </span>
           <Button

@@ -72,10 +72,9 @@ export class UserRepository {
           ban_reason: users.ban_reason,
           ban_expires: users.ban_expires,
           created_at: users.created_at,
-          role:
-            sql<string>`GROUP_CONCAT(DISTINCT ${roles.name} ORDER BY ${roles.name} SEPARATOR ', ')`.as(
-              "role",
-            ),
+          role: sql<string>`GROUP_CONCAT(DISTINCT ${roles.name} ORDER BY ${roles.name} SEPARATOR ', ')`.as(
+            "role",
+          ),
         })
         .from(users)
         .leftJoin(user_roles, eq(user_roles.user_id, users.id))

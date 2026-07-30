@@ -53,7 +53,7 @@ export class SecurityAuditor {
 
   private async audit_csrf_protection(): Promise<void> {
     const csrf_files = this.search_files("csrf", "CSRF_COOKIE", "x-csrf-token");
-    const api_guards = this.search_files("api-guards", "assert_csrf");
+    // const api_guards = this.search_files("api-guards", "assert_csrf");
     if (csrf_files.length === 0) {
       this.add_finding({
         severity: "critical",

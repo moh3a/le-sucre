@@ -40,7 +40,7 @@ export class LoginProtectionService {
 
     const maxLockRemaining = Math.max(
       ipLockRemaining > 0 ? ipLockRemaining : 0,
-      idLockRemaining > 0 ? idLockRemaining : 0
+      idLockRemaining > 0 ? idLockRemaining : 0,
     );
 
     if (maxLockRemaining > 0) {
@@ -110,9 +110,9 @@ export class LoginProtectionService {
       const lockoutHistoryKey = `login:lockouthistory:${identifier}`;
       const lockoutCountRaw = await redis.get(lockoutHistoryKey);
       const lockoutCount = lockoutCountRaw ? parseInt(lockoutCountRaw, 10) : 0;
-      
+
       const duration = this.INITIAL_LOCKOUT_SEC * Math.pow(2, lockoutCount); // Double lockout time each time
-      
+
       await Promise.all([
         redis.setex(ipLockoutKey, duration, "1"),
         redis.setex(idLockoutKey, duration, "1"),
@@ -171,7 +171,7 @@ export class LoginProtectionService {
   async check_impossible_travel(
     userId: string,
     currentIp: string,
-    currentCountry: string | null
+    currentCountry: string | null,
   ): Promise<boolean> {
     if (!currentCountry) return false;
 

@@ -60,7 +60,6 @@ export async function POST(
       }
     }
 
-    const payload = JSON.parse(raw_body);
     const { payment_webhook_service } =
       await import("@/features/payment_management_system/services/payment-webhook.service");
     const result = await payment_webhook_service.handle_provider_webhook(

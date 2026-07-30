@@ -16,8 +16,8 @@ export const GET = admin_route(async ({ req }) => {
     price_max: dto.price_max,
     rating_min: dto.rating_min,
     rating_max: dto.rating_max,
-  }); 
-  
+  });
+
   return new Response(csv, {
     headers: {
       "Content-Type": "text/csv",

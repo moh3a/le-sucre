@@ -26,7 +26,9 @@ export interface UseNetworkStatusReturn extends NetworkState {
   mark_online: () => void;
 }
 
-export function useNetworkStatus(slowThresholdMs = DEFAULT_SLOW_THRESHOLD_MS): UseNetworkStatusReturn {
+export function useNetworkStatus(
+  slowThresholdMs = DEFAULT_SLOW_THRESHOLD_MS,
+): UseNetworkStatusReturn {
   const [status, setStatus] = useState<NetworkStatus>(detect_initial_status);
   const [lastOfflineAt, setLastOfflineAt] = useState<number | null>(null);
   const [lastOnlineAt, setLastOnlineAt] = useState<number | null>(null);

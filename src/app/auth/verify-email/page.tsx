@@ -6,9 +6,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-export default function VerifyEmailPage(props: {
-  searchParams: Promise<{ token?: string }>;
-}) {
+export default function VerifyEmailPage() {
   const t = useTranslations("auth");
 
   const is_verifying = false;

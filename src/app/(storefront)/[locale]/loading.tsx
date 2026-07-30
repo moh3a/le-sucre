@@ -11,7 +11,7 @@ export default function StorefrontLoading() {
       </div>
 
       {/* Hero skeleton */}
-      <Skeleton className="h-[400px] w-full rounded-2xl" />
+      <Skeleton className="h-100 w-full rounded-2xl" />
 
       {/* Section skeletons */}
       {Array.from({ length: 3 }).map((_, i) => (

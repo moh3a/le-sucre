@@ -105,30 +105,15 @@ function QueryGuard({
             </div>
             <div className="flex gap-2">
               {query?.refetch && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleRetry}
-                >
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={handleRetry}>
                   <RefreshCw className="size-3.5" />
                   {t("retry")}
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleRefresh}
-              >
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={handleRefresh}>
                 {t("refresh")}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleRetry}
-              >
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleRetry}>
                 {t("continue_editing")}
               </Button>
             </div>
@@ -150,22 +135,12 @@ function QueryGuard({
             </div>
             <div className="flex gap-2">
               {query?.refetch && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleRetry}
-                >
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={handleRetry}>
                   <RefreshCw className="size-3.5" />
                   {t("retry")}
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleRefresh}
-              >
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleRefresh}>
                 {t("refresh")}
               </Button>
             </div>

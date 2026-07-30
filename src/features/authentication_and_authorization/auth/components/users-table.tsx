@@ -56,7 +56,9 @@ export function UsersTable() {
       {
         id: "email_verified",
         accessorKey: "email_verified",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("verified_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("verified_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant={row.original.email_verified ? "default" : "outline"}>
             {row.original.email_verified ? t("yes") : t("no")}
@@ -66,7 +68,9 @@ export function UsersTable() {
       {
         id: "is_active",
         accessorKey: "is_active",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("active_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("active_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? "default" : "destructive"}>
             {row.original.is_active ? t("active") : t("inactive")}
@@ -76,7 +80,9 @@ export function UsersTable() {
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("registered_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("registered_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -123,7 +129,10 @@ export function UsersTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={6} rowCount={10} />}>
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={<DataTableSkeleton columnCount={6} rowCount={10} />}
+    >
       <DataTable table={table} />
     </QueryGuard>
   );

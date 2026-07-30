@@ -56,59 +56,57 @@ export function AccountSecurityTab() {
 
   return (
     <QueryGuard mutation={{ isPending: change.isPending, error: change.error }}>
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("change_password_title")}</CardTitle>
-          <CardDescription>
-            {t("change_password_description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("current_password")}</FieldLabel>
-                <Input type="password" {...form.register("current_password")} />
-                {form.formState.errors.current_password && (
-                  <FieldError>{form.formState.errors.current_password.message}</FieldError>
-                )}
-              </Field>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("change_password_title")}</CardTitle>
+            <CardDescription>{t("change_password_description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
+              <FieldGroup>
+                <Field>
+                  <FieldLabel>{t("current_password")}</FieldLabel>
+                  <Input type="password" {...form.register("current_password")} />
+                  {form.formState.errors.current_password && (
+                    <FieldError>{form.formState.errors.current_password.message}</FieldError>
+                  )}
+                </Field>
 
-              <Field>
-                <FieldLabel>{t("new_password")}</FieldLabel>
-                <Input type="password" {...form.register("new_password")} />
-                {form.formState.errors.new_password && (
-                  <FieldError>{form.formState.errors.new_password.message}</FieldError>
-                )}
-              </Field>
+                <Field>
+                  <FieldLabel>{t("new_password")}</FieldLabel>
+                  <Input type="password" {...form.register("new_password")} />
+                  {form.formState.errors.new_password && (
+                    <FieldError>{form.formState.errors.new_password.message}</FieldError>
+                  )}
+                </Field>
 
-              <Field>
-                <FieldLabel>{t("confirm_password")}</FieldLabel>
-                <Input type="password" {...form.register("confirm_password")} />
-                {form.formState.errors.confirm_password && (
-                  <FieldError>{form.formState.errors.confirm_password.message}</FieldError>
-                )}
-              </Field>
-            </FieldGroup>
+                <Field>
+                  <FieldLabel>{t("confirm_password")}</FieldLabel>
+                  <Input type="password" {...form.register("confirm_password")} />
+                  {form.formState.errors.confirm_password && (
+                    <FieldError>{form.formState.errors.confirm_password.message}</FieldError>
+                  )}
+                </Field>
+              </FieldGroup>
 
-            {change.isSuccess && (
-              <p className="text-sm text-green-600">{t("password_updated_success")}</p>
-            )}
+              {change.isSuccess && (
+                <p className="text-sm text-green-600">{t("password_updated_success")}</p>
+              )}
 
-            {change.isError && (
-              <p className="text-sm text-destructive">
-                {change.error.message ?? t("error_occurred")}
-              </p>
-            )}
+              {change.isError && (
+                <p className="text-destructive text-sm">
+                  {change.error.message ?? t("error_occurred")}
+                </p>
+              )}
 
-            <Button type="submit" disabled={change.isPending}>
-              {change.isPending ? t("updating") : t("update")}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+              <Button type="submit" disabled={change.isPending}>
+                {change.isPending ? t("updating") : t("update")}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </QueryGuard>
   );
 }

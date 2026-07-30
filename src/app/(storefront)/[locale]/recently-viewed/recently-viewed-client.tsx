@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { CircleAlert, Clock } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CircleAlert, Clock } from "lucide-react";
 import { trpc } from "@/components/providers/app-providers";
-import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
+import {
+  ProductCard,
+  ProductCardSkeleton,
+} from "@/features/product_information_management/products/components/storefront/product-card";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -71,7 +75,7 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
 
   if (query.isLoading) {
     return (
-      <div className="mx-auto container space-y-12 px-4 py-8">
+      <div className="container mx-auto space-y-12 px-4 py-8">
         <section className="flex items-center justify-between">
           <div>
             <Skeleton className="h-8 w-56" />
@@ -93,15 +97,13 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
 
   if (query.error) {
     return (
-      <div className="mx-auto container px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
             <AlertTitle>{t("title")}</AlertTitle>
             <AlertDescription>
-              {query.error instanceof Error
-                ? query.error.message
-                : t("error_loading")}
+              {query.error instanceof Error ? query.error.message : t("error_loading")}
             </AlertDescription>
           </Alert>
         </div>
@@ -112,7 +114,7 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
   const items = query.data ?? [];
 
   return (
-    <div className="mx-auto container space-y-12 px-4 py-8">
+    <div className="container mx-auto space-y-12 px-4 py-8">
       {/* PAGE HEADER */}
       <section className="flex items-center justify-between">
         <div>
@@ -133,11 +135,7 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
         <section>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {items.map((item) => (
-              <ProductCard
-                key={item.id}
-                product={toStorefrontProduct(item)}
-                variant="catalog"
-              />
+              <ProductCard key={item.id} product={toStorefrontProduct(item)} variant="catalog" />
             ))}
           </div>
         </section>

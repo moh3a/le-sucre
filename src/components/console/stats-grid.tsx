@@ -19,7 +19,7 @@ export function StatsGrid({ items, loading }: { items: StatItem[]; loading?: boo
     return (
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[88px] rounded-lg" />
+          <Skeleton key={i} className="h-22 rounded-lg" />
         ))}
       </div>
     );

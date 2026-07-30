@@ -76,7 +76,7 @@ export function PromotionsPageSkeleton() {
       <Separator />
 
       <section className="text-center">
-        <Skeleton className="mb-2 mx-auto h-7 w-44" />
+        <Skeleton className="mx-auto mb-2 h-7 w-44" />
         <Skeleton className="text-muted-foreground mx-auto mb-4 h-4 w-72" />
         <Skeleton className="mx-auto h-10 w-36 rounded-md" />
       </section>

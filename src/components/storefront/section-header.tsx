@@ -10,7 +10,13 @@ interface SectionHeaderProps {
   children?: ReactNode;
 }
 
-export function SectionHeader({ title, actionLabel, actionHref, onAction, children }: SectionHeaderProps) {
+export function SectionHeader({
+  title,
+  actionLabel,
+  actionHref,
+  onAction,
+  children,
+}: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <h2 className="text-2xl font-bold">{title}</h2>

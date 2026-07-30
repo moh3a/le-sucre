@@ -1,7 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
+
 import {
   Carousel,
   CarouselContent,
@@ -59,13 +61,13 @@ export function HeroBannerCarousel({ banners, locale = "fr" }: Props) {
                         muted
                         loop
                         playsInline
-                        className="h-[300px] w-full object-cover sm:h-[400px] lg:h-[500px]"
+                        className="h-75 w-full object-cover sm:h-100 lg:h-125"
                       />
                     ) : (
                       <img
                         src={banner.image_url ?? ""}
                         alt={banner.alt_text ?? ""}
-                        className="h-[300px] w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-[400px] lg:h-[500px]"
+                        className="h-75 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-100 lg:h-125"
                         loading="lazy"
                       />
                     )}

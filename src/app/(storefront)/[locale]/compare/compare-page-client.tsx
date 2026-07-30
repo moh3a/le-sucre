@@ -3,8 +3,9 @@
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
 import { X, ShoppingCart, Check, Minus, CircleAlert } from "lucide-react";
+
+import { useRouter } from "@/i18n/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -93,17 +94,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
 
   const products = data.products;
 
-  const allSpecLabels = Array.from(
-    new Set(products.flatMap((p) => p.specs.map((s) => s.label))),
-  );
-
-  const basicFeatures = [
-    { key: "image", label: t("image") },
-    { key: "name", label: t("name") },
-    { key: "price", label: t("price") },
-    { key: "rating", label: t("rating") },
-    { key: "description", label: t("description") },
-  ] as const;
+  const allSpecLabels = Array.from(new Set(products.flatMap((p) => p.specs.map((s) => s.label))));
 
   const hasSpecs = allSpecLabels.length > 0;
 
@@ -129,14 +120,17 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
       <Separator />
 
       <section className="overflow-x-auto">
-        <div className="min-w-[640px]">
+        <div className="min-w-160">
           <div
             className="mb-8 grid gap-6"
             style={{ gridTemplateColumns: `200px repeat(${products.length}, 1fr)` }}
           >
             <div />
             {products.map((product) => (
-              <div key={product.id} className="group relative flex flex-col items-center text-center">
+              <div
+                key={product.id}
+                className="group relative flex flex-col items-center text-center"
+              >
                 <button
                   type="button"
                   onClick={() => handleRemove(product.slug)}
@@ -170,9 +164,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
             <FeatureRow
               label={t("name")}
               products={products}
-              render={(p) => (
-                <span className="font-medium">{p.name}</span>
-              )}
+              render={(p) => <span className="font-medium">{p.name}</span>}
             />
             <FeatureRow
               label={t("price")}
@@ -201,9 +193,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
               label={t("description")}
               products={products}
               render={(p) => (
-                <p className="text-muted-foreground line-clamp-3 text-sm">
-                  {p.description || "-"}
-                </p>
+                <p className="text-muted-foreground line-clamp-3 text-sm">{p.description || "-"}</p>
               )}
             />
             <FeatureRow
@@ -216,7 +206,10 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
                     {t("in_stock")}
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="gap-1 rounded-full text-xs text-muted-foreground">
+                  <Badge
+                    variant="outline"
+                    className="text-muted-foreground gap-1 rounded-full text-xs"
+                  >
                     <Minus className="h-3 w-3" />
                     {t("out_of_stock")}
                   </Badge>
@@ -248,9 +241,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
                               {t("yes")}
                             </Badge>
                           ) : (
-                            <span className="text-muted-foreground text-sm">
-                              {t("no")}
-                            </span>
+                            <span className="text-muted-foreground text-sm">{t("no")}</span>
                           )
                         ) : (
                           <span className="text-sm">{val}</span>
@@ -294,13 +285,7 @@ function FeatureRow<T>({
   );
 }
 
-function CompareEmpty({
-  slugs,
-  onAdd,
-}: {
-  slugs: string[];
-  onAdd: (slug: string) => void;
-}) {
+function CompareEmpty({ slugs, onAdd }: { slugs: string[]; onAdd: (slug: string) => void }) {
   const t = useTranslations("compare");
   const router = useRouter();
 
@@ -316,7 +301,7 @@ function CompareEmpty({
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <span className="text-2xl">{String.fromCodePoint(0x21C4)}</span>
+            <span className="text-2xl">{String.fromCodePoint(0x21c4)}</span>
           </EmptyMedia>
           <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
           <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
@@ -339,7 +324,6 @@ function CompareEmpty({
 }
 
 function CompareSkeleton() {
-  const t = useTranslations("compare");
   return (
     <div className="container mx-auto space-y-8 px-4 py-8">
       <div className="flex items-center justify-between">
@@ -349,10 +333,7 @@ function CompareSkeleton() {
         </div>
       </div>
       <Separator />
-      <div
-        className="grid gap-6"
-        style={{ gridTemplateColumns: "200px repeat(3, 1fr)" }}
-      >
+      <div className="grid gap-6" style={{ gridTemplateColumns: "200px repeat(3, 1fr)" }}>
         <div />
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex flex-col items-center gap-3">

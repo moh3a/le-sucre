@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { CircleAlert, Gift } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -15,7 +17,6 @@ import { SectionHeader } from "@/components/storefront/section-header";
 import { PromotionCouponCard } from "@/features/order_management_system/promotions/components/storefront/promotion-coupon-card";
 import { PromotionTieredOffer } from "@/features/order_management_system/promotions/components/storefront/promotion-tiered-offer";
 import { PromotionLoyaltyCard } from "@/features/order_management_system/promotions/components/storefront/promotion-loyalty-card";
-import { CircleAlert, Gift } from "lucide-react";
 import {
   Empty,
   EmptyHeader,
@@ -63,9 +64,7 @@ export function PromotionsPageClient({ locale }: PromotionsPageClientProps) {
     (p) => p.promotion_type === "automatic" || p.promotion_type === "customer",
   );
 
-  const coupon_promotions = promotions.filter(
-    (p) => p.promotion_type === "promo_code",
-  );
+  const coupon_promotions = promotions.filter((p) => p.promotion_type === "promo_code");
   const coupon_codes_by_promotion = new Map<string, (typeof promo_codes)[number]>();
   for (const pc of promo_codes) {
     if (!coupon_codes_by_promotion.has(pc.promotion_id)) {
@@ -125,14 +124,12 @@ export function PromotionsPageClient({ locale }: PromotionsPageClientProps) {
             <CarouselContent>
               {banners.map((promo) => (
                 <CarouselItem key={promo.id}>
-                  <div className="flex h-64 flex-col items-center justify-center rounded-lg bg-linear-to-r from-primary to-chiffon p-8 text-center">
-                    <h3 className="mb-2 text-2xl font-semibold text-primary-foreground">
+                  <div className="from-primary to-chiffon flex h-64 flex-col items-center justify-center rounded-lg bg-linear-to-r p-8 text-center">
+                    <h3 className="text-primary-foreground mb-2 text-2xl font-semibold">
                       {promo.name}
                     </h3>
                     {promo.description && (
-                      <p className="max-w-lg text-primary-foreground/80">
-                        {promo.description}
-                      </p>
+                      <p className="text-primary-foreground/80 max-w-lg">{promo.description}</p>
                     )}
                   </div>
                 </CarouselItem>

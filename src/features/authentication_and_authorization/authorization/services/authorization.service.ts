@@ -35,7 +35,8 @@ export class AuthorizationService {
 
   async assert_permission(user_id: string, permission: string) {
     const ok = await this.roles.user_has_permission(user_id, permission);
-    if (!ok) throw_error(AUTHORIZATION_ERROR.PERMISSION_MISSING, { required_permission: permission });
+    if (!ok)
+      throw_error(AUTHORIZATION_ERROR.PERMISSION_MISSING, { required_permission: permission });
   }
 
   async assert_customer(user_id: string) {

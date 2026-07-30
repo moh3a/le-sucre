@@ -40,14 +40,12 @@ export function AnalyticsProductsTab({ from, to }: { from: string; to: string })
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_product")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_product")} />,
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <Link
               href={`/console/products/${row.original.product_id}`}
-              className="text-primary hover:underline font-medium"
+              className="text-primary font-medium hover:underline"
             >
               {row.original.name}
             </Link>
@@ -60,9 +58,7 @@ export function AnalyticsProductsTab({ from, to }: { from: string; to: string })
       {
         id: "views",
         accessorKey: "views",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_views")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_views")} />,
         cell: ({ row }) => row.original.views.toLocaleString("fr-FR"),
       },
       {
@@ -76,9 +72,7 @@ export function AnalyticsProductsTab({ from, to }: { from: string; to: string })
       {
         id: "revenue",
         accessorKey: "revenue",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_revenue")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_revenue")} />,
         cell: ({ row }) => (
           <Badge variant="secondary">
             {format_currency(Number(row.original.revenue), "DZD", 0)}
@@ -93,9 +87,7 @@ export function AnalyticsProductsTab({ from, to }: { from: string; to: string })
         ),
         cell: ({ row }) => {
           const rate =
-            row.original.views > 0
-              ? (row.original.units_sold / row.original.views) * 100
-              : 0;
+            row.original.views > 0 ? (row.original.units_sold / row.original.views) * 100 : 0;
           return `${rate.toFixed(1)}%`;
         },
       },
@@ -115,9 +107,18 @@ export function AnalyticsProductsTab({ from, to }: { from: string; to: string })
 
   function handleExport() {
     const rows = table.getFilteredRowModel().rows;
-    const header = [t("col_product"), t("col_views"), t("col_units_sold"), t("col_revenue"), t("col_conversion")].join(",");
+    const header = [
+      t("col_product"),
+      t("col_views"),
+      t("col_units_sold"),
+      t("col_revenue"),
+      t("col_conversion"),
+    ].join(",");
     const csvRows = rows.map((r) => {
-      const rate = r.original.views > 0 ? ((r.original.units_sold / r.original.views) * 100).toFixed(1) : "0.0";
+      const rate =
+        r.original.views > 0
+          ? ((r.original.units_sold / r.original.views) * 100).toFixed(1)
+          : "0.0";
       return [
         `"${r.original.name}"`,
         r.original.views,

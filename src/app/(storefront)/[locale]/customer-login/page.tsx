@@ -18,12 +18,8 @@ export default function CustomerLoginPage() {
             {t("my_account")}
           </Link>
         </Button>
-        <h1 className="font-heading text-2xl font-bold">
-          {t("customer_auth_title")}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {t("customer_auth_desc")}
-        </p>
+        <h1 className="font-heading text-2xl font-bold">{t("customer_auth_title")}</h1>
+        <p className="text-muted-foreground mt-1 text-sm">{t("customer_auth_desc")}</p>
       </div>
 
       <AuthForm />

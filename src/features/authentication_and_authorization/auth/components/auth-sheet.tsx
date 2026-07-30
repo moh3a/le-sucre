@@ -26,7 +26,10 @@ export function AuthSheet({ open, onOpenChange }: AuthSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side={isRtl ? "left" : "right"} className="w-full overflow-y-auto data-[side=left]:sm:max-w-2xl data-[side=right]:sm:max-w-2xl p-6">
+      <SheetContent
+        side={isRtl ? "left" : "right"}
+        className="w-full overflow-y-auto p-6 data-[side=left]:sm:max-w-2xl data-[side=right]:sm:max-w-2xl"
+      >
         <SheetHeader className="mb-6">
           <SheetTitle>{tLayout("customer_auth_title") || "Mon compte"}</SheetTitle>
           <SheetDescription>

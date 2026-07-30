@@ -31,12 +31,9 @@ export function createSoftDeleteHandler(config: SoftDeleteRouterConfig) {
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
     const actorUserId = ctx.session.user.id;
 
-    const whereClause = and(
-      eq(config.idColumn as any, input.id),
-      isNull(config.deletedAtColumn),
-    );
+    const whereClause = and(eq(config.idColumn, input.id), isNull(config.deletedAtColumn));
 
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       [config.deletedAtColumn.name]: now,
     };
     if (config.deletedByColumn) {
@@ -76,12 +73,9 @@ export function createRestoreHandler(config: SoftDeleteRouterConfig) {
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
     const actorUserId = ctx.session.user.id;
 
-    const whereClause = and(
-      eq(config.idColumn as any, input.id),
-      isNotNull(config.deletedAtColumn),
-    );
+    const whereClause = and(eq(config.idColumn, input.id), isNotNull(config.deletedAtColumn));
 
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       [config.deletedAtColumn.name]: null,
     };
     if (config.deletedByColumn) {
@@ -113,14 +107,11 @@ export function createRestoreHandler(config: SoftDeleteRouterConfig) {
 export function createForceDeleteHandler(config: SoftDeleteRouterConfig) {
   return async ({
     input,
-    ctx,
   }: {
     input: { id: string };
     ctx: { session: { user: { id: string } } };
   }) => {
-    const actorUserId = ctx.session.user.id;
-
-    await db.delete(config.table).where(eq(config.idColumn as any, input.id));
+    await db.delete(config.table).where(eq(config.idColumn, input.id));
 
     void audit_service.log({
       action: `${config.entityType}.force_delete`,
@@ -139,24 +130,18 @@ export function createForceDeleteHandler(config: SoftDeleteRouterConfig) {
 export function createTrashListHandler(
   config: SoftDeleteRouterConfig,
   options?: {
-    select?: (table: MySqlTable) => Record<string, any>;
+    select?: (table: MySqlTable) => Record<string, MySqlColumn | SQL>;
     additionalWhere?: (table: MySqlTable) => SQL;
     orderBy?: MySqlColumn;
   },
 ) {
-  return async ({
-    input,
-  }: {
-    input: { page?: number; limit?: number; search?: string };
-  }) => {
+  return async ({ input }: { input: { page?: number; limit?: number; search?: string } }) => {
     const { page = 1, limit = 20 } = input;
     const offset = (page - 1) * limit;
 
     const conditions: SQL[] = [isNotNull(config.deletedAtColumn)];
 
-    const selectCols = options?.select
-      ? options.select(config.table)
-      : { id: config.idColumn };
+    const selectCols = options?.select ? options.select(config.table) : { id: config.idColumn };
 
     const query = db
       .select(selectCols)

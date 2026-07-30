@@ -1,35 +1,73 @@
 import "server-only";
 
 const SENSITIVE_FIELDS = new Set([
-  "password", "password_hash", "passwordHash", "hashed_password",
-  "access_token", "refresh_token", "id_token", "session_token",
-  "token", "secret", "api_key", "apiKey", "api_secret", "apiSecret",
-  "client_secret", "webhook_secret", "webhookSecret",
-  "stripe_secret_key", "stripeSecretKey",
-  "paypal_client_secret", "paypalClientSecret",
-  "authorization", "x-api-key", "x-csrf-token", "x-auth-token",
-  "otp", "totp_secret", "totpSecret", "backup_codes", "backupCodes",
-  "mfa_secret", "mfaSecret", "reset_token", "resetToken",
-  "verification_token", "verificationToken",
-  "jwt", "jwt_token", "private_key", "privateKey",
-  "stripe_customer_id", "paypal_payer_id",
-  "internal_notes", "audit_metadata",
+  "password",
+  "password_hash",
+  "passwordHash",
+  "hashed_password",
+  "access_token",
+  "refresh_token",
+  "id_token",
+  "session_token",
+  "token",
+  "secret",
+  "api_key",
+  "apiKey",
+  "api_secret",
+  "apiSecret",
+  "client_secret",
+  "webhook_secret",
+  "webhookSecret",
+  "stripe_secret_key",
+  "stripeSecretKey",
+  "paypal_client_secret",
+  "paypalClientSecret",
+  "authorization",
+  "x-api-key",
+  "x-csrf-token",
+  "x-auth-token",
+  "otp",
+  "totp_secret",
+  "totpSecret",
+  "backup_codes",
+  "backupCodes",
+  "mfa_secret",
+  "mfaSecret",
+  "reset_token",
+  "resetToken",
+  "verification_token",
+  "verificationToken",
+  "jwt",
+  "jwt_token",
+  "private_key",
+  "privateKey",
+  "stripe_customer_id",
+  "paypal_payer_id",
+  "internal_notes",
+  "audit_metadata",
 ]);
 
 const REDACTED = "[REDACTED]";
 
 function is_sensitive(key: string): boolean {
   const lower = key.toLowerCase().replace(/[_-]/g, "");
-  return SENSITIVE_FIELDS.has(key) || SENSITIVE_FIELDS.has(lower)
-    || lower.includes("password") || lower.includes("secret")
-    || lower.includes("token") || lower.includes("apikey")
-    || lower.includes("apisecret") || lower.includes("privatekey");
+  return (
+    SENSITIVE_FIELDS.has(key) ||
+    SENSITIVE_FIELDS.has(lower) ||
+    lower.includes("password") ||
+    lower.includes("secret") ||
+    lower.includes("token") ||
+    lower.includes("apikey") ||
+    lower.includes("apisecret") ||
+    lower.includes("privatekey")
+  );
 }
 
 function redact_deep(value: unknown, depth = 0): unknown {
   if (depth > 10) return REDACTED;
   if (typeof value === "string") {
-    if (value.length > 200 && !value.includes(" ")) return value.substring(0, 16) + "...[TRUNCATED]";
+    if (value.length > 200 && !value.includes(" "))
+      return value.substring(0, 16) + "...[TRUNCATED]";
     return value;
   }
   if (typeof value === "object" && value !== null) {

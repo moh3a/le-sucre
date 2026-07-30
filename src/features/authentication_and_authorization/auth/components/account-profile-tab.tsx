@@ -65,110 +65,123 @@ export function AccountProfileTab() {
   }
 
   return (
-    <QueryGuard query={{ isLoading, error }} loadingFallback={
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48" />
+            <CardTitle>{t("profile_photo_title")}</CardTitle>
+            <CardDescription>{t("profile_photo_description")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+          <CardContent>
+            <MediaPickerDialog
+              onSelect={handle_image_select}
+              trigger={
+                <div className="group relative inline-flex cursor-pointer overflow-hidden rounded-full">
+                  {image_value ? (
+                    <Image
+                      src={image_value}
+                      alt={t("avatar_alt")}
+                      width={96}
+                      height={96}
+                      className="size-24 object-cover transition-opacity group-hover:opacity-75"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="bg-muted flex size-24 items-center justify-center rounded-full">
+                      <Camera className="text-muted-foreground size-8" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/20">
+                    <span className="text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                      {t("change_photo")}
+                    </span>
+                  </div>
+                </div>
+              }
+            />
+            {image_value && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={handle_image_clear}
+              >
+                {t("delete_photo")}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("personal_info_title")}</CardTitle>
+            <CardDescription>{t("personal_info_description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
+              <FieldGroup>
+                <Field>
+                  <FieldLabel>{t("full_name")}</FieldLabel>
+                  <Input {...form.register("name")} />
+                  {form.formState.errors.name && (
+                    <FieldError>{form.formState.errors.name.message}</FieldError>
+                  )}
+                </Field>
+
+                <Field>
+                  <FieldLabel>{t("email")}</FieldLabel>
+                  <Input
+                    value={data?.user.email ?? ""}
+                    disabled
+                    className="text-muted-foreground"
+                  />
+                  <p className="text-muted-foreground text-xs">{t("email_cannot_change")}</p>
+                </Field>
+
+                <Field>
+                  <FieldLabel>{t("roles")}</FieldLabel>
+                  <div className="flex flex-wrap gap-2">
+                    {data?.roles.map((role) => (
+                      <Badge key={role} variant="outline">
+                        {role}
+                      </Badge>
+                    ))}
+                  </div>
+                </Field>
+
+                <Field>
+                  <FieldLabel>{t("member_since")}</FieldLabel>
+                  <p className="text-muted-foreground text-sm">
+                    {formatDate(data?.user.createdAt)}
+                  </p>
+                </Field>
+              </FieldGroup>
+
+              <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
+                {update.isPending ? t("saving") : t("save")}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
-    }>
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("profile_photo_title")}</CardTitle>
-          <CardDescription>{t("profile_photo_description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <MediaPickerDialog
-            onSelect={handle_image_select}
-            trigger={
-              <div className="group relative inline-flex cursor-pointer overflow-hidden rounded-full">
-                {image_value ? (
-                  <Image
-                    src={image_value}
-                    alt={t("avatar_alt")}
-                    width={96}
-                    height={96}
-                    className="size-24 object-cover transition-opacity group-hover:opacity-75"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="bg-muted flex size-24 items-center justify-center rounded-full">
-                    <Camera className="text-muted-foreground size-8" />
-                  </div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/20">
-                  <span className="text-white text-xs opacity-0 transition-opacity group-hover:opacity-100">
-                    {t("change_photo")}
-                  </span>
-                </div>
-              </div>
-            }
-          />
-          {image_value && (
-            <Button type="button" variant="ghost" size="sm" className="mt-2" onClick={handle_image_clear}>
-              {t("delete_photo")}
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("personal_info_title")}</CardTitle>
-          <CardDescription>{t("personal_info_description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("full_name")}</FieldLabel>
-                <Input {...form.register("name")} />
-                {form.formState.errors.name && (
-                  <FieldError>{form.formState.errors.name.message}</FieldError>
-                )}
-              </Field>
-
-              <Field>
-                <FieldLabel>{t("email")}</FieldLabel>
-                <Input value={data?.user.email ?? ""} disabled className="text-muted-foreground" />
-                <p className="text-muted-foreground text-xs">{t("email_cannot_change")}</p>
-              </Field>
-
-              <Field>
-                <FieldLabel>{t("roles")}</FieldLabel>
-                <div className="flex flex-wrap gap-2">
-                  {data?.roles.map((role) => (
-                    <Badge key={role} variant="outline">
-                      {role}
-                    </Badge>
-                  ))}
-                </div>
-              </Field>
-
-              <Field>
-                <FieldLabel>{t("member_since")}</FieldLabel>
-                <p className="text-sm text-muted-foreground">
-                  {formatDate(data?.user.createdAt)}
-                </p>
-              </Field>
-            </FieldGroup>
-
-            <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
-              {update.isPending ? t("saving") : t("save")}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
     </QueryGuard>
   );
 }

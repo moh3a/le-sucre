@@ -1,7 +1,7 @@
 import { LayoutGrid, Sparkles, ArrowRight, Tag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
-import { CategoryCard } from "@/features/product_information_management/categories/components/storefront/category-card";
 import { CategoryGrid } from "@/features/product_information_management/categories/components/storefront/category-grid";
 import { DataState } from "@/components/storefront/data-state";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
@@ -39,8 +39,10 @@ export default async function CategoriesPage({ params }: Props) {
   const featuredCategories = tree.slice(0, 4);
 
   return (
-    <div className="mx-auto container space-y-12 px-4 py-8">
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("categories") }]} />
+    <div className="container mx-auto space-y-12 px-4 py-8">
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("categories") }]}
+      />
 
       {/* HERO SECTION */}
       <section className="from-lemon-lime/20 to-lemon-chiffon/40 relative overflow-hidden rounded-2xl bg-linear-to-r p-8 md:p-12">
@@ -49,19 +51,15 @@ export default async function CategoriesPage({ params }: Props) {
             <Sparkles className="mr-1 size-3" />
             {t("shop_by")}
           </Badge>
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-            {t("page_title")}
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            {t("page_description")}
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{t("page_title")}</h1>
+          <p className="text-muted-foreground text-lg">{t("page_description")}</p>
           <div className="pt-2">
             <Badge variant="secondary" className="text-sm">
               {t("categories_count", { count: totalCategories })}
             </Badge>
           </div>
         </div>
-        <div className="absolute right-0 top-0 h-full w-1/3 opacity-5">
+        <div className="absolute top-0 right-0 h-full w-1/3 opacity-5">
           <LayoutGrid className="h-full w-full" />
         </div>
       </section>

@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -11,7 +19,10 @@ import { CircleAlert, Clock, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/components/providers/app-providers";
-import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
+import {
+  ProductCard,
+  ProductCardSkeleton,
+} from "@/features/product_information_management/products/components/storefront/product-card";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -75,9 +86,7 @@ function toStorefrontProduct(item: {
 export function FlashSalesContent({ locale }: { locale: AppLocale }) {
   const t = useTranslations("flashSales");
 
-  const flash_sales_query = trpc.campaigns.activeFlashSales.useQuery(
-    { locale },
-  );
+  const flash_sales_query = trpc.campaigns.activeFlashSales.useQuery({ locale });
 
   const trending_query = trpc.recommendations.trending.useQuery({
     locale: locale === "ar" ? "fr" : locale,
@@ -89,7 +98,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
 
   if (loading) {
     return (
-      <div className="mx-auto container space-y-12 px-4 py-8">
+      <div className="container mx-auto space-y-12 px-4 py-8">
         <section>
           <div className="mb-6 flex items-center gap-3">
             <Skeleton className="h-8 w-56" />
@@ -125,7 +134,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
 
   if (flash_sales_query.error) {
     return (
-      <div className="mx-auto container px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
@@ -147,7 +156,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
   const empty = active_sales.length === 0;
 
   return (
-    <div className="mx-auto container space-y-12 px-4 py-8">
+    <div className="container mx-auto space-y-12 px-4 py-8">
       {/* ACTIVE FLASH SALES */}
       <section>
         <div className="mb-6 flex items-center gap-3">

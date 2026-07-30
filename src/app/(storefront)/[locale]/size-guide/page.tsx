@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
+import { Ruler } from "lucide-react";
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Ruler } from "lucide-react";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type RowData = {
@@ -15,16 +16,25 @@ type Props = {
 };
 
 const CLOTHING_ROWS: RowData[] = [
-  { labelKey: "clothes_chest", values: ["82-86", "86-90", "90-95", "95-100", "100-106", "106-112"] },
+  {
+    labelKey: "clothes_chest",
+    values: ["82-86", "86-90", "90-95", "95-100", "100-106", "106-112"],
+  },
   { labelKey: "clothes_waist", values: ["62-66", "66-70", "70-75", "75-80", "80-86", "86-92"] },
-  { labelKey: "clothes_hips", values: ["88-92", "92-96", "96-100", "100-105", "105-110", "110-116"] },
+  {
+    labelKey: "clothes_hips",
+    values: ["88-92", "92-96", "96-100", "100-105", "105-110", "110-116"],
+  },
   { labelKey: "clothes_length", values: ["60", "62", "64", "66", "68", "70"] },
 ];
 
 const CLOTHING_HEADERS = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const SHOE_ROWS: RowData[] = [
-  { labelKey: "shoe_foot", values: ["22.5", "23", "23.8", "24.5", "25.2", "25.8", "26.5", "27.2", "27.8", "28.5"] },
+  {
+    labelKey: "shoe_foot",
+    values: ["22.5", "23", "23.8", "24.5", "25.2", "25.8", "26.5", "27.2", "27.8", "28.5"],
+  },
   { labelKey: "shoe_eu", values: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45"] },
   { labelKey: "shoe_uk", values: ["3.5", "4", "5", "5.5", "6.5", "7.5", "8", "9", "9.5", "10.5"] },
 ];
@@ -59,10 +69,12 @@ export default async function SizeGuidePage({ params }: Props) {
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("size_guide") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("size_guide") }]}
+      />
       <section className="text-center">
-        <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg text-balance leading-relaxed">
+        <h1 className="mb-4 text-4xl font-bold text-balance">{t("title")}</h1>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed text-balance">
           {t("subtitle")}
         </p>
       </section>
@@ -88,9 +100,13 @@ export default async function SizeGuidePage({ params }: Props) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-muted-foreground p-3 text-left font-medium">{t("measureHeader")}</th>
+                        <th className="text-muted-foreground p-3 text-left font-medium">
+                          {t("measureHeader")}
+                        </th>
                         {CLOTHING_HEADERS.map((h) => (
-                          <th key={h} className="text-muted-foreground p-3 text-center font-medium">{h}</th>
+                          <th key={h} className="text-muted-foreground p-3 text-center font-medium">
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -99,7 +115,9 @@ export default async function SizeGuidePage({ params }: Props) {
                         <tr key={row.labelKey} className="border-b last:border-0">
                           <td className="p-3 font-medium">{t(row.labelKey)}</td>
                           {row.values.map((v, i) => (
-                            <td key={i} className="p-3 text-center">{v}</td>
+                            <td key={i} className="p-3 text-center">
+                              {v}
+                            </td>
                           ))}
                         </tr>
                       ))}
@@ -121,9 +139,13 @@ export default async function SizeGuidePage({ params }: Props) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-muted-foreground p-3 text-left font-medium">{t("measureHeader")}</th>
+                        <th className="text-muted-foreground p-3 text-left font-medium">
+                          {t("measureHeader")}
+                        </th>
                         {SHOE_HEADERS.map((h) => (
-                          <th key={h} className="text-muted-foreground p-3 text-center font-medium">{h}</th>
+                          <th key={h} className="text-muted-foreground p-3 text-center font-medium">
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -132,7 +154,9 @@ export default async function SizeGuidePage({ params }: Props) {
                         <tr key={row.labelKey} className="border-b last:border-0">
                           <td className="p-3 font-medium">{t(row.labelKey)}</td>
                           {row.values.map((v, i) => (
-                            <td key={i} className="p-3 text-center">{v}</td>
+                            <td key={i} className="p-3 text-center">
+                              {v}
+                            </td>
                           ))}
                         </tr>
                       ))}
@@ -154,9 +178,13 @@ export default async function SizeGuidePage({ params }: Props) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-muted-foreground p-3 text-left font-medium">{t("typeHeader")}</th>
+                        <th className="text-muted-foreground p-3 text-left font-medium">
+                          {t("typeHeader")}
+                        </th>
                         {[t("accessoryHead"), t("accessoryDiameter")].map((h) => (
-                          <th key={h} className="text-muted-foreground p-3 text-left font-medium">{h}</th>
+                          <th key={h} className="text-muted-foreground p-3 text-left font-medium">
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -165,7 +193,9 @@ export default async function SizeGuidePage({ params }: Props) {
                         <tr key={row.labelKey} className="border-b last:border-0">
                           <td className="p-3 font-medium">{t(row.labelKey)}</td>
                           {row.values.map((v, i) => (
-                            <td key={i} className="p-3">{v}</td>
+                            <td key={i} className="p-3">
+                              {v}
+                            </td>
                           ))}
                         </tr>
                       ))}
@@ -181,7 +211,7 @@ export default async function SizeGuidePage({ params }: Props) {
       <Separator />
 
       <section>
-        <h2 className="mb-6 text-balance text-2xl font-bold">{t("tipsTitle")}</h2>
+        <h2 className="mb-6 text-2xl font-bold text-balance">{t("tipsTitle")}</h2>
         <div className="grid gap-6 sm:grid-cols-3">
           {TIPS.map((tip) => (
             <Card key={tip.titleKey}>
@@ -195,9 +225,7 @@ export default async function SizeGuidePage({ params }: Props) {
             </Card>
           ))}
         </div>
-        <p className="text-muted-foreground mt-4 text-center text-sm">
-          {t("tipsComingSoon")}
-        </p>
+        <p className="text-muted-foreground mt-4 text-center text-sm">{t("tipsComingSoon")}</p>
       </section>
     </div>
   );

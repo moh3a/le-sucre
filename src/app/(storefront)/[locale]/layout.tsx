@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
+
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -26,10 +27,10 @@ async function getNavCategories(): Promise<CategoryTreeNode[]> {
 
 async function getAnnouncementBanners(locale: string): Promise<CampaignBanner[]> {
   try {
-    const campaigns = await campaign_service.get_storefront_sections({
+    const campaigns = (await campaign_service.get_storefront_sections({
       locale: locale as "fr" | "en" | "ar",
       page_slug: "home",
-    }) as Array<{
+    })) as Array<{
       banners: Array<{
         id: string;
         banner_type: string;
@@ -87,10 +88,8 @@ export default async function StorefrontLayout({ children, params }: Props) {
     notFound();
   }
 
-  const [categories, announcementBanners]: [CategoryTreeNode[], CampaignBanner[]] = await Promise.all([
-    getNavCategories(),
-    getAnnouncementBanners(locale),
-  ]);
+  const [categories, announcementBanners]: [CategoryTreeNode[], CampaignBanner[]] =
+    await Promise.all([getNavCategories(), getAnnouncementBanners(locale)]);
 
   return (
     <div className="flex min-h-screen flex-col">

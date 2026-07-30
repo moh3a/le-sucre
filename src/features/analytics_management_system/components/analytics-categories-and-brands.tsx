@@ -40,9 +40,7 @@ function CategoryTable({
       {
         id: "category_id",
         accessorKey: "category_id",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_category")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_category")} />,
         cell: ({ row }) => (
           <span className="font-medium">{row.original.category_id || t("no_category")}</span>
         ),
@@ -50,17 +48,13 @@ function CategoryTable({
       {
         id: "views",
         accessorKey: "views",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_views")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_views")} />,
         cell: ({ row }) => row.original.views.toLocaleString("fr-FR"),
       },
       {
         id: "revenue",
         accessorKey: "revenue",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_revenue")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_revenue")} />,
         cell: ({ row }) => (
           <Badge variant="secondary">
             {format_currency(Number(row.original.revenue), "DZD", 0)}
@@ -111,9 +105,7 @@ function BrandTable({
       {
         id: "brand_id",
         accessorKey: "brand_id",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_brand")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_brand")} />,
         cell: ({ row }) => (
           <span className="font-medium">{row.original.brand_id || t("no_brand")}</span>
         ),
@@ -121,17 +113,13 @@ function BrandTable({
       {
         id: "views",
         accessorKey: "views",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_views")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_views")} />,
         cell: ({ row }) => row.original.views.toLocaleString("fr-FR"),
       },
       {
         id: "revenue",
         accessorKey: "revenue",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label={t("col_revenue")} />
-        ),
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("col_revenue")} />,
         cell: ({ row }) => (
           <Badge variant="secondary">
             {format_currency(Number(row.original.revenue), "DZD", 0)}
@@ -170,7 +158,12 @@ function BrandTable({
 
 export function AnalyticsCategoriesBrands({ from, to }: { from: string; to: string }) {
   const t = useTranslations("analytics");
-  const { data, isLoading } = trpc.analytics.products.useQuery({ from, to, limit: 50, sort: "revenue" });
+  const { data, isLoading } = trpc.analytics.products.useQuery({
+    from,
+    to,
+    limit: 50,
+    sort: "revenue",
+  });
 
   return (
     <div className="grid gap-4 md:grid-cols-2">

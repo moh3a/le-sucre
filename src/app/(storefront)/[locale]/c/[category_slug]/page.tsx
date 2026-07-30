@@ -68,7 +68,13 @@ async function getBrandsForCategory(categoryId: string, categoryPath: string) {
     })
     .from(products)
     .innerJoin(brands, eq(brands.id, products.brand_id))
-    .where(and(inArray(products.category_id, descendantIds), eq(products.status, "published"), eq(brands.is_active, true)))
+    .where(
+      and(
+        inArray(products.category_id, descendantIds),
+        eq(products.status, "published"),
+        eq(brands.is_active, true),
+      ),
+    )
     .groupBy(brands.id, brands.name, brands.slug)
     .orderBy(desc(sql<number>`COUNT(*)`))
     .limit(20);
@@ -114,10 +120,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const sp = await searchParams;
   const filters = parse_catalog_search_params(sp);
 
-  const breadcrumbs = [
-    { label: t("home"), href: "/" },
-    { label: category.name },
-  ];
+  const breadcrumbs = [{ label: t("home"), href: "/" }, { label: category.name }];
 
   return (
     <CatalogSearchPageClient

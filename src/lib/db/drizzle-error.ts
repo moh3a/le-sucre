@@ -80,7 +80,10 @@ function extract_errno(error: unknown): number | null {
   return null;
 }
 
-export async function catch_drizzle<T>(promise: Promise<T>, fallback?: DrizzleErrorDef): Promise<T> {
+export async function catch_drizzle<T>(
+  promise: Promise<T>,
+  fallback?: DrizzleErrorDef,
+): Promise<T> {
   try {
     return await promise;
   } catch (error) {
@@ -99,14 +102,26 @@ export function handle_drizzle_error(error: unknown, fallback?: DrizzleErrorDef)
   }
 
   if (fallback) {
-    throw new AppError(fallback.message.fr, fallback.code, fallback.status, { _messages: fallback.message }, true);
+    throw new AppError(
+      fallback.message.fr,
+      fallback.code,
+      fallback.status,
+      { _messages: fallback.message },
+      true,
+    );
   }
 
   throw new AppError(
     "Une erreur de base de données est survenue",
     "DB_ERROR",
     500,
-    { _messages: { fr: "Une erreur de base de données est survenue", en: "A database error occurred", ar: "حدث خطأ في قاعدة البيانات" } },
+    {
+      _messages: {
+        fr: "Une erreur de base de données est survenue",
+        en: "A database error occurred",
+        ar: "حدث خطأ في قاعدة البيانات",
+      },
+    },
     true,
   );
 }

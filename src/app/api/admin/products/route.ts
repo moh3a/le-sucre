@@ -1,7 +1,10 @@
 import { admin_route } from "@/lib/api/admin-handler";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { product_service } from "@/features/product_information_management/products/services/product.service";
-import { validate_create_product, validate_list_products } from "@/features/product_information_management/products/validators/product.validators";
+import {
+  validate_create_product,
+  validate_list_products,
+} from "@/features/product_information_management/products/validators/product.validators";
 
 export const GET = admin_route(async ({ req }) => {
   const url = new URL(req.url);

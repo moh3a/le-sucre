@@ -70,6 +70,7 @@ export class ProfileRepository {
     const c = await this.count_addresses(user_id);
     const is_first = c === 0;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, created_at: _ca, updated_at: _ua, ...insert_data } = data;
 
     await db.insert(user_addresses).values({
@@ -100,6 +101,7 @@ export class ProfileRepository {
     const existing = await this.find_address_by_id(id, user_id);
     if (!existing) return null;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, created_at: _ca, updated_at: _ua, user_id: _uid, ...update_data } = data;
 
     await db

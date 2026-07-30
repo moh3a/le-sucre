@@ -7,7 +7,7 @@ export const local_analytics_provider: AnalyticsProvider = {
   async persist_event(row) {
     await event_repository.insert_batch([row]);
   },
-  async forward_realtime(_payload) {
+  async forward_realtime() {
     // no-op — future: Kafka / Segment / BigQuery streaming
   },
 };

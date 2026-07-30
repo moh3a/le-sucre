@@ -95,7 +95,11 @@ export class SessionSecurityService {
       await redis.del(`session:active:${session_token}`);
       return false;
     }
-    await redis.setex(`session:last_activity:${session_token}`, CONFIG.SESSION_IDLE_TIMEOUT_SEC, String(now));
+    await redis.setex(
+      `session:last_activity:${session_token}`,
+      CONFIG.SESSION_IDLE_TIMEOUT_SEC,
+      String(now),
+    );
     return true;
   }
 

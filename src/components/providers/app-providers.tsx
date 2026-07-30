@@ -43,8 +43,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         create_network_link({
           timeout_ms: 30_000,
           on_timeout: () => get_network_listeners().on_timeout?.(),
-          on_backend_unavailable: () =>
-            get_network_listeners().on_backend_unavailable?.(),
+          on_backend_unavailable: () => get_network_listeners().on_backend_unavailable?.(),
           on_request_failed: () => get_network_listeners().on_request_failed?.(),
         }),
         httpBatchLink({

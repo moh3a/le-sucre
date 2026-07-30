@@ -10,8 +10,15 @@ type BannerKey = "offline" | "backend" | "timeout" | "slow" | "restored";
 
 export function ConnectionBanner() {
   const t = useTranslations("common");
-  const { isOnline, isOffline, isSlow, backend_available, last_error_type, clear_error, mark_backend_available } =
-    useNetworkContext();
+  const {
+    isOnline,
+    isOffline,
+    isSlow,
+    backend_available,
+    last_error_type,
+    clear_error,
+    mark_backend_available,
+  } = useNetworkContext();
 
   const active_ref = useRef<BannerKey | null>(null);
   const prev_offline_ref = useRef(false);
@@ -93,7 +100,15 @@ export function ConnectionBanner() {
       toast.dismiss(active_ref.current);
       active_ref.current = null;
     }
-  }, [isOffline, isSlow, backend_available, last_error_type, clear_error, mark_backend_available, t]);
+  }, [
+    isOffline,
+    isSlow,
+    backend_available,
+    last_error_type,
+    clear_error,
+    mark_backend_available,
+    t,
+  ]);
 
   return null;
 }

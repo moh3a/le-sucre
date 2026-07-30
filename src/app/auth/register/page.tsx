@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 import { GalleryVerticalEnd } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -99,15 +100,13 @@ export default async function RegisterPage() {
                 </div>
 
                 {/* TERMS CHECKBOX */}
-                <p className="text-muted-foreground text-center text-xs">
-                  {t("terms_accept")}
-                </p>
+                <p className="text-muted-foreground text-center text-xs">{t("terms_accept")}</p>
 
                 {/* LOGIN LINK */}
                 <div className="text-center text-sm">
-                  <a href="/auth" className="text-primary underline-offset-4 hover:underline">
+                  <Link href="/auth" className="text-primary underline-offset-4 hover:underline">
                     {t("already_have_account")}
-                  </a>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

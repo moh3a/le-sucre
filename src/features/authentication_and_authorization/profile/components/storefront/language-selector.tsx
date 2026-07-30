@@ -60,7 +60,7 @@ export function LanguageSelector({
             {languages.map((lang) => (
               <label
                 key={lang.code}
-                className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted has-checked:border-primary"
+                className="hover:bg-muted has-checked:border-primary flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors"
               >
                 <input
                   type="radio"

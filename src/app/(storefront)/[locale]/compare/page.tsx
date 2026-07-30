@@ -21,7 +21,9 @@ export default async function ComparePage({ params, searchParams }: Props) {
 
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("compare") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("compare") }]}
+      />
       <ComparePageClient initialSlugs={initialSlugs} locale={locale as "fr" | "en" | "ar"} />
     </>
   );

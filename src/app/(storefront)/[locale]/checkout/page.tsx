@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
+
 import { CheckoutPageClient } from "@/features/order_management_system/checkout/components/storefront/checkout-page-client";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
@@ -21,7 +22,9 @@ export default async function CheckoutPage({ params }: Props) {
 
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("checkout") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("checkout") }]}
+      />
       <CheckoutPageClient cartId={cartId} locale={locale} />
     </>
   );

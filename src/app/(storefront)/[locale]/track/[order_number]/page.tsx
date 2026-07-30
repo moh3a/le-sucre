@@ -18,7 +18,9 @@ export default async function TrackOrderPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("track_order") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("track_order") }]}
+      />
       <TrackOrderPageClient orderNumber={order_number} />
     </>
   );

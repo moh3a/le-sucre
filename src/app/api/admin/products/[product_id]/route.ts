@@ -7,9 +7,10 @@ type RouteContext = { params: Promise<{ product_id: string }> };
 
 export async function GET(_req: Request, context: RouteContext) {
   const { product_id } = await context.params;
-  return admin_route(async () => product_service.get_by_id(product_id), PERMISSIONS.products_read)(
-    _req,
-  );
+  return admin_route(
+    async () => product_service.get_by_id(product_id),
+    PERMISSIONS.products_read,
+  )(_req);
 }
 
 export async function PATCH(req: Request, context: RouteContext) {
@@ -23,5 +24,8 @@ export async function PATCH(req: Request, context: RouteContext) {
 
 export async function DELETE(req: Request, context: RouteContext) {
   const { product_id } = await context.params;
-  return admin_route(async () => product_service.remove(product_id), PERMISSIONS.products_write)(req);
+  return admin_route(
+    async () => product_service.remove(product_id),
+    PERMISSIONS.products_write,
+  )(req);
 }

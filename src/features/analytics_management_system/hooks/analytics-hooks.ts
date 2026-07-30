@@ -2,7 +2,7 @@ import { event_ingestion_service } from "../services/event-ingestion.service";
 
 /**
  * Analytics Integration Hooks
- * 
+ *
  * These hooks should be called at the appropriate points in the application
  * to track user behavior and events for analytics.
  */
@@ -23,7 +23,12 @@ export async function track_product_view(product_id: string, user_id?: string | 
  * Track add to cart event
  * Call this when a user adds an item to cart
  */
-export async function track_add_to_cart(product_id: string, sku_id: string, quantity: number, user_id?: string | null) {
+export async function track_add_to_cart(
+  product_id: string,
+  sku_id: string,
+  quantity: number,
+  user_id?: string | null,
+) {
   void event_ingestion_service.track({
     event_type: "add_to_cart",
     product_id,
@@ -49,7 +54,12 @@ export async function track_checkout_started(user_id?: string | null, cart_id?: 
  * Track purchase event
  * Call this when an order is completed/paid
  */
-export async function track_purchase(order_id: string, revenue: string, lines: Array<{ product_id: string; sku_id: string; quantity: number }>, user_id?: string | null) {
+export async function track_purchase(
+  order_id: string,
+  revenue: string,
+  lines: Array<{ product_id: string; sku_id: string; quantity: number }>,
+  user_id?: string | null,
+) {
   void event_ingestion_service.track_purchase({
     order_id,
     user_id,
@@ -74,7 +84,11 @@ export async function track_search(query: string, result_count: number, user_id?
  * Track recommendation click event
  * Call this when a user clicks on a recommended product
  */
-export async function track_recommendation_click(product_id: string, recommendation_type: string, user_id?: string | null) {
+export async function track_recommendation_click(
+  product_id: string,
+  recommendation_type: string,
+  user_id?: string | null,
+) {
   void event_ingestion_service.track({
     event_type: "recommendation_click",
     product_id,

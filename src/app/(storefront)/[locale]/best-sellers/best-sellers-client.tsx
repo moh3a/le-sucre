@@ -105,7 +105,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
 
   if (trending_query.error) {
     return (
-      <div className="mx-auto container px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex items-start justify-center p-6">
           <Alert variant="destructive" className="max-w-md">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
@@ -132,7 +132,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
 
   if (empty) {
     return (
-      <div className="mx-auto container space-y-12 px-4 py-8">
+      <div className="container mx-auto space-y-12 px-4 py-8">
         <section className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center">
             <Trophy className="text-muted-foreground/40 h-8 w-8" />
@@ -156,7 +156,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
   }
 
   return (
-    <div className="mx-auto container space-y-12 px-4 py-8">
+    <div className="container mx-auto space-y-12 px-4 py-8">
       {/* PAGE HEADER */}
       <section className="flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center">
@@ -272,7 +272,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
         {trending_items.length > 0 ? (
           <div className="flex gap-4 overflow-x-auto pb-4">
             {trending_items.map((item) => (
-              <Card key={item.id} className="min-w-[180px] shrink-0">
+              <Card key={item.id} className="min-w-45 shrink-0">
                 <CardContent className="p-0">
                   {item.image_url ? (
                     <img

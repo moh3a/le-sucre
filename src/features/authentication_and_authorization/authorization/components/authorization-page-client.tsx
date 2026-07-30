@@ -24,9 +24,24 @@ export function AuthorizationPageClient() {
           <StatsGrid
             loading={statsLoading}
             items={[
-              { label: t("stat_roles"), value: stats?.total_roles ?? 0, icon: Shield, color: "info" },
-              { label: t("stat_permissions"), value: stats?.total_permissions ?? 0, icon: Key, color: "success" },
-              { label: t("stat_avg_permissions"), value: stats?.avg_permissions_per_role ?? 0, icon: BarChart3, color: "warning" },
+              {
+                label: t("stat_roles"),
+                value: stats?.total_roles ?? 0,
+                icon: Shield,
+                color: "info",
+              },
+              {
+                label: t("stat_permissions"),
+                value: stats?.total_permissions ?? 0,
+                icon: Key,
+                color: "success",
+              },
+              {
+                label: t("stat_avg_permissions"),
+                value: stats?.avg_permissions_per_role ?? 0,
+                icon: BarChart3,
+                color: "warning",
+              },
             ]}
           />
         }

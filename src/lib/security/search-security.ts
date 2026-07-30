@@ -87,9 +87,11 @@ export function validate_search_complexity(query: string): SearchValidationResul
   return { valid: true, sanitized_query: sanitized };
 }
 
-export function validate_filter_params(
-  filters: Record<string, string | string[]>,
-): { valid: boolean; sanitized: Record<string, string | string[]>; error?: string } {
+export function validate_filter_params(filters: Record<string, string | string[]>): {
+  valid: boolean;
+  sanitized: Record<string, string | string[]>;
+  error?: string;
+} {
   const filter_keys = Object.keys(filters);
   if (filter_keys.length > SEARCH_SECURITY_LIMITS.MAX_FILTERS) {
     return {
@@ -105,7 +107,9 @@ export function validate_filter_params(
       sanitized[key] = value.replace(/[<>"';&|\\*?%~#(){}[\]!^$=+`]/g, "").substring(0, 200);
     } else if (Array.isArray(value)) {
       sanitized[key] = value.map((v) =>
-        String(v).replace(/[<>"';&|\\*?%~#(){}[\]!^$=+`]/g, "").substring(0, 200),
+        String(v)
+          .replace(/[<>"';&|\\*?%~#(){}[\]!^$=+`]/g, "")
+          .substring(0, 200),
       );
     }
   }

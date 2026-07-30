@@ -9,7 +9,11 @@ export const update_profile_schema = z.object({
     .regex(/^\+?[\d\s\-()]{7,20}$/, "Numéro de téléphone invalide")
     .optional()
     .nullable(),
-  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format attendu: YYYY-MM-DD").optional().nullable(),
+  date_of_birth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format attendu: YYYY-MM-DD")
+    .optional()
+    .nullable(),
   gender: z.enum(["male", "female", "other"]).optional().nullable(),
   company: z.string().max(255).optional().nullable(),
   tax_id: z.string().max(100).optional().nullable(),

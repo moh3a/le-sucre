@@ -32,48 +32,48 @@ export function AdminTopbar() {
 
   return (
     <QueryGuard session={{ isPending, error }}>
-    <header className="bg-background flex h-16 items-center justify-between border-b px-6">
-      {/* Search */}
-      <div className="relative w-64">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-        <Input placeholder={t("search_placeholder")} className="h-9 pl-9" />
-      </div>
+      <header className="bg-background flex h-16 items-center justify-between border-b px-6">
+        {/* Search */}
+        <div className="relative w-64">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input placeholder={t("search_placeholder")} className="h-9 pl-9" />
+        </div>
 
-      {/* Right actions */}
-      <div className="flex items-center gap-3">
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="bg-brand-crimson-violet absolute top-1 right-1 h-2 w-2 rounded-full" />
-        </Button>
+        {/* Right actions */}
+        <div className="flex items-center gap-3">
+          {/* Notifications */}
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="bg-brand-crimson-violet absolute top-1 right-1 h-2 w-2 rounded-full" />
+          </Button>
 
-        {/* User */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex h-9 items-center gap-2 px-2">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
-              </Avatar>
-              <span className="hidden text-sm font-medium sm:block">
-                {session?.user?.name ?? t("administrator")}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
-              {session?.user?.email}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>{t("my_profile_short")}</DropdownMenuItem>
-            <DropdownMenuItem>{t("settings")}</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={() => authClient.signOut()}>
-              {t("sign_out")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </header>
+          {/* User */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex h-9 items-center gap-2 px-2">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+                </Avatar>
+                <span className="hidden text-sm font-medium sm:block">
+                  {session?.user?.name ?? t("administrator")}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
+                {session?.user?.email}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>{t("my_profile_short")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("settings")}</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={() => authClient.signOut()}>
+                {t("sign_out")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
     </QueryGuard>
   );
 }

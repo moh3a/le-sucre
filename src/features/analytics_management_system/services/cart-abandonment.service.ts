@@ -16,9 +16,7 @@ export class CartAbandonmentService {
     const abandoned_carts = await db
       .select({ id: carts.id, user_id: carts.user_id })
       .from(carts)
-      .where(
-        and(eq(carts.status, "active"), lte(carts.updated_at, threshold)),
-      )
+      .where(and(eq(carts.status, "active"), lte(carts.updated_at, threshold)))
       .limit(CART_ABANDONED_BATCH);
 
     if (!abandoned_carts.length) return;
@@ -35,9 +33,7 @@ export class CartAbandonmentService {
       });
     }
 
-    const new_ids = abandoned_carts
-      .filter((c) => !reported_set.has(c.id))
-      .map((c) => c.id);
+    const new_ids = abandoned_carts.filter((c) => !reported_set.has(c.id)).map((c) => c.id);
     if (new_ids.length) await redis.sadd("analytics:abandoned_reported", ...new_ids);
   }
 }

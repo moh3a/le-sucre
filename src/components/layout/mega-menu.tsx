@@ -48,7 +48,7 @@ function MegaMenuDesktop({ categories }: MegaMenuProps) {
             {t("categories")}
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="grid gap-1 p-4 md:w-[700px] lg:w-[850px]">
+            <div className="grid gap-1 p-4 md:w-175 lg:w-212.5">
               <div className="grid grid-cols-[1fr_200px] gap-6">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-1">
                   {topCategories.map((category) => (

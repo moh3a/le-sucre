@@ -14,4 +14,3 @@ export default async function CustomerDetailPage({ params }: Props) {
 
   return <CustomerDetailTabs user_id={customer_id} />;
 }
- 

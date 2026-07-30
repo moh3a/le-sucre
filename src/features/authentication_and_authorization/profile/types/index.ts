@@ -1,5 +1,8 @@
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import type { user_profiles, user_addresses } from "@/features/authentication_and_authorization/profile/db/schema";
+import type {
+  user_profiles,
+  user_addresses,
+} from "@/features/authentication_and_authorization/profile/db/schema";
 
 export type UserProfile = InferSelectModel<typeof user_profiles>;
 export type UserProfileInsert = InferInsertModel<typeof user_profiles>;

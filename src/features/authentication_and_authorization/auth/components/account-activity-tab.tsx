@@ -27,44 +27,57 @@ type ActivityRow = {
 export function AccountActivityTab() {
   const t = useTranslations("products");
 
-  const action_label = useCallback((action: string): string => {
-    const labels: Record<string, string> = {
-      "profile.updated": t("activity_profile_updated"),
-      "password.changed": t("activity_password_changed"),
-      "auth.login.success": t("activity_login_success"),
-      "auth.login.failure": t("activity_login_failure"),
-      "auth.logout": t("activity_logout"),
-    };
-    return labels[action] ?? action;
-  }, [t]);
+  const action_label = useCallback(
+    (action: string): string => {
+      const labels: Record<string, string> = {
+        "profile.updated": t("activity_profile_updated"),
+        "password.changed": t("activity_password_changed"),
+        "auth.login.success": t("activity_login_success"),
+        "auth.login.failure": t("activity_login_failure"),
+        "auth.logout": t("activity_logout"),
+      };
+      return labels[action] ?? action;
+    },
+    [t],
+  );
 
   const columns = useMemo<ColumnDef<ActivityRow>[]>(
     () => [
       {
         id: "action",
         accessorKey: "action",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_action_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("activity_action_column")} />
+        ),
         cell: ({ row }) => <span className="font-medium">{action_label(row.original.action)}</span>,
       },
       {
         id: "resource",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_resource_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("activity_resource_column")} />
+        ),
         cell: ({ row }) => (
           <span className="text-muted-foreground text-sm">
-            {row.original.resource_type ? `${row.original.resource_type}#${row.original.resource_id?.slice(0, 8)}` : "—"}
+            {row.original.resource_type
+              ? `${row.original.resource_type}#${row.original.resource_id?.slice(0, 8)}`
+              : "—"}
           </span>
         ),
       },
       {
         id: "ip_address",
         accessorKey: "ip_address",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_ip_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("activity_ip_column")} />
+        ),
         cell: ({ row }) => row.original.ip_address ?? "—",
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("activity_date_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("activity_date_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.created_at),
       },
     ],
@@ -86,18 +99,21 @@ export function AccountActivityTab() {
   });
 
   return (
-    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={4} rowCount={10} />}>
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("activity_recent_title")}</CardTitle>
-        <CardDescription>
-          {t("activity_entries_count", { count: data?.meta.total_records ?? 0 })}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DataTable table={table} />
-      </CardContent>
-    </Card>
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={<DataTableSkeleton columnCount={4} rowCount={10} />}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("activity_recent_title")}</CardTitle>
+          <CardDescription>
+            {t("activity_entries_count", { count: data?.meta.total_records ?? 0 })}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable table={table} />
+        </CardContent>
+      </Card>
     </QueryGuard>
   );
 }

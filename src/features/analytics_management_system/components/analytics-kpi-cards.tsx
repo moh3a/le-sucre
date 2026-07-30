@@ -26,8 +26,7 @@ export function AnalyticsKpiCards({
   const t = useTranslations("analytics");
 
   const viewSessions = funnel.find((s) => s.step === "view")?.sessions ?? 0;
-  const avgOrderValue =
-    totals.orders > 0 ? Number(totals.revenue) / totals.orders : 0;
+  const avgOrderValue = totals.orders > 0 ? Number(totals.revenue) / totals.orders : 0;
 
   return (
     <StatsGrid

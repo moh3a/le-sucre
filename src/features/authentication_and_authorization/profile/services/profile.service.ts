@@ -6,7 +6,7 @@ import { profile_repository } from "@/features/authentication_and_authorization/
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { AUDIT_ACTION } from "@/features/authentication_and_authorization/constants/audit-actions";
 import type { UserProfileInsert } from "@/features/authentication_and_authorization/profile/types";
-import type { CreateAddressInput, UpdateAddressInput } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
+import type { CreateAddressInput } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
 
 const ADDRESS_LIMIT = 10;
 

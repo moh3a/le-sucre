@@ -69,4 +69,11 @@ export interface AddressData {
   phone: string;
 }
 
-export type ProductCardVariant = "catalog" | "wishlist" | "cart-item" | "compare" | "saved" | "flash-sale" | "mini";
+export type ProductCardVariant =
+  | "catalog"
+  | "wishlist"
+  | "cart-item"
+  | "compare"
+  | "saved"
+  | "flash-sale"
+  | "mini";

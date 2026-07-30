@@ -44,7 +44,7 @@ export function AuthorizationTable() {
             <CardDescription>{t("matrix_description")}</CardDescription>
           </div>
           <div className="relative max-w-sm">
-            <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder={t("search_permissions")}
               value={search}
@@ -58,7 +58,7 @@ export function AuthorizationTable() {
         <div className="relative w-full overflow-auto">
           <table className="w-full caption-bottom text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 transition-colors">
+              <tr className="bg-muted/50 border-b transition-colors">
                 <th className="text-muted-foreground h-12 w-64 px-4 text-left align-middle font-semibold">
                   {t("permissions_column")} ({filtered.length})
                 </th>
@@ -68,10 +68,7 @@ export function AuthorizationTable() {
                     className="text-muted-foreground h-12 px-4 text-center align-middle font-semibold"
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className="text-xs capitalize"
-                      >
+                      <Badge variant="outline" className="text-xs capitalize">
                         {role.replace("_", " ")}
                       </Badge>
                       <span className="text-muted-foreground text-[10px] font-normal">
@@ -82,7 +79,7 @@ export function AuthorizationTable() {
                 ))}
               </tr>
             </thead>
-            <tbody className="[&_tr:last-child]:border-0 bg-background">
+            <tbody className="bg-background [&_tr:last-child]:border-0">
               {filtered.length === 0 ? (
                 <tr>
                   <td
@@ -98,11 +95,11 @@ export function AuthorizationTable() {
                   return (
                     <tr
                       key={permissionKey}
-                      className="border-b transition-colors hover:bg-muted/30"
+                      className="hover:bg-muted/30 border-b transition-colors"
                     >
                       <td className="p-4 align-middle font-medium">
                         <div className="flex flex-col">
-                          <span className="font-mono text-xs text-crimson-violet">
+                          <span className="text-crimson-violet font-mono text-xs">
                             {permissionValue}
                           </span>
                           <span className="text-muted-foreground mt-0.5 text-xs capitalize">
@@ -113,10 +110,10 @@ export function AuthorizationTable() {
                       {roles.map((role) => {
                         const hasPermission = ROLE_PERMISSION_MAP[role].includes(permissionValue);
                         return (
-                          <td key={role} className="p-4 align-middle text-center">
+                          <td key={role} className="p-4 text-center align-middle">
                             <div className="flex justify-center">
                               {hasPermission ? (
-                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-olive-leaf">
+                                <div className="bg-primary/20 text-olive-leaf flex h-6 w-6 items-center justify-center rounded-full">
                                   <Check className="h-4 w-4" />
                                 </div>
                               ) : (

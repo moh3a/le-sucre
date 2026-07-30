@@ -8,7 +8,7 @@ import {
   mfa_settings,
   mfa_backup_codes,
 } from "@/features/authentication_and_authorization/auth/mfa_schema";
-import { AppError, NotFoundError, ValidationError } from "@/lib/error_handling";
+import { NotFoundError, ValidationError } from "@/lib/error_handling";
 
 const TOTP_INTERVAL_SEC = 30;
 const TOTP_CODE_LENGTH = 6;

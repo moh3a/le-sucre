@@ -25,9 +25,7 @@ const default_consent: CookieConsent = {
 
 function read_consent(): CookieConsent {
   if (typeof document === "undefined") return default_consent;
-  const raw = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${COOKIE_CONSENT_KEY}=`));
+  const raw = document.cookie.split("; ").find((row) => row.startsWith(`${COOKIE_CONSENT_KEY}=`));
   if (!raw) return default_consent;
   try {
     return JSON.parse(decodeURIComponent(raw.split("=")[1])) as CookieConsent;
@@ -66,18 +64,19 @@ export function useCookieConsent() {
     setConsent(new_consent);
   }, []);
 
-  const save_preferences = useCallback(
-    (categories: Record<CookieCategory, boolean>) => {
-      const new_consent: CookieConsent = {
-        accepted: true,
-        categories: { necessary: true, analytics: categories.analytics, marketing: categories.marketing },
-        updatedAt: new Date().toISOString(),
-      };
-      write_consent(new_consent);
-      setConsent(new_consent);
-    },
-    [],
-  );
+  const save_preferences = useCallback((categories: Record<CookieCategory, boolean>) => {
+    const new_consent: CookieConsent = {
+      accepted: true,
+      categories: {
+        necessary: true,
+        analytics: categories.analytics,
+        marketing: categories.marketing,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+    write_consent(new_consent);
+    setConsent(new_consent);
+  }, []);
 
   const show_banner = loaded && !consent.accepted;
 

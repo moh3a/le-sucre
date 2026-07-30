@@ -37,7 +37,6 @@ export function StorefrontAnnouncementBar({ banners }: Props) {
 
 function AnnouncementItem({
   banner,
-  tick,
   onDismiss,
 }: {
   banner: CampaignBanner;

@@ -27,7 +27,7 @@ export function CountdownTimer({
     if (remaining <= 0) return;
     const id = setInterval(() => setRemaining((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(id);
-  }, [remaining > 0]);
+  }, [remaining]);
 
   const days = Math.floor(remaining / 86400);
   const hours = Math.floor((remaining % 86400) / 3600);

@@ -12,11 +12,18 @@ function is_email(value: string): boolean {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { identifier, phone, email } = body as { identifier?: string; phone?: string; email?: string };
+    const { identifier, phone, email } = body as {
+      identifier?: string;
+      phone?: string;
+      email?: string;
+    };
     const value = identifier || phone || email;
 
     if (!value) {
-      return NextResponse.json({ error: "Email ou téléphone requis / Email or phone required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email ou téléphone requis / Email or phone required" },
+        { status: 400 },
+      );
     }
 
     if (is_email(value)) {

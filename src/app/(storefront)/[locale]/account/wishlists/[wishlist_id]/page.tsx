@@ -20,7 +20,14 @@ export default async function CustomerWishlistDetailPage({
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("my_wishlists"), href: "/account/wishlists" }, { label: tBc("detail") }]} />
+      <StorefrontBreadcrumbs
+        items={[
+          { label: tBc("home"), href: "/" },
+          { label: tBc("my_account"), href: "/account" },
+          { label: tBc("my_wishlists"), href: "/account/wishlists" },
+          { label: tBc("detail") },
+        ]}
+      />
       <CustomerWishlistDetailPageClient wishlistId={wishlist_id} />
     </>
   );

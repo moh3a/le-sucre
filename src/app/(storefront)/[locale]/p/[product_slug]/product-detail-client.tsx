@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -43,13 +42,11 @@ import {
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LabelSelector } from "@/components/ui/label-selector";
 import { ColorSwatchSelector } from "@/components/ui/color-swatch-selector";
-import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth/client";
 import type { StorefrontProduct } from "@/components/storefront/types";
 import { AppLocale } from "@/i18n/config";
@@ -157,7 +154,6 @@ export function ProductDetailClient({ slug, locale }: Props) {
   const all_media_urls = media.map((m) => m.url);
 
   const retail_unit = product_units?.find((u) => u.channel === "retail");
-  const wholesale_unit = product_units?.find((u) => u.channel === "wholesale");
   const unit_name = retail_unit?.unit_name ?? "pièce";
   const pieces_per_unit = retail_unit?.pieces_per_unit ?? 1;
 

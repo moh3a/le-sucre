@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { APP_NAME } from "@/constants";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
+import { APP_NAME } from "@/constants";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -34,9 +35,11 @@ export default async function PrivacyPage({ params }: Props) {
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("privacy") }]} />
+      <StorefrontBreadcrumbs
+        items={[{ label: tBc("home"), href: "/" }, { label: tBc("privacy") }]}
+      />
       <section className="text-center">
-        <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
+        <h1 className="mb-4 text-4xl font-bold text-balance">{t("title")}</h1>
         <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
       </section>
 
@@ -54,9 +57,7 @@ export default async function PrivacyPage({ params }: Props) {
         {SECTIONS.map((section) => (
           <Card key={section.id}>
             <CardHeader>
-              <CardTitle className="text-lg font-heading">
-                {t(`${section.id}_title`)}
-              </CardTitle>
+              <CardTitle className="font-heading text-lg">{t(`${section.id}_title`)}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm leading-relaxed">

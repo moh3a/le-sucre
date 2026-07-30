@@ -3,7 +3,6 @@ import { PERMISSIONS } from "@/features/authentication_and_authorization/authori
 
 const FORBIDDEN_EXPORT_CHARS = /[=+\-@\t\r\n]/;
 const MAX_EXPORT_ROWS = 10000;
-const MAX_EXPORT_COLUMNS = 50;
 
 export function sanitize_csv_value(value: string): string {
   if (FORBIDDEN_EXPORT_CHARS.test(value[0] ?? "")) {

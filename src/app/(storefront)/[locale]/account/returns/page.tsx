@@ -11,7 +11,13 @@ export default async function ReturnsPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("my_returns") }]} />
+      <StorefrontBreadcrumbs
+        items={[
+          { label: tBc("home"), href: "/" },
+          { label: tBc("my_account"), href: "/account" },
+          { label: tBc("my_returns") },
+        ]}
+      />
       <CustomerReturnsPageClient />
     </>
   );

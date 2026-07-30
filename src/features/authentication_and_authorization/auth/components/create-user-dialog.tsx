@@ -64,83 +64,79 @@ export function CreateUserDialog() {
 
   return (
     <QueryGuard mutation={create_user}>
-    <ResponsiveDialog open={open} onOpenChange={setOpen}>
-      <ResponsiveDialogTrigger asChild>
-        <Button>
-          <Plus />
-          {t("create_user_button")}
-        </Button>
-      </ResponsiveDialogTrigger>
-      <ResponsiveDialogContent>
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>{t("create_user_title")}</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
-            {t("create_user_description")}
-          </ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-
-        <form onSubmit={on_submit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="create-name">{t("name")}</Label>
-            <Input
-              id="create-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("full_name_placeholder")}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="create-phone">{t("phone")}</Label>
-            <Input
-              id="create-phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={t("phone_placeholder")}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="create-password">{t("password")}</Label>
-            <Input
-              id="create-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t("password_min_placeholder")}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="create-role">{t("role")}</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger id="create-role">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_OPTIONS.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {ROLE_LABELS[r]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={create_user.isPending}
-          >
-            {create_user.isPending ? t("creating") : t("create_user_submit")}
+      <ResponsiveDialog open={open} onOpenChange={setOpen}>
+        <ResponsiveDialogTrigger asChild>
+          <Button>
+            <Plus />
+            {t("create_user_button")}
           </Button>
-        </form>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+        </ResponsiveDialogTrigger>
+        <ResponsiveDialogContent>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>{t("create_user_title")}</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
+              {t("create_user_description")}
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+
+          <form onSubmit={on_submit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-name">{t("name")}</Label>
+              <Input
+                id="create-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("full_name_placeholder")}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="create-phone">{t("phone")}</Label>
+              <Input
+                id="create-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder={t("phone_placeholder")}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="create-password">{t("password")}</Label>
+              <Input
+                id="create-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t("password_min_placeholder")}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="create-role">{t("role")}</Label>
+              <Select value={role} onValueChange={setRole}>
+                <SelectTrigger id="create-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLE_OPTIONS.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {ROLE_LABELS[r]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={create_user.isPending}>
+              {create_user.isPending ? t("creating") : t("create_user_submit")}
+            </Button>
+          </form>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </QueryGuard>
   );
 }

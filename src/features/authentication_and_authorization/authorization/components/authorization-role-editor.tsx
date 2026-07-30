@@ -51,7 +51,9 @@ export function AuthorizationRoleEditor() {
     const all = Object.entries(PERMISSIONS);
     if (!perm_search.trim()) return all;
     const q = perm_search.toLowerCase();
-    return all.filter(([key, value]) => key.toLowerCase().includes(q) || value.toLowerCase().includes(q));
+    return all.filter(
+      ([key, value]) => key.toLowerCase().includes(q) || value.toLowerCase().includes(q),
+    );
   }, [perm_search]);
 
   const selected_count = effective_permissions.length;
@@ -100,7 +102,14 @@ export function AuthorizationRoleEditor() {
           </ResponsiveDialogHeader>
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <Select value={selected_role} onValueChange={(v) => { setSelectedRole(v); setDraftPermissions([]); setPermSearch(""); }}>
+              <Select
+                value={selected_role}
+                onValueChange={(v) => {
+                  setSelectedRole(v);
+                  setDraftPermissions([]);
+                  setPermSearch("");
+                }}
+              >
                 <SelectTrigger className="w-50 capitalize">
                   <SelectValue placeholder={t("select_role_placeholder")} />
                 </SelectTrigger>
@@ -124,7 +133,7 @@ export function AuthorizationRoleEditor() {
             <Separator />
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative flex-1">
-                <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   placeholder={tAuth("search_permissions")}
                   value={perm_search}

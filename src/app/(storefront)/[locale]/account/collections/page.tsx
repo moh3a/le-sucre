@@ -15,7 +15,13 @@ export default async function CustomerCollectionsPage({ params }: Props) {
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
   return (
     <>
-      <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("my_account"), href: "/account" }, { label: tBc("my_collections") }]} />
+      <StorefrontBreadcrumbs
+        items={[
+          { label: tBc("home"), href: "/" },
+          { label: tBc("my_account"), href: "/account" },
+          { label: tBc("my_collections") },
+        ]}
+      />
       <CustomerCollectionsPageClient />
     </>
   );

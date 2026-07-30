@@ -15,26 +15,11 @@ function normalizePath(pathname: string): string {
 }
 
 const BREADCRUMB_MAP: Record<string, Array<{ key: string; href?: string }>> = {
-  "/console/analytics": [
-    { key: "admin_home", href: "/console" },
-    { key: "analytics" },
-  ],
-  "/console/tasks": [
-    { key: "admin_home", href: "/console" },
-    { key: "tasks" },
-  ],
-  "/console/settings": [
-    { key: "admin_home", href: "/console" },
-    { key: "settings" },
-  ],
-  "/console/account": [
-    { key: "admin_home", href: "/console" },
-    { key: "account" },
-  ],
-  "/console/notifications": [
-    { key: "admin_home", href: "/console" },
-    { key: "notifications" },
-  ],
+  "/console/analytics": [{ key: "admin_home", href: "/console" }, { key: "analytics" }],
+  "/console/tasks": [{ key: "admin_home", href: "/console" }, { key: "tasks" }],
+  "/console/settings": [{ key: "admin_home", href: "/console" }, { key: "settings" }],
+  "/console/account": [{ key: "admin_home", href: "/console" }, { key: "account" }],
+  "/console/notifications": [{ key: "admin_home", href: "/console" }, { key: "notifications" }],
 
   "/console/products": [
     { key: "admin_home", href: "/console" },
@@ -79,80 +64,49 @@ const BREADCRUMB_MAP: Record<string, Array<{ key: string; href?: string }>> = {
     { key: "catalog" },
     { key: "reviews" },
   ],
-  "/console/media": [
-    { key: "admin_home", href: "/console" },
-    { key: "catalog" },
-    { key: "media" },
-  ],
+  "/console/media": [{ key: "admin_home", href: "/console" }, { key: "catalog" }, { key: "media" }],
 
-  "/console/orders": [
-    { key: "admin_home", href: "/console" },
-    { key: "orders" },
-  ],
+  "/console/orders": [{ key: "admin_home", href: "/console" }, { key: "orders" }],
   "/console/orders/[id]": [
     { key: "admin_home", href: "/console" },
     { key: "orders", href: "/console/orders" },
     { key: "detail" },
   ],
-  "/console/shipping": [
-    { key: "admin_home", href: "/console" },
-    { key: "shipments" },
-  ],
+  "/console/shipping": [{ key: "admin_home", href: "/console" }, { key: "shipments" }],
   "/console/shipping/[id]": [
     { key: "admin_home", href: "/console" },
     { key: "shipments", href: "/console/shipping" },
     { key: "detail" },
   ],
-  "/console/preorders": [
-    { key: "admin_home", href: "/console" },
-    { key: "preorders" },
-  ],
-  "/console/carts": [
-    { key: "admin_home", href: "/console" },
-    { key: "carts" },
-  ],
-  "/console/customers": [
-    { key: "admin_home", href: "/console" },
-    { key: "customers" },
-  ],
+  "/console/preorders": [{ key: "admin_home", href: "/console" }, { key: "preorders" }],
+  "/console/carts": [{ key: "admin_home", href: "/console" }, { key: "carts" }],
+  "/console/customers": [{ key: "admin_home", href: "/console" }, { key: "customers" }],
   "/console/customers/[id]": [
     { key: "admin_home", href: "/console" },
     { key: "customers", href: "/console/customers" },
     { key: "detail" },
   ],
 
-  "/console/payments": [
-    { key: "admin_home", href: "/console" },
-    { key: "payments" },
-  ],
+  "/console/payments": [{ key: "admin_home", href: "/console" }, { key: "payments" }],
   "/console/payments/[id]": [
     { key: "admin_home", href: "/console" },
     { key: "payments", href: "/console/payments" },
     { key: "detail" },
   ],
-  "/console/invoices": [
-    { key: "admin_home", href: "/console" },
-    { key: "invoices" },
-  ],
+  "/console/invoices": [{ key: "admin_home", href: "/console" }, { key: "invoices" }],
   "/console/invoices/[id]": [
     { key: "admin_home", href: "/console" },
     { key: "invoices", href: "/console/invoices" },
     { key: "detail" },
   ],
 
-  "/console/promotions": [
-    { key: "admin_home", href: "/console" },
-    { key: "promotions" },
-  ],
+  "/console/promotions": [{ key: "admin_home", href: "/console" }, { key: "promotions" }],
   "/console/promotions/[id]": [
     { key: "admin_home", href: "/console" },
     { key: "promotions", href: "/console/promotions" },
     { key: "detail" },
   ],
-  "/console/campaigns": [
-    { key: "admin_home", href: "/console" },
-    { key: "campaigns" },
-  ],
+  "/console/campaigns": [{ key: "admin_home", href: "/console" }, { key: "campaigns" }],
   "/console/campaigns/new": [
     { key: "admin_home", href: "/console" },
     { key: "campaigns", href: "/console/campaigns" },
@@ -204,23 +158,11 @@ const BREADCRUMB_MAP: Record<string, Array<{ key: string; href?: string }>> = {
     { key: "webhooks" },
   ],
 
-  "/console/inventory": [
-    { key: "admin_home", href: "/console" },
-    { key: "inventory" },
-  ],
-  "/console/procurement": [
-    { key: "admin_home", href: "/console" },
-    { key: "procurement" },
-  ],
-  "/console/returns": [
-    { key: "admin_home", href: "/console" },
-    { key: "returns_rma" },
-  ],
+  "/console/inventory": [{ key: "admin_home", href: "/console" }, { key: "inventory" }],
+  "/console/procurement": [{ key: "admin_home", href: "/console" }, { key: "procurement" }],
+  "/console/returns": [{ key: "admin_home", href: "/console" }, { key: "returns_rma" }],
 
-  "/console/operations": [
-    { key: "admin_home", href: "/console" },
-    { key: "operations" },
-  ],
+  "/console/operations": [{ key: "admin_home", href: "/console" }, { key: "operations" }],
   "/console/operations/sla-definitions": [
     { key: "admin_home", href: "/console" },
     { key: "operations", href: "/console/operations" },
@@ -247,30 +189,12 @@ const BREADCRUMB_MAP: Record<string, Array<{ key: string; href?: string }>> = {
     { key: "agent_kpi" },
   ],
 
-  "/console/users": [
-    { key: "admin_home", href: "/console" },
-    { key: "users" },
-  ],
-  "/console/authorization": [
-    { key: "admin_home", href: "/console" },
-    { key: "authorizations" },
-  ],
-  "/console/audit-logs": [
-    { key: "admin_home", href: "/console" },
-    { key: "audit" },
-  ],
-  "/console/feature-flags": [
-    { key: "admin_home", href: "/console" },
-    { key: "feature_flags" },
-  ],
-  "/console/blacklist": [
-    { key: "admin_home", href: "/console" },
-    { key: "blacklist" },
-  ],
-  "/console/health": [
-    { key: "admin_home", href: "/console" },
-    { key: "health" },
-  ],
+  "/console/users": [{ key: "admin_home", href: "/console" }, { key: "users" }],
+  "/console/authorization": [{ key: "admin_home", href: "/console" }, { key: "authorizations" }],
+  "/console/audit-logs": [{ key: "admin_home", href: "/console" }, { key: "audit" }],
+  "/console/feature-flags": [{ key: "admin_home", href: "/console" }, { key: "feature_flags" }],
+  "/console/blacklist": [{ key: "admin_home", href: "/console" }, { key: "blacklist" }],
+  "/console/health": [{ key: "admin_home", href: "/console" }, { key: "health" }],
 };
 
 export function ConsoleBreadcrumb() {
@@ -295,7 +219,7 @@ export function ConsoleBreadcrumb() {
           <span key={i} className="flex items-center gap-1">
             {i > 0 && <ChevronRight className="size-3 shrink-0" />}
             {item.href && !isLast ? (
-              <Link href={item.href} className="transition-colors hover:text-foreground">
+              <Link href={item.href} className="hover:text-foreground transition-colors">
                 {item.label}
               </Link>
             ) : (

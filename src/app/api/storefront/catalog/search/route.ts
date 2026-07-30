@@ -7,11 +7,7 @@ import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/rate-limit";
 import { assert_ip_not_blacklisted } from "@/lib/security/ip-blacklist";
 import { sanitize_search_input, sanitize_json } from "@/lib/security/sanitization";
-import {
-  validate_search_query,
-  search_limits,
-  pagination_limits,
-} from "@/lib/security/validation";
+import { validate_search_query, pagination_limits } from "@/lib/security/validation";
 
 export async function GET(req: Request) {
   try {

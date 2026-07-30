@@ -173,7 +173,10 @@ export class PhoneAuthService {
       await login_protection_service.record_success(ip, lookupKey, result.user.id);
       return result;
     } catch (e) {
-      logger.warn(`Failed login attempt`, { identifier: lookupKey, error: e instanceof Error ? e.message : String(e) });
+      logger.warn(`Failed login attempt`, {
+        identifier: lookupKey,
+        error: e instanceof Error ? e.message : String(e),
+      });
       await login_protection_service.record_failure(ip, lookupKey);
       throw_error(AUTH_ERROR.INVALID_CREDENTIALS);
     }

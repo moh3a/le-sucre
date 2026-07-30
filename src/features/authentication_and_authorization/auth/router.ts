@@ -1,3 +1,5 @@
+import z from "zod";
+
 import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import {
   permission_procedure,
@@ -12,8 +14,10 @@ import {
   assign_role_dto,
   create_user_dto,
 } from "@/features/authentication_and_authorization/auth/models/auth.dto";
-import { login_dto, register_dto } from "@/features/authentication_and_authorization/auth/models/auth.dto";
-import z from "zod";
+import {
+  login_dto,
+  register_dto,
+} from "@/features/authentication_and_authorization/auth/models/auth.dto";
 import { auth } from "@/lib/auth";
 import { user_repository } from "./repositories/user.repository";
 import { profile_repository } from "@/features/authentication_and_authorization/profile/repositories/profile.repository";
@@ -21,52 +25,48 @@ import { phone_auth_service } from "./services/phone-auth.service";
 
 export const auth_router = create_trpc_router({
   // ─── Email/Phone-based authentication ────────────────────────
-  signUp: public_procedure
-    .input(register_dto)
-    .mutation(async ({ ctx, input }) => {
-      const result = await phone_auth_service.sign_up({
-        name: input.name,
-        email: input.email || undefined,
-        phone: input.phone || undefined,
-        password: input.password,
-      });
-      await audit_service.log({
-        actor_user_id: result.user.id,
-        action: "auth.register",
-        resource_type: "user",
-        resource_id: result.user.id,
-        metadata: { email: input.email, phone: input.phone },
-      });
-      return result;
-    }),
+  signUp: public_procedure.input(register_dto).mutation(async ({ input }) => {
+    const result = await phone_auth_service.sign_up({
+      name: input.name,
+      email: input.email || undefined,
+      phone: input.phone || undefined,
+      password: input.password,
+    });
+    await audit_service.log({
+      actor_user_id: result.user.id,
+      action: "auth.register",
+      resource_type: "user",
+      resource_id: result.user.id,
+      metadata: { email: input.email, phone: input.phone },
+    });
+    return result;
+  }),
 
-  signIn: public_procedure
-    .input(login_dto)
-    .mutation(async ({ ctx, input }) => {
-      const result = await phone_auth_service.sign_in({
-        identifier: input.identifier,
-        password: input.password,
-        remember_me: input.remember_me,
-      });
-      await audit_service.log({
-        actor_user_id: result.user.id,
-        action: "auth.login",
-        resource_type: "user",
-        resource_id: result.user.id,
-        metadata: { identifier: input.identifier },
-      });
-      return result;
-    }),
+  signIn: public_procedure.input(login_dto).mutation(async ({ input }) => {
+    const result = await phone_auth_service.sign_in({
+      identifier: input.identifier,
+      password: input.password,
+      remember_me: input.remember_me,
+    });
+    await audit_service.log({
+      actor_user_id: result.user.id,
+      action: "auth.login",
+      resource_type: "user",
+      resource_id: result.user.id,
+      metadata: { identifier: input.identifier },
+    });
+    return result;
+  }),
 
   resolveIdentifier: public_procedure
     .input(z.object({ identifier: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       return phone_auth_service.find_by_identifier(input.identifier);
     }),
 
   resolvePhone: public_procedure
     .input(z.object({ phone: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       return phone_auth_service.find_by_phone(input.phone);
     }),
 

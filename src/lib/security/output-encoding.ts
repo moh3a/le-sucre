@@ -31,7 +31,10 @@ export function encode_js_string(input: string): string {
 }
 
 export function encode_url_param(input: string): string {
-  return encodeURIComponent(input).replace(/['()*!]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+  return encodeURIComponent(input).replace(
+    /['()*!]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
 }
 
 export function encode_json_for_html<T>(data: T): string {
@@ -41,15 +44,53 @@ export function encode_json_for_html<T>(data: T): string {
 
 export function sanitize_rich_text(input: string): string {
   const ALLOWED_TAGS = new Set([
-    "b", "i", "em", "strong", "u", "s", "mark", "small", "sub", "sup",
-    "p", "br", "span", "div", "ul", "ol", "li",
-    "h1", "h2", "h3", "h4", "h5", "h6",
-    "a", "img", "table", "thead", "tbody", "tr", "th", "td",
-    "blockquote", "pre", "code",
+    "b",
+    "i",
+    "em",
+    "strong",
+    "u",
+    "s",
+    "mark",
+    "small",
+    "sub",
+    "sup",
+    "p",
+    "br",
+    "span",
+    "div",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "a",
+    "img",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+    "blockquote",
+    "pre",
+    "code",
   ]);
   const ALLOWED_ATTRS = new Set([
-    "href", "target", "rel", "title", "alt", "src",
-    "width", "height", "class", "id", "style",
+    "href",
+    "target",
+    "rel",
+    "title",
+    "alt",
+    "src",
+    "width",
+    "height",
+    "class",
+    "id",
+    "style",
   ]);
   const FORBIDDEN_PROTOCOLS = /^(javascript|data|vbscript|file):/i;
 

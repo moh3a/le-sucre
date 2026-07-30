@@ -11,7 +11,11 @@ import { CreateUserDialog } from "./create-user-dialog";
 
 export function UsersPageClient() {
   const t = useTranslations("users");
-  const { data: statsData, isLoading: isLoadingStats, error: statsError } = trpc.adminAuth.getStats.useQuery();
+  const {
+    data: statsData,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = trpc.adminAuth.getStats.useQuery();
 
   const isLoading = isLoadingStats;
   const totalUsers = statsData?.total ?? 0;
@@ -19,43 +23,43 @@ export function UsersPageClient() {
   return (
     <QueryGuard query={{ isLoading: isLoadingStats, error: statsError }}>
       <ConsolePageShell
-      title={t("title")}
-      subtitle={t("subtitle")}
-      actions={<CreateUserDialog />}
-      stats={
-        <StatsGrid
-          loading={isLoading}
-          items={[
-            {
-              label: t("stats_total_users"),
-              value: totalUsers,
-              icon: Users,
-              color: "info",
-            },
-            {
-              label: t("stats_active"),
-              value: statsData?.active ?? 0,
-              icon: UserCheck,
-              color: "success",
-            },
-            {
-              label: t("stats_new_30d"),
-              value: statsData?.new_30d ?? 0,
-              icon: Clock,
-              color: "warning",
-            },
-            {
-              label: t("stats_staff"),
-              value: statsData?.staff ?? 0,
-              icon: Shield,
-              color: "default",
-            },
-          ]}
-        />
-      }
-    >
-      <UsersTable />
-    </ConsolePageShell>
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={<CreateUserDialog />}
+        stats={
+          <StatsGrid
+            loading={isLoading}
+            items={[
+              {
+                label: t("stats_total_users"),
+                value: totalUsers,
+                icon: Users,
+                color: "info",
+              },
+              {
+                label: t("stats_active"),
+                value: statsData?.active ?? 0,
+                icon: UserCheck,
+                color: "success",
+              },
+              {
+                label: t("stats_new_30d"),
+                value: statsData?.new_30d ?? 0,
+                icon: Clock,
+                color: "warning",
+              },
+              {
+                label: t("stats_staff"),
+                value: statsData?.staff ?? 0,
+                icon: Shield,
+                color: "default",
+              },
+            ]}
+          />
+        }
+      >
+        <UsersTable />
+      </ConsolePageShell>
     </QueryGuard>
   );
 }

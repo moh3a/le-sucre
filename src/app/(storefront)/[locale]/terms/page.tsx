@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { APP_NAME } from "@/constants";
@@ -39,7 +40,7 @@ export default async function TermsPage({ params }: Props) {
     <div className="container mx-auto space-y-12 px-4 py-8">
       <StorefrontBreadcrumbs items={[{ label: tBc("home"), href: "/" }, { label: tBc("terms") }]} />
       <section className="text-center">
-        <h1 className="mb-4 text-balance text-4xl font-bold">{t("title")}</h1>
+        <h1 className="mb-4 text-4xl font-bold text-balance">{t("title")}</h1>
         <p className="text-muted-foreground text-sm">{t("lastUpdated")}</p>
       </section>
 
@@ -57,7 +58,7 @@ export default async function TermsPage({ params }: Props) {
         {ARTICLES.map((article) => (
           <Card key={article.number}>
             <CardHeader>
-              <CardTitle className="text-lg font-heading">
+              <CardTitle className="font-heading text-lg">
                 {t("articleLabel", { number: article.number })} — {t(article.titleKey)}
               </CardTitle>
             </CardHeader>

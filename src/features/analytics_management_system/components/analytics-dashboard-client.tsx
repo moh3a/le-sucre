@@ -21,22 +21,22 @@ export function AnalyticsDashboardClient() {
       loadingFallback={<p className="text-muted-foreground text-sm">{t("loading")}</p>}
     >
       <Card>
-      <CardHeader>
-        <CardTitle>{t("overview_title")}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <AnalyticsKpiCards totals={data.totals} repeat={data.repeat} funnel={data.funnel} />
-        <LineChart
-          title={t("revenue_30_days")}
-          description={t("revenue_description")}
-          data={data.series.map((r) => ({
-            day_key: r.day_key,
-            revenue: Number(r.revenue),
-          }))}
-          x_key="day_key"
-          y_key="revenue"
-        />
-      </CardContent>
+        <CardHeader>
+          <CardTitle>{t("overview_title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <AnalyticsKpiCards totals={data.totals} repeat={data.repeat} funnel={data.funnel} />
+          <LineChart
+            title={t("revenue_30_days")}
+            description={t("revenue_description")}
+            data={data.series.map((r) => ({
+              day_key: r.day_key,
+              revenue: Number(r.revenue),
+            }))}
+            x_key="day_key"
+            y_key="revenue"
+          />
+        </CardContent>
       </Card>
     </QueryGuard>
   );

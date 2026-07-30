@@ -20,7 +20,7 @@ interface ErrorBoundaryState {
 
 function DefaultErrorFallback({ error, onRetry }: { error: Error; onRetry: () => void }) {
   return (
-    <div className="flex min-h-[300px] items-center justify-center p-6">
+    <div className="flex min-h-75 items-center justify-center p-6">
       <Card className="max-w-md text-center">
         <CardContent className="space-y-4 pt-6">
           <AlertTriangle className="text-crimson-violet mx-auto size-10 opacity-80" />

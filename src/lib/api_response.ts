@@ -31,7 +31,7 @@ export class ApiResponse {
   public static success<T>(
     data: T,
     pagination: PaginationMeta | null = null,
-    request_id?: string
+    request_id?: string,
   ): ApiResponseEnvelope<T> {
     return {
       success: true,
@@ -48,10 +48,7 @@ export class ApiResponse {
   /**
    * Generates an error standardized response envelope from an AppError instance.
    */
-  public static error(
-    error: AppError,
-    request_id?: string
-  ): ApiResponseEnvelope<null> {
+  public static error(error: AppError, request_id?: string): ApiResponseEnvelope<null> {
     return {
       success: false,
       data: null,

@@ -18,11 +18,7 @@ export function AnalyticsOverviewTab({ from, to }: { from: string; to: string })
     >
       {data && (
         <>
-          <AnalyticsKpiCards
-            totals={data.totals}
-            repeat={data.repeat}
-            funnel={data.funnel}
-          />
+          <AnalyticsKpiCards totals={data.totals} repeat={data.repeat} funnel={data.funnel} />
 
           <div className="grid gap-4 md:grid-cols-2">
             <LineChart

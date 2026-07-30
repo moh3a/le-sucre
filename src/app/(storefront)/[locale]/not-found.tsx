@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -21,7 +21,7 @@ export default async function NotFoundPage({ params }: Props) {
   return (
     <div className="container mx-auto flex min-h-[70vh] items-center justify-center px-4 py-8">
       <div className="mx-auto max-w-md text-center">
-        <h1 className="mb-2 text-8xl font-bold text-primary">404</h1>
+        <h1 className="text-primary mb-2 text-8xl font-bold">404</h1>
         <h2 className="mb-4 text-2xl font-bold">{t("subtitle")}</h2>
         <p className="text-muted-foreground mb-8">{t("description")}</p>
         <Button size="lg" className="mb-8" asChild>

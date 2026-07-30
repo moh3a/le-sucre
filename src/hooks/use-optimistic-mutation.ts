@@ -33,7 +33,7 @@ export function useOptimisticToggle() {
   const query_client = useQueryClient();
 
   const toggle = useCallback(
-    async <TData,>(options: OptimisticUpdateOptions<TData>) => {
+    async <TData>(options: OptimisticUpdateOptions<TData>) => {
       const {
         query_key,
         updater,
@@ -54,7 +54,9 @@ export function useOptimisticToggle() {
       try {
         await mutate();
 
-        const message = success_message ?? (success_key ? t(success_key as never, success_params as never) : undefined);
+        const message =
+          success_message ??
+          (success_key ? t(success_key as never, success_params as never) : undefined);
         if (message) {
           toast.success(message);
         }
@@ -63,7 +65,8 @@ export function useOptimisticToggle() {
       } catch {
         query_client.setQueryData<TData>(query_key, previous);
 
-        const message = error_message ?? (error_key ? t(error_key as never, error_params as never) : undefined);
+        const message =
+          error_message ?? (error_key ? t(error_key as never, error_params as never) : undefined);
         toast.error(message ?? t("action_failed"), {
           description: t("retry_or_refresh"),
         });
@@ -90,7 +93,8 @@ export function useSuccessToast() {
   const show_success = useCallback(
     (options: SuccessToastOptions = {}) => {
       const { message, i18n_key, params } = options;
-      const text = message ?? (i18n_key ? t(i18n_key as never, params as never) : t("action_completed"));
+      const text =
+        message ?? (i18n_key ? t(i18n_key as never, params as never) : t("action_completed"));
       toast.success(text);
     },
     [t],
@@ -99,7 +103,8 @@ export function useSuccessToast() {
   const show_error = useCallback(
     (options: SuccessToastOptions = {}) => {
       const { message, i18n_key, params } = options;
-      const text = message ?? (i18n_key ? t(i18n_key as never, params as never) : t("action_failed"));
+      const text =
+        message ?? (i18n_key ? t(i18n_key as never, params as never) : t("action_failed"));
       toast.error(text);
     },
     [t],

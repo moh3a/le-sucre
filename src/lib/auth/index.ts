@@ -5,9 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { APP_NAME } from "@/constants";
 import * as authSchema from "@/features/authentication_and_authorization/auth/schema";
-import {
-  ROLE_NAMES,
-} from "@/features/authentication_and_authorization/authorization/constants/roles";
+import { ROLE_NAMES } from "@/features/authentication_and_authorization/authorization/constants/roles";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { db } from "../db";
 import { RoleName } from "@/features/authentication_and_authorization/authorization/constants/roles";
@@ -53,10 +51,7 @@ const auth_options = {
       const rows = await db
         .select({ roleName: authSchema.roles.name })
         .from(authSchema.user_roles)
-        .innerJoin(
-          authSchema.roles,
-          eq(authSchema.user_roles.role_id, authSchema.roles.id),
-        )
+        .innerJoin(authSchema.roles, eq(authSchema.user_roles.role_id, authSchema.roles.id))
         .where(eq(authSchema.user_roles.user_id, user.id))
         .limit(1);
 
@@ -145,10 +140,7 @@ const auth_options = {
     user: {
       create: {
         after: async (user: Record<string, unknown>) => {
-          await role_repository.assign_role(
-            user.id as string,
-            ROLE_NAMES.customer,
-          );
+          await role_repository.assign_role(user.id as string, ROLE_NAMES.customer);
         },
       },
     },

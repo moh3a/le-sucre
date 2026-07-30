@@ -9,11 +9,7 @@ export default function SLADefinitionsPage() {
   const t = useTranslations("sla");
 
   return (
-    <ConsolePageShell
-      title={t("title")}
-      subtitle={t("subtitle")}
-      actions={<CreateSLADialog />}
-    >
+    <ConsolePageShell title={t("title")} subtitle={t("subtitle")} actions={<CreateSLADialog />}>
       <SLAClient />
     </ConsolePageShell>
   );

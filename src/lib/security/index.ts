@@ -55,9 +55,5 @@ export {
   validate_filter_params,
   SEARCH_SECURITY_LIMITS,
 } from "./search-security";
-export {
-  authorization_audit_service,
-  AuthorizationAuditService,
-} from "./authorization-audit";
+export { authorization_audit_service, AuthorizationAuditService } from "./authorization-audit";
 export { validate_session } from "./session-middleware";
-
