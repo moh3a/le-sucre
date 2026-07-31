@@ -85,6 +85,11 @@ export function CategoryFormDialog({
                       parent_id: category.parent_id,
                       sort_order: category.sort_order,
                       is_active: category.is_active,
+                      image_url: category.image_url,
+                      banner_url: category.banner_url,
+                      meta_title: category.meta_title,
+                      meta_description: category.meta_description,
+                      is_featured: category.is_featured,
                     }
                   : undefined
               }

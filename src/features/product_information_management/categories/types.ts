@@ -8,6 +8,11 @@ export type CategoryRecord = {
   depth: number;
   sort_order: number;
   is_active: boolean;
+  image_url: string | null;
+  banner_url: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
 };

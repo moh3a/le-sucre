@@ -1,5 +1,6 @@
 import { LayoutGrid, Sparkles, ArrowRight, Tag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { CategoryGrid } from "@/features/product_information_management/categories/components/storefront/category-grid";
@@ -36,7 +37,8 @@ export default async function CategoriesPage({ params }: Props) {
   }
 
   const totalCategories = tree.length;
-  const featuredCategories = tree.slice(0, 4);
+  const featuredByFlag = tree.filter((category) => category.is_featured);
+  const featuredCategories = (featuredByFlag.length > 0 ? featuredByFlag : tree).slice(0, 4);
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
@@ -82,9 +84,20 @@ export default async function CategoriesPage({ params }: Props) {
               <Link key={category.id} href={`/c/${category.slug}`} className="group block">
                 <Card className="h-full transition-shadow hover:shadow-md">
                   <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-                    <div className="bg-lemon-lime/20 group-hover:bg-lemon-lime/30 flex size-16 items-center justify-center rounded-full transition-colors">
-                      <LayoutGrid className="text-olive-leaf size-6" />
-                    </div>
+                    {category.image_url ? (
+                      <Image
+                        src={category.image_url}
+                        alt={category.name}
+                        width={64}
+                        height={64}
+                        className="bg-lemon-lime/20 group-hover:bg-lemon-lime/30 size-16 rounded-full object-cover transition-transform group-hover:scale-105"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="bg-lemon-lime/20 group-hover:bg-lemon-lime/30 flex size-16 items-center justify-center rounded-full transition-colors">
+                        <LayoutGrid className="text-olive-leaf size-6" />
+                      </div>
+                    )}
                     <div className="space-y-1">
                       <p className="text-sm font-semibold">{category.name}</p>
                       {category.children.length > 0 && (
@@ -111,13 +124,13 @@ export default async function CategoriesPage({ params }: Props) {
             name: cat.name,
             slug: cat.slug,
             description: cat.description,
-            image_url: null,
+            image_url: cat.image_url,
             children: cat.children.map((c) => ({
               id: c.id,
               name: c.name,
               slug: c.slug,
               description: c.description ?? null,
-              image_url: null,
+              image_url: c.image_url,
               children: [],
             })),
           }))}

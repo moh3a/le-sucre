@@ -2,8 +2,9 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { Calendar, Hash, MoreHorizontal, Pencil, Text, ToggleLeft, Trash2 } from "lucide-react";
+import { Calendar, Hash, Image as ImageIcon, MoreHorizontal, Pencil, Star, Text, ToggleLeft, Trash2 } from "lucide-react";
 import * as React from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -158,6 +159,28 @@ export function CategoryTable() {
         enableSorting: false,
       },
       {
+        id: "image",
+        accessorKey: "image_url",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("image")} />,
+        cell: ({ row }) => {
+          const url = row.getValue("image_url") as string | null;
+          if (!url) return <span className="text-muted-foreground">—</span>;
+          return (
+            <Image
+              src={url}
+              alt=""
+              width={40}
+              height={40}
+              className="size-10 rounded-md object-cover"
+              unoptimized
+            />
+          );
+        },
+        meta: { label: t("image"), icon: ImageIcon },
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
         id: "slug",
         accessorKey: "slug",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("slug")} />,
@@ -232,6 +255,34 @@ export function CategoryTable() {
         enableSorting: false,
       },
       {
+        id: "is_featured",
+        accessorKey: "is_featured",
+        header: ({ column }) => <DataTableColumnHeader column={column} label={t("featured")} />,
+        cell: ({ row }) => {
+          const featured = row.getValue("is_featured") as boolean;
+          return featured ? (
+            <Badge variant="default">
+              <Star className="size-3" />
+              {t("featured")}
+            </Badge>
+          ) : (
+            <Badge variant="secondary">{t("not_featured")}</Badge>
+          );
+        },
+        meta: {
+          label: t("featured"),
+          variant: "select",
+          icon: Star,
+          options: [
+            { label: t("featured"), value: "true" },
+            { label: t("not_featured"), value: "false" },
+          ],
+        },
+        enableColumnFilter: true,
+        enableSorting: false,
+        enableHiding: true,
+      },
+      {
         id: "created_at",
         accessorKey: "created_at",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_at")} />,
@@ -272,16 +323,21 @@ export function CategoryTable() {
   const [per_page] = useQueryState("catPerPage", parseAsInteger.withDefault(10));
   const [name_filter] = useQueryState("name", parseAsString);
   const [active_filter] = useQueryState("is_active", parseAsArrayOf(parseAsString, ","));
+  const [featured_filter] = useQueryState("is_featured", parseAsArrayOf(parseAsString, ","));
 
   const search = name_filter?.trim() || undefined;
   const active_value = active_filter?.[0];
   const is_active = active_value === "true" ? true : active_value === "false" ? false : undefined;
+  const featured_value = featured_filter?.[0];
+  const is_featured =
+    featured_value === "true" ? true : featured_value === "false" ? false : undefined;
 
   const query = trpc.categories.list.useQuery({
     page,
     limit: per_page,
     search,
     is_active,
+    is_featured,
   });
   const { data, isLoading, isFetching } = query;
 

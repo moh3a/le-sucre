@@ -23,6 +23,7 @@ export class CategoryRepository {
   async list_flat(params: {
     parent_id?: string | null;
     is_active?: boolean;
+    is_featured?: boolean;
     search?: string;
     page: number;
     limit: number;
@@ -38,6 +39,8 @@ export class CategoryRepository {
       );
     }
     if (params.is_active !== undefined) filters.push(eq(categories.is_active, params.is_active));
+    if (params.is_featured !== undefined)
+      filters.push(eq(categories.is_featured, params.is_featured));
     if (params.search) {
       const q = `%${params.search}%`;
       filters.push(or(like(categories.name, q), like(categories.slug, q))!);

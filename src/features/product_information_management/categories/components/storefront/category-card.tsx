@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -30,13 +31,36 @@ export function CategoryCard({ category, isLoading, error, variant = "grid" }: C
       {category && variant === "home" ? (
         <Link href={`/c/${category.slug}`} className="group block">
           <Card className="group h-full cursor-pointer overflow-hidden p-4 text-center transition-shadow hover:shadow-md">
-            <div className="bg-muted mx-auto mb-3 h-20 w-20 rounded-full transition-transform group-hover:scale-105" />
+            {category.image_url ? (
+              <Image
+                src={category.image_url}
+                alt={category.name}
+                width={80}
+                height={80}
+                className="bg-muted mx-auto mb-3 h-20 w-20 rounded-full object-cover transition-transform group-hover:scale-105"
+                unoptimized
+              />
+            ) : (
+              <div className="bg-muted mx-auto mb-3 h-20 w-20 rounded-full transition-transform group-hover:scale-105" />
+            )}
             <p className="text-sm font-medium">{category.name}</p>
           </Card>
         </Link>
       ) : category ? (
         <Link href={`/c/${category.slug}`} className="group block h-full">
-          <Card className="h-full transition-shadow hover:shadow-md">
+          <Card className="h-full overflow-hidden transition-shadow hover:shadow-md">
+            {category.image_url && (
+              <div className="relative h-32 w-full overflow-hidden">
+                <Image
+                  src={category.image_url}
+                  alt={category.name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform group-hover:scale-105"
+                  unoptimized
+                />
+              </div>
+            )}
             <CardHeader>
               <CardTitle className="text-xl">{category.name}</CardTitle>
               {category.description && (

@@ -349,7 +349,13 @@
     "create_category": "Créer une catégorie",
     "search_subcategory_placeholder": "Rechercher une sous-catégorie…",
     "no_subcategories": "Aucune sous-catégorie trouvée.",
-    "create_subcategory": "Créer une sous-catégorie"
+    "create_subcategory": "Créer une sous-catégorie",
+    "image": "Image",
+    "banner": "Bannière",
+    "meta_title": "Meta titre",
+    "meta_description": "Meta description",
+    "featured": "Mise en avant",
+    "not_featured": "Non mise en avant"
   },
   "products": {
     "title": "Produits & Publication",

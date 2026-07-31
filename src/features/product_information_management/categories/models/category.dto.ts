@@ -13,6 +13,11 @@ export const create_category_dto = z.object({
   parent_id: z.string().length(24).nullable().optional(),
   sort_order: z.number().int().min(0).default(0),
   is_active: z.boolean().default(true),
+  image_url: z.string().url().max(2048).optional().nullable(),
+  banner_url: z.string().url().max(2048).optional().nullable(),
+  meta_title: z.string().max(255).optional().nullable(),
+  meta_description: z.string().max(5000).optional().nullable(),
+  is_featured: z.boolean().default(false),
 });
 
 export const update_category_dto = create_category_dto.partial().extend({
@@ -27,6 +32,7 @@ export const move_category_dto = z.object({
 export const list_categories_dto = z.object({
   parent_id: z.string().length(24).nullable().optional(),
   is_active: z.boolean().optional(),
+  is_featured: z.boolean().optional(),
   search: z.string().max(100).optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),

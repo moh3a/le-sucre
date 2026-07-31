@@ -84,6 +84,7 @@ export class CategoryService {
   async list_flat(params: {
     parent_id?: string | null;
     is_active?: boolean;
+    is_featured?: boolean;
     search?: string;
     page: number;
     limit: number;
@@ -152,6 +153,11 @@ export class CategoryService {
         depth,
         sort_order: input.sort_order ?? 0,
         is_active: input.is_active ?? true,
+        image_url: input.image_url ?? null,
+        banner_url: input.banner_url ?? null,
+        meta_title: input.meta_title ?? null,
+        meta_description: input.meta_description ?? null,
+        is_featured: input.is_featured ?? false,
       }),
     );
     if (insert_err) {
@@ -203,6 +209,11 @@ export class CategoryService {
         ...(input.description !== undefined && { description: input.description }),
         ...(input.sort_order !== undefined && { sort_order: input.sort_order }),
         ...(input.is_active !== undefined && { is_active: input.is_active }),
+        ...(input.image_url !== undefined && { image_url: input.image_url }),
+        ...(input.banner_url !== undefined && { banner_url: input.banner_url }),
+        ...(input.meta_title !== undefined && { meta_title: input.meta_title }),
+        ...(input.meta_description !== undefined && { meta_description: input.meta_description }),
+        ...(input.is_featured !== undefined && { is_featured: input.is_featured }),
       }),
     );
     if (update_err) {

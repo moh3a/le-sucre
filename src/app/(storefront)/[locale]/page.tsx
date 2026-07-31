@@ -39,7 +39,7 @@ function categoryNodeToItem(node: CategoryTreeNode): CategoryItem {
     name: node.name,
     slug: node.slug,
     description: node.description,
-    image_url: null,
+    image_url: node.image_url,
     children: node.children.map(categoryNodeToItem),
   };
 }
@@ -152,7 +152,12 @@ async function getHomepageData(locale: string) {
 
   const categories =
     categoriesResult.status === "fulfilled"
-      ? categoriesResult.value.slice(0, 5).map(categoryNodeToItem)
+      ? (() => {
+          const featuredByFlag = categoriesResult.value.filter((c) => c.is_featured);
+          const selected =
+            featuredByFlag.length > 0 ? featuredByFlag : categoriesResult.value;
+          return selected.slice(0, 5).map(categoryNodeToItem);
+        })()
       : [];
 
   const trending: StorefrontProduct[] =

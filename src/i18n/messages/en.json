@@ -319,7 +319,13 @@
     "tab_list": "List",
     "category_created": "Category created successfully",
     "category_updated": "Category updated successfully",
-    "category_deleted": "Category deleted successfully"
+    "category_deleted": "Category deleted successfully",
+    "image": "Image",
+    "banner": "Banner",
+    "meta_title": "Meta title",
+    "meta_description": "Meta description",
+    "featured": "Featured",
+    "not_featured": "Not featured"
   },
   "products": {
     "title": "Products & Publishing",
