@@ -1,4 +1,4 @@
-import { MediaLibraryPageClient } from "@/features/media_library/components/media-library-page-client";
+import { MediaLibraryPageClient } from "@/features/system/media_library/components/media-library-page-client";
 
 export const metadata = { title: "Médiathèque" };
 

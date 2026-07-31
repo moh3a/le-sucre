@@ -4,13 +4,7 @@ import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import {
-  CheckCircle2,
-  Download,
-  MoreHorizontal,
-  Play,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Download, MoreHorizontal, Play, XCircle } from "lucide-react";
 import Link from "next/link";
 
 import { DataTable } from "@/features/data-table/components/data-table";
@@ -106,7 +100,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -136,25 +133,31 @@ function FacetedFilter({
 export function TasksTable() {
   const t = useTranslations("tasks");
 
-  const STATUS_LABELS: Record<string, string> = {
-    pending: t("pending_label"),
-    in_progress: t("in_progress_label"),
-    completed: t("completed_label"),
-    cancelled: t("cancelled_label"),
-  };
+  const STATUS_LABELS: Record<string, string> = useMemo(
+    () => ({
+      pending: t("pending_label"),
+      in_progress: t("in_progress_label"),
+      completed: t("completed_label"),
+      cancelled: t("cancelled_label"),
+    }),
+    [t],
+  );
 
   const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
     label,
     value,
   }));
 
-  const TYPE_LABELS: Record<string, string> = {
-    order_follow_up: t("type_order_follow_up"),
-    customer_follow_up: t("type_customer_follow_up"),
-    inventory_review: t("type_inventory_review"),
-    campaign_review: t("type_campaign_review"),
-    general: t("type_general"),
-  };
+  const TYPE_LABELS: Record<string, string> = useMemo(
+    () => ({
+      order_follow_up: t("type_order_follow_up"),
+      customer_follow_up: t("type_customer_follow_up"),
+      inventory_review: t("type_inventory_review"),
+      campaign_review: t("type_campaign_review"),
+      general: t("type_general"),
+    }),
+    [t],
+  );
 
   const [page] = useQueryState("tkPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("tkPerPage", parseAsInteger.withDefault(20));
@@ -201,7 +204,7 @@ export function TasksTable() {
         accessorKey: "title",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("title_column")} />,
         cell: ({ row }) => (
-          <span className="max-w-[240px] truncate font-medium text-sm">{row.original.title}</span>
+          <span className="max-w-60 truncate text-sm font-medium">{row.original.title}</span>
         ),
       },
       {
@@ -209,15 +212,22 @@ export function TasksTable() {
         accessorKey: "task_type",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => (
-          <span className="text-sm">{TYPE_LABELS[row.original.task_type] ?? row.original.task_type}</span>
+          <span className="text-sm">
+            {TYPE_LABELS[row.original.task_type] ?? row.original.task_type}
+          </span>
         ),
       },
       {
         id: "priority",
         accessorKey: "priority",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("priority_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("priority_column")} />
+        ),
         cell: ({ row }) => (
-          <Badge variant={PRIORITY_STYLES[row.original.priority] ?? "outline"} className="uppercase text-[10px]">
+          <Badge
+            variant={PRIORITY_STYLES[row.original.priority] ?? "outline"}
+            className="text-[10px] uppercase"
+          >
             {row.original.priority}
           </Badge>
         ),
@@ -225,7 +235,9 @@ export function TasksTable() {
       {
         id: "assigned_to_user_id",
         accessorKey: "assigned_to_user_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("assigned_to_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("assigned_to_column")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.assigned_to_user_id
@@ -237,7 +249,9 @@ export function TasksTable() {
       {
         id: "status",
         accessorKey: "status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("status_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("status_column")} />
+        ),
         cell: ({ row }) => (
           <Badge variant={STATUS_STYLES[row.original.status] ?? "outline"}>
             {STATUS_LABELS[row.original.status] ?? row.original.status}
@@ -247,14 +261,22 @@ export function TasksTable() {
       {
         id: "due_at",
         accessorKey: "due_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("due_date_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("due_date_column")} />
+        ),
         cell: ({ row }) =>
-          row.original.due_at ? formatDate(row.original.due_at, { month: "short" }) : <span className="text-muted-foreground">—</span>,
+          row.original.due_at ? (
+            formatDate(row.original.due_at, { month: "short" })
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          ),
       },
       {
         id: "created_at",
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("created_column")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("created_column")} />
+        ),
         cell: ({ row }) => formatDate(row.original.created_at, { month: "short" }),
       },
       {
@@ -310,7 +332,7 @@ export function TasksTable() {
         },
       },
     ],
-    [startMutation, completeMutation, cancelMutation],
+    [TYPE_LABELS, STATUS_LABELS, startMutation, completeMutation, cancelMutation, t],
   );
 
   const { data, isLoading } = trpc.operations.adminTaskListAll.useQuery({
@@ -335,40 +357,41 @@ export function TasksTable() {
     <QueryGuard
       query={{ isLoading }}
       mutation={{
-        isPending: startMutation.isPending || completeMutation.isPending || cancelMutation.isPending,
+        isPending:
+          startMutation.isPending || completeMutation.isPending || cancelMutation.isPending,
         error: startMutation.error ?? completeMutation.error ?? cancelMutation.error,
       }}
       loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}
     >
       <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <FacetedFilter
-          title={t("status_title")}
-          options={STATUS_OPTIONS}
-          value={status ?? undefined}
-          onChange={(val) => setStatus(val)}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center gap-2 border-t p-2">
-          <Badge variant="outline">
-            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
-          </Badge>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href={`/api/admin/tasks/export?${new URLSearchParams({
-                ...(status ? { status } : {}),
-              })}`}
-              download="tasks.csv"
-            >
-              <Download className="mr-1 h-4 w-4" />
-              {t("export")}
-            </a>
-          </Button>
-        </div>
-      )}
-    </DataTable>
+        <DataTableAdvancedToolbar table={table}>
+          <FacetedFilter
+            title={t("status_title")}
+            options={STATUS_OPTIONS}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/tasks/export?${new URLSearchParams({
+                  ...(status ? { status } : {}),
+                })}`}
+                download="tasks.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                {t("export")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
     </QueryGuard>
   );
 }

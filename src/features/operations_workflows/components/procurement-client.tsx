@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { SupplierCombobox } from "./supplier-combobox";
-import { WarehouseCombobox } from "@/features/inventory_management_system/warehouses/components/warehouse-combobox";
+import { WarehouseCombobox } from "@/features/fulfillment_management_system/warehouses/components/warehouse-combobox";
 import { ProductCombobox } from "@/features/product_information_management/products/components/product-combobox";
 import { DataTable } from "@/features/data-table/components/data-table";
 import { DataTableAdvancedToolbar } from "@/features/data-table/components/data-table-advanced-toolbar";

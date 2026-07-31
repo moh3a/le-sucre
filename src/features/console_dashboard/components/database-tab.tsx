@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { extract_error_message } from "@/lib/error-detection";
 import {
@@ -128,7 +134,7 @@ function SqlConsole() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handle_keydown}
             placeholder="SELECT * FROM users LIMIT 10"
-            className="border-input bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-[120px] w-full rounded-xl border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-[3px]"
+            className="border-input bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-30 w-full rounded-xl border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-[3px]"
             spellCheck={false}
           />
         </div>
@@ -145,7 +151,7 @@ function SqlConsole() {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3">
+          <div className="border-destructive/20 bg-destructive/5 rounded-xl border p-3">
             <p className="text-destructive text-sm">{error}</p>
           </div>
         )}
@@ -158,9 +164,7 @@ function SqlConsole() {
                   ? `${result.rows.length} ${t("db_rows_returned")}`
                   : `${result.rows_affected} ${t("db_rows_affected")}`}
               </span>
-              <span className="text-muted-foreground">
-                {result.duration_ms}ms
-              </span>
+              <span className="text-muted-foreground">{result.duration_ms}ms</span>
             </div>
             {result.columns.length > 0 && (
               <div className="overflow-x-auto rounded-xl border">
@@ -335,15 +339,29 @@ function ImportSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
-          <Button variant={mode === "sql" ? "default" : "outline"} size="sm" onClick={() => setMode("sql")}>
+          <Button
+            variant={mode === "sql" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMode("sql")}
+          >
             SQL
           </Button>
-          <Button variant={mode === "csv" ? "default" : "outline"} size="sm" onClick={() => setMode("csv")}>
+          <Button
+            variant={mode === "csv" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMode("csv")}
+          >
             CSV
           </Button>
         </div>
 
-        <input ref={fileRef} type="file" accept={mode === "sql" ? ".sql,.txt" : ".csv"} onChange={handle_file} className="hidden" />
+        <input
+          ref={fileRef}
+          type="file"
+          accept={mode === "sql" ? ".sql,.txt" : ".csv"}
+          onChange={handle_file}
+          className="hidden"
+        />
         <Button variant="outline" onClick={() => fileRef.current?.click()}>
           <FileText className="size-4" data-icon="inline-start" />
           {t("db_upload_file")}
@@ -356,7 +374,7 @@ function ImportSection() {
               value={sqlContent}
               onChange={(e) => setSqlContent(e.target.value)}
               placeholder="CREATE TABLE ... ; INSERT INTO ... ;"
-              className="border-input bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-[160px] w-full rounded-xl border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-[3px]"
+              className="border-input bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-40 w-full rounded-xl border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-[3px]"
               spellCheck={false}
             />
             <Button
@@ -395,7 +413,7 @@ function ImportSection() {
                 value={csvContent}
                 onChange={(e) => setCsvContent(e.target.value)}
                 placeholder="col1,col2,col3&#10;val1,val2,val3"
-                className="border-input bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-[120px] w-full rounded-xl border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-[3px]"
+                className="border-input bg-input/30 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-30 w-full rounded-xl border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-[3px]"
                 spellCheck={false}
               />
             </div>
@@ -506,19 +524,26 @@ function HistorySection() {
       case "partial":
         return <AlertTriangle className="size-3.5 text-yellow-500" />;
       default:
-        return <Clock className="size-3.5 text-muted-foreground" />;
+        return <Clock className="text-muted-foreground size-3.5" />;
     }
   };
 
   const type_badge = (type: string) => {
-    const variants: Record<string, "default" | "secondary" | "outline" | "destructive" | "success" | "warning" | "accent"> = {
+    const variants: Record<
+      string,
+      "default" | "secondary" | "outline" | "destructive" | "success" | "warning" | "accent"
+    > = {
       query: "default",
       export: "success",
       import_sql: "warning",
       import_csv: "warning",
       job: "accent",
     };
-    return <Badge variant={variants[type] ?? "secondary"} className="text-xs">{type}</Badge>;
+    return (
+      <Badge variant={variants[type] ?? "secondary"} className="text-xs">
+        {type}
+      </Badge>
+    );
   };
 
   return (
@@ -554,7 +579,7 @@ function HistorySection() {
                 {status_icon(entry.status)}
                 {type_badge(entry.operation_type)}
                 <span className="text-muted-foreground min-w-0 flex-1 truncate font-mono text-xs">
-                  {entry.query ? entry.query.slice(0, 80) : entry.table_name ?? "—"}
+                  {entry.query ? entry.query.slice(0, 80) : (entry.table_name ?? "—")}
                 </span>
                 <span className="text-muted-foreground shrink-0 text-xs">
                   {entry.duration_ms ? `${entry.duration_ms}ms` : ""}

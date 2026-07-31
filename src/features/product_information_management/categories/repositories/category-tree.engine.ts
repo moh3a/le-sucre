@@ -3,7 +3,7 @@ import { eq, inArray, like, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { categories } from "../schema";
 import { CATEGORY_ERROR } from "../constants/error-codes";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import type { CategoryRecord, CategoryTreeNode } from "../types";
 
 const MAX_DEPTH = 50;

@@ -4,20 +4,20 @@ import { run_worker_loop } from "@/lib/queue/job-runner";
 import { logger } from "@/lib/logger";
 
 import { soft_delete_cleanup_service } from "@/lib/db/soft-delete-cleanup.service";
-import { shipping_job_runner_service } from "@/features/shipping_management_system/services/shipping-job-runner.service";
-import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
-import { payment_retry_service } from "@/features/payment_management_system/services/payment-retry.service";
-import { campaign_scheduler_repository } from "@/features/campaign_management_system/repositories/campaign_scheduler.repository";
-import { campaign_repository } from "@/features/campaign_management_system/repositories/campaign.repository";
-import { campaign_cache } from "@/features/campaign_management_system/services/campaign_cache.service";
+import { shipping_job_runner_service } from "@/features/fulfillment_management_system/shipping/services/shipping-job-runner.service";
+import { reservation_service } from "@/features/fulfillment_management_system/inventory/services/reservation.service";
+import { payment_retry_service } from "@/features/payment_management_system/payment/services/payment-retry.service";
+import { campaign_scheduler_repository } from "@/features/marketing/campaign/repositories/campaign_scheduler.repository";
+import { campaign_repository } from "@/features/marketing/campaign/repositories/campaign.repository";
+import { campaign_cache } from "@/features/marketing/campaign/services/campaign_cache.service";
 import {
   CAMPAIGN_JOB_TYPE,
   CAMPAIGN_STATUS,
-} from "@/features/campaign_management_system/constants/campaign_types";
-import { forecast_job_runner_service } from "@/features/inventory_management_system/forecasting/services/forecast-job-runner.service";
+} from "@/features/marketing/campaign/constants/campaign_types";
+import { forecast_job_runner_service } from "@/features/fulfillment_management_system/forecasting/services/forecast-job-runner.service";
 import { index_job_runner_service } from "@/features/product_information_management/recommendations/services/index-job-runner.service";
-import { aggregation_job_runner_service } from "@/features/analytics_management_system/services/aggregation-job-runner.service";
-import { cart_abandonment_service } from "@/features/analytics_management_system/services/cart-abandonment.service";
+import { aggregation_job_runner_service } from "@/features/marketing/analytics/services/aggregation-job-runner.service";
+import { cart_abandonment_service } from "@/features/marketing/analytics/services/cart-abandonment.service";
 import { promotion_job_runner_service } from "@/features/order_management_system/promotions/services/promotion-job-runner.service";
 import { preorder_fulfillment_service } from "@/features/order_management_system/preorders/services/preorder-fulfillment.service";
 

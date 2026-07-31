@@ -2,7 +2,7 @@ import "server-only";
 
 import type { z } from "zod";
 
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { PROMOTION_ERROR } from "../constants/error-codes";
 import { promotion_repository } from "../repositories/promotion.repository";
 import { promo_code_repository } from "../repositories/promo-code.repository";

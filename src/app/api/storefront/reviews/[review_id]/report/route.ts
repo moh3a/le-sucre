@@ -1,6 +1,6 @@
 import { json_ok, json_error } from "@/lib/http";
 import { get_storefront_identity } from "@/features/order_management_system/carts/cart-context.helper";
-import { report_service } from "@/features/product_reviews_management/services/report.service";
+import { report_service } from "@/features/product_information_management/reviews/services/report.service";
 import { z } from "zod";
 
 const report_review_dto = z.object({

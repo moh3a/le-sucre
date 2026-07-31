@@ -1,6 +1,6 @@
 import { json_ok, json_error } from "@/lib/http";
 import { get_storefront_identity } from "@/features/order_management_system/carts/cart-context.helper";
-import { helpful_service } from "@/features/product_reviews_management/services/helpful.service";
+import { helpful_service } from "@/features/product_information_management/reviews/services/helpful.service";
 
 export async function POST(req: Request, { params }: { params: Promise<{ review_id: string }> }) {
   try {

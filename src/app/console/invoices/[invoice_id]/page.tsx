@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
-import { InvoiceDetailClient } from "@/features/billing_and_finance_system/components/invoice_detail_client";
+import { InvoiceDetailClient } from "@/features/payment_management_system/billing/components/invoice_detail_client";
 
 type Props = { params: Promise<{ invoice_id: string }> };
 

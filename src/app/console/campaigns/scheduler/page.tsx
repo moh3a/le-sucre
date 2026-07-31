@@ -1,4 +1,4 @@
-import { SchedulerClient } from "@/features/campaign_management_system/components/scheduler-client";
+import { SchedulerClient } from "@/features/marketing/campaign/components/scheduler-client";
 
 export const metadata = { title: "Campaign Scheduler" };
 

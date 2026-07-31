@@ -1,4 +1,4 @@
-import { FlashSalesClient } from "@/features/campaign_management_system/components/flash-sales-client";
+import { FlashSalesClient } from "@/features/marketing/campaign/components/flash-sales-client";
 
 export const metadata = { title: "Flash Sales" };
 

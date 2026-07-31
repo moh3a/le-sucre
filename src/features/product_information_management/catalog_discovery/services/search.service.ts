@@ -20,7 +20,7 @@ import { search_repository } from "../repositories/search.repository";
 import { search_cache_service, CATALOG_CACHE, CATALOG_CACHE_TTL } from "./search-cache.service";
 import type { CatalogFacets } from "../types";
 import { effective_list_price_sql } from "../engines/sort.engine";
-import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
+import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 import { suggestions_service } from "./suggestions.service";
 
 export class SearchService {

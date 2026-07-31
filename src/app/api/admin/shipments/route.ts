@@ -1,6 +1,6 @@
 import { admin_route } from "@/lib/api/admin-handler";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
-import { shipping_repository } from "@/features/shipping_management_system/repository";
+import { shipping_repository } from "@/features/fulfillment_management_system/shipping/repository";
 
 export const GET = admin_route(async ({ req }) => {
   const url = new URL(req.url);

@@ -1,16 +1,16 @@
 import "server-only";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { CUSTOMER_ERROR } from "../constants/error-codes";
 import { customer_repository } from "../repositories/customer.repository";
 import { cart_repository } from "../../carts/repository";
 import { order_repository } from "../../orders/repositories/order.repository";
-import { review_repository } from "@/features/product_reviews_management/repositories/review.repository";
+import { review_repository } from "@/features/product_information_management/reviews/repositories/review.repository";
 import { return_repository } from "@/features/order_management_system/return_replacement/repositories/return.repository";
 import { promotion_repository } from "@/features/order_management_system/promotions/repositories/promotion.repository";
-import { WishlistRepository } from "@/features/wishlist_management_system/repositories/wishlist.repository";
-import { WishlistItemRepository } from "@/features/wishlist_management_system/repositories/wishlist_item.repository";
-import { FavoritesRepository } from "@/features/wishlist_management_system/repositories/favorites.repository";
-import { SaveForLaterRepository } from "@/features/wishlist_management_system/repositories/save_for_later.repository";
+import { WishlistRepository } from "@/features/order_management_system/customers/wishlist/repositories/wishlist.repository";
+import { WishlistItemRepository } from "@/features/order_management_system/customers/wishlist/repositories/wishlist_item.repository";
+import { FavoritesRepository } from "@/features/order_management_system/customers/wishlist/repositories/favorites.repository";
+import { SaveForLaterRepository } from "@/features/order_management_system/customers/wishlist/repositories/save_for_later.repository";
 
 // Segmentation thresholds
 const VIP_THRESHOLD = 50_000; // DZD — total_spent > 50 000 → VIP

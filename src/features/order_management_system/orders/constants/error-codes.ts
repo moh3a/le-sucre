@@ -1,4 +1,4 @@
-import type { ErrorDef } from "@/features/inventory_management_system/shared/error-codes";
+import type { ErrorDef } from "@/features/fulfillment_management_system/shared/error-codes";
 
 export const ORDER_ERROR = {
   NOT_FOUND: {

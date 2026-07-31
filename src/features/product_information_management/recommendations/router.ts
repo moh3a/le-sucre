@@ -21,7 +21,7 @@ import { product_service } from "@/features/product_information_management/produ
 import { recommendation_repository } from "./repositories/recommendation.repository";
 import { indexing_service } from "./services/indexing.service";
 import { invalidate_recommendations_for_product } from "./helpers/invalidate-recommendations.helper";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { RECOMMENDATION_ERROR, RECOMMENDATION_INDEX_ERROR } from "./constants/error-codes";
 
 export const recommendations_router = create_trpc_router({

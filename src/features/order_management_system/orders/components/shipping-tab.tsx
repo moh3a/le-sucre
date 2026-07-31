@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ShipmentPanel } from "@/features/shipping_management_system/components/shipment-panel";
+import { ShipmentPanel } from "@/features/fulfillment_management_system/shipping/components/shipment-panel";
 
 type ShippingTabProps = {
   order_id: string;

@@ -166,7 +166,7 @@ export function DataTableSortList<TData>({
         <PopoverContent
           aria-labelledby={labelId}
           aria-describedby={descriptionId}
-          className="flex w-full max-w-(--radix-popover-content-available-width) flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-(--radix-popover-content-available-width) flex-col gap-3.5 p-4 sm:min-w-95"
           {...props}
         >
           <div className="flex flex-col gap-1">
@@ -177,14 +177,12 @@ export function DataTableSortList<TData>({
               id={descriptionId}
               className={cn("text-muted-foreground text-sm", sorting.length > 0 && "sr-only")}
             >
-              {sorting.length > 0
-                ? t("modify_sorting")
-                : t("add_sorting")}
+              {sorting.length > 0 ? t("modify_sorting") : t("add_sorting")}
             </p>
           </div>
           {sorting.length > 0 && (
             <SortableContent asChild>
-              <div role="list" className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
+              <div role="list" className="flex max-h-75 flex-col gap-2 overflow-y-auto p-1">
                 {sorting.map((sort) => (
                   <DataTableSortItem
                     key={sort.id}
@@ -219,7 +217,7 @@ export function DataTableSortList<TData>({
       </Popover>
       <SortableOverlay>
         <div className="flex items-center gap-2">
-          <div className="bg-primary/10 h-8 w-[180px] rounded-sm" />
+          <div className="bg-primary/10 h-8 w-45 rounded-sm" />
           <div className="bg-primary/10 h-8 w-24 rounded-sm" />
           <div className="bg-primary/10 size-8 shrink-0 rounded-sm" />
           <div className="bg-primary/10 size-8 shrink-0 rounded-sm" />

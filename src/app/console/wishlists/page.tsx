@@ -1,4 +1,4 @@
-import { AdminWishlistAnalyticsPageClient } from "@/features/wishlist_management_system/components/admin-wishlist-analytics-page-client";
+import { AdminWishlistAnalyticsPageClient } from "@/features/order_management_system/customers/wishlist/components/admin-wishlist-analytics-page-client";
 
 export const metadata = { title: "Listes de souhaits" };
 

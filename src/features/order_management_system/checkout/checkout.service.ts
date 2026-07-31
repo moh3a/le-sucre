@@ -4,13 +4,13 @@ import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
 import { db } from "@/lib/db";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { CHECKOUT_ERROR } from "./constants/error-codes";
 import { carts, cart_items } from "../schema";
 import { checkout_engine } from "./checkout.engine";
 import { order_service } from "../orders/services/order.service";
 import type { checkout_preview_dto, place_order_dto } from "../orders/models/order.dto";
-import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
+import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 
 export class CheckoutService {
   async preview(

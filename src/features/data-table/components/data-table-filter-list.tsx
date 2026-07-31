@@ -59,7 +59,11 @@ import { formatDate } from "@/lib/format";
 import { generateId } from "@/lib/id";
 import { getFiltersStateParser } from "@/features/data-table/lib/parsers";
 import { cn } from "@/lib/utils";
-import type { ExtendedColumnFilter, FilterOperator, JoinOperator } from "@/features/data-table/types";
+import type {
+  ExtendedColumnFilter,
+  FilterOperator,
+  JoinOperator,
+} from "@/features/data-table/types";
 
 const DEBOUNCE_MS = 300;
 const THROTTLE_MS = 50;
@@ -221,7 +225,7 @@ export function DataTableFilterList<TData>({
         <PopoverContent
           aria-describedby={descriptionId}
           aria-labelledby={labelId}
-          className="flex w-full max-w-(--radix-popover-content-available-width) flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-(--radix-popover-content-available-width) flex-col gap-3.5 p-4 sm:min-w-95"
           {...props}
         >
           <div className="flex flex-col gap-1">
@@ -232,14 +236,12 @@ export function DataTableFilterList<TData>({
               id={descriptionId}
               className={cn("text-muted-foreground text-sm", filters.length > 0 && "sr-only")}
             >
-              {filters.length > 0
-                ? t("modify_filters")
-                : t("add_filters")}
+              {filters.length > 0 ? t("modify_filters") : t("add_filters")}
             </p>
           </div>
           {filters.length > 0 ? (
             <SortableContent asChild>
-              <div role="list" className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
+              <div role="list" className="flex max-h-75 flex-col gap-2 overflow-y-auto p-1">
                 {filters.map((filter, index) => (
                   <DataTableFilterItem<TData>
                     key={filter.filterId}
@@ -270,7 +272,7 @@ export function DataTableFilterList<TData>({
       </Popover>
       <SortableOverlay>
         <div className="flex items-center gap-2">
-          <div className="bg-primary/10 h-8 min-w-[72px] rounded-sm" />
+          <div className="bg-primary/10 h-8 min-w-18 rounded-sm" />
           <div className="bg-primary/10 h-8 w-32 rounded-sm" />
           <div className="bg-primary/10 h-8 w-32 rounded-sm" />
           <div className="bg-primary/10 h-8 min-w-36 flex-1 rounded-sm" />
@@ -351,7 +353,7 @@ function DataTableFilterItem<TData>({
         className="flex items-center gap-2"
         onKeyDown={onItemKeyDown}
       >
-        <div className="min-w-[72px] text-center">
+        <div className="min-w-18 text-center">
           {index === 0 ? (
             <span className="text-muted-foreground text-sm">{t("where")}</span>
           ) : index === 1 ? (
@@ -464,7 +466,7 @@ function DataTableFilterItem<TData>({
           </SelectContent>
         </Select>
         <div className="max-w-60 min-w-36 flex-1">
-            {onFilterInputRender({
+          {onFilterInputRender({
             filter,
             inputId,
             column,
@@ -631,18 +633,23 @@ function onFilterInputRender<TData>({
             <Button
               id={inputId}
               aria-controls={inputListboxId}
-              aria-label={t("select_options", { label: columnMeta?.label ?? "", s: multiple ? "s" : "" })}
+              aria-label={t("select_options", {
+                label: columnMeta?.label ?? "",
+                s: multiple ? "s" : "",
+              })}
               variant="outline"
               size="sm"
               className="w-full rounded font-normal"
             >
               <FacetedBadgeList
                 options={columnMeta?.options}
-                placeholder={columnMeta?.placeholder ?? t("select_options", { s: multiple ? "s" : "" })}
+                placeholder={
+                  columnMeta?.placeholder ?? t("select_options", { s: multiple ? "s" : "" })
+                }
               />
             </Button>
           </FacetedTrigger>
-          <FacetedContent id={inputListboxId} className="w-[200px]">
+          <FacetedContent id={inputListboxId} className="w-50">
             <FacetedInput
               aria-label={t("search_options", { label: columnMeta?.label ?? "" })}
               placeholder={columnMeta?.placeholder ?? t("search_options")}

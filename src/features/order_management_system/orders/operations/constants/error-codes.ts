@@ -1,4 +1,4 @@
-import type { ErrorDef } from "@/features/inventory_management_system/shared/error-codes";
+import type { ErrorDef } from "@/features/fulfillment_management_system/shared/error-codes";
 
 export const ORDER_OPERATIONS_ERROR = {
   NOT_FOUND: { code: "OPERATIONS_NOT_FOUND", status: 404, message: { fr: "Ressource opérationnelle introuvable", en: "Operations resource not found", ar: "لم يتم العثور على مورد العمليات" } },

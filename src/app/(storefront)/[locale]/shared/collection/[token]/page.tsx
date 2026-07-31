@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { SharedCollectionPageClient } from "@/features/wishlist_management_system/components/shared-collection-page-client";
+import { SharedCollectionPageClient } from "@/features/order_management_system/customers/wishlist/components/shared-collection-page-client";
 
 type Props = {
   params: Promise<{ locale: string; token: string }>;

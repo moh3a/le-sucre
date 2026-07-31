@@ -1,5 +1,5 @@
 import "server-only";
-import { ip_blacklist_service } from "@/features/ip_blacklist/services/blacklist.service";
+import { ip_blacklist_service } from "@/features/system/ip_blacklist/services/blacklist.service";
 import { ForbiddenError } from "@/lib/error_handling";
 
 export function extract_client_ip(reqOrHeaders: Request | Headers): string {
@@ -35,4 +35,4 @@ export async function assert_ip_not_blacklisted(
   }
 }
 
-export { ip_blacklist_service } from "@/features/ip_blacklist/services/blacklist.service";
+export { ip_blacklist_service } from "@/features/system/ip_blacklist/services/blacklist.service";

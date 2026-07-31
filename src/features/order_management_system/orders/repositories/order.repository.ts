@@ -6,9 +6,9 @@ import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/lib/db";
 import { orders, order_items, order_adjustments, order_status_events } from "../schema";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
-import { invoices } from "@/features/billing_and_finance_system/db/schema";
-import { shipments } from "@/features/shipping_management_system/schema";
-import { payment_transactions } from "@/features/payment_management_system/db/schema";
+import { invoices } from "@/features/payment_management_system/billing/db/schema";
+import { shipments } from "@/features/fulfillment_management_system/shipping/schema";
+import { payment_transactions } from "@/features/payment_management_system/payment/db/schema";
 
 export class OrderRepository {
   async admin_list_by_product(product_id: string, page: number, limit: number) {

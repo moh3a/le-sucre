@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { DashboardPageClient } from "@/features/customer_dashboard/components/dashboard-page-client";
+import { DashboardPageClient } from "@/features/order_management_system/customers/dashboard/components/dashboard-page-client";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = { params: Promise<{ locale: string }> };

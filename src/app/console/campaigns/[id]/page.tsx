@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
-import { CampaignDetailTabs } from "@/features/campaign_management_system/components/campaign_detail_tabs";
+import { CampaignDetailTabs } from "@/features/marketing/campaign/components/campaign_detail_tabs";
 
 type PageProps = { params: Promise<{ id: string }> };
 

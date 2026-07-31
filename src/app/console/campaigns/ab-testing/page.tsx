@@ -1,4 +1,4 @@
-import { ABTestingClient } from "@/features/campaign_management_system/components/ab-testing-client";
+import { ABTestingClient } from "@/features/marketing/campaign/components/ab-testing-client";
 
 export const metadata = { title: "A/B Testing" };
 

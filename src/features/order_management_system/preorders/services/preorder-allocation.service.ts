@@ -2,7 +2,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { PREORDER_ERROR } from "../constants/error-codes";
 import { preorder_allocations } from "../schema";
 import { preorder_repository } from "../repositories/preorder.repository";

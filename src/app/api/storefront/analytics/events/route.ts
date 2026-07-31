@@ -1,6 +1,6 @@
 import { json_ok, json_error } from "@/lib/http";
-import { batch_ingest_dto } from "@/features/analytics_management_system/models/analytics.dto";
-import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
+import { batch_ingest_dto } from "@/features/marketing/analytics/models/analytics.dto";
+import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 import { get_storefront_identity } from "@/features/order_management_system/carts/cart-context.helper";
 
 export async function POST(req: Request) {

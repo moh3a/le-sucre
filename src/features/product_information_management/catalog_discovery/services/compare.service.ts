@@ -5,7 +5,7 @@ import { products } from "@/features/product_information_management/products/sch
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { product_media } from "@/features/product_information_management/products/schema";
 import { eq, and, inArray, sql } from "drizzle-orm";
-import { review_service } from "@/features/product_reviews_management/services/review.service";
+import { review_service } from "@/features/product_information_management/reviews/services/review.service";
 import { brand_service } from "@/features/product_information_management/brands/services/brand.service";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import type { CompareResponse, CompareProductData } from "../models/compare.dto";

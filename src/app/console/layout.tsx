@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ConsoleBreadcrumb } from "@/components/console/console-breadcrumb";
 import { auth } from "@/lib/auth";
 import { AuthorizationService } from "@/features/authentication_and_authorization/authorization/services/authorization.service";
-import { InitService } from "@/features/init_system/services/init.service";
+import { InitService } from "@/features/system/init_system/services/init.service";
 import { APP_NAME } from "@/constants";
 
 export const metadata: Metadata = {

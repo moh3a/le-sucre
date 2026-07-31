@@ -31,50 +31,50 @@ export function DashboardPageClient() {
       }}
     >
       <ConsolePageShell
-      title={t("title")}
-      subtitle={t("subtitle")}
-      stats={
-        <StatsGrid
-          loading={loading}
-          items={[
-            {
-              label: t("revenue_7_days"),
-              value: analytics.data?.totals?.revenue
-                ? `${Number(analytics.data.totals.revenue).toLocaleString("fr-DZ", { maximumFractionDigits: 0 })} DZD`
-                : "—",
-              description: t("revenue_desc"),
-              icon: ReceiptCent,
-              color: "success",
-            },
-            {
-              label: t("orders_title"),
-              value: orders.data?.meta.total_records ?? 0,
-              description: t("orders_desc"),
-              icon: ReceiptCent,
-              color: "info",
-            },
-            {
-              label: t("published_products"),
-              value: products.data?.meta.total_records ?? 0,
-              description: t("products_desc"),
-              icon: Package,
-              color: "default",
-            },
-            {
-              label: t("categories_title"),
-              value: categories.data?.meta.total_records ?? 0,
-              description: t("categories_desc"),
-              icon: FolderTree,
-              color: "warning",
-            },
-          ]}
-        />
-      }
-    >
-      <section className="space-y-3">
-        <h2 className="text-sm font-medium">{t("recent_orders")}</h2>
-        <OrderTable compact />
-      </section>
+        title={t("title")}
+        subtitle={t("subtitle")}
+        stats={
+          <StatsGrid
+            loading={loading}
+            items={[
+              {
+                label: t("revenue_7_days"),
+                value: analytics.data?.totals?.revenue
+                  ? `${Number(analytics.data.totals.revenue).toLocaleString("fr-DZ", { maximumFractionDigits: 0 })} DZD`
+                  : "—",
+                description: t("revenue_desc"),
+                icon: ReceiptCent,
+                color: "success",
+              },
+              {
+                label: t("orders_title"),
+                value: orders.data?.meta.total_records ?? 0,
+                description: t("orders_desc"),
+                icon: ReceiptCent,
+                color: "info",
+              },
+              {
+                label: t("published_products"),
+                value: products.data?.meta.total_records ?? 0,
+                description: t("products_desc"),
+                icon: Package,
+                color: "default",
+              },
+              {
+                label: t("categories_title"),
+                value: categories.data?.meta.total_records ?? 0,
+                description: t("categories_desc"),
+                icon: FolderTree,
+                color: "warning",
+              },
+            ]}
+          />
+        }
+      >
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">{t("recent_orders")}</h2>
+          <OrderTable compact />
+        </section>
       </ConsolePageShell>
     </QueryGuard>
   );

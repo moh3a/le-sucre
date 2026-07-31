@@ -523,7 +523,9 @@ function FilterValueSelector<TData>({ column, value, onSelect }: FilterValueSele
             ) : (
               <>
                 <BadgeCheck />
-                <span className="truncate">{t("filter_by")} &quot;{value}&quot;</span>
+                <span className="truncate">
+                  {t("filter_by")} &quot;{value}&quot;
+                </span>
               </>
             )}
           </CommandItem>
@@ -648,7 +650,7 @@ function onFilterInputRender<TData>({
               className="dark:bg-input/30 h-full min-w-16 rounded-none border px-1.5 font-normal"
             >
               {selectedOptions.length === 0 ? (
-                  filter.variant === "multiSelect" ? (
+                filter.variant === "multiSelect" ? (
                   t("select_options")
                 ) : (
                   t("select_option")

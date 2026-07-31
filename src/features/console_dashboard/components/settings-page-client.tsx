@@ -162,13 +162,39 @@ function GeneralTab({ settings }: { settings: StoreSettings | undefined }) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label={t("store_name")} value={form.store_name ?? ""} onChange={set("store_name")} />
-          <FormField label={t("store_phone")} value={form.store_phone ?? ""} onChange={set("store_phone")} />
-          <FormField label={t("store_address")} value={form.store_address ?? ""} onChange={set("store_address")} className="sm:col-span-2" />
-          <FormField label={t("store_vat")} value={form.store_vat_number ?? ""} onChange={set("store_vat_number")} />
+          <FormField
+            label={t("store_name")}
+            value={form.store_name ?? ""}
+            onChange={set("store_name")}
+          />
+          <FormField
+            label={t("store_phone")}
+            value={form.store_phone ?? ""}
+            onChange={set("store_phone")}
+          />
+          <FormField
+            label={t("store_address")}
+            value={form.store_address ?? ""}
+            onChange={set("store_address")}
+            className="sm:col-span-2"
+          />
+          <FormField
+            label={t("store_vat")}
+            value={form.store_vat_number ?? ""}
+            onChange={set("store_vat_number")}
+          />
           <FormField label={t("currency")} value={form.currency ?? ""} onChange={set("currency")} />
-          <FormField label={t("tax_rate")} value={form.tax_rate ?? ""} onChange={set("tax_rate")} type="number" />
-          <FormField label={t("default_language")} value={form.default_language ?? ""} onChange={set("default_language")} />
+          <FormField
+            label={t("tax_rate")}
+            value={form.tax_rate ?? ""}
+            onChange={set("tax_rate")}
+            type="number"
+          />
+          <FormField
+            label={t("default_language")}
+            value={form.default_language ?? ""}
+            onChange={set("default_language")}
+          />
         </div>
         <div className="flex justify-end">
           <Button onClick={handle_save} disabled={update_mutation.isPending}>

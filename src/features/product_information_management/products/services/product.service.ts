@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { generate_id } from "@/lib/utils";
 import { tryFn, AppError } from "@/lib/error_handling";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { PRODUCT_ERROR } from "../constants/error-codes";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { slugify_name } from "@/features/product_information_management/categories/repositories/category-tree.engine";
@@ -25,7 +25,7 @@ import { invalidate_recommendations_for_product } from "../../recommendations/he
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { AUDIT_ACTION } from "@/features/product_information_management/constants/audit-actions";
 import { brand_service } from "@/features/product_information_management/brands/services/brand.service";
-import { review_service } from "@/features/product_reviews_management/services/review.service";
+import { review_service } from "@/features/product_information_management/reviews/services/review.service";
 import { variant_service } from "@/features/product_information_management/variants/services/variant.service";
 import { sku_service } from "@/features/product_information_management/variants/services/sku.service";
 

@@ -10,16 +10,16 @@ import { CategoryCard } from "@/features/product_information_management/categori
 import { ProductCard } from "@/features/product_information_management/products/components/storefront/product-card";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 import { HeroBannerCarousel } from "@/components/storefront/hero-banner-carousel";
-import { StorefrontSectionRenderer } from "@/features/campaign_management_system/components/storefront/storefront-section-renderer";
+import { StorefrontSectionRenderer } from "@/features/marketing/campaign/components/storefront/storefront-section-renderer";
 import { CountdownTimer } from "@/components/storefront/countdown-timer";
-import { campaign_service } from "@/features/campaign_management_system/services/campaign.service";
-import { campaign_flash_sale_service } from "@/features/campaign_management_system/services/campaign_flash_sale.service";
+import { campaign_service } from "@/features/marketing/campaign/services/campaign.service";
+import { campaign_flash_sale_service } from "@/features/marketing/campaign/services/campaign_flash_sale.service";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
 import { search_service } from "@/features/product_information_management/catalog_discovery/services/search.service";
 import { recommendation_service } from "@/features/product_information_management/recommendations/services/recommendation.service";
 import { brand_service } from "@/features/product_information_management/brands/services/brand.service";
-import type { CampaignBanner } from "@/features/campaign_management_system/components/storefront/types";
-import type { StorefrontSection } from "@/features/campaign_management_system/components/storefront/types";
+import type { CampaignBanner } from "@/features/marketing/campaign/components/storefront/types";
+import type { StorefrontSection } from "@/features/marketing/campaign/components/storefront/types";
 import type { CategoryItem, StorefrontProduct } from "@/components/storefront/types";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 

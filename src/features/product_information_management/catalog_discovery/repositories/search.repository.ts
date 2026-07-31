@@ -9,7 +9,7 @@ import {
 } from "@/features/product_information_management/products/schema";
 import { brands } from "@/features/product_information_management/brands/schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
-import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
+import { inventory_levels } from "@/features/fulfillment_management_system/inventory/schema";
 import type {
   ResolvedCatalogFilters,
   CatalogProductCard,

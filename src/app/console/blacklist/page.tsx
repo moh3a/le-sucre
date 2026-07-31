@@ -1,4 +1,4 @@
-import { BlacklistPageClient } from "@/features/ip_blacklist/components/blacklist-page-client";
+import { BlacklistPageClient } from "@/features/system/ip_blacklist/components/blacklist-page-client";
 
 export const metadata = { title: "Liste noire IP" };
 

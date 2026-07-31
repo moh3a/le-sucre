@@ -1,6 +1,6 @@
 import { admin_route } from "@/lib/api/admin-handler";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
-import { media_service } from "@/features/media_library/services/media.service";
+import { media_service } from "@/features/system/media_library/services/media.service";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   return admin_route(async () => {

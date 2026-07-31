@@ -1,6 +1,6 @@
 import "server-only";
 
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { PROFILE_ERROR } from "@/features/authentication_and_authorization/profile/constants/error-codes";
 import { profile_repository } from "@/features/authentication_and_authorization/profile/repositories/profile.repository";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";

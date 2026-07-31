@@ -3,7 +3,7 @@ import { rate_limit } from "@/lib/redis";
 import { ForbiddenError, RateLimitError } from "@/lib/error_handling";
 import { assert_csrf } from "@/features/authentication_and_authorization/auth/helpers/csrf";
 import { RATE_LIMIT_PRESETS } from "@/lib/security/rate-limit-presets";
-import { ip_blacklist_service } from "@/features/ip_blacklist/services/blacklist.service";
+import { ip_blacklist_service } from "@/features/system/ip_blacklist/services/blacklist.service";
 
 export async function assert_origin(req: Request) {
   const origin = req.headers.get("origin");

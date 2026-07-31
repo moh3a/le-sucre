@@ -14,7 +14,7 @@ import {
 } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 import { create_category_dto, update_category_dto } from "../models/category.dto";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { CATEGORY_ERROR } from "../constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { invalidate_catalog_cache } from "@/features/product_information_management/catalog_discovery/helpers/invalidate-catalog-cache.helper";

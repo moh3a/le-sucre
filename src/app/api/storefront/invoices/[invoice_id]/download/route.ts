@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { invoice_service } from "@/features/billing_and_finance_system/services/invoice.service";
-import { pdf_generation_service } from "@/features/billing_and_finance_system/services/pdf_generation.service";
+import { invoice_service } from "@/features/payment_management_system/billing/services/invoice.service";
+import { pdf_generation_service } from "@/features/payment_management_system/billing/services/pdf_generation.service";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
 
 export async function GET(req: Request, props: { params: Promise<{ invoice_id: string }> }) {

@@ -1,5 +1,5 @@
 import { ConsolePageShell } from "@/components/console/console-page-shell";
-import { CampaignForm } from "@/features/campaign_management_system/components/campaign_form";
+import { CampaignForm } from "@/features/marketing/campaign/components/campaign_form";
 
 export const metadata = { title: "Nouvelle campagne" };
 

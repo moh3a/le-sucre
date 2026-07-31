@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { PaymentDetailClient } from "@/features/payment_management_system/components/payment-detail-client";
+import { PaymentDetailClient } from "@/features/payment_management_system/payment/components/payment-detail-client";
 
 type PageProps = { params: Promise<{ payment_id: string }> };
 

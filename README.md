@@ -8,11 +8,12 @@
 - check if every operation works
 - error: src\lib\compose-refs.ts
 - error: src\hooks\use-network-polling.ts
+- error: src\features\billing_and_finance_system\repositories\invoice.repository.ts
 - lint `features/`
 
 <p align="center">
   <a href="https://github.com/moh3a/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
-  <img src="https://img.shields.io/badge/version-0.4.11-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-0.4.24-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-proprietary-red?style=flat-square" alt="License">
 </p>
 
@@ -31,13 +32,6 @@
   <img src="https://img.shields.io/badge/pnpm-9-FF6914?style=flat-square&logo=pnpm" alt="pnpm">
   <a href="https://trpc.io"><img src="https://img.shields.io/badge/tRPC-11-398CCB?style=flat-square" alt="tRPC"></a>
   <a href="https://www.better-auth.com"><img src="https://img.shields.io/badge/Better_Auth-1.6-FFD166?style=flat-square" alt="Better Auth"></a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Storefront-FR%20%7C%20EN%20%7C%20AR-700145?style=flat-square" alt="i18n">
-  <img src="https://img.shields.io/badge/Admin-French-4D4C20?style=flat-square" alt="Admin">
-  <img src="https://img.shields.io/badge/Currency-DZD-4d4c20?style=flat-square" alt="Currency">
-  <img src="https://img.shields.io/badge/Tax-19%25-700145?style=flat-square" alt="Tax">
 </p>
 
 Enterprise-grade ecommerce platform for pastry and sweets making tools, cooking ingredients, and packaging. Built for the Algerian market with support for B2C and future B2B use cases.

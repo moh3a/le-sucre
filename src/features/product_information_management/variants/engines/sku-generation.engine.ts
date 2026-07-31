@@ -11,7 +11,7 @@ import type { GenerateSkusResult, OptionPair } from "../types";
 import { cartesian_combinations } from "./variant-combination.engine";
 import { build_option_signature, build_sku_code } from "./option-signature.engine";
 import { and, eq, inArray } from "drizzle-orm";
-import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
+import { inventory_levels } from "@/features/fulfillment_management_system/inventory/schema";
 import { cart_items } from "@/features/order_management_system/carts/schema";
 
 const INSERT_CHUNK = 500;

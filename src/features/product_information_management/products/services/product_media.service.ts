@@ -4,11 +4,11 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
 import { generate_id } from "@/lib/utils";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { PRODUCT_ERROR } from "../constants/error-codes";
 import { build_product_media_key, build_public_media_url, media_config } from "@/config/media";
-import { MediaRepository } from "@/features/media_library/repositories/media.repository";
-import { build_media_storage_key } from "@/features/media_library/helpers";
+import { MediaRepository } from "@/features/system/media_library/repositories/media.repository";
+import { build_media_storage_key } from "@/features/system/media_library/helpers";
 import { product_repository } from "../repositories/product.repository";
 
 export type MediaUploadIntent = {

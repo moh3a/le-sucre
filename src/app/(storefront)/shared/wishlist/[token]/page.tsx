@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SharedWishlistPageClient } from "@/features/wishlist_management_system/components/shared-wishlist-page-client";
+import { SharedWishlistPageClient } from "@/features/order_management_system/customers/wishlist/components/shared-wishlist-page-client";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: "Liste de souhaits partagée" };

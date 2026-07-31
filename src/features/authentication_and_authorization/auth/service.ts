@@ -3,7 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { AUTH_ERROR } from "./constants/error-codes";
 import { AUTHORIZATION_ERROR } from "@/features/authentication_and_authorization/authorization/constants/error-codes";
 import {

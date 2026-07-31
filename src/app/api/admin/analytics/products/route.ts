@@ -1,6 +1,6 @@
 import { json_ok, json_error } from "@/lib/http";
-import { date_range_dto } from "@/features/analytics_management_system/models/analytics.dto";
-import { analytics_query_service } from "@/features/analytics_management_system/services/analytics-query.service";
+import { date_range_dto } from "@/features/marketing/analytics/models/analytics.dto";
+import { analytics_query_service } from "@/features/marketing/analytics/services/analytics-query.service";
 
 export async function GET(req: Request) {
   try {

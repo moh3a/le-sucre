@@ -11,10 +11,10 @@ import { product_router } from "@/features/product_information_management/produc
 import { variants_router } from "@/features/product_information_management/variants/router";
 import { catalog_router } from "@/features/product_information_management/catalog_discovery/router";
 import { recommendations_router } from "@/features/product_information_management/recommendations/router";
-import { reviews_router } from "@/features/product_reviews_management/router";
-import { inventory_router } from "@/features/inventory_management_system/inventory/router";
-import { forecast_router } from "@/features/inventory_management_system/forecasting/router";
-import { warehouse_router } from "@/features/inventory_management_system/warehouses/router";
+import { reviews_router } from "@/features/product_information_management/reviews/router";
+import { inventory_router } from "@/features/fulfillment_management_system/inventory/router";
+import { forecast_router } from "@/features/fulfillment_management_system/forecasting/router";
+import { warehouse_router } from "@/features/fulfillment_management_system/warehouses/router";
 import { cart_router } from "@/features/order_management_system/carts/router";
 import { checkout_router } from "@/features/order_management_system/checkout/router";
 import { order_router } from "@/features/order_management_system/orders/router";
@@ -22,34 +22,34 @@ import { preorder_router } from "@/features/order_management_system/preorders/ro
 import { customers_router } from "@/features/order_management_system/customers/router";
 import { promotion_router } from "@/features/order_management_system/promotions/router";
 import { return_replacement_router } from "@/features/order_management_system/return_replacement/router";
-import { analytics_router } from "@/features/analytics_management_system/router";
-import { shipping_router } from "@/features/shipping_management_system/router";
-import { invoice_router } from "@/features/billing_and_finance_system/routers/invoice.router";
-import { campaign_router } from "@/features/campaign_management_system/router";
+import { analytics_router } from "@/features/marketing/analytics/router";
+import { shipping_router } from "@/features/fulfillment_management_system/shipping/router";
+import { invoice_router } from "@/features/payment_management_system/billing/routers/invoice.router";
+import { campaign_router } from "@/features/marketing/campaign/router";
 import { order_operations_router } from "@/features/order_management_system/orders/operations/routers/order-operations.router";
 import { customer_relations_router } from "@/features/order_management_system/customers/operations/routers/customer-relations.router";
 import { warranty_router } from "@/features/order_management_system/warranty/routers/warranty.router";
 import { promotion_review_router } from "@/features/order_management_system/promotions/operations/routers/promotion-review.router";
-import { delivery_operations_router } from "@/features/shipping_management_system/operations/routers/delivery.router";
-import { inventory_adjustment_router } from "@/features/inventory_management_system/inventory/operations/routers/inventory-adjustment.router";
-import { payment_operations_router } from "@/features/payment_management_system/operations/routers/payment-operations.router";
+import { delivery_operations_router } from "@/features/fulfillment_management_system/shipping/operations/routers/delivery.router";
+import { inventory_adjustment_router } from "@/features/fulfillment_management_system/inventory/operations/routers/inventory-adjustment.router";
+import { payment_operations_router } from "@/features/payment_management_system/payment/operations/routers/payment-operations.router";
 import { product_workflow_router } from "@/features/product_information_management/products/operations/routers/product-workflow.router";
 import { admin_task_router } from "@/features/console_dashboard/tasks/routers/admin-task.router";
 import { notification_router } from "@/features/console_dashboard/notifications/routers/notification.router";
-import { payment_router } from "@/features/payment_management_system/router";
-import { wishlist_management_router } from "@/features/wishlist_management_system/router";
-import { feature_flag_router } from "@/features/feature_flag_system/router";
-import { media_router } from "@/features/media_library/routers/media.router";
-import { blacklist_router } from "@/features/ip_blacklist/routers/blacklist.router";
+import { payment_router } from "@/features/payment_management_system/payment/router";
+import { wishlist_management_router } from "@/features/order_management_system/customers/wishlist/router";
+import { feature_flag_router } from "@/features/system/feature_flag_system/router";
+import { media_router } from "@/features/system/media_library/routers/media.router";
+import { blacklist_router } from "@/features/system/ip_blacklist/routers/blacklist.router";
 import { operations_workflows_router } from "@/features/operations_workflows/router";
 import {
   profile_router,
   admin_profile_router,
 } from "@/features/authentication_and_authorization/profile/routers/profile.router";
-import { contact_router } from "@/features/contact_management/router";
-import { health_router } from "@/features/monitoring/health/routers/health.router";
-import { dashboard_router } from "@/features/customer_dashboard/routers/dashboard.router";
-import { init_router } from "@/features/init_system/router";
+import { contact_router } from "@/features/marketing/contact/router";
+import { health_router } from "@/features/system/monitoring/health/routers/health.router";
+import { dashboard_router } from "@/features/order_management_system/customers/dashboard/routers/dashboard.router";
+import { init_router } from "@/features/system/init_system/router";
 import { settings_router } from "@/features/console_dashboard/settings/routers/settings.router";
 import { database_router } from "@/features/console_dashboard/database/router";
 

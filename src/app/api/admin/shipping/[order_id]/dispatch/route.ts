@@ -1,6 +1,6 @@
 import { admin_route } from "@/lib/api/admin-handler";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
-import { shipping_service } from "@/features/shipping_management_system/services/shipping.service";
+import { shipping_service } from "@/features/fulfillment_management_system/shipping/services/shipping.service";
 
 type RouteContext = { params: Promise<{ order_id: string }> };
 

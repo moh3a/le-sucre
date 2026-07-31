@@ -1,6 +1,5 @@
 import { index, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { generate_id } from "@/lib/utils";
-import { users } from "@/features/authentication_and_authorization/auth/schema";
 
 export const admin_tasks = mysqlTable(
   "admin_tasks",

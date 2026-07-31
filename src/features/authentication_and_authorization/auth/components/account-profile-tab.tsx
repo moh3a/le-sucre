@@ -16,9 +16,9 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
+import { MediaPickerDialog } from "@/features/system/media_library/components/media-picker-dialog";
 import { formatDate } from "@/lib/format";
-import type { MediaDTO } from "@/features/media_library/types";
+import type { MediaDTO } from "@/features/system/media_library/types";
 
 function get_profile_form_schema(t: ReturnType<typeof useTranslations<"profile">>) {
   return z.object({

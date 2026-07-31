@@ -3,7 +3,6 @@ import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { database_history } from "../database/schema";
-import { generate_id } from "@/lib/utils";
 import logger from "@/lib/logger";
 
 const pool = db.$client as import("mysql2/promise").Pool;
@@ -72,12 +71,7 @@ export const KNOWN_JOBS = [
 function escape_csv_value(value: unknown): string {
   if (value === null || value === undefined) return "";
   const str = String(value);
-  if (
-    str.includes('"') ||
-    str.includes(",") ||
-    str.includes("\n") ||
-    str.includes("\r")
-  ) {
+  if (str.includes('"') || str.includes(",") || str.includes("\n") || str.includes("\r")) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
@@ -112,12 +106,8 @@ async function log_to_history(params: {
       query: params.query ?? null,
       table_name: params.table_name ?? null,
       status: params.status,
-      rows_affected:
-        params.rows_affected !== undefined
-          ? String(params.rows_affected)
-          : null,
-      duration_ms:
-        params.duration_ms !== undefined ? String(params.duration_ms) : null,
+      rows_affected: params.rows_affected !== undefined ? String(params.rows_affected) : null,
+      duration_ms: params.duration_ms !== undefined ? String(params.duration_ms) : null,
       error_message: params.error_message ?? null,
       file_name: params.file_name ?? null,
       file_format: params.file_format ?? null,
@@ -132,10 +122,7 @@ async function log_to_history(params: {
 }
 
 export class DatabaseManagementService {
-  async execute_query(
-    query: string,
-    user_id?: string,
-  ): Promise<QueryResult> {
+  async execute_query(query: string, user_id?: string): Promise<QueryResult> {
     const start = Date.now();
 
     try {
@@ -143,9 +130,7 @@ export class DatabaseManagementService {
       const duration_ms = Date.now() - start;
 
       if (Array.isArray(result) && fields && fields.length > 0) {
-        const columns = fields.map(
-          (f: { name: string }) => f.name,
-        );
+        const columns = fields.map((f: { name: string }) => f.name);
         const rows = result as Record<string, unknown>[];
 
         await log_to_history({
@@ -185,8 +170,7 @@ export class DatabaseManagementService {
       };
     } catch (error) {
       const duration_ms = Date.now() - start;
-      const error_message =
-        error instanceof Error ? error.message : "Unknown error";
+      const error_message = error instanceof Error ? error.message : "Unknown error";
 
       await log_to_history({
         operation_type: "query",
@@ -216,20 +200,15 @@ export class DatabaseManagementService {
   async describe_table(table_name: string): Promise<TableDescription> {
     const escaped = table_name.replace(/`/g, "``");
     const [col_rows] = await pool.query(`DESCRIBE \`${escaped}\``);
-    const columns = (
-      col_rows as Record<string, unknown>[]
-    ).map((row) => ({
+    const columns = (col_rows as Record<string, unknown>[]).map((row) => ({
       name: String(row["Field"] ?? ""),
       type: String(row["Type"] ?? ""),
       nullable: String(row["Null"] ?? ""),
       key: String(row["Key"] ?? ""),
-      default_value:
-        row["Default"] === null ? "" : String(row["Default"]),
+      default_value: row["Default"] === null ? "" : String(row["Default"]),
     }));
 
-    const [count_rows] = await pool.query(
-      `SELECT COUNT(*) as count FROM \`${escaped}\``,
-    );
+    const [count_rows] = await pool.query(`SELECT COUNT(*) as count FROM \`${escaped}\``);
     const count_result = count_rows as Record<string, unknown>[];
     const row_count = Number(count_result[0]?.["count"] ?? 0);
 
@@ -245,9 +224,7 @@ export class DatabaseManagementService {
     const escaped = table_name.replace(/`/g, "``");
 
     try {
-      const [rows] = await pool.query(
-        `SELECT * FROM \`${escaped}\` LIMIT 10000`,
-      );
+      const [rows] = await pool.query(`SELECT * FROM \`${escaped}\` LIMIT 10000`);
       const data_rows = rows as Record<string, unknown>[];
       const duration_ms = Date.now() - start;
 
@@ -271,13 +248,9 @@ export class DatabaseManagementService {
           data = "";
         } else {
           const columns = Object.keys(data_rows[0]);
-          const escaped_columns = columns
-            .map((c) => `\`${c.replace(/`/g, "``")}\``)
-            .join(", ");
+          const escaped_columns = columns.map((c) => `\`${c.replace(/`/g, "``")}\``).join(", ");
           const statements = data_rows.map((row) => {
-            const values = columns
-              .map((c) => escape_sql_value(row[c]))
-              .join(", ");
+            const values = columns.map((c) => escape_sql_value(row[c])).join(", ");
             return `INSERT INTO \`${escaped}\` (${escaped_columns}) VALUES (${values});`;
           });
           data = statements.join("\n");
@@ -309,8 +282,7 @@ export class DatabaseManagementService {
       };
     } catch (error) {
       const duration_ms = Date.now() - start;
-      const error_message =
-        error instanceof Error ? error.message : "Unknown error";
+      const error_message = error instanceof Error ? error.message : "Unknown error";
 
       await log_to_history({
         operation_type: "export",
@@ -331,10 +303,7 @@ export class DatabaseManagementService {
     }
   }
 
-  async import_sql(
-    sql_content: string,
-    user_id?: string,
-  ): Promise<ImportSqlResult> {
+  async import_sql(sql_content: string, user_id?: string): Promise<ImportSqlResult> {
     const start = Date.now();
     const statements = sql_content
       .split(";")
@@ -349,12 +318,8 @@ export class DatabaseManagementService {
         await pool.query(statement);
         statements_executed++;
       } catch (error) {
-        const error_message =
-          error instanceof Error ? error.message : "Unknown error";
-        const truncated =
-          statement.length > 200
-            ? statement.slice(0, 200) + "..."
-            : statement;
+        const error_message = error instanceof Error ? error.message : "Unknown error";
+        const truncated = statement.length > 200 ? statement.slice(0, 200) + "..." : statement;
         errors.push(`Statement failed: "${truncated}" → ${error_message}`);
         logger.error("database_import_sql_statement_failed", {
           statement_preview: truncated,
@@ -376,9 +341,7 @@ export class DatabaseManagementService {
     });
 
     if (errors.length > 0 && statements_executed === 0) {
-      throw new Error(
-        `All ${errors.length} statements failed:\n${errors.join("\n")}`,
-      );
+      throw new Error(`All ${errors.length} statements failed:\n${errors.join("\n")}`);
     }
 
     return { statements_executed, errors, duration_ms };
@@ -394,15 +357,11 @@ export class DatabaseManagementService {
 
     const lines = csv_content.split(/\r?\n/).filter((line) => line.trim() !== "");
     if (lines.length < 2) {
-      throw new Error(
-        "CSV content must contain at least a header row and one data row",
-      );
+      throw new Error("CSV content must contain at least a header row and one data row");
     }
 
     const headers = parse_csv_line(lines[0]);
-    const escaped_columns = headers
-      .map((h) => `\`${h.replace(/`/g, "``")}\``)
-      .join(", ");
+    const escaped_columns = headers.map((h) => `\`${h.replace(/`/g, "``")}\``).join(", ");
 
     const BATCH_SIZE = 100;
     let rows_imported = 0;
@@ -413,9 +372,7 @@ export class DatabaseManagementService {
 
       for (const line of batch) {
         const values = parse_csv_line(line);
-        const escaped_values = headers.map((_, idx) =>
-          escape_sql_value(values[idx] ?? null),
-        );
+        const escaped_values = headers.map((_, idx) => escape_sql_value(values[idx] ?? null));
         values_clauses.push(`(${escaped_values.join(", ")})`);
       }
 
@@ -426,17 +383,14 @@ export class DatabaseManagementService {
         const header = result as import("mysql2/promise").ResultSetHeader;
         rows_imported += header.affectedRows ?? batch.length;
       } catch (error) {
-        const error_message =
-          error instanceof Error ? error.message : "Unknown error";
+        const error_message = error instanceof Error ? error.message : "Unknown error";
         logger.error("database_import_csv_batch_failed", {
           table_name,
           batch_start: i,
           batch_size: batch.length,
           message: error_message,
         });
-        throw new Error(
-          `CSV import failed at row ${i}: ${error_message}`,
-        );
+        throw new Error(`CSV import failed at row ${i}: ${error_message}`);
       }
     }
 
@@ -492,17 +446,13 @@ export class DatabaseManagementService {
     return job_defs;
   }
 
-  async trigger_job(
-    job_name: string,
-    user_id?: string,
-  ): Promise<JobTriggerResult> {
+  async trigger_job(job_name: string, user_id?: string): Promise<JobTriggerResult> {
     const start = Date.now();
 
     try {
       if (job_name === "soft-delete-cleanup") {
-        const { soft_delete_cleanup_service } = await import(
-          "@/lib/db/soft-delete-cleanup.service"
-        );
+        const { soft_delete_cleanup_service } =
+          await import("@/lib/db/soft-delete-cleanup.service");
         const result = await soft_delete_cleanup_service.runCleanup();
         const duration_ms = Date.now() - start;
 
@@ -531,8 +481,7 @@ export class DatabaseManagementService {
       return { job_name, status: "not_available", duration_ms };
     } catch (error) {
       const duration_ms = Date.now() - start;
-      const error_message =
-        error instanceof Error ? error.message : "Unknown error";
+      const error_message = error instanceof Error ? error.message : "Unknown error";
 
       await log_to_history({
         operation_type: "job",

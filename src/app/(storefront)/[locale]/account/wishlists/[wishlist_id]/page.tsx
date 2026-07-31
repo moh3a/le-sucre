@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
-import { CustomerWishlistDetailPageClient } from "@/features/wishlist_management_system/components/customer-wishlist-detail-page-client";
+import { CustomerWishlistDetailPageClient } from "@/features/order_management_system/customers/wishlist/components/customer-wishlist-detail-page-client";
 
 type Props = { params: Promise<{ locale: string; wishlist_id: string }> };
 

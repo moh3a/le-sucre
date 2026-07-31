@@ -7,9 +7,9 @@ import { useTranslations } from "next-intl";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductVariantsPanel } from "@/features/product_information_management/variants/components/product-variants-panel";
-import { ProductInventoryPanel } from "@/features/inventory_management_system/inventory/components/product-inventory-panel";
-import { ProductRatingSummary } from "@/features/product_reviews_management/components/product-rating-summary";
-import { ProductReviewsList } from "@/features/product_reviews_management/components/product-reviews-list";
+import { ProductInventoryPanel } from "@/features/fulfillment_management_system/inventory/components/product-inventory-panel";
+import { ProductRatingSummary } from "@/features/product_information_management/reviews/components/product-rating-summary";
+import { ProductReviewsList } from "@/features/product_information_management/reviews/components/product-reviews-list";
 import { ProductMediaGallery } from "./product-media-gallery";
 import { ProductOrdersPanel } from "./product-orders-panel";
 import { ProductDetailGeneralTab } from "./general-tab";

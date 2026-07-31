@@ -11,7 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import type { CampaignBanner } from "@/features/campaign_management_system/components/storefront/types";
+import type { CampaignBanner } from "@/features/marketing/campaign/components/storefront/types";
 
 interface Props {
   banners: CampaignBanner[];

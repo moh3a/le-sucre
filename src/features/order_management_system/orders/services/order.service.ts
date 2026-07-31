@@ -23,23 +23,23 @@ import { promo_code_repository } from "../../promotions/repositories/promo-code.
 import { track_promotion_redemption } from "../../promotions/analytics/promotion-analytics.hook";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { user_repository } from "@/features/authentication_and_authorization/auth/repositories/user.repository";
-import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
+import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
-import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
-import { invoice_service } from "@/features/billing_and_finance_system/services/invoice.service";
-import { crm_sync_service } from "@/features/crm_integration/services/crm-sync.service";
+import { reservation_service } from "@/features/fulfillment_management_system/inventory/services/reservation.service";
+import { invoice_service } from "@/features/payment_management_system/billing/services/invoice.service";
+import { crm_sync_service } from "@/features/marketing/crm_integration/services/crm-sync.service";
 import { order_items, orders } from "../schema";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/error_handling";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { ORDER_ERROR } from "../constants/error-codes";
 import { CART_ERROR } from "../../carts/constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
 import { assert_order_transition } from "../order-lifecycle.engine";
-import { shipping_repository } from "@/features/shipping_management_system/repository";
+import { shipping_repository } from "@/features/fulfillment_management_system/shipping/repository";
 
 /**
  * Catch non-AppError exceptions (Drizzle ORM errors, network failures, etc.)

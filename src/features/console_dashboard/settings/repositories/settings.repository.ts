@@ -7,20 +7,12 @@ import { settings } from "../schema";
 
 export class SettingsRepository {
   async get(key: string) {
-    const [row] = await db
-      .select()
-      .from(settings)
-      .where(eq(settings.key, key))
-      .limit(1);
+    const [row] = await db.select().from(settings).where(eq(settings.key, key)).limit(1);
     return row ?? null;
   }
 
   async get_by_category(category: string) {
-    return db
-      .select()
-      .from(settings)
-      .where(eq(settings.category, category))
-      .orderBy(settings.key);
+    return db.select().from(settings).where(eq(settings.category, category)).orderBy(settings.key);
   }
 
   async get_all() {
@@ -30,10 +22,7 @@ export class SettingsRepository {
   async upsert(key: string, value: string, category: string, updated_by?: string) {
     const existing = await this.get(key);
     if (existing) {
-      return db
-        .update(settings)
-        .set({ value, updated_by })
-        .where(eq(settings.key, key));
+      return db.update(settings).set({ value, updated_by }).where(eq(settings.key, key));
     }
     return db.insert(settings).values({ key, value, category, updated_by });
   }

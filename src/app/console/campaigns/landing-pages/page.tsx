@@ -1,4 +1,4 @@
-import { LandingPagesClient } from "@/features/campaign_management_system/components/landing-pages-client";
+import { LandingPagesClient } from "@/features/marketing/campaign/components/landing-pages-client";
 
 export const metadata = { title: "Landing Pages" };
 

@@ -3,7 +3,7 @@ import "server-only";
 import type { z } from "zod";
 
 import { generate_id } from "@/lib/utils";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { BRAND_ERROR } from "../constants/error-codes";
 import { slugify_name } from "@/features/product_information_management/categories/repositories/category-tree.engine";
 

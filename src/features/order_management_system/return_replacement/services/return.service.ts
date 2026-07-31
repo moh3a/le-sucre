@@ -6,7 +6,7 @@ import { format } from "date-fns";
 
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { build_order_number } from "@/features/order_management_system/orders/order-number.helper";

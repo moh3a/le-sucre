@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { ColumnSort, Row, RowData } from "@tanstack/react-table";
 import type { FilterItemSchema } from "@/features/data-table/lib/parsers";
 import { DataTableConfig } from "@/features/data-table/config";

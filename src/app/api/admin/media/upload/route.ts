@@ -1,13 +1,13 @@
 import { admin_route } from "@/lib/api/admin-handler";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
-import { media_service } from "@/features/media_library/services/media.service";
+import { media_service } from "@/features/system/media_library/services/media.service";
 import {
   enforce_upload_rate_limit,
   check_user_upload_quota,
   track_upload_quota,
-} from "@/features/media_library/helpers";
-import { MEDIA_ERROR, UPLOAD_LIMITS } from "@/features/media_library/constants";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+} from "@/features/system/media_library/helpers";
+import { MEDIA_ERROR, UPLOAD_LIMITS } from "@/features/system/media_library/constants";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 
 export async function POST(req: Request) {
   return admin_route(async ({ user }) => {

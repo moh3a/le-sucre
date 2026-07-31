@@ -4,7 +4,7 @@ import { and, asc, count, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { catch_drizzle } from "@/lib/db/drizzle-error";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
 import { SKU_ERROR } from "../constants/error-codes";
 import {
@@ -12,7 +12,7 @@ import {
   product_translations,
 } from "@/features/product_information_management/products/schema";
 import { product_properties, property_values, product_skus, sku_option_values } from "../schema";
-import { inventory_levels } from "@/features/inventory_management_system/inventory/schema";
+import { inventory_levels } from "@/features/fulfillment_management_system/inventory/schema";
 
 export class SkuRepository {
   async get_product(product_id: string) {

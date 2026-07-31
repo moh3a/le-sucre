@@ -11,12 +11,12 @@ import {
   product_properties,
   property_values,
 } from "@/features/product_information_management/variants/schema";
-import { warehouses } from "@/features/inventory_management_system/warehouses/schema";
-import { campaigns } from "@/features/campaign_management_system/schema";
+import { warehouses } from "@/features/fulfillment_management_system/warehouses/schema";
+import { campaigns } from "@/features/marketing/campaign/schema";
 import { promotions } from "@/features/order_management_system/promotions/schema";
-import { product_reviews } from "@/features/product_reviews_management/schema";
-import { feature_flags } from "@/features/feature_flag_system/db/schema";
-import { invoices } from "@/features/billing_and_finance_system/db/schema";
+import { product_reviews } from "@/features/product_information_management/reviews/schema";
+import { feature_flags } from "@/features/system/feature_flag_system/db/schema";
+import { invoices } from "@/features/payment_management_system/billing/db/schema";
 
 /** All entity soft-delete configurations for cleanup */
 const ENTITY_CONFIGS: Record<string, SoftDeleteConfig & { retentionDays: number }> = {

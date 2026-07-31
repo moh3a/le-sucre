@@ -6,9 +6,7 @@ import { PERMISSIONS } from "@/features/authentication_and_authorization/authori
 import { settings_service } from "../services/settings.service";
 
 export const settings_router = create_trpc_router({
-  getAll: permission_procedure(PERMISSIONS.settings_read).query(() =>
-    settings_service.get_all(),
-  ),
+  getAll: permission_procedure(PERMISSIONS.settings_read).query(() => settings_service.get_all()),
 
   getCategory: permission_procedure(PERMISSIONS.settings_read)
     .input(z.object({ category: z.string().min(1).max(64) }))
@@ -26,9 +24,7 @@ export const settings_router = create_trpc_router({
         ),
       }),
     )
-    .mutation(({ input, ctx }) =>
-      settings_service.update_many(input.entries, ctx.user.id),
-    ),
+    .mutation(({ input, ctx }) => settings_service.update_many(input.entries, ctx.user.id)),
 
   getEnvStatus: permission_procedure(PERMISSIONS.settings_read).query(() =>
     settings_service.get_env_status(),

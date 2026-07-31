@@ -1,4 +1,4 @@
-import type { ErrorDef } from "@/features/inventory_management_system/shared/error-codes";
+import type { ErrorDef } from "@/features/fulfillment_management_system/shared/error-codes";
 
 export const CUSTOMER_RELATIONS_ERROR = {
   FOLLOW_UP_NOT_FOUND: { code: "FOLLOW_UP_NOT_FOUND", status: 404, message: { fr: "Relance introuvable", en: "Follow-up not found", ar: "لم يتم العثور على المتابعة" } },

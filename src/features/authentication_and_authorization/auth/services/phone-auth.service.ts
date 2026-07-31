@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { AUTH_ERROR } from "@/features/authentication_and_authorization/auth/constants/error-codes";
 import { role_repository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
 import { ROLE_NAMES } from "@/features/authentication_and_authorization/authorization/constants/roles";

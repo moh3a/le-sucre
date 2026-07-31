@@ -6,7 +6,7 @@ import {
   type RoleName,
 } from "@/features/authentication_and_authorization/authorization/constants/roles";
 import { RoleRepository } from "@/features/authentication_and_authorization/authorization/repositories/role.repository";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { AUTHORIZATION_ERROR } from "../constants/error-codes";
 
 export class AuthorizationService {

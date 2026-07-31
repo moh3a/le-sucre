@@ -14,8 +14,5 @@ export const settings = mysqlTable(
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
-  (t) => [
-    index("settings_key_uidx").on(t.key),
-    index("settings_category_idx").on(t.category),
-  ],
+  (t) => [index("settings_key_uidx").on(t.key), index("settings_category_idx").on(t.category)],
 );

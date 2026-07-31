@@ -14,7 +14,7 @@ import { relations } from "drizzle-orm";
 import { generate_id } from "@/lib/utils";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { products } from "@/features/product_information_management/products/schema";
-import { warehouses } from "@/features/inventory_management_system/warehouses/schema";
+import { warehouses } from "@/features/fulfillment_management_system/warehouses/schema";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 
 // ─── Generic Approval Workflow ──────────────────────────────────────────────

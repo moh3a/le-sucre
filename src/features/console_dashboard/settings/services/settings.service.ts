@@ -1,12 +1,13 @@
 import "server-only";
 
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { settings_repository } from "../repositories/settings.repository";
 import { SETTINGS_ERROR } from "../constants/error-codes";
+import { APP_NAME } from "@/constants";
 
 const DEFAULTS: Record<string, Record<string, string>> = {
   general: {
-    store_name: "Le Sucre",
+    store_name: APP_NAME,
     store_address: "",
     store_phone: "",
     store_vat_number: "",

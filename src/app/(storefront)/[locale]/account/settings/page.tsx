@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { SettingsPageClient } from "@/features/customer_dashboard/components/settings-page-client";
+import { SettingsPageClient } from "@/features/order_management_system/customers/dashboard/components/settings-page-client";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = { params: Promise<{ locale: string }> };

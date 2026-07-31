@@ -7,7 +7,7 @@ import { env } from "@/config/env";
 import {
   paymentProviders,
   paymentProvidersSchema,
-} from "@/features/payment_management_system/constants/payment-status";
+} from "@/features/payment_management_system/payment/constants/payment-status";
 
 export async function POST(
   request: NextRequest,
@@ -61,7 +61,7 @@ export async function POST(
     }
 
     const { payment_webhook_service } =
-      await import("@/features/payment_management_system/services/payment-webhook.service");
+      await import("@/features/payment_management_system/payment/services/payment-webhook.service");
     const result = await payment_webhook_service.handle_provider_webhook(
       providerName,
       request.headers,

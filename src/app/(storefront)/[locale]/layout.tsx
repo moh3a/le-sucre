@@ -7,10 +7,10 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnonymousSessionProvider } from "@/features/authentication_and_authorization/auth/components/AnonymousSessionProvider";
 import { category_service } from "@/features/product_information_management/categories/services/category.service";
-import { campaign_service } from "@/features/campaign_management_system/services/campaign.service";
+import { campaign_service } from "@/features/marketing/campaign/services/campaign.service";
 import { StorefrontAnnouncementBar } from "@/components/storefront/storefront-announcement-bar";
 import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
-import type { CampaignBanner } from "@/features/campaign_management_system/components/storefront/types";
+import type { CampaignBanner } from "@/features/marketing/campaign/components/storefront/types";
 
 type Props = PropsWithChildren<{
   params: Promise<{ locale: string }>;

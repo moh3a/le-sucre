@@ -2,19 +2,19 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { CART_ERROR } from "./constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
 import { resolve_unit_price } from "@/features/product_information_management/variants/engines/pricing.engine";
-import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
+import { reservation_service } from "@/features/fulfillment_management_system/inventory/services/reservation.service";
 import { carts } from "../schema";
 import type { add_cart_item_dto } from "./models/cart.dto";
 import { cart_repository } from "./repository";
 import { availability_service } from "../preorders/services/availability.service";
 import { preorder_allocation_service } from "../preorders/services/preorder-allocation.service";
-import { event_ingestion_service } from "@/features/analytics_management_system/services/event-ingestion.service";
+import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 
 const RESERVE_TTL_SEC = 900;
 

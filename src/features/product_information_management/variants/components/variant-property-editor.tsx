@@ -42,7 +42,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
+import { MediaPickerDialog } from "@/features/system/media_library/components/media-picker-dialog";
 import { create_property_dto, create_property_value_dto } from "../models/variant.dto";
 import { SkuGeneratorPanel } from "./sku-generator-panel";
 import { DeletePropertyDialog } from "./delete-property-dialog";

@@ -4,7 +4,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { catch_drizzle } from "@/lib/db/drizzle-error";
-import { throw_error } from "@/features/inventory_management_system/shared/error-codes";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { generate_id } from "@/lib/utils";
 import { VARIANT_ERROR } from "../constants/error-codes";
 

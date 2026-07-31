@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
-import { ShipmentDetailClient } from "@/features/shipping_management_system/components/shipment-detail-client";
+import { ShipmentDetailClient } from "@/features/fulfillment_management_system/shipping/components/shipment-detail-client";
 
 type Props = { params: Promise<{ shipment_id: string }> };
 

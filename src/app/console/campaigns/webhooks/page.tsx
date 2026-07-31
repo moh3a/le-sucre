@@ -1,4 +1,4 @@
-import { WebhooksClient } from "@/features/campaign_management_system/components/webhooks-client";
+import { WebhooksClient } from "@/features/marketing/campaign/components/webhooks-client";
 
 export const metadata = { title: "Webhook Events" };
 

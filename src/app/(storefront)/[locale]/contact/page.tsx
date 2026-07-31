@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { ContactForm } from "@/features/contact_management/components/storefront/contact-form";
+import { ContactForm } from "@/features/marketing/contact/components/storefront/contact-form";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
 type Props = {

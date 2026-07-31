@@ -16,22 +16,42 @@ export function TasksPageClient() {
   return (
     <QueryGuard query={{ isLoading }}>
       <ConsolePageShell
-      title={t("title")}
-      subtitle={t("subtitle")}
-      actions={<CreateTaskDialog />}
-      stats={
-        <StatsGrid
-          loading={isLoading}
-          items={[
-            { label: t("pending"), value: dashboard?.pending ?? 0, icon: Clock, color: "warning" },
-            { label: t("in_progress"), value: dashboard?.in_progress ?? 0, icon: ListTodo, color: "info" },
-            { label: t("overdue"), value: dashboard?.overdue ?? 0, icon: AlertTriangle, color: "error" },
-            { label: t("completed"), value: dashboard?.completed ?? 0, icon: CheckCircle2, color: "success" },
-          ]}
-        />
-      }
-    >
-      <TasksTable />
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={<CreateTaskDialog />}
+        stats={
+          <StatsGrid
+            loading={isLoading}
+            items={[
+              {
+                label: t("pending"),
+                value: dashboard?.pending ?? 0,
+                icon: Clock,
+                color: "warning",
+              },
+              {
+                label: t("in_progress"),
+                value: dashboard?.in_progress ?? 0,
+                icon: ListTodo,
+                color: "info",
+              },
+              {
+                label: t("overdue"),
+                value: dashboard?.overdue ?? 0,
+                icon: AlertTriangle,
+                color: "error",
+              },
+              {
+                label: t("completed"),
+                value: dashboard?.completed ?? 0,
+                icon: CheckCircle2,
+                color: "success",
+              },
+            ]}
+          />
+        }
+      >
+        <TasksTable />
       </ConsolePageShell>
     </QueryGuard>
   );

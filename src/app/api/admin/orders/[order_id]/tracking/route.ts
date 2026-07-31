@@ -1,5 +1,5 @@
 import { json_ok, json_error } from "@/lib/http";
-import { shipping_service } from "@/features/shipping_management_system/services/shipping.service";
+import { shipping_service } from "@/features/fulfillment_management_system/shipping/services/shipping.service";
 
 type RouteContext = { params: Promise<{ order_id: string }> };
 

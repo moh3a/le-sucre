@@ -19,13 +19,7 @@ interface FacetedFilterProps {
   onChange: (value: string | null) => void;
 }
 
-export function FacetedFilter({
-  title,
-  options,
-  icon: Icon,
-  value,
-  onChange,
-}: FacetedFilterProps) {
+export function FacetedFilter({ title, options, icon: Icon, value, onChange }: FacetedFilterProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -55,9 +49,7 @@ export function FacetedFilter({
                 orientation="vertical"
                 className="mx-0.5 data-[orientation=vertical]:h-4"
               />
-              <span className="ml-1">
-                {options.find((o) => o.value === value)?.label}
-              </span>
+              <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
         </Button>

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { shipping_webhook_service } =
-      await import("@/features/shipping_management_system/services/shipping-webhook.service");
+      await import("@/features/fulfillment_management_system/shipping/services/shipping-webhook.service");
     await shipping_webhook_service.handle_provider_webhook("yalidine", request.headers, raw_body);
 
     return NextResponse.json({ received: true });

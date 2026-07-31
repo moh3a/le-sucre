@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 
-import { CustomerWishlistsPageClient } from "@/features/wishlist_management_system/components/customer-wishlists-page-client";
+import { CustomerWishlistsPageClient } from "@/features/order_management_system/customers/wishlist/components/customer-wishlists-page-client";
 
 type Props = { params: Promise<{ locale: string }> };
 

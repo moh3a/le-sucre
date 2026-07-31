@@ -1,5 +1,5 @@
 import { AppError } from "@/lib/error_handling";
-import { extract_messages } from "@/features/inventory_management_system/shared/error-codes";
+import { extract_messages } from "@/features/fulfillment_management_system/shared/error-codes";
 import { redact } from "@/lib/security/redaction";
 
 const HTTP_TO_TRPC_CODE: Record<number, string> = {

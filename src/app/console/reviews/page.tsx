@@ -1,4 +1,4 @@
-import { ReviewsPageClient } from "@/features/product_reviews_management/components/reviews-page-client";
+import { ReviewsPageClient } from "@/features/product_information_management/reviews/components/reviews-page-client";
 
 export const metadata = { title: "Avis" };
 

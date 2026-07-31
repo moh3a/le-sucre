@@ -11,9 +11,9 @@ import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MediaPickerDialog } from "@/features/media_library/components/media-picker-dialog";
+import { MediaPickerDialog } from "@/features/system/media_library/components/media-picker-dialog";
 import { full_product_media_dto } from "../../models/product.dto";
-import type { MediaDTO } from "@/features/media_library/types";
+import type { MediaDTO } from "@/features/system/media_library/types";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,

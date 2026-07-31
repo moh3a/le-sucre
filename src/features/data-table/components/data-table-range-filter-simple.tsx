@@ -82,9 +82,7 @@ export function RangeFilter({
                 min={min}
                 max={max}
                 value={minValue ?? ""}
-                onChange={(e) =>
-                  onMinChange(e.target.value ? Number(e.target.value) : null)
-                }
+                onChange={(e) => onMinChange(e.target.value ? Number(e.target.value) : null)}
                 className={unit ? "pr-8" : ""}
               />
               {unit && (
@@ -104,9 +102,7 @@ export function RangeFilter({
                 min={min}
                 max={max}
                 value={maxValue ?? ""}
-                onChange={(e) =>
-                  onMaxChange(e.target.value ? Number(e.target.value) : null)
-                }
+                onChange={(e) => onMaxChange(e.target.value ? Number(e.target.value) : null)}
                 className={unit ? "pr-8" : ""}
               />
               {unit && (

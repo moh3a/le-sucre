@@ -1,6 +1,6 @@
 import { admin_route } from "@/lib/api/admin-handler";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
-import { moderation_service } from "@/features/product_reviews_management/services/moderation.service";
+import { moderation_service } from "@/features/product_information_management/reviews/services/moderation.service";
 import { z } from "zod";
 
 const list_reviews_dto = z.object({

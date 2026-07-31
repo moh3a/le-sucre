@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { formatDate } from "@/lib/format";
-import { ShipmentPanel } from "@/features/shipping_management_system/components/shipment-panel";
+import { ShipmentPanel } from "@/features/fulfillment_management_system/shipping/components/shipment-panel";
 import { ReturnPanel } from "@/features/order_management_system/return_replacement/components/return-panel";
 import { OrderOperationsTab } from "./order-operations-tab";
 import { OrderCommentsTab } from "./order-comments-tab";

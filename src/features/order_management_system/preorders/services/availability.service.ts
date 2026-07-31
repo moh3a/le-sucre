@@ -1,8 +1,8 @@
 // services/availability.service.ts
 import "server-only";
 import { preorder_repository } from "../repositories/preorder.repository";
-import { inventory_repository } from "@/features/inventory_management_system/inventory/repositories/inventory.repository";
-import { demand_forecast_service } from "@/features/inventory_management_system/forecasting/services/demand-forecast.service";
+import { inventory_repository } from "@/features/fulfillment_management_system/inventory/repositories/inventory.repository";
+import { demand_forecast_service } from "@/features/fulfillment_management_system/forecasting/services/demand-forecast.service";
 import { addDays, format } from "date-fns";
 
 export class AvailabilityService {

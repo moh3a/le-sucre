@@ -1,8 +1,8 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { inventory_repository } from "@/features/inventory_management_system/inventory/repositories/inventory.repository";
-import { reservation_service } from "@/features/inventory_management_system/inventory/services/reservation.service";
+import { inventory_repository } from "@/features/fulfillment_management_system/inventory/repositories/inventory.repository";
+import { reservation_service } from "@/features/fulfillment_management_system/inventory/services/reservation.service";
 import { preorder_repository } from "../repositories/preorder.repository";
 import { PREORDER_LINE_STATUS } from "../constants/preorder-status";
 import { order_items, orders } from "@/features/order_management_system/orders/schema";

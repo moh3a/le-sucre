@@ -1,4 +1,4 @@
-import { ShipmentsPageClient } from "@/features/shipping_management_system/components/shipments-page-tabbed";
+import { ShipmentsPageClient } from "@/features/fulfillment_management_system/shipping/components/shipments-page-tabbed";
 
 export const metadata = { title: "Expéditions" };
 
