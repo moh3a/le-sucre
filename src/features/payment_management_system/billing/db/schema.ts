@@ -5,7 +5,6 @@ import {
   json,
   mysqlTable,
   timestamp,
-  uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
@@ -20,7 +19,6 @@ export const invoices = mysqlTable(
     id: varchar("id", { length: 255 })
       .primaryKey()
       .$defaultFn(() => generate_id()),
-    invoice_number: varchar("invoice_number", { length: 64 }).notNull(),
     order_id: varchar("order_id", { length: 255 })
       .notNull()
       .references(() => orders.id, { onDelete: "cascade" }),
@@ -54,7 +52,6 @@ export const invoices = mysqlTable(
     ...softDeleteColumns,
   },
   (t) => [
-    uniqueIndex("invoices_invoice_number_uidx").on(t.invoice_number),
     index("invoices_order_idx").on(t.order_id),
     index("invoices_user_idx").on(t.user_id),
     index("invoices_status_idx").on(t.status),

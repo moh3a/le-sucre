@@ -5,14 +5,7 @@ import { generate_id } from "@/lib/utils";
 import { suppliers, supplier_products, purchase_orders, purchase_order_items } from "../schema";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { AUDIT_ACTION } from "../constants/audit-actions";
-
-let po_counter = 1;
-
-function generate_po_number(): string {
-  const year = new Date().getFullYear();
-  const num = String(po_counter++).padStart(6, "0");
-  return `PO-${year}-${num}`;
-}
+import { build_po_id } from "../helpers/purchase-order-id.helper";
 
 export class ProcurementService {
   // ─── Suppliers ──────────────────────────────────────────────────────────
@@ -73,12 +66,10 @@ export class ProcurementService {
     created_by_user_id: string;
   }) {
     const subtotal = input.items.reduce((s, i) => s + i.unit_cost * i.quantity, 0);
-    const po_number = generate_po_number();
+    const po_id = await build_po_id();
 
-    const po_id = generate_id();
     await db.insert(purchase_orders).values({
       id: po_id,
-      po_number,
       supplier_id: input.supplier_id,
       warehouse_id: input.warehouse_id ?? null,
       status: "draft",
@@ -105,7 +96,7 @@ export class ProcurementService {
       action: AUDIT_ACTION.PURCHASE_ORDER_CREATED,
       resource_type: "purchase_order_id",
       resource_id: po_id,
-      metadata: { po_number, supplier_id: input.supplier_id },
+      metadata: { po_number: po_id, supplier_id: input.supplier_id },
     });
 
     return this.get_po(po_id);

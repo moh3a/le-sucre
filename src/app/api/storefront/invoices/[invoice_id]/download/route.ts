@@ -34,7 +34,7 @@ export async function GET(req: Request, props: { params: Promise<{ invoice_id: s
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${invoice.invoice_number}.pdf"`,
+        "Content-Disposition": `attachment; filename="${invoice.id}.pdf"`,
       },
     });
   } catch (err) {

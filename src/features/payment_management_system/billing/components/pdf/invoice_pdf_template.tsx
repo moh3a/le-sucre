@@ -25,7 +25,7 @@ interface InvoiceItem {
 }
 
 interface InvoicePdfData {
-  invoice_number: string;
+  id: string;
   order_id: string;
   order_number?: string;
   status: string;
@@ -130,7 +130,7 @@ export const InvoicePdfTemplate: React.FC<{
           </View>
           <View style={styles.titleContainer}>
             <Text style={styles.docTitle}>{get_doc_title()}</Text>
-            <Text style={styles.docNumber}>N°: {invoice.invoice_number}</Text>
+            <Text style={styles.docNumber}>N°: {invoice.id}</Text>
             <Text style={styles.dateText}>
               {"Date d'émission: "}
               {format_date(invoice.created_at)}

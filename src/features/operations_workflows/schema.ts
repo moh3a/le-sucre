@@ -186,7 +186,6 @@ export const purchase_orders = mysqlTable(
   "purchase_orders",
   {
     id: varchar("id", { length: 255 }).primaryKey().$defaultFn(() => generate_id()),
-    po_number: varchar("po_number", { length: 64 }).notNull(),
     supplier_id: varchar("supplier_id", { length: 255 }).notNull().references(() => suppliers.id, { onDelete: "cascade" }),
     warehouse_id: varchar("warehouse_id", { length: 255 }).references(() => warehouses.id, { onDelete: "set null" }),
     status: varchar("status", { length: 32 }).notNull().default("draft"),
@@ -204,7 +203,6 @@ export const purchase_orders = mysqlTable(
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },
   (t) => [
-    uniqueIndex("purchase_orders_po_number_uidx").on(t.po_number),
     index("purchase_orders_supplier_idx").on(t.supplier_id),
     index("purchase_orders_status_idx").on(t.status),
   ],

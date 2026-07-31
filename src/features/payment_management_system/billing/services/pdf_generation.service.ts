@@ -24,7 +24,7 @@ export class PdfGenerationService {
     // Generate React PDF template element
     const element = React.createElement(InvoicePdfTemplate, {
       invoice: {
-        invoice_number: invoice_data.invoice_number,
+        id: invoice_data.id,
         order_id: invoice_data.order_id,
         order_number: invoice_data.order_number || invoice_data.order_id,
         status: invoice_data.status,

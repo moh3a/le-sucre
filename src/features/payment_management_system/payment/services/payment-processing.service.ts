@@ -14,6 +14,7 @@ import type { PaymentProviderName } from "../providers/contracts";
 import { PAYMENT_ERROR } from "../constants/error-codes";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { orders } from "@/features/order_management_system/orders/schema";
+import { build_payment_id } from "../payment-id.helper";
 
 export class PaymentProcessingService {
   constructor(private readonly repo = payment_repository) {}
@@ -52,6 +53,7 @@ export class PaymentProcessingService {
     }
 
     const transaction = await this.repo.create_transaction({
+      id: await build_payment_id(),
       order_id: input.order_id,
       user_id: input.actor_user_id ?? order.user_id,
       provider: input.provider,

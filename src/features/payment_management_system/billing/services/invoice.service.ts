@@ -5,7 +5,7 @@ import { invoice_repository } from "../repositories/invoice.repository";
 import { tax_calculation_service } from "./tax_calculation.service";
 import { pdf_generation_service } from "./pdf_generation.service";
 import { email_service } from "./email.service";
-import { generate_sequential_number } from "../helpers/number_generator";
+import { build_invoice_id } from "../helpers/invoice-id.helper";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { INVOICE_ERROR } from "../constants/error-codes";
@@ -41,7 +41,7 @@ export class InvoiceService {
       return this.repo.find_by_id(existing_invoice.id);
     }
 
-    const invoice_number = await generate_sequential_number("INV");
+    const invoice_doc_id = await build_invoice_id("INV");
 
     // Perform tax and subtotal calculations
     const totals = tax_calculation_service.calculate_invoice_totals({
@@ -58,8 +58,7 @@ export class InvoiceService {
     const now_str = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     const new_invoice = {
-      id: generate_id(),
-      invoice_number,
+      id: invoice_doc_id,
       order_id: order.id,
       user_id: order.user_id,
       status: is_paid ? "paid" : "unpaid",
@@ -115,7 +114,7 @@ export class InvoiceService {
       await email_service.send_invoice_email({
         to_email: recipient_email,
         customer_name: (new_invoice.billing_address?.full_name as string) || "Client",
-        invoice_number: invoice.invoice_number,
+        invoice_number: invoice.id,
         amount: invoice.grand_total,
         currency: invoice.currency,
         pdf_buffer,
@@ -151,7 +150,7 @@ export class InvoiceService {
     }
 
     const { order, items } = full_order;
-    const invoice_number = await generate_sequential_number("REF");
+    const invoice_doc_id = await build_invoice_id("REF");
 
     // Map refunded items back to order item metadata to fetch name & code
     const list_items = refund_items.map((ri) => {
@@ -178,8 +177,7 @@ export class InvoiceService {
     const now_str = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     const new_invoice = {
-      id: generate_id(),
-      invoice_number,
+      id: invoice_doc_id,
       order_id: order.id,
       user_id: order.user_id,
       status: "paid", // Refund invoices are settled immediately
@@ -237,7 +235,7 @@ export class InvoiceService {
     }
 
     const { order } = full_order;
-    const invoice_number = await generate_sequential_number("CN");
+    const invoice_doc_id = await build_invoice_id("CN");
     const now_str = new Date().toISOString().slice(0, 19).replace("T", " ");
 
     const totals = tax_calculation_service.calculate_invoice_totals({
@@ -251,8 +249,7 @@ export class InvoiceService {
     });
 
     const new_invoice = {
-      id: generate_id(),
-      invoice_number,
+      id: invoice_doc_id,
       order_id: order.id,
       user_id: order.user_id,
       status: "paid",

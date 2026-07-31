@@ -1,9 +1,9 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { generate_id } from "@/lib/utils";
 import { admin_task_repository as repo } from "../repositories/admin-task.repository";
 import { admin_tasks } from "../schema";
+import { build_task_id } from "../task-id.helper";
 
 export class AdminTaskService {
   async create(input: {
@@ -20,7 +20,7 @@ export class AdminTaskService {
     const [created] = await db
       .insert(admin_tasks)
       .values({
-        id: generate_id(),
+        id: await build_task_id(),
         task_type: input.task_type,
         title: input.title,
         description: input.description ?? null,

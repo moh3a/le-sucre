@@ -57,7 +57,6 @@ type SupplierRow = {
 
 type PORow = {
   id: string;
-  po_number: string;
   supplier_id: string;
   warehouse_id?: string | null;
   status: string;
@@ -633,7 +632,7 @@ function ReceivePODialog({
         <DialogHeader>
           <DialogTitle>
             {t("receive_po_title", {
-              po_number: po?.po_number ?? "",
+              po_number: po?.id ?? "",
             })}
           </DialogTitle>
         </DialogHeader>
@@ -710,9 +709,9 @@ export function PurchaseOrdersListClient() {
   const columns = useMemo<ColumnDef<PORow>[]>(
     () => [
       {
-        accessorKey: "po_number",
+        accessorKey: "id",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("po_number")} />,
-        cell: ({ row }) => <span className="font-medium">{row.original.po_number}</span>,
+        cell: ({ row }) => <span className="font-medium">{row.original.id}</span>,
       },
       {
         accessorKey: "total",

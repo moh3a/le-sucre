@@ -98,7 +98,7 @@ export function InvoicesTab({ order_id }: InvoicesTabProps) {
                 return (
                   <tr key={inv.id}>
                     <td className="px-4 py-3 font-mono text-xs font-medium">
-                      {inv.invoice_number}
+                      {inv.id}
                     </td>
                     <td className="px-4 py-3 text-xs">{type_label}</td>
                     <td className="px-4 py-3">

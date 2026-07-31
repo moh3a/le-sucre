@@ -3,17 +3,15 @@
 ## TODOs
 
 - category image url
-- format task, bon de commande, invoice, payment, like order id
 - https://www.npmjs.com/package/yalidine
 - check if every operation works
 - error: src\lib\compose-refs.ts
 - error: src\hooks\use-network-polling.ts
 - error: src\features\billing_and_finance_system\repositories\invoice.repository.ts
-- lint `features/`
 
 <p align="center">
   <a href="https://github.com/moh3a/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
-  <img src="https://img.shields.io/badge/version-0.4.24-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-0.4.25-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-proprietary-red?style=flat-square" alt="License">
 </p>
 

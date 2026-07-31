@@ -26,7 +26,6 @@ import { InvoiceStatus, InvoiceType } from "../types";
 
 type InvoiceRow = {
   id: string;
-  invoice_number: string;
   type: string;
   status: string;
   grand_total: string;
@@ -115,7 +114,7 @@ export function InvoiceTable() {
   });
 
   const handleDownload = React.useCallback(
-    async (id: string, invoice_number: string) => {
+    async (id: string) => {
       try {
         const res = await fetch(`/api/admin/invoices/${id}/download`);
         if (!res.ok) throw new Error(t("download_failed"));
@@ -123,7 +122,7 @@ export function InvoiceTable() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${invoice_number}.pdf`;
+        a.download = `${id}.pdf`;
         a.click();
         URL.revokeObjectURL(url);
       } catch {
@@ -137,7 +136,7 @@ export function InvoiceTable() {
     () => [
       {
         id: "invoice_number",
-        accessorKey: "invoice_number",
+        accessorKey: "id",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label={t("invoice_number_column")} />
         ),
@@ -146,7 +145,7 @@ export function InvoiceTable() {
             href={`/console/invoices/${row.original.id}`}
             className="font-mono text-sm font-semibold hover:underline"
           >
-            {row.original.invoice_number}
+            {row.original.id}
           </Link>
         ),
       },
@@ -217,7 +216,7 @@ export function InvoiceTable() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleDownload(row.original.id, row.original.invoice_number)}
+              onClick={() => handleDownload(row.original.id)}
             >
               <Download className="size-4" />
             </Button>

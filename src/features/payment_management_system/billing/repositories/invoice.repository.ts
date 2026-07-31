@@ -26,7 +26,7 @@ export class InvoiceRepository {
   }
 
   async find_by_number(invoice_number: string, includeDeleted = false) {
-    const filters: any[] = [eq(invoices.invoice_number, invoice_number)];
+    const filters: any[] = [eq(invoices.id, invoice_number)];
     if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
     const row = await db
       .select()
@@ -130,7 +130,7 @@ export class InvoiceRepository {
     if (search) {
       conds.push(
         or(
-          like(invoices.invoice_number, `%${search}%`),
+          like(invoices.id, `%${search}%`),
           like(invoices.order_id, `%${search}%`),
           like(users.name, `%${search}%`),
         ),
@@ -297,7 +297,6 @@ export class InvoiceRepository {
       db
         .select({
           id: invoices.id,
-          invoice_number: invoices.invoice_number,
           grand_total: invoices.grand_total,
           currency: invoices.currency,
           deleted_at: invoices.deleted_at,

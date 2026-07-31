@@ -3,6 +3,12 @@ import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { customer_relations_repository as repo } from "../repositories/customer-relations.repository";
+import {
+  build_contact_id,
+  build_note_id,
+  build_follow_up_id,
+  build_support_case_id,
+} from "../customer-id.helper";
 
 const CUSTOMER_ERROR = {
   FOLLOW_UP_NOT_FOUND: { code: "FOLLOW_UP_NOT_FOUND", status: 404, message: { fr: "Relance introuvable", en: "Follow-up not found", ar: "لم يتم العثور على المتابعة" } },
@@ -13,7 +19,7 @@ const CUSTOMER_ERROR = {
 export class CustomerRelationsService {
   async log_contact(input: { user_id?: string | null; order_id?: string | null; contact_type: string; direction: string; subject?: string; summary?: string; duration_seconds?: number; handled_by_user_id?: string }) {
     const id = await repo.insert_contact({
-      id: generate_id(), user_id: input.user_id ?? null, order_id: input.order_id ?? null,
+      id: await build_contact_id(), user_id: input.user_id ?? null, order_id: input.order_id ?? null,
       contact_type: input.contact_type, direction: input.direction, subject: input.subject ?? null,
       summary: input.summary ?? null, duration_seconds: input.duration_seconds ?? null,
       handled_by_user_id: input.handled_by_user_id ?? null, metadata: {},
@@ -27,7 +33,7 @@ export class CustomerRelationsService {
 
   async add_note(input: { user_id: string; note_type: string; content: string; created_by_user_id: string }) {
     const id = await repo.insert_note({
-      id: generate_id(), user_id: input.user_id, note_type: input.note_type,
+      id: await build_note_id(), user_id: input.user_id, note_type: input.note_type,
       content: input.content, created_by_user_id: input.created_by_user_id,
     });
     return id;
@@ -42,7 +48,7 @@ export class CustomerRelationsService {
     description?: string; assigned_to_user_id?: string; priority?: string; scheduled_at: string; created_by_user_id: string;
   }) {
     const id = await repo.insert_follow_up({
-      id: generate_id(), user_id: input.user_id ?? null, order_id: input.order_id ?? null,
+      id: await build_follow_up_id(), user_id: input.user_id ?? null, order_id: input.order_id ?? null,
       follow_up_type: input.follow_up_type, title: input.title, description: input.description ?? null,
       assigned_to_user_id: input.assigned_to_user_id ?? null, priority: input.priority ?? "normal",
       status: "pending", scheduled_at: input.scheduled_at, created_by_user_id: input.created_by_user_id,
@@ -70,7 +76,7 @@ export class CustomerRelationsService {
 
   async create_case(input: { user_id?: string | null; order_id?: string | null; subject: string; description: string; category?: string; priority?: string; assigned_to_user_id?: string; created_by_user_id: string }) {
     const id = await repo.insert_case({
-      id: generate_id(), user_id: input.user_id ?? null, order_id: input.order_id ?? null,
+      id: await build_support_case_id(), user_id: input.user_id ?? null, order_id: input.order_id ?? null,
       subject: input.subject, description: input.description, category: input.category ?? "general",
       priority: input.priority ?? "normal", status: "open", assigned_to_user_id: input.assigned_to_user_id ?? null,
       created_by_user_id: input.created_by_user_id,

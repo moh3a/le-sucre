@@ -314,715 +314,722 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
     .filter((s) => !edit_items.some((i) => i.sku_id === s.sku_id));
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<div className="space-y-4">{Array.from({ length: 3 }).map((_, i) => (<div key={i} className="bg-muted h-24 animate-pulse rounded-lg" />))}</div>}>
-    <Tabs defaultValue="general">
-      <TabsList className="mb-4">
-        <TabsTrigger value="general">{t("general_tab")}</TabsTrigger>
-        <TabsTrigger value="items">{t("items_tab")} ({items.length})</TabsTrigger>
-        <TabsTrigger value="shipping">{t("shipping_tab")}</TabsTrigger>
-        <TabsTrigger value="payments">{t("payments_tab")}</TabsTrigger>
-        <TabsTrigger value="invoices">{t("invoices_tab")}</TabsTrigger>
-        <TabsTrigger value="returns">{t("returns_tab")}</TabsTrigger>
-        <TabsTrigger value="operations">{t("operations_tab")}</TabsTrigger>
-        <TabsTrigger value="comments">{t("comments_tab")}</TabsTrigger>
-        <TabsTrigger value="timeline">{t("timeline_tab")}</TabsTrigger>
-      </TabsList>
-
-      {/* ── General ─────────────────────────────────── */}
-      <TabsContent value="general" className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>{t("status_column")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant={STATUS_BADGE[order.status] ?? "secondary"}>
-                {ORDER_LABELS[order.status] ?? order.status}
-              </Badge>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>{t("payment_column")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
-                {PAYMENT_LABELS[order.payment_status] ?? order.payment_status}
-              </Badge>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>{t("shipping_column")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant={FULFILLMENT_BADGE[order.fulfillment_status] ?? "outline"}>
-                {FULFILLMENT_LABELS[order.fulfillment_status] ?? order.fulfillment_status}
-              </Badge>
-            </CardContent>
-          </Card>
+    <QueryGuard
+      query={{ isLoading }}
+      loadingFallback={
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-muted h-24 animate-pulse rounded-lg" />
+          ))}
         </div>
+      }
+    >
+      <Tabs defaultValue="general">
+        <TabsList className="mb-4">
+          <TabsTrigger value="general">{t("general_tab")}</TabsTrigger>
+          <TabsTrigger value="items">
+            {t("items_tab")} ({items.length})
+          </TabsTrigger>
+          <TabsTrigger value="shipping">{t("shipping_tab")}</TabsTrigger>
+          <TabsTrigger value="payments">{t("payments_tab")}</TabsTrigger>
+          <TabsTrigger value="invoices">{t("invoices_tab")}</TabsTrigger>
+          <TabsTrigger value="returns">{t("returns_tab")}</TabsTrigger>
+          <TabsTrigger value="operations">{t("operations_tab")}</TabsTrigger>
+          <TabsTrigger value="comments">{t("comments_tab")}</TabsTrigger>
+          <TabsTrigger value="timeline">{t("timeline_tab")}</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("financial_summary")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t("subtotal")}</span>
-              <span>{Number(order.subtotal).toLocaleString("fr-FR")} DZD</span>
-            </div>
-            {Number(order.discount_total) > 0 && (
-              <div className="flex justify-between text-red-500">
-                <span>{t("discount")}</span>
-                <span>−{Number(order.discount_total).toLocaleString("fr-FR")} DZD</span>
-              </div>
-            )}
-            {Number(order.tax_total) > 0 && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("taxes")}</span>
-                <span>{Number(order.tax_total).toLocaleString("fr-FR")} DZD</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t("shipping")}</span>
-              <span>{Number(order.shipping_total).toLocaleString("fr-FR")} DZD</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between font-semibold">
-              <span>{t("total")}</span>
-              <span>{Number(order.grand_total).toLocaleString("fr-FR")} DZD</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* ── General ─────────────────────────────────── */}
+        <TabsContent value="general" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>{t("status_column")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge variant={STATUS_BADGE[order.status] ?? "secondary"}>
+                  {ORDER_LABELS[order.status] ?? order.status}
+                </Badge>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>{t("payment_column")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
+                  {PAYMENT_LABELS[order.payment_status] ?? order.payment_status}
+                </Badge>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>{t("shipping_column")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge variant={FULFILLMENT_BADGE[order.fulfillment_status] ?? "outline"}>
+                  {FULFILLMENT_LABELS[order.fulfillment_status] ?? order.fulfillment_status}
+                </Badge>
+              </CardContent>
+            </Card>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("change_status")}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex gap-2">
-            <Select onValueChange={set_next_status} value={next_status}>
-              <SelectTrigger className="w-60">
-                <SelectValue placeholder={t("select_status_placeholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.filter((s) => s.value !== order.status).map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              disabled={!next_status || transition.isPending}
-              onClick={() => transition.mutate({ order_id: order.id, status: next_status })}
-            >
-              {t("apply")}
-            </Button>
-            <div className="flex-1" />
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => set_delete_open(true)}
-            >
-              <Trash2 className="mr-1 size-4" />
-              {t("delete")}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("staff_assignment")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-              <div className="flex-1 space-y-1.5">
-                <label className="text-muted-foreground text-xs font-medium">{t("operator_label")}</label>
-                <Select
-                  value={order.assigned_operator_id ?? "unassigned"}
-                  onValueChange={(val) =>
-                    assign_operator.mutate({
-                      order_id: order.id,
-                      operator_id: val === "unassigned" ? null : val,
-                    })
-                  }
-                  disabled={operators_loading || assign_operator.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t("select_operator_placeholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
-                    {operators_data?.map((op) => (
-                      <SelectItem key={op.id} value={op.id}>
-                        {op.name} ({op.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex-1 space-y-1.5">
-                <label className="text-muted-foreground text-xs font-medium">{t("delivery_person_label")}</label>
-                <Select
-                  value={order.assigned_delivery_person_id ?? "unassigned"}
-                  onValueChange={(val) =>
-                    assign_delivery.mutate({
-                      order_id: order.id,
-                      delivery_person_id: val === "unassigned" ? null : val,
-                    })
-                  }
-                  disabled={deliverers_loading || assign_delivery.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t("select_delivery_placeholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
-                    {deliverers_data?.map((del) => (
-                      <SelectItem key={del.id} value={del.id}>
-                        {del.name} ({del.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <NotesCard order_id={order.id} initial_notes={order.notes ?? ""} on_saved={refetch} />
-      </TabsContent>
-
-      {/* ── Items ───────────────────────────────────── */}
-      <TabsContent value="items">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>{t("articles_commande")}</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={init_items_form}>
-                {t("modifier_articles")}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <table className="w-full text-sm">
-              <thead className="border-b">
-                <tr className="text-muted-foreground">
-                  <th className="px-4 py-3 text-left font-medium">{t("produit")}</th>
-                  <th className="px-4 py-3 text-left font-medium">{t("sku")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("qte")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("prix_unitaire")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("total_ligne")}</th>
-                  <th className="px-4 py-3 text-left font-medium">{t("livraison")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {items.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-4 py-3 font-medium">{item.product_name}</td>
-                    <td className="text-muted-foreground px-4 py-3 font-mono text-xs">
-                      {item.sku_code}
-                    </td>
-                    <td className="px-4 py-3 text-right">{item.quantity}</td>
-                    <td className="px-4 py-3 text-right">
-                      {Number(item.unit_price).toLocaleString("fr-FR")} DZD
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium">
-                      {Number(item.line_total).toLocaleString("fr-FR")} DZD
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant="outline">{item.fulfillment_type}</Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-
-        {/* Inline items editor */}
-        {edit_items.length > 0 && (
-          <Card className="mt-4 border-blue-200">
+          <Card>
             <CardHeader>
-              <CardTitle>{t("edition_articles")}</CardTitle>
+              <CardTitle>{t("financial_summary")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("subtotal")}</span>
+                <span>{Number(order.subtotal).toLocaleString("fr-FR")} DZD</span>
+              </div>
+              {Number(order.discount_total) > 0 && (
+                <div className="flex justify-between text-red-500">
+                  <span>{t("discount")}</span>
+                  <span>−{Number(order.discount_total).toLocaleString("fr-FR")} DZD</span>
+                </div>
+              )}
+              {Number(order.tax_total) > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("taxes")}</span>
+                  <span>{Number(order.tax_total).toLocaleString("fr-FR")} DZD</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("shipping")}</span>
+                <span>{Number(order.shipping_total).toLocaleString("fr-FR")} DZD</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between font-semibold">
+                <span>{t("total")}</span>
+                <span>{Number(order.grand_total).toLocaleString("fr-FR")} DZD</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("change_status")}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex gap-2">
+              <Select onValueChange={set_next_status} value={next_status}>
+                <SelectTrigger className="w-60">
+                  <SelectValue placeholder={t("select_status_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.filter((s) => s.value !== order.status).map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={!next_status || transition.isPending}
+                onClick={() => transition.mutate({ order_id: order.id, status: next_status })}
+              >
+                {t("apply")}
+              </Button>
+              <div className="flex-1" />
+              <Button variant="destructive" size="sm" onClick={() => set_delete_open(true)}>
+                <Trash2 className="mr-1 size-4" />
+                {t("delete")}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("staff_assignment")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="divide-y rounded-md border">
-                {edit_items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 px-3 py-2 text-sm">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{item.product_name}</p>
-                      <p className="text-muted-foreground truncate font-mono text-xs">
-                        {item.sku_code}
-                      </p>
-                    </div>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={9999}
-                      value={item.quantity}
-                      onChange={(e) => update_item_qty(item.id, Number(e.target.value))}
-                      className="h-8 w-20 text-xs"
-                    />
-                    <span className="text-muted-foreground w-24 text-right text-xs">
-                      {(item.unit_price * item.quantity).toLocaleString("fr-FR")} DZD
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => remove_item(item.id)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
-                  <span>{t("total")}</span>
-                  <span>{edit_items_total.toLocaleString("fr-FR")} DZD</span>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-muted-foreground text-xs font-medium">
+                    {t("operator_label")}
+                  </label>
+                  <Select
+                    value={order.assigned_operator_id ?? "unassigned"}
+                    onValueChange={(val) =>
+                      assign_operator.mutate({
+                        order_id: order.id,
+                        operator_id: val === "unassigned" ? null : val,
+                      })
+                    }
+                    disabled={operators_loading || assign_operator.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("select_operator_placeholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
+                      {operators_data?.map((op) => (
+                        <SelectItem key={op.id} value={op.id}>
+                          {op.name} ({op.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-muted-foreground text-xs font-medium">
+                    {t("delivery_person_label")}
+                  </label>
+                  <Select
+                    value={order.assigned_delivery_person_id ?? "unassigned"}
+                    onValueChange={(val) =>
+                      assign_delivery.mutate({
+                        order_id: order.id,
+                        delivery_person_id: val === "unassigned" ? null : val,
+                      })
+                    }
+                    disabled={deliverers_loading || assign_delivery.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("select_delivery_placeholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
+                      {deliverers_data?.map((del) => (
+                        <SelectItem key={del.id} value={del.id}>
+                          {del.name} ({del.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-
-              {/* Add item to order */}
-              <div className="rounded-md border p-3">
-                <p className="mb-2 text-xs font-medium">{t("ajouter_article")}</p>
-                <div className="flex flex-wrap items-end gap-2">
-                  <div className="relative min-w-[200px] flex-1">
-                    <Search className="text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2" />
-                    <Input
-                      className="h-8 pl-7 text-xs"
-                      placeholder={t("search_sku_placeholder")}
-                      value={search_query}
-                      onChange={(e) => {
-                        set_search_query(e.target.value);
-                        set_selected_sku_id("");
-                      }}
-                    />
-                  </div>
-                  {search_query && (
-                    <div className="max-h-[120px] w-full overflow-y-auto rounded border text-xs">
-                      {sku_options.length === 0 ? (
-                        <p className="text-muted-foreground p-2">{t("no_results")}</p>
-                      ) : (
-                        sku_options.slice(0, 6).map((sku) => (
-                          <label
-                            key={sku.sku_id}
-                            className={`hover:bg-muted/40 flex cursor-pointer items-center gap-2 px-2 py-1.5 ${
-                              selected_sku_id === sku.sku_id ? "bg-muted/60" : ""
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="sku_add"
-                              checked={selected_sku_id === sku.sku_id}
-                              onChange={() => {
-                                set_selected_sku_id(sku.sku_id);
-                                set_add_price(String(sku.unit_price));
-                              }}
-                            />
-                            <span className="flex-1 truncate">{sku.product_name}</span>
-                            <span className="text-muted-foreground truncate font-mono">
-                              {sku.sku_code}
-                            </span>
-                          </label>
-                        ))
-                      )}
-                    </div>
-                  )}
-                  {selected_sku_id && (
-                    <>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={add_qty}
-                        onChange={(e) => set_add_qty(Math.max(1, Number(e.target.value)))}
-                        className="h-8 w-16 text-xs"
-                        placeholder={t("qty_placeholder")}
-                      />
-                      <Input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={add_price}
-                        onChange={(e) => set_add_price(e.target.value)}
-                        className="h-8 w-24 text-xs"
-                        placeholder={t("unit_price_placeholder")}
-                      />
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="h-8 text-xs"
-                        onClick={add_item_to_list}
-                      >
-                        <Plus className="mr-1 h-3 w-3" />
-                        {t("ajouter")}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="outline" onClick={() => set_edit_items([])}>
-                  {t("annuler")}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={on_save_items}
-                  disabled={update_items.isPending || edit_items.length === 0}
-                >
-                  {update_items.isPending ? t("saving") : t("save_modifications")}
-                </Button>
-              </div>
             </CardContent>
           </Card>
-        )}
 
-        {adjustments.length > 0 && (
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle>{t("ajustements")}</CardTitle>
+          <NotesCard order_id={order.id} initial_notes={order.notes ?? ""} on_saved={refetch} />
+        </TabsContent>
+
+        {/* ── Items ───────────────────────────────────── */}
+        <TabsContent value="items">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <CardTitle>{t("articles_commande")}</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={init_items_form}>
+                  {t("modifier_articles")}
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-1 text-sm">
-              {adjustments.map((adj) => (
-                <div key={adj.id} className="flex justify-between">
-                  <span className="text-muted-foreground">{adj.label}</span>
-                  <span>
-                    {adj.type === "discount" ? "−" : "+"}
-                    {Number(adj.amount).toLocaleString("fr-FR")} DZD
-                  </span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-      </TabsContent>
-
-      {/* ── Shipping ────────────────────────────────── */}
-      <TabsContent value="shipping">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>{t("shipping_address_label")}</CardTitle>
-            <Button size="sm" variant="outline" onClick={init_shipping_form}>
-              {t("modify_address")}
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p className="font-medium">{shipping_addr.full_name}</p>
-            <p>{shipping_addr.phone}</p>
-            <p>{shipping_addr.line1}</p>
-            {shipping_addr.line2 && <p>{shipping_addr.line2}</p>}
-            <p>
-              {shipping_addr.city}
-              {shipping_addr.postal_code ? `, ${shipping_addr.postal_code}` : ""}
-            </p>
-            <p>{shipping_addr.country_code}</p>
-          </CardContent>
-        </Card>
-
-        {/* Inline shipping editor */}
-        {ship_full_name !== "" && (
-          <Card className="mt-4 border-blue-200">
-            <CardHeader>
-              <CardTitle>{t("edit_address_label")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-3 md:grid-cols-2">
-                <Field>
-                  <FieldLabel>{t("full_name")}</FieldLabel>
-                  <Input
-                    value={ship_full_name}
-                    onChange={(e) => set_ship_full_name(e.target.value)}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>{t("telephone")}</FieldLabel>
-                  <Input value={ship_phone} onChange={(e) => set_ship_phone(e.target.value)} />
-                </Field>
-              </div>
-              <Field>
-                <FieldLabel>{t("adresse")}</FieldLabel>
-                <Input value={ship_line1} onChange={(e) => set_ship_line1(e.target.value)} />
-              </Field>
-              <Field>
-                <FieldLabel>{t("complement_adresse")}</FieldLabel>
-                <Input value={ship_line2} onChange={(e) => set_ship_line2(e.target.value)} />
-              </Field>
-              <div className="grid gap-3 md:grid-cols-3">
-                <Field>
-                  <FieldLabel>{t("ville")}</FieldLabel>
-                  <Input value={ship_city} onChange={(e) => set_ship_city(e.target.value)} />
-                </Field>
-                <Field>
-                  <FieldLabel>{t("wilaya_etat")}</FieldLabel>
-                  <Input value={ship_state} onChange={(e) => set_ship_state(e.target.value)} />
-                </Field>
-                <Field>
-                  <FieldLabel>{t("code_postal")}</FieldLabel>
-                  <Input value={ship_postal} onChange={(e) => set_ship_postal(e.target.value)} />
-                </Field>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="outline" onClick={() => set_ship_full_name("")}>
-                  {t("annuler")}
-                </Button>
-                <Button size="sm" onClick={on_save_shipping} disabled={update_shipping.isPending}>
-                  {update_shipping.isPending ? t("saving") : t("enregistrer")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <ShipmentPanel order_id={order_id} />
-      </TabsContent>
-
-      {/* ── Payments ────────────────────────────────── */}
-      <TabsContent value="payments">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>{t("payment_info")}</CardTitle>
-            <Button size="sm" variant="outline" onClick={init_payment_form}>
-              {t("modify_payment")}
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">{t("statut")}</span>
-              <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
-                {PAYMENT_LABELS[order.payment_status] ?? order.payment_status}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">{t("prestataire")}</span>
-              <span>{order.payment_provider ?? "—"}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">{t("reference")}</span>
-              <span className="font-mono text-xs">{order.payment_reference ?? "—"}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground w-36">{t("montant_total")}</span>
-              <span className="font-semibold">
-                {Number(order.grand_total).toLocaleString("fr-FR")} DZD
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Inline payment editor */}
-        {pay_status && (
-          <Card className="mt-4 border-blue-200">
-            <CardHeader>
-              <CardTitle>{t("edit_payment_label")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Field>
-                <FieldLabel>{t("statut")}</FieldLabel>
-                <Select value={pay_status} onValueChange={set_pay_status}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAYMENT_STATUS_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field>
-                <FieldLabel>{t("prestataire")}</FieldLabel>
-                <Input
-                  value={pay_provider}
-                  onChange={(e) => set_pay_provider(e.target.value)}
-                  placeholder={t("payment_method_placeholder")}
-                />
-              </Field>
-              <Field>
-                <FieldLabel>{t("reference")}</FieldLabel>
-                <Input
-                  value={pay_reference}
-                  onChange={(e) => set_pay_reference(e.target.value)}
-                  placeholder={t("transaction_id_placeholder")}
-                />
-              </Field>
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="outline" onClick={() => set_pay_status("")}>
-                  {t("annuler")}
-                </Button>
-                <Button size="sm" onClick={on_save_payment} disabled={update_payment.isPending}>
-                  {update_payment.isPending ? t("saving") : t("enregistrer")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </TabsContent>
-
-      {/* ── Invoices ────────────────────────────────── */}
-      <TabsContent value="invoices" className="space-y-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
-            <CardTitle>{t("invoices_liees")}</CardTitle>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => generate_invoice.mutate({ order_id: order.id })}
-              disabled={generate_invoice.isPending}
-            >
-              <FileText className="mr-1 h-3 w-3" />
-              {t("generer_facture")}
-            </Button>
-          </CardHeader>
-          <CardContent className="p-0">
-            {!invoices_data || invoices_data.length === 0 ? (
-              <p className="text-muted-foreground p-4 text-sm">
-                {t("no_invoices")}
-              </p>
-            ) : (
+            <CardContent className="p-0">
               <table className="w-full text-sm">
                 <thead className="border-b">
                   <tr className="text-muted-foreground">
-                    <th className="px-4 py-3 text-left font-medium">{t("invoice_number_col")}</th>
-                    <th className="px-4 py-3 text-left font-medium">{t("type_col")}</th>
-                    <th className="px-4 py-3 text-left font-medium">{t("statut_col")}</th>
-                    <th className="px-4 py-3 text-right font-medium">{t("montant_col")}</th>
-                    <th className="px-4 py-3 text-left font-medium">{t("created_on_col")}</th>
-                    <th className="px-4 py-3 text-center font-medium">{t("actions")}</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("produit")}</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("sku")}</th>
+                    <th className="px-4 py-3 text-right font-medium">{t("qte")}</th>
+                    <th className="px-4 py-3 text-right font-medium">{t("prix_unitaire")}</th>
+                    <th className="px-4 py-3 text-right font-medium">{t("total_ligne")}</th>
+                    <th className="px-4 py-3 text-left font-medium">{t("livraison")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {invoices_data.map((inv) => {
-                    const type_label =
-                      inv.type === "order_invoice"
-                        ? t("invoice_type_order")
-                        : inv.type === "refund_invoice"
-                          ? t("invoice_type_refund")
-                          : t("invoice_type_credit");
-                    const status_label =
-                      inv.status === "unpaid"
-                        ? t("invoice_status_unpaid")
-                        : inv.status === "paid"
-                          ? t("invoice_status_paid")
-                          : inv.status === "void"
-                            ? t("invoice_status_void")
-                            : inv.status === "refunded"
-                              ? t("invoice_status_refunded")
-                              : t("invoice_status_partially_refunded");
-                    const status_variant: Record<
-                      string,
-                      "default" | "secondary" | "destructive" | "outline"
-                    > = {
-                      unpaid: "outline",
-                      paid: "default",
-                      void: "destructive",
-                      refunded: "secondary",
-                      partially_refunded: "secondary",
-                    };
-                    return (
-                      <tr key={inv.id}>
-                        <td className="px-4 py-3 font-mono text-xs font-medium">
-                          {inv.invoice_number}
-                        </td>
-                        <td className="px-4 py-3 text-xs">{type_label}</td>
-                        <td className="px-4 py-3">
-                          <Badge variant={status_variant[inv.status] ?? "outline"}>
-                            {status_label}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right font-medium">
-                          {Number(inv.grand_total).toLocaleString("fr-FR")} DZD
-                        </td>
-                        <td className="text-muted-foreground px-4 py-3 text-xs">
-                          {formatDate(inv.created_at, {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-7 text-xs"
-                              onClick={() =>
-                                window.open(`/api/admin/invoices/${inv.id}/download`, "_blank")
-                              }
+                  {items.map((item) => (
+                    <tr key={item.id}>
+                      <td className="px-4 py-3 font-medium">{item.product_name}</td>
+                      <td className="text-muted-foreground px-4 py-3 font-mono text-xs">
+                        {item.sku_code}
+                      </td>
+                      <td className="px-4 py-3 text-right">{item.quantity}</td>
+                      <td className="px-4 py-3 text-right">
+                        {Number(item.unit_price).toLocaleString("fr-FR")} DZD
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium">
+                        {Number(item.line_total).toLocaleString("fr-FR")} DZD
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline">{item.fulfillment_type}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+
+          {/* Inline items editor */}
+          {edit_items.length > 0 && (
+            <Card className="mt-4 border-blue-200">
+              <CardHeader>
+                <CardTitle>{t("edition_articles")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="divide-y rounded-md border">
+                  {edit_items.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{item.product_name}</p>
+                        <p className="text-muted-foreground truncate font-mono text-xs">
+                          {item.sku_code}
+                        </p>
+                      </div>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={9999}
+                        value={item.quantity}
+                        onChange={(e) => update_item_qty(item.id, Number(e.target.value))}
+                        className="h-8 w-20 text-xs"
+                      />
+                      <span className="text-muted-foreground w-24 text-right text-xs">
+                        {(item.unit_price * item.quantity).toLocaleString("fr-FR")} DZD
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => remove_item(item.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
+                    <span>{t("total")}</span>
+                    <span>{edit_items_total.toLocaleString("fr-FR")} DZD</span>
+                  </div>
+                </div>
+
+                {/* Add item to order */}
+                <div className="rounded-md border p-3">
+                  <p className="mb-2 text-xs font-medium">{t("ajouter_article")}</p>
+                  <div className="flex flex-wrap items-end gap-2">
+                    <div className="relative min-w-50 flex-1">
+                      <Search className="text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2" />
+                      <Input
+                        className="h-8 pl-7 text-xs"
+                        placeholder={t("search_sku_placeholder")}
+                        value={search_query}
+                        onChange={(e) => {
+                          set_search_query(e.target.value);
+                          set_selected_sku_id("");
+                        }}
+                      />
+                    </div>
+                    {search_query && (
+                      <div className="max-h-30 w-full overflow-y-auto rounded border text-xs">
+                        {sku_options.length === 0 ? (
+                          <p className="text-muted-foreground p-2">{t("no_results")}</p>
+                        ) : (
+                          sku_options.slice(0, 6).map((sku) => (
+                            <label
+                              key={sku.sku_id}
+                              className={`hover:bg-muted/40 flex cursor-pointer items-center gap-2 px-2 py-1.5 ${
+                                selected_sku_id === sku.sku_id ? "bg-muted/60" : ""
+                              }`}
                             >
-                              {t("voir")}
-                            </Button>
-                            {inv.status === "unpaid" && (
+                              <input
+                                type="radio"
+                                name="sku_add"
+                                checked={selected_sku_id === sku.sku_id}
+                                onChange={() => {
+                                  set_selected_sku_id(sku.sku_id);
+                                  set_add_price(String(sku.unit_price));
+                                }}
+                              />
+                              <span className="flex-1 truncate">{sku.product_name}</span>
+                              <span className="text-muted-foreground truncate font-mono">
+                                {sku.sku_code}
+                              </span>
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    {selected_sku_id && (
+                      <>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={add_qty}
+                          onChange={(e) => set_add_qty(Math.max(1, Number(e.target.value)))}
+                          className="h-8 w-16 text-xs"
+                          placeholder={t("qty_placeholder")}
+                        />
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={add_price}
+                          onChange={(e) => set_add_price(e.target.value)}
+                          className="h-8 w-24 text-xs"
+                          placeholder={t("unit_price_placeholder")}
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-8 text-xs"
+                          onClick={add_item_to_list}
+                        >
+                          <Plus className="mr-1 h-3 w-3" />
+                          {t("ajouter")}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button size="sm" variant="outline" onClick={() => set_edit_items([])}>
+                    {t("annuler")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={on_save_items}
+                    disabled={update_items.isPending || edit_items.length === 0}
+                  >
+                    {update_items.isPending ? t("saving") : t("save_modifications")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {adjustments.length > 0 && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>{t("ajustements")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm">
+                {adjustments.map((adj) => (
+                  <div key={adj.id} className="flex justify-between">
+                    <span className="text-muted-foreground">{adj.label}</span>
+                    <span>
+                      {adj.type === "discount" ? "−" : "+"}
+                      {Number(adj.amount).toLocaleString("fr-FR")} DZD
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* ── Shipping ────────────────────────────────── */}
+        <TabsContent value="shipping">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <CardTitle>{t("shipping_address_label")}</CardTitle>
+              <Button size="sm" variant="outline" onClick={init_shipping_form}>
+                {t("modify_address")}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <p className="font-medium">{shipping_addr.full_name}</p>
+              <p>{shipping_addr.phone}</p>
+              <p>{shipping_addr.line1}</p>
+              {shipping_addr.line2 && <p>{shipping_addr.line2}</p>}
+              <p>
+                {shipping_addr.city}
+                {shipping_addr.postal_code ? `, ${shipping_addr.postal_code}` : ""}
+              </p>
+              <p>{shipping_addr.country_code}</p>
+            </CardContent>
+          </Card>
+
+          {/* Inline shipping editor */}
+          {ship_full_name !== "" && (
+            <Card className="mt-4 border-blue-200">
+              <CardHeader>
+                <CardTitle>{t("edit_address_label")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field>
+                    <FieldLabel>{t("full_name")}</FieldLabel>
+                    <Input
+                      value={ship_full_name}
+                      onChange={(e) => set_ship_full_name(e.target.value)}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("telephone")}</FieldLabel>
+                    <Input value={ship_phone} onChange={(e) => set_ship_phone(e.target.value)} />
+                  </Field>
+                </div>
+                <Field>
+                  <FieldLabel>{t("adresse")}</FieldLabel>
+                  <Input value={ship_line1} onChange={(e) => set_ship_line1(e.target.value)} />
+                </Field>
+                <Field>
+                  <FieldLabel>{t("complement_adresse")}</FieldLabel>
+                  <Input value={ship_line2} onChange={(e) => set_ship_line2(e.target.value)} />
+                </Field>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <Field>
+                    <FieldLabel>{t("ville")}</FieldLabel>
+                    <Input value={ship_city} onChange={(e) => set_ship_city(e.target.value)} />
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("wilaya_etat")}</FieldLabel>
+                    <Input value={ship_state} onChange={(e) => set_ship_state(e.target.value)} />
+                  </Field>
+                  <Field>
+                    <FieldLabel>{t("code_postal")}</FieldLabel>
+                    <Input value={ship_postal} onChange={(e) => set_ship_postal(e.target.value)} />
+                  </Field>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button size="sm" variant="outline" onClick={() => set_ship_full_name("")}>
+                    {t("annuler")}
+                  </Button>
+                  <Button size="sm" onClick={on_save_shipping} disabled={update_shipping.isPending}>
+                    {update_shipping.isPending ? t("saving") : t("enregistrer")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <ShipmentPanel order_id={order_id} />
+        </TabsContent>
+
+        {/* ── Payments ────────────────────────────────── */}
+        <TabsContent value="payments">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <CardTitle>{t("payment_info")}</CardTitle>
+              <Button size="sm" variant="outline" onClick={init_payment_form}>
+                {t("modify_payment")}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground w-36">{t("statut")}</span>
+                <Badge variant={PAYMENT_BADGE[order.payment_status] ?? "outline"}>
+                  {PAYMENT_LABELS[order.payment_status] ?? order.payment_status}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground w-36">{t("prestataire")}</span>
+                <span>{order.payment_provider ?? "—"}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground w-36">{t("reference")}</span>
+                <span className="font-mono text-xs">{order.payment_reference ?? "—"}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground w-36">{t("montant_total")}</span>
+                <span className="font-semibold">
+                  {Number(order.grand_total).toLocaleString("fr-FR")} DZD
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inline payment editor */}
+          {pay_status && (
+            <Card className="mt-4 border-blue-200">
+              <CardHeader>
+                <CardTitle>{t("edit_payment_label")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Field>
+                  <FieldLabel>{t("statut")}</FieldLabel>
+                  <Select value={pay_status} onValueChange={set_pay_status}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field>
+                  <FieldLabel>{t("prestataire")}</FieldLabel>
+                  <Input
+                    value={pay_provider}
+                    onChange={(e) => set_pay_provider(e.target.value)}
+                    placeholder={t("payment_method_placeholder")}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>{t("reference")}</FieldLabel>
+                  <Input
+                    value={pay_reference}
+                    onChange={(e) => set_pay_reference(e.target.value)}
+                    placeholder={t("transaction_id_placeholder")}
+                  />
+                </Field>
+                <div className="flex justify-end gap-2">
+                  <Button size="sm" variant="outline" onClick={() => set_pay_status("")}>
+                    {t("annuler")}
+                  </Button>
+                  <Button size="sm" onClick={on_save_payment} disabled={update_payment.isPending}>
+                    {update_payment.isPending ? t("saving") : t("enregistrer")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* ── Invoices ────────────────────────────────── */}
+        <TabsContent value="invoices" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <CardTitle>{t("invoices_liees")}</CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => generate_invoice.mutate({ order_id: order.id })}
+                disabled={generate_invoice.isPending}
+              >
+                <FileText className="mr-1 h-3 w-3" />
+                {t("generer_facture")}
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              {!invoices_data || invoices_data.length === 0 ? (
+                <p className="text-muted-foreground p-4 text-sm">{t("no_invoices")}</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="border-b">
+                    <tr className="text-muted-foreground">
+                      <th className="px-4 py-3 text-left font-medium">{t("invoice_number_col")}</th>
+                      <th className="px-4 py-3 text-left font-medium">{t("type_col")}</th>
+                      <th className="px-4 py-3 text-left font-medium">{t("statut_col")}</th>
+                      <th className="px-4 py-3 text-right font-medium">{t("montant_col")}</th>
+                      <th className="px-4 py-3 text-left font-medium">{t("created_on_col")}</th>
+                      <th className="px-4 py-3 text-center font-medium">{t("actions")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {invoices_data.map((inv) => {
+                      const type_label =
+                        inv.type === "order_invoice"
+                          ? t("invoice_type_order")
+                          : inv.type === "refund_invoice"
+                            ? t("invoice_type_refund")
+                            : t("invoice_type_credit");
+                      const status_label =
+                        inv.status === "unpaid"
+                          ? t("invoice_status_unpaid")
+                          : inv.status === "paid"
+                            ? t("invoice_status_paid")
+                            : inv.status === "void"
+                              ? t("invoice_status_void")
+                              : inv.status === "refunded"
+                                ? t("invoice_status_refunded")
+                                : t("invoice_status_partially_refunded");
+                      const status_variant: Record<
+                        string,
+                        "default" | "secondary" | "destructive" | "outline"
+                      > = {
+                        unpaid: "outline",
+                        paid: "default",
+                        void: "destructive",
+                        refunded: "secondary",
+                        partially_refunded: "secondary",
+                      };
+                      return (
+                        <tr key={inv.id}>
+                          <td className="px-4 py-3 font-mono text-xs font-medium">{inv.id}</td>
+                          <td className="px-4 py-3 text-xs">{type_label}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={status_variant[inv.status] ?? "outline"}>
+                              {status_label}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right font-medium">
+                            {Number(inv.grand_total).toLocaleString("fr-FR")} DZD
+                          </td>
+                          <td className="text-muted-foreground px-4 py-3 text-xs">
+                            {formatDate(inv.created_at, {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-1">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 className="h-7 text-xs"
-                                onClick={() => mark_invoice_paid.mutate({ id: inv.id })}
-                                disabled={mark_invoice_paid.isPending}
+                                onClick={() =>
+                                  window.open(`/api/admin/invoices/${inv.id}/download`, "_blank")
+                                }
                               >
-                                {t("mark_paid")}
+                                {t("voir")}
                               </Button>
-                            )}
-                            {(inv.status === "unpaid" || inv.status === "paid") && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 text-xs text-red-500"
-                                onClick={() => void_invoice.mutate({ id: inv.id })}
-                                disabled={void_invoice.isPending}
-                              >
-                                {t("annuler")}
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </CardContent>
-        </Card>
-      </TabsContent>
+                              {inv.status === "unpaid" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => mark_invoice_paid.mutate({ id: inv.id })}
+                                  disabled={mark_invoice_paid.isPending}
+                                >
+                                  {t("mark_paid")}
+                                </Button>
+                              )}
+                              {(inv.status === "unpaid" || inv.status === "paid") && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs text-red-500"
+                                  onClick={() => void_invoice.mutate({ id: inv.id })}
+                                  disabled={void_invoice.isPending}
+                                >
+                                  {t("annuler")}
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* ── Returns & Replacements ──────────────────── */}
-      <TabsContent value="returns">
-        <ReturnPanel
-          order_id={order.id}
-          items={items.map((i) => ({
-            id: i.id,
-            sku_id: i.sku_id,
-            product_name: i.product_name,
-            sku_code: i.sku_code,
-            quantity: i.quantity,
-            unit_price: i.unit_price,
-          }))}
-          order_status={order.status}
-          on_update={refetch}
-        />
-      </TabsContent>
+        {/* ── Returns & Replacements ──────────────────── */}
+        <TabsContent value="returns">
+          <ReturnPanel
+            order_id={order.id}
+            items={items.map((i) => ({
+              id: i.id,
+              sku_id: i.sku_id,
+              product_name: i.product_name,
+              sku_code: i.sku_code,
+              quantity: i.quantity,
+              unit_price: i.unit_price,
+            }))}
+            order_status={order.status}
+            on_update={refetch}
+          />
+        </TabsContent>
 
-      {/* ── Operations ──────────────────────────────── */}
-      <TabsContent value="operations">
-        <OrderOperationsTab order_id={order.id} order_status={order.status} />
-      </TabsContent>
+        {/* ── Operations ──────────────────────────────── */}
+        <TabsContent value="operations">
+          <OrderOperationsTab order_id={order.id} order_status={order.status} />
+        </TabsContent>
 
-      {/* ── Comments ────────────────────────────────── */}
-      <TabsContent value="comments">
-        <OrderCommentsTab order_id={order.id} />
-      </TabsContent>
+        {/* ── Comments ────────────────────────────────── */}
+        <TabsContent value="comments">
+          <OrderCommentsTab order_id={order.id} />
+        </TabsContent>
 
-      {/* ── Timeline ────────────────────────────────── */}
-      <TabsContent value="timeline">
-        <TimelineTab order_id={order.id} />
-      </TabsContent>
+        {/* ── Timeline ────────────────────────────────── */}
+        <TabsContent value="timeline">
+          <TimelineTab order_id={order.id} />
+        </TabsContent>
       </Tabs>
 
       <DeleteOrderDialog

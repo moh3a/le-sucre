@@ -70,7 +70,6 @@ type BillingAddress = {
 type Invoice = {
   id: string;
   order_id: string;
-  invoice_number: string;
   type: string;
   status: string;
   currency: string;
@@ -139,7 +138,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
     onSuccess: async (_data, variables) => {
       await utils.invoices.list_invoices.invalidate();
       toast.success(t("deleted"), {
-        description: invoice?.invoice_number ?? variables.id,
+        description: invoice?.id ?? variables.id,
         action: {
           label: tc("undo"),
           onClick: async () => {
@@ -171,7 +170,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${invoice.invoice_number}.pdf`;
+      a.download = `${invoice.id}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -210,7 +209,7 @@ export function InvoiceDetailClient({ id }: { id: string }) {
           <div className="flex items-center gap-3">
             <FileText className="text-muted-foreground size-5" />
             <div>
-              <h3 className="font-mono text-lg font-bold">{invoice.invoice_number}</h3>
+              <h3 className="font-mono text-lg font-bold">{invoice.id}</h3>
               <p className="text-muted-foreground text-sm">
                 {TYPE_LABEL[invoice.type] ?? invoice.type} ·{" "}
                 {formatDate(invoice.created_at, { month: "long" })}
