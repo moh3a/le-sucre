@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { ExternalLink, Loader2, RefreshCcw, ToggleLeft, Truck } from "lucide-react";
+import { ExternalLink, Loader2, Printer, RefreshCcw, ToggleLeft, Truck } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ type ShipmentRow = {
   provider: string;
   tracking_number: string | null;
   tracking_url: string | null;
+  label_url: string | null;
   status: string;
   delivery_status: string;
   recipient_name: string;
@@ -156,6 +157,16 @@ export function ShippingTable({ compact = false }: { compact?: boolean }) {
         header: t("actions"),
         cell: ({ row }) => (
           <div className="flex items-center gap-1">
+            {row.original.label_url ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                title={t("print_label")}
+                onClick={() => window.open(row.original.label_url!, "_blank", "noopener,noreferrer")}
+              >
+                <Printer className="size-4" />
+              </Button>
+            ) : null}
             {row.original.tracking_url ? (
               <Button variant="ghost" size="icon" asChild>
                 <a href={row.original.tracking_url} target="_blank" rel="noreferrer">

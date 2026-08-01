@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, Loader2, RefreshCcw } from "lucide-react";
+import { ExternalLink, Loader2, Printer, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -29,11 +29,28 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
     onError: (err) => toast.error(err.message),
   });
 
+  const label_mutation = trpc.shipping.getLabel.useMutation({
+    onSuccess: (result) => {
+      toast.success(t("label_ready"));
+      window.open(result.label_url, "_blank", "noopener,noreferrer");
+      void refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   if (!data) {
     return <p className="text-muted-foreground text-sm">{t("shipment_not_found")}</p>;
   }
 
   const { shipment, tracking_events } = data;
+
+  function open_label() {
+    if (shipment.label_url) {
+      window.open(shipment.label_url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    label_mutation.mutate({ shipment_id });
+  }
 
   return (
     <QueryGuard query={{ isLoading, error }}>
@@ -50,6 +67,19 @@ export function ShipmentDetailClient({ shipment_id }: { shipment_id: string }) {
                   </a>
                 </Button>
               ) : null}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!shipment.tracking_number || label_mutation.isPending}
+                onClick={open_label}
+              >
+                {label_mutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Printer className="mr-2 h-4 w-4" />
+                )}
+                {t("print_label")}
+              </Button>
               <Button
                 size="sm"
                 disabled={!shipment.tracking_number || sync_mutation.isPending}

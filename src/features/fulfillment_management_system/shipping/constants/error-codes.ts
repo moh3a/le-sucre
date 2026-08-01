@@ -73,6 +73,33 @@ export const SHIPPING_ERROR = {
       ar: "فشل الحصول على عرض أسعار الشحن",
     },
   },
+  QUOTE_NOT_SUPPORTED: {
+    code: "SHIPPING_QUOTE_NOT_SUPPORTED",
+    status: 400,
+    message: {
+      fr: "Ce transporteur ne propose pas de devis en ligne",
+      en: "This shipping provider does not offer online quotes",
+      ar: "شركة الشحن هذه لا توفر عرض أسعار عبر الإنترنت",
+    },
+  },
+  LABEL_NOT_AVAILABLE: {
+    code: "SHIPPING_LABEL_NOT_AVAILABLE",
+    status: 404,
+    message: {
+      fr: "Aucune étiquette d'expédition disponible",
+      en: "No shipping label available",
+      ar: "لا تتوفر ملصق شحن",
+    },
+  },
+  PROVIDER_HISTORY_UNAVAILABLE: {
+    code: "SHIPPING_PROVIDER_HISTORY_UNAVAILABLE",
+    status: 404,
+    message: {
+      fr: "L'historique du transporteur n'est pas disponible pour ce transporteur",
+      en: "Provider history is not available for this carrier",
+      ar: "سجل شركة الشحن غير متاح لهذه الشركة",
+    },
+  },
   CREATION_FAILED: {
     code: "SHIPPING_CREATION_FAILED",
     status: 502,

@@ -1,4 +1,4 @@
-export type ShippingProviderName = "yalidine" | "dhl" | "fedex" | "ups" | "ems";
+import type { ShippingProviderName } from "../types";
 
 export type ShippingQuoteInput = {
   from_city?: string;
@@ -7,7 +7,7 @@ export type ShippingQuoteInput = {
   weight_kg: number;
   cod_amount?: number;
   is_cod: boolean;
-};
+}; 
 
 export type ShippingQuoteResult = {
   provider: ShippingProviderName;
@@ -39,8 +39,28 @@ export type CreateShipmentResult = {
   provider_shipment_id: string;
   tracking_number: string;
   tracking_url?: string | null;
+  label_url?: string | null;
   status: string;
   raw_payload?: Record<string, unknown>;
+};
+
+export type ProviderStatusBucket = "in_transit" | "delivered" | "failed" | "returned" | "unknown";
+
+export type ProviderShipmentItem = {
+  provider_shipment_id: string;
+  tracking_number: string;
+  status_bucket: ProviderStatusBucket;
+  label_url?: string | null;
+  recipient_name?: string;
+  city?: string;
+  price?: string;
+  updated_at?: string | null;
+  raw_payload?: Record<string, unknown>;
+};
+
+export type ProviderShipmentList = {
+  items: ProviderShipmentItem[];
+  total: number;
 };
 
 export type TrackingEvent = {
@@ -56,7 +76,7 @@ export type TrackingResult = {
   status: string;
   delivery_status: string;
   tracking_number?: string;
-  tracking_url?: string;
+  tracking_url?: string | null;
   events: TrackingEvent[];
   raw_payload?: Record<string, unknown>;
 };
@@ -68,4 +88,11 @@ export interface ShippingProviderAdapter {
   get_tracking(tracking_number: string): Promise<TrackingResult>;
   verify_webhook?(headers: Headers, raw_body: string): Promise<boolean>;
   parse_webhook?(payload: unknown): Promise<{ tracking_number: string } | null>;
+  supports_quote?: boolean;
+  list_shipments?(input: {
+    page: number;
+    page_size?: number;
+    status?: string;
+  }): Promise<ProviderShipmentList>;
+  get_label?(tracking_number: string): Promise<string>;
 }

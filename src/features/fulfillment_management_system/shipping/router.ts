@@ -7,12 +7,13 @@ import {
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { shipping_service } from "./services/shipping.service";
 import { shipping_repository } from "./repository";
+import { shippingProviderNamesSchema } from "./types";
 
 export const shipping_router = create_trpc_router({
   quote: public_procedure
     .input(
       z.object({
-        provider: z.enum(["yalidine", "dhl", "fedex", "ups", "ems"]),
+        provider: shippingProviderNamesSchema,
         to_city: z.string().min(1),
         country_code: z.string().length(2),
         weight_kg: z.number().positive(),
@@ -50,11 +51,26 @@ export const shipping_router = create_trpc_router({
     shipping_repository.admin_stats(),
   ),
 
+  providerOverview: permission_procedure(PERMISSIONS.shipping_read)
+    .input(
+      z.object({
+        provider: shippingProviderNamesSchema,
+        page: z.number().int().min(1).default(1),
+        page_size: z.number().int().min(1).max(100).default(20),
+        status: z.string().optional(),
+      }),
+    )
+    .query(({ input }) => shipping_service.provider_overview(input)),
+
+  getLabel: permission_procedure(PERMISSIONS.orders_write)
+    .input(z.object({ shipment_id: z.string().min(1) }))
+    .mutation(({ input }) => shipping_service.get_shipment_label(input.shipment_id)),
+
   create: permission_procedure(PERMISSIONS.orders_write)
     .input(
       z.object({
         order_id: z.string().min(1),
-        provider: z.enum(["yalidine", "dhl", "fedex", "ups", "ems"]),
+        provider: shippingProviderNamesSchema,
         weight_kg: z.number().positive(),
       }),
     )

@@ -1859,7 +1859,22 @@
     "create_shipment_title": "Create a shipment",
     "create_shipment_desc": "Create a new shipment for an order.",
     "create_shipment_button": "Create shipment",
-    "new_shipment": "New shipment"
+    "new_shipment": "New shipment",
+    "tab_carrier_overview": "Carrier Overview",
+    "tab_description_carrier_overview": "Live parcels and performance directly from the carrier",
+    "provider_overview_title": "Carrier overview",
+    "provider_history_title": "Carrier parcels",
+    "stats_provider_total": "Total parcels",
+    "stats_provider_in_transit": "In transit",
+    "stats_provider_delivered": "Delivered",
+    "stats_provider_failed": "Failed",
+    "stats_provider_returned": "Returned",
+    "refresh": "Refresh",
+    "not_available": "not available",
+    "print_label": "Print label",
+    "label_ready": "Label ready",
+    "price": "Price",
+    "updated_at": "Updated at"
   },
   "delivery_attempts": {
     "delivery_title": "Deliveries",

@@ -3,7 +3,6 @@ import "server-only";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { SHIPPING_ERROR } from "../../constants/error-codes";
-import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
 import { shipping_repository } from "@/features/fulfillment_management_system/shipping/repository";
 import { delivery_repository as repo } from "../repositories/delivery.repository";
@@ -55,7 +54,9 @@ export class DeliveryService {
     });
 
     if (input.status === "successful") {
-      await shipping_repository.update_shipment(input.shipment_id, { delivery_status: "delivered" });
+      await shipping_repository.update_shipment(input.shipment_id, {
+        delivery_status: "delivered",
+      });
       await order_repository.update_order_status(input.order_id, "delivered", {
         fulfillment_status: "fulfilled",
       });
@@ -85,7 +86,11 @@ export class DeliveryService {
     return repo.get_attempts_by_shipment(shipment_id);
   }
 
-  async retry_delivery(input: { order_id: string; scheduled_at: string; delivery_person_id?: string }) {
+  async retry_delivery(input: {
+    order_id: string;
+    scheduled_at: string;
+    delivery_person_id?: string;
+  }) {
     const order = await order_repository.find_by_id(input.order_id);
     if (!order) throw_error(SHIPPING_ERROR.ORDER_NOT_FOUND);
 

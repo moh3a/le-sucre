@@ -18,10 +18,30 @@ export function DeliveryAttemptsContent() {
       <StatsGrid
         loading={isLoading}
         items={[
-          { label: t("stats_successful"), value: stats?.total_successful ?? 0, icon: Truck, color: "success" },
-          { label: t("stats_failed"), value: stats?.total_failed ?? 0, icon: XCircle, color: "error" },
-          { label: t("stats_today_failed"), value: stats?.today_failed ?? 0, icon: AlertTriangle, color: "error" },
-          { label: t("stats_rto"), value: stats?.total_rto ?? 0, icon: RotateCcw, color: "warning" },
+          {
+            label: t("stats_successful"),
+            value: stats?.total_successful ?? 0,
+            icon: Truck,
+            color: "success",
+          },
+          {
+            label: t("stats_failed"),
+            value: stats?.total_failed ?? 0,
+            icon: XCircle,
+            color: "error",
+          },
+          {
+            label: t("stats_today_failed"),
+            value: stats?.today_failed ?? 0,
+            icon: AlertTriangle,
+            color: "error",
+          },
+          {
+            label: t("stats_rto"),
+            value: stats?.total_rto ?? 0,
+            icon: RotateCcw,
+            color: "warning",
+          },
         ]}
       />
       <DeliveryAttemptsTable />
@@ -43,10 +63,30 @@ export function DeliveryPageClient() {
           <StatsGrid
             loading={isLoading}
             items={[
-              { label: t("stats_successful"), value: stats?.total_successful ?? 0, icon: Truck, color: "success" },
-              { label: t("stats_failed"), value: stats?.total_failed ?? 0, icon: XCircle, color: "error" },
-              { label: t("stats_today_failed"), value: stats?.today_failed ?? 0, icon: AlertTriangle, color: "error" },
-              { label: t("stats_rto"), value: stats?.total_rto ?? 0, icon: RotateCcw, color: "warning" },
+              {
+                label: t("stats_successful"),
+                value: stats?.total_successful ?? 0,
+                icon: Truck,
+                color: "success",
+              },
+              {
+                label: t("stats_failed"),
+                value: stats?.total_failed ?? 0,
+                icon: XCircle,
+                color: "error",
+              },
+              {
+                label: t("stats_today_failed"),
+                value: stats?.today_failed ?? 0,
+                icon: AlertTriangle,
+                color: "error",
+              },
+              {
+                label: t("stats_rto"),
+                value: stats?.total_rto ?? 0,
+                icon: RotateCcw,
+                color: "warning",
+              },
             ]}
           />
         }

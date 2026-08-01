@@ -28,6 +28,7 @@ export const shipments = mysqlTable(
     provider_shipment_id: varchar("provider_shipment_id", { length: 128 }),
     tracking_number: varchar("tracking_number", { length: 128 }),
     tracking_url: varchar("tracking_url", { length: 2048 }),
+    label_url: varchar("label_url", { length: 2048 }),
 
     status: varchar("status", { length: 32 }).notNull().default("draft"),
     delivery_status: varchar("delivery_status", { length: 32 }).notNull().default("pending"),

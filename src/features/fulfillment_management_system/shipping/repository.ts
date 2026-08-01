@@ -19,6 +19,7 @@ export class ShippingRepository {
           provider: shipments.provider,
           tracking_number: shipments.tracking_number,
           tracking_url: shipments.tracking_url,
+          label_url: shipments.label_url,
           status: shipments.status,
           delivery_status: shipments.delivery_status,
           recipient_name: shipments.recipient_name,

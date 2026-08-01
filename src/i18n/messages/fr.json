@@ -2116,7 +2116,22 @@
     "dispatched": "Expédiée",
     "in_transit": "En transit",
     "delivered": "Livrée",
-    "failed": "Échec"
+    "failed": "Échec",
+    "tab_carrier_overview": "Aperçu transporteur",
+    "tab_description_carrier_overview": "Colis et performances en direct depuis le transporteur",
+    "provider_overview_title": "Aperçu du transporteur",
+    "provider_history_title": "Colis transporteur",
+    "stats_provider_total": "Total colis",
+    "stats_provider_in_transit": "En transit",
+    "stats_provider_delivered": "Livrés",
+    "stats_provider_failed": "Échecs",
+    "stats_provider_returned": "Retours",
+    "refresh": "Actualiser",
+    "not_available": "non disponible",
+    "print_label": "Imprimer l'étiquette",
+    "label_ready": "Étiquette prête",
+    "price": "Prix",
+    "updated_at": "Mis à jour le"
   },
   "delivery_attempts": {
     "delivery_title": "Livraisons",

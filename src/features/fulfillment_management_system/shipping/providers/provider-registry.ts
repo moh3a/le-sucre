@@ -1,4 +1,12 @@
-import type { ShippingProviderAdapter, ShippingProviderName, ShippingQuoteInput, ShippingQuoteResult, CreateShipmentInput, CreateShipmentResult, TrackingResult } from "./contracts";
+import type { ShippingProviderName } from "../types";
+import type {
+  ShippingProviderAdapter,
+  ShippingQuoteInput,
+  ShippingQuoteResult,
+  CreateShipmentInput,
+  CreateShipmentResult,
+  TrackingResult,
+} from "./contracts";
 import { yalidine_adapter } from "./yalidine.adapter";
 
 class PlaceholderAdapter implements ShippingProviderAdapter {

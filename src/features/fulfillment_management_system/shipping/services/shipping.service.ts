@@ -1,12 +1,14 @@
 import "server-only";
 
+import { format } from "date-fns";
+
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { SHIPPING_ERROR } from "../constants/error-codes";
 import { shipping_repository } from "../repository";
 import { get_shipping_provider } from "../providers/provider-registry";
-import type { ShippingProviderName } from "../providers/contracts";
-import { format } from "date-fns";
+import type { ProviderStatusBucket } from "../providers/contracts";
+import { ShippingProviderName } from "../types";
 
 export class ShippingService {
   constructor(private readonly repo = shipping_repository) {}
@@ -20,6 +22,9 @@ export class ShippingService {
     cod_amount?: number;
   }) {
     const provider = get_shipping_provider(input.provider);
+    if (provider.supports_quote === false) {
+      throw_error(SHIPPING_ERROR.QUOTE_NOT_SUPPORTED);
+    }
     return provider.quote(input);
   }
 
@@ -60,6 +65,7 @@ export class ShippingService {
       provider_shipment_id: created.provider_shipment_id,
       tracking_number: created.tracking_number,
       tracking_url: created.tracking_url ?? null,
+      label_url: created.label_url ?? null,
       status: created.status,
       delivery_status: "pending",
       shipping_cost: order.shipping_total,
@@ -78,7 +84,9 @@ export class ShippingService {
       metadata: created.raw_payload ?? {},
     });
 
-    await this.repo.update_shipment(shipment!.id, { last_sync_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") });
+    await this.repo.update_shipment(shipment!.id, {
+      last_sync_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+    });
     await this.sync_tracking(shipment!.id);
 
     return this.get_shipment_detail(shipment!.id);
@@ -127,6 +135,62 @@ export class ShippingService {
     const shipment = await this.repo.find_shipment_by_order(order_id);
     if (!shipment) throw_error(SHIPPING_ERROR.NO_SHIPMENT_FOR_ORDER);
     return this.get_shipment_detail(shipment.id);
+  }
+
+  async provider_overview(input: {
+    provider: ShippingProviderName;
+    page: number;
+    page_size?: number;
+    status?: string;
+  }) {
+    const provider = get_shipping_provider(input.provider);
+    if (!provider.list_shipments) throw_error(SHIPPING_ERROR.PROVIDER_HISTORY_UNAVAILABLE);
+
+    const { items, total } = await provider.list_shipments(input);
+
+    const counts: Record<ProviderStatusBucket, number> = {
+      in_transit: 0,
+      delivered: 0,
+      failed: 0,
+      returned: 0,
+      unknown: 0,
+    };
+    for (const item of items) counts[item.status_bucket] += 1;
+
+    return {
+      provider: input.provider,
+      stats: {
+        total,
+        in_transit: counts.in_transit,
+        delivered: counts.delivered,
+        failed: counts.failed,
+        returned: counts.returned,
+        unknown: counts.unknown,
+      },
+      items,
+      meta: {
+        page: Math.max(input.page, 1),
+        page_size: items.length,
+        total,
+      },
+    };
+  }
+
+  async get_shipment_label(shipment_id: string) {
+    const shipment = await this.repo.find_shipment(shipment_id);
+    if (!shipment) throw_error(SHIPPING_ERROR.SHIPMENT_NOT_FOUND);
+    if (shipment.label_url) return { label_url: shipment.label_url, from_cache: true };
+
+    const provider = get_shipping_provider(shipment.provider as ShippingProviderName);
+    if (!provider.get_label || !shipment.tracking_number) {
+      throw_error(SHIPPING_ERROR.LABEL_NOT_AVAILABLE);
+    }
+
+    const label_url = await provider.get_label(shipment.tracking_number);
+    if (!label_url) throw_error(SHIPPING_ERROR.LABEL_NOT_AVAILABLE);
+
+    await this.repo.update_shipment(shipment_id, { label_url });
+    return { label_url, from_cache: false };
   }
 }
 

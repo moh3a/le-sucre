@@ -1788,7 +1788,22 @@
     "dispatched": "تم الإرسال",
     "in_transit": "قيد النقل",
     "delivered": "تم التوصيل",
-    "failed": "فاشل"
+    "failed": "فاشل",
+    "tab_carrier_overview": "نظرة على الناقل",
+    "tab_description_carrier_overview": "الشحنات والأداء مباشرة من شركة النقل",
+    "provider_overview_title": "نظرة على الناقل",
+    "provider_history_title": "شحنات الناقل",
+    "stats_provider_total": "إجمالي الشحنات",
+    "stats_provider_in_transit": "قيد النقل",
+    "stats_provider_delivered": "تم التوصيل",
+    "stats_provider_failed": "فاشلة",
+    "stats_provider_returned": "مرتجعة",
+    "refresh": "تحديث",
+    "not_available": "غير متاح",
+    "print_label": "طباعة الملصق",
+    "label_ready": "الملصق جاهز",
+    "price": "السعر",
+    "updated_at": "آخر تحديث"
   },
   "delivery_attempts": {
     "delivery_title": "التوصيلات",

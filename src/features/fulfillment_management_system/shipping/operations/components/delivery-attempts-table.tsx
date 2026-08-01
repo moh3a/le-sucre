@@ -101,7 +101,10 @@ function FacetedFilter({
           <span className="ml-2">{title}</span>
           {value && (
             <>
-              <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
+              <Separator
+                orientation="vertical"
+                className="mx-0.5 data-[orientation=vertical]:h-4"
+              />
               <span className="ml-1">{options.find((o) => o.value === value)?.label}</span>
             </>
           )}
@@ -137,14 +140,17 @@ export function DeliveryAttemptsTable() {
   const [retryTarget, setRetryTarget] = React.useState<string | null>(null);
   const [rtoTarget, setRtoTarget] = React.useState<string | null>(null);
 
-  const STATUS_LABELS: Record<string, string> = {
-    successful: t("delivered"),
-    failed: t("failed"),
-    customer_unavailable: t("customer_unavailable"),
-    wrong_address: t("wrong_address"),
-    refused: t("refused"),
-    cancelled: t("cancelled"),
-  };
+  const STATUS_LABELS: Record<string, string> = useMemo(
+    () => ({
+      successful: t("delivered"),
+      failed: t("failed"),
+      customer_unavailable: t("customer_unavailable"),
+      wrong_address: t("wrong_address"),
+      refused: t("refused"),
+      cancelled: t("cancelled"),
+    }),
+    [t],
+  );
 
   const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
     label,
@@ -195,9 +201,7 @@ export function DeliveryAttemptsTable() {
         id: "attempt_number",
         accessorKey: "attempt_number",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("attempt")} />,
-        cell: ({ row }) => (
-          <span className="text-sm">#{row.original.attempt_number}</span>
-        ),
+        cell: ({ row }) => <span className="text-sm">#{row.original.attempt_number}</span>,
       },
       {
         id: "status",
@@ -214,7 +218,7 @@ export function DeliveryAttemptsTable() {
         accessorKey: "description",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("description")} />,
         cell: ({ row }) => (
-          <span className="text-muted-foreground max-w-[180px] truncate text-xs">
+          <span className="text-muted-foreground max-w-45 truncate text-xs">
             {row.original.description ?? "—"}
           </span>
         ),
@@ -222,7 +226,9 @@ export function DeliveryAttemptsTable() {
       {
         id: "delivery_person_id",
         accessorKey: "delivery_person_id",
-        header: ({ column }) => <DataTableColumnHeader column={column} label={t("delivery_person")} />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("delivery_person")} />
+        ),
         cell: ({ row }) => (
           <span className="font-mono text-xs">
             {row.original.delivery_person_id
@@ -235,16 +241,28 @@ export function DeliveryAttemptsTable() {
         id: "attempted_at",
         accessorKey: "attempted_at",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("attempt_date")} />,
-        cell: ({ row }) => formatDate(row.original.attempted_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        cell: ({ row }) =>
+          formatDate(row.original.attempted_at, {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
       },
       {
         id: "next_attempt_at",
         accessorKey: "next_attempt_at",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("next_attempt")} />,
         cell: ({ row }) =>
-          row.original.next_attempt_at
-            ? formatDate(row.original.next_attempt_at, { month: "short", day: "numeric", hour: "2-digit" })
-            : <span className="text-muted-foreground">—</span>,
+          row.original.next_attempt_at ? (
+            formatDate(row.original.next_attempt_at, {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+            })
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          ),
       },
       {
         id: "actions",
@@ -297,7 +315,7 @@ export function DeliveryAttemptsTable() {
         },
       },
     ],
-    [retryMutation, rtoMutation, t],
+    [retryMutation, rtoMutation, t, STATUS_LABELS],
   );
 
   const { data, isLoading, error } = trpc.operations.deliveryListAttempts.useQuery({
@@ -319,88 +337,94 @@ export function DeliveryAttemptsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading, error }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}>
-    <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <FacetedFilter
-          title={t("status")}
-          options={STATUS_OPTIONS}
-          value={status ?? undefined}
-          onChange={(val) => setStatus(val)}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center gap-2 border-t p-2">
-          <Badge variant="outline">
-            {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
-          </Badge>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href={`/api/admin/delivery-attempts/export?${new URLSearchParams({
-                ...(status ? { status } : {}),
-              })}`}
-              download="delivery-attempts.csv"
+    <QueryGuard
+      query={{ isLoading, error }}
+      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}
+    >
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <FacetedFilter
+            title={t("status")}
+            options={STATUS_OPTIONS}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {t("selected_count", { count: table.getFilteredSelectedRowModel().rows.length })}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/delivery-attempts/export?${new URLSearchParams({
+                  ...(status ? { status } : {}),
+                })}`}
+                download="delivery-attempts.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                {t("export")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
+
+      <AlertDialog
+        open={retryTarget !== null}
+        onOpenChange={(open) => !open && setRetryTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("reschedule")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("confirm_reschedule_description")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (retryTarget) {
+                  retryMutation.mutate({
+                    order_id: retryTarget,
+                    scheduled_at: new Date(Date.now() + 86400000).toISOString(),
+                  });
+                  setRetryTarget(null);
+                }
+              }}
             >
-              <Download className="mr-1 h-4 w-4" />
-              {t("export")}
-            </a>
-          </Button>
-        </div>
-      )}
-    </DataTable>
+              {retryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {t("reschedule")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-    <AlertDialog open={retryTarget !== null} onOpenChange={(open) => !open && setRetryTarget(null)}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t("reschedule")}</AlertDialogTitle>
-          <AlertDialogDescription>{t("confirm_reschedule_description")}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction onClick={() => {
-            if (retryTarget) {
-              retryMutation.mutate({
-                order_id: retryTarget,
-                scheduled_at: new Date(Date.now() + 86400000).toISOString(),
-              });
-              setRetryTarget(null);
-            }
-          }}>
-            {retryMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            {t("reschedule")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-
-    <AlertDialog open={rtoTarget !== null} onOpenChange={(open) => !open && setRtoTarget(null)}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t("return_warehouse")}</AlertDialogTitle>
-          <AlertDialogDescription>{t("confirm_return_warehouse_description")}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={() => {
-              if (rtoTarget) {
-                rtoMutation.mutate({ order_id: rtoTarget });
-                setRtoTarget(null);
-              }
-            }}
-          >
-            {rtoMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            {t("return_warehouse")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <AlertDialog open={rtoTarget !== null} onOpenChange={(open) => !open && setRtoTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("return_warehouse")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirm_return_warehouse_description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (rtoTarget) {
+                  rtoMutation.mutate({ order_id: rtoTarget });
+                  setRtoTarget(null);
+                }
+              }}
+            >
+              {rtoMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {t("return_warehouse")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

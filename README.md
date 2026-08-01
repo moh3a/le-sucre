@@ -2,7 +2,6 @@
 
 ## TODOs
 
-- https://www.npmjs.com/package/yalidine
 - check if every operation works
 - error: src\lib\compose-refs.ts
 - error: src\hooks\use-network-polling.ts
