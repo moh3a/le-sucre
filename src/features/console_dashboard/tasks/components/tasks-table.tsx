@@ -27,8 +27,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import { STAFF_ROLES } from "@/features/authentication_and_authorization/authorization/constants/roles";
+import {
+  TASK_TYPES,
+  TASK_TYPE_LABEL_KEYS,
+  TASK_TYPES_WITH_COMPLETION_EFFECT,
+  TASK_COMPLETION_EFFECT_LABEL_KEYS,
+  REFERENCE_ROUTES,
+  type ReferenceType,
+} from "../constants/task-types";
 
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
@@ -52,6 +71,7 @@ type TaskRow = {
   reference_type: string | null;
   reference_id: string | null;
   assigned_to_user_id: string | null;
+  assignee_name: string | null;
   status: string;
   priority: string;
   due_at: string | null;
@@ -59,7 +79,13 @@ type TaskRow = {
   completed_by_user_id: string | null;
   completion_notes: string | null;
   created_by_user_id: string;
+  creator_name: string | null;
   created_at: string;
+};
+
+type TasksTableProps = {
+  mode?: "mine" | "all";
+  showAssigneeFilter?: boolean;
 };
 
 function FacetedFilter({
@@ -130,10 +156,10 @@ function FacetedFilter({
   );
 }
 
-export function TasksTable() {
+export function TasksTable({ mode = "all", showAssigneeFilter = false }: TasksTableProps) {
   const t = useTranslations("tasks");
 
-  const STATUS_LABELS: Record<string, string> = useMemo(
+  const STATUS_LABELS: Record<string, string> = React.useMemo(
     () => ({
       pending: t("pending_label"),
       in_progress: t("in_progress_label"),
@@ -148,28 +174,53 @@ export function TasksTable() {
     value,
   }));
 
-  const TYPE_LABELS: Record<string, string> = useMemo(
-    () => ({
-      order_follow_up: t("type_order_follow_up"),
-      customer_follow_up: t("type_customer_follow_up"),
-      inventory_review: t("type_inventory_review"),
-      campaign_review: t("type_campaign_review"),
-      general: t("type_general"),
-    }),
+  const TYPE_LABELS: Record<string, string> = React.useMemo(
+    () =>
+      Object.fromEntries(TASK_TYPES.map((type) => [type, t(TASK_TYPE_LABEL_KEYS[type])])) as Record<
+        string,
+        string
+      >,
     [t],
   );
+
+  const TYPE_OPTIONS = TASK_TYPES.map((type) => ({ value: type, label: TYPE_LABELS[type] }));
 
   const [page] = useQueryState("tkPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("tkPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("tkStatus", parseAsString);
+  const [type, setType] = useQueryState("tkType", parseAsString);
+  const [assignee, setAssignee] = useQueryState("tkAssignee", parseAsString);
+
+  const { data: users_data } = trpc.adminAuth.listUsers.useQuery(
+    { page: 1, limit: 100 },
+    { enabled: showAssigneeFilter },
+  );
+
+  const assignee_options = React.useMemo(() => {
+    if (!users_data) return [];
+    return users_data.items
+      .filter((u) =>
+        (u.roles ?? "")
+          .split(", ")
+          .filter(Boolean)
+          .some((r) => STAFF_ROLES.includes(r as (typeof STAFF_ROLES)[number])),
+      )
+      .map((u) => ({ label: u.name, value: u.id }));
+  }, [users_data]);
 
   const utils = trpc.useUtils();
+
+  const invalidate = () => {
+    utils.operations.adminTaskListAll.invalidate();
+    utils.operations.adminTaskListMine.invalidate();
+    utils.operations.adminTaskDashboard.invalidate();
+    utils.operations.adminTaskTeamDashboard.invalidate();
+  };
 
   const startMutation = trpc.operations.adminTaskStart.useMutation({
     onSuccess: () => {
       toast.success(t("started"));
-      utils.operations.adminTaskListAll.invalidate();
-      utils.operations.adminTaskDashboard.invalidate();
+      invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -177,17 +228,21 @@ export function TasksTable() {
   const completeMutation = trpc.operations.adminTaskComplete.useMutation({
     onSuccess: () => {
       toast.success(t("completed_toast"));
-      utils.operations.adminTaskListAll.invalidate();
-      utils.operations.adminTaskDashboard.invalidate();
+      invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
 
+  const [complete_target, setCompleteTarget] = React.useState<TaskRow | null>(null);
+  const confirmComplete = () => {
+    if (complete_target) completeMutation.mutate({ id: complete_target.id });
+    setCompleteTarget(null);
+  };
+
   const cancelMutation = trpc.operations.adminTaskCancel.useMutation({
     onSuccess: () => {
       toast.success(t("cancelled_toast"));
-      utils.operations.adminTaskListAll.invalidate();
-      utils.operations.adminTaskDashboard.invalidate();
+      invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -212,9 +267,7 @@ export function TasksTable() {
         accessorKey: "task_type",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("type_column")} />,
         cell: ({ row }) => (
-          <span className="text-sm">
-            {TYPE_LABELS[row.original.task_type] ?? row.original.task_type}
-          </span>
+          <span className="text-sm">{TYPE_LABELS[row.original.task_type] ?? row.original.task_type}</span>
         ),
       },
       {
@@ -239,10 +292,20 @@ export function TasksTable() {
           <DataTableColumnHeader column={column} label={t("assigned_to_column")} />
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs">
-            {row.original.assigned_to_user_id
-              ? `${row.original.assigned_to_user_id.slice(0, 10)}…`
-              : "—"}
+          <span className="text-sm">
+            {row.original.assignee_name ?? row.original.assigned_to_user_id ?? "—"}
+          </span>
+        ),
+      },
+      {
+        id: "created_by_user_id",
+        accessorKey: "created_by_user_id",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("created_by_column")} />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm text-muted-foreground">
+            {row.original.creator_name ?? t("system")}
           </span>
         ),
       },
@@ -283,6 +346,10 @@ export function TasksTable() {
         id: "actions",
         cell: ({ row }) => {
           const r = row.original;
+          const reference_route =
+            r.reference_type && REFERENCE_ROUTES[r.reference_type as ReferenceType]
+              ? REFERENCE_ROUTES[r.reference_type as ReferenceType] + r.reference_id
+              : null;
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -292,19 +359,9 @@ export function TasksTable() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                {r.reference_id && (
+                {reference_route && (
                   <DropdownMenuItem asChild>
-                    <Link
-                      href={
-                        r.reference_type === "order"
-                          ? `/console/orders/${r.reference_id}`
-                          : r.reference_type === "campaign"
-                            ? `/console/campaigns/${r.reference_id}`
-                            : `#`
-                      }
-                    >
-                      {t("view_reference")}
-                    </Link>
+                    <Link href={reference_route}>{t("view_reference")}</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -315,7 +372,7 @@ export function TasksTable() {
                   </DropdownMenuItem>
                 )}
                 {r.status === "in_progress" && (
-                  <DropdownMenuItem onClick={() => completeMutation.mutate({ id: r.id })}>
+                  <DropdownMenuItem onClick={() => setCompleteTarget(r)}>
                     <CheckCircle2 className="mr-2 size-4 text-green-600" />
                     {t("complete")}
                   </DropdownMenuItem>
@@ -332,14 +389,24 @@ export function TasksTable() {
         },
       },
     ],
-    [TYPE_LABELS, STATUS_LABELS, startMutation, completeMutation, cancelMutation, t],
+    [TYPE_LABELS, STATUS_LABELS, startMutation, cancelMutation, t],
   );
 
-  const { data, isLoading } = trpc.operations.adminTaskListAll.useQuery({
+  const mine = mode === "mine";
+  const mineQuery = trpc.operations.adminTaskListMine.useQuery({
     page,
     limit: per_page,
     status: status || undefined,
+    task_type: type || undefined,
   });
+  const allQuery = trpc.operations.adminTaskListAll.useQuery({
+    page,
+    limit: per_page,
+    status: status || undefined,
+    task_type: type || undefined,
+    assignee_id: assignee || undefined,
+  });
+  const { data, isLoading } = mine ? mineQuery : allQuery;
 
   const items = (data?.items ?? []) as unknown as TaskRow[];
   const page_count = data?.meta.total_pages ?? 0;
@@ -361,7 +428,7 @@ export function TasksTable() {
           startMutation.isPending || completeMutation.isPending || cancelMutation.isPending,
         error: startMutation.error ?? completeMutation.error ?? cancelMutation.error,
       }}
-      loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}
+      loadingFallback={<DataTableSkeleton columnCount={10} rowCount={10} filterCount={1} />}
     >
       <DataTable table={table}>
         <DataTableAdvancedToolbar table={table}>
@@ -371,6 +438,20 @@ export function TasksTable() {
             value={status ?? undefined}
             onChange={(val) => setStatus(val)}
           />
+          <FacetedFilter
+            title={t("type_title")}
+            options={TYPE_OPTIONS}
+            value={type ?? undefined}
+            onChange={(val) => setType(val)}
+          />
+          {showAssigneeFilter && (
+            <FacetedFilter
+              title={t("assignee_title")}
+              options={assignee_options}
+              value={assignee ?? undefined}
+              onChange={(val) => setAssignee(val)}
+            />
+          )}
           <DataTableSortList table={table} />
         </DataTableAdvancedToolbar>
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
@@ -392,6 +473,28 @@ export function TasksTable() {
           </div>
         )}
       </DataTable>
+      <AlertDialog open={complete_target !== null} onOpenChange={(open) => !open && setCompleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirm_complete_title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {complete_target &&
+                (TASK_TYPES_WITH_COMPLETION_EFFECT.has(complete_target.task_type)
+                  ? t(
+                      TASK_COMPLETION_EFFECT_LABEL_KEYS[complete_target.task_type] ??
+                        "confirm_complete_description",
+                    )
+                  : t("confirm_complete_description"))}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel_button")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmComplete}>
+              {t("complete_confirm_button")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </QueryGuard>
   );
 }

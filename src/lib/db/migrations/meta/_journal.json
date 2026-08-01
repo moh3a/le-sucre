@@ -29,6 +29,13 @@
       "when": 1785545864077,
       "tag": "0003_kind_timeslip",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1785623521224,
+      "tag": "0004_panoramic_gargoyle",
+      "breakpoints": true
     }
   ]
 }

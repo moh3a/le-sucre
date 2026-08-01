@@ -1,0 +1,1 @@
+ALTER TABLE `admin_tasks` MODIFY COLUMN `created_by_user_id` varchar(255);

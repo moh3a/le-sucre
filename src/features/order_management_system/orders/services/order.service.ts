@@ -40,6 +40,8 @@ import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
 import { assert_order_transition } from "../order-lifecycle.engine";
 import { shipping_repository } from "@/features/fulfillment_management_system/shipping/repository";
+import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
+import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
 /**
  * Catch non-AppError exceptions (Drizzle ORM errors, network failures, etc.)
@@ -104,7 +106,11 @@ export class OrderService {
   constructor(private readonly repo = order_repository) {}
 
   async place_from_cart(
-    input: z.infer<typeof place_order_dto> & { cart_id: string; user_id?: string | null },
+    input: z.infer<typeof place_order_dto> & {
+      cart_id: string;
+      user_id?: string | null;
+      actor_user_id?: string | null;
+    },
   ) {
     try {
       const existing = await this.repo.find_by_idempotency(input.idempotency_key);
@@ -348,6 +354,14 @@ export class OrderService {
         console.error("Failed to sync order to CRM:", err);
       });
 
+    dispatch_task_creation({
+      task_type: "order_assignment",
+      title: build_auto_task_title("order_assignment", { order_number }),
+      reference_type: "order",
+      reference_id: order_id,
+      created_by_user_id: input.actor_user_id ?? null,
+    });
+
     return this.repo.get_full(order_id);
     } catch (error) {
       rethrow_as_order_error(error);
@@ -578,7 +592,7 @@ export class OrderService {
     return this.repo.get_full(input.order_id);
   }
 
-  async admin_create(input: z.infer<typeof admin_create_order_dto>) {
+  async admin_create(input: z.infer<typeof admin_create_order_dto> & { actor_user_id?: string | null }) {
     try {
       const cart = await cart_service.get_or_create_cart({ user_id: input.user_id });
       if (!cart) throw_error(ORDER_ERROR.CART_NOT_FOUND);
@@ -590,6 +604,7 @@ export class OrderService {
       return await this.place_from_cart({
         cart_id: cart.id,
         user_id: input.user_id,
+        actor_user_id: input.actor_user_id ?? null,
         shipping_address: input.shipping_address,
         billing_address: input.billing_address,
         discount_code: input.discount_code,

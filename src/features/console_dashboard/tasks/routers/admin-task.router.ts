@@ -3,24 +3,31 @@ import { create_trpc_router } from "@/lib/trpc/router";
 import { permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
 import { admin_task_service } from "../services/admin-task.service";
+import { TASK_TYPES, REFERENCE_TYPES } from "../constants/task-types";
+
+const task_type_enum = z.enum(TASK_TYPES);
+const reference_type_enum = z.enum(REFERENCE_TYPES);
+const priority_enum = z.enum(["low", "normal", "high", "urgent"]);
+
+const list_input = z.object({
+  status: z.string().optional(),
+  task_type: z.string().optional(),
+  assignee_id: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
 
 export const admin_task_router = create_trpc_router({
-  adminTaskCreate: permission_procedure(PERMISSIONS.settings_write)
+  adminTaskCreate: permission_procedure(PERMISSIONS.tasks_write)
     .input(
       z.object({
-        task_type: z.enum([
-          "order_follow_up",
-          "customer_follow_up",
-          "inventory_review",
-          "campaign_review",
-          "general",
-        ]),
+        task_type: task_type_enum,
         title: z.string().min(1).max(255),
         description: z.string().optional(),
-        reference_type: z.string().optional(),
+        reference_type: reference_type_enum.optional(),
         reference_id: z.string().optional(),
         assigned_to_user_id: z.string().optional(),
-        priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
+        priority: priority_enum.optional(),
         due_at: z.string().optional(),
       }),
     )
@@ -28,13 +35,13 @@ export const admin_task_router = create_trpc_router({
       admin_task_service.create({ ...input, created_by_user_id: ctx.session!.user.id }),
     ),
 
-  adminTaskUpdate: permission_procedure(PERMISSIONS.settings_write)
+  adminTaskUpdate: permission_procedure(PERMISSIONS.tasks_write)
     .input(
       z.object({
         id: z.string(),
         title: z.string().optional(),
         description: z.string().optional(),
-        priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
+        priority: priority_enum.optional(),
         due_at: z.string().optional(),
         assigned_to_user_id: z.string().optional(),
       }),
@@ -43,61 +50,80 @@ export const admin_task_router = create_trpc_router({
       admin_task_service.update({ ...input, updated_by_user_id: ctx.session!.user.id }),
     ),
 
-  adminTaskAssign: permission_procedure(PERMISSIONS.settings_write)
+  adminTaskAssign: permission_procedure(PERMISSIONS.tasks_write)
     .input(z.object({ id: z.string(), assigned_to_user_id: z.string() }))
     .mutation(({ ctx, input }) =>
       admin_task_service.assign({ ...input, assigned_by_user_id: ctx.session!.user.id }),
     ),
 
-  adminTaskStart: permission_procedure(PERMISSIONS.settings_write)
+  adminTaskStart: permission_procedure(PERMISSIONS.tasks_write)
     .input(z.object({ id: z.string() }))
     .mutation(({ ctx, input }) =>
       admin_task_service.start_task({ ...input, user_id: ctx.session!.user.id }),
     ),
 
-  adminTaskComplete: permission_procedure(PERMISSIONS.settings_write)
+  adminTaskComplete: permission_procedure(PERMISSIONS.tasks_write)
     .input(z.object({ id: z.string(), completion_notes: z.string().optional() }))
     .mutation(({ ctx, input }) =>
       admin_task_service.complete({ ...input, completed_by_user_id: ctx.session!.user.id }),
     ),
 
-  adminTaskCancel: permission_procedure(PERMISSIONS.settings_write)
+  adminTaskCancel: permission_procedure(PERMISSIONS.tasks_write)
     .input(z.object({ id: z.string() }))
     .mutation(({ ctx, input }) =>
       admin_task_service.cancel({ ...input, cancelled_by_user_id: ctx.session!.user.id }),
     ),
 
-  adminTaskGet: permission_procedure(PERMISSIONS.settings_read)
+  adminTaskGet: permission_procedure(PERMISSIONS.tasks_read)
     .input(z.object({ id: z.string() }))
     .query(({ input }) => admin_task_service.get(input.id)),
 
-  adminTaskListMine: permission_procedure(PERMISSIONS.settings_read)
-    .input(
-      z.object({
-        status: z.string().optional(),
-        page: z.coerce.number().int().min(1).default(1),
-        limit: z.coerce.number().int().min(1).max(100).default(20),
-      }),
-    )
+  adminTaskListMine: permission_procedure(PERMISSIONS.tasks_read)
+    .input(list_input)
     .query(({ ctx, input }) =>
-      admin_task_service.list_for_user(ctx.session!.user.id, input.status, input.page, input.limit),
+      admin_task_service.list_for_user(
+        ctx.session!.user.id,
+        input.status,
+        input.task_type,
+        input.page,
+        input.limit,
+      ),
     ),
 
-  adminTaskListAll: permission_procedure(PERMISSIONS.settings_read)
+  adminTaskListAll: permission_procedure(PERMISSIONS.tasks_read)
+    .input(list_input)
+    .query(({ input }) =>
+      admin_task_service.list_all(
+        input.status,
+        input.task_type,
+        input.assignee_id,
+        input.page,
+        input.limit,
+      ),
+    ),
+
+  adminTaskListByAssignee: permission_procedure(PERMISSIONS.tasks_read)
     .input(
       z.object({
+        assignee_id: z.string(),
         status: z.string().optional(),
         page: z.coerce.number().int().min(1).default(1),
         limit: z.coerce.number().int().min(1).max(100).default(20),
       }),
     )
-    .query(({ input }) => admin_task_service.list_all(input.status, input.page, input.limit)),
+    .query(({ input }) =>
+      admin_task_service.list_for_user(input.assignee_id, input.status, undefined, input.page, input.limit),
+    ),
 
-  adminTaskGetOverdue: permission_procedure(PERMISSIONS.settings_read).query(() =>
+  adminTaskGetOverdue: permission_procedure(PERMISSIONS.tasks_read).query(() =>
     admin_task_service.get_overdue(),
   ),
 
-  adminTaskDashboard: permission_procedure(PERMISSIONS.settings_read).query(({ ctx }) =>
+  adminTaskDashboard: permission_procedure(PERMISSIONS.tasks_read).query(({ ctx }) =>
     admin_task_service.get_dashboard_stats(ctx.session!.user.id),
+  ),
+
+  adminTaskTeamDashboard: permission_procedure(PERMISSIONS.tasks_read).query(() =>
+    admin_task_service.team_workload(),
   ),
 });

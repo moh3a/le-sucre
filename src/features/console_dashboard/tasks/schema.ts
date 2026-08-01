@@ -19,7 +19,7 @@ export const admin_tasks = mysqlTable(
     completed_at: timestamp("completed_at", { mode: "string" }),
     completed_by_user_id: varchar("completed_by_user_id", { length: 255 }),
     completion_notes: text("completion_notes"),
-    created_by_user_id: varchar("created_by_user_id", { length: 255 }).notNull(),
+    created_by_user_id: varchar("created_by_user_id", { length: 255 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
   },

@@ -28,6 +28,8 @@ import { brand_service } from "@/features/product_information_management/brands/
 import { review_service } from "@/features/product_information_management/reviews/services/review.service";
 import { variant_service } from "@/features/product_information_management/variants/services/variant.service";
 import { sku_service } from "@/features/product_information_management/variants/services/sku.service";
+import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
+import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
 const DEFAULT_LOCALE = "fr";
 
@@ -76,7 +78,7 @@ function db_error_reason(err: Error): { fr: string; en: string; ar: string } {
 }
 
 export class ProductService {
-  async create(input: z.infer<typeof create_product_dto>) {
+  async create(input: z.infer<typeof create_product_dto>, actor_user_id?: string | null) {
     const slug = input.slug ?? slugify_name(input.name);
     if (await product_repository.find_by_slug(slug)) {
       throw_error(PRODUCT_ERROR.SLUG_CONFLICT);
@@ -141,6 +143,17 @@ export class ProductService {
       resource_type: "product_id",
       resource_id: id,
     });
+
+    if (input.status === "draft") {
+      dispatch_task_creation({
+        task_type: "product_creation",
+        title: build_auto_task_title("product_creation", { product_name: input.name }),
+        reference_type: "product",
+        reference_id: id,
+        created_by_user_id: actor_user_id ?? null,
+      });
+    }
+
     return this.get_by_id(id);
   }
 

@@ -26,6 +26,8 @@ import type {
   storefront_home_sections_dto,
   track_campaign_event_dto,
 } from "../models/campaign.dto";
+import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
+import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
 export class CampaignService {
   // ─── Admin Queries ─────────────────────────────────────────────────────────
@@ -86,6 +88,16 @@ export class CampaignService {
         "campaign.activated" as AutomationTrigger,
         campaign,
       );
+    }
+
+    if (campaign && (input.status === "draft" || input.status === "scheduled")) {
+      dispatch_task_creation({
+        task_type: "campaign_review",
+        title: build_auto_task_title("campaign_review", { campaign_name: input.name }),
+        reference_type: "campaign",
+        reference_id: campaign.id,
+        created_by_user_id: actor_id ?? null,
+      });
     }
 
     return campaign;

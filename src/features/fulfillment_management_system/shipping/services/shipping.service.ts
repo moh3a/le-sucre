@@ -9,6 +9,8 @@ import { shipping_repository } from "../repository";
 import { get_shipping_provider } from "../providers/provider-registry";
 import type { ProviderStatusBucket } from "../providers/contracts";
 import { ShippingProviderName } from "../types";
+import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
+import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
 export class ShippingService {
   constructor(private readonly repo = shipping_repository) {}
@@ -32,6 +34,7 @@ export class ShippingService {
     order_id: string;
     provider: ShippingProviderName;
     weight_kg: number;
+    actor_user_id?: string | null;
   }) {
     const order = await this.repo.get_order(input.order_id);
     if (!order) throw_error(SHIPPING_ERROR.ORDER_NOT_FOUND);
@@ -88,6 +91,14 @@ export class ShippingService {
       last_sync_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
     await this.sync_tracking(shipment!.id);
+
+    dispatch_task_creation({
+      task_type: "shipment_assignment",
+      title: build_auto_task_title("shipment_assignment", { shipment_id: shipment!.id }),
+      reference_type: "shipment",
+      reference_id: shipment!.id,
+      created_by_user_id: input.actor_user_id ?? null,
+    });
 
     return this.get_shipment_detail(shipment!.id);
   }

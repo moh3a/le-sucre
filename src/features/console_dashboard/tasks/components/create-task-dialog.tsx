@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Plus } from "lucide-react";
+
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
@@ -25,17 +27,32 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { STAFF_ROLES } from "@/features/authentication_and_authorization/authorization/constants/roles";
+import { UserCombobox } from "@/features/authentication_and_authorization/auth/components/user-combobox";
+import { OrderCombobox } from "@/features/order_management_system/orders/components/order-combobox";
+import { ShippingCombobox } from "@/features/fulfillment_management_system/shipping/components/shipping-combobox";
+import { TransactionCombobox } from "@/features/payment_management_system/payment/components/transaction-combobox";
+import { ProductCombobox } from "@/features/product_information_management/products/components/product-combobox";
+import { CustomerCombobox } from "@/features/order_management_system/customers/components/customer-combobox";
+import { CampaignCombobox } from "@/features/marketing/campaign/components/campaign-combobox";
+import {
+  TASK_TYPES,
+  TASK_TYPE_LABEL_KEYS,
+  REFERENCE_TYPES,
+  REFERENCE_TYPE_LABEL_KEYS,
+  type TaskType,
+  type ReferenceType,
+} from "../constants/task-types";
 
 export function CreateTaskDialog() {
   const t = useTranslations("tasks");
   const [open, setOpen] = useState(false);
-  const [taskType, setTaskType] = useState("general");
+  const [taskType, setTaskType] = useState<TaskType>("general");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [referenceType, setReferenceType] = useState("");
-  const [referenceId, setReferenceId] = useState("");
-  const [assignedTo, setAssignedTo] = useState("");
+  const [referenceType, setReferenceType] = useState<ReferenceType | "">("");
+  const [referenceId, setReferenceId] = useState<string | null>(null);
+  const [assignedTo, setAssignedTo] = useState<string | null>(null);
   const [priority, setPriority] = useState("normal");
   const [dueAt, setDueAt] = useState("");
 
@@ -46,7 +63,9 @@ export function CreateTaskDialog() {
       setOpen(false);
       reset();
       utils.operations.adminTaskListAll.invalidate();
+      utils.operations.adminTaskListMine.invalidate();
       utils.operations.adminTaskDashboard.invalidate();
+      utils.operations.adminTaskTeamDashboard.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -56,8 +75,8 @@ export function CreateTaskDialog() {
     setTitle("");
     setDescription("");
     setReferenceType("");
-    setReferenceId("");
-    setAssignedTo("");
+    setReferenceId(null);
+    setAssignedTo(null);
     setPriority("normal");
     setDueAt("");
   }
@@ -69,17 +88,12 @@ export function CreateTaskDialog() {
       return;
     }
     mutation.mutate({
-      task_type: taskType as
-        | "order_follow_up"
-        | "customer_follow_up"
-        | "inventory_review"
-        | "campaign_review"
-        | "general",
+      task_type: taskType,
       title,
       description: description || undefined,
       reference_type: referenceType || undefined,
-      reference_id: referenceId || undefined,
-      assigned_to_user_id: assignedTo || undefined,
+      reference_id: referenceType ? referenceId ?? undefined : undefined,
+      assigned_to_user_id: assignedTo ?? undefined,
       priority: priority as "low" | "normal" | "high" | "urgent",
       due_at: dueAt ? new Date(dueAt).toISOString() : undefined,
     });
@@ -113,18 +127,16 @@ export function CreateTaskDialog() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="tk_type">{t("type_label")}</Label>
-                <Select value={taskType} onValueChange={setTaskType}>
+                <Select value={taskType} onValueChange={(v) => setTaskType(v as TaskType)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="order_follow_up">{t("type_order_follow_up")}</SelectItem>
-                    <SelectItem value="customer_follow_up">
-                      {t("type_customer_follow_up")}
-                    </SelectItem>
-                    <SelectItem value="inventory_review">{t("type_inventory_review")}</SelectItem>
-                    <SelectItem value="campaign_review">{t("type_campaign_review")}</SelectItem>
-                    <SelectItem value="general">{t("type_general")}</SelectItem>
+                    {TASK_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {t(TASK_TYPE_LABEL_KEYS[type])}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -152,31 +164,50 @@ export function CreateTaskDialog() {
                 placeholder={t("description_placeholder")}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tk_ref_type">{t("reference_type_label")}</Label>
-                <Select value={referenceType} onValueChange={setReferenceType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("none_placeholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="order">{t("ref_type_order")}</SelectItem>
-                    <SelectItem value="campaign">{t("ref_type_campaign")}</SelectItem>
-                    <SelectItem value="product">{t("ref_type_product")}</SelectItem>
-                    <SelectItem value="customer">{t("ref_type_customer")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tk_ref_id">{t("reference_id_label")}</Label>
-                <Input
-                  id="tk_ref_id"
-                  value={referenceId}
-                  onChange={(e) => setReferenceId(e.target.value)}
-                  placeholder={t("reference_id_placeholder")}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="tk_ref_type">{t("reference_type_label")}</Label>
+              <Select
+                value={referenceType}
+                onValueChange={(v) => {
+                  setReferenceType(v as ReferenceType | "");
+                  setReferenceId(null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("none_placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {REFERENCE_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {t(REFERENCE_TYPE_LABEL_KEYS[type])}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            {referenceType && (
+              <div className="space-y-2">
+                <Label>{t("reference_id_label")}</Label>
+                {referenceType === "order" && (
+                  <OrderCombobox value={referenceId} onValueChange={setReferenceId} />
+                )}
+                {referenceType === "shipment" && (
+                  <ShippingCombobox value={referenceId} onValueChange={setReferenceId} />
+                )}
+                {referenceType === "payment" && (
+                  <TransactionCombobox value={referenceId} onValueChange={setReferenceId} />
+                )}
+                {referenceType === "product" && (
+                  <ProductCombobox value={referenceId} onValueChange={setReferenceId} />
+                )}
+                {referenceType === "customer" && (
+                  <CustomerCombobox value={referenceId} onValueChange={setReferenceId} />
+                )}
+                {referenceType === "campaign" && (
+                  <CampaignCombobox value={referenceId} onValueChange={setReferenceId} />
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="tk_due_at">{t("due_date_label")}</Label>
@@ -189,11 +220,11 @@ export function CreateTaskDialog() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tk_assigned_to">{t("assigned_to_label")}</Label>
-                <Input
-                  id="tk_assigned_to"
+                <UserCombobox
                   value={assignedTo}
-                  onChange={(e) => setAssignedTo(e.target.value)}
-                  placeholder={t("user_id_placeholder")}
+                  onValueChange={setAssignedTo}
+                  allowedRoles={STAFF_ROLES}
+                  placeholder={t("assigned_to_placeholder")}
                 />
               </div>
             </div>

@@ -74,7 +74,9 @@ export const shipping_router = create_trpc_router({
         weight_kg: z.number().positive(),
       }),
     )
-    .mutation(({ input }) => shipping_service.create_for_order(input)),
+    .mutation(({ ctx, input }) =>
+      shipping_service.create_for_order({ ...input, actor_user_id: ctx.session!.user.id }),
+    ),
 
   sync: permission_procedure(PERMISSIONS.orders_write)
     .input(z.object({ shipment_id: z.string().min(1) }))

@@ -42,11 +42,15 @@ export const inventory_router = create_trpc_router({
 
   receiveStock: permission_procedure(PERMISSIONS.inventory_write)
     .input(receive_stock_dto)
-    .mutation(({ input }) => inventory_service.receive_stock(input)),
+    .mutation(({ ctx, input }) =>
+      inventory_service.receive_stock(input, ctx.session!.user.id),
+    ),
 
   batchReceiveStock: permission_procedure(PERMISSIONS.inventory_write)
     .input(batch_receive_stock_dto)
-    .mutation(({ input }) => inventory_service.batch_receive_stock(input)),
+    .mutation(({ ctx, input }) =>
+      inventory_service.batch_receive_stock(input, ctx.session!.user.id),
+    ),
 
   createReservation: permission_procedure(PERMISSIONS.inventory_write)
     .input(create_reservation_dto)

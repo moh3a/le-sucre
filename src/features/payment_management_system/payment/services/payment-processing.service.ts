@@ -15,6 +15,8 @@ import { PAYMENT_ERROR } from "../constants/error-codes";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { build_payment_id } from "../payment-id.helper";
+import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
+import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
 export class PaymentProcessingService {
   constructor(private readonly repo = payment_repository) {}
@@ -80,6 +82,14 @@ export class PaymentProcessingService {
       resource_id: transaction.id,
       to_status: PAYMENT_TRANSACTION_STATUS.PENDING,
       metadata: { provider: input.provider, amount: input.amount },
+    });
+
+    dispatch_task_creation({
+      task_type: "payment_follow_up",
+      title: build_auto_task_title("payment_follow_up", { transaction_id: transaction.id }),
+      reference_type: "payment",
+      reference_id: transaction.id,
+      created_by_user_id: input.actor_user_id ?? null,
     });
 
     return transaction;

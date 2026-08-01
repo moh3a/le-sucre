@@ -109,7 +109,9 @@ export const order_router = create_trpc_router({
 
   adminCreateOrder: permission_procedure(PERMISSIONS.orders_write)
     .input(admin_create_order_dto)
-    .mutation(({ input }) => order_service.admin_create(input)),
+    .mutation(({ ctx, input }) =>
+      order_service.admin_create({ ...input, actor_user_id: ctx.session!.user.id }),
+    ),
 
   adminUpdatePayment: permission_procedure(PERMISSIONS.orders_write)
     .input(update_order_payment_dto)

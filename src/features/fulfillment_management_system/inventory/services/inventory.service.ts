@@ -23,6 +23,8 @@ import { forecast_index_service } from "../../forecasting/services/forecast-inde
 import { preorder_fulfillment_service } from "@/features/order_management_system/preorders/services/preorder-fulfillment.service";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { AUDIT_ACTION } from "../../constants/audit-actions";
+import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
+import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
 export class InventoryService {
   constructor(private readonly repo = inventory_repository) {}
@@ -162,8 +164,8 @@ export class InventoryService {
     return this.get_level(input.sku_id, input.warehouse_id);
   }
 
-  async receive_stock(input: z.infer<typeof receive_stock_dto>) {
-    await this.assert_sku(input.sku_id);
+  async receive_stock(input: z.infer<typeof receive_stock_dto>, actor_user_id?: string | null) {
+    const sku = await this.assert_sku(input.sku_id);
     const level = await this.repo.ensure_level(input.sku_id, input.warehouse_id);
     const new_on_hand = level.quantity_on_hand + input.quantity;
 
@@ -185,10 +187,22 @@ export class InventoryService {
       resource_type: "sku_id",
       resource_id: input.sku_id,
     });
+
+    dispatch_task_creation({
+      task_type: "stock_receiving",
+      title: build_auto_task_title("stock_receiving", {}),
+      reference_type: "product",
+      reference_id: sku.product_id,
+      created_by_user_id: actor_user_id ?? null,
+    });
+
     return this.get_level(input.sku_id, input.warehouse_id);
   }
 
-  async batch_receive_stock(input: z.infer<typeof batch_receive_stock_dto>) {
+  async batch_receive_stock(
+    input: z.infer<typeof batch_receive_stock_dto>,
+    actor_user_id?: string | null,
+  ) {
     const validated_skus: Array<{ id: string; product_id: string }> = [];
     for (const item of input.items) {
       const sku = await this.assert_sku(item.sku_id);
@@ -253,6 +267,12 @@ export class InventoryService {
       action: AUDIT_ACTION.INVENTORY_STOCK_RECEIVED,
       resource_type: "batch",
       resource_id: `batch:${input.items.length}_items`,
+    });
+
+    dispatch_task_creation({
+      task_type: "stock_receiving",
+      title: build_auto_task_title("stock_receiving", {}),
+      created_by_user_id: actor_user_id ?? null,
     });
 
     return { received: input.items.length };

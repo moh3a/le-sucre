@@ -36,7 +36,9 @@ export const product_router = create_trpc_router({
 
   create: permission_procedure(PERMISSIONS.products_write)
     .input(create_product_dto)
-    .mutation(({ input }) => product_service.create(input)),
+    .mutation(({ ctx, input }) =>
+      product_service.create(input, ctx.session!.user.id),
+    ),
 
   update: permission_procedure(PERMISSIONS.products_write)
     .input(update_product_dto)
