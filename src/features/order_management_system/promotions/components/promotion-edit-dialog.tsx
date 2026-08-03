@@ -41,9 +41,8 @@ const edit_form_schema = z.object({
     PROMOTION_STATUS.scheduled,
     PROMOTION_STATUS.active,
     PROMOTION_STATUS.paused,
-    PROMOTION_STATUS.expired,
   ]),
-  priority: z.coerce.number().int().min(0).max(9999),
+  priority: z.number().int().min(0).max(9999),
   is_stackable: z.boolean(),
   starts_at: z.string().optional().or(z.literal("")),
   ends_at: z.string().optional().or(z.literal("")),
@@ -181,7 +180,6 @@ export function PromotionEditDialog({ open, on_open_change, promotion }: Promoti
                         <SelectItem value={PROMOTION_STATUS.scheduled}>{tp("status_scheduled")}</SelectItem>
                         <SelectItem value={PROMOTION_STATUS.active}>{tp("status_active")}</SelectItem>
                         <SelectItem value={PROMOTION_STATUS.paused}>{tp("status_paused")}</SelectItem>
-                        <SelectItem value={PROMOTION_STATUS.expired}>{tp("status_expired")}</SelectItem>
                       </SelectContent>
                     </Select>
                   )}

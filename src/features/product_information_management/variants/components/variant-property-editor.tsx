@@ -100,7 +100,7 @@ export function VariantPropertyEditor({ product_id, on_change }: VariantProperty
     onError: (err) => toast.error(err.message),
   });
 
-  const property_form = useForm<PropertyFormValues>({
+  const property_form = useForm<z.input<typeof create_property_dto>, unknown, PropertyFormValues>({
     resolver: zodResolver(create_property_dto),
     defaultValues: {
       product_id,

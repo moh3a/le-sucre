@@ -62,7 +62,7 @@ export function CreateOrderDialog() {
         shipping_city: z.string().min(2, t("shipping_city_validation")).max(128),
         shipping_state: z.string().max(128).optional(),
         shipping_postal_code: z.string().max(32).optional(),
-        shipping_country_code: z.string().length(2).default("DZ"),
+        shipping_country_code: z.string().length(2),
         notes: z.string().max(4096).optional(),
       }),
     [t],

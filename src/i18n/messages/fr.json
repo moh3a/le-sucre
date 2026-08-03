@@ -75,14 +75,14 @@
     "article_9_content": "La responsabilité de {appName} ne saurait être engagée pour tout dommage indirect résultant de l'utilisation des produits achetés ou en cas de force majeure telle que définie par la jurisprudence.",
     "article_10_title": "Litiges",
     "article_10_content": "Les présentes conditions sont soumises au droit algérien. En cas de litige, les parties s'efforceront de trouver une solution amiable. À défaut, les tribunaux d'Alger seront seuls compétents.",
-    "contactText": "Pour toute question concernant nos conditions générales de vente, veuillez nous contacter à l'adresse contact@lesucre.dz."
+    "contactText": "Pour toute question concernant nos conditions générales de vente, veuillez nous contacter à l'adresse contact@orla.dz."
   },
   "errorPage": {
     "title": "Erreur interne",
     "description": "Désolé, une erreur inattendue s'est produite. Notre équipe technique a été informée et travaille à résoudre le problème.",
     "retry": "Réessayer",
     "goHome": "Retourner à l'accueil",
-    "contactText": "Si le problème persiste, veuillez nous contacter à l'adresse support@lesucre.dz"
+    "contactText": "Si le problème persiste, veuillez nous contacter à l'adresse support@orla.dz"
   },
   "notFound": {
     "title": "Page introuvable",
@@ -369,6 +369,7 @@
     "view": "Voir",
     "save": "Enregistrer",
     "delete": "Supprimer",
+    "validation_failed": "Veuillez corriger les champs invalides",
     "loading": "Chargement…",
     "empty": "Aucun produit",
     "name": "Nom",
@@ -4721,12 +4722,12 @@
     "section_4_title": "Cookies",
     "section_4_content": "Notre site utilise des cookies pour améliorer votre expérience de navigation, analyser le trafic et personnaliser le contenu. Vous pouvez contrôler l'utilisation des cookies dans les paramètres de votre navigateur.",
     "section_5_title": "Vos droits",
-    "section_5_content": "Conformément à la réglementation applicable, vous disposez d'un droit d'accès, de rectification, d'effacement et de portabilité de vos données. Vous pouvez exercer ces droits en nous contactant à contact@lesucre.dz.",
+    "section_5_content": "Conformément à la réglementation applicable, vous disposez d'un droit d'accès, de rectification, d'effacement et de portabilité de vos données. Vous pouvez exercer ces droits en nous contactant à contact@orla.dz.",
     "section_6_title": "Sécurité des données",
     "section_6_content": "Nous mettons en oeuvre des mesures de sécurité techniques et organisationnelles pour protéger vos informations personnelles contre tout accès non autorisé, perte ou divulgation.",
     "section_7_title": "Conservation des données",
     "section_7_content": "Vos données personnelles sont conservées pendant la durée nécessaire à la réalisation des finalités pour lesquelles elles ont été collectées, conformément aux obligations légales en vigueur.",
-    "footer": "Pour toute question concernant notre politique de confidentialité, veuillez nous contacter à l'adresse contact@lesucre.dz."
+    "footer": "Pour toute question concernant notre politique de confidentialité, veuillez nous contacter à l'adresse contact@orla.dz."
   },
   "newsletterConfirm": {
     "title": "Confirmation newsletter",
@@ -4745,7 +4746,7 @@
     "description": "Notre site est actuellement en maintenance pour vous offrir une meilleure expérience. Nous serons de retour dans quelques instants. Merci de votre patience.",
     "estimatedReturn": "Retour estimé : dans les prochaines heures",
     "followText": "Suivez-nous sur les réseaux sociaux pour rester informé :",
-    "copyright": "{appName} - contact@lesucre.dz"
+    "copyright": "{appName} - contact@orla.dz"
   },
   "faq": {
     "title": "FAQ",
@@ -4821,7 +4822,7 @@
     "subtitle": "Une question, une suggestion ou une commande spéciale ? Nous sommes là pour vous aider.",
     "infoTitle": "Nos coordonnées",
     "infoEmail": "Email",
-    "infoEmailValue": "contact@lesucre.dz",
+    "infoEmailValue": "contact@orla.dz",
     "infoPhone": "Téléphone",
     "infoPhoneValue": "+213 (0) 555 12 34 56",
     "infoAddress": "Adresse",

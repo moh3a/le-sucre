@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -43,19 +42,26 @@ import {
   product_status_enum,
   upsert_translation_dto,
 } from "../../models/product.dto";
+import { apply_server_field_errors } from "../../helpers/apply-server-field-errors.helper";
 
 const general_form_schema = z.object({
-  name: z.string().min(1, "Requis"),
+  name: z.string().min(2, "Au minimum 2 caractères"),
   description: z.string().optional().nullable(),
-  name_en: z.string().min(1, "Requis"),
+  name_en: z
+    .string()
+    .optional()
+    .refine((v) => !v || v.length >= 2, "Au minimum 2 caractères"),
   description_en: z.string().optional().nullable(),
-  name_ar: z.string().min(1, "Requis"),
+  name_ar: z
+    .string()
+    .optional()
+    .refine((v) => !v || v.length >= 2, "Au minimum 2 caractères"),
   description_ar: z.string().optional().nullable(),
-  retail_unit_name: z.string().max(128).default("pièce"),
-  wholesale_unit_name: z.string().max(128).default("carton"),
-  wholesale_pieces_per_unit: z.coerce.number().int().min(1, "Doit être ≥ 1"),
-  wholesale_base_price: z.coerce.number().min(0).optional().nullable(),
-  wholesale_offer_price: z.coerce.number().min(0).optional().nullable(),
+  retail_unit_name: z.string().max(128),
+  wholesale_unit_name: z.string().max(128),
+  wholesale_pieces_per_unit: z.number().int().min(1, "Doit être ≥ 1"),
+  wholesale_base_price: z.number().min(0).optional().nullable(),
+  wholesale_offer_price: z.number().min(0).optional().nullable(),
   keywords: z.array(z.string()),
   slug: z.string().min(1, "Requis"),
   status: product_status_enum,
@@ -94,23 +100,32 @@ export function ProductDetailGeneralTab({
 
   const { data: tree } = trpc.categories.tree.useQuery();
 
+  function handle_mutation_error(err: { message?: string; data?: unknown }) {
+    const data = (err.data ?? {}) as { fieldErrors?: Record<string, string[]> };
+    if (apply_server_field_errors(form, data)) {
+      toast.error(t("validation_failed"));
+    } else {
+      toast.error(err.message ?? t("validation_failed"));
+    }
+  }
+
   const update = trpc.products.update.useMutation({
     onSuccess: () => {
       utils.products.byId.invalidate({ id: product_id });
       utils.products.adminList.invalidate();
       toast.success(t("product_updated"));
     },
-    onError: (err) => toast.error(err.message),
+    onError: handle_mutation_error,
   });
 
   const upsert_en = trpc.products.upsertTranslation.useMutation({
     onSuccess: () => utils.products.byId.invalidate({ id: product_id }),
-    onError: (err) => toast.error(err.message),
+    onError: handle_mutation_error,
   });
 
   const upsert_ar = trpc.products.upsertTranslation.useMutation({
     onSuccess: () => utils.products.byId.invalidate({ id: product_id }),
-    onError: (err) => toast.error(err.message),
+    onError: handle_mutation_error,
   });
 
   const fr_tr = translations.find((tr) => tr.locale === "fr");
@@ -142,7 +157,7 @@ export function ProductDetailGeneralTab({
       base_price: retail_unit?.base_price ? Number(retail_unit.base_price) : product.base_price,
       offer_price: retail_unit?.offer_price ? Number(retail_unit.offer_price) : product.offer_price ?? null,
       category_id: product.category_id,
-      subcategory_id: null,
+      subcategory_id: product.category_id,
       brand_id: product.brand_id ?? null,
     }),
     [fr_tr, en_tr, ar_tr, product, retail_unit, wholesale_unit],
@@ -151,19 +166,59 @@ export function ProductDetailGeneralTab({
   const form = useForm<GeneralFormValues>({
     resolver: zodResolver(general_form_schema),
     defaultValues: default_values,
+    mode: "onChange",
   });
+
+  useEffect(() => {
+    form.trigger();
+  }, [form]);
 
   const watched_category_id = form.watch("category_id");
 
-  const category_options = useMemo(() => {
+  const all_categories = useMemo(() => {
     if (!tree) return [];
-    return tree.filter((n) => !n.parent_id).map((n) => ({ id: n.id, name: n.name }));
+    return tree.flatMap((n) => [
+      { value: n.id, label: n.name, parent_id: n.parent_id ?? null },
+      ...(n.children ?? []).map((c) => ({
+        value: c.id,
+        label: c.name,
+        parent_id: c.parent_id ?? n.id,
+      })),
+    ]);
   }, [tree]);
 
-  const subcategory_options = useMemo(() => {
-    const parent = tree?.find((n) => n.id === watched_category_id);
-    return parent?.children?.map((c) => ({ id: c.id, name: c.name })) ?? [];
-  }, [tree, watched_category_id]);
+  const category_options = useMemo(
+    () => all_categories.filter((c) => !c.parent_id),
+    [all_categories],
+  );
+
+  const subcategory_options = useMemo(
+    () => all_categories.filter((c) => c.parent_id === watched_category_id),
+    [all_categories, watched_category_id],
+  );
+
+  function resolve_category(value: string | null) {
+    if (!value) return null;
+    const match = all_categories.find((c) => c.value === value);
+    if (!match) return null;
+    if (match.parent_id) {
+      return all_categories.find((c) => c.value === match.parent_id) ?? null;
+    }
+    return match;
+  }
+
+  useEffect(() => {
+    if (all_categories.length === 0) return;
+    const stored = product.category_id;
+    const match = all_categories.find((c) => c.value === stored);
+    if (match?.parent_id) {
+      form.setValue("category_id", match.parent_id, { shouldValidate: true });
+      form.setValue("subcategory_id", stored, { shouldValidate: true });
+    } else if (stored) {
+      form.setValue("category_id", stored, { shouldValidate: true });
+      form.setValue("subcategory_id", null, { shouldValidate: true });
+    }
+  }, [all_categories, form, product.category_id]);
 
   const data_ready = !!tree;
 
@@ -190,26 +245,29 @@ export function ProductDetailGeneralTab({
       brand_id: values.brand_id || null,
     });
 
-    const p2 = upsert_en.mutateAsync({
-      product_id,
-      locale: "en",
-      name: values.name_en,
-      description: values.description_en,
-    });
+    const p2 = values.name_en
+      ? upsert_en.mutateAsync({
+          product_id,
+          locale: "en",
+          name: values.name_en,
+          description: values.description_en,
+        })
+      : Promise.resolve();
 
-    const p3 = upsert_ar.mutateAsync({
-      product_id,
-      locale: "ar",
-      name: values.name_ar,
-      description: values.description_ar,
-    });
+    const p3 = values.name_ar
+      ? upsert_ar.mutateAsync({
+          product_id,
+          locale: "ar",
+          name: values.name_ar,
+          description: values.description_ar,
+        })
+      : Promise.resolve();
 
     await Promise.all([p1, p2, p3]);
   }
 
   return (
-    <QueryGuard mutation={update}>
-      <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
+    <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>{t("general")}</CardTitle>
@@ -222,7 +280,7 @@ export function ProductDetailGeneralTab({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("name_fr")}</FieldLabel>
+                    <FieldLabel required>{t("name_fr")}</FieldLabel>
                     <Input {...field} />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -460,7 +518,7 @@ export function ProductDetailGeneralTab({
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("slug")}</FieldLabel>
+                    <FieldLabel required>{t("slug")}</FieldLabel>
                     <Input {...field} />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -493,7 +551,7 @@ export function ProductDetailGeneralTab({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>{t("base_price")}</FieldLabel>
+                      <FieldLabel required>{t("base_price")}</FieldLabel>
                       <Input
                         type="number"
                         step="0.01"
@@ -540,15 +598,18 @@ export function ProductDetailGeneralTab({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>{t("category")}</FieldLabel>
+                      <FieldLabel required>{t("category")}</FieldLabel>
                       {data_ready ? (
-                        <Combobox value={field.value} onValueChange={field.onChange}>
+                        <Combobox
+                          value={resolve_category(field.value)}
+                          onValueChange={(item) => field.onChange(item?.value ?? "")}
+                        >
                           <ComboboxInput placeholder={t("search_category_placeholder")} showClear />
                           <ComboboxContent>
                             <ComboboxList>
                               {category_options.map((cat) => (
-                                <ComboboxItem key={cat.id} value={cat.id}>
-                                  {cat.name}
+                                <ComboboxItem key={cat.value} value={cat}>
+                                  {cat.label}
                                 </ComboboxItem>
                               ))}
                             </ComboboxList>
@@ -570,8 +631,10 @@ export function ProductDetailGeneralTab({
                       <FieldLabel>{t("subcategory")}</FieldLabel>
                       {data_ready ? (
                         <Combobox
-                          value={field.value ?? ""}
-                          onValueChange={(val) => field.onChange(val || null)}
+                          value={
+                            subcategory_options.find((sub) => sub.value === field.value) ?? null
+                          }
+                          onValueChange={(item) => field.onChange(item?.value ?? null)}
                         >
                           <ComboboxInput
                             placeholder={
@@ -585,8 +648,8 @@ export function ProductDetailGeneralTab({
                           <ComboboxContent>
                             <ComboboxList>
                               {subcategory_options.map((sub) => (
-                                <ComboboxItem key={sub.id} value={sub.id}>
-                                  {sub.name}
+                                <ComboboxItem key={sub.value} value={sub}>
+                                  {sub.label}
                                 </ComboboxItem>
                               ))}
                             </ComboboxList>
@@ -615,7 +678,7 @@ export function ProductDetailGeneralTab({
               />
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={pending}>
+                <Button type="submit" disabled={pending || !form.formState.isValid}>
                   {pending ? t("saving") : t("save")}
                 </Button>
               </div>
@@ -623,6 +686,5 @@ export function ProductDetailGeneralTab({
           </CardContent>
         </Card>
       </form>
-    </QueryGuard>
   );
 }

@@ -8,8 +8,8 @@
 - error: src\features\billing_and_finance_system\repositories\invoice.repository.ts
 
 <p align="center">
-  <a href="https://github.com/moh3a/le-sucre/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/le-sucre/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
-  <img src="https://img.shields.io/badge/version-0.4.25-blue?style=flat-square" alt="Version">
+  <a href="https://github.com/moh3a/orla/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/orla/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
+  <img src="https://img.shields.io/badge/version-0.4.29-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-proprietary-red?style=flat-square" alt="License">
 </p>
 
@@ -114,8 +114,8 @@ Enterprise-grade ecommerce platform for pastry and sweets making tools, cooking 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/moh3a/le-sucre.git
-cd le-sucre
+git clone https://github.com/moh3a/orla.git
+cd orla
 pnpm install
 ```
 
@@ -251,7 +251,7 @@ feature/
 
 ```bash
 # Build image
-docker build -t le-sucre-app .
+docker build -t orla-app .
 
 # Start all services
 docker compose -f docker-compose.prod.yml up -d

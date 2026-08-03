@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -29,60 +28,58 @@ import {
   TagsInputLabel,
   TagsInputList,
 } from "@/components/ui/tags-input";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
 import { BrandCombobox } from "@/features/product_information_management/brands/components/brand-combobox";
+import { CategoryCombobox } from "@/features/product_information_management/categories/components/category-combobox";
+import { SubcategoryCombobox } from "@/features/product_information_management/categories/components/subcategory-combobox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { product_status_enum } from "../models/product.dto";
-import type { CategoryTreeNode } from "@/features/product_information_management/categories/types";
+import { apply_server_field_errors } from "../helpers/apply-server-field-errors.helper";
 
 const product_form_schema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(2, "Au minimum 2 caractères"),
   description: z.string().optional().nullable(),
-  name_en: z.string().min(1),
+  name_en: z
+    .string()
+    .optional()
+    .refine((v) => !v || v.length >= 2, "Au minimum 2 caractères"),
   description_en: z.string().optional().nullable(),
-  name_ar: z.string().min(1),
+  name_ar: z
+    .string()
+    .optional()
+    .refine((v) => !v || v.length >= 2, "Au minimum 2 caractères"),
   description_ar: z.string().optional().nullable(),
-  retail_unit_name: z.string().max(128).default("pièce"),
-  wholesale_unit_name: z.string().max(128).default("carton"),
-  wholesale_pieces_per_unit: z.coerce.number().int().min(1).default(1),
-  wholesale_base_price: z.coerce.number().min(0).optional().nullable(),
-  wholesale_offer_price: z.coerce.number().min(0).optional().nullable(),
+  retail_unit_name: z.string().max(128),
+  wholesale_unit_name: z.string().max(128),
+  wholesale_pieces_per_unit: z.number().int().min(1),
+  wholesale_base_price: z.number().min(0).optional().nullable(),
+  wholesale_offer_price: z.number().min(0).optional().nullable(),
   keywords: z.array(z.string()),
   slug: z.string().optional(),
   status: product_status_enum,
   base_price: z.number().min(0),
   offer_price: z.number().min(0).optional().nullable(),
-  category_id: z.string().min(1),
+  category_id: z.string().min(1, "Requis"),
   subcategory_id: z.string().optional().nullable(),
   brand_id: z.string().optional().nullable(),
-  sku: z.string().min(1),
+  sku: z.string().min(1, "Requis"),
 });
 
 type ProductFormValues = z.infer<typeof product_form_schema>;
-
-function flatten_categories(
-  nodes: CategoryTreeNode[],
-  depth = 0,
-): Array<{ id: string; label: string }> {
-  return nodes.flatMap((node) => [
-    { id: node.id, label: `${"—".repeat(depth)} ${node.name}`.trim() },
-    ...flatten_categories(node.children ?? [], depth + 1),
-  ]);
-}
 
 export function ProductForm({ mode }: { mode: "create" | "edit" }) {
   const t = useTranslations("products");
   const router = useRouter();
   const utils = trpc.useUtils();
 
-  const { data: tree } = trpc.categories.tree.useQuery();
+  function handle_mutation_error(err: { message?: string; data?: unknown }) {
+    const data = (err.data ?? {}) as { fieldErrors?: Record<string, string[]> };
+    if (apply_server_field_errors(form, data)) {
+      toast.error(t("validation_failed"));
+    } else {
+      toast.error(err.message ?? t("validation_failed"));
+    }
+  }
 
   const create = trpc.products.create.useMutation({
     onSuccess: (result) => {
@@ -90,14 +87,14 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
       toast.success(t("product_created"));
       router.push(`/console/products/${result.product.id}`);
     },
-    onError: (err) => toast.error(err.message),
+    onError: handle_mutation_error,
   });
 
   const upsert_en = trpc.products.upsertTranslation.useMutation({
-    onError: (err) => toast.error(err.message),
+    onError: handle_mutation_error,
   });
   const upsert_ar = trpc.products.upsertTranslation.useMutation({
-    onError: (err) => toast.error(err.message),
+    onError: handle_mutation_error,
   });
 
   const default_values: ProductFormValues = {
@@ -126,21 +123,15 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(product_form_schema),
     defaultValues: default_values,
+    mode: "onChange",
   });
+
+  useEffect(() => {
+    form.trigger();
+  }, [form]);
 
   const watched_category_id = form.watch("category_id");
 
-  const category_options = useMemo(() => {
-    if (!tree) return [];
-    return tree.filter((n) => !n.parent_id).map((n) => ({ id: n.id, name: n.name }));
-  }, [tree]);
-
-  const subcategory_options = useMemo(() => {
-    const parent = tree?.find((n) => n.id === watched_category_id);
-    return parent?.children?.map((c) => ({ id: c.id, name: c.name })) ?? [];
-  }, [tree, watched_category_id]);
-
-  const data_ready = !!tree;
   const pending = create.isPending || upsert_en.isPending || upsert_ar.isPending;
 
   async function on_submit(values: ProductFormValues) {
@@ -168,23 +159,26 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
     });
 
     await Promise.all([
-      upsert_en.mutateAsync({
-        product_id: result.product.id,
-         locale: "en",
-        name: values.name_en,
-        description: values.description_en,
-      }),
-      upsert_ar.mutateAsync({
-        product_id: result.product.id,
-         locale: "ar",
-        name: values.name_ar,
-        description: values.description_ar,
-      }),
+      values.name_en
+        ? upsert_en.mutateAsync({
+            product_id: result.product.id,
+             locale: "en",
+            name: values.name_en,
+            description: values.description_en,
+          })
+        : Promise.resolve(),
+      values.name_ar
+        ? upsert_ar.mutateAsync({
+            product_id: result.product.id,
+             locale: "ar",
+            name: values.name_ar,
+            description: values.description_ar,
+          })
+        : Promise.resolve(),
     ]);
   }
 
   return (
-    <QueryGuard mutation={create}>
     <form onSubmit={form.handleSubmit(on_submit)} className="space-y-6">
       <Card>
         <CardHeader>
@@ -198,7 +192,7 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>{t("sku")}</FieldLabel>
+                  <FieldLabel required>{t("sku")}</FieldLabel>
                   <Input {...field} />
                   <FieldError errors={[fieldState.error]} />
                 </Field>
@@ -210,7 +204,7 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>{t("name_fr")}</FieldLabel>
+                  <FieldLabel required>{t("name_fr")}</FieldLabel>
                   <Input {...field} />
                   <FieldError errors={[fieldState.error]} />
                 </Field>
@@ -471,7 +465,7 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("base_price")}</FieldLabel>
+                    <FieldLabel required>{t("base_price")}</FieldLabel>
                     <Input
                       type="number"
                       step="0.01"
@@ -516,23 +510,12 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{t("category")}</FieldLabel>
-                    {data_ready ? (
-                      <Combobox value={field.value} onValueChange={field.onChange}>
-                        <ComboboxInput placeholder={t("search_category_placeholder")} showClear />
-                        <ComboboxContent>
-                          <ComboboxList>
-                            {category_options.map((cat) => (
-                              <ComboboxItem key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    ) : (
-                      <Input value={field.value} disabled />
-                    )}
+                    <FieldLabel required>{t("category")}</FieldLabel>
+                    <CategoryCombobox
+                      value={field.value || null}
+                      onValueChange={(val) => field.onChange(val ?? "")}
+                      placeholder={t("search_category_placeholder")}
+                    />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
@@ -544,33 +527,16 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
                 render={({ field }) => (
                   <Field>
                     <FieldLabel>{t("subcategory")}</FieldLabel>
-                    {data_ready ? (
-                      <Combobox
-                        value={field.value ?? ""}
-                        onValueChange={(val) => field.onChange(val || null)}
-                      >
-                        <ComboboxInput
-                          placeholder={
-                            watched_category_id
-                              ? t("search_subcategory_placeholder")
-                              : t("select_category_first")
-                          }
-                          showClear
-                          disabled={!watched_category_id}
-                        />
-                        <ComboboxContent>
-                          <ComboboxList>
-                            {subcategory_options.map((sub) => (
-                              <ComboboxItem key={sub.id} value={sub.id}>
-                                {sub.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    ) : (
-                      <Input value={field.value ?? ""} disabled />
-                    )}
+                    <SubcategoryCombobox
+                      value={field.value ?? null}
+                      onValueChange={(val) => field.onChange(val ?? null)}
+                      disabled={!watched_category_id}
+                      placeholder={
+                        watched_category_id
+                          ? t("search_subcategory_placeholder")
+                          : t("select_category_first")
+                      }
+                    />
                   </Field>
                 )}
               />
@@ -594,7 +560,7 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={pending}>
+              <Button type="submit" disabled={pending || !form.formState.isValid}>
                 {pending ? t("saving") : t("save")}
               </Button>
             </div>
@@ -602,6 +568,5 @@ export function ProductForm({ mode }: { mode: "create" | "edit" }) {
         </CardContent>
       </Card>
     </form>
-    </QueryGuard>
   );
 }

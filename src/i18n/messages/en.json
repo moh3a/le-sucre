@@ -75,14 +75,14 @@
     "article_9_content": "{appName}'s liability cannot be engaged for any indirect damage resulting from the use of purchased products or in case of force majeure as defined by case law.",
     "article_10_title": "Disputes",
     "article_10_content": "These terms are subject to Algerian law. In case of dispute, the parties will strive to find an amicable solution. Failing this, the courts of Algiers shall have sole jurisdiction.",
-    "contactText": "For any questions regarding our terms and conditions, please contact us at contact@lesucre.dz."
+    "contactText": "For any questions regarding our terms and conditions, please contact us at contact@orla.dz."
   },
   "errorPage": {
     "title": "Internal error",
     "description": "Sorry, an unexpected error occurred. Our technical team has been notified and is working to resolve the issue.",
     "retry": "Try again",
     "goHome": "Return to homepage",
-    "contactText": "If the problem persists, please contact us at support@lesucre.dz"
+    "contactText": "If the problem persists, please contact us at support@orla.dz"
   },
   "notFound": {
     "title": "Page not found",
@@ -339,6 +339,7 @@
     "view": "View",
     "save": "Save",
     "delete": "Delete",
+    "validation_failed": "Please fix the invalid fields",
     "loading": "Loading…",
     "empty": "No products",
     "name": "Name",
@@ -4631,12 +4632,12 @@
     "section_4_title": "Cookies",
     "section_4_content": "Our site uses cookies to improve your browsing experience, analyze traffic and personalize content. You can control cookie usage in your browser settings.",
     "section_5_title": "Your Rights",
-    "section_5_content": "In accordance with applicable regulations, you have the right to access, rectify, erase and port your data. You can exercise these rights by contacting us at contact@lesucre.dz.",
+    "section_5_content": "In accordance with applicable regulations, you have the right to access, rectify, erase and port your data. You can exercise these rights by contacting us at contact@orla.dz.",
     "section_6_title": "Data Security",
     "section_6_content": "We implement technical and organizational security measures to protect your personal information against unauthorized access, loss or disclosure.",
     "section_7_title": "Data Retention",
     "section_7_content": "Your personal data is kept for the period necessary to fulfill the purposes for which it was collected, in accordance with applicable legal obligations.",
-    "footer": "For any questions regarding our privacy policy, please contact us at contact@lesucre.dz."
+    "footer": "For any questions regarding our privacy policy, please contact us at contact@orla.dz."
   },
   "newsletterConfirm": {
     "title": "Newsletter Confirmation",
@@ -4655,7 +4656,7 @@
     "description": "Our site is currently under maintenance to offer you a better experience. We'll be back in a few moments. Thank you for your patience.",
     "estimatedReturn": "Estimated return: within the next few hours",
     "followText": "Follow us on social media to stay informed:",
-    "copyright": "{appName} - contact@lesucre.dz"
+    "copyright": "{appName} - contact@orla.dz"
   },
   "faq": {
     "title": "FAQ",
@@ -4731,7 +4732,7 @@
     "subtitle": "A question, a suggestion or a special order? We are here to help you.",
     "infoTitle": "Our Contact Details",
     "infoEmail": "Email",
-    "infoEmailValue": "contact@lesucre.dz",
+    "infoEmailValue": "contact@orla.dz",
     "infoPhone": "Phone",
     "infoPhoneValue": "+213 (0) 555 12 34 56",
     "infoAddress": "Address",

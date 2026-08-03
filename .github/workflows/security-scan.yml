@@ -92,11 +92,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image
-        run: docker build -t le-sucre-app:${{ github.sha }} .
+        run: docker build -t orla-app:${{ github.sha }} .
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: le-sucre-app:${{ github.sha }}
+          image-ref: orla-app:${{ github.sha }}
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH

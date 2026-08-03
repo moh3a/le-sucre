@@ -36,6 +36,7 @@ import { create_address_schema } from "@/features/authentication_and_authorizati
 import type { UserAddress } from "@/features/authentication_and_authorization/profile/types";
 import type { CreateAddressInput } from "@/features/authentication_and_authorization/profile/validators/profile.validators";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { z } from "zod";
 
 export function AddressFormCard({
   address,
@@ -69,7 +70,7 @@ export function AddressFormCard({
     onError: (err) => toast.error(err.message),
   });
 
-  const form = useForm<CreateAddressInput>({
+  const form = useForm<z.input<typeof create_address_schema>, unknown, CreateAddressInput>({
     resolver: zodResolver(create_address_schema),
     values: address
       ? {

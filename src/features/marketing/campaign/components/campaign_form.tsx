@@ -52,7 +52,7 @@ const form_schema = z.object({
   }),
   promotion_id: z.string().max(255).optional().nullable(),
   ab_test_group: z.string().max(64).optional().nullable(),
-  ab_traffic_split: z.number().int().min(0).max(100).default(100),
+  ab_traffic_split: z.number().int().min(0).max(100),
   translations: z.array(
     z.object({
       locale: z.enum(["en", "fr", "ar"]),
@@ -64,8 +64,8 @@ const form_schema = z.object({
       seo_description: z.string().max(500).optional().or(z.literal("")),
     }),
   ),
-  category_ids: z.array(z.string()).default([]),
-  brand_ids: z.array(z.string()).default([]),
+  category_ids: z.array(z.string()),
+  brand_ids: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof form_schema>;

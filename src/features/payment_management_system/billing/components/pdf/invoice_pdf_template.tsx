@@ -57,7 +57,7 @@ const default_company: CompanyInfo = {
   name: "ORLA",
   address: "123 Rue de la Liberté, Alger, Algérie",
   vat_number: "AI-198273645000",
-  email: "contact@lesucre.dz",
+  email: "contact@orla.dz",
   phone: "0000 00 00 00",
 };
 

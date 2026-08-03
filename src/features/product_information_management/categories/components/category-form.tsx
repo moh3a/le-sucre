@@ -102,7 +102,7 @@ export function CategoryForm({ mode, category_id, default_values, onSuccess, onC
     onError: (err) => toast.error(err.message),
   });
 
-  const form = useForm<CategoryFormValues>({
+  const form = useForm<z.input<typeof create_category_dto>, unknown, CategoryFormValues>({
     resolver: zodResolver(create_category_dto),
     defaultValues: {
       name: "",

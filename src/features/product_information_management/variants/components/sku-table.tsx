@@ -79,21 +79,21 @@ function flatten_options(
 }
 
 const sku_form_schema = z.object({
-  sku_code: z.string().max(128).default(""),
-  base_price: z.string().default(""),
-  offer_price: z.string().default(""),
-  is_active: z.boolean().default(true),
+  sku_code: z.string().max(128),
+  base_price: z.string(),
+  offer_price: z.string(),
+  is_active: z.boolean(),
 });
 type SkuFormValues = z.infer<typeof sku_form_schema>;
 
 const bulk_price_schema = z.object({
-  base_price: z.string().default(""),
-  offer_price: z.string().default(""),
+  base_price: z.string(),
+  offer_price: z.string(),
 });
 type BulkPriceFormValues = z.infer<typeof bulk_price_schema>;
 
 const bulk_stock_schema = z.object({
-  stock: z.string().default(""),
+  stock: z.string(),
 });
 type BulkStockFormValues = z.infer<typeof bulk_stock_schema>;
 

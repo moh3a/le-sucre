@@ -48,31 +48,28 @@ const form_schema = z.object({
     PROMOTION_STATUS.active,
     PROMOTION_STATUS.paused,
   ]),
-  priority: z.coerce.number().int().min(0).max(9999).default(100),
-  is_stackable: z.boolean().default(false),
+  priority: z.number().int().min(0).max(9999),
+  is_stackable: z.boolean(),
   starts_at: z.string().optional().or(z.literal("")),
   ends_at: z.string().optional().or(z.literal("")),
-  rule_scope_type: z
-    .enum([
-      DISCOUNT_SCOPE.cart,
-      DISCOUNT_SCOPE.category,
-      DISCOUNT_SCOPE.product,
-      DISCOUNT_SCOPE.sku,
-      DISCOUNT_SCOPE.customer,
-      DISCOUNT_SCOPE.shipping,
-    ])
-    .default(DISCOUNT_SCOPE.cart),
+  rule_scope_type: z.enum([
+    DISCOUNT_SCOPE.cart,
+    DISCOUNT_SCOPE.category,
+    DISCOUNT_SCOPE.product,
+    DISCOUNT_SCOPE.sku,
+    DISCOUNT_SCOPE.customer,
+    DISCOUNT_SCOPE.shipping,
+  ]),
   rule_discount_type: z
     .enum([
       DISCOUNT_TYPE.percent,
       DISCOUNT_TYPE.fixed,
       DISCOUNT_TYPE.free_shipping,
       DISCOUNT_TYPE.buy_x_get_y,
-    ])
-    .default(DISCOUNT_TYPE.percent),
-  rule_discount_value: z.coerce.number().min(0).default(10),
-  rule_min_subtotal: z.coerce.number().min(0).optional().or(z.literal("")),
-  rule_max_discount_amount: z.coerce.number().min(0).optional().or(z.literal("")),
+    ]),
+  rule_discount_value: z.number().min(0),
+  rule_min_subtotal: z.number().min(0).optional().or(z.literal("")),
+  rule_max_discount_amount: z.number().min(0).optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof form_schema>;
@@ -393,7 +390,9 @@ export function CreatePromotionDialog() {
                       min={0}
                       {...field}
                       value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
                       placeholder={t("optional_placeholder")}
                     />
                   </Field>
@@ -411,7 +410,9 @@ export function CreatePromotionDialog() {
                       min={0}
                       {...field}
                       value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
                       placeholder={t("optional_placeholder")}
                     />
                   </Field>

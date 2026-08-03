@@ -110,7 +110,7 @@ export class InvoiceService {
         order_number: order.order_number,
       });
 
-      const recipient_email = order.guest_email || "billing@lesucre.dz";
+      const recipient_email = order.guest_email || "billing@orla.dz";
       await email_service.send_invoice_email({
         to_email: recipient_email,
         customer_name: (new_invoice.billing_address?.full_name as string) || "Client",

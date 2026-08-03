@@ -163,7 +163,7 @@ export function CategoryTable() {
         accessorKey: "image_url",
         header: ({ column }) => <DataTableColumnHeader column={column} label={t("image")} />,
         cell: ({ row }) => {
-          const url = row.getValue("image_url") as string | null;
+          const url = row.original.image_url;
           if (!url) return <span className="text-muted-foreground">—</span>;
           return (
             <Image

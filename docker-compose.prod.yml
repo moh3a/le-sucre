@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    image: le-sucre-app:latest
+    image: orla-app:latest
     restart: unless-stopped
     env_file: .env.production
     ports:
@@ -34,7 +34,7 @@ services:
         max-file: "3"
 
   worker-shipping:
-    image: le-sucre-app:latest
+    image: orla-app:latest
     restart: unless-stopped
     env_file: .env.production
     command: ["node", "--import", "tsx", "src/lib/queue/workers/shipping.worker.ts"]
@@ -58,7 +58,7 @@ services:
         max-file: "3"
 
   worker-blacklist-expiry:
-    image: le-sucre-app:latest
+    image: orla-app:latest
     restart: unless-stopped
     env_file: .env.production
     command: ["node", "--import", "tsx", "src/features/ip_blacklist/scripts/expire-blacklist.ts"]
@@ -82,7 +82,7 @@ services:
         max-file: "3"
 
   worker-reservations:
-    image: le-sucre-app:latest
+    image: orla-app:latest
     restart: unless-stopped
     env_file: .env.production
     command: ["node", "--import", "tsx", "src/lib/queue/workers/reservation-expiry.worker.ts"]

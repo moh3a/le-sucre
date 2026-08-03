@@ -1,3 +1,5 @@
+import { ZodError } from "zod";
+
 import { AppError } from "@/lib/error_handling";
 import { extract_messages } from "@/features/fulfillment_management_system/shared/error-codes";
 import { redact } from "@/lib/security/redaction";
@@ -18,6 +20,16 @@ export function app_error_formatter(opts: Record<string, unknown>) {
   const shape = opts.shape as { message: string; data?: Record<string, unknown> };
   const error = opts.error as { cause: unknown };
   const cause = error.cause;
+  if (cause instanceof ZodError) {
+    return {
+      ...shape,
+      message: "Validation échouée",
+      data: {
+        ...((shape.data ?? {}) as Record<string, unknown>),
+        fieldErrors: cause.flatten().fieldErrors,
+      },
+    };
+  }
   if (cause instanceof AppError) {
     const httpStatus = cause.status_code;
     const messages = extract_messages(cause.details);
