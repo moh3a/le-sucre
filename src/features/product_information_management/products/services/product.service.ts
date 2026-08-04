@@ -28,6 +28,7 @@ import { brand_service } from "@/features/product_information_management/brands/
 import { review_service } from "@/features/product_information_management/reviews/services/review.service";
 import { variant_service } from "@/features/product_information_management/variants/services/variant.service";
 import { sku_service } from "@/features/product_information_management/variants/services/sku.service";
+import { availability_service } from "@/features/order_management_system/preorders/services/availability.service";
 import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
 import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
 
@@ -215,12 +216,68 @@ export class ProductService {
 
     let variant_config = null;
     let sku_list = null;
+    let sku_availability: Record<
+      string,
+      {
+        mode: string;
+        fulfillment_type: string | null;
+        estimated_available_at: string | null;
+        deposit_percent: number;
+        max_preorder_qty: number | null;
+      }
+    > = {};
     try {
       if (parsed.has_variants) {
         variant_config = await variant_service.get_variant_config(product.id);
       }
       const sku_result = await sku_service.list_by_product(product.id);
       sku_list = sku_result.items;
+      sku_availability = Object.fromEntries(
+        await Promise.all(
+          sku_result.items.map(async (sku) => {
+            const fallback = {
+              mode: "unavailable",
+              fulfillment_type: null,
+              estimated_available_at: null,
+              deposit_percent: 100,
+              max_preorder_qty: null,
+            } as const;
+            try {
+              const availability = await availability_service.resolve(sku.sku_id, 1);
+              return [
+                sku.sku_id,
+                {
+                  mode: availability.mode,
+                  fulfillment_type: availability.fulfillment_type,
+                  estimated_available_at:
+                    "estimated_available_at" in availability
+                      ? (availability.estimated_available_at ?? null)
+                      : null,
+                  deposit_percent:
+                    "deposit_percent" in availability
+                      ? (availability.deposit_percent ?? 100)
+                      : 100,
+                  max_preorder_qty:
+                    "max_preorder_qty" in availability
+                      ? availability.max_preorder_qty
+                      : null,
+                },
+              ] as const;
+            } catch {
+              return [sku.sku_id, fallback] as const;
+            }
+          }),
+        ),
+      ) as Record<
+        string,
+        {
+          mode: string;
+          fulfillment_type: string | null;
+          estimated_available_at: string | null;
+          deposit_percent: number;
+          max_preorder_qty: number | null;
+        }
+      >;
     } catch {
       // SKU or variant data may be unavailable
     }
@@ -236,6 +293,7 @@ export class ProductService {
       review_summary,
       variant_config,
       sku_list,
+      sku_availability,
       product_units,
     };
   }

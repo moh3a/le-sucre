@@ -1,12 +1,5 @@
 # ORLA
 
-## TODOs
-
-- check if every operation works
-- error: src\lib\compose-refs.ts
-- error: src\hooks\use-network-polling.ts
-- error: src\features\billing_and_finance_system\repositories\invoice.repository.ts
-
 <p align="center">
   <a href="https://github.com/moh3a/orla/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/orla/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
   <img src="https://img.shields.io/badge/version-0.4.29-blue?style=flat-square" alt="Version">

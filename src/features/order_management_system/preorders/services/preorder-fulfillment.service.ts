@@ -1,6 +1,7 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, count, eq, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { inventory_repository } from "@/features/fulfillment_management_system/inventory/repositories/inventory.repository";
 import { reservation_service } from "@/features/fulfillment_management_system/inventory/services/reservation.service";
 import { preorder_repository } from "../repositories/preorder.repository";
@@ -43,11 +44,25 @@ export class PreorderFulfillmentService {
           .where(eq(order_items.id, alloc.order_item_id));
       }
 
-      // Set order's fulfillment_status to partial
-      await db
-        .update(orders)
-        .set({ fulfillment_status: "partial" })
-        .where(eq(orders.id, alloc.order_id));
+      // Only mark the order as partially fulfilled while other lines remain pending.
+      const [pending_count] = await db
+        .select({ value: count() })
+        .from(order_items)
+        .where(
+          and(
+            eq(order_items.order_id, alloc.order_id),
+            or(
+              isNull(order_items.preorder_status),
+              ne(order_items.preorder_status, PREORDER_LINE_STATUS.ready_to_ship),
+            ),
+          ),
+        );
+      if (Number(pending_count?.value ?? 0) > 0) {
+        await db
+          .update(orders)
+          .set({ fulfillment_status: "partial" })
+          .where(eq(orders.id, alloc.order_id));
+      }
 
       // Insert inventory movement for preorder fulfillment
       await db.transaction(async (tx) => {
@@ -75,8 +90,12 @@ export class PreorderFulfillmentService {
     for (const row of active_skus) {
       try {
         await this.fulfill_incoming_stock(row.sku_id, warehouse_id);
-      } catch {
-        // Log or handle error to keep processing other SKUs
+      } catch (error) {
+        logger.error("preorder_fulfillment: failed to fulfill confirmed allocations", {
+          sku_id: row.sku_id,
+          warehouse_id,
+          err: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }

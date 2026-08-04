@@ -12,6 +12,7 @@ export class OrderAdminService {
     status?: string;
     payment_status?: string;
     fulfillment_status?: string;
+    preorder_only?: boolean;
     from?: string;
     to?: string;
   }) {

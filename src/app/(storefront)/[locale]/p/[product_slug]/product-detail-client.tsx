@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Heart,
   ShoppingCart,
@@ -23,25 +20,12 @@ import { ProductPrice } from "@/features/product_information_management/products
 import { ProductRating } from "@/features/product_information_management/products/components/storefront/product-rating";
 import { ProductQuantitySelector } from "@/features/product_information_management/products/components/storefront/product-quantity-selector";
 import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
-import type { create_preorder_allocation_dto } from "@/features/order_management_system/preorders/models/preorder.dto";
-
-type PreorderInput = z.infer<typeof create_preorder_allocation_dto>;
 import { SectionHeader } from "@/components/storefront/section-header";
 import { ProductSpecs } from "@/features/product_information_management/products/components/storefront/product-specs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-  ResponsiveDialogTrigger,
-} from "@/components/ui/responsive-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -148,7 +132,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
     );
   }
 
-  const { product, translation, media, brand, review_summary, variant_config, sku_list, product_units } = data;
+  const { product, translation, media, brand, review_summary, variant_config, sku_list, sku_availability, product_units } = data;
   const name = translation?.name ?? product.sku;
   const description = translation?.description ?? "";
   const all_media_urls = media.map((m) => m.url);
@@ -223,11 +207,10 @@ export function ProductDetailClient({ slug, locale }: Props) {
         : null;
   const display_currency = matched_sku?.currency ?? product.currency;
   const default_sku = variant_skus[0];
-  const display_in_stock = matched_sku
-    ? matched_sku.stock_available > 0
-    : default_sku
-      ? default_sku.stock_available > 0
-      : true;
+  const selected_sku_id = matched_sku?.sku_id ?? default_sku?.sku_id ?? null;
+  const selected_availability = selected_sku_id
+    ? (sku_availability?.[selected_sku_id] ?? null)
+    : null;
   const has_discount = display_original !== null;
   const discount_pct =
     has_discount && display_original
@@ -292,8 +275,8 @@ export function ProductDetailClient({ slug, locale }: Props) {
           <QuantityAndCartSection
             quantityDefault={1}
             disabled={variant_properties.length > 0 && !matched_sku}
-            display_in_stock={display_in_stock}
-            sku_id={matched_sku?.sku_id ?? default_sku?.sku_id ?? null}
+            availability={selected_availability}
+            sku_id={selected_sku_id}
             session={session ?? null}
             create_preorder={create_preorder}
             onAddToCart={() => {}}
@@ -540,10 +523,18 @@ function VariantPropertyGroup({
   );
 }
 
+type SkuAvailability = {
+  mode: string;
+  fulfillment_type: string | null;
+  estimated_available_at: string | null;
+  deposit_percent: number;
+  max_preorder_qty: number | null;
+};
+
 function QuantityAndCartSection({
   quantityDefault,
   disabled,
-  display_in_stock,
+  availability,
   sku_id,
   session,
   create_preorder,
@@ -553,56 +544,76 @@ function QuantityAndCartSection({
 }: {
   quantityDefault: number;
   disabled?: boolean;
-  display_in_stock: boolean;
+  availability: SkuAvailability | null;
   sku_id: string | null;
   session: { user?: { name?: string | null; email?: string | null } } | null;
-  create_preorder: { mutateAsync: (input: PreorderInput) => Promise<{ ok: boolean }>; isPending: boolean };
+  create_preorder: {
+    mutateAsync: (input: {
+      sku_id: string;
+      quantity: number;
+      contact_name?: string;
+      contact_phone?: string;
+    }) => Promise<{ ok: boolean }>;
+    isPending: boolean;
+    error: { message?: string } | null;
+    reset: () => void;
+  };
   onAddToCart: (quantity: number) => void;
   unit_name?: string | null;
   pieces_per_unit?: number;
 }) {
   const t = useTranslations("product_detail");
   const [quantity, setQuantity] = useState(quantityDefault);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const isOutOfStock = !disabled && !display_in_stock;
+  const [submitted, setSubmitted] = useState(false);
   const showUnitInfo = (pieces_per_unit ?? 1) > 1;
 
-  const preorder_form = useForm({
-    resolver: zodResolver(
-      z.object({
-        contact_name: z.string().min(1, "Veuillez saisir votre nom").max(255),
-        contact_phone: z.string().max(50).optional().or(z.literal("")),
-        quantity: z.coerce.number().int().min(1).max(99),
-      }),
-    ),
-    defaultValues: {
-      contact_name: session?.user?.name ?? "",
-      contact_phone: "",
-      quantity,
-    },
-  });
+  const mode = availability?.mode ?? null;
+  const isPreorder = mode === "preorder";
+  const isBackorder = mode === "backorder";
+  const isOrderable = mode === "in_stock" || isBackorder;
+  const maxQty = isPreorder ? (availability?.max_preorder_qty ?? 99) : 99;
+  const effectiveQuantity = Math.min(quantity, maxQty);
 
-  const [submitted, setSubmitted] = useState(false);
-
-  async function onPreorder(values: {
-    contact_name: string;
-    contact_phone?: string;
-    quantity: number;
-  }) {
+  async function onPreorder() {
     if (!sku_id) return;
     await create_preorder.mutateAsync({
       sku_id,
-      quantity: values.quantity,
-      contact_name: values.contact_name,
-      contact_phone: values.contact_phone || undefined,
+      quantity: effectiveQuantity,
+      contact_name: session?.user?.name ?? undefined,
     });
     setSubmitted(true);
+  }
+
+  if (disabled) {
+    return (
+      <div className="space-y-3">
+        <Button className="flex-1 gap-2" size="lg" disabled>
+          <ShoppingCart className="h-4 w-4" />
+          {t("out_of_stock")}
+        </Button>
+      </div>
+    );
+  }
+
+  if (!isOrderable && !isPreorder) {
+    return (
+      <div className="space-y-3">
+        <Button className="flex-1 gap-2" size="lg" disabled>
+          <ShoppingCart className="h-4 w-4" />
+          {t("out_of_stock")}
+        </Button>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-4">
-        <ProductQuantitySelector value={quantity} onChange={setQuantity} />
+        <ProductQuantitySelector
+          value={effectiveQuantity}
+          onChange={setQuantity}
+          max={maxQty}
+        />
         {showUnitInfo && (
           <p className="text-muted-foreground text-xs">
             1 {unit_name ?? "unité"} = {pieces_per_unit} {pieces_per_unit === 1 ? "pièce" : "pièces"}
@@ -610,101 +621,60 @@ function QuantityAndCartSection({
         )}
       </div>
 
-      {isOutOfStock && sku_id ? (
-        <ResponsiveDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <ResponsiveDialogTrigger asChild>
-            <Button className="flex-1 gap-2" size="lg" disabled={disabled}>
+      {isPreorder ? (
+        <>
+          {submitted ? (
+            <p className="text-sm font-medium">{t("preorder_confirmed")}</p>
+          ) : (
+            <Button
+              className="flex-1 gap-2"
+              size="lg"
+              onClick={onPreorder}
+              disabled={create_preorder.isPending}
+            >
               <Clock className="h-4 w-4" />
-              Précommander
+              {create_preorder.isPending ? t("preorder_submitting") : t("preorder")}
             </Button>
-          </ResponsiveDialogTrigger>
-          <ResponsiveDialogContent>
-            <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>Précommander</ResponsiveDialogTitle>
-              <ResponsiveDialogDescription>
-                Soyez informé dès que ce produit sera disponible.
-              </ResponsiveDialogDescription>
-            </ResponsiveDialogHeader>
-
-            {submitted ? (
-              <div className="py-8 text-center">
-                <p className="mb-2 text-lg font-medium">Précommande confirmée</p>
-                <p className="text-muted-foreground text-sm">
-                  Nous vous contacterons au numero {preorder_form.getValues("contact_phone")} dès
-                  que le produit sera disponible.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={preorder_form.handleSubmit(onPreorder)} className="space-y-4 p-1">
-                <div className="space-y-2">
-                  <label htmlFor="preorder-name" className="text-sm font-medium">
-                    Nom complet
-                  </label>
-                  <Input
-                    id="preorder-name"
-                    placeholder="Votre nom"
-                    {...preorder_form.register("contact_name")}
-                  />
-                   {preorder_form.formState.errors.contact_name?.message && (
-                    <p className="text-destructive text-xs">
-                      {String(preorder_form.formState.errors.contact_name.message)}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="preorder-phone" className="text-sm font-medium">
-                    Téléphone (optionnel)
-                  </label>
-                  <Input
-                    id="preorder-phone"
-                    placeholder="05 XX XX XX XX"
-                    {...preorder_form.register("contact_phone")}
-                  />
-                  {preorder_form.formState.errors.contact_phone?.message && (
-                    <p className="text-destructive text-xs">
-                      {String(preorder_form.formState.errors.contact_phone.message)}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="preorder-qty" className="text-sm font-medium">
-                    Quantité
-                  </label>
-                  <Input
-                    id="preorder-qty"
-                    type="number"
-                    min={1}
-                    max={99}
-                    {...preorder_form.register("quantity")}
-                  />
-                  {preorder_form.formState.errors.quantity?.message && (
-                    <p className="text-destructive text-xs">
-                      {String(preorder_form.formState.errors.quantity.message)}
-                    </p>
-                  )}
-                </div>
-                <ResponsiveDialogFooter>
-                  <Button type="submit" disabled={create_preorder.isPending}>
-                    {create_preorder.isPending ? "Envoi en cours..." : "Confirmer la précommande"}
-                  </Button>
-                </ResponsiveDialogFooter>
-              </form>
-            )}
-          </ResponsiveDialogContent>
-        </ResponsiveDialog>
+          )}
+          {create_preorder.error?.message && (
+            <p className="text-destructive text-xs">{create_preorder.error.message}</p>
+          )}
+          {availability?.estimated_available_at && (
+            <p className="text-muted-foreground text-xs">
+              {t("estimated_available_at")}: {formatDate(availability.estimated_available_at)}
+            </p>
+          )}
+          {availability && availability.deposit_percent < 100 && (
+            <p className="text-muted-foreground text-xs">
+              {t("deposit", { percent: availability.deposit_percent })}
+            </p>
+          )}
+        </>
       ) : (
-        <Button
-          className="flex-1 gap-2"
-          size="lg"
-          disabled={disabled}
-          onClick={() => onAddToCart(quantity)}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {disabled ? "Rupture de stock" : t("add_to_cart")}
-        </Button>
+        <>
+          <Button
+            className="flex-1 gap-2"
+            size="lg"
+            onClick={() => onAddToCart(effectiveQuantity)}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {isBackorder ? t("preorder_backorder") : t("add_to_cart")}
+          </Button>
+          {isBackorder && availability?.estimated_available_at && (
+            <p className="text-muted-foreground text-xs">
+              {t("estimated_available_at")}: {formatDate(availability.estimated_available_at)}
+            </p>
+          )}
+        </>
       )}
     </div>
   );
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString();
 }
 
 function ReviewsSection({

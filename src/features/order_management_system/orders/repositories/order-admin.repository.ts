@@ -1,10 +1,10 @@
 import "server-only";
-import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte, min, sql } from "drizzle-orm";
 import { endOfMonth, format, startOfMonth, subDays } from "date-fns";
 import { alias } from "drizzle-orm/mysql-core";
 
 import { db } from "@/lib/db";
-import { orders } from "../schema";
+import { order_items, orders } from "../schema";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
 
 function month_bounds() {
@@ -81,6 +81,7 @@ export class OrderAdminRepository {
     status?: string;
     payment_status?: string;
     fulfillment_status?: string;
+    preorder_only?: boolean;
     from?: string;
     to?: string;
   }) {
@@ -90,12 +91,29 @@ export class OrderAdminRepository {
     if (input.payment_status) clauses.push(eq(orders.payment_status, input.payment_status));
     if (input.fulfillment_status)
       clauses.push(eq(orders.fulfillment_status, input.fulfillment_status));
+    if (input.preorder_only)
+      clauses.push(
+        sql`EXISTS (SELECT 1 FROM ${order_items} oi WHERE oi.order_id = ${orders.id} AND oi.fulfillment_type IN ('preorder', 'backorder'))`,
+      );
     if (input.from) clauses.push(gte(orders.created_at, input.from));
     if (input.to) clauses.push(lte(orders.created_at, input.to));
     const where = clauses.length ? and(...clauses) : undefined;
 
     const operator_users = alias(users, "operator_users");
     const delivery_users = alias(users, "delivery_users");
+
+    const preorder_agg = db
+      .select({
+        order_id: order_items.order_id,
+        preorder_lines: count(),
+        earliest_eta: min(order_items.estimated_available_at),
+      })
+      .from(order_items)
+      .where(
+        sql`${order_items.fulfillment_type} IN ('preorder', 'backorder')`,
+      )
+      .groupBy(order_items.order_id)
+      .as("preorder_agg");
 
     const items = await db
       .select({
@@ -104,6 +122,8 @@ export class OrderAdminRepository {
         status: orders.status,
         payment_status: orders.payment_status,
         fulfillment_status: orders.fulfillment_status,
+        has_preorder_lines: sql<boolean>`COALESCE(${preorder_agg.preorder_lines}, 0) > 0`,
+        earliest_eta: preorder_agg.earliest_eta,
         grand_total: orders.grand_total,
         guest_phone: orders.guest_phone,
         created_at: orders.created_at,
@@ -121,6 +141,7 @@ export class OrderAdminRepository {
       .leftJoin(users, eq(users.id, orders.user_id))
       .leftJoin(operator_users, eq(operator_users.id, orders.assigned_operator_id))
       .leftJoin(delivery_users, eq(delivery_users.id, orders.assigned_delivery_person_id))
+      .leftJoin(preorder_agg, eq(preorder_agg.order_id, orders.id))
       .where(where)
       .orderBy(desc(orders.created_at))
       .limit(input.limit)

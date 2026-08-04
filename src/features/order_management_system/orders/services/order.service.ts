@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { z } from "zod";
 
 import type {
@@ -17,6 +17,8 @@ import { build_order_number } from "../order-number.helper";
 import { cart_items, carts } from "../../schema";
 import { checkout_engine } from "../../checkout/checkout.engine";
 import { preorder_allocation_service } from "../../preorders/services/preorder-allocation.service";
+import { preorder_allocations } from "../../preorders/schema";
+import { compute_line_capture_amount } from "../../preorders/preorder-checkout.helper";
 import { FULFILLMENT_TYPE, PREORDER_LINE_STATUS } from "../../preorders/constants/preorder-status";
 import { preorder_repository } from "../../preorders/repositories/preorder.repository";
 import { promo_code_repository } from "../../promotions/repositories/promo-code.repository";
@@ -222,6 +224,21 @@ export class OrderService {
     //   if (!line.reservation_id) continue;
     //   await reservation_service.commit({ id: line.reservation_id, order_id });
     // }
+    const allocation_ids = items
+      .map((i) => i.preorder_allocation_id)
+      .filter((id): id is string => !!id);
+    const allocation_etas = new Map<string, string | null>();
+    if (allocation_ids.length) {
+      const allocs = await db
+        .select({
+          id: preorder_allocations.id,
+          estimated_available_at: preorder_allocations.estimated_available_at,
+        })
+        .from(preorder_allocations)
+        .where(inArray(preorder_allocations.id, allocation_ids));
+      for (const a of allocs) allocation_etas.set(a.id, a.estimated_available_at);
+    }
+
     const item_inserts = await Promise.all(
       items.map(async (line) => {
         const [sku] = await db
@@ -268,9 +285,22 @@ export class OrderService {
           reservation_id: is_preorder_line ? null : (line.reservation_id ?? null),
           fulfillment_type,
           preorder_status: is_preorder_line ? PREORDER_LINE_STATUS.pending_stock : null,
-          estimated_available_at: null as string | null,
+          estimated_available_at: is_preorder_line
+            ? (allocation_etas.get(line.preorder_allocation_id ?? "") ?? null)
+            : null,
           preorder_allocation_id: line.preorder_allocation_id ?? null,
           payment_capture_mode: deposit_percent < 100 ? "deposit" : "full",
+          metadata:
+            is_preorder_line && deposit_percent < 100
+              ? {
+                  deposit_percent,
+                  deposit_amount: compute_line_capture_amount(
+                    String(line.unit_price),
+                    line.quantity,
+                    deposit_percent,
+                  ),
+                }
+              : {},
           _deposit_percent: deposit_percent,
           _confirm_allocation: is_preorder_line ? line.preorder_allocation_id : null,
         };

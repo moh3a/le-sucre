@@ -82,6 +82,7 @@ export const admin_list_enriched_dto = z.object({
   status: z.string().optional(),
   payment_status: z.string().optional(),
   fulfillment_status: z.string().optional(),
+  preorder_only: z.coerce.boolean().optional(),
   from: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)

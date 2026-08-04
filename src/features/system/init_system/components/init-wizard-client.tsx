@@ -177,7 +177,7 @@ export function InitWizardClient() {
         try {
           await ensureStatus.mutateAsync({});
         } catch {
-          // proceed to console anyway
+          // proceed to consoleway
         }
         router.replace("/console");
       })();

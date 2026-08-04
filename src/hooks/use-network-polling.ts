@@ -25,7 +25,9 @@ export function useNetworkPolling({
   const interval_ref = useRef<ReturnType<typeof setInterval> | null>(null);
   const callback_ref = useRef(callback);
 
-  callback_ref.current = callback;
+  useEffect(() => {
+    callback_ref.current = callback;
+  });
 
   const stop = useCallback(() => {
     if (interval_ref.current !== null) {

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, eq, like, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, like, or, sql } from "drizzle-orm";
 import { format } from "date-fns";
 
 import { db, type DbClient } from "@/lib/db";
@@ -22,30 +22,33 @@ export class PreorderRepository {
       .then((r) => r[0] ?? null);
   }
 
-  async create_allocation(input: {
-    sku_id: string;
-    quantity: number;
-    user_id?: string | null;
-    contact_name: string;
-    contact_email?: string | null;
-    contact_phone?: string | null;
-  }) {
-    const id = generate_id();
-    await db.insert(preorder_allocations).values({
-      id,
+  insert_allocation(
+    tx: Tx,
+    input: {
+      id: string;
+      sku_id: string;
+      quantity: number;
+      cart_id?: string | null;
+      user_id?: string | null;
+      status: string;
+      estimated_available_at: string | null;
+      contact_name?: string | null;
+      contact_email?: string | null;
+      contact_phone?: string | null;
+    },
+  ) {
+    return tx.insert(preorder_allocations).values({
+      id: input.id,
       sku_id: input.sku_id,
       quantity: input.quantity,
-      status: PREORDER_ALLOCATION_STATUS.pending,
+      cart_id: input.cart_id ?? null,
       user_id: input.user_id ?? null,
-      contact_name: input.contact_name,
-      // contact_email: null,
+      status: input.status,
+      estimated_available_at: input.estimated_available_at,
+      contact_name: input.contact_name ?? null,
+      contact_email: input.contact_email ?? null,
       contact_phone: input.contact_phone ?? null,
-      estimated_available_at: format(
-        new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-        "yyyy-MM-dd HH:mm:ss",
-      ),
     });
-    return { id };
   }
 
   async get_settings_for_update(tx: Tx, sku_id: string) {
@@ -170,6 +173,103 @@ export class PreorderRepository {
           updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
         },
       });
+  }
+
+  async bulk_upsert_settings(entries: Array<typeof sku_preorder_settings.$inferInsert>) {
+    await db.transaction(async (tx) => {
+      for (const entry of entries) {
+        await tx
+          .insert(sku_preorder_settings)
+          .values(entry)
+          .onDuplicateKeyUpdate({
+            set: {
+              is_preorder_enabled: entry.is_preorder_enabled,
+              allow_backorder: entry.allow_backorder,
+              max_preorder_qty: entry.max_preorder_qty,
+              estimated_available_at: entry.estimated_available_at,
+              deposit_percent: entry.deposit_percent,
+              lead_time_days: entry.lead_time_days,
+              is_active: entry.is_active,
+              updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+            },
+          });
+      }
+    });
+  }
+
+  list_settings_by_product(product_id: string) {
+    return db
+      .select({
+        sku_id: sku_preorder_settings.sku_id,
+        is_preorder_enabled: sku_preorder_settings.is_preorder_enabled,
+        allow_backorder: sku_preorder_settings.allow_backorder,
+        max_preorder_qty: sku_preorder_settings.max_preorder_qty,
+        preorder_sold: sku_preorder_settings.preorder_sold,
+        estimated_available_at: sku_preorder_settings.estimated_available_at,
+        deposit_percent: sku_preorder_settings.deposit_percent,
+        lead_time_days: sku_preorder_settings.lead_time_days,
+        is_active: sku_preorder_settings.is_active,
+      })
+      .from(sku_preorder_settings)
+      .innerJoin(product_skus, eq(sku_preorder_settings.sku_id, product_skus.id))
+      .where(eq(product_skus.product_id, product_id));
+  }
+
+  async list_settings(input: { page: number; limit: number; search?: string }) {
+    const offset = (input.page - 1) * input.limit;
+    const clauses = [];
+    if (input.search) {
+      clauses.push(
+        or(
+          like(sku_preorder_settings.sku_id, `%${input.search}%`),
+          like(product_skus.sku_code, `%${input.search}%`),
+          like(product_translations.name, `%${input.search}%`),
+        ),
+      );
+    }
+    const where = clauses.length ? and(...clauses) : undefined;
+
+    const [total_rows] = await db
+      .select({ total: count() })
+      .from(sku_preorder_settings)
+      .innerJoin(product_skus, eq(sku_preorder_settings.sku_id, product_skus.id))
+      .leftJoin(product_translations, eq(product_translations.product_id, product_skus.product_id))
+      .where(where);
+
+    const items = await db
+      .select({
+        sku_id: sku_preorder_settings.sku_id,
+        sku_code: product_skus.sku_code,
+        product_name: product_translations.name,
+        is_preorder_enabled: sku_preorder_settings.is_preorder_enabled,
+        allow_backorder: sku_preorder_settings.allow_backorder,
+        max_preorder_qty: sku_preorder_settings.max_preorder_qty,
+        preorder_sold: sku_preorder_settings.preorder_sold,
+        estimated_available_at: sku_preorder_settings.estimated_available_at,
+        deposit_percent: sku_preorder_settings.deposit_percent,
+        lead_time_days: sku_preorder_settings.lead_time_days,
+        is_active: sku_preorder_settings.is_active,
+        updated_at: sku_preorder_settings.updated_at,
+      })
+      .from(sku_preorder_settings)
+      .innerJoin(product_skus, eq(sku_preorder_settings.sku_id, product_skus.id))
+      .leftJoin(product_translations, eq(product_translations.product_id, product_skus.product_id))
+      .where(where)
+      .orderBy(desc(sku_preorder_settings.updated_at))
+      .limit(input.limit)
+      .offset(offset);
+
+    const total_records = Number(total_rows?.total ?? 0);
+    return {
+      items,
+      meta: {
+        page: input.page,
+        limit: input.limit,
+        total_records,
+        total_pages: Math.max(1, Math.ceil(total_records / input.limit)),
+        has_more: input.page * input.limit < total_records,
+      },
+    };
   }
 
   async admin_list_allocations(

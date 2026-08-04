@@ -14,6 +14,7 @@ import type { add_cart_item_dto } from "./models/cart.dto";
 import { cart_repository } from "./repository";
 import { availability_service } from "../preorders/services/availability.service";
 import { preorder_allocation_service } from "../preorders/services/preorder-allocation.service";
+import { PREORDER_ERROR } from "../preorders/constants/error-codes";
 import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 
 const RESERVE_TTL_SEC = 900;
@@ -108,6 +109,8 @@ export class CartService {
       });
       preorder_allocation_id = alloc.id;
       fulfillment_type = availability.fulfillment_type!;
+    } else if (availability.mode === "blocked") {
+      throw_error(PREORDER_ERROR.PREORDER_CAP_EXCEEDED);
     } else {
       throw_error(CART_ERROR.SKU_OUT_OF_STOCK);
     }
@@ -164,6 +167,8 @@ export class CartService {
       });
       preorder_allocation_id = alloc.id;
       fulfillment_type = availability.fulfillment_type!;
+    } else if (availability.mode === "blocked") {
+      throw_error(PREORDER_ERROR.PREORDER_CAP_EXCEEDED);
     } else {
       throw_error(CART_ERROR.SKU_OUT_OF_STOCK);
     }

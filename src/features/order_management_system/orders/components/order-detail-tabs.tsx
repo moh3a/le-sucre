@@ -544,7 +544,30 @@ export function OrderDetailTabs({ order_id }: OrderDetailTabsProps) {
                         {Number(item.line_total).toLocaleString("fr-FR")} DZD
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline">{item.fulfillment_type}</Badge>
+                        <div className="flex flex-col items-start gap-0.5">
+                          <Badge
+                            variant={
+                              item.fulfillment_type === "preorder"
+                                ? "default"
+                                : item.fulfillment_type === "backorder"
+                                  ? "secondary"
+                                  : "outline"
+                            }
+                          >
+                            {item.fulfillment_type === "preorder"
+                              ? t("line_preorder")
+                              : item.fulfillment_type === "backorder"
+                                ? t("line_backorder")
+                                : t("line_standard")}
+                          </Badge>
+                          {item.estimated_available_at && (
+                            <span className="text-muted-foreground text-xs">
+                              {t("eta_prefix", {
+                                date: formatDate(item.estimated_available_at, { month: "short" }),
+                              })}
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

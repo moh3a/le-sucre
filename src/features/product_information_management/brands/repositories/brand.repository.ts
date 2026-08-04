@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, isNotNull, isNull, like, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, like, or, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { brands } from "../schema";
@@ -8,16 +8,24 @@ import { products } from "@/features/product_information_management/products/sch
 
 export class BrandRepository {
   async find_by_id(id: string, includeDeleted = false) {
-    const filters: any[] = [eq(brands.id, id)];
+    const filters: SQL<unknown>[] = [eq(brands.id, id)];
     if (!includeDeleted) filters.push(isNull(brands.deleted_at));
-    const [row] = await db.select().from(brands).where(and(...filters)).limit(1);
+    const [row] = await db
+      .select()
+      .from(brands)
+      .where(and(...filters))
+      .limit(1);
     return row ?? null;
   }
 
   async find_by_slug(slug: string, includeDeleted = false) {
-    const filters: any[] = [eq(brands.slug, slug)];
+    const filters: SQL<unknown>[] = [eq(brands.slug, slug)];
     if (!includeDeleted) filters.push(isNull(brands.deleted_at));
-    const [row] = await db.select().from(brands).where(and(...filters)).limit(1);
+    const [row] = await db
+      .select()
+      .from(brands)
+      .where(and(...filters))
+      .limit(1);
     return row ?? null;
   }
 
@@ -30,12 +38,13 @@ export class BrandRepository {
   }) {
     const { page, limit } = params;
     const offset = (page - 1) * limit;
-    const filters: any[] = [];
+    const filters: SQL<unknown>[] = [];
     if (!params.includeDeleted) filters.push(isNull(brands.deleted_at));
     if (params.is_active !== undefined) filters.push(eq(brands.is_active, params.is_active));
     if (params.search) {
       const q = `%${params.search}%`;
-      filters.push(or(like(brands.name, q), like(brands.slug, q))!);
+      const search_or = or(like(brands.name, q), like(brands.slug, q));
+      if (search_or) filters.push(search_or);
     }
     const where = filters.length ? and(...filters) : undefined;
 
@@ -84,13 +93,7 @@ export class BrandRepository {
       })
       .from(brands)
       .leftJoin(products, eq(products.brand_id, brands.id))
-      .where(
-        and(
-          eq(brands.slug, slug),
-          eq(brands.is_active, true),
-          isNull(brands.deleted_at),
-        ),
-      )
+      .where(and(eq(brands.slug, slug), eq(brands.is_active, true), isNull(brands.deleted_at)))
       .groupBy(brands.id)
       .limit(1);
     return row ?? null;

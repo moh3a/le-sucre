@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { MoreHorizontal, ReceiptCent, ToggleLeft, Trash2 } from "lucide-react";
+import { MoreHorizontal, PackageSearch, ReceiptCent, ToggleLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -35,6 +35,8 @@ type OrderRow = {
   status: string;
   payment_status: string;
   fulfillment_status: string;
+  has_preorder_lines: boolean;
+  earliest_eta: string | null;
   grand_total: string;
   guest_phone: string | null;
   created_at: string;
@@ -99,6 +101,30 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
             {ORDER_LABELS[row.original.status] ?? row.original.status}
           </Badge>
         ),
+      },
+      {
+        id: "preorder",
+        accessorKey: "has_preorder_lines",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label={t("preorder_column")} />
+        ),
+        cell: ({ row }) => {
+          if (!row.original.has_preorder_lines) {
+            return <span className="text-muted-foreground text-sm">—</span>;
+          }
+          return (
+            <div className="flex flex-col gap-0.5">
+              <Badge variant="outline">{t("preorder_badge")}</Badge>
+              {row.original.earliest_eta && (
+                <span className="text-muted-foreground text-xs">
+                  {formatDate(row.original.earliest_eta, { month: "short" })}
+                </span>
+              )}
+            </div>
+          );
+        },
+        meta: { label: t("preorder_column"), icon: PackageSearch },
+        enableSorting: false,
       },
       {
         id: "fulfillment_status",
@@ -204,6 +230,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
     "fulfillment_status",
     parseAsString,
   );
+  const [preorder_only, setPreorderOnly] = useQueryState("preorder", parseAsString);
   const [from, setFrom] = useQueryState("from", parseAsString);
   const [to, setTo] = useQueryState("to", parseAsString);
 
@@ -215,6 +242,7 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
     status,
     payment_status: payment_status ?? undefined,
     fulfillment_status: fulfillment_status ?? undefined,
+    preorder_only: preorder_only ? preorder_only === "1" : undefined,
     from: from ?? undefined,
     to: to ?? undefined,
   });
@@ -272,6 +300,13 @@ export function OrderTable({ compact = false }: { compact?: boolean }) {
             icon={ToggleLeft}
             value={fulfillment_status}
             onChange={setFulfillmentStatus}
+          />
+          <FacetedFilter
+            title={t("preorder_column")}
+            options={[{ label: t("filter_preorder"), value: "1" }]}
+            icon={PackageSearch}
+            value={preorder_only}
+            onChange={setPreorderOnly}
           />
           <DateRangeFilter
             title={t("date_column")}

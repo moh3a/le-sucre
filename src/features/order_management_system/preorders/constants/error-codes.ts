@@ -19,6 +19,24 @@ export const PREORDER_ERROR = {
       ar: "لا توجد تخصيصات طلب مسبق مؤكدة للتنفيذ",
     },
   },
+  SKU_OUT_OF_STOCK: {
+    code: "PREORDER_SKU_OUT_OF_STOCK",
+    status: 409,
+    message: {
+      fr: "Ce produit ne peut pas être précommandé actuellement",
+      en: "This product cannot be preordered at the moment",
+      ar: "لا يمكن طلب هذا المنتج مسبقًا حاليًا",
+    },
+  },
+  PREORDER_CAP_EXCEEDED: {
+    code: "PREORDER_CAP_EXCEEDED",
+    status: 409,
+    message: {
+      fr: "La quantité demandée dépasse la limite de précommande",
+      en: "Requested quantity exceeds the preorder limit",
+      ar: "الكمية المطلوبة تتجاوز حد الطلب المسبق",
+    },
+  },
   ALLOCATION_NOT_FOUND: {
     code: "PREORDER_ALLOCATION_NOT_FOUND",
     status: 404,

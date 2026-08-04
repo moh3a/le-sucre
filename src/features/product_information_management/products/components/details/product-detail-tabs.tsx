@@ -15,6 +15,7 @@ import { ProductOrdersPanel } from "./product-orders-panel";
 import { ProductDetailGeneralTab } from "./general-tab";
 import { ProductAnalyticsPanel } from "./product-analytics-panel";
 import { ProductRecommendationsTab } from "./product-recommendations-tab";
+import { ProductPreordersPanel } from "@/features/order_management_system/preorders/components/product-preorders-panel";
 import { ProductChangeLog } from "@/features/product_information_management/products/operations/components/product-change-log";
 import { trpc } from "@/components/providers/app-providers";
 import { QueryGuard } from "@/components/query-guard";
@@ -26,6 +27,7 @@ const outer_tab_schema = z.enum([
   "inventory",
   "media",
   "reviews",
+  "preorders",
   "analytics",
   "recommendations",
   "journal",
@@ -71,6 +73,7 @@ export function ProductDetailTabs({ product_id }: Props) {
                 <TabsTrigger value="inventory">{t("tab_inventory")}</TabsTrigger>
                 <TabsTrigger value="media">{t("tab_media")}</TabsTrigger>
                 <TabsTrigger value="reviews">{t("tab_reviews")}</TabsTrigger>
+                <TabsTrigger value="preorders">{t("tab_preorders")}</TabsTrigger>
                 <TabsTrigger value="analytics">{t("tab_analytics")}</TabsTrigger>
                 <TabsTrigger value="recommendations">{t("tab_recommendations")}</TabsTrigger>
                 <TabsTrigger value="journal">{t("tab_journal")}</TabsTrigger>
@@ -111,6 +114,10 @@ export function ProductDetailTabs({ product_id }: Props) {
               <TabsContent value="reviews" className="space-y-6">
                 <ProductRatingSummary product_id={product_id} />
                 <ProductReviewsList product_id={product_id} />
+              </TabsContent>
+
+              <TabsContent value="preorders">
+                <ProductPreordersPanel product_id={product_id} />
               </TabsContent>
 
               <TabsContent value="analytics">

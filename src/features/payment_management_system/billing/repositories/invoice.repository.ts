@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, isNotNull, isNull, like, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, like, or, sql, sum, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { invoices, invoice_items } from "../db/schema";
 import { orders } from "@/features/order_management_system/orders/schema";
@@ -9,7 +9,7 @@ import type { Invoice, NewInvoice, NewInvoiceItem } from "../types";
 
 export class InvoiceRepository {
   async find_by_id(id: string, includeDeleted = false) {
-    const filters: any[] = [eq(invoices.id, id)];
+    const filters: SQL<unknown>[] = [eq(invoices.id, id)];
     if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
     const row = await db
       .select()
@@ -26,7 +26,7 @@ export class InvoiceRepository {
   }
 
   async find_by_number(invoice_number: string, includeDeleted = false) {
-    const filters: any[] = [eq(invoices.id, invoice_number)];
+    const filters: SQL<unknown>[] = [eq(invoices.id, invoice_number)];
     if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
     const row = await db
       .select()
@@ -43,7 +43,7 @@ export class InvoiceRepository {
   }
 
   async find_by_order_id(order_id: string, includeDeleted = false) {
-    const filters: any[] = [eq(invoices.order_id, order_id)];
+    const filters: SQL<unknown>[] = [eq(invoices.order_id, order_id)];
     if (!includeDeleted) filters.push(isNull(invoices.deleted_at));
     return await db
       .select()
@@ -121,20 +121,19 @@ export class InvoiceRepository {
   }) {
     const { page, limit, status, type, order_id, search } = params;
     const offset = (page - 1) * limit;
-    const conds: any[] = [isNull(invoices.deleted_at)];
+    const conds: SQL<unknown>[] = [isNull(invoices.deleted_at)];
 
     if (status) conds.push(eq(invoices.status, status));
     if (type) conds.push(eq(invoices.type, type));
     if (order_id) conds.push(eq(invoices.order_id, order_id));
 
     if (search) {
-      conds.push(
-        or(
-          like(invoices.id, `%${search}%`),
-          like(invoices.order_id, `%${search}%`),
-          like(users.name, `%${search}%`),
-        ),
+      const search_like = or(
+        like(invoices.id, `%${search}%`),
+        like(invoices.order_id, `%${search}%`),
+        like(users.name, `%${search}%`),
       );
+      if (search_like) conds.push(search_like);
     }
 
     const where_clause = conds.length ? and(...conds) : undefined;
@@ -191,7 +190,7 @@ export class InvoiceRepository {
   }
 
   async get_financial_summary(start_date?: string, end_date?: string) {
-    const conds = [];
+    const conds: SQL<unknown>[] = [];
     if (start_date) {
       conds.push(sql`${invoices.created_at} >= ${start_date}`);
     }

@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
@@ -97,13 +98,27 @@ const bulk_stock_schema = z.object({
 });
 type BulkStockFormValues = z.infer<typeof bulk_stock_schema>;
 
+const bulk_preorder_schema = z.object({
+  is_preorder_enabled: z.boolean(),
+  allow_backorder: z.boolean(),
+  max_preorder_qty: z.string().optional(),
+  deposit_percent: z.string().regex(/^\d{1,3}$/),
+  lead_time_days: z.string().regex(/^\d{1,3}$/),
+});
+type BulkPreorderFormValues = z.infer<typeof bulk_preorder_schema>;
+
 export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTableProps) {
   const t = useTranslations("variants");
+  const tp = useTranslations("preorders");
   const utils = trpc.useUtils();
   const { execute_with_undo } = useUndoAction();
 
   const { data, isLoading } = trpc.variants.listSkus.useQuery({ product_id });
   const { data: config } = trpc.variants.getConfig.useQuery({ product_id });
+  const { data: preorder_settings } = trpc.preorders.getSettingsByProduct.useQuery(
+    { product_id },
+    { enabled: !!product_id },
+  );
 
   const invalidate = async () => {
     await utils.variants.listSkus.invalidate({ product_id });
@@ -145,6 +160,17 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       toast.error(err.message);
     },
   });
+  const bulk_preorder = trpc.preorders.bulkUpsertSettings.useMutation({
+    onSuccess: async () => {
+      set_bulk_preorder_dialog_open(false);
+      setRowSelection({});
+      toast.success(tp("bulk_preorder_success"));
+      await utils.preorders.getSettingsByProduct.invalidate({ product_id });
+      await utils.preorders.adminListSettings.invalidate();
+      await invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const [sheet_open, set_sheet_open] = useState(false);
   const [editing_id, set_editing_id] = useState<string | null>(null);
@@ -166,6 +192,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
 
   const [bulk_price_dialog_open, set_bulk_price_dialog_open] = useState(false);
   const [bulk_stock_dialog_open, set_bulk_stock_dialog_open] = useState(false);
+  const [bulk_preorder_dialog_open, set_bulk_preorder_dialog_open] = useState(false);
   const [bulk_delete_dialog_open, set_bulk_delete_dialog_open] = useState(false);
   const [delete_target, set_delete_target] = useState<{ id: string; code: string } | null>(null);
 
@@ -179,12 +206,28 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     defaultValues: { stock: "" },
   });
 
+  const bulk_preorder_form = useForm<BulkPreorderFormValues>({
+    resolver: zodResolver(bulk_preorder_schema),
+    defaultValues: {
+      is_preorder_enabled: true,
+      allow_backorder: false,
+      max_preorder_qty: "",
+      deposit_percent: "100",
+      lead_time_days: "14",
+    },
+  });
+
   const [inline_edits, set_inline_edits] = useState<
     Record<string, { base_price?: string; offer_price?: string; stock_available?: string }>
   >({});
 
   const items = useMemo(() => (data?.items ?? []) as SkuListRow[], [data?.items]);
   const properties = useMemo(() => config?.properties ?? [], [config?.properties]);
+  const preorder_by_sku = useMemo(() => {
+    const map = new Map<string, NonNullable<typeof preorder_settings>[number]>();
+    for (const s of preorder_settings ?? []) map.set(s.sku_id, s);
+    return map;
+  }, [preorder_settings]);
 
   function open_create() {
     set_editing_id(null);
@@ -503,6 +546,21 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
         ),
       },
       {
+        id: "preorder",
+        header: () => <span className="text-muted-foreground text-xs font-medium">{tp("column")}</span>,
+        cell: ({ row }) => {
+          const settings = preorder_by_sku.get(row.original.sku_id);
+          if (settings?.is_preorder_enabled) {
+            return <Badge>{tp("preorder_badge")}</Badge>;
+          }
+          if (settings?.allow_backorder) {
+            return <Badge variant="outline">{tp("backorder_badge")}</Badge>;
+          }
+          return <Badge variant="secondary">{tp("not_configured")}</Badge>;
+        },
+        enableSorting: false,
+      },
+      {
         id: "actions",
         header: () => <span className="sr-only">Actions</span>,
         cell: ({ row }) => (
@@ -534,6 +592,8 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
       currency,
       open_edit,
       t,
+      tp,
+      preorder_by_sku,
       properties,
       property_columns,
       inline_edits,
@@ -609,6 +669,22 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
     await invalidate();
   }
 
+  async function on_save_bulk_preorder() {
+    const values = bulk_preorder_form.getValues();
+    await bulk_preorder.mutateAsync({
+      entries: selected_ids.map((sku_id) => ({
+        sku_id,
+        is_preorder_enabled: values.is_preorder_enabled,
+        allow_backorder: values.allow_backorder,
+        max_preorder_qty: values.max_preorder_qty ? Number(values.max_preorder_qty) : null,
+        estimated_available_at: null,
+        deposit_percent: Number(values.deposit_percent),
+        lead_time_days: Number(values.lead_time_days),
+        is_active: true,
+      })),
+    });
+  }
+
   const action_bar = useMemo(
     () =>
       selected_ids.length > 0 ? (
@@ -659,6 +735,24 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
             {t("stock")}
           </Button>
           <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={() => {
+              bulk_preorder_form.reset({
+                is_preorder_enabled: true,
+                allow_backorder: false,
+                max_preorder_qty: "",
+                deposit_percent: "100",
+                lead_time_days: "14",
+              });
+              set_bulk_preorder_dialog_open(true);
+            }}
+            disabled={bulk_preorder.isPending}
+          >
+            {tp("configure_bulk")}
+          </Button>
+          <Button
             variant="destructive"
             size="sm"
             className="h-8 text-xs"
@@ -670,7 +764,7 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
         </div>
       ) : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selected_ids, bulk_update.isPending, bulk_delete.isPending],
+    [selected_ids, bulk_update.isPending, bulk_delete.isPending, bulk_preorder.isPending, tp],
   );
 
   const editing_item = useMemo(
@@ -902,6 +996,94 @@ export function SkuTable({ product_id, product_sku, currency, on_change }: SkuTa
                 disabled={set_stock.isPending || !bulk_stock_form.watch("stock")}
               >
                 {set_stock.isPending ? t("saving") : t("set_stock")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={bulk_preorder_dialog_open} onOpenChange={set_bulk_preorder_dialog_open}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{tp("bulk_preorder_title")}</DialogTitle>
+              <DialogDescription>{tp("bulk_preorder_description")}</DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <Controller
+                name="is_preorder_enabled"
+                control={bulk_preorder_form.control}
+                render={({ field }) => (
+                  <label className="flex items-center justify-between gap-2 text-sm">
+                    <span>{tp("preorder_enabled")}</span>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(v) => field.onChange(v)}
+                    />
+                  </label>
+                )}
+              />
+              <Controller
+                name="allow_backorder"
+                control={bulk_preorder_form.control}
+                render={({ field }) => (
+                  <label className="flex items-center justify-between gap-2 text-sm">
+                    <span>{tp("allow_backorder")}</span>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(v) => field.onChange(v)}
+                    />
+                  </label>
+                )}
+              />
+              <Controller
+                name="max_preorder_qty"
+                control={bulk_preorder_form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{tp("max_qty")}</FieldLabel>
+                    <Input type="number" min={1} placeholder={tp("max_qty_unlimited")} {...field} />
+                  </Field>
+                )}
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Controller
+                  name="deposit_percent"
+                  control={bulk_preorder_form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{tp("deposit_percent")}</FieldLabel>
+                      <Input type="number" min={0} max={100} {...field} />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="lead_time_days"
+                  control={bulk_preorder_form.control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{tp("lead_time_days")}</FieldLabel>
+                      <Input type="number" min={1} max={365} {...field} />
+                    </Field>
+                  )}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => set_bulk_preorder_dialog_open(false)}
+                disabled={bulk_preorder.isPending}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="button"
+                onClick={on_save_bulk_preorder}
+                disabled={bulk_preorder.isPending}
+              >
+                {bulk_preorder.isPending ? t("saving") : tp("apply_bulk")}
               </Button>
             </DialogFooter>
           </DialogContent>

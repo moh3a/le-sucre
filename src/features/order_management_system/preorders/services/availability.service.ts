@@ -36,8 +36,16 @@ export class AvailabilityService {
           fulfillment_type: "preorder",
           estimated_available_at: eta,
           deposit_percent: Number(settings.deposit_percent ?? 100),
+          max_preorder_qty: settings.max_preorder_qty ?? null,
         };
       }
+
+      return {
+        mode: "blocked" as const,
+        available,
+        fulfillment_type: null,
+        reason: "cap_exceeded" as const,
+      };
     }
 
     if (settings?.allow_backorder) {
@@ -50,7 +58,12 @@ export class AvailabilityService {
       };
     }
 
-    return { mode: "unavailable" as const, available, fulfillment_type: null };
+    return {
+      mode: "unavailable" as const,
+      available,
+      fulfillment_type: null,
+      reason: "no_stock" as const,
+    };
   }
 
   private async estimate_from_forecast(sku_id: string, warehouse_id: string) {

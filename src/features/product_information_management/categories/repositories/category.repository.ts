@@ -1,20 +1,20 @@
 import "server-only";
 
-import { and, count, eq, isNotNull, isNull, like, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, like, or, sql, type SQL } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { categories } from "../schema";
 
 export class CategoryRepository {
   async find_by_id(id: string, includeDeleted = false) {
-    const filters: any[] = [eq(categories.id, id)];
+    const filters: SQL<unknown>[] = [eq(categories.id, id)];
     if (!includeDeleted) filters.push(isNull(categories.deleted_at));
     const r = await db.select().from(categories).where(and(...filters)).limit(1);
     return r[0] ?? null;
   }
 
   async find_by_slug(slug: string, includeDeleted = false) {
-    const filters: any[] = [eq(categories.slug, slug)];
+    const filters: SQL<unknown>[] = [eq(categories.slug, slug)];
     if (!includeDeleted) filters.push(isNull(categories.deleted_at));
     const r = await db.select().from(categories).where(and(...filters)).limit(1);
     return r[0] ?? null;
@@ -29,7 +29,7 @@ export class CategoryRepository {
     limit: number;
     includeDeleted?: boolean;
   }) {
-    const filters: any[] = [];
+    const filters: SQL<unknown>[] = [];
     if (!params.includeDeleted) filters.push(isNull(categories.deleted_at));
     if (params.parent_id !== undefined) {
       filters.push(
@@ -43,7 +43,8 @@ export class CategoryRepository {
       filters.push(eq(categories.is_featured, params.is_featured));
     if (params.search) {
       const q = `%${params.search}%`;
-      filters.push(or(like(categories.name, q), like(categories.slug, q))!);
+      const search_or = or(like(categories.name, q), like(categories.slug, q));
+      if (search_or) filters.push(search_or);
     }
     const where = filters.length ? and(...filters) : undefined;
     const offset = (params.page - 1) * params.limit;
@@ -69,7 +70,7 @@ export class CategoryRepository {
   }
 
   async list_all_for_tree(active_only = false) {
-    const filters: any[] = [isNull(categories.deleted_at)];
+    const filters: SQL<unknown>[] = [isNull(categories.deleted_at)];
     if (active_only) filters.push(eq(categories.is_active, true));
     return await db
       .select()
