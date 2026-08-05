@@ -93,6 +93,7 @@ export function CreateOrderDialog() {
 
   const { control, formState, watch, reset } = form;
   const selected_user_id = watch("user_id");
+  const shipping_phone = watch("shipping_phone");
 
   const utils = trpc.useUtils();
 
@@ -387,7 +388,9 @@ export function CreateOrderDialog() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">{t("client")} / {t("adresse_livraison")}</CardTitle>
+                <CardTitle className="text-base">
+                  {t("client")} / {t("adresse_livraison")}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-8">
                 <Controller
@@ -417,7 +420,7 @@ export function CreateOrderDialog() {
                     </Field>
                   )}
                 />
-                
+
                 {selected_user_id && (
                   <Field>
                     <FieldLabel>{t("saved_address")}</FieldLabel>
@@ -458,14 +461,14 @@ export function CreateOrderDialog() {
                     >
                       <label
                         className={cn(
-                          "hover:bg-primary/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
+                          "hover:bg-secondary/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
                           selected_address_id === "__new__" &&
-                            "border-primary bg-primary/60 text-primary-foreground",
+                            "bg-secondary/60 text-secondary-foreground",
                         )}
                       >
                         <RadioGroupPrimitive.Item
                           value="__new__"
-                          className="border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2"
+                          className="data-[state=checked]:border-primary data-[state=checked]:bg-primary mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border"
                         >
                           <RadioGroupPrimitive.Indicator>
                             <Check className="text-primary-foreground size-3" />
@@ -473,7 +476,7 @@ export function CreateOrderDialog() {
                         </RadioGroupPrimitive.Item>
                         <div className="space-y-0.5">
                           <p className="text-sm font-medium">{t("new_address_option")}</p>
-                          <p className="text-primary-foreground/90 text-xs">
+                          <p className="text-muted-foreground text-xs">
                             {t("new_address_description") ??
                               "Saisir une nouvelle adresse de livraison"}
                           </p>
@@ -490,13 +493,14 @@ export function CreateOrderDialog() {
                           <label
                             key={addr.id}
                             className={cn(
-                              "hover:bg-accent/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
-                              selected_address_id === addr.id && "border-primary bg-accent/30",
+                              "hover:bg-secondary/50 flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
+                              selected_address_id === addr.id &&
+                                "bg-secondary/60 text-secondary-foreground",
                             )}
                           >
                             <RadioGroupPrimitive.Item
                               value={addr.id}
-                              className="border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2"
+                              className="data-[state=checked]:border-primary data-[state=checked]:bg-primary mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border"
                             >
                               <RadioGroupPrimitive.Indicator>
                                 <Check className="text-primary-foreground size-3" />
@@ -516,107 +520,111 @@ export function CreateOrderDialog() {
                     </RadioGroupPrimitive.Root>
                   </Field>
                 )}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Controller
-                    name="shipping_full_name"
-                    control={control}
-                    render={({ field }) => (
-                      <Field data-invalid={!!formState.errors.shipping_full_name}>
-                        <FieldLabel>{t("nom_complet")}</FieldLabel>
-                        <Input {...field} placeholder={t("shipping_name_placeholder")} />
-                        {formState.errors.shipping_full_name && (
-                          <FieldError errors={[formState.errors.shipping_full_name]} />
+                {!shipping_phone.length && (
+                  <>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Controller
+                        name="shipping_full_name"
+                        control={control}
+                        render={({ field }) => (
+                          <Field data-invalid={!!formState.errors.shipping_full_name}>
+                            <FieldLabel>{t("nom_complet")}</FieldLabel>
+                            <Input {...field} placeholder={t("shipping_name_placeholder")} />
+                            {formState.errors.shipping_full_name && (
+                              <FieldError errors={[formState.errors.shipping_full_name]} />
+                            )}
+                          </Field>
                         )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name="shipping_phone"
-                    control={control}
-                    render={({ field }) => (
-                      <Field data-invalid={!!formState.errors.shipping_phone}>
-                        <FieldLabel>{t("telephone")}</FieldLabel>
-                        <Input {...field} placeholder={t("phone_placeholder")} />
-                        {formState.errors.shipping_phone && (
-                          <FieldError errors={[formState.errors.shipping_phone]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                </div>
-
-                <Controller
-                  name="shipping_line1"
-                  control={control}
-                  render={({ field }) => (
-                    <Field data-invalid={!!formState.errors.shipping_line1}>
-                      <FieldLabel>{t("adresse")}</FieldLabel>
-                      <Input {...field} placeholder={t("address_placeholder")} />
-                      {formState.errors.shipping_line1 && (
-                        <FieldError errors={[formState.errors.shipping_line1]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name="shipping_line2"
-                  control={control}
-                  render={({ field }) => (
-                    <Field>
-                      <FieldLabel>{t("complement_adresse")}</FieldLabel>
-                      <Input
-                        {...field}
-                        value={field.value ?? ""}
-                        placeholder={t("address_line2_placeholder")}
                       />
-                    </Field>
-                  )}
-                />
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Controller
-                    name="shipping_city"
-                    control={control}
-                    render={({ field }) => (
-                      <Field data-invalid={!!formState.errors.shipping_city}>
-                        <FieldLabel>{t("ville")}</FieldLabel>
-                        <Input {...field} placeholder={t("city_placeholder")} />
-                        {formState.errors.shipping_city && (
-                          <FieldError errors={[formState.errors.shipping_city]} />
+                      <Controller
+                        name="shipping_phone"
+                        control={control}
+                        render={({ field }) => (
+                          <Field data-invalid={!!formState.errors.shipping_phone}>
+                            <FieldLabel>{t("telephone")}</FieldLabel>
+                            <Input {...field} placeholder={t("phone_placeholder")} />
+                            {formState.errors.shipping_phone && (
+                              <FieldError errors={[formState.errors.shipping_phone]} />
+                            )}
+                          </Field>
                         )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name="shipping_state"
-                    control={control}
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>{t("wilaya_etat")}</FieldLabel>
-                        <Input
-                          {...field}
-                          value={field.value ?? ""}
-                          placeholder={t("state_placeholder")}
-                        />
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name="shipping_postal_code"
-                    control={control}
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel>{t("code_postal")}</FieldLabel>
-                        <Input
-                          {...field}
-                          value={field.value ?? ""}
-                          placeholder={t("postal_placeholder")}
-                        />
-                      </Field>
-                    )}
-                  />
-                </div>
+                      />
+                    </div>
+
+                    <Controller
+                      name="shipping_line1"
+                      control={control}
+                      render={({ field }) => (
+                        <Field data-invalid={!!formState.errors.shipping_line1}>
+                          <FieldLabel>{t("adresse")}</FieldLabel>
+                          <Input {...field} placeholder={t("address_placeholder")} />
+                          {formState.errors.shipping_line1 && (
+                            <FieldError errors={[formState.errors.shipping_line1]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+
+                    <Controller
+                      name="shipping_line2"
+                      control={control}
+                      render={({ field }) => (
+                        <Field>
+                          <FieldLabel>{t("complement_adresse")}</FieldLabel>
+                          <Input
+                            {...field}
+                            value={field.value ?? ""}
+                            placeholder={t("address_line2_placeholder")}
+                          />
+                        </Field>
+                      )}
+                    />
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <Controller
+                        name="shipping_city"
+                        control={control}
+                        render={({ field }) => (
+                          <Field data-invalid={!!formState.errors.shipping_city}>
+                            <FieldLabel>{t("ville")}</FieldLabel>
+                            <Input {...field} placeholder={t("city_placeholder")} />
+                            {formState.errors.shipping_city && (
+                              <FieldError errors={[formState.errors.shipping_city]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                      <Controller
+                        name="shipping_state"
+                        control={control}
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>{t("wilaya_etat")}</FieldLabel>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              placeholder={t("state_placeholder")}
+                            />
+                          </Field>
+                        )}
+                      />
+                      <Controller
+                        name="shipping_postal_code"
+                        control={control}
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel>{t("code_postal")}</FieldLabel>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              placeholder={t("postal_placeholder")}
+                            />
+                          </Field>
+                        )}
+                      />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

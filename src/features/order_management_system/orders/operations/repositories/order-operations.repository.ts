@@ -167,10 +167,6 @@ export class OrderOperationsRepository {
       .where(where)
       .orderBy(desc(order_comments.created_at));
   }
-
-  async update_comment(id: string, content: string) {
-    await db.update(order_comments).set({ content }).where(eq(order_comments.id, id));
-  }
 }
 
 export const order_operations_repository = new OrderOperationsRepository();

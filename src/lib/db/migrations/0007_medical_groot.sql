@@ -1,0 +1,1 @@
+ALTER TABLE `order_assignments` MODIFY COLUMN `to_user_id` varchar(255);

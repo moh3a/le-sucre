@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, not, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/lib/db";
@@ -13,19 +13,27 @@ import { payment_transactions } from "@/features/payment_management_system/payme
 export class OrderRepository {
   async admin_list_by_product(product_id: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
-    const items = await db
-      .selectDistinct({
-        order: orders,
-        customer_name: users.name,
-      })
-      .from(orders)
-      .innerJoin(order_items, eq(order_items.order_id, orders.id))
-      .leftJoin(users, eq(users.id, orders.user_id))
-      .where(eq(order_items.product_id, product_id))
-      .orderBy(desc(orders.created_at))
-      .limit(limit)
-      .offset(offset);
+    const [items, [{ total }]] = await Promise.all([
+      db
+        .selectDistinct({
+          order: orders,
+          customer_name: users.name,
+        })
+        .from(orders)
+        .innerJoin(order_items, eq(order_items.order_id, orders.id))
+        .leftJoin(users, eq(users.id, orders.user_id))
+        .where(eq(order_items.product_id, product_id))
+        .orderBy(desc(orders.created_at))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ total: sql<number>`count(DISTINCT ${orders.id})` })
+        .from(orders)
+        .innerJoin(order_items, eq(order_items.order_id, orders.id))
+        .where(eq(order_items.product_id, product_id)),
+    ]);
 
+    const total_records = Number(total);
     return {
       items: items.map((item) => {
         const addr = item.order.shipping_address as Record<string, unknown>;
@@ -35,7 +43,10 @@ export class OrderRepository {
           customer_name: item.customer_name || fallbackName || item.order.guest_phone || "Client",
         };
       }),
-      meta: { total_pages: Math.ceil(items.length / limit), total_records: items.length },
+      meta: {
+        total_pages: Math.ceil(total_records / limit),
+        total_records,
+      },
     };
   }
 
@@ -282,13 +293,6 @@ export class OrderRepository {
 
   async find_items_by_order(order_id: string) {
     return await db.select().from(order_items).where(eq(order_items.order_id, order_id));
-  }
-
-  async delete_items_by_order(order_id: string, keep_ids?: string[]) {
-    const where = keep_ids?.length
-      ? and(eq(order_items.order_id, order_id), not(inArray(order_items.id, keep_ids)))
-      : eq(order_items.order_id, order_id);
-    await db.delete(order_items).where(where);
   }
 
   async update_shipping_address(order_id: string, address: Record<string, unknown>) {

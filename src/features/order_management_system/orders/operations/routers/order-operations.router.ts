@@ -6,7 +6,7 @@ import { order_operations_service } from "../services/order-operations.service";
 
 export const order_operations_router = create_trpc_router({
   orderAssignOperator: permission_procedure(PERMISSIONS.orders_write)
-    .input(z.object({ order_id: z.string(), operator_id: z.string(), note: z.string().optional() }))
+    .input(z.object({ order_id: z.string(), operator_id: z.string().max(255).nullable(), note: z.string().optional() }))
     .mutation(({ ctx, input }) => order_operations_service.assign_operator({ ...input, actor_user_id: ctx.session!.user.id })),
 
   orderGetAssignmentHistory: permission_procedure(PERMISSIONS.orders_read)

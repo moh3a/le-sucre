@@ -50,7 +50,7 @@ export const list_orders_dto = z.object({
 export const update_order_payment_dto = z.object({
   order_id: z.string().min(1).max(255),
   payment_status: z
-    .enum(["pending", "authorized", "paid", "failed", "refunded"])
+    .enum(["pending", "authorized", "partially_paid", "paid", "failed", "refunded"])
     .optional(),
   payment_provider: z.string().max(32).optional().nullable(),
   payment_reference: z.string().max(128).optional().nullable(),

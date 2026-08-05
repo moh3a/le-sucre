@@ -47,7 +47,7 @@ type GeneralTabProps = {
 
 const STATUS_OPTIONS_VALUES = [
   "pending_payment",
-  "paid",
+  "confirmed",
   "processing",
   "shipped",
   "delivered",
@@ -71,7 +71,7 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
   const { data: deliverers_data, isLoading: deliverers_loading } =
     trpc.adminAuth.listUsersByRole.useQuery({ role: "delivery_person" });
 
-  const assign_operator = trpc.orders.adminAssignOperator.useMutation({
+  const assign_operator = trpc.operations.orderAssignOperator.useMutation({
     onSuccess: () => {
       on_update();
       toast.success(t("operator_assigned"));

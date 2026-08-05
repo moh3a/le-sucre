@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Ban, TriangleAlert, PauseCircle, PlayCircle } from "lucide-react";
+import { Ban, TriangleAlert, PauseCircle, PlayCircle, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -39,6 +39,8 @@ export function OrderOperationsTab({ order_id }: OrderOpsTabProps) {
 
   // Holds
   const { data: holds, refetch: refetch_holds } = trpc.operations.orderGetHolds.useQuery({ order_id });
+  // Assignment history
+  const { data: assignments } = trpc.operations.orderGetAssignmentHistory.useQuery({ order_id });
   const [hold_reason, set_hold_reason] = useState("");
   const [hold_desc, set_hold_desc] = useState("");
   const place_hold = trpc.operations.orderPlaceOnHold.useMutation({
@@ -177,6 +179,39 @@ export function OrderOperationsTab({ order_id }: OrderOpsTabProps) {
                 <PauseCircle className="mr-1 h-3 w-3" />
                 {t("place_on_hold")}
               </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Assignment history ─────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserRound className="h-4 w-4" />
+            {t("assignment_history_title")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(assignments?.length ?? 0) === 0 ? (
+            <p className="text-muted-foreground text-sm">{t("assignment_history_empty")}</p>
+          ) : (
+            <div className="divide-y rounded-md border text-sm">
+              {assignments?.map((a) => (
+                <div key={a.id} className="flex items-center justify-between px-3 py-2">
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {a.note ?? (a.to_user_id ? `${t("assigned_operator")}: ${a.to_user_id}` : t("operator_unassigned"))}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {t("by")} {a.assigned_by_user_id ?? "—"}
+                    </p>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    {formatDate(a.created_at, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>

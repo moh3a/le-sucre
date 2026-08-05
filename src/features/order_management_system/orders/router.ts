@@ -64,20 +64,6 @@ export const order_router = create_trpc_router({
     .input(z.object({ days: z.coerce.number().int().min(7).max(365).default(30) }).optional())
     .query(({ input }) => order_admin_service.charts(input?.days)),
 
-  adminAssignOperator: permission_procedure(PERMISSIONS.orders_write)
-    .input(
-      z.object({
-        order_id: z.string().min(1).max(255),
-        operator_id: z.string().max(255).nullable(),
-      }),
-    )
-    .mutation(({ ctx, input }) =>
-      order_service.assign_operator({
-        ...input,
-        actor_user_id: ctx.session!.user.id,
-      }),
-    ),
-
   adminAssignDeliveryPerson: permission_procedure(PERMISSIONS.orders_write)
     .input(
       z.object({

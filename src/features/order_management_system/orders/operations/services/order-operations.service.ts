@@ -2,18 +2,7 @@ import "server-only";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
-import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { order_operations_repository as repo } from "../repositories/order-operations.repository";
-import type { NotificationService } from "@/features/console_dashboard/notifications/services/notification.service";
-
-function get_notification_types() {
-  const NOTIFICATION_TYPES = {
-    ORDER_ASSIGNED: "order_assigned",
-    ORDER_ESCALATED: "order_escalated",
-    ORDER_CANCELLATION_REQUESTED: "order_cancellation_requested",
-  } as const;
-  return NOTIFICATION_TYPES;
-}
 
 const OPERATIONS_ERROR = {
   NOT_FOUND: { code: "OPERATIONS_NOT_FOUND", status: 404, message: { fr: "Ressource opérationnelle introuvable", en: "Operations resource not found", ar: "لم يتم العثور على مورد العمليات" } },
@@ -21,10 +10,12 @@ const OPERATIONS_ERROR = {
   ALREADY_HELD: { code: "OPERATIONS_ALREADY_HELD", status: 409, message: { fr: "La commande est déjà en attente", en: "Order is already on hold", ar: "الطلب معلق بالفعل" } },
   NOT_HELD: { code: "OPERATIONS_NOT_HELD", status: 409, message: { fr: "La commande n'est pas en attente", en: "Order is not on hold", ar: "الطلب ليس معلقًا" } },
   CANCELLATION_PENDING: { code: "OPERATIONS_CANCELLATION_PENDING", status: 409, message: { fr: "Une demande d'annulation est déjà en cours", en: "A cancellation request is already pending", ar: "طلب الإلغاء معلق بالفعل" } },
+  CANNOT_ESCALATE: { code: "OPERATIONS_CANNOT_ESCALATE", status: 409, message: { fr: "Impossible d'escalader cette commande", en: "Cannot escalate this order", ar: "لا يمكن تصعيد هذا الطلب" } },
+  INVALID_TRANSITION: { code: "OPERATIONS_INVALID_TRANSITION", status: 409, message: { fr: "Transition de statut invalide", en: "Invalid status transition", ar: "انتقال حالة غير صالح" } },
 };
 
 export class OrderOperationsService {
-  async assign_operator(input: { order_id: string; operator_id: string; actor_user_id: string; note?: string }) {
+  async assign_operator(input: { order_id: string; operator_id: string | null; actor_user_id: string; note?: string }) {
     const order = await order_repository.find_by_id(input.order_id);
     if (!order) throw_error(OPERATIONS_ERROR.NOT_FOUND);
     const old_operator_id = order.assigned_operator_id;
@@ -36,7 +27,7 @@ export class OrderOperationsService {
     });
     await order_repository.insert_status_event({
       id: generate_id(), order_id: input.order_id, from_status: order.status, to_status: order.status,
-      actor_user_id: input.actor_user_id, note: input.note ?? "Opérateur assigné",
+      actor_user_id: input.actor_user_id, note: input.note ?? (input.operator_id ? "Opérateur assigné" : "Opérateur désassigné"),
     });
   }
 

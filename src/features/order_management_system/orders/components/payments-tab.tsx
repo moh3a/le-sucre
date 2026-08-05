@@ -41,7 +41,7 @@ export function PaymentsTab({
   grand_total,
   on_update,
 }: PaymentsTabProps) {
-  const t = useTranslations("payments");
+  const t = useTranslations("orders");
   const update_payment = trpc.orders.adminUpdatePayment.useMutation({
     onSuccess: () => {
       on_update();
@@ -63,7 +63,7 @@ export function PaymentsTab({
   function on_save_payment() {
     update_payment.mutate({
       order_id,
-      payment_status: pay_status as "pending" | "authorized" | "paid" | "failed" | "refunded",
+      payment_status: pay_status as "pending" | "authorized" | "partially_paid" | "paid" | "failed" | "refunded",
       payment_provider: pay_provider || null,
       payment_reference: pay_reference || null,
     });
@@ -74,9 +74,9 @@ export function PaymentsTab({
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>{t("informations_paiement")}</CardTitle>
+          <CardTitle>{t("payment_info")}</CardTitle>
           <Button size="sm" variant="outline" onClick={init_payment_form}>
-            {t("modifier_paiement")}
+            {t("modify_payment")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
@@ -106,7 +106,7 @@ export function PaymentsTab({
       {pay_status && (
         <Card className="mt-4 border-blue-200">
           <CardHeader>
-            <CardTitle>{t("modifier_paiement")}</CardTitle>
+            <CardTitle>{t("edit_payment_label")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Field>
@@ -129,7 +129,7 @@ export function PaymentsTab({
               <Input
                 value={pay_provider}
                 onChange={(e) => set_pay_provider(e.target.value)}
-                placeholder={t("provider_placeholder")}
+                placeholder={t("payment_method_placeholder")}
               />
             </Field>
             <Field>
@@ -149,7 +149,7 @@ export function PaymentsTab({
                 onClick={on_save_payment}
                 disabled={update_payment.isPending}
               >
-                {update_payment.isPending ? t("saving") : t("save")}
+                {update_payment.isPending ? t("saving") : t("enregistrer")}
               </Button>
             </div>
           </CardContent>

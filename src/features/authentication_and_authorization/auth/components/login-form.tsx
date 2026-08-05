@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/client";
-import logger from "@/lib/logger";
 
 type LoginFormValues = z.infer<ReturnType<typeof get_login_form_schema>>;
 
@@ -77,7 +76,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       password: values.password,
     });
     if (result.error) {
-      logger.info(result.error);
+      console.log(result.error);
       set_root_error(t("error_invalid"));
       return;
     }

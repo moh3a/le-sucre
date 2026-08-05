@@ -2,16 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ShipmentPanel } from "@/features/fulfillment_management_system/shipping/components/shipment-panel";
 
 type ShippingTabProps = {
   order_id: string;
@@ -20,7 +17,7 @@ type ShippingTabProps = {
 };
 
 export function ShippingTab({ order_id, shipping_address, on_update }: ShippingTabProps) {
-  const t = useTranslations("shipping");
+  const t = useTranslations("orders");
   const update_shipping = trpc.orders.adminUpdateShipping.useMutation({
     onSuccess: () => {
       on_update();
@@ -66,13 +63,12 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
   }
 
   return (
-    <QueryGuard mutation={update_shipping}>
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>{t("adresse_livraison")}</CardTitle>
+          <CardTitle>{t("shipping_address_label")}</CardTitle>
           <Button size="sm" variant="outline" onClick={init_shipping_form}>
-            {t("modifier_adresse")}
+            {t("modify_address")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
@@ -91,12 +87,12 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
       {ship_full_name !== "" && (
         <Card className="mt-4 border-blue-200">
           <CardHeader>
-            <CardTitle>{t("modifier_adresse")}</CardTitle>
+            <CardTitle>{t("edit_address_label")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid gap-3 md:grid-cols-2">
               <Field>
-                <FieldLabel>{t("nom_complet")}</FieldLabel>
+                <FieldLabel>{t("full_name")}</FieldLabel>
                 <Input
                   value={ship_full_name}
                   onChange={(e) => set_ship_full_name(e.target.value)}
@@ -104,47 +100,29 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
               </Field>
               <Field>
                 <FieldLabel>{t("telephone")}</FieldLabel>
-                <Input
-                  value={ship_phone}
-                  onChange={(e) => set_ship_phone(e.target.value)}
-                />
+                <Input value={ship_phone} onChange={(e) => set_ship_phone(e.target.value)} />
               </Field>
             </div>
             <Field>
               <FieldLabel>{t("adresse")}</FieldLabel>
-              <Input
-                value={ship_line1}
-                onChange={(e) => set_ship_line1(e.target.value)}
-              />
+              <Input value={ship_line1} onChange={(e) => set_ship_line1(e.target.value)} />
             </Field>
             <Field>
               <FieldLabel>{t("complement_adresse")}</FieldLabel>
-              <Input
-                value={ship_line2}
-                onChange={(e) => set_ship_line2(e.target.value)}
-              />
+              <Input value={ship_line2} onChange={(e) => set_ship_line2(e.target.value)} />
             </Field>
             <div className="grid gap-3 md:grid-cols-3">
               <Field>
                 <FieldLabel>{t("ville")}</FieldLabel>
-                <Input
-                  value={ship_city}
-                  onChange={(e) => set_ship_city(e.target.value)}
-                />
+                <Input value={ship_city} onChange={(e) => set_ship_city(e.target.value)} />
               </Field>
               <Field>
                 <FieldLabel>{t("wilaya_etat")}</FieldLabel>
-                <Input
-                  value={ship_state}
-                  onChange={(e) => set_ship_state(e.target.value)}
-                />
+                <Input value={ship_state} onChange={(e) => set_ship_state(e.target.value)} />
               </Field>
               <Field>
                 <FieldLabel>{t("code_postal")}</FieldLabel>
-                <Input
-                  value={ship_postal}
-                  onChange={(e) => set_ship_postal(e.target.value)}
-                />
+                <Input value={ship_postal} onChange={(e) => set_ship_postal(e.target.value)} />
               </Field>
             </div>
             <div className="flex justify-end gap-2">
@@ -156,15 +134,12 @@ export function ShippingTab({ order_id, shipping_address, on_update }: ShippingT
                 onClick={on_save_shipping}
                 disabled={update_shipping.isPending}
               >
-                {update_shipping.isPending ? t("saving") : t("save")}
+                {update_shipping.isPending ? t("saving") : t("enregistrer")}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
-
-      <ShipmentPanel order_id={order_id} />
     </>
-    </QueryGuard>
   );
 }

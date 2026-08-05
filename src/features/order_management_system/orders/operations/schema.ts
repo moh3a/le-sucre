@@ -18,7 +18,7 @@ export const order_assignments = mysqlTable(
     order_id: varchar("order_id", { length: 255 }).notNull().references(() => orders.id, { onDelete: "cascade" }),
     assignment_type: varchar("assignment_type", { length: 32 }).notNull(),
     from_user_id: varchar("from_user_id", { length: 255 }),
-    to_user_id: varchar("to_user_id", { length: 255 }).notNull(),
+    to_user_id: varchar("to_user_id", { length: 255 }),
     assigned_by_user_id: varchar("assigned_by_user_id", { length: 255 }).notNull(),
     note: varchar("note", { length: 512 }),
     created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),

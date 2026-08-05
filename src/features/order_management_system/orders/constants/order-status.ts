@@ -12,6 +12,7 @@ export const ORDER_STATUS = {
 export const PAYMENT_STATUS = {
   pending: "pending",
   authorized: "authorized",
+  partially_paid: "partially_paid",
   paid: "paid",
   failed: "failed",
   refunded: "refunded",
@@ -49,6 +50,7 @@ export const ORDER_LABELS: Record<string, string> = {
 export const PAYMENT_LABELS: Record<string, string> = {
   pending: "En attente",
   authorized: "Autorisé",
+  partially_paid: "Partiellement payé",
   paid: "Payé",
   failed: "Échoué",
   refunded: "Remboursé",
@@ -75,6 +77,7 @@ export const STATUS_BADGE: Record<string, "default" | "secondary" | "destructive
 export const PAYMENT_BADGE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
   authorized: "secondary",
+  partially_paid: "secondary",
   paid: "default",
   failed: "destructive",
   refunded: "destructive",
@@ -90,6 +93,7 @@ export const FULFILLMENT_BADGE: Record<string, "default" | "secondary" | "destru
 export const PAYMENT_STATUS_OPTIONS = [
   { value: "pending", label: "En attente" },
   { value: "authorized", label: "Autorisé" },
+  { value: "partially_paid", label: "Partiellement payé" },
   { value: "paid", label: "Payé" },
   { value: "failed", label: "Échoué" },
   { value: "refunded", label: "Remboursé" },

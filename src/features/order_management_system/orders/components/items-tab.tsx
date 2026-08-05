@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/components/providers/app-providers";
-import { QueryGuard } from "@/components/query-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { formatDate } from "@/lib/format";
 
 type EditableItem = {
   id: string;
@@ -33,6 +33,7 @@ type ItemsTabProps = {
     unit_price: string;
     line_total: string;
     fulfillment_type: string;
+    estimated_available_at?: string | null;
   }>;
   adjustments: Array<{
     id: string;
@@ -142,7 +143,6 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
     .filter((s) => !edit_items.some((i) => i.sku_id === s.sku_id));
 
   return (
-    <QueryGuard query={{isLoading: false}}>
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -180,7 +180,30 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
                     {Number(item.line_total).toLocaleString("fr-FR")} DZD
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant="outline">{item.fulfillment_type}</Badge>
+                    <div className="flex flex-col items-start gap-0.5">
+                      <Badge
+                        variant={
+                          item.fulfillment_type === "preorder"
+                            ? "default"
+                            : item.fulfillment_type === "backorder"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {item.fulfillment_type === "preorder"
+                          ? t("line_preorder")
+                          : item.fulfillment_type === "backorder"
+                            ? t("line_backorder")
+                            : t("line_standard")}
+                      </Badge>
+                      {item.estimated_available_at && (
+                        <span className="text-muted-foreground text-xs">
+                          {t("eta_prefix", {
+                            date: formatDate(item.estimated_available_at, { month: "short" }),
+                          })}
+                        </span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -239,7 +262,7 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
                   <Search className="text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2" />
                   <Input
                     className="h-8 pl-7 text-xs"
-                    placeholder={t("search_sku")}
+                    placeholder={t("search_sku_placeholder")}
                     value={search_query}
                     onChange={(e) => {
                       set_search_query(e.target.value);
@@ -340,6 +363,5 @@ export function ItemsTab({ order_id, items, adjustments, on_update }: ItemsTabPr
         </Card>
       )}
     </>
-    </QueryGuard>
   );
 }

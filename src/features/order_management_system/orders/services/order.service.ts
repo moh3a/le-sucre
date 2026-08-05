@@ -165,66 +165,6 @@ export class OrderService {
       placed_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
 
-    // const item_inserts = await Promise.all(
-    //   items.map(async (line) => {
-    //     const [sku] = await db
-    //       .select({ sku_code: product_skus.sku_code })
-    //       .from(product_skus)
-    //       .where(eq(product_skus.id, line.sku_id))
-    //       .limit(1);
-
-    //     const [tr] = await db
-    //       .select({ name: product_translations.name })
-    //       .from(product_translations)
-    //       .where(
-    //         and(
-    //           eq(product_translations.product_id, line.product_id),
-    //           eq(product_translations.locale, "fr"),
-    //         ),
-    //       )
-    //       .limit(1);
-
-    //     return {
-    //       id: generate_id(),
-    //       order_id,
-    //       sku_id: line.sku_id,
-    //       product_id: line.product_id,
-    //       sku_code: sku?.sku_code ?? line.sku_id,
-    //       product_name: tr?.name ?? line.product_id,
-    //       quantity: line.quantity,
-    //       unit_price: String(line.unit_price),
-    //       line_total: (Number(line.unit_price) * line.quantity).toFixed(2),
-    //       currency: line.currency,
-    //       reservation_id: line.reservation_id ?? null,
-    //     };
-    //   }),
-    // );
-
-    // await this.repo.insert_items(item_inserts);
-
-    // await this.repo.insert_adjustments(
-    //   totals.adjustments.map((a) => ({
-    //     id: generate_id(),
-    //     order_id,
-    //     type: a.type,
-    //     label: a.label,
-    //     amount: a.amount.startsWith("-") ? a.amount.slice(1) : a.amount,
-    //     currency: cart.currency,
-    //   })),
-    // );
-
-    // await this.repo.insert_status_event({
-    //   id: generate_id(),
-    //   order_id,
-    //   from_status: null,
-    //   to_status: "pending_payment",
-    //   note: "Commande créée",
-    // });
-
-    // for (const line of items) {
-    //   if (!line.reservation_id) continue;
-    //   await reservation_service.commit({ id: line.reservation_id, order_id });
-    // }
     const allocation_ids = items
       .map((i) => i.preorder_allocation_id)
       .filter((id): id is string => !!id);
@@ -313,6 +253,17 @@ export class OrderService {
       ({ _deposit_percent, _confirm_allocation, ...row }) => row,
     );
     await this.repo.insert_items(normalized_items);
+
+    await this.repo.insert_adjustments(
+      totals.adjustments.map((a) => ({
+        id: generate_id(),
+        order_id,
+        type: a.type,
+        label: a.label,
+        amount: a.amount.startsWith("-") ? a.amount.slice(1) : a.amount,
+        currency: cart.currency,
+      })),
+    );
 
     if (input.discount_code) {
       const code_row = await promo_code_repository.find_by_code(input.discount_code);
@@ -486,62 +437,6 @@ export class OrderService {
     return this.repo.get_full(input.order_id);
   }
 
-  async assign_operator(input: {
-    order_id: string;
-    operator_id: string | null;
-    actor_user_id: string;
-  }) {
-    const current = await this.repo.find_by_id(input.order_id);
-    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
-
-    const old_operator_id = current.assigned_operator_id;
-    if (old_operator_id !== input.operator_id) {
-      let old_name = "Non assigné";
-      let new_name = "Non assigné";
-
-      if (old_operator_id) {
-        const old_user = await user_repository.find_by_id(old_operator_id);
-        if (old_user) old_name = old_user.name;
-      }
-      if (input.operator_id) {
-        const new_user = await user_repository.find_by_id(input.operator_id);
-        if (new_user) new_name = new_user.name;
-      }
-
-      let note = "";
-      if (!old_operator_id && input.operator_id) {
-        note = `Opérateur assigné : ${new_name}`;
-      } else if (old_operator_id && !input.operator_id) {
-        note = `Opérateur désassigné (précédemment : ${old_name})`;
-      } else {
-        note = `Opérateur modifié : de ${old_name} à ${new_name}`;
-      }
-
-      await this.repo.update_order_assignment(input.order_id, {
-        assigned_operator_id: input.operator_id,
-      });
-
-      await this.repo.insert_status_event({
-        id: generate_id(),
-        order_id: input.order_id,
-        from_status: current.status,
-        to_status: current.status,
-        actor_user_id: input.actor_user_id,
-        note,
-      });
-    }
-
-    void audit_service.log({
-      actor_user_id: input.actor_user_id,
-      action: "order.assign_operator",
-      resource_type: "order_id",
-      resource_id: input.order_id,
-      metadata: { operator_id: input.operator_id ?? undefined },
-    });
-
-    return this.repo.get_full(input.order_id);
-  }
-
   async assign_delivery_person(input: {
     order_id: string;
     delivery_person_id: string | null;
@@ -646,7 +541,7 @@ export class OrderService {
         guest_phone: undefined,
       });
     } catch (error) {
-      logger.log(error)
+      logger.error("Failed to place admin order:", error);
       rethrow_as_order_error(error);
     }
   }
@@ -785,6 +680,9 @@ export class OrderService {
     const new_shipping = Number(current.shipping_total);
     const new_grand = Math.max(0, new_subtotal - new_discount + new_tax + new_shipping);
 
+    const old_items = await this.repo.find_items_by_order(input.order_id);
+    const old_qty = old_items.reduce((s, i) => s + i.quantity, 0);
+
     // Replace items in transaction
     await db.transaction(async (tx) => {
       await tx.delete(order_items).where(eq(order_items.order_id, input.order_id));
@@ -800,10 +698,6 @@ export class OrderService {
         .where(eq(orders.id, input.order_id));
     });
 
-    const old_qty = (await this.repo.find_items_by_order(input.order_id)).reduce(
-      (s, i) => s + i.quantity,
-      0,
-    );
     const new_qty = enriched_items.reduce((s, i) => s + i.quantity, 0);
     const diff = new_qty - old_qty;
 
