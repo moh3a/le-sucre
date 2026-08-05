@@ -57,12 +57,18 @@ const campaign_theme_schema = z
   })
   .optional();
 
+const cta_url_schema = z
+  .string()
+  .optional()
+  .or(z.literal(""))
+  .refine((value) => !value || /^(https?:\/\/|\/)/.test(value));
+
 const translation_schema = z.object({
   locale: z.enum(["en", "fr", "ar"]),
   title: z.string().max(255).optional(),
   subtitle: z.string().max(512).optional(),
   cta_label: z.string().max(128).optional(),
-  cta_url: z.string().url().optional().or(z.literal("")),
+  cta_url: cta_url_schema,
   seo_title: z.string().max(255).optional(),
   seo_description: z.string().max(500).optional(),
 });

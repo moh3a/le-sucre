@@ -80,14 +80,24 @@ export class CampaignService {
       created_by: actor_id ?? null,
     });
 
-    if (campaign && input.status === CAMPAIGN_STATUS.scheduled && input.starts_at) {
-      await campaign_scheduler_service.schedule_activation(campaign.id, input.starts_at);
-    }
-    if (campaign && input.ends_at) {
-      await campaign_scheduler_service.schedule_deactivation(campaign.id, input.ends_at);
+    if (campaign && (input.status === CAMPAIGN_STATUS.scheduled || input.ends_at)) {
+      try {
+        if (input.status === CAMPAIGN_STATUS.scheduled && input.starts_at) {
+          await campaign_scheduler_service.schedule_activation(campaign.id, input.starts_at);
+        }
+        if (input.ends_at) {
+          await campaign_scheduler_service.schedule_deactivation(campaign.id, input.ends_at);
+        }
+      } catch {
+        throw_error(CAMPAIGN_ERROR.SCHEDULER_SCHEDULE_FAILED);
+      }
     }
 
-    await campaign_cache.invalidate_all_sections();
+    try {
+      await campaign_cache.invalidate_all_sections();
+    } catch {
+      throw_error(CAMPAIGN_ERROR.CACHE_INVALIDATION_FAILED);
+    }
 
     void audit_service.log({
       action: AUDIT_ACTION.CAMPAIGN_CREATED,
@@ -156,16 +166,24 @@ export class CampaignService {
 
     // Re-schedule if dates changed
     if (input.starts_at || input.ends_at) {
-      await campaign_scheduler_service.cancel_pending(input.id);
-      if (input.starts_at && updated?.status === CAMPAIGN_STATUS.scheduled) {
-        await campaign_scheduler_service.schedule_activation(input.id, input.starts_at);
-      }
-      if (input.ends_at) {
-        await campaign_scheduler_service.schedule_deactivation(input.id, input.ends_at);
+      try {
+        await campaign_scheduler_service.cancel_pending(input.id);
+        if (input.starts_at && updated?.status === CAMPAIGN_STATUS.scheduled) {
+          await campaign_scheduler_service.schedule_activation(input.id, input.starts_at);
+        }
+        if (input.ends_at) {
+          await campaign_scheduler_service.schedule_deactivation(input.id, input.ends_at);
+        }
+      } catch {
+        throw_error(CAMPAIGN_ERROR.SCHEDULER_SCHEDULE_FAILED);
       }
     }
 
-    await campaign_cache.invalidate(input.id);
+    try {
+      await campaign_cache.invalidate(input.id);
+    } catch {
+      throw_error(CAMPAIGN_ERROR.CACHE_INVALIDATION_FAILED);
+    }
 
     void audit_service.log({
       action: AUDIT_ACTION.CAMPAIGN_UPDATED,

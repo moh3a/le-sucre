@@ -3168,6 +3168,7 @@
         "display_subtitle": "Sous-titre ({lang})",
         "cta_label": "Libellé du Bouton (CTA)",
         "cta_url": "URL d'action (CTA)",
+        "cta_url_invalid": "L'URL doit commencer par http(s):// ou /",
         "seo_heading": "Référencement SEO ({lang})",
         "seo_title_label": "Titre SEO",
         "seo_description_label": "Description SEO",

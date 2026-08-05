@@ -73,7 +73,11 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
         title: z.string().max(255).optional().or(z.literal("")),
         subtitle: z.string().max(512).optional().or(z.literal("")),
         cta_label: z.string().max(128).optional().or(z.literal("")),
-        cta_url: z.string().optional().or(z.literal("")),
+        cta_url: z
+          .string()
+          .optional()
+          .or(z.literal(""))
+          .refine((value) => !value || /^(https?:\/\/|\/)/.test(value), t("cta_url_invalid")),
         seo_title: z.string().max(255).optional().or(z.literal("")),
         seo_description: z.string().max(500).optional().or(z.literal("")),
       }),
@@ -292,13 +296,17 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
     };
 
     if (mode === "create") {
-      await create_mutation.mutateAsync(payload);
+      try {
+        await create_mutation.mutateAsync(payload);
+      } catch {}
     } else {
       if (!campaign_id) return;
-      await update_mutation.mutateAsync({
-        ...payload,
-        id: campaign_id,
-      });
+      try {
+        await update_mutation.mutateAsync({
+          ...payload,
+          id: campaign_id,
+        });
+      } catch {}
     }
   };
 

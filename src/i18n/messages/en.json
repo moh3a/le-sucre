@@ -2979,6 +2979,7 @@
         "display_subtitle": "Subtitle ({lang})",
         "cta_label": "Button label (CTA)",
         "cta_url": "Action URL (CTA)",
+        "cta_url_invalid": "URL must start with http(s):// or /",
         "seo_heading": "SEO ({lang})",
         "seo_title_label": "SEO title",
         "seo_description_label": "SEO description",

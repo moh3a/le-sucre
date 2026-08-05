@@ -127,6 +127,15 @@ export const CAMPAIGN_ERROR = {
       ar: "فشل إلغاء الجدولات المعلقة",
     },
   },
+  SCHEDULER_SCHEDULE_FAILED: {
+    code: "CAMPAIGN_SCHEDULER_SCHEDULE_FAILED",
+    status: 500,
+    message: {
+      fr: "Échec de la planification de la campagne. Veuillez réessayer.",
+      en: "Failed to schedule the campaign. Please try again.",
+      ar: "فشل في جدولة الحملة. يرجى المحاولة مرة أخرى.",
+    },
+  },
   CACHE_GET_FAILED: {
     code: "CAMPAIGN_CACHE_GET_FAILED",
     status: 500,

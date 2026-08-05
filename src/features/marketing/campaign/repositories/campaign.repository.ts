@@ -3,6 +3,8 @@ import { and, asc, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import { format, subDays } from "date-fns";
+import { ValidationError } from "@/lib/error_handling";
+import { handle_drizzle_error } from "@/lib/db/drizzle-error";
 import {
   campaigns,
   campaign_translations,
@@ -36,6 +38,15 @@ function now_iso() {
 
 function day_key(date = new Date()) {
   return format(date, "yyyy-MM-dd");
+}
+
+function to_db_ts(value: string | null | undefined): string | null {
+  if (value == null || value === "") return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new ValidationError("La date fournie n'est pas valide");
+  }
+  return format(date, "yyyy-MM-dd HH:mm:ss");
 }
 
 export class CampaignRepository {
@@ -416,35 +427,39 @@ export class CampaignRepository {
   }) {
     const id = generate_id();
 
-    await db.insert(campaigns).values({
-      id,
-      name: input.name,
-      slug: input.slug,
-      description: input.description ?? null,
-      campaign_type: input.campaign_type,
-      status: input.status,
-      priority: input.priority,
-      starts_at: input.starts_at ?? null,
-      ends_at: input.ends_at ?? null,
-      content: input.content ?? {},
-      theme: input.theme ?? {},
-      promotion_id: input.promotion_id ?? null,
-      ab_test_group: input.ab_test_group ?? null,
-      ab_traffic_split: input.ab_traffic_split ?? 100,
-      metadata: input.metadata ?? {},
-      created_by: input.created_by ?? null,
-    });
+    try {
+      await db.insert(campaigns).values({
+        id,
+        name: input.name,
+        slug: input.slug,
+        description: input.description ?? null,
+        campaign_type: input.campaign_type,
+        status: input.status,
+        priority: input.priority,
+        starts_at: to_db_ts(input.starts_at),
+        ends_at: to_db_ts(input.ends_at),
+        content: input.content ?? {},
+        theme: input.theme ?? {},
+        promotion_id: input.promotion_id ?? null,
+        ab_test_group: input.ab_test_group ?? null,
+        ab_traffic_split: input.ab_traffic_split ?? 100,
+        metadata: input.metadata ?? {},
+        created_by: input.created_by ?? null,
+      });
 
-    await this._sync_children(id, {
-      translations: input.translations ?? [],
-      banners: input.banners ?? [],
-      sections: input.sections ?? [],
-      targets: input.targets ?? [],
-      category_ids: input.category_ids ?? [],
-      brand_ids: input.brand_ids ?? [],
-    });
+      await this._sync_children(id, {
+        translations: input.translations ?? [],
+        banners: input.banners ?? [],
+        sections: input.sections ?? [],
+        targets: input.targets ?? [],
+        category_ids: input.category_ids ?? [],
+        brand_ids: input.brand_ids ?? [],
+      });
 
-    return this.get_full(id);
+      return this.get_full(id);
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async update(
@@ -461,34 +476,48 @@ export class CampaignRepository {
     const { translations, banners, sections, targets, category_ids, brand_ids, ...camp_patch } =
       patch;
 
-    if (Object.keys(camp_patch).length) {
-      await db.update(campaigns).set(camp_patch).where(eq(campaigns.id, id));
-    }
+    try {
+      if (Object.keys(camp_patch).length) {
+        if (camp_patch.starts_at !== undefined) {
+          camp_patch.starts_at = to_db_ts(camp_patch.starts_at);
+        }
+        if (camp_patch.ends_at !== undefined) {
+          camp_patch.ends_at = to_db_ts(camp_patch.ends_at);
+        }
+        await db.update(campaigns).set(camp_patch).where(eq(campaigns.id, id));
+      }
 
-    if (
-      translations !== undefined ||
-      banners !== undefined ||
-      sections !== undefined ||
-      targets !== undefined ||
-      category_ids !== undefined ||
-      brand_ids !== undefined
-    ) {
-      await this._sync_children(id, {
-        translations: translations ?? [],
-        banners: banners ?? [],
-        sections: sections ?? [],
-        targets: targets ?? [],
-        category_ids: category_ids ?? [],
-        brand_ids: brand_ids ?? [],
-      });
-    }
+      if (
+        translations !== undefined ||
+        banners !== undefined ||
+        sections !== undefined ||
+        targets !== undefined ||
+        category_ids !== undefined ||
+        brand_ids !== undefined
+      ) {
+        await this._sync_children(id, {
+          translations: translations ?? [],
+          banners: banners ?? [],
+          sections: sections ?? [],
+          targets: targets ?? [],
+          category_ids: category_ids ?? [],
+          brand_ids: brand_ids ?? [],
+        });
+      }
 
-    return this.get_full(id);
+      return this.get_full(id);
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async set_status(id: string, status: string) {
-    await db.update(campaigns).set({ status }).where(eq(campaigns.id, id));
-    return this.get_by_id(id);
+    try {
+      await db.update(campaigns).set({ status }).where(eq(campaigns.id, id));
+      return this.get_by_id(id);
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   // ─── Banner ───────────────────────────────────────────────────────────────
@@ -497,41 +526,57 @@ export class CampaignRepository {
     campaign_id: string,
     data: Omit<typeof campaign_banners.$inferInsert, "id" | "campaign_id">,
   ) {
-    const id = generate_id();
-    await db.insert(campaign_banners).values({ id, campaign_id, ...data });
-    const [row] = await db
-      .select()
-      .from(campaign_banners)
-      .where(eq(campaign_banners.id, id))
-      .limit(1);
-    return row;
+    try {
+      const id = generate_id();
+      await db.insert(campaign_banners).values({ id, campaign_id, ...data });
+      const [row] = await db
+        .select()
+        .from(campaign_banners)
+        .where(eq(campaign_banners.id, id))
+        .limit(1);
+      return row;
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async update_banner(id: string, data: Partial<typeof campaign_banners.$inferInsert>) {
-    await db.update(campaign_banners).set(data).where(eq(campaign_banners.id, id));
-    const [row] = await db
-      .select()
-      .from(campaign_banners)
-      .where(eq(campaign_banners.id, id))
-      .limit(1);
-    return row ?? null;
+    try {
+      await db.update(campaign_banners).set(data).where(eq(campaign_banners.id, id));
+      const [row] = await db
+        .select()
+        .from(campaign_banners)
+        .where(eq(campaign_banners.id, id))
+        .limit(1);
+      return row ?? null;
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async delete_banner(id: string) {
-    await db.delete(campaign_banners).where(eq(campaign_banners.id, id));
+    try {
+      await db.delete(campaign_banners).where(eq(campaign_banners.id, id));
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async reorder_banners(campaign_id: string, ordered_ids: string[]) {
-    for (let i = 0; i < ordered_ids.length; i++) {
-      await db
-        .update(campaign_banners)
-        .set({ sort_order: i })
-        .where(
-          and(
-            eq(campaign_banners.id, ordered_ids[i]!),
-            eq(campaign_banners.campaign_id, campaign_id),
-          ),
-        );
+    try {
+      for (let i = 0; i < ordered_ids.length; i++) {
+        await db
+          .update(campaign_banners)
+          .set({ sort_order: i })
+          .where(
+            and(
+              eq(campaign_banners.id, ordered_ids[i]!),
+              eq(campaign_banners.campaign_id, campaign_id),
+            ),
+          );
+      }
+    } catch (error) {
+      handle_drizzle_error(error);
     }
   }
 
@@ -541,28 +586,40 @@ export class CampaignRepository {
     campaign_id: string,
     data: Omit<typeof campaign_sections.$inferInsert, "id" | "campaign_id">,
   ) {
-    const id = generate_id();
-    await db.insert(campaign_sections).values({ id, campaign_id, ...data });
-    const [row] = await db
-      .select()
-      .from(campaign_sections)
-      .where(eq(campaign_sections.id, id))
-      .limit(1);
-    return row;
+    try {
+      const id = generate_id();
+      await db.insert(campaign_sections).values({ id, campaign_id, ...data });
+      const [row] = await db
+        .select()
+        .from(campaign_sections)
+        .where(eq(campaign_sections.id, id))
+        .limit(1);
+      return row;
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async update_section(id: string, data: Partial<typeof campaign_sections.$inferInsert>) {
-    await db.update(campaign_sections).set(data).where(eq(campaign_sections.id, id));
-    const [row] = await db
-      .select()
-      .from(campaign_sections)
-      .where(eq(campaign_sections.id, id))
-      .limit(1);
-    return row ?? null;
+    try {
+      await db.update(campaign_sections).set(data).where(eq(campaign_sections.id, id));
+      const [row] = await db
+        .select()
+        .from(campaign_sections)
+        .where(eq(campaign_sections.id, id))
+        .limit(1);
+      return row ?? null;
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   async delete_section(id: string) {
-    await db.delete(campaign_sections).where(eq(campaign_sections.id, id));
+    try {
+      await db.delete(campaign_sections).where(eq(campaign_sections.id, id));
+    } catch (error) {
+      handle_drizzle_error(error);
+    }
   }
 
   // ─── Analytics ────────────────────────────────────────────────────────────
@@ -628,7 +685,17 @@ export class CampaignRepository {
       .from(campaign_analytics_daily)
       .where(eq(campaign_analytics_daily.campaign_id, campaign_id));
 
-    return row ?? null;
+    if (!row) return null;
+
+    return {
+      total_impressions: Number(row.total_impressions) || 0,
+      total_clicks: Number(row.total_clicks) || 0,
+      total_banner_clicks: Number(row.total_banner_clicks) || 0,
+      total_add_to_cart: Number(row.total_add_to_cart) || 0,
+      total_conversions: Number(row.total_conversions) || 0,
+      total_revenue: Number(row.total_revenue) || 0,
+      total_unique_visitors: Number(row.total_unique_visitors) || 0,
+    };
   }
 
   /** Global analytics rollup across all campaigns for the last `days` days */
@@ -663,15 +730,25 @@ export class CampaignRepository {
       .where(gte(campaign_analytics_daily.day_key, since))
       .orderBy(asc(campaign_analytics_daily.day_key));
 
+    const totals_row = totals ?? {
+      impressions: 0,
+      clicks: 0,
+      banner_clicks: 0,
+      add_to_cart: 0,
+      conversions: 0,
+      unique_visitors: 0,
+      revenue: "0",
+    };
+
     return {
-      totals: totals ?? {
-        impressions: 0,
-        clicks: 0,
-        banner_clicks: 0,
-        add_to_cart: 0,
-        conversions: 0,
-        unique_visitors: 0,
-        revenue: "0",
+      totals: {
+        impressions: Number(totals_row.impressions) || 0,
+        clicks: Number(totals_row.clicks) || 0,
+        banner_clicks: Number(totals_row.banner_clicks) || 0,
+        add_to_cart: Number(totals_row.add_to_cart) || 0,
+        conversions: Number(totals_row.conversions) || 0,
+        unique_visitors: Number(totals_row.unique_visitors) || 0,
+        revenue: totals_row.revenue,
       },
       timeseries,
     };
@@ -710,7 +787,13 @@ export class CampaignRepository {
       .orderBy(desc(campaigns.created_at))
       .limit(limit);
 
-    return rows;
+    return rows.map((row) => ({
+      ...row,
+      impressions: Number(row.impressions) || 0,
+      clicks: Number(row.clicks) || 0,
+      conversions: Number(row.conversions) || 0,
+      revenue: Number(row.revenue) || 0,
+    }));
   }
 
   /** Scheduled campaigns that have not started yet, ordered by soonest launch */

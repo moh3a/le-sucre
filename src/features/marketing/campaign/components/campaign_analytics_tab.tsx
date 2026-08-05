@@ -11,7 +11,7 @@ import {
   ShoppingCart,
   Calendar,
 } from "lucide-react";
-import { format, subDays } from "date-fns";
+import { format, parseISO, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
 import { QueryGuard } from "@/components/query-guard";
@@ -39,7 +39,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
   const toStr = format(new Date(), "yyyy-MM-dd");
   const fromStr = format(subDays(new Date(), rangeDays), "yyyy-MM-dd");
 
-  const { data, isLoading } = trpc.campaigns.analytics.useQuery({
+  const { data, isLoading, error, refetch } = trpc.campaigns.analytics.useQuery({
     campaign_id,
     from: fromStr,
     to: toStr,
@@ -52,15 +52,15 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
     total_banner_clicks: 0,
     total_add_to_cart: 0,
     total_conversions: 0,
-    total_revenue: "0",
+    total_revenue: 0,
     total_unique_visitors: 0,
   };
 
   const timeseries = data?.timeseries ?? [];
 
-  const clickCount = summary.total_clicks + summary.total_banner_clicks;
-  const ctr = summary.total_impressions > 0 ? (clickCount / summary.total_impressions) * 100 : 0;
-  const cr = clickCount > 0 ? (summary.total_conversions / clickCount) * 100 : 0;
+  const clickCount = Number(summary.total_clicks) + Number(summary.total_banner_clicks);
+  const ctr = Number(summary.total_impressions) > 0 ? (clickCount / Number(summary.total_impressions)) * 100 : 0;
+  const cr = clickCount > 0 ? (Number(summary.total_conversions) / clickCount) * 100 : 0;
 
   const stats: StatItem[] = [
     {
@@ -108,7 +108,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
   ];
 
   return (
-    <QueryGuard query={{ isLoading }}>
+    <QueryGuard query={{ isLoading, error, refetch }}>
       <div className="space-y-6">
         {/* Date filter range */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -171,7 +171,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
                     return (
                       <TableRow key={day.id ?? day.day_key}>
                         <TableCell className="font-medium">
-                          {format(new Date(day.day_key), "dd MMM yyyy", { locale: fr })}
+                          {format(parseISO(day.day_key), "dd MMM yyyy", { locale: fr })}
                         </TableCell>
                         <TableCell>{(day.impressions ?? 0).toLocaleString()}</TableCell>
                         <TableCell>

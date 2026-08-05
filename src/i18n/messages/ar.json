@@ -2968,6 +2968,7 @@
         "display_subtitle": "العنوان الفرعي ({lang})",
         "cta_label": "تسمية الزر (CTA)",
         "cta_url": "رابط الإجراء (CTA)",
+        "cta_url_invalid": "يجب أن يبدأ الرابط بـ http(s):// أو /",
         "seo_heading": "تحسين محركات البحث ({lang})",
         "seo_title_label": "عنوان SEO",
         "seo_description_label": "وصف SEO",

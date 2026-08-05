@@ -110,6 +110,15 @@ const DRIZZLE_ERROR_MAP: Record<number, DrizzleErrorDef> = {
       ar: "القيمة المدخلة غير صالحة للحقل المقابل",
     },
   },
+  1292: {
+    code: "DB_INVALID_DATETIME",
+    status: 400,
+    message: {
+      fr: "La date saisie n'est pas valide ou utilise un format non pris en charge",
+      en: "The entered date is not valid or uses an unsupported format",
+      ar: "التاريخ المدخل غير صالح أو يستخدم صيغة غير مدعومة",
+    },
+  },
   1264: {
     code: "DB_VALUE_OUT_OF_RANGE",
     status: 400,
