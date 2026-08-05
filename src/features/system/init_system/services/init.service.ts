@@ -22,6 +22,7 @@ import { role_repository } from "@/features/authentication_and_authorization/aut
 import { generate_id } from "@/lib/utils";
 import { INIT_ERROR } from "../constants/error-codes";
 import { init_repository } from "../repositories/init.repository";
+import logger from "@/lib/logger";
 
 export interface InitStatus {
   initialized: boolean;
@@ -224,7 +225,7 @@ export class InitService {
 
       return { user_id };
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       throw_error(INIT_ERROR.ADMIN_CREATION_FAILED);
     }
   }

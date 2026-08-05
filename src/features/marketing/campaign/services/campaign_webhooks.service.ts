@@ -86,24 +86,6 @@ export class CampaignWebhooksService {
   async get_stats() {
     return campaign_webhooks_repository.stats();
   }
-
-  async get_recent_events(campaign_id?: string, limit = 20): Promise<CampaignEventPayload[]> {
-    const { items } = await campaign_webhooks_repository.list(
-      1,
-      limit,
-      undefined,
-      undefined,
-      campaign_id,
-    );
-    return items.map((r) => ({
-      event: r.event_type as CampaignWebhookEvent,
-      campaign_id: r.campaign_id,
-      campaign_name: r.campaign_name ?? "",
-      campaign_type: r.campaign_type ?? "",
-      status: r.status,
-      timestamp: r.created_at,
-    }));
-  }
 }
 
 export const campaign_webhooks_service = new CampaignWebhooksService();

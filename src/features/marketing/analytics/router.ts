@@ -42,6 +42,10 @@ export const analytics_router = create_trpc_router({
     .input(search_analytics_query_dto)
     .query(({ input }) => analytics_query_service.search_analytics(input)),
 
+  customers: permission_procedure(PERMISSIONS.analytics_read).query(() =>
+    analytics_query_service.customers(),
+  ),
+
   realtime: permission_procedure(PERMISSIONS.analytics_read).query(() =>
     analytics_query_service.realtime(),
   ),

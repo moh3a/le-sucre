@@ -42,7 +42,7 @@ export class CampaignSchedulerRepository {
   async mark_processing(id: string) {
     await db
       .update(campaign_jobs)
-      .set({ status: "processing", attempts: 0 })
+      .set({ status: "processing" })
       .where(eq(campaign_jobs.id, id));
   }
 

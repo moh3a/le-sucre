@@ -9,7 +9,7 @@ import { reservation_service } from "@/features/fulfillment_management_system/in
 import { payment_retry_service } from "@/features/payment_management_system/payment/services/payment-retry.service";
 import { campaign_scheduler_repository } from "@/features/marketing/campaign/repositories/campaign_scheduler.repository";
 import { campaign_repository } from "@/features/marketing/campaign/repositories/campaign.repository";
-import { campaign_cache } from "@/features/marketing/campaign/services/campaign_cache.service";
+import { campaign_service } from "@/features/marketing/campaign/services/campaign.service";
 import {
   CAMPAIGN_JOB_TYPE,
   CAMPAIGN_STATUS,
@@ -38,8 +38,12 @@ async function process_campaign_jobs() {
           if (!campaign) break;
 
           if (campaign.status === CAMPAIGN_STATUS.scheduled) {
-            await campaign_repository.set_status(campaign_id, CAMPAIGN_STATUS.active);
-            await campaign_cache.invalidate(campaign_id);
+            // Route through the service layer so the transition is validated and
+            // the audit log, webhooks and automation triggers are dispatched.
+            await campaign_service.set_status({
+              id: campaign_id,
+              status: CAMPAIGN_STATUS.active,
+            });
             logger.info("campaign_activated", { campaign_id });
           }
           break;
@@ -57,16 +61,12 @@ async function process_campaign_jobs() {
             campaign.status === CAMPAIGN_STATUS.active ||
             campaign.status === CAMPAIGN_STATUS.scheduled
           ) {
-            await campaign_repository.set_status(campaign_id, CAMPAIGN_STATUS.ended);
-            await campaign_cache.invalidate(campaign_id);
+            await campaign_service.set_status({
+              id: campaign_id,
+              status: CAMPAIGN_STATUS.ended,
+            });
             logger.info("campaign_deactivated", { campaign_id });
           }
-          break;
-        }
-
-        case CAMPAIGN_JOB_TYPE.sync_sections: {
-          await campaign_cache.invalidate_all_sections();
-          logger.info("campaign_sections_synced");
           break;
         }
 

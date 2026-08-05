@@ -45,7 +45,7 @@ export class CheckoutService {
       user_id: input.user_id ?? null,
     });
 
-    event_ingestion_service.track({
+    void event_ingestion_service.track({
       event_type: "checkout_started",
       cart_id: input.cart_id,
       user_id: input.user_id,

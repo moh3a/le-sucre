@@ -7,9 +7,21 @@ import {
   products,
 } from "@/features/product_information_management/products/schema";
 import { tryFn } from "@/lib/error_handling";
+import logger from "@/lib/logger";
+
+export type ProductSort = "revenue" | "views" | "conversion";
+
+const BEST_SELLER_ORDER: Record<ProductSort, ReturnType<typeof desc>> = {
+  revenue: desc(sql`SUM(${analytics_product_daily.revenue})`),
+  views: desc(sql`SUM(${analytics_product_daily.views})`),
+  conversion: desc(sql`CASE WHEN SUM(${analytics_product_daily.views}) = 0
+    THEN 0
+    ELSE SUM(${analytics_product_daily.purchases}) / SUM(${analytics_product_daily.views})
+  END`),
+};
 
 export const product_analytics_engine = {
-  async best_sellers(from: string, to: string, limit: number) {
+  async best_sellers(from: string, to: string, limit: number, sort: ProductSort = "revenue") {
     return db
       .select({
         product_id: analytics_product_daily.product_id,
@@ -31,7 +43,7 @@ export const product_analytics_engine = {
         and(gte(analytics_product_daily.day_key, from), lte(analytics_product_daily.day_key, to)),
       )
       .groupBy(analytics_product_daily.product_id, product_translations.name)
-      .orderBy(desc(sql`SUM(${analytics_product_daily.revenue})`))
+      .orderBy(BEST_SELLER_ORDER[sort])
       .limit(limit);
   },
 
@@ -79,7 +91,7 @@ export const product_analytics_engine = {
         )
         .orderBy(asc(analytics_product_daily.day_key)),
     );
-    console.log(error);
+    if (error) logger.error("analytics_product_daily_series_failed", { error });
     return result;
   },
 

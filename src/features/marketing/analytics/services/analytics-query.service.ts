@@ -11,8 +11,8 @@ import type { date_range_dto, product_analytics_query_dto } from "../models/anal
 import { reporting_queries } from "../queries/reporting.queries";
 import {
   IAnalyticsOverview,
-  IProductDetailsAnalytics,
   IProductsAnalytics,
+  IProductDetailsAnalytics,
   ISearchAnalytics,
 } from "../types";
 import { format } from "date-fns";
@@ -27,7 +27,7 @@ export class AnalyticsQueryService {
       sales_analytics_engine.totals(input.from, input.to),
       sales_analytics_engine.revenue_series(input.from, input.to),
       funnel_analytics_engine.steps(input.from, input.to),
-      customer_analytics_engine.repeat_purchase_rate(90),
+      customer_analytics_engine.repeat_purchase_rate(input.from, input.to),
     ]);
 
     const payload = { totals, series, funnel, repeat };
@@ -41,7 +41,7 @@ export class AnalyticsQueryService {
     if (cached) return cached as IProductsAnalytics;
 
     const [best_sellers, most_viewed, categories, brands] = await Promise.all([
-      product_analytics_engine.best_sellers(input.from, input.to, input.limit),
+      product_analytics_engine.best_sellers(input.from, input.to, input.limit, input.sort),
       product_analytics_engine.most_viewed(input.from, input.to, input.limit),
       reporting_queries.top_categories(input.from, input.to, input.limit),
       reporting_queries.top_brands(input.from, input.to, input.limit),
@@ -55,7 +55,7 @@ export class AnalyticsQueryService {
   async productDetail(
     input: z.infer<typeof product_analytics_query_dto> & { product_id: string },
   ): Promise<IProductDetailsAnalytics> {
-    const key = `analytics:product_detail:${input.product_id}:${input.from}:${input.to}`;
+    const key = ANALYTICS_CACHE.productDetail(input.product_id, input.from, input.to);
     const cached = await analytics_cache_service.get(key);
     if (cached) return cached as IProductDetailsAnalytics;
 
@@ -73,7 +73,7 @@ export class AnalyticsQueryService {
     input: z.infer<typeof date_range_dto> & { limit?: number },
   ): Promise<ISearchAnalytics> {
     const limit = input.limit ?? 20;
-    const key = `analytics:search:${input.from}:${input.to}:${limit}`;
+    const key = ANALYTICS_CACHE.search(input.from, input.to, limit);
     const cached = await analytics_cache_service.get(key);
     if (cached) return cached as ISearchAnalytics;
 
@@ -81,6 +81,10 @@ export class AnalyticsQueryService {
     const payload = { top_searches };
     await analytics_cache_service.set(key, payload, ANALYTICS_CACHE_TTL.dashboard);
     return payload;
+  }
+
+  async customers() {
+    return customer_analytics_engine.cohorts();
   }
 
   async realtime() {

@@ -94,6 +94,7 @@ export class CampaignLandingPageService {
       const recommendations = await campaign_recommendation_service.get_recommendations({
         strategy: (config.strategy as RecommendationStrategy) ?? "trending",
         limit,
+        locale: locale as "fr" | "en" | "ar",
         category_id: config.category_id as string | undefined,
         brand_id: config.brand_id as string | undefined,
         user_id,

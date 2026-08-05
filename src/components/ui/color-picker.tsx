@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import logger from "@/lib/logger";
 
 const ROOT_NAME = "ColorPicker";
 const ROOT_IMPL_NAME = "ColorPickerImpl";
@@ -1049,7 +1050,7 @@ function ColorPickerEyeDropper(props: React.ComponentProps<typeof Button>) {
         store.setHsv(newHsv);
       }
     } catch (error) {
-      console.warn("EyeDropper error:", error);
+      logger.warn("EyeDropper error:", error);
     }
   }, [color, store]);
 

@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -11,6 +12,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { trpc } from "@/components/providers/app-providers";
 import type { CampaignBanner } from "@/features/marketing/campaign/components/storefront/types";
 
 interface Props {
@@ -19,9 +21,18 @@ interface Props {
 }
 
 export function HeroBannerCarousel({ banners, locale = "fr" }: Props) {
+  const track = trpc.campaigns.trackEvent.useMutation();
+
   const heroBanners = banners.filter(
     (b) => b.is_active && ["hero", "sidebar", "inline"].includes(b.banner_type),
   );
+
+  useEffect(() => {
+    for (const banner of heroBanners) {
+      track.mutate({ campaign_id: banner.campaign_id, event_type: "impression" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!heroBanners.length) return null;
 
@@ -48,6 +59,9 @@ export function HeroBannerCarousel({ banners, locale = "fr" }: Props) {
                   href={href}
                   target={target}
                   rel={target === "_blank" ? "noopener noreferrer" : undefined}
+                  onClick={() =>
+                    track.mutate({ campaign_id: banner.campaign_id, event_type: "banner_click" })
+                  }
                   className="group relative block w-full overflow-hidden rounded-2xl"
                 >
                   <picture>

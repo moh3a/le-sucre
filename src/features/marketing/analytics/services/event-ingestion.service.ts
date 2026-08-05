@@ -1,16 +1,32 @@
 import "server-only";
-import type { z } from "zod";
 import { increment_realtime_counter } from "../engines/event-tracking.engine";
 import { event_repository } from "../repositories/event.repository";
-import type { ingest_event_dto } from "../models/analytics.dto";
 import { get_analytics_provider } from "../providers/provider-registry";
 
+/** Input accepted by the ingestion service. `event_type` is intentionally
+ * loose so server-side events (purchase, cart_abandoned) can be tracked;
+ * the public surface is validated by the router DTOs. */
+export type AnalyticsTrackInput = {
+  event_type: string;
+  session_key?: string | null;
+  product_id?: string | null;
+  sku_id?: string | null;
+  category_id?: string | null;
+  brand_id?: string | null;
+  order_id?: string | null;
+  cart_id?: string | null;
+  search_query?: string | null;
+  campaign_id?: string | null;
+  slot_type?: string | null;
+  revenue?: string | null;
+  quantity?: number | null;
+  metadata?: Record<string, unknown>;
+};
+
 export class EventIngestionService {
-  async track(
-    input: z.infer<typeof ingest_event_dto> & {
-      user_id?: string | null;
-    },
-  ) {
+  async track(input: AnalyticsTrackInput & { user_id?: string | null }) {
+    const provider = get_analytics_provider();
+
     await increment_realtime_counter(input.event_type, {
       product_id: input.product_id,
       sku_id: input.sku_id,
@@ -27,20 +43,39 @@ export class EventIngestionService {
       sku_id: input.sku_id ?? null,
       category_id: input.category_id ?? null,
       brand_id: input.brand_id ?? null,
+      order_id: input.order_id ?? null,
       cart_id: input.cart_id ?? null,
       search_query: input.search_query ?? null,
       campaign_id: input.campaign_id ?? null,
       slot_type: input.slot_type ?? null,
+      revenue: input.revenue ?? null,
       quantity: input.quantity ?? null,
       metadata: input.metadata,
     });
 
     // async persist — provider can forward to Kafka/Segment later
-    void get_analytics_provider().persist_event(row);
+    void provider.persist_event(row);
+    void provider.forward_realtime({
+      event_type: input.event_type,
+      product_id: input.product_id ?? null,
+      sku_id: input.sku_id ?? null,
+      session_key: input.session_key ?? null,
+      user_id: input.user_id ?? null,
+      day_key: row.day_key,
+      ts: Date.now(),
+    });
+
     return { ok: true };
   }
 
-  async track_batch(events: Array<z.infer<typeof ingest_event_dto>>, user_id?: string | null) {
+  async track_batch(
+    events: Array<
+      AnalyticsTrackInput & {
+        user_id?: string | null;
+      }
+    >,
+    user_id?: string | null,
+  ) {
     for (const e of events) await this.track({ ...e, user_id });
     return { ok: true, count: events.length };
   }
@@ -65,7 +100,7 @@ export class EventIngestionService {
         revenue: input.revenue,
       }),
     );
-    void event_repository.insert_batch(rows);
+    void get_analytics_provider().persist_events(rows);
   }
 }
 

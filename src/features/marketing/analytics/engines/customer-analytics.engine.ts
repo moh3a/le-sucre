@@ -1,14 +1,11 @@
 import "server-only";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orders } from "@/features/order_management_system/orders/schema";
 import { analytics_customer_cohorts } from "../schema";
-import { format, subDays } from "date-fns";
 
 export const customer_analytics_engine = {
-  async repeat_purchase_rate(days = 90) {
-    const cutoff_iso = format(subDays(new Date(), days), "yyyy-MM-dd HH:mm:ss");
-
+  async repeat_purchase_rate(from: string, to: string) {
     const rows = await db
       .select({
         user_id: orders.user_id,
@@ -18,7 +15,8 @@ export const customer_analytics_engine = {
       .where(
         and(
           eq(orders.payment_status, "paid"),
-          gte(orders.placed_at, cutoff_iso),
+          gte(orders.placed_at, `${from} 00:00:00`),
+          lte(orders.placed_at, `${to} 23:59:59`),
           sql`${orders.user_id} IS NOT NULL`,
         ),
       )

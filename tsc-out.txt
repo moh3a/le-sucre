@@ -1,0 +1,32 @@
+src/app/(storefront)/[locale]/p/[product_slug]/product-detail-client.tsx(144,61): error TS2339: Property 'metadata' does not exist on type '{ id: string; category_id: string; sku: string; base_price: number; currency: string; status: "draft" | "published" | "archived"; is_featured: boolean; has_variants: boolean; created_at: string; ... 6 more ...; seo_keywords?: string | ... 1 more ... | undefined; }'.
+src/features/console_dashboard/database/service.ts(339,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/features/console_dashboard/database/service.ts(435,38): error TS2339: Property 'find' does not exist on type '{ id: string; operation_type: string; query: string | null; table_name: string | null; status: string; rows_affected: string | null; duration_ms: string | null; error_message: string | null; file_name: string | null; file_format: string | null; executed_by: string | null; created_at: string; }'.
+src/features/console_dashboard/database/service.ts(435,44): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/features/fulfillment_management_system/shipping/components/provider-overview.tsx(30,37): error TS2724: '"../providers/contracts"' has no exported member named 'ShippingProviderName'. Did you mean 'ShippingProviderAdapter'?
+src/features/fulfillment_management_system/shipping/operations/components/delivery-attempts-table.tsx(143,49): error TS2304: Cannot find name 'useMemo'.
+src/features/order_management_system/orders/services/order.service.ts(649,18): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'LogEntry'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(68,80): error TS2339: Property 'rules' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(81,54): error TS2339: Property 'name' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(85,60): error TS2339: Property 'slug' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(90,63): error TS2339: Property 'promotion_type' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(91,40): error TS2339: Property 'promotion_type' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(98,65): error TS2339: Property 'status' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(99,42): error TS2339: Property 'status' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(105,30): error TS2339: Property 'priority' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(109,30): error TS2339: Property 'is_stackable' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(113,30): error TS2339: Property 'starts_at' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(113,63): error TS2339: Property 'starts_at' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(117,30): error TS2339: Property 'ends_at' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(117,61): error TS2339: Property 'ends_at' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(119,24): error TS2339: Property 'description' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(122,57): error TS2339: Property 'description' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(127,41): error TS2339: Property 'created_at' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(131,41): error TS2339: Property 'updated_at' does not exist on type '{}'.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(146,27): error TS7006: Parameter 'rule' implicitly has an 'any' type.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(510,35): error TS2554: Expected 1 arguments, but got 2.
+src/features/order_management_system/promotions/components/promotion-detail-client.tsx(598,35): error TS2554: Expected 1 arguments, but got 2.
+src/features/product_information_management/categories/services/category.service.ts(294,48): error TS2339: Property 'delete' does not exist on type 'CategoryRepository'.
+src/features/product_information_management/products/services/product.service.ts(109,23): error TS2339: Property 'metadata' does not exist on type '{ status: "draft" | "published" | "archived"; is_featured: boolean; sku: string; has_variants: boolean; category_id: string; base_price: number; currency: string; name: string; retail_unit_name: string; ... 10 more ...; wholesale_offer_price?: number | ... 1 more ... | undefined; }'.
+src/features/product_information_management/products/services/product.service.ts(338,17): error TS2339: Property 'metadata' does not exist on type '{ id: string; status?: "draft" | "published" | "archived" | undefined; slug?: string | undefined; is_featured?: boolean | undefined; sku?: string | undefined; has_variants?: boolean | undefined; ... 14 more ...; wholesale_offer_price?: number | ... 1 more ... | undefined; }'.
+src/features/product_information_management/products/services/product.service.ts(338,61): error TS2339: Property 'metadata' does not exist on type '{ id: string; status?: "draft" | "published" | "archived" | undefined; slug?: string | undefined; is_featured?: boolean | undefined; sku?: string | undefined; has_variants?: boolean | undefined; ... 14 more ...; wholesale_offer_price?: number | ... 1 more ... | undefined; }'.

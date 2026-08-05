@@ -19,6 +19,7 @@ import {
   campaign_webhook_events,
 } from "../schema";
 import { CAMPAIGN_STATUS, CAMPAIGN_TYPE } from "../constants/campaign_types";
+import { campaign_targeting_service } from "../services/campaign_targeting.service";
 
 /** Canonical list of recommendation strategy ids resolvable by the recommendation engine. */
 const RECOMMENDATION_STRATEGY_IDS = [
@@ -49,6 +50,10 @@ function to_db_ts(value: string | null | undefined): string | null {
   return format(date, "yyyy-MM-dd HH:mm:ss");
 }
 
+function not_deleted() {
+  return sql`${campaigns.deleted_at} IS NULL`;
+}
+
 export class CampaignRepository {
   // ─── Queries ──────────────────────────────────────────────────────────────
 
@@ -60,7 +65,7 @@ export class CampaignRepository {
     search?: string,
   ) {
     const offset = (page - 1) * limit;
-    const clauses = [];
+    const clauses = [not_deleted()];
 
     if (status) clauses.push(eq(campaigns.status, status));
     if (campaign_type) clauses.push(eq(campaigns.campaign_type, campaign_type));
@@ -92,41 +97,46 @@ export class CampaignRepository {
   async stats() {
     const [total, active, scheduled, draft, paused, ended, cancelled, landing_pages, ab_groups] =
       await Promise.all([
-        db.select({ count: sql<number>`count(*)` }).from(campaigns),
+        db.select({ count: sql<number>`count(*)` }).from(campaigns).where(not_deleted()),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.status, CAMPAIGN_STATUS.active)),
+          .where(and(not_deleted(), eq(campaigns.status, CAMPAIGN_STATUS.active))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.status, CAMPAIGN_STATUS.scheduled)),
+          .where(and(not_deleted(), eq(campaigns.status, CAMPAIGN_STATUS.scheduled))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.status, CAMPAIGN_STATUS.draft)),
+          .where(and(not_deleted(), eq(campaigns.status, CAMPAIGN_STATUS.draft))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.status, CAMPAIGN_STATUS.paused)),
+          .where(and(not_deleted(), eq(campaigns.status, CAMPAIGN_STATUS.paused))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.status, CAMPAIGN_STATUS.ended)),
+          .where(and(not_deleted(), eq(campaigns.status, CAMPAIGN_STATUS.ended))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.status, CAMPAIGN_STATUS.cancelled)),
+          .where(and(not_deleted(), eq(campaigns.status, CAMPAIGN_STATUS.cancelled))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page)),
+          .where(and(not_deleted(), eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page))),
         db
           .select({
             count: sql<number>`count(DISTINCT ${campaigns.ab_test_group})`,
           })
           .from(campaigns)
-          .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`),
+          .where(
+            and(
+              not_deleted(),
+              sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`,
+            ),
+          ),
       ]);
 
     return {
@@ -151,13 +161,14 @@ export class CampaignRepository {
       db
         .select({ count: sql<number>`count(*)` })
         .from(campaigns)
-        .where(eq(campaigns.campaign_type, campaign_type)),
+        .where(and(not_deleted(), eq(campaigns.campaign_type, campaign_type))),
       ...statuses.map((status) =>
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
           .where(
             and(
+              not_deleted(),
               eq(campaigns.campaign_type, campaign_type),
               eq(campaigns.status, CAMPAIGN_STATUS[status]),
             ),
@@ -235,12 +246,20 @@ export class CampaignRepository {
   }
 
   async get_by_id(id: string) {
-    const [row] = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
+    const [row] = await db
+      .select()
+      .from(campaigns)
+      .where(and(eq(campaigns.id, id), not_deleted()))
+      .limit(1);
     return row ?? null;
   }
 
   async get_by_slug(slug: string) {
-    const [row] = await db.select().from(campaigns).where(eq(campaigns.slug, slug)).limit(1);
+    const [row] = await db
+      .select()
+      .from(campaigns)
+      .where(and(eq(campaigns.slug, slug), not_deleted()))
+      .limit(1);
     return row ?? null;
   }
 
@@ -291,6 +310,7 @@ export class CampaignRepository {
       .from(campaigns)
       .where(
         and(
+          not_deleted(),
           eq(campaigns.status, CAMPAIGN_STATUS.active),
           or(sql`${campaigns.starts_at} IS NULL`, lte(campaigns.starts_at, now)),
           or(sql`${campaigns.ends_at} IS NULL`, gte(campaigns.ends_at, now)),
@@ -306,7 +326,8 @@ export class CampaignRepository {
         .from(campaign_targets)
         .where(eq(campaign_targets.campaign_id, campaign.id));
 
-      if (!(await this._matches_targeting(targets, locale, country, user_id))) continue;
+      if (!(await campaign_targeting_service.evaluate_targets(targets, { locale, country, user_id })))
+        continue;
 
       const sections = await db
         .select()
@@ -343,53 +364,6 @@ export class CampaignRepository {
     }
 
     return result;
-  }
-
-  private async _matches_targeting(
-    targets: (typeof campaign_targets.$inferSelect)[],
-    locale: string,
-    country?: string,
-    user_id?: string,
-  ): Promise<boolean> {
-    if (!targets.length) return true;
-
-    // Separate inclusive vs exclusive rules
-    const inclusive = targets.filter((t) => t.is_inclusive);
-    const exclusive = targets.filter((t) => !t.is_inclusive);
-
-    // Check exclusive blocks first
-    for (const t of exclusive) {
-      if (t.target_type === "language" && t.target_value === locale) return false;
-      if (t.target_type === "country" && t.target_value === country) return false;
-    }
-
-    // If no inclusive rules, pass by default
-    if (!inclusive.length) return true;
-
-    // All-inclusive = always pass
-    if (inclusive.some((t) => t.target_type === "all")) return true;
-
-    let match = false;
-    for (const t of inclusive) {
-      if (t.target_type === "language" && t.target_value === locale) {
-        match = true;
-        break;
-      }
-      if (t.target_type === "country" && t.target_value === country) {
-        match = true;
-        break;
-      }
-      if (t.target_type === "new_customer" && !user_id) {
-        match = true;
-        break;
-      }
-      if (t.target_type === "returning_customer" && user_id) {
-        match = true;
-        break;
-      }
-    }
-
-    return match;
   }
 
   // ─── Writes ───────────────────────────────────────────────────────────────
@@ -496,12 +470,12 @@ export class CampaignRepository {
         brand_ids !== undefined
       ) {
         await this._sync_children(id, {
-          translations: translations ?? [],
-          banners: banners ?? [],
-          sections: sections ?? [],
-          targets: targets ?? [],
-          category_ids: category_ids ?? [],
-          brand_ids: brand_ids ?? [],
+          translations,
+          banners,
+          sections,
+          targets,
+          category_ids,
+          brand_ids,
         });
       }
 
@@ -773,7 +747,7 @@ export class CampaignRepository {
       })
       .from(campaigns)
       .leftJoin(campaign_analytics_daily, eq(campaign_analytics_daily.campaign_id, campaigns.id))
-      .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page))
+      .where(and(not_deleted(), eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page)))
       .groupBy(
         campaigns.id,
         campaigns.name,
@@ -813,6 +787,7 @@ export class CampaignRepository {
       .from(campaigns)
       .where(
         and(
+          not_deleted(),
           eq(campaigns.status, CAMPAIGN_STATUS.scheduled),
           sql`${campaigns.starts_at} IS NOT NULL`,
           gte(campaigns.starts_at, now),
@@ -829,17 +804,22 @@ export class CampaignRepository {
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.flash_sale)),
+          .where(and(not_deleted(), eq(campaigns.campaign_type, CAMPAIGN_TYPE.flash_sale))),
         db
           .select({ count: sql<number>`count(*)` })
           .from(campaigns)
-          .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page)),
+          .where(and(not_deleted(), eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page))),
         db
           .select({
             count: sql<number>`count(DISTINCT ${campaigns.ab_test_group})`,
           })
           .from(campaigns)
-          .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`),
+          .where(
+            and(
+              not_deleted(),
+              sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`,
+            ),
+          ),
         db.select({ count: sql<number>`count(*)` }).from(campaign_automation_rules),
         db
           .select({ count: sql<number>`count(*)` })
@@ -863,26 +843,52 @@ export class CampaignRepository {
   private async _sync_children(
     campaign_id: string,
     data: {
-      translations: Array<Omit<typeof campaign_translations.$inferInsert, "id" | "campaign_id">>;
-      banners: Array<Omit<typeof campaign_banners.$inferInsert, "id" | "campaign_id">>;
-      sections: Array<Omit<typeof campaign_sections.$inferInsert, "id" | "campaign_id">>;
-      targets: Array<Omit<typeof campaign_targets.$inferInsert, "id" | "campaign_id">>;
-      category_ids: string[];
-      brand_ids: string[];
+      translations?: Array<Omit<typeof campaign_translations.$inferInsert, "id" | "campaign_id">>;
+      banners?: Array<Omit<typeof campaign_banners.$inferInsert, "id" | "campaign_id">>;
+      sections?: Array<Omit<typeof campaign_sections.$inferInsert, "id" | "campaign_id">>;
+      targets?: Array<Omit<typeof campaign_targets.$inferInsert, "id" | "campaign_id">>;
+      category_ids?: string[];
+      brand_ids?: string[];
     },
   ) {
-    await Promise.all([
-      db.delete(campaign_translations).where(eq(campaign_translations.campaign_id, campaign_id)),
-      db.delete(campaign_banners).where(eq(campaign_banners.campaign_id, campaign_id)),
-      db.delete(campaign_sections).where(eq(campaign_sections.campaign_id, campaign_id)),
-      db.delete(campaign_targets).where(eq(campaign_targets.campaign_id, campaign_id)),
-      db.delete(campaign_categories).where(eq(campaign_categories.campaign_id, campaign_id)),
-      db.delete(campaign_brands).where(eq(campaign_brands.campaign_id, campaign_id)),
-    ]);
+    // Only delete and re-insert the groups explicitly provided. Undefined groups
+    // are left untouched so a partial update can never wipe sibling children.
+    const deletes: Promise<unknown>[] = [];
+    if (data.translations !== undefined) {
+      deletes.push(
+        db.delete(campaign_translations).where(eq(campaign_translations.campaign_id, campaign_id)),
+      );
+    }
+    if (data.banners !== undefined) {
+      deletes.push(
+        db.delete(campaign_banners).where(eq(campaign_banners.campaign_id, campaign_id)),
+      );
+    }
+    if (data.sections !== undefined) {
+      deletes.push(
+        db.delete(campaign_sections).where(eq(campaign_sections.campaign_id, campaign_id)),
+      );
+    }
+    if (data.targets !== undefined) {
+      deletes.push(
+        db.delete(campaign_targets).where(eq(campaign_targets.campaign_id, campaign_id)),
+      );
+    }
+    if (data.category_ids !== undefined) {
+      deletes.push(
+        db.delete(campaign_categories).where(eq(campaign_categories.campaign_id, campaign_id)),
+      );
+    }
+    if (data.brand_ids !== undefined) {
+      deletes.push(
+        db.delete(campaign_brands).where(eq(campaign_brands.campaign_id, campaign_id)),
+      );
+    }
+    await Promise.all(deletes);
 
     const inserts: Promise<unknown>[] = [];
 
-    if (data.translations.length) {
+    if (data.translations?.length) {
       inserts.push(
         db
           .insert(campaign_translations)
@@ -890,7 +896,7 @@ export class CampaignRepository {
       );
     }
 
-    if (data.banners.length) {
+    if (data.banners?.length) {
       inserts.push(
         db.insert(campaign_banners).values(
           data.banners.map((b, i) => ({
@@ -903,7 +909,7 @@ export class CampaignRepository {
       );
     }
 
-    if (data.sections.length) {
+    if (data.sections?.length) {
       inserts.push(
         db.insert(campaign_sections).values(
           data.sections.map((s, i) => ({
@@ -916,7 +922,7 @@ export class CampaignRepository {
       );
     }
 
-    if (data.targets.length) {
+    if (data.targets?.length) {
       inserts.push(
         db
           .insert(campaign_targets)
@@ -924,7 +930,7 @@ export class CampaignRepository {
       );
     }
 
-    if (data.category_ids.length) {
+    if (data.category_ids?.length) {
       inserts.push(
         db.insert(campaign_categories).values(
           data.category_ids.map((category_id) => ({
@@ -936,7 +942,7 @@ export class CampaignRepository {
       );
     }
 
-    if (data.brand_ids.length) {
+    if (data.brand_ids?.length) {
       inserts.push(
         db
           .insert(campaign_brands)

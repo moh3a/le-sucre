@@ -44,6 +44,7 @@ import { assert_order_transition } from "../order-lifecycle.engine";
 import { shipping_repository } from "@/features/fulfillment_management_system/shipping/repository";
 import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
 import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
+import logger from "@/lib/logger";
 
 /**
  * Catch non-AppError exceptions (Drizzle ORM errors, network failures, etc.)
@@ -368,7 +369,7 @@ export class OrderService {
     });
 
     void invoice_service.generate_order_invoice(order_id).catch((err) => {
-      console.error("Failed to auto-generate invoice:", err);
+      logger.error("Failed to auto-generate invoice:", err);
     });
 
     void crm_sync_service
@@ -381,7 +382,7 @@ export class OrderService {
         user_id: input.user_id,
       })
       .catch((err) => {
-        console.error("Failed to sync order to CRM:", err);
+        logger.error("Failed to sync order to CRM:", err);
       });
 
     dispatch_task_creation({
@@ -645,7 +646,7 @@ export class OrderService {
         guest_phone: undefined,
       });
     } catch (error) {
-      console.log(error)
+      logger.log(error)
       rethrow_as_order_error(error);
     }
   }
@@ -699,7 +700,7 @@ export class OrderService {
             await invoice_service.void_invoice(main_invoice.id);
           }
         } catch (err) {
-          console.error("Failed to sync invoice with payment status:", err);
+          logger.error("Failed to sync invoice with payment status:", err);
         }
       })();
     }

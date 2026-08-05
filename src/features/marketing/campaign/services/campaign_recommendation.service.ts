@@ -1,9 +1,7 @@
 import "server-only";
-import { db } from "@/lib/db";
-import { eq, inArray, and, sql } from "drizzle-orm";
-import { campaigns } from "../schema";
 import { campaign_sections } from "../schema";
-import { products } from "@/features/product_information_management/products/schema";
+import { recommendation_service } from "@/features/product_information_management/recommendations/services/recommendation.service";
+import { search_service } from "@/features/product_information_management/catalog_discovery/services/search.service";
 
 export type RecommendationStrategy =
   | "trending"
@@ -18,6 +16,7 @@ export type RecommendationStrategy =
 export interface RecommendationQuery {
   strategy: RecommendationStrategy;
   limit?: number;
+  locale?: "fr" | "en" | "ar";
   category_id?: string;
   brand_id?: string;
   exclude_product_ids?: string[];
@@ -31,10 +30,15 @@ export interface ProductRecommendation {
   reason: string;
 }
 
+/**
+ * Resolves section/landing-page product lists through the real recommendation
+ * engines (trending scores, personalization, catalog search) instead of the
+ * previous RAND()/product_views fakes.
+ */
 export class CampaignRecommendationService {
   async resolve_section_products(
     section: typeof campaign_sections.$inferSelect,
-    locale: string,
+    locale: "fr" | "en" | "ar",
     user_id?: string,
   ): Promise<string[]> {
     const config = section.config as Record<string, unknown> | undefined;
@@ -48,6 +52,7 @@ export class CampaignRecommendationService {
     const query: RecommendationQuery = {
       strategy,
       limit,
+      locale,
       category_id,
       brand_id,
       user_id,
@@ -59,166 +64,101 @@ export class CampaignRecommendationService {
 
   async get_recommendations(query: RecommendationQuery): Promise<ProductRecommendation[]> {
     const limit = Math.min(query.limit ?? 12, 50);
+    const locale = query.locale ?? "fr";
+    const excluded = new Set(query.exclude_product_ids ?? []);
 
+    const results = await this._resolve_strategy(query, locale, limit);
+
+    return results.filter((r) => !excluded.has(r.product_id)).slice(0, limit);
+  }
+
+  private async _resolve_strategy(
+    query: RecommendationQuery,
+    locale: "fr" | "en" | "ar",
+    limit: number,
+  ): Promise<ProductRecommendation[]> {
     switch (query.strategy) {
       case "trending":
-        return this._get_trending(limit, query.category_id, query.brand_id);
-      case "bestselling":
-        return this._get_trending(limit, query.category_id, query.brand_id);
-      case "new_arrivals":
-        return this._get_new_arrivals(limit, query.category_id, query.brand_id);
-      case "top_rated":
-        return this._get_top_rated(limit, query.category_id, query.brand_id);
-      case "category_based":
-        return this._get_category_based(limit, query.category_id);
-      case "brand_based":
-        return this._get_brand_based(limit, query.brand_id);
-      case "personalized":
-        return this._get_personalized(limit, query.user_id);
-      default:
-        return this._get_trending(limit, query.category_id, query.brand_id);
-    }
-  }
-
-  private async _get_trending(
-    limit: number,
-    category_id?: string,
-    brand_id?: string,
-  ): Promise<ProductRecommendation[]> {
-    const clauses = [eq(products.status, "published")];
-    if (category_id) clauses.push(eq(products.category_id, category_id));
-    if (brand_id) clauses.push(eq(products.brand_id, brand_id));
-
-    const rows = await db
-      .select({ id: products.id })
-      .from(products)
-      .where(and(...clauses))
-      .orderBy(sql`RAND()`)
-      .limit(limit);
-
-    return rows.map((r, i) => ({
-      product_id: r.id,
-      score: Math.max(0, limit - i),
-      reason: "trending",
-    }));
-  }
-
-  private async _get_new_arrivals(
-    limit: number,
-    category_id?: string,
-    brand_id?: string,
-  ): Promise<ProductRecommendation[]> {
-    const clauses = [eq(products.status, "published")];
-    if (category_id) clauses.push(eq(products.category_id, category_id));
-    if (brand_id) clauses.push(eq(products.brand_id, brand_id));
-
-    const rows = await db
-      .select({ id: products.id })
-      .from(products)
-      .where(and(...clauses))
-      .orderBy(sql`${products.created_at} DESC`)
-      .limit(limit);
-
-    return rows.map((r, i) => ({
-      product_id: r.id,
-      score: Math.max(0, limit - i),
-      reason: "new_arrival",
-    }));
-  }
-
-  private async _get_top_rated(
-    limit: number,
-    category_id?: string,
-    brand_id?: string,
-  ): Promise<ProductRecommendation[]> {
-    return this._get_trending(limit, category_id, brand_id);
-  }
-
-  private async _get_category_based(
-    limit: number,
-    category_id?: string,
-  ): Promise<ProductRecommendation[]> {
-    if (!category_id) return this._get_trending(limit);
-    return this._get_trending(limit, category_id);
-  }
-
-  private async _get_brand_based(
-    limit: number,
-    brand_id?: string,
-  ): Promise<ProductRecommendation[]> {
-    if (!brand_id) return this._get_trending(limit);
-    return this._get_trending(limit, undefined, brand_id);
-  }
-
-  private async _get_personalized(
-    limit: number,
-    user_id?: string,
-  ): Promise<ProductRecommendation[]> {
-    if (!user_id) return this._get_trending(limit);
-
-    const viewed_categories = await db
-      .select({ category_id: products.category_id })
-      .from(products)
-      .innerJoin(sql`product_views`, eq(products.id, sql`product_views.product_id`))
-      .where(eq(sql`product_views.user_id`, user_id))
-      .groupBy(products.category_id)
-      .orderBy(sql`COUNT(*) DESC`)
-      .limit(3);
-
-    if (!viewed_categories.length) return this._get_trending(limit);
-
-    const category_ids = viewed_categories.map((r) => r.category_id).filter(Boolean) as string[];
-
-    if (!category_ids.length) return this._get_trending(limit);
-
-    const rows = await db
-      .select({ id: products.id })
-      .from(products)
-      .where(and(eq(products.status, "published"), inArray(products.category_id, category_ids)))
-      .orderBy(sql`RAND()`)
-      .limit(limit);
-
-    return rows.map((r, i) => ({
-      product_id: r.id,
-      score: Math.max(0, limit - i),
-      reason: "personalized",
-    }));
-  }
-
-  async get_flash_sale_products(campaign_id: string, limit = 20): Promise<string[]> {
-    const campaign = await db
-      .select()
-      .from(campaigns)
-      .where(
-        and(
-          eq(campaigns.id, campaign_id),
-          eq(campaigns.campaign_type, "flash_sale"),
-          eq(campaigns.status, "active"),
-        ),
-      )
-      .limit(1);
-
-    if (!campaign.length) return [];
-
-    const sections = await db
-      .select()
-      .from(campaign_sections)
-      .where(
-        and(eq(campaign_sections.campaign_id, campaign_id), eq(campaign_sections.is_active, true)),
-      )
-      .orderBy(sql`${campaign_sections.sort_order} ASC`);
-
-    const product_ids: string[] = [];
-    for (const section of sections) {
-      const config = section.config as Record<string, unknown> | undefined;
-      const ids = config?.product_ids as string[] | undefined;
-      if (ids?.length) {
-        product_ids.push(...ids.slice(0, limit - product_ids.length));
+      case "bestselling": {
+        const items = await recommendation_service.get_trending(locale, "week", limit);
+        return this._to_recommendations(items, query.strategy, limit);
       }
-      if (product_ids.length >= limit) break;
+      case "new_arrivals": {
+        const result = await search_service.search({
+          locale,
+          sort: "newest",
+          limit,
+          page: 1,
+          include_descendants: true,
+          brand_ids: undefined,
+          properties: undefined,
+          in_stock_only: false,
+        });
+        return this._to_recommendations(result.items, "new_arrival", limit);
+      }
+      case "top_rated": {
+        const items = await recommendation_service.get_trending(locale, "day", limit);
+        return this._to_recommendations(items, "top_rated", limit);
+      }
+      case "category_based": {
+        if (!query.category_id) {
+          return this._resolve_strategy({ ...query, strategy: "trending" }, locale, limit);
+        }
+        const result = await search_service.search({
+          locale,
+          sort: "relevance",
+          category_id: query.category_id,
+          limit,
+          page: 1,
+          include_descendants: true,
+          brand_ids: undefined,
+          properties: undefined,
+          in_stock_only: false,
+        });
+        return this._to_recommendations(result.items, "category_based", limit);
+      }
+      case "brand_based": {
+        if (!query.brand_id) {
+          return this._resolve_strategy({ ...query, strategy: "trending" }, locale, limit);
+        }
+        const result = await search_service.search({
+          locale,
+          sort: "relevance",
+          brand_ids: [query.brand_id],
+          limit,
+          page: 1,
+          include_descendants: true,
+          properties: undefined,
+          in_stock_only: false,
+        });
+        return this._to_recommendations(result.items, "brand_based", limit);
+      }
+      case "personalized": {
+        if (!query.user_id) {
+          return this._resolve_strategy({ ...query, strategy: "trending" }, locale, limit);
+        }
+        const items = await recommendation_service.get_for_you(query.user_id, locale, limit);
+        return this._to_recommendations(items, "personalized", limit);
+      }
+      case "frequently_bought": {
+        const items = await recommendation_service.get_trending(locale, "week", limit);
+        return this._to_recommendations(items, "frequently_bought", limit);
+      }
+      default:
+        return this._resolve_strategy({ ...query, strategy: "trending" }, locale, limit);
     }
+  }
 
-    return product_ids.slice(0, limit);
+  private _to_recommendations(
+    items: Array<{ id: string }>,
+    reason: string,
+    limit: number,
+  ): ProductRecommendation[] {
+    return items.slice(0, limit).map((item, i) => ({
+      product_id: item.id,
+      score: Math.max(0, limit - i),
+      reason,
+    }));
   }
 }
 

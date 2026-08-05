@@ -6,6 +6,7 @@ import { customer_product_views } from "../schema";
 import { increment_trending_signal } from "../engines/trending.engine";
 import { RECOMMENDATION_CACHE } from "../constants/cache-keys";
 import { tryFn } from "@/lib/error_handling";
+import { event_ingestion_service } from "@/features/marketing/analytics/services/event-ingestion.service";
 
 const MAX_RECENT = 24;
 
@@ -32,6 +33,13 @@ export class ViewTrackingService {
     void redis_err;
 
     void increment_trending_signal(input.product_id, "view");
+
+    void event_ingestion_service.track({
+      event_type: "product_view",
+      product_id: input.product_id,
+      session_key: input.session_key ?? null,
+      user_id: input.user_id ?? null,
+    });
 
     if (input.user_id || input.session_key) {
       const [db_err] = await tryFn(

@@ -78,15 +78,11 @@ export const redisKeys = {
   // ─── Analytics ──────────────────────────────────────
   analytics: {
     productViews: (productId: string) => `analytics:views:product:${productId}`,
-    dailyRevenue: (date: string) => `analytics:revenue:${date}`,
   },
 
   analyticsEvents: {
-    counter: (event: string, day: string) => `analytics:cnt:${event}:${day}`,
-    product: (productId: string, day: string) => `analytics:prod:${productId}:${day}`,
     funnel: (step: string, day: string) => `analytics:funnel:${step}:${day}`,
     realtime: () => `analytics:realtime:events`,
-    buffer: () => `analytics:buffer:events`,
     ttl: 60 * 60 * 48,
   },
 
@@ -106,8 +102,8 @@ export const redisKeys = {
 
   campaign: {
     byId: (id: string) => `campaign:id:${id}`,
-    active_sections: (page: string, locale: string, country: string) =>
-      `campaign:sections:${page}:${locale}:${country}`,
+    active_sections: (page: string, locale: string, country: string, user_id: string) =>
+      `campaign:sections:${page}:${locale}:${country}:${user_id}`,
     list: (params: string) => `campaign:list:${params}`,
     ttl: 60 * 5, // 5 minutes
     sectionsTtl: 60 * 2, // 2 minutes

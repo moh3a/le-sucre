@@ -18,6 +18,12 @@ export interface AnalyticsProvider {
   persist_event(row: AnalyticsEventRow): Promise<void>;
 
   /**
+   * Durably persist a batch of raw event rows.
+   * Used for server-side business events (e.g. purchases).
+   */
+  persist_events(rows: AnalyticsEventRow[]): Promise<void>;
+
+  /**
    * Forward real-time signals to an external stream (optional no-op).
    * Payload is intentionally loose so any downstream schema can be used.
    */

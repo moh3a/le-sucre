@@ -1,5 +1,6 @@
 export interface CampaignBanner {
   id: string;
+  campaign_id: string;
   banner_type: string;
   image_url: string | null;
   mobile_image_url: string | null;

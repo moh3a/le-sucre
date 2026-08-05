@@ -5,6 +5,8 @@ import { eq, and, inArray, sql, gte, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { campaign_targets, campaigns } from "../schema";
 import { TARGET_TYPE, CAMPAIGN_STATUS } from "../constants/campaign_types";
+import { products } from "@/features/product_information_management/products/schema";
+import { customer_product_views } from "@/features/product_information_management/recommendations/schema";
 
 export interface TargetingContext {
   locale: string;
@@ -31,6 +33,13 @@ export class CampaignTargetingService {
       .from(campaign_targets)
       .where(eq(campaign_targets.campaign_id, campaign_id));
 
+    return this.evaluate_targets(targets, ctx);
+  }
+
+  async evaluate_targets(
+    targets: (typeof campaign_targets.$inferSelect)[],
+    ctx: TargetingContext,
+  ): Promise<boolean> {
     if (!targets.length) return true;
 
     const inclusive = targets.filter((t) => t.is_inclusive);
@@ -120,16 +129,16 @@ export class CampaignTargetingService {
     const ctx: TargetingContext = { user_id, locale, country };
 
     const recent_views = await db
-      .select({ product_id: sql<string>`product_id` })
-      .from(sql`product_views`)
+      .select({ product_id: customer_product_views.product_id })
+      .from(customer_product_views)
       .where(
         and(
-          eq(sql`product_views.user_id`, user_id),
-          gte(sql`product_views.viewed_at`, sql`DATE_SUB(NOW(), INTERVAL 30 DAY)`),
+          eq(customer_product_views.user_id, user_id),
+          gte(customer_product_views.viewed_at, sql`DATE_SUB(NOW(), INTERVAL 30 DAY)`),
         ),
       )
-      .orderBy(sql`MAX(viewed_at) DESC`)
-      .groupBy(sql`product_id`)
+      .orderBy(sql`MAX(${customer_product_views.viewed_at}) DESC`)
+      .groupBy(customer_product_views.product_id)
       .limit(10)
       .then((rows) => rows.map((r) => r.product_id));
 
@@ -137,9 +146,9 @@ export class CampaignTargetingService {
 
     if (recent_views.length > 0) {
       const cats = await db
-        .select({ category_id: sql<string>`DISTINCT p.category_id` })
-        .from(sql`products p`)
-        .where(inArray(sql`p.id`, recent_views))
+        .select({ category_id: products.category_id })
+        .from(products)
+        .where(inArray(products.id, recent_views))
         .then((rows) => rows.map((r) => r.category_id).filter(Boolean) as string[]);
       ctx.purchased_category_ids = cats;
     }

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { invoice_service } from "@/features/payment_management_system/billing/services/invoice.service";
 import { pdf_generation_service } from "@/features/payment_management_system/billing/services/pdf_generation.service";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
+import logger from "@/lib/logger";
 
 export async function GET(req: Request, props: { params: Promise<{ invoice_id: string }> }) {
   const { invoice_id } = await props.params;
@@ -38,7 +39,7 @@ export async function GET(req: Request, props: { params: Promise<{ invoice_id: s
       },
     });
   } catch (err) {
-    console.error("Storefront PDF download error:", err);
+    logger.error("Storefront PDF download error:", err);
     return new NextResponse("Erreur lors de la génération du document", { status: 500 });
   }
 }

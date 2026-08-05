@@ -63,8 +63,6 @@ export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
 export const CAMPAIGN_JOB_TYPE = {
   activate_campaign: "activate_campaign",
   deactivate_campaign: "deactivate_campaign",
-  sync_sections: "sync_sections",
-  rollup_analytics: "rollup_analytics",
 } as const;
 
 export type CampaignJobType = (typeof CAMPAIGN_JOB_TYPE)[keyof typeof CAMPAIGN_JOB_TYPE];

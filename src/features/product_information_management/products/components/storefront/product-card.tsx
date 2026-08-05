@@ -36,6 +36,8 @@ interface ProductCardProps {
   reviewCount?: number;
   /** Override the default HREF */
   href?: string;
+  /** Optional analytics hook fired before navigating to the product */
+  onProductClick?: () => void;
   /** Extra actions rendered at bottom */
   actions?: ReactNode;
 }
@@ -57,12 +59,14 @@ export function ProductCard({
   rating,
   reviewCount,
   href,
+  onProductClick,
   actions,
 }: ProductCardProps) {
   const router = useRouter();
   const linkHref = href ?? `/p/${product.slug}`;
 
   function goToProduct() {
+    onProductClick?.();
     router.push(linkHref);
   }
 

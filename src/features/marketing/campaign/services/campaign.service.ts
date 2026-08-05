@@ -13,7 +13,7 @@ import { campaign_automation_service } from "./campaign_automation.service";
 import { campaign_ab_test_service } from "./campaign_ab_test.service";
 import type { AutomationTrigger } from "./campaign_automation.service";
 import type { CampaignWebhookEvent } from "./campaign_webhooks.service";
-import { CAMPAIGN_STATUS } from "../constants/campaign_types";
+import { CAMPAIGN_STATUS, CAMPAIGN_TYPE } from "../constants/campaign_types";
 import type {
   create_campaign_dto,
   update_campaign_dto,
@@ -230,19 +230,41 @@ export class CampaignService {
         void campaign_webhooks_service.dispatch_async(webhook_event, updated);
       }
 
+      // A scheduled campaign that just went live: fired by the scheduler consumer
+      // (worker) when it promotes a scheduled campaign to active.
+      if (existing.status === CAMPAIGN_STATUS.scheduled && input.status === CAMPAIGN_STATUS.active) {
+        void campaign_webhooks_service.dispatch_async("campaign.scheduled", updated);
+        void campaign_automation_service.process_trigger("campaign.scheduled", updated);
+      }
+
+      // Flash-sale lifecycle triggers fire only for flash-sale campaigns.
+      if (updated.campaign_type === CAMPAIGN_TYPE.flash_sale) {
+        if (input.status === CAMPAIGN_STATUS.active) {
+          void campaign_webhooks_service.dispatch_async("campaign.flash_sale_starting", updated);
+          void campaign_automation_service.process_trigger(
+            "campaign.flash_sale_starting",
+            updated,
+          );
+        }
+        if (input.status === CAMPAIGN_STATUS.ended) {
+          void campaign_webhooks_service.dispatch_async("campaign.flash_sale_ending", updated);
+          void campaign_automation_service.process_trigger("campaign.flash_sale_ending", updated);
+        }
+      }
+
       const trigger_map: Record<string, AutomationTrigger> = {
         [CAMPAIGN_STATUS.active]: "campaign.activated",
         [CAMPAIGN_STATUS.ended]: "campaign.ended",
         [CAMPAIGN_STATUS.paused]: "campaign.paused",
-        // TODO: wire the remaining automation triggers:
-        //  - CAMPAIGN_STATUS.scheduled  -> "campaign.scheduled" (depends on a scheduler consumer)
-        //  - "campaign.status_changed"  -> fires on every status transition
-        //  - flash-sale & analytics-threshold triggers are dispatched elsewhere or not at all
+        [CAMPAIGN_STATUS.scheduled]: "campaign.scheduled",
       };
       const auto_trigger = trigger_map[input.status];
       if (auto_trigger) {
         void campaign_automation_service.process_trigger(auto_trigger, updated);
       }
+
+      // Fires on every status transition with the new status available to rules.
+      void campaign_automation_service.process_trigger("campaign.status_changed", updated);
     }
 
     return updated;
@@ -333,8 +355,14 @@ export class CampaignService {
 
   async get_storefront_sections(input: z.infer<typeof storefront_home_sections_dto>) {
     const country = input.country ?? "";
+    const cache_key_user = input.user_id ?? "";
 
-    const cached = await campaign_cache.get_active_sections(input.page_slug, input.locale, country);
+    const cached = await campaign_cache.get_active_sections(
+      input.page_slug,
+      input.locale,
+      country,
+      cache_key_user,
+    );
     if (cached) return cached;
 
     const campaigns = await campaign_repository.list_active_for_page(
@@ -344,15 +372,51 @@ export class CampaignService {
       input.user_id,
     );
 
-    await campaign_cache.set_active_sections(input.page_slug, input.locale, country, campaigns);
+    // A/B-tested campaigns must be resolved per visitor and are never cached,
+    // otherwise every anonymous visitor would see the first cached assignment.
+    const has_ab_groups = campaigns.some((c) => c.ab_test_group);
+    if (has_ab_groups) {
+      return this._apply_ab_serving(campaigns, input.user_id);
+    }
+
+    await campaign_cache.set_active_sections(
+      input.page_slug,
+      input.locale,
+      country,
+      cache_key_user,
+      campaigns,
+    );
     return campaigns;
+  }
+
+  private async _apply_ab_serving(
+    campaigns: Awaited<ReturnType<typeof campaign_repository.list_active_for_page>>,
+    user_id?: string,
+  ) {
+    const groups = [
+      ...new Set(
+        campaigns.map((c) => c.ab_test_group).filter((g): g is string => Boolean(g)),
+      ),
+    ];
+
+    const assigned = new Map<string, string>();
+    for (const group of groups) {
+      const variant = await campaign_ab_test_service.get_variant_for_user(group, user_id);
+      if (variant) assigned.set(group, variant.campaign_id);
+    }
+
+    return campaigns.filter((c) => {
+      if (!c.ab_test_group) return true;
+      const chosen = assigned.get(c.ab_test_group);
+      return !chosen || chosen === c.id;
+    });
   }
 
   // ─── Analytics ─────────────────────────────────────────────────────────────
 
   async track_event(input: z.infer<typeof track_campaign_event_dto>) {
     const field_map: Record<
-      string,
+      z.infer<typeof track_campaign_event_dto>["event_type"],
       "impressions" | "clicks" | "banner_clicks" | "add_to_cart" | "conversions"
     > = {
       impression: "impressions",
@@ -363,11 +427,52 @@ export class CampaignService {
     };
 
     const field = field_map[input.event_type];
-    if (field) {
-      await campaign_repository.increment_analytics(input.campaign_id, field, input.revenue ?? 0);
-    }
-    // TODO: check configured thresholds after incrementing and dispatch the
-    // "campaign.analytics_threshold_met" automation trigger when crossed.
+    await campaign_repository.increment_analytics(input.campaign_id, field, input.revenue ?? 0);
+    await this._check_analytics_thresholds(input.campaign_id);
+  }
+
+  private async _check_analytics_thresholds(campaign_id: string) {
+    const campaign = await campaign_repository.get_by_id(campaign_id);
+    if (!campaign) return;
+
+    const metadata = (campaign.metadata ?? {}) as Record<string, unknown>;
+    const thresholds = (metadata.analytics_thresholds ?? {}) as Record<string, number>;
+    if (Object.keys(thresholds).length === 0) return;
+    if (metadata.analytics_threshold_dispatched_at) return;
+
+    const summary = await campaign_repository.get_analytics_summary(campaign_id);
+    if (!summary) return;
+
+    const totals: Record<string, number> = {
+      impressions: summary.total_impressions,
+      clicks: summary.total_clicks,
+      banner_clicks: summary.total_banner_clicks,
+      add_to_cart: summary.total_add_to_cart,
+      conversions: summary.total_conversions,
+      unique_visitors: summary.total_unique_visitors,
+    };
+
+    const crossed = Object.entries(thresholds).find(
+      ([metric, threshold]) => (totals[metric] ?? 0) >= Number(threshold),
+    );
+    if (!crossed) return;
+
+    // Flag the dispatch before firing so concurrent events do not re-trigger it.
+    await campaign_repository.update(campaign_id, {
+      metadata: { ...metadata, analytics_threshold_dispatched_at: new Date().toISOString() },
+    });
+
+    void campaign_webhooks_service.dispatch_async("campaign.analytics_threshold", campaign, {
+      metric: crossed[0],
+      threshold: crossed[1],
+      current_value: totals[crossed[0]],
+    });
+    void campaign_automation_service.process_trigger("campaign.analytics_threshold_met", {
+      id: campaign.id,
+      name: campaign.name,
+      campaign_type: campaign.campaign_type,
+      status: campaign.status,
+    });
   }
 
   async get_analytics(campaign_id: string, from: string, to: string) {

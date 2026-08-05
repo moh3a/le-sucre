@@ -1,4 +1,5 @@
 // router.ts
+import { z } from "zod";
 import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import { storefront_procedure, permission_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { PERMISSIONS } from "@/features/authentication_and_authorization/authorization/constants/permissions";
@@ -22,7 +23,7 @@ import { recommendation_repository } from "./repositories/recommendation.reposit
 import { indexing_service } from "./services/indexing.service";
 import { invalidate_recommendations_for_product } from "./helpers/invalidate-recommendations.helper";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
-import { RECOMMENDATION_ERROR, RECOMMENDATION_INDEX_ERROR } from "./constants/error-codes";
+import { RECOMMENDATION_ERROR } from "./constants/error-codes";
 
 export const recommendations_router = create_trpc_router({
   byProduct: public_procedure.input(product_recommendations_query_dto).query(async ({ input }) => {
@@ -60,6 +61,15 @@ export const recommendations_router = create_trpc_router({
     });
     return recommendation_service.hydrate_ids(input.locale, ids);
   }),
+
+  hydrate: public_procedure
+    .input(
+      z.object({
+        locale: z.string().default("fr"),
+        ids: z.array(z.string().min(1)).max(100),
+      }),
+    )
+    .query(({ input }) => recommendation_service.hydrate_ids(input.locale, input.ids)),
 
   trackView: public_procedure.input(track_product_view_dto).mutation(({ input, ctx }) =>
     view_tracking_service.track_view({

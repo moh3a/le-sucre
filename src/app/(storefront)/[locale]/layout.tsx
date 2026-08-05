@@ -31,6 +31,7 @@ async function getAnnouncementBanners(locale: string): Promise<CampaignBanner[]>
       locale: locale as "fr" | "en" | "ar",
       page_slug: "home",
     })) as Array<{
+      id: string;
       banners: Array<{
         id: string;
         banner_type: string;
@@ -58,6 +59,7 @@ async function getAnnouncementBanners(locale: string): Promise<CampaignBanner[]>
         if (banner.is_active) {
           banners.push({
             id: banner.id,
+            campaign_id: campaign.id,
             banner_type: banner.banner_type,
             image_url: banner.image_url,
             mobile_image_url: banner.mobile_image_url,

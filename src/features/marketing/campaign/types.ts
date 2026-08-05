@@ -43,9 +43,3 @@ export type SectionType =
 
 export type LinkTarget = "_self" | "_blank" | "_parent" | "_top";
 
-export type CamppaignJobType =
-  | "activate_campaign"
-  | "deactivate_campaign"
-  | "sync_sections"
-  | "rollup_analytics";
-export type CampaignJobStatus = "pending" | "processing" | "done" | "failed";

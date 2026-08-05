@@ -14,6 +14,8 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empt
 interface CatalogProductGridProps {
   products: ProductType[];
   isLoading?: boolean;
+  /** Optional analytics hook fired when a product card is clicked */
+  onProductClick?: (productId: string) => void;
 }
 
 function to_storefront(p: ProductType): StorefrontProduct {
@@ -31,7 +33,7 @@ function to_storefront(p: ProductType): StorefrontProduct {
   };
 }
 
-export function CatalogProductGrid({ products, isLoading }: CatalogProductGridProps) {
+export function CatalogProductGrid({ products, isLoading, onProductClick }: CatalogProductGridProps) {
   const t = useTranslations("catalog");
 
   if (isLoading) {
@@ -65,6 +67,7 @@ export function CatalogProductGrid({ products, isLoading }: CatalogProductGridPr
           product={to_storefront(product)}
           variant="catalog"
           href={`/p/${product.slug}`}
+          onProductClick={() => onProductClick?.(product.id)}
         />
       ))}
     </div>

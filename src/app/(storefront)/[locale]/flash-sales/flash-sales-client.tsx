@@ -57,6 +57,20 @@ function formatCountdown(seconds: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+interface FlashSaleState {
+  campaign_id: string;
+  name: string;
+  slug: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  time_remaining_seconds: number;
+  is_active: boolean;
+  is_ending_soon: boolean;
+  product_ids: string[];
+}
+
+type SaleStatus = "active" | "upcoming" | "ended";
+
 function toStorefrontProduct(item: {
   id: string;
   slug: string;
@@ -86,15 +100,13 @@ function toStorefrontProduct(item: {
 export function FlashSalesContent({ locale }: { locale: AppLocale }) {
   const t = useTranslations("flashSales");
 
-  const flash_sales_query = trpc.campaigns.activeFlashSales.useQuery({ locale });
+  const active_query = trpc.campaigns.activeFlashSales.useQuery({ locale });
+  const upcoming_query = trpc.campaigns.upcomingFlashSales.useQuery();
+  const ended_query = trpc.campaigns.endedFlashSales.useQuery();
 
-  const trending_query = trpc.recommendations.trending.useQuery({
-    locale: locale === "ar" ? "fr" : locale,
-    period: "week",
-    limit: 12,
-  });
-
-  const loading = flash_sales_query.isLoading;
+  const loading =
+    active_query.isLoading || upcoming_query.isLoading || ended_query.isLoading;
+  const error = active_query.error ?? upcoming_query.error ?? ended_query.error;
 
   if (loading) {
     return (
@@ -132,7 +144,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
     );
   }
 
-  if (flash_sales_query.error) {
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-start justify-center p-6">
@@ -140,9 +152,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
             <AlertTitle>{t("activeSales")}</AlertTitle>
             <AlertDescription>
-              {flash_sales_query.error instanceof Error
-                ? flash_sales_query.error.message
-                : t("error_loading")}
+              {error instanceof Error ? error.message : t("error_loading")}
             </AlertDescription>
           </Alert>
         </div>
@@ -150,8 +160,9 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
     );
   }
 
-  const active_sales = flash_sales_query.data ?? [];
-  const trending_products = trending_query.data ?? [];
+  const active_sales = active_query.data ?? [];
+  const upcoming_sales = upcoming_query.data ?? [];
+  const ended_sales = ended_query.data ?? [];
 
   const empty = active_sales.length === 0;
 
@@ -180,11 +191,7 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
             {active_sales.map((sale) => (
-              <FlashSaleCard
-                key={sale.campaign_id}
-                sale={sale}
-                products={trending_products.slice(0, 4)}
-              />
+              <FlashSaleCard key={sale.campaign_id} sale={sale} locale={locale} status="active" />
             ))}
           </div>
         )}
@@ -195,14 +202,22 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
       {/* UPCOMING FLASH SALES */}
       <section>
         <h2 className="mb-6 text-2xl font-bold">{t("upcoming")}</h2>
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Clock className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>{t("empty_upcoming")}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
+        {upcoming_sales.length > 0 ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {upcoming_sales.map((sale) => (
+              <FlashSaleCard key={sale.campaign_id} sale={sale} locale={locale} status="upcoming" />
+            ))}
+          </div>
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Clock className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>{t("empty_upcoming")}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )}
       </section>
 
       <Separator />
@@ -210,11 +225,19 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
       {/* ENDED FLASH SALES */}
       <section>
         <h2 className="mb-6 text-2xl font-bold">{t("ended")}</h2>
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>{t("empty_ended")}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
+        {ended_sales.length > 0 ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {ended_sales.map((sale) => (
+              <FlashSaleCard key={sale.campaign_id} sale={sale} locale={locale} status="ended" />
+            ))}
+          </div>
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{t("empty_ended")}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        )}
       </section>
     </div>
   );
@@ -222,47 +245,42 @@ export function FlashSalesContent({ locale }: { locale: AppLocale }) {
 
 function FlashSaleCard({
   sale,
-  products,
+  locale,
+  status,
 }: {
-  sale: {
-    campaign_id: string;
-    name: string;
-    slug: string;
-    starts_at: string | null;
-    ends_at: string | null;
-    time_remaining_seconds: number;
-    is_active: boolean;
-    is_ending_soon: boolean;
-    product_ids: string[];
-  };
-  products: Array<{
-    id: string;
-    slug: string;
-    name: string;
-    image_url: string | null;
-    currency: string;
-    min_price: string;
-    max_price: string | null;
-    is_featured: boolean;
-    in_stock: boolean;
-    brand_name: string | null;
-  }>;
+  sale: FlashSaleState;
+  locale: AppLocale;
+  status: SaleStatus;
 }) {
   const t = useTranslations("flashSales");
-  const remaining = useCountdown(sale.time_remaining_seconds);
-  const endingSoon = sale.is_ending_soon || remaining < 3600;
+  const remaining = useCountdown(status === "active" ? sale.time_remaining_seconds : null);
+  const endingSoon = status === "active" && (sale.is_ending_soon || remaining < 3600);
+
+  const products_query = trpc.recommendations.hydrate.useQuery(
+    {
+      locale,
+      ids: sale.product_ids.slice(0, 4),
+    },
+    { enabled: sale.product_ids.length > 0 },
+  );
+
+  const products = products_query.data ?? [];
 
   return (
     <Card className={cn(endingSoon && "ring-destructive/30 ring-2")}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">{sale.name}</CardTitle>
-          <Badge
-            variant={endingSoon ? "destructive" : "outline"}
-            className="animate-pulse font-mono text-base tabular-nums"
-          >
-            {formatCountdown(remaining)}
-          </Badge>
+          {status === "active" ? (
+            <Badge
+              variant={endingSoon ? "destructive" : "outline"}
+              className="animate-pulse font-mono text-base tabular-nums"
+            >
+              {formatCountdown(remaining)}
+            </Badge>
+          ) : (
+            <Badge variant="outline">{status === "upcoming" ? t("upcoming") : t("ended")}</Badge>
+          )}
         </div>
         <CardDescription>{t("limitedTime")}</CardDescription>
       </CardHeader>

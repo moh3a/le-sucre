@@ -110,6 +110,17 @@ export function CatalogSearchPageClient({
   const search_query = trpc.catalog.search.useQuery(searchInput);
   const { data: searchResult, isLoading: isSearchLoading } = search_query;
   const { data: facetsResult } = trpc.catalog.facets.useQuery(facetInput);
+  const track_click = trpc.analytics.track.useMutation();
+
+  const handleProductClick = (productId: string) => {
+    if (!params.q) return;
+    track_click.mutate({
+      event_type: "click",
+      search_query: params.q,
+      product_id: productId,
+      metadata: { slot: "search_result" },
+    });
+  };
 
   const handlePropertyChange = (code: string, values: string[]) => {
     setSelectedProperties((prev) => {
@@ -279,7 +290,11 @@ export function CatalogSearchPageClient({
 
           {/* Results */}
           <div className="min-w-0 flex-1 space-y-6">
-            <CatalogProductGrid products={searchResult?.items ?? []} isLoading={isSearchLoading} />
+            <CatalogProductGrid
+              products={searchResult?.items ?? []}
+              isLoading={isSearchLoading}
+              onProductClick={handleProductClick}
+            />
 
             {searchResult && (
               <CatalogPagination

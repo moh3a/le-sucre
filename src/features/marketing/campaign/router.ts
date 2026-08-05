@@ -24,7 +24,6 @@ import {
   reorder_banners_dto,
   add_section_dto,
   update_section_dto,
-  storefront_home_sections_dto,
   track_campaign_event_dto,
 } from "./models/campaign.dto";
 
@@ -136,6 +135,14 @@ export const campaign_router = create_trpc_router({
     .input(z.object({ slug: z.string().min(1).max(255) }))
     .query(({ input }) => campaign_flash_sale_service.get_flash_sale_by_slug(input.slug)),
 
+  upcomingFlashSales: public_procedure.query(() =>
+    campaign_flash_sale_service.get_upcoming_flash_sales(),
+  ),
+
+  endedFlashSales: public_procedure.query(() =>
+    campaign_flash_sale_service.get_ended_flash_sales(),
+  ),
+
   // ─── Landing Pages ─────────────────────────────────────────────────────────
 
   landingPage: public_procedure
@@ -155,17 +162,6 @@ export const campaign_router = create_trpc_router({
     .query(() => campaign_landing_page_service.get_landing_pages_for_storefront()),
 
   // ─── Webhook Events ────────────────────────────────────────────────────────
-
-  webhookEvents: permission_procedure(PERMISSIONS.campaigns_read)
-    .input(
-      z.object({
-        campaign_id: z.string().optional(),
-        limit: z.number().int().min(1).max(100).default(20),
-      }),
-    )
-    .query(({ input }) =>
-      campaign_webhooks_service.get_recent_events(input.campaign_id, input.limit),
-    ),
 
   webhookEventsAdmin: permission_procedure(PERMISSIONS.campaigns_read)
     .input(
@@ -230,10 +226,6 @@ export const campaign_router = create_trpc_router({
 
   // ─── Landing Pages (Admin) ─────────────────────────────────────────────────
 
-  landingPagesAdmin: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
-    campaign_service.list({ campaign_type: "landing_page", page: 1, limit: 100 }),
-  ),
-
   landingPageStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
     campaign_service.get_landing_page_stats(),
   ),
@@ -267,10 +259,6 @@ export const campaign_router = create_trpc_router({
 
   // ─── Flash Sales (Admin) ───────────────────────────────────────────────────
 
-  flashSalesAdmin: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
-    campaign_service.list({ campaign_type: "flash_sale", page: 1, limit: 100 }),
-  ),
-
   flashSaleStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
     campaign_service.get_flash_sale_stats(),
   ),
@@ -288,10 +276,6 @@ export const campaign_router = create_trpc_router({
     .query(({ input }) => campaign_service.get_analytics(input.campaign_id, input.from, input.to)),
 
   // ─── Public storefront ─────────────────────────────────────────────────────
-
-  storefrontSections: public_procedure
-    .input(storefront_home_sections_dto)
-    .query(({ input }) => campaign_service.get_storefront_sections(input)),
 
   trackEvent: public_procedure
     .input(track_campaign_event_dto)

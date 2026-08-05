@@ -9,6 +9,7 @@ import { build_invoice_id } from "../helpers/invoice-id.helper";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { INVOICE_ERROR } from "../constants/error-codes";
+import logger from "@/lib/logger";
 
 export class InvoiceService {
   constructor(
@@ -121,7 +122,7 @@ export class InvoiceService {
       });
     } catch (err) {
       // Don't fail the transaction if PDF generation/delivery fails, let background jobs retry it
-      console.error("PDF generation or email delivery failed:", err);
+      logger.error("PDF generation or email delivery failed:", err);
     }
 
     return invoice;

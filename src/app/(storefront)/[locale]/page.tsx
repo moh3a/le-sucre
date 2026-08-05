@@ -50,6 +50,7 @@ async function getCampaignData(locale: string) {
       locale: locale as "fr" | "en" | "ar",
       page_slug: "home",
     }) as Array<{
+      id: string;
       banners: Array<{
         id: string;
         banner_type: string;
@@ -87,6 +88,7 @@ async function getCampaignData(locale: string) {
         if (banner.is_active) {
           banners.push({
             id: banner.id,
+            campaign_id: campaign.id,
             banner_type: banner.banner_type,
             image_url: banner.image_url,
             mobile_image_url: banner.mobile_image_url,
@@ -146,7 +148,7 @@ async function getHomepageData(locale: string) {
       in_stock_only: false,
     }),
     recommendation_service.get_trending(appLocale, "day", 4),
-    campaign_flash_sale_service.get_active_flash_sales(appLocale),
+    campaign_flash_sale_service.get_active_flash_sales(),
     brand_service.list_active_storefront(),
   ]);
 

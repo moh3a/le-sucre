@@ -21,6 +21,7 @@ import type {
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { assertIsError } from "@/lib/error_handling";
 import { format } from "date-fns";
+import logger from "@/lib/logger";
 
 export class PromotionService {
   list(input: z.infer<typeof list_promotions_dto>) {
@@ -72,7 +73,7 @@ export class PromotionService {
         })),
       });
     } catch (error: unknown) {
-      console.log(error);
+      logger.error(error);
       const message = assertIsError(error).message;
       if (message.includes("Duplicate entry") || message.includes("ER_DUP_ENTRY")) {
         throw_error(PROMOTION_ERROR.SLUG_CONFLICT);

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { trpc } from "@/components/providers/app-providers";
 import type { CampaignBanner } from "./types";
 import { CampaignCountdownBar } from "./storefront-countdown-bar";
 
@@ -21,6 +23,13 @@ export function StorefrontCampaignBanners({ banners }: Props) {
 }
 
 function BannerSlot({ banner }: { banner: CampaignBanner }) {
+  const track = trpc.campaigns.trackEvent.useMutation();
+
+  useEffect(() => {
+    track.mutate({ campaign_id: banner.campaign_id, event_type: "impression" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (banner.banner_type === "countdown_bar") {
     return <CampaignCountdownBar banner={banner} />;
   }
@@ -35,6 +44,9 @@ function BannerSlot({ banner }: { banner: CampaignBanner }) {
       href={href}
       target={target}
       rel={target === "_blank" ? "noopener noreferrer" : undefined}
+      onClick={() =>
+        track.mutate({ campaign_id: banner.campaign_id, event_type: "banner_click" })
+      }
       className={`storefront-banner storefront-banner--${banner.banner_type} relative block w-full overflow-hidden`}
     >
       <picture>

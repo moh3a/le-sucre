@@ -165,9 +165,34 @@ export const create_campaign_dto = z.object({
 });
 
 // ─── Update ────────────────────────────────────────────────────────────────────
+// Declared explicitly (NOT create_campaign_dto.partial()) so that Zod defaults
+// defined on the create schema (metadata, ab_traffic_split, and the empty child
+// arrays) never leak into partial updates. Otherwise a patch that omits a child
+// group (e.g. the targeting tab only sending `targets`) would silently reset the
+// omitted groups to their defaults and wipe banners/sections/translations/links.
 
-export const update_campaign_dto = create_campaign_dto.partial().extend({
+export const update_campaign_dto = z.object({
   id: z.string().min(1).max(255),
+  name: z.string().min(1).max(255).optional(),
+  slug: z.string().min(1).max(255).optional(),
+  description: z.string().optional(),
+  campaign_type: z.enum(Object.values(CAMPAIGN_TYPE) as [string, ...string[]]).optional(),
+  status: z.enum(Object.values(CAMPAIGN_STATUS) as [string, ...string[]]).optional(),
+  priority: z.number().int().min(1).max(9999).optional(),
+  starts_at: z.string().datetime({ offset: true }).optional(),
+  ends_at: z.string().datetime({ offset: true }).optional(),
+  content: campaign_content_schema,
+  theme: campaign_theme_schema,
+  promotion_id: z.string().max(255).optional(),
+  ab_test_group: z.string().max(64).optional(),
+  ab_traffic_split: z.number().int().min(0).max(100).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  translations: z.array(translation_schema).optional(),
+  banners: z.array(banner_schema).optional(),
+  sections: z.array(section_schema).optional(),
+  targets: z.array(target_schema).optional(),
+  category_ids: z.array(z.string()).optional(),
+  brand_ids: z.array(z.string()).optional(),
 });
 
 // ─── Banner CRUD ───────────────────────────────────────────────────────────────
