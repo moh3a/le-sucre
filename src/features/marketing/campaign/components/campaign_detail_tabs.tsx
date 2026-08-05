@@ -1,6 +1,9 @@
 "use client";
 
+import { useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -16,25 +19,48 @@ import type { BannerRow } from "@/features/marketing/campaign/components/campaig
 
 type CampaignDto = z.infer<typeof full_campaign_dto>;
 
+const tab_schema = z.enum(["general", "banners", "sections", "targeting", "analytics"]);
+
 type DetailTabsProps = {
   campaign_id: string;
-  default_tab?: string;
 };
 
-export function CampaignDetailTabs({ campaign_id, default_tab }: DetailTabsProps) {
+export function CampaignDetailTabs({ campaign_id }: DetailTabsProps) {
+  const t = useTranslations("campaigns");
   const { data: campaign, isLoading } = trpc.campaigns.byId.useQuery({ id: campaign_id });
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const parsed = tab_schema.safeParse(searchParams.get("tab"));
+  const active_tab = parsed.success ? parsed.data : "general";
+
+  const on_tab_change = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", value);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
 
   if (!campaign) return null;
 
   return (
     <QueryGuard query={{ isLoading }}>
-      <Tabs defaultValue={default_tab ?? "general"} className="w-full">
+      <Tabs value={active_tab} onValueChange={on_tab_change} className="w-full">
         <TabsList className="flex flex-wrap">
-          <TabsTrigger value="general">Général</TabsTrigger>
-          <TabsTrigger value="banners">Bannières ({campaign.banners?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="sections">Sections ({campaign.sections?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="targeting">Ciblage ({campaign.targets?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="general">{t("tab_general")}</TabsTrigger>
+          <TabsTrigger value="banners">
+            {t("tab_banners", { count: campaign.banners?.length ?? 0 })}
+          </TabsTrigger>
+          <TabsTrigger value="sections">
+            {t("tab_sections", { count: campaign.sections?.length ?? 0 })}
+          </TabsTrigger>
+          <TabsTrigger value="targeting">
+            {t("tab_targeting", { count: campaign.targets?.length ?? 0 })}
+          </TabsTrigger>
+          <TabsTrigger value="analytics">{t("tab_analytics")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">

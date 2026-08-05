@@ -1,7 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { db } from "@/lib/db";
-import { eq, and, gte, lte, sql } from "drizzle-orm";
+import { eq, and, gte, lte, sql, inArray, asc } from "drizzle-orm";
 import { campaigns, campaign_analytics_daily } from "../schema";
 import { CAMPAIGN_STATUS } from "../constants/campaign_types";
 import { format, subDays } from "date-fns";
@@ -30,6 +30,11 @@ export interface ABTestReport {
   ended_at: string | null;
   significant: boolean;
   winner_id: string | null;
+}
+
+export interface ABTestGroupOverview extends ABTestReport {
+  campaign_ids: string[];
+  active_variants: number;
 }
 
 export class CampaignABTestService {
@@ -121,21 +126,136 @@ export class CampaignABTestService {
       };
     }
 
+    const analytics_rows = await this._analytics_rows(group_campaigns, since, now);
+    const { variants, total_impressions, total_conversions, started_at, ended_at } =
+      this._aggregate_group(group_campaigns, analytics_rows);
+
+    const best_conversion = Math.max(...variants.map((v) => v.conversion_rate));
+    const report: ABTestReport = {
+      test_group,
+      variants: variants.map((v) => ({
+        ...v,
+        winner: v.conversion_rate === best_conversion && best_conversion > 0,
+        confidence: this._calculate_confidence(
+          v.impressions,
+          v.conversions,
+          total_impressions,
+          total_conversions,
+        ),
+      })),
+      total_impressions,
+      total_conversions,
+      started_at,
+      ended_at,
+      significant: false,
+      winner_id: null,
+    };
+
+    const winning = report.variants.find((v) => v.winner);
+    if (winning) {
+      report.winner_id = winning.variant_id;
+      if (total_impressions > 0) {
+        report.significant = this._is_significant(
+          best_conversion,
+          variants.filter((v) => v.conversion_rate !== best_conversion),
+          total_impressions,
+        );
+      }
+    }
+
+    return report;
+  }
+
+  /** Overview of every A/B test group with aggregated performance for the dashboard */
+  async get_ab_test_overview(days = 30): Promise<ABTestGroupOverview[]> {
+    const since = format(subDays(new Date(), days), "yyyy-MM-dd");
+    const now = format(new Date(), "yyyy-MM-dd");
+
+    const groups = await db
+      .selectDistinct({ test_group: campaigns.ab_test_group })
+      .from(campaigns)
+      .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`);
+
+    if (!groups.length) return [];
+
+    const group_names = groups.map((g) => g.test_group).filter((g): g is string => Boolean(g));
+
+    const group_campaigns = await db
+      .select()
+      .from(campaigns)
+      .where(inArray(campaigns.ab_test_group, group_names))
+      .orderBy(asc(campaigns.priority));
+
+    const analytics_rows = await this._analytics_rows(group_campaigns, since, now);
+
+    const overview: ABTestGroupOverview[] = [];
+    for (const test_group of group_names) {
+      const members = group_campaigns.filter((c) => c.ab_test_group === test_group);
+      if (!members.length) continue;
+
+      const { variants, total_impressions, total_conversions, started_at, ended_at } =
+        this._aggregate_group(members, analytics_rows);
+
+      const best_conversion = Math.max(...variants.map((v) => v.conversion_rate));
+      const computed = variants.map((v) => ({
+        ...v,
+        winner: v.conversion_rate === best_conversion && best_conversion > 0,
+        confidence: this._calculate_confidence(
+          v.impressions,
+          v.conversions,
+          total_impressions,
+          total_conversions,
+        ),
+      }));
+
+      const winning = computed.find((v) => v.winner);
+      overview.push({
+        test_group,
+        variants: computed,
+        campaign_ids: members.map((c) => c.id),
+        active_variants: members.filter((c) => c.status === CAMPAIGN_STATUS.active).length,
+        total_impressions,
+        total_conversions,
+        started_at,
+        ended_at,
+        significant:
+          !!winning &&
+          total_impressions > 0 &&
+          this._is_significant(
+            best_conversion,
+            variants.filter((v) => v.conversion_rate !== best_conversion),
+            total_impressions,
+          ),
+        winner_id: winning?.variant_id ?? null,
+      });
+    }
+
+    return overview.sort((a, b) => b.total_impressions - a.total_impressions);
+  }
+
+  private async _analytics_rows(
+    group_campaigns: (typeof campaigns.$inferSelect)[],
+    since: string,
+    now: string,
+  ) {
     const variant_ids = group_campaigns.map((c) => c.id);
-    const analytics_rows = await db
+    if (!variant_ids.length) return [];
+    return db
       .select()
       .from(campaign_analytics_daily)
       .where(
         and(
-          sql`${campaign_analytics_daily.campaign_id} IN (${sql.join(
-            variant_ids.map((id) => sql`${id}`),
-            sql`, `,
-          )})`,
+          inArray(campaign_analytics_daily.campaign_id, variant_ids),
           gte(campaign_analytics_daily.day_key, since),
           lte(campaign_analytics_daily.day_key, now),
         ),
       );
+  }
 
+  private _aggregate_group(
+    group_campaigns: (typeof campaigns.$inferSelect)[],
+    analytics_rows: (typeof campaign_analytics_daily.$inferSelect)[],
+  ) {
     const variants: ABTestVariantResult[] = [];
     let total_impressions = 0;
     let total_conversions = 0;
@@ -166,44 +286,14 @@ export class CampaignABTestService {
       });
     }
 
-    const best_conversion = Math.max(...variants.map((v) => v.conversion_rate));
-    const report: ABTestReport = {
-      test_group,
-      variants: variants.map((v) => ({
-        ...v,
-        winner: v.conversion_rate === best_conversion && best_conversion > 0,
-        confidence: this._calculate_confidence(
-          v.impressions,
-          v.conversions,
-          total_impressions,
-          total_conversions,
-        ),
-      })),
-      total_impressions,
-      total_conversions,
-      started_at: group_campaigns.reduce((earliest: string | null, c) => {
-        return !earliest || (c.starts_at && c.starts_at < earliest) ? c.starts_at : earliest;
-      }, null),
-      ended_at: group_campaigns.reduce((latest: string | null, c) => {
-        return !latest || (c.ends_at && c.ends_at > latest) ? c.ends_at : latest;
-      }, null),
-      significant: false,
-      winner_id: null,
-    };
+    const started_at = group_campaigns.reduce((earliest: string | null, c) => {
+      return !earliest || (c.starts_at && c.starts_at < earliest) ? c.starts_at : earliest;
+    }, null);
+    const ended_at = group_campaigns.reduce((latest: string | null, c) => {
+      return !latest || (c.ends_at && c.ends_at > latest) ? c.ends_at : latest;
+    }, null);
 
-    const winning = report.variants.find((v) => v.winner);
-    if (winning) {
-      report.winner_id = winning.variant_id;
-      if (total_impressions > 0) {
-        report.significant = this._is_significant(
-          best_conversion,
-          variants.filter((v) => v.conversion_rate !== best_conversion),
-          total_impressions,
-        );
-      }
-    }
-
-    return report;
+    return { variants, total_impressions, total_conversions, started_at, ended_at };
   }
 
   private _deterministic_roll(

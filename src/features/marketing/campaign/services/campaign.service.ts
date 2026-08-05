@@ -10,6 +10,7 @@ import { campaign_scheduler_service } from "./campaign_scheduler.service";
 import { campaign_cache } from "./campaign_cache.service";
 import { campaign_webhooks_service } from "./campaign_webhooks.service";
 import { campaign_automation_service } from "./campaign_automation.service";
+import { campaign_ab_test_service } from "./campaign_ab_test.service";
 import type { AutomationTrigger } from "./campaign_automation.service";
 import type { CampaignWebhookEvent } from "./campaign_webhooks.service";
 import { CAMPAIGN_STATUS } from "../constants/campaign_types";
@@ -40,6 +41,18 @@ export class CampaignService {
       input.campaign_type,
       input.search,
     );
+  }
+
+  async get_flash_sale_stats() {
+    return campaign_repository.flash_sale_stats();
+  }
+
+  async get_landing_page_stats() {
+    return campaign_repository.landing_page_stats();
+  }
+
+  async get_recommendation_stats() {
+    return campaign_repository.recommendation_stats();
   }
 
   async get_by_id(id: string) {
@@ -84,10 +97,12 @@ export class CampaignService {
 
     if (campaign) {
       void campaign_webhooks_service.dispatch_async("campaign.created", campaign);
-      void campaign_automation_service.process_trigger(
-        "campaign.activated" as AutomationTrigger,
-        campaign,
-      );
+      if (campaign.status === CAMPAIGN_STATUS.active) {
+        void campaign_automation_service.process_trigger(
+          "campaign.activated" as AutomationTrigger,
+          campaign,
+        );
+      }
     }
 
     if (campaign && (input.status === "draft" || input.status === "scheduled")) {
@@ -201,6 +216,10 @@ export class CampaignService {
         [CAMPAIGN_STATUS.active]: "campaign.activated",
         [CAMPAIGN_STATUS.ended]: "campaign.ended",
         [CAMPAIGN_STATUS.paused]: "campaign.paused",
+        // TODO: wire the remaining automation triggers:
+        //  - CAMPAIGN_STATUS.scheduled  -> "campaign.scheduled" (depends on a scheduler consumer)
+        //  - "campaign.status_changed"  -> fires on every status transition
+        //  - flash-sale & analytics-threshold triggers are dispatched elsewhere or not at all
       };
       const auto_trigger = trigger_map[input.status];
       if (auto_trigger) {
@@ -329,6 +348,8 @@ export class CampaignService {
     if (field) {
       await campaign_repository.increment_analytics(input.campaign_id, field, input.revenue ?? 0);
     }
+    // TODO: check configured thresholds after incrementing and dispatch the
+    // "campaign.analytics_threshold_met" automation trigger when crossed.
   }
 
   async get_analytics(campaign_id: string, from: string, to: string) {
@@ -348,6 +369,20 @@ export class CampaignService {
       .from(campaigns)
       .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`);
     return rows.map((r) => r.group).filter(Boolean);
+  }
+
+  // ─── Dashboard Overview ─────────────────────────────────────────────────────
+
+  async get_overview() {
+    const [analytics, ab_tests, landing_pages, upcoming, counts] = await Promise.all([
+      campaign_repository.get_analytics_overview(30),
+      campaign_ab_test_service.get_ab_test_overview(30),
+      campaign_repository.list_landing_pages_overview(6),
+      campaign_repository.list_upcoming(5),
+      campaign_repository.get_subfeature_counts(),
+    ]);
+
+    return { analytics, ab_tests, landing_pages, upcoming, counts };
   }
 }
 

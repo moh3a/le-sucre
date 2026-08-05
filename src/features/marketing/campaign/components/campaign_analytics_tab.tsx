@@ -16,6 +16,7 @@ import { fr } from "date-fns/locale";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
+import { StatsGrid, type StatItem } from "@/components/console/stats-grid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,48 +62,48 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
   const ctr = summary.total_impressions > 0 ? (clickCount / summary.total_impressions) * 100 : 0;
   const cr = clickCount > 0 ? (summary.total_conversions / clickCount) * 100 : 0;
 
-  const kpis = [
+  const stats: StatItem[] = [
     {
-      title: t("impressions"),
+      label: t("impressions"),
       value: summary.total_impressions.toLocaleString(),
-      desc: t("impressions_desc"),
+      description: t("impressions_desc"),
       icon: Eye,
-      color: "text-blue-500 bg-blue-500/10",
+      color: "info",
     },
     {
-      title: t("clicks"),
+      label: t("clicks"),
       value: clickCount.toLocaleString(),
-      desc: `${t("banner")}: ${summary.total_banner_clicks} | ${t("other")}: ${summary.total_clicks}`,
+      description: `${t("banner")}: ${summary.total_banner_clicks} | ${t("other")}: ${summary.total_clicks}`,
       icon: MousePointerClick,
-      color: "text-amber-500 bg-amber-500/10",
+      color: "warning",
     },
     {
-      title: t("ctr"),
+      label: t("ctr"),
       value: `${ctr.toFixed(2)} %`,
-      desc: t("ctr_desc"),
+      description: t("ctr_desc"),
       icon: Percent,
-      color: "text-emerald-500 bg-emerald-500/10",
+      color: "success",
     },
     {
-      title: t("add_to_cart"),
+      label: t("add_to_cart"),
       value: summary.total_add_to_cart.toLocaleString(),
-      desc: t("add_to_cart_desc"),
+      description: t("add_to_cart_desc"),
       icon: ShoppingCart,
-      color: "text-indigo-500 bg-indigo-500/10",
+      color: "info",
     },
     {
-      title: t("conversions"),
+      label: t("conversions"),
       value: summary.total_conversions.toLocaleString(),
-      desc: `${t("conv_rate")}: ${cr.toFixed(2)}%`,
+      description: `${t("conv_rate")}: ${cr.toFixed(2)}%`,
       icon: TrendingUp,
-      color: "text-purple-500 bg-purple-500/10",
+      color: "success",
     },
     {
-      title: t("revenue"),
+      label: t("revenue"),
       value: `${Number(summary.total_revenue).toLocaleString()} DZD`,
-      desc: t("revenue_desc"),
+      description: t("revenue_desc"),
       icon: Coins,
-      color: "text-primary bg-primary/10",
+      color: "default",
     },
   ];
 
@@ -110,12 +111,14 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
     <QueryGuard query={{ isLoading }}>
       <div className="space-y-6">
         {/* Date filter range */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" />
             <span>
-              Données du {format(subDays(new Date(), rangeDays), "dd MMMM", { locale: fr })} au{" "}
-              {format(new Date(), "dd MMMM yyyy", { locale: fr })}
+              {t("analytics_period", {
+                from: format(subDays(new Date(), rangeDays), "dd MMMM", { locale: fr }),
+                to: format(new Date(), "dd MMMM yyyy", { locale: fr }),
+              })}
             </span>
           </div>
           <div className="flex gap-2">
@@ -129,31 +132,14 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
                   rangeDays === d ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""
                 }
               >
-                Derniers {d} jours
+                {t("analytics_last_days", { days: d })}
               </Button>
             ))}
           </div>
         </div>
 
         {/* KPI metrics cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {kpis.map((kpi, idx) => (
-            <Card key={idx} className="border shadow">
-              <CardContent className="flex items-center justify-between p-5">
-                <div className="space-y-1">
-                  <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                    {kpi.title}
-                  </p>
-                  <p className="text-2xl font-bold">{kpi.value}</p>
-                  <p className="text-muted-foreground text-[10px]">{kpi.desc}</p>
-                </div>
-                <div className={`rounded-lg p-3 ${kpi.color}`}>
-                  <kpi.icon className="h-5 w-5" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <StatsGrid loading={isLoading} items={stats} />
 
         {/* Daily analytics details list */}
         <Card>
@@ -169,13 +155,13 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Jour</TableHead>
-                    <TableHead>Vues (Imp.)</TableHead>
-                    <TableHead>Clics</TableHead>
-                    <TableHead>CTR</TableHead>
-                    <TableHead>Ajouts Panier</TableHead>
-                    <TableHead>Conversions</TableHead>
-                    <TableHead className="text-right">Revenu</TableHead>
+                    <TableHead>{t("analytics_day")}</TableHead>
+                    <TableHead>{t("analytics_views")}</TableHead>
+                    <TableHead>{t("clicks")}</TableHead>
+                    <TableHead>{t("ctr")}</TableHead>
+                    <TableHead>{t("add_to_cart")}</TableHead>
+                    <TableHead>{t("conversions")}</TableHead>
+                    <TableHead className="text-right">{t("revenue")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -191,7 +177,7 @@ export function CampaignAnalyticsTab({ campaign_id }: AnalyticsTabProps) {
                         <TableCell>
                           {dayClicks.toLocaleString()}
                           <span className="text-muted-foreground block text-[10px]">
-                            bannière: {day.banner_clicks ?? 0}
+                            {t("analytics_banner_clicks")}: {day.banner_clicks ?? 0}
                           </span>
                         </TableCell>
                         <TableCell className="font-mono text-xs">{dayCtr.toFixed(2)} %</TableCell>

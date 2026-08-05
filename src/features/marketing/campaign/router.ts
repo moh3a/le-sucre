@@ -8,6 +8,7 @@ import { campaign_ab_test_service } from "./services/campaign_ab_test.service";
 import { campaign_flash_sale_service } from "./services/campaign_flash_sale.service";
 import { campaign_landing_page_service } from "./services/campaign_landing_page.service";
 import { campaign_webhooks_service } from "./services/campaign_webhooks.service";
+import { campaign_scheduler_service } from "./services/campaign_scheduler.service";
 import {
   campaign_automation_service,
   type AutomationTrigger,
@@ -39,6 +40,10 @@ export const campaign_router = create_trpc_router({
   campaignStats: permission_procedure(PERMISSIONS.campaigns_read)
     .input(z.object({}).optional())
     .query(() => campaign_repository.stats()),
+
+  campaignOverview: permission_procedure(PERMISSIONS.campaigns_read)
+    .input(z.object({}).optional())
+    .query(() => campaign_service.get_overview()),
 
   byId: permission_procedure(PERMISSIONS.campaigns_read)
     .input(id_input)
@@ -125,7 +130,7 @@ export const campaign_router = create_trpc_router({
 
   activeFlashSales: public_procedure
     .input(z.object({ locale: z.string().optional() }))
-    .query(({ input }) => campaign_flash_sale_service.get_active_flash_sales(input.locale)),
+    .query(() => campaign_flash_sale_service.get_active_flash_sales()),
 
   flashSaleBySlug: public_procedure
     .input(z.object({ slug: z.string().min(1).max(255) }))
@@ -147,9 +152,7 @@ export const campaign_router = create_trpc_router({
 
   landingPagesList: public_procedure
     .input(z.object({ locale: z.string().default("fr") }))
-    .query(({ input }) =>
-      campaign_landing_page_service.get_landing_pages_for_storefront(input.locale),
-    ),
+    .query(() => campaign_landing_page_service.get_landing_pages_for_storefront()),
 
   // ─── Webhook Events ────────────────────────────────────────────────────────
 
@@ -163,6 +166,30 @@ export const campaign_router = create_trpc_router({
     .query(({ input }) =>
       campaign_webhooks_service.get_recent_events(input.campaign_id, input.limit),
     ),
+
+  webhookEventsAdmin: permission_procedure(PERMISSIONS.campaigns_read)
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(10),
+        event_type: z.string().optional(),
+        status: z.string().optional(),
+        search: z.string().optional(),
+      }),
+    )
+    .query(({ input }) =>
+      campaign_webhooks_service.list_events(
+        input.page,
+        input.limit,
+        input.event_type,
+        input.status,
+        input.search,
+      ),
+    ),
+
+  webhookStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
+    campaign_webhooks_service.get_stats(),
+  ),
 
   // ─── Automation Rules ──────────────────────────────────────────────────────
 
@@ -195,24 +222,11 @@ export const campaign_router = create_trpc_router({
 
   automationRuleToggle: permission_procedure(PERMISSIONS.campaigns_write)
     .input(z.object({ id: z.string(), is_active: z.boolean() }))
-    .mutation(async ({ input }) => {
-      const { db } = await import("@/lib/db");
-      const { campaign_automation_rules } = await import("./services/campaign_automation.service");
-      const { eq } = await import("drizzle-orm");
-      await db
-        .update(campaign_automation_rules)
-        .set({ is_active: input.is_active })
-        .where(eq(campaign_automation_rules.id, input.id));
-    }),
+    .mutation(({ input }) => campaign_automation_service.toggle_rule(input.id, input.is_active)),
 
   automationRuleDelete: permission_procedure(PERMISSIONS.campaigns_write)
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      const { db } = await import("@/lib/db");
-      const { campaign_automation_rules } = await import("./services/campaign_automation.service");
-      const { eq } = await import("drizzle-orm");
-      await db.delete(campaign_automation_rules).where(eq(campaign_automation_rules.id, input.id));
-    }),
+    .mutation(({ input }) => campaign_automation_service.delete_rule(input.id)),
 
   // ─── Landing Pages (Admin) ─────────────────────────────────────────────────
 
@@ -220,10 +234,45 @@ export const campaign_router = create_trpc_router({
     campaign_service.list({ campaign_type: "landing_page", page: 1, limit: 100 }),
   ),
 
+  landingPageStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
+    campaign_service.get_landing_page_stats(),
+  ),
+
+  recommendationStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
+    campaign_service.get_recommendation_stats(),
+  ),
+
+  // ─── Scheduler (Admin) ──────────────────────────────────────────────────────
+
+  schedulerJobs: permission_procedure(PERMISSIONS.campaigns_read)
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        limit: z.number().int().min(1).max(100).default(10),
+        status: z.string().optional(),
+        search: z.string().optional(),
+      }),
+    )
+    .query(({ input }) =>
+      campaign_scheduler_service.list_jobs(input.page, input.limit, input.status, input.search),
+    ),
+
+  schedulerStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
+    campaign_scheduler_service.get_stats(),
+  ),
+
+  schedulerJobCancel: permission_procedure(PERMISSIONS.campaigns_write)
+    .input(z.object({ id: z.string().min(1).max(255) }))
+    .mutation(({ input }) => campaign_scheduler_service.cancel_job(input.id)),
+
   // ─── Flash Sales (Admin) ───────────────────────────────────────────────────
 
   flashSalesAdmin: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
     campaign_service.list({ campaign_type: "flash_sale", page: 1, limit: 100 }),
+  ),
+
+  flashSaleStats: permission_procedure(PERMISSIONS.campaigns_read).query(() =>
+    campaign_service.get_flash_sale_stats(),
   ),
 
   // ─── Analytics ─────────────────────────────────────────────────────────────

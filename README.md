@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/moh3a/orla/actions"><img src="https://img.shields.io/github/actions/workflow/status/moh3a/orla/security-scan.yml?branch=main&style=flat-square&label=CI&logo=github" alt="CI"></a>
-  <img src="https://img.shields.io/badge/version-0.4.29-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-0.4.31-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-proprietary-red?style=flat-square" alt="License">
 </p>
 

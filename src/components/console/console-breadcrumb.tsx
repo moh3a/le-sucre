@@ -117,11 +117,6 @@ const BREADCRUMB_MAP: Record<string, Array<{ key: string; href?: string }>> = {
     { key: "campaigns", href: "/console/campaigns" },
     { key: "detail" },
   ],
-  "/console/campaigns/[id]/analytics": [
-    { key: "admin_home", href: "/console" },
-    { key: "campaigns", href: "/console/campaigns" },
-    { key: "analytics" },
-  ],
   "/console/campaigns/ab-testing": [
     { key: "admin_home", href: "/console" },
     { key: "campaigns", href: "/console/campaigns" },

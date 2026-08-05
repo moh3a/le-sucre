@@ -36,6 +36,20 @@
       "when": 1785623521224,
       "tag": "0004_panoramic_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1785878824689,
+      "tag": "0005_crazy_spirit",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1785883521372,
+      "tag": "0006_grey_punisher",
+      "breakpoints": true
     }
   ]
 }

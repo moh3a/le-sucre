@@ -7,7 +7,7 @@ import {
   BarChart3,
   Calendar,
   Download,
-  Eye,
+  FileText,
   Layers,
   Megaphone,
   MoreHorizontal,
@@ -40,6 +40,7 @@ import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import { QueryGuard } from "@/components/query-guard";
 import { CampaignStatusBadge } from "./campaign_status_badge";
+import { CampaignOverview } from "./campaign_overview";
 import { formatDate } from "@/lib/format";
 import { trpc } from "@/components/providers/app-providers";
 
@@ -269,9 +270,9 @@ export function CampaignListPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/console/campaigns/${row.original.id}/analytics`}>
+                <Link href={`/console/campaigns/${row.original.id}?tab=analytics`}>
                   <BarChart3 className="mr-2 size-4" />
-                  Analytiques
+                  {t("tab_analytics")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -340,12 +341,18 @@ export function CampaignListPage() {
                 icon: Calendar,
                 color: "warning",
               },
-              { label: "Brouillons", value: stats?.draft ?? 0, icon: Eye, color: "default" },
-              { label: "Terminées", value: stats?.ended ?? 0, icon: Square, color: "default" },
+              {
+                label: "Landing pages",
+                value: stats?.landing_pages ?? 0,
+                icon: FileText,
+                color: "info",
+              },
             ]}
           />
         }
       >
+        <CampaignOverview />
+
         <DataTable table={table}>
           <DataTableAdvancedToolbar table={table}>
             <Input

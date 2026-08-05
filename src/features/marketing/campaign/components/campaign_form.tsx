@@ -33,42 +33,6 @@ import { QueryGuard } from "@/components/query-guard";
 import { CategoryTreeNode } from "@/features/product_information_management/categories/types";
 
 // Form value schema matching Zod DTO
-const form_schema = z.object({
-  name: z.string().min(1, "Le nom est requis").max(255),
-  slug: z.string().min(1, "Le slug est requis").max(255),
-  description: z.string().optional(),
-  campaign_type: z.string().min(1, "Le type est requis"),
-  status: z.string().min(1, "Le statut est requis"),
-  priority: z.number().int().min(1).max(9999),
-  starts_at: z.string().optional().or(z.literal("")),
-  ends_at: z.string().optional().or(z.literal("")),
-  theme: z.object({
-    bg_color: z.string().max(32).optional(),
-    text_color: z.string().max(32).optional(),
-    accent_color: z.string().max(32).optional(),
-    overlay_opacity: z.number().min(0).max(1).optional(),
-    layout: z.enum(["full_width", "split", "card_grid", "carousel"]).optional(),
-    bg_image_url: z.string().max(2048).optional().nullable(),
-  }),
-  promotion_id: z.string().max(255).optional().nullable(),
-  ab_test_group: z.string().max(64).optional().nullable(),
-  ab_traffic_split: z.number().int().min(0).max(100),
-  translations: z.array(
-    z.object({
-      locale: z.enum(["en", "fr", "ar"]),
-      title: z.string().max(255).optional().or(z.literal("")),
-      subtitle: z.string().max(512).optional().or(z.literal("")),
-      cta_label: z.string().max(128).optional().or(z.literal("")),
-      cta_url: z.string().optional().or(z.literal("")),
-      seo_title: z.string().max(255).optional().or(z.literal("")),
-      seo_description: z.string().max(500).optional().or(z.literal("")),
-    }),
-  ),
-  category_ids: z.array(z.string()),
-  brand_ids: z.array(z.string()),
-});
-
-type FormValues = z.infer<typeof form_schema>;
 type CampaignDto = z.infer<typeof full_campaign_dto>;
 
 type CampaignFormProps = {
@@ -82,6 +46,43 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
   const tc = useTranslations("common");
   const router = useRouter();
   const utils = trpc.useUtils();
+
+  const form_schema = z.object({
+    name: z.string().min(1, t("name_required")).max(255),
+    slug: z.string().min(1, t("slug_required")).max(255),
+    description: z.string().optional(),
+    campaign_type: z.string().min(1, t("type_required")),
+    status: z.string().min(1, t("status_required")),
+    priority: z.number().int().min(1).max(9999),
+    starts_at: z.string().optional().or(z.literal("")),
+    ends_at: z.string().optional().or(z.literal("")),
+    theme: z.object({
+      bg_color: z.string().max(32).optional(),
+      text_color: z.string().max(32).optional(),
+      accent_color: z.string().max(32).optional(),
+      overlay_opacity: z.number().min(0).max(1).optional(),
+      layout: z.enum(["full_width", "split", "card_grid", "carousel"]).optional(),
+      bg_image_url: z.string().max(2048).optional().nullable(),
+    }),
+    promotion_id: z.string().max(255).optional().nullable(),
+    ab_test_group: z.string().max(64).optional().nullable(),
+    ab_traffic_split: z.number().int().min(0).max(100),
+    translations: z.array(
+      z.object({
+        locale: z.enum(["en", "fr", "ar"]),
+        title: z.string().max(255).optional().or(z.literal("")),
+        subtitle: z.string().max(512).optional().or(z.literal("")),
+        cta_label: z.string().max(128).optional().or(z.literal("")),
+        cta_url: z.string().optional().or(z.literal("")),
+        seo_title: z.string().max(255).optional().or(z.literal("")),
+        seo_description: z.string().max(500).optional().or(z.literal("")),
+      }),
+    ),
+    category_ids: z.array(z.string()),
+    brand_ids: z.array(z.string()),
+  });
+
+  type FormValues = z.infer<typeof form_schema>;
 
   // Load supporting options
   const { data: promotions } = trpc.promotions.adminList.useQuery({ page: 1, limit: 100 });
@@ -230,12 +231,23 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
   });
 
   const {
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
     setValue,
   } = form;
   const watchName = watch("name");
   const watchSlug = watch("slug");
+
+  useEffect(() => {
+    const warnBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [isDirty]);
 
   const syncSlug = useEffectEvent((name: string) => {
     if (mode === "create" && name && (!watchSlug || watchSlug === slugify(name.slice(0, -1)))) {
@@ -901,7 +913,10 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/console/campaigns")}
+            onClick={() => {
+              if (isDirty && !window.confirm(tc("unsaved_changes"))) return;
+              router.push("/console/campaigns");
+            }}
             disabled={isPending}
           >
             {tc("cancel")}
@@ -909,7 +924,7 @@ export function CampaignForm({ mode, campaign_id, default_values }: CampaignForm
           <Button
             type="submit"
             className="bg-primary text-primary-foreground hover:bg-primary/90"
-            disabled={isPending}
+            disabled={isPending || !isDirty}
           >
             {isPending ? tc("saving") : t("save_campaign")}
           </Button>

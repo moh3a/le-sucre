@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import {
   campaigns,
   campaign_translations,
@@ -12,8 +12,23 @@ import {
   campaign_categories,
   campaign_brands,
   campaign_analytics_daily,
+  campaign_jobs,
+  campaign_automation_rules,
+  campaign_webhook_events,
 } from "../schema";
-import { CAMPAIGN_STATUS } from "../constants/campaign_types";
+import { CAMPAIGN_STATUS, CAMPAIGN_TYPE } from "../constants/campaign_types";
+
+/** Canonical list of recommendation strategy ids resolvable by the recommendation engine. */
+const RECOMMENDATION_STRATEGY_IDS = [
+  "trending",
+  "bestselling",
+  "new_arrivals",
+  "top_rated",
+  "category_based",
+  "brand_based",
+  "personalized",
+  "frequently_bought",
+] as const;
 
 function now_iso() {
   return format(new Date(), "yyyy-MM-dd HH:mm:ss");
@@ -64,33 +79,44 @@ export class CampaignRepository {
   }
 
   async stats() {
-    const [total, active, scheduled, draft, paused, ended, cancelled] = await Promise.all([
-      db.select({ count: sql<number>`count(*)` }).from(campaigns),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(campaigns)
-        .where(eq(campaigns.status, CAMPAIGN_STATUS.active)),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(campaigns)
-        .where(eq(campaigns.status, CAMPAIGN_STATUS.scheduled)),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(campaigns)
-        .where(eq(campaigns.status, CAMPAIGN_STATUS.draft)),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(campaigns)
-        .where(eq(campaigns.status, CAMPAIGN_STATUS.paused)),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(campaigns)
-        .where(eq(campaigns.status, CAMPAIGN_STATUS.ended)),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(campaigns)
-        .where(eq(campaigns.status, CAMPAIGN_STATUS.cancelled)),
-    ]);
+    const [total, active, scheduled, draft, paused, ended, cancelled, landing_pages, ab_groups] =
+      await Promise.all([
+        db.select({ count: sql<number>`count(*)` }).from(campaigns),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.status, CAMPAIGN_STATUS.active)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.status, CAMPAIGN_STATUS.scheduled)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.status, CAMPAIGN_STATUS.draft)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.status, CAMPAIGN_STATUS.paused)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.status, CAMPAIGN_STATUS.ended)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.status, CAMPAIGN_STATUS.cancelled)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page)),
+        db
+          .select({
+            count: sql<number>`count(DISTINCT ${campaigns.ab_test_group})`,
+          })
+          .from(campaigns)
+          .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`),
+      ]);
 
     return {
       total: Number(total[0].count),
@@ -100,6 +126,100 @@ export class CampaignRepository {
       paused: Number(paused[0].count),
       ended: Number(ended[0].count),
       cancelled: Number(cancelled[0].count),
+      landing_pages: Number(landing_pages[0].count),
+      ab_groups: Number(ab_groups[0].count),
+    };
+  }
+
+  /**
+   * Aggregated status counts for a single campaign type.
+   * Runs a total count plus one count per requested status in parallel.
+   */
+  private async stats_by_type(campaign_type: string, statuses: (keyof typeof CAMPAIGN_STATUS)[]) {
+    const [total, ...status_results] = await Promise.all([
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(campaigns)
+        .where(eq(campaigns.campaign_type, campaign_type)),
+      ...statuses.map((status) =>
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(
+            and(
+              eq(campaigns.campaign_type, campaign_type),
+              eq(campaigns.status, CAMPAIGN_STATUS[status]),
+            ),
+          ),
+      ),
+    ]);
+
+    const counts: Record<string, number> = { total: Number(total[0].count) };
+    statuses.forEach((status, index) => {
+      counts[status] = Number(status_results[index][0].count);
+    });
+    return counts;
+  }
+
+  /** Aggregated counts for flash-sale campaigns (by status). */
+  async flash_sale_stats() {
+    return this.stats_by_type(CAMPAIGN_TYPE.flash_sale, [
+      "active",
+      "scheduled",
+      "paused",
+      "ended",
+    ]);
+  }
+
+  /** Aggregated counts for landing-page campaigns (by status). */
+  async landing_page_stats() {
+    return this.stats_by_type(CAMPAIGN_TYPE.landing_page, [
+      "active",
+      "scheduled",
+      "draft",
+      "ended",
+    ]);
+  }
+
+  /** Usage stats for recommendation strategies across campaign sections. */
+  async recommendation_stats() {
+    const strategy_key = sql`${campaign_sections.config}->>'$.strategy'`;
+
+    const [configured_sections, campaigns_using, strategies_used, usage_rows] =
+      await Promise.all([
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaign_sections)
+          .where(sql`${strategy_key} IS NOT NULL`),
+        db
+          .select({ count: sql<number>`count(DISTINCT ${campaign_sections.campaign_id})` })
+          .from(campaign_sections)
+          .where(sql`${strategy_key} IS NOT NULL`),
+        db
+          .select({ count: sql<number>`count(DISTINCT ${strategy_key})` })
+          .from(campaign_sections)
+          .where(sql`${strategy_key} IS NOT NULL`),
+        db
+          .select({
+            strategy: sql<string>`${strategy_key}`,
+            count: sql<number>`count(*)`,
+          })
+          .from(campaign_sections)
+          .where(sql`${strategy_key} IS NOT NULL`)
+          .groupBy(strategy_key),
+      ]);
+
+    const usage: Record<string, number> = {};
+    for (const row of usage_rows) {
+      if (row.strategy) usage[row.strategy] = Number(row.count);
+    }
+
+    return {
+      total: RECOMMENDATION_STRATEGY_IDS.length,
+      configured_sections: Number(configured_sections[0].count),
+      campaigns_using: Number(campaigns_using[0].count),
+      strategies_in_use: Number(strategies_used[0].count),
+      usage,
     };
   }
 
@@ -509,6 +629,150 @@ export class CampaignRepository {
       .where(eq(campaign_analytics_daily.campaign_id, campaign_id));
 
     return row ?? null;
+  }
+
+  /** Global analytics rollup across all campaigns for the last `days` days */
+  async get_analytics_overview(days = 30) {
+    const since = format(subDays(new Date(), days), "yyyy-MM-dd");
+
+    const [totals] = await db
+      .select({
+        impressions: sql<number>`coalesce(SUM(${campaign_analytics_daily.impressions}), 0)`,
+        clicks: sql<number>`coalesce(SUM(${campaign_analytics_daily.clicks}), 0)`,
+        banner_clicks: sql<number>`coalesce(SUM(${campaign_analytics_daily.banner_clicks}), 0)`,
+        add_to_cart: sql<number>`coalesce(SUM(${campaign_analytics_daily.add_to_cart}), 0)`,
+        conversions: sql<number>`coalesce(SUM(${campaign_analytics_daily.conversions}), 0)`,
+        unique_visitors: sql<number>`coalesce(SUM(${campaign_analytics_daily.unique_visitors}), 0)`,
+        revenue: sql<string>`coalesce(SUM(${campaign_analytics_daily.revenue}), 0)`,
+      })
+      .from(campaign_analytics_daily)
+      .where(gte(campaign_analytics_daily.day_key, since));
+
+    const timeseries = await db
+      .select({
+        day_key: campaign_analytics_daily.day_key,
+        impressions: campaign_analytics_daily.impressions,
+        clicks: campaign_analytics_daily.clicks,
+        banner_clicks: campaign_analytics_daily.banner_clicks,
+        add_to_cart: campaign_analytics_daily.add_to_cart,
+        conversions: campaign_analytics_daily.conversions,
+        unique_visitors: campaign_analytics_daily.unique_visitors,
+        revenue: campaign_analytics_daily.revenue,
+      })
+      .from(campaign_analytics_daily)
+      .where(gte(campaign_analytics_daily.day_key, since))
+      .orderBy(asc(campaign_analytics_daily.day_key));
+
+    return {
+      totals: totals ?? {
+        impressions: 0,
+        clicks: 0,
+        banner_clicks: 0,
+        add_to_cart: 0,
+        conversions: 0,
+        unique_visitors: 0,
+        revenue: "0",
+      },
+      timeseries,
+    };
+  }
+
+  /** Landing page campaigns with their aggregated analytics */
+  async list_landing_pages_overview(limit = 6) {
+    const rows = await db
+      .select({
+        id: campaigns.id,
+        name: campaigns.name,
+        slug: campaigns.slug,
+        status: campaigns.status,
+        priority: campaigns.priority,
+        starts_at: campaigns.starts_at,
+        ends_at: campaigns.ends_at,
+        created_at: campaigns.created_at,
+        impressions: sql<number>`coalesce(SUM(${campaign_analytics_daily.impressions}), 0)`,
+        clicks: sql<number>`coalesce(SUM(${campaign_analytics_daily.clicks}), 0)`,
+        conversions: sql<number>`coalesce(SUM(${campaign_analytics_daily.conversions}), 0)`,
+        revenue: sql<string>`coalesce(SUM(${campaign_analytics_daily.revenue}), 0)`,
+      })
+      .from(campaigns)
+      .leftJoin(campaign_analytics_daily, eq(campaign_analytics_daily.campaign_id, campaigns.id))
+      .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page))
+      .groupBy(
+        campaigns.id,
+        campaigns.name,
+        campaigns.slug,
+        campaigns.status,
+        campaigns.priority,
+        campaigns.starts_at,
+        campaigns.ends_at,
+        campaigns.created_at,
+      )
+      .orderBy(desc(campaigns.created_at))
+      .limit(limit);
+
+    return rows;
+  }
+
+  /** Scheduled campaigns that have not started yet, ordered by soonest launch */
+  async list_upcoming(limit = 5) {
+    const now = now_iso();
+    return db
+      .select({
+        id: campaigns.id,
+        name: campaigns.name,
+        slug: campaigns.slug,
+        campaign_type: campaigns.campaign_type,
+        status: campaigns.status,
+        priority: campaigns.priority,
+        starts_at: campaigns.starts_at,
+        ends_at: campaigns.ends_at,
+      })
+      .from(campaigns)
+      .where(
+        and(
+          eq(campaigns.status, CAMPAIGN_STATUS.scheduled),
+          sql`${campaigns.starts_at} IS NOT NULL`,
+          gte(campaigns.starts_at, now),
+        ),
+      )
+      .orderBy(asc(campaigns.starts_at))
+      .limit(limit);
+  }
+
+  /** Aggregated counts for every campaign sub-feature surfaced on the dashboard */
+  async get_subfeature_counts() {
+    const [flash_sales, landing_pages, ab_groups, automation_rules, scheduled_jobs, webhook_events] =
+      await Promise.all([
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.flash_sale)),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaigns)
+          .where(eq(campaigns.campaign_type, CAMPAIGN_TYPE.landing_page)),
+        db
+          .select({
+            count: sql<number>`count(DISTINCT ${campaigns.ab_test_group})`,
+          })
+          .from(campaigns)
+          .where(sql`${campaigns.ab_test_group} IS NOT NULL AND ${campaigns.ab_test_group} != ''`),
+        db.select({ count: sql<number>`count(*)` }).from(campaign_automation_rules),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(campaign_jobs)
+          .where(eq(campaign_jobs.status, "pending")),
+        db.select({ count: sql<number>`count(*)` }).from(campaign_webhook_events),
+      ]);
+
+    return {
+      flash_sales: Number(flash_sales[0].count),
+      landing_pages: Number(landing_pages[0].count),
+      ab_groups: Number(ab_groups[0].count),
+      automation_rules: Number(automation_rules[0].count),
+      scheduled_jobs: Number(scheduled_jobs[0].count),
+      webhook_events: Number(webhook_events[0].count),
+    };
   }
 
   // ─── Private helpers ──────────────────────────────────────────────────────

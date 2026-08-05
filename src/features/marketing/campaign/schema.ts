@@ -352,6 +352,67 @@ export const campaign_jobs = mysqlTable(
   ],
 );
 
+// ─── Campaign Automation Rules ────────────────────────────────────────────────
+
+export const campaign_automation_rules = mysqlTable(
+  "campaign_automation_rules",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
+    name: varchar("name", { length: 255 }).notNull(),
+    trigger: varchar("trigger", { length: 64 }).notNull(),
+    action: varchar("action", { length: 64 }).notNull(),
+    campaign_type_filter: varchar("campaign_type_filter", { length: 64 }),
+    status_filter: varchar("status_filter", { length: 32 }),
+    config: json("config").$type<Record<string, unknown>>().notNull().default({}),
+    is_active: boolean("is_active").notNull().default(true),
+    priority: int("priority").notNull().default(100),
+    created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    updated_at: timestamp("updated_at", { mode: "string" }).defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [index("automation_rules_trigger_idx").on(t.trigger, t.is_active)],
+);
+
+// ─── Campaign Automation Execution Log ────────────────────────────────────────
+
+export const campaign_automation_log = mysqlTable(
+  "campaign_automation_log",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
+    rule_id: varchar("rule_id", { length: 255 }).notNull(),
+    campaign_id: varchar("campaign_id", { length: 255 }).notNull(),
+    trigger: varchar("trigger", { length: 64 }).notNull(),
+    action: varchar("action", { length: 64 }).notNull(),
+    status: varchar("status", { length: 32 }).notNull().default("pending"),
+    result: json("result").$type<Record<string, unknown>>().default({}),
+    created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+  },
+  (t) => [index("automation_log_campaign_idx").on(t.campaign_id)],
+);
+
+// ─── Campaign Webhook Events ──────────────────────────────────────────────────
+
+export const campaign_webhook_events = mysqlTable(
+  "campaign_webhook_events",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => generate_id()),
+    event_type: varchar("event_type", { length: 64 }).notNull(),
+    campaign_id: varchar("campaign_id", { length: 255 }).notNull(),
+    payload: json("payload").$type<Record<string, unknown>>().notNull(),
+    status: varchar("status", { length: 32 }).notNull().default("pending"),
+    created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("campaign_webhook_events_type_idx").on(t.event_type),
+    index("campaign_webhook_events_campaign_idx").on(t.campaign_id),
+  ],
+);
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const campaignsRelations = relations(campaigns, ({ one, many }) => ({

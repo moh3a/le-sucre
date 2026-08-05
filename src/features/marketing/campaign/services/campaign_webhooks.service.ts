@@ -1,9 +1,6 @@
 import "server-only";
 import logger from "@/lib/logger";
-import { db } from "@/lib/db";
-import { eq, and, desc, sql } from "drizzle-orm";
-import { mysqlTable, varchar, json, timestamp, index } from "drizzle-orm/mysql-core";
-import { generate_id } from "@/lib/utils";
+import { campaign_webhooks_repository } from "../repositories/campaign_webhooks.repository";
 
 export type CampaignWebhookEvent =
   | "campaign.created"
@@ -17,24 +14,6 @@ export type CampaignWebhookEvent =
   | "campaign.flash_sale_starting"
   | "campaign.flash_sale_ending"
   | "campaign.analytics_threshold";
-
-export const campaign_webhook_events = mysqlTable(
-  "campaign_webhook_events",
-  {
-    id: varchar("id", { length: 255 })
-      .primaryKey()
-      .$defaultFn(() => generate_id()),
-    event_type: varchar("event_type", { length: 64 }).notNull(),
-    campaign_id: varchar("campaign_id", { length: 255 }).notNull(),
-    payload: json("payload").$type<Record<string, unknown>>().notNull(),
-    status: varchar("status", { length: 32 }).notNull().default("pending"),
-    created_at: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
-  },
-  (t) => [
-    index("campaign_webhook_events_type_idx").on(t.event_type),
-    index("campaign_webhook_events_campaign_idx").on(t.campaign_id),
-  ],
-);
 
 interface CampaignEventPayload {
   event: CampaignWebhookEvent;
@@ -69,13 +48,11 @@ export class CampaignWebhooksService {
     };
 
     try {
-      await db.insert(campaign_webhook_events).values({
-        id: generate_id(),
-        event_type: event,
-        campaign_id: campaign.id,
-        payload: payload as unknown as Record<string, unknown>,
-        status: "pending",
-      });
+      await campaign_webhooks_repository.insert_event(
+        event,
+        campaign.id,
+        payload as unknown as Record<string, unknown>,
+      );
 
       logger.info("campaign_webhook_dispatched", { event, campaign_id: campaign.id });
     } catch (err) {
@@ -101,20 +78,31 @@ export class CampaignWebhooksService {
     void this.dispatch(event, campaign, extra);
   }
 
+  /** Paginated admin listing. */
+  async list_events(page: number, limit: number, event_type?: string, status?: string, search?: string) {
+    return campaign_webhooks_repository.list(page, limit, event_type, status, search);
+  }
+
+  async get_stats() {
+    return campaign_webhooks_repository.stats();
+  }
+
   async get_recent_events(campaign_id?: string, limit = 20): Promise<CampaignEventPayload[]> {
-    const clauses = [sql`event_type LIKE 'campaign.%'`];
-    if (campaign_id) {
-      clauses.push(eq(sql`campaign_id`, campaign_id));
-    }
-
-    const rows = await db
-      .select()
-      .from(campaign_webhook_events)
-      .where(and(...clauses))
-      .orderBy(desc(campaign_webhook_events.created_at))
-      .limit(limit);
-
-    return rows.map((r) => r.payload as unknown as CampaignEventPayload);
+    const { items } = await campaign_webhooks_repository.list(
+      1,
+      limit,
+      undefined,
+      undefined,
+      campaign_id,
+    );
+    return items.map((r) => ({
+      event: r.event_type as CampaignWebhookEvent,
+      campaign_id: r.campaign_id,
+      campaign_name: r.campaign_name ?? "",
+      campaign_type: r.campaign_type ?? "",
+      status: r.status,
+      timestamp: r.created_at,
+    }));
   }
 }
 
