@@ -3,7 +3,13 @@ import { ApiResponse } from "@/lib/api_response";
 import { normalize_error } from "@/lib/error_handling";
 import { logger } from "@/lib/logger";
 
-export function json_ok<T>(data: T, status = 200, request_id?: string) {
+export function json_ok<T extends Response>(data: T, status?: number, request_id?: string): T;
+export function json_ok<T>(data: T, status?: number, request_id?: string): NextResponse;
+export function json_ok<T>(data: T, status = 200, request_id?: string): Response | NextResponse {
+  if (data instanceof Response) {
+    if (request_id) data.headers.set("x-request-id", request_id);
+    return data;
+  }
   return NextResponse.json(ApiResponse.success(data, null, request_id), {
     status,
     headers: request_id ? { "x-request-id": request_id } : undefined,

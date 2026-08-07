@@ -1,10 +1,12 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNull, like, lte, or, sql } from "drizzle-orm";
 import { format } from "date-fns";
 
 import { db, type DbClient } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
+import { PREORDER_ERROR } from "../constants/error-codes";
 import { sku_preorder_settings, preorder_allocations, preorder_status_events } from "../schema";
 import { product_skus } from "@/features/product_information_management/variants/schema";
 import { product_translations } from "@/features/product_information_management/products/schema";
@@ -12,9 +14,12 @@ import { PREORDER_ALLOCATION_STATUS } from "../constants/preorder-status";
 
 type Tx = Parameters<Parameters<DbClient["transaction"]>[0]>[0];
 
+const LOCALE = "fr";
+
 export class PreorderRepository {
-  get_settings(sku_id: string) {
-    return db
+  get_settings(sku_id: string, tx?: Tx) {
+    const client = tx ?? db;
+    return client
       .select()
       .from(sku_preorder_settings)
       .where(eq(sku_preorder_settings.sku_id, sku_id))
@@ -77,15 +82,30 @@ export class PreorderRepository {
       .where(eq(sku_preorder_settings.sku_id, sku_id));
   }
 
-  async confirm_allocation(allocation_id: string, order_id: string, order_item_id: string) {
-    const [alloc] = await db
+  async confirm_allocation(
+    allocation_id: string,
+    order_id: string,
+    order_item_id: string,
+    tx?: Tx,
+  ) {
+    const client = tx ?? db;
+    const [alloc] = await client
       .select()
       .from(preorder_allocations)
       .where(eq(preorder_allocations.id, allocation_id))
       .limit(1);
-    if (!alloc) return;
+    if (!alloc) throw_error(PREORDER_ERROR.ALLOCATION_NOT_FOUND);
+    if (alloc.status === PREORDER_ALLOCATION_STATUS.cancelled)
+      throw_error(PREORDER_ERROR.ALLOCATION_CANCELLED);
+    if (alloc.status === PREORDER_ALLOCATION_STATUS.expired)
+      throw_error(PREORDER_ERROR.ALLOCATION_EXPIRED);
+    if (
+      alloc.status === PREORDER_ALLOCATION_STATUS.confirmed ||
+      alloc.status === PREORDER_ALLOCATION_STATUS.fulfilled
+    )
+      throw_error(PREORDER_ERROR.ALLOCATION_ALREADY_CONFIRMED);
 
-    await db
+    await client
       .update(preorder_allocations)
       .set({
         status: PREORDER_ALLOCATION_STATUS.confirmed,
@@ -95,7 +115,7 @@ export class PreorderRepository {
       })
       .where(eq(preorder_allocations.id, allocation_id));
 
-    await db.insert(preorder_status_events).values({
+    await client.insert(preorder_status_events).values({
       id: generate_id(),
       allocation_id,
       from_status: alloc.status,
@@ -129,6 +149,52 @@ export class PreorderRepository {
         allocation_id,
         from_status: alloc.status,
         to_status: PREORDER_ALLOCATION_STATUS.cancelled,
+      });
+    });
+  }
+
+  async expire_stale_pending(cutoff: string) {
+    const rows = await db
+      .select({ id: preorder_allocations.id })
+      .from(preorder_allocations)
+      .where(
+        and(
+          eq(preorder_allocations.status, PREORDER_ALLOCATION_STATUS.pending),
+          isNull(preorder_allocations.cart_id),
+          lte(preorder_allocations.created_at, cutoff),
+        ),
+      )
+      .limit(500);
+    for (const row of rows) {
+      await this.expire_allocation(row.id);
+    }
+    return rows.length;
+  }
+
+  async expire_allocation(allocation_id: string) {
+    const [alloc] = await db
+      .select()
+      .from(preorder_allocations)
+      .where(eq(preorder_allocations.id, allocation_id))
+      .limit(1);
+    if (!alloc || alloc.status !== PREORDER_ALLOCATION_STATUS.pending) return;
+
+    await db.transaction(async (tx) => {
+      await this.decrement_preorder_sold(tx, alloc.sku_id, alloc.quantity);
+      await tx
+        .update(preorder_allocations)
+        .set({
+          status: PREORDER_ALLOCATION_STATUS.expired,
+          updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+        })
+        .where(eq(preorder_allocations.id, allocation_id));
+
+      await tx.insert(preorder_status_events).values({
+        id: generate_id(),
+        allocation_id,
+        from_status: alloc.status,
+        to_status: PREORDER_ALLOCATION_STATUS.expired,
+        note: "Expiré automatiquement",
       });
     });
   }
@@ -233,7 +299,13 @@ export class PreorderRepository {
       .select({ total: count() })
       .from(sku_preorder_settings)
       .innerJoin(product_skus, eq(sku_preorder_settings.sku_id, product_skus.id))
-      .leftJoin(product_translations, eq(product_translations.product_id, product_skus.product_id))
+      .leftJoin(
+        product_translations,
+        and(
+          eq(product_translations.product_id, product_skus.product_id),
+          eq(product_translations.locale, LOCALE),
+        ),
+      )
       .where(where);
 
     const items = await db
@@ -253,7 +325,13 @@ export class PreorderRepository {
       })
       .from(sku_preorder_settings)
       .innerJoin(product_skus, eq(sku_preorder_settings.sku_id, product_skus.id))
-      .leftJoin(product_translations, eq(product_translations.product_id, product_skus.product_id))
+      .leftJoin(
+        product_translations,
+        and(
+          eq(product_translations.product_id, product_skus.product_id),
+          eq(product_translations.locale, LOCALE),
+        ),
+      )
       .where(where)
       .orderBy(desc(sku_preorder_settings.updated_at))
       .limit(input.limit)
@@ -303,7 +381,10 @@ export class PreorderRepository {
         .leftJoin(product_skus, eq(preorder_allocations.sku_id, product_skus.id))
         .leftJoin(
           product_translations,
-          eq(product_skus.product_id, product_translations.product_id),
+          and(
+            eq(product_translations.product_id, product_skus.product_id),
+            eq(product_translations.locale, LOCALE),
+          ),
         )
         .where(where),
       db
@@ -327,7 +408,10 @@ export class PreorderRepository {
         .leftJoin(product_skus, eq(preorder_allocations.sku_id, product_skus.id))
         .leftJoin(
           product_translations,
-          eq(product_skus.product_id, product_translations.product_id),
+          and(
+            eq(product_translations.product_id, product_skus.product_id),
+            eq(product_translations.locale, LOCALE),
+          ),
         )
         .where(where)
         .orderBy(sql`${preorder_allocations.created_at} DESC`)
@@ -337,12 +421,12 @@ export class PreorderRepository {
 
     return {
       items,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      meta: { total, page, limit, total_pages: Math.ceil(total / limit) },
     };
   }
 
   async stats() {
-    const [total, pending, confirmed, fulfilled, cancelled] = await Promise.all([
+    const [total, pending, confirmed, fulfilled, cancelled, expired] = await Promise.all([
       db.select({ count: count() }).from(preorder_allocations),
       db
         .select({ count: count() })
@@ -360,6 +444,10 @@ export class PreorderRepository {
         .select({ count: count() })
         .from(preorder_allocations)
         .where(eq(preorder_allocations.status, "cancelled")),
+      db
+        .select({ count: count() })
+        .from(preorder_allocations)
+        .where(eq(preorder_allocations.status, "expired")),
     ]);
 
     const [{ total_qty }] = await db
@@ -380,6 +468,7 @@ export class PreorderRepository {
       confirmed: confirmed[0].count,
       fulfilled: fulfilled[0].count,
       cancelled: cancelled[0].count,
+      expired: expired[0].count,
       total_qty_active: total_qty,
     };
   }
@@ -389,6 +478,51 @@ export class PreorderRepository {
       .update(preorder_allocations)
       .set({ estimated_available_at, updated_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") })
       .where(eq(preorder_allocations.id, allocation_id));
+  }
+
+  async export_csv(input: { search?: string; status?: string }) {
+    const { items } = await this.admin_list_allocations(1, 100_000, input.status, input.search);
+    const escape = (value: string | number | null | undefined) => {
+      const v = String(value ?? "");
+      return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    };
+    const header = [
+      "id",
+      "sku_id",
+      "sku_code",
+      "product_name",
+      "warehouse_id",
+      "order_id",
+      "cart_id",
+      "order_item_id",
+      "quantity",
+      "status",
+      "estimated_available_at",
+      "fulfilled_at",
+      "created_at",
+      "updated_at",
+    ];
+    const rows = items.map((i) =>
+      [
+        i.id,
+        i.sku_id,
+        i.sku_code,
+        i.product_name,
+        i.warehouse_id,
+        i.order_id,
+        i.cart_id,
+        i.order_item_id,
+        i.quantity,
+        i.status,
+        i.estimated_available_at,
+        i.fulfilled_at,
+        i.created_at,
+        i.updated_at,
+      ]
+        .map(escape)
+        .join(","),
+    );
+    return [header.join(","), ...rows].join("\n");
   }
 }
 export const preorder_repository = new PreorderRepository();

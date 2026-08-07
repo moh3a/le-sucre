@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CircleAlert, Sparkles } from "lucide-react";
 import { trpc } from "@/components/providers/app-providers";
 import { ProductCard, ProductCardSkeleton } from "@/features/product_information_management/products/components/storefront/product-card";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -21,6 +22,7 @@ import {
 
 export function NewArrivalsContent({ locale }: { locale: AppLocale }) {
   const t = useTranslations("newArrivals");
+  const { add_product } = useStorefrontCart();
   const [page, setPage] = useState(1);
   const limit = 24;
 
@@ -122,6 +124,7 @@ export function NewArrivalsContent({ locale }: { locale: AppLocale }) {
                     brand_name: item.brand_name,
                   }}
                   variant="catalog"
+                  onAddToCart={() => void add_product({ product_id: item.id })}
                 />
               ))}
             </div>

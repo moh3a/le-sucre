@@ -20,6 +20,7 @@ import { aggregation_job_runner_service } from "@/features/marketing/analytics/s
 import { cart_abandonment_service } from "@/features/marketing/analytics/services/cart-abandonment.service";
 import { promotion_job_runner_service } from "@/features/order_management_system/promotions/services/promotion-job-runner.service";
 import { preorder_fulfillment_service } from "@/features/order_management_system/preorders/services/preorder-fulfillment.service";
+import { preorder_allocation_service } from "@/features/order_management_system/preorders/services/preorder-allocation.service";
 
 async function process_campaign_jobs() {
   const jobs = await campaign_scheduler_repository.poll_due(20);
@@ -108,6 +109,10 @@ async function process_analytics_jobs() {
 }
 
 async function process_preorders() {
+  const expired = await preorder_allocation_service.expire_stale();
+  if (expired > 0) {
+    logger.info("preorder_allocations_expired", { expired });
+  }
   await preorder_fulfillment_service.fulfill_all_confirmed();
 }
 

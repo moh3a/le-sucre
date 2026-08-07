@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useUndoAction } from "@/hooks/use-undo-action";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
+import { useStorefrontCart } from "../../hooks/use-storefront-cart";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SectionHeader } from "@/components/storefront/section-header";
@@ -26,10 +27,12 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
   const router = useRouter();
   const utils = trpc.useUtils();
   const { execute_with_undo } = useUndoAction();
+  const { cart_id: bootstrapped_cart_id } = useStorefrontCart();
+  const effective_cart_id = bootstrapped_cart_id ?? cartId;
 
   const cartQuery = trpc.cart.getCart.useQuery(
-    { cart_id: cartId ?? "", locale },
-    { enabled: !!cartId },
+    { cart_id: effective_cart_id ?? "", locale },
+    { enabled: !!effective_cart_id },
   );
   const updateMut = trpc.cart.updateItem.useMutation({
     onSuccess: () => {
@@ -38,6 +41,7 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
     },
   });
   const removeMut = trpc.cart.removeItem.useMutation();
+  const reAddMut = trpc.cart.addItem.useMutation();
   const savedQuery = trpc.wishlistManagement.saveForLater.list.useQuery({ page: 1, limit: 50 });
   const trendingQuery = trpc.recommendations.trending.useQuery({
     locale: locale as "fr" | "en" | "ar",
@@ -50,23 +54,33 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
     discount_label: string;
     discount_amount: number;
   } | null>(null);
+  const [promoCode, setPromoCode] = useState("");
   const applyPromo = trpc.promotions.validateCode.useMutation({
     onSuccess: (data) => {
-      if (!data) return;
-      const discount = (data as { applied?: Array<{ label: string; amount: number }> })
-        .applied?.[0];
+      const promoData = data as {
+        applied?: Array<{ label: string }>;
+        discount_total?: string;
+      };
+      const first = promoData.applied?.[0];
+      if (!first) {
+        setAppliedPromo(null);
+        toast.error(t("promo_not_applicable"));
+        return;
+      }
       setAppliedPromo({
-        code: "",
-        discount_label: discount?.label ?? "Réduction",
-        discount_amount: Number(discount?.amount ?? 0),
+        code: promoCode,
+        discount_label: first.label,
+        discount_amount: Number(promoData.discount_total ?? 0),
       });
+      toast.success(t("promo_applied"));
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const items = cartQuery.data?.items ?? [];
   const subtotal = Number(cartQuery.data?.subtotal ?? 0);
   const currency = cartQuery.data?.currency ?? "DZD";
-  const shipping = subtotal > 0 ? 0 : 0;
+  const shipping = 0;
   const discount = appliedPromo?.discount_amount ?? 0;
   const total = Math.max(0, subtotal + shipping - discount);
 
@@ -75,21 +89,28 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
   }
 
   async function handleQuantityChange(itemId: string, quantity: number) {
-    if (!cartId) return;
-    updateMut.mutate({ cart_id: cartId, item_id: itemId, quantity });
+    if (!effective_cart_id) return;
+    updateMut.mutate({ cart_id: effective_cart_id, item_id: itemId, quantity });
   }
 
   function handleRemove(itemId: string) {
-    if (!cartId) return;
+    if (!effective_cart_id) return;
     const item = items.find((i) => i.id === itemId);
     execute_with_undo({
       description: item?.product_name ?? "Article",
       execute: async () => {
-        await removeMut.mutateAsync({ cart_id: cartId, item_id: itemId });
+        await removeMut.mutateAsync({ cart_id: effective_cart_id, item_id: itemId });
         await utils.cart.getCart.invalidate();
       },
-      rollback: () => {
-        utils.cart.getCart.invalidate();
+      rollback: async () => {
+        if (item) {
+          await reAddMut.mutateAsync({
+            cart_id: effective_cart_id,
+            sku_id: item.sku_id,
+            quantity: item.quantity,
+          });
+        }
+        await utils.cart.getCart.invalidate();
       },
       undoTimeoutMs: 8_000,
     });
@@ -97,6 +118,7 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
 
   function handleApplyPromo(code: string) {
     if (!code.trim() || items.length === 0) return;
+    setPromoCode(code.trim());
     applyPromo.mutate({
       code: code.trim(),
       lines: items.map((i) => ({
@@ -114,7 +136,7 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
     router.push("/checkout");
   }
 
-  const hasItems = cartId && items.length > 0;
+  const hasItems = effective_cart_id && items.length > 0;
   const savedItems = savedQuery.data?.items ?? [];
   const trendingItems = trendingQuery.data ?? [];
   const showSaved = hasItems && savedItems.length > 0;
@@ -154,12 +176,12 @@ export function CartPageClient({ cartId, locale }: CartPageClientProps) {
                       id: item.product_id,
                       slug: item.sku_id,
                       name: item.product_name,
-                      image_url: null,
+                      image_url: item.image_url ?? null,
                       currency: item.currency,
                       min_price: item.unit_price,
                       max_price: null,
                       is_featured: false,
-                      in_stock: true,
+                      in_stock: item.fulfillment_type !== "unavailable",
                       brand_name: null,
                     },
                     quantity: item.quantity,

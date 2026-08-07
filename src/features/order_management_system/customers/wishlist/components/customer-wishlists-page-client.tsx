@@ -25,6 +25,9 @@ export function CustomerWishlistsPageClient() {
   const createWishlistMut = trpc.wishlistManagement.wishlists.create.useMutation();
   const deleteWishlistMut = trpc.wishlistManagement.wishlists.delete.useMutation();
   const removeItemMut = trpc.wishlistManagement.wishlists.removeItem.useMutation();
+  const setDefaultMut = trpc.wishlistManagement.wishlists.setDefault.useMutation();
+  const updateItemMut = trpc.wishlistManagement.wishlists.updateItem.useMutation();
+  const bulkAddMut = trpc.wishlistManagement.wishlists.bulkAdd.useMutation();
   const utils = trpc.useUtils();
 
   const queryError = useMemo(() => {
@@ -67,6 +70,47 @@ export function CustomerWishlistsPageClient() {
     }
   }
 
+  async function handleSetDefault(id: string) {
+    try {
+      await setDefaultMut.mutateAsync({ id });
+      toast.success(t("set_default_success"));
+      utils.wishlistManagement.wishlists.list.invalidate();
+    } catch {
+      toast.error(t("set_default_error"));
+    }
+  }
+
+  async function handleUpdateItem(
+    itemId: string,
+    patch: {
+      quantity?: number;
+      priority?: "low" | "medium" | "high" | "urgent";
+      notes?: string;
+    },
+  ) {
+    try {
+      await updateItemMut.mutateAsync({ id: itemId, ...patch });
+      toast.success(t("item_updated"));
+      utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: selectedId ?? "" });
+    } catch {
+      toast.error(t("item_updated"));
+    }
+  }
+
+  async function handleBulkAdd(wishlistId: string, productIds: string[]) {
+    try {
+      await bulkAddMut.mutateAsync({
+        wishlist_id: wishlistId,
+        items: productIds.map((product_id) => ({ product_id })),
+      });
+      toast.success(t("items_added", { count: productIds.length }));
+      utils.wishlistManagement.wishlists.listItems.invalidate({ wishlist_id: wishlistId });
+      utils.wishlistManagement.wishlists.stats.invalidate();
+    } catch {
+      toast.error(t("items_added_error"));
+    }
+  }
+
   return (
     <QueryGuard
       query={{ isLoading: listQuery.isLoading, error: queryError }}
@@ -90,6 +134,9 @@ export function CustomerWishlistsPageClient() {
           onCreateWishlist={handleCreate}
           onDeleteWishlist={handleDelete}
           onRemoveItem={handleRemoveItem}
+          onSetDefault={handleSetDefault}
+          onUpdateItem={handleUpdateItem}
+          onBulkAdd={handleBulkAdd}
           isLoading={listQuery.isLoading || isItemsLoading}
         />
       </div>

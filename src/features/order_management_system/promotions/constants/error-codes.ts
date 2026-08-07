@@ -148,6 +148,15 @@ export const FLASH_SALE_ERROR = {
       ar: "لم يبدأ البيع السريع بعد",
     },
   },
+  STOCK_EXCEEDED: {
+    code: "FLASH_SALE_STOCK_EXCEEDED",
+    status: 409,
+    message: {
+      fr: "Stock vente flash épuisé",
+      en: "Flash sale stock exhausted",
+      ar: "نفد مخزون البيع السريع",
+    },
+  },
 } as const satisfies Record<string, ErrorDef>;
 
 export const CART_DISCOUNT_ERROR = {

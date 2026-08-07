@@ -64,18 +64,6 @@ export class PreorderFulfillmentService {
           .where(eq(orders.id, alloc.order_id));
       }
 
-      // Insert inventory movement for preorder fulfillment
-      await db.transaction(async (tx) => {
-        await inventory_repository.insert_movement(tx, {
-          sku_id,
-          warehouse_id,
-          movement_type: "preorder_fulfill",
-          quantity_delta: -alloc.quantity,
-          reference_type: "preorder_allocation",
-          reference_id: alloc.id,
-        });
-      });
-
       available -= alloc.quantity;
     }
   }

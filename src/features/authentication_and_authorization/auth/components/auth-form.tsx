@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/client";
 import { trpc } from "@/components/providers/app-providers";
+import { reset_cart_bootstrap } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 
 const phone_regex = /^\+?[\d\s\-()]{7,20}$/;
 const email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,6 +54,8 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [signUpConfirm, setSignUpConfirm] = useState("");
   const [signUpError, setSignUpError] = useState("");
 
+  const merge_mutation = trpc.cart.mergeGuestCart.useMutation();
+
   const signUpMutation = trpc.auth.signUp.useMutation({
     onSuccess: async () => {
       const identifier = signUpEmail || signUpPhone;
@@ -67,6 +70,12 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             setTab("signin");
             return;
           }
+          try {
+            await merge_mutation.mutateAsync();
+          } catch {
+            // non-blocking — a stale guest cart is harmless
+          }
+          reset_cart_bootstrap();
         }
       }
       reset();
@@ -120,6 +129,13 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
         setSignInError(t("error_invalid"));
         return;
       }
+
+      try {
+        await merge_mutation.mutateAsync();
+      } catch {
+        // non-blocking — a stale guest cart is harmless
+      }
+      reset_cart_bootstrap();
 
       reset();
       onSuccess?.();

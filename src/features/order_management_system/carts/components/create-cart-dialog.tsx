@@ -28,7 +28,7 @@ export function CreateCartDialog() {
 
   const utils = trpc.useUtils();
 
-  const add = trpc.cart.addItem.useMutation({
+  const add = trpc.cart.adminAddItem.useMutation({
     onSuccess: () => {
       toast.success(t("item_added"));
       setOpen(false);

@@ -20,6 +20,7 @@ export const admin_create_order_dto = z.object({
 
 export const checkout_preview_dto = z.object({
   discount_code: z.string().max(64).optional(),
+  shipping_method: z.string().min(1).max(32).optional(),
   shipping_cost: z.coerce.number().min(0).optional(),
   tax_rate: z.coerce.number().min(0).max(1).optional(), // 0.19 = 19%
 });
@@ -29,6 +30,7 @@ export const place_order_dto = z.object({
   shipping_address: address_snapshot_dto,
   billing_address: address_snapshot_dto.optional(),
   discount_code: z.string().max(64).optional(),
+  shipping_method: z.string().min(1).max(32).optional(),
   shipping_cost: z.coerce.number().min(0).default(0),
   tax_rate: z.coerce.number().min(0).max(1).optional(),
   idempotency_key: z.string().min(8).max(64),

@@ -62,6 +62,10 @@ export const customer_relations_router = create_trpc_router({
   customerGetOverdueFollowUps: permission_procedure(PERMISSIONS.orders_read)
     .query(() => customer_relations_service.get_overdue_follow_ups()),
 
+  customerGetFollowUp: permission_procedure(PERMISSIONS.orders_read)
+    .input(z.object({ id: z.string() }))
+    .query(({ input }) => customer_relations_service.get_follow_up(input.id)),
+
   customerGetFollowUpsByUser: permission_procedure(PERMISSIONS.customers_read)
     .input(z.object({ user_id: z.string() }))
     .query(({ input }) => customer_relations_service.get_follow_ups_by_user(input.user_id)),

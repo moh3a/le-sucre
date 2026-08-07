@@ -14,6 +14,7 @@ import {
   ProductCard,
   ProductCardSkeleton,
 } from "@/features/product_information_management/products/components/storefront/product-card";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
 import type { AppLocale } from "@/i18n/config";
 
@@ -24,6 +25,7 @@ interface Props {
 
 export function BrandDetailClient({ slug, locale }: Props) {
   const t = useTranslations("brandDetail");
+  const { add_product } = useStorefrontCart();
 
   const brand_query = trpc.brands.bySlug.useQuery({ slug });
   const brand = brand_query.data;
@@ -140,7 +142,12 @@ export function BrandDetailClient({ slug, locale }: Props) {
         ) : products.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {products.map((item) => (
-              <ProductCard key={item.id} product={item} variant="catalog" />
+              <ProductCard
+                key={item.id}
+                product={item}
+                variant="catalog"
+                onAddToCart={() => void add_product({ product_id: item.id })}
+              />
             ))}
           </div>
         ) : (

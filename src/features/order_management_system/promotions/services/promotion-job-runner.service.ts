@@ -35,11 +35,14 @@ export class PromotionJobRunnerService {
     for (const job of jobs) {
       try {
         const flash_sale_id = String(job.payload?.flash_sale_id ?? "");
+        const promotion_id = String(job.payload?.promotion_id ?? "");
 
         if (job.job_type === "activate_flash" && flash_sale_id) {
           await promotion_scheduler_service.activate_flash(flash_sale_id);
         } else if (job.job_type === "deactivate_flash" && flash_sale_id) {
           await promotion_scheduler_service.deactivate_flash(flash_sale_id);
+        } else if (job.job_type === "expire_promotions" && promotion_id) {
+          await promotion_scheduler_service.expire_promotion(promotion_id);
         }
 
         await this.mark_done(job.id);

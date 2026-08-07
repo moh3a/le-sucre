@@ -31,6 +31,31 @@ export class WishlistItemRepository {
     return row ?? null;
   }
 
+  async find_by_customer_and_product(
+    customer_id: string,
+    product_id: string,
+    variant_id: string | null,
+  ): Promise<Array<{ id: string; wishlist_id: string; product_id: string; variant_id: string | null }>> {
+    const conditions: ReturnType<typeof eq>[] = [
+      eq(wishlists.customer_id, customer_id),
+      eq(wishlist_items.product_id, product_id),
+      eq(wishlist_items.is_purchased, false),
+    ];
+    const variant_match = variant_id
+      ? eq(wishlist_items.variant_id, variant_id)
+      : sql`${wishlist_items.variant_id} IS NULL`;
+    return db
+      .select({
+        id: wishlist_items.id,
+        wishlist_id: wishlist_items.wishlist_id,
+        product_id: wishlist_items.product_id,
+        variant_id: wishlist_items.variant_id,
+      })
+      .from(wishlist_items)
+      .innerJoin(wishlists, eq(wishlist_items.wishlist_id, wishlists.id))
+      .where(and(...conditions, variant_match));
+  }
+
   async list_by_wishlist(
     wishlist_id: string,
     page: number,
@@ -88,6 +113,17 @@ export class WishlistItemRepository {
       .from(wishlist_items)
       .where(eq(wishlist_items.wishlist_id, wishlist_id));
     return Number(row.total);
+  }
+
+  async list_by_product(product_id: string, variant_id: string | null): Promise<WishlistItem[]> {
+    const conditions: ReturnType<typeof eq>[] = [eq(wishlist_items.product_id, product_id)];
+    const variant_match = variant_id
+      ? eq(wishlist_items.variant_id, variant_id)
+      : sql`${wishlist_items.variant_id} IS NULL`;
+    return db
+      .select()
+      .from(wishlist_items)
+      .where(and(...conditions, variant_match));
   }
 
   async mark_as_purchased(

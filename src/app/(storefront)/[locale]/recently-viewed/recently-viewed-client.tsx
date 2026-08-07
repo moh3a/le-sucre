@@ -13,6 +13,7 @@ import {
   ProductCard,
   ProductCardSkeleton,
 } from "@/features/product_information_management/products/components/storefront/product-card";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -67,6 +68,7 @@ function toStorefrontProduct(item: {
 export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
   const t = useTranslations("recentlyViewed");
   const sessionKey = useSessionKey();
+  const { add_product } = useStorefrontCart();
 
   const query = trpc.recommendations.recent.useQuery(
     { locale: locale === "ar" ? "fr" : locale, session_key: sessionKey, limit: 24 },
@@ -135,7 +137,12 @@ export function RecentlyViewedContent({ locale }: { locale: AppLocale }) {
         <section>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {items.map((item) => (
-              <ProductCard key={item.id} product={toStorefrontProduct(item)} variant="catalog" />
+              <ProductCard
+                key={item.id}
+                product={toStorefrontProduct(item)}
+                variant="catalog"
+                onAddToCart={() => void add_product({ product_id: item.id })}
+              />
             ))}
           </div>
         </section>

@@ -23,6 +23,7 @@ import {
   ProductCard,
   ProductCardSkeleton,
 } from "@/features/product_information_management/products/components/storefront/product-card";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import type { AppLocale } from "@/i18n/config";
 import {
   Empty,
@@ -255,6 +256,7 @@ function FlashSaleCard({
   const t = useTranslations("flashSales");
   const remaining = useCountdown(status === "active" ? sale.time_remaining_seconds : null);
   const endingSoon = status === "active" && (sale.is_ending_soon || remaining < 3600);
+  const { add_product } = useStorefrontCart();
 
   const products_query = trpc.recommendations.hydrate.useQuery(
     {
@@ -292,6 +294,7 @@ function FlashSaleCard({
                 key={product.id}
                 product={toStorefrontProduct(product)}
                 variant="flash-sale"
+                onAddToCart={() => void add_product({ product_id: product.id })}
               />
             ))}
           </div>

@@ -141,6 +141,7 @@ export function PreordersTable() {
     { label: t("confirmed"), value: "confirmed" },
     { label: t("fulfilled"), value: "fulfilled" },
     { label: t("cancelled"), value: "cancelled" },
+    { label: t("expired"), value: "expired" },
   ];
 
   const STATUS_BADGES: Record<
@@ -152,6 +153,7 @@ export function PreordersTable() {
       confirmed: { label: t("confirmed"), variant: "secondary" },
       fulfilled: { label: t("fulfilled"), variant: "default" },
       cancelled: { label: t("cancelled"), variant: "destructive" },
+      expired: { label: t("expired"), variant: "outline" },
     }),
     [t],
   );
@@ -253,7 +255,9 @@ export function PreordersTable() {
         cell: ({ row }) => {
           const eta = row.original.estimated_available_at;
           const canEdit =
-            row.original.status !== "fulfilled" && row.original.status !== "cancelled";
+            row.original.status !== "fulfilled" &&
+            row.original.status !== "cancelled" &&
+            row.original.status !== "expired";
           return (
             <div className="flex items-center gap-2">
               <span className="text-xs">{eta ? formatDate(eta, { month: "short" }) : "—"}</span>
@@ -307,7 +311,9 @@ export function PreordersTable() {
                   </Link>
                 </DropdownMenuItem>
               )}
-              {row.original.status !== "fulfilled" && row.original.status !== "cancelled" && (
+              {row.original.status !== "fulfilled" &&
+                row.original.status !== "cancelled" &&
+                row.original.status !== "expired" && (
                 <DropdownMenuItem
                   onClick={() => {
                     setEtaDialog({
@@ -334,7 +340,7 @@ export function PreordersTable() {
   );
 
   const items = (data?.items ?? []) as PreorderRow[];
-  const page_count = data?.meta.totalPages ?? 0;
+  const page_count = data?.meta.total_pages ?? 0;
 
   const { table } = useDataTable({
     data: items,

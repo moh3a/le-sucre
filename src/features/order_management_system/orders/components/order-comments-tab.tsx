@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { MessageSquare, Send, Lock, Globe } from "lucide-react";
+import { MessageSquare, Send, Lock, Globe, Pencil, X } from "lucide-react";
 
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
@@ -24,6 +24,8 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
   });
   const [content, set_content] = useState("");
   const [is_private, set_is_private] = useState(true);
+  const [editing_id, set_editing_id] = useState<string | null>(null);
+  const [edit_content, set_edit_content] = useState("");
 
   const add_comment = trpc.operations.orderAddComment.useMutation({
     onSuccess: () => {
@@ -33,6 +35,31 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
     },
     onError: (err) => toast.error(`${t("error")}: ${err.message}`),
   });
+
+  const update_comment = trpc.operations.orderUpdateComment.useMutation({
+    onSuccess: () => {
+      refetch();
+      set_editing_id(null);
+      set_edit_content("");
+      toast.success(t("comment_updated"));
+    },
+    onError: (err) => toast.error(`${t("error")}: ${err.message}`),
+  });
+
+  function start_editing(comment_id: string, comment_content: string) {
+    set_editing_id(comment_id);
+    set_edit_content(comment_content);
+  }
+
+  function cancel_editing() {
+    set_editing_id(null);
+    set_edit_content("");
+  }
+
+  function save_editing() {
+    if (!editing_id || !edit_content.trim()) return;
+    update_comment.mutate({ id: editing_id, content: edit_content.trim() });
+  }
 
   return (
     <QueryGuard query={{ isLoading: !comments?.length }} mutation={add_comment}>
@@ -112,16 +139,60 @@ export function OrderCommentsTab({ order_id }: OrderCommentsTabProps) {
                     )}
                     <span className="font-medium">{c.author_user_id}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(c.created_at, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(c.created_at, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    {editing_id === c.id ? (
+                      <>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={save_editing}
+                          disabled={!edit_content.trim() || update_comment.isPending}
+                          title={t("save")}
+                        >
+                          <Send className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={cancel_editing}
+                          title={t("annuler")}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => start_editing(c.id, c.content)}
+                        title={t("edit")}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <p className="mt-1 whitespace-pre-wrap">{c.content}</p>
+                {editing_id === c.id ? (
+                  <Textarea
+                    className="mt-1 min-h-16"
+                    value={edit_content}
+                    onChange={(e) => set_edit_content(e.target.value)}
+                    rows={2}
+                  />
+                ) : (
+                  <p className="mt-1 whitespace-pre-wrap">{c.content}</p>
+                )}
               </div>
             ))}
           </CardContent>

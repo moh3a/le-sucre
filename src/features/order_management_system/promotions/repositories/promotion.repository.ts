@@ -65,6 +65,53 @@ export class PromotionRepository {
     };
   }
 
+  async export_csv(input: { search?: string; status?: string; promotion_type?: string }) {
+    const { items } = await this.list_admin(1, 100_000, input.status, input.promotion_type, input.search);
+    const escape = (value: string | number | boolean | null | undefined) => {
+      const v = String(value ?? "");
+      return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    };
+    const header = [
+      "id",
+      "name",
+      "slug",
+      "promotion_type",
+      "status",
+      "priority",
+      "is_stackable",
+      "starts_at",
+      "ends_at",
+      "created_at",
+      "updated_at",
+      "usage_count",
+      "total_discount",
+      "discount_type",
+      "discount_value",
+    ];
+    const rows = items.map((i) =>
+      [
+        i.id,
+        i.name,
+        i.slug,
+        i.promotion_type,
+        i.status,
+        i.priority,
+        i.is_stackable,
+        i.starts_at,
+        i.ends_at,
+        i.created_at,
+        i.updated_at,
+        i.usage_count,
+        i.total_discount,
+        i.discount_type,
+        i.discount_value,
+      ]
+        .map(escape)
+        .join(","),
+    );
+    return [header.join(","), ...rows].join("\n");
+  }
+
   async stats() {
     const [total, active, draft, scheduled, paused, expired, promoCodeCount, totalRedemptions] = await Promise.all([
       db.select({ count: count() }).from(promotions),

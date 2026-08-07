@@ -24,6 +24,7 @@ import {
   PAYMENT_BADGE,
   FULFILLMENT_BADGE,
   STATUS_BADGE,
+  ORDER_STATUS_TRANSITIONS,
 } from "../constants/order-status";
 import { NotesCard } from "./notes-card";
 
@@ -61,10 +62,16 @@ export function GeneralTab({ order, on_update }: GeneralTabProps) {
   const transition = trpc.orders.adminTransition.useMutation({ onSuccess: () => on_update() });
   const [next_status, set_next_status] = useState<string>("");
 
-  const STATUS_OPTIONS = STATUS_OPTIONS_VALUES.map((value) => ({
-    value,
-    label: t(`status_${value}`),
-  }));
+  const allowed_transitions = ORDER_STATUS_TRANSITIONS[order.status];
+  const transition_options = allowed_transitions?.length
+    ? STATUS_OPTIONS_VALUES.filter((value) => allowed_transitions.includes(value))
+    : STATUS_OPTIONS_VALUES;
+  const STATUS_OPTIONS = transition_options
+    .filter((value) => value !== order.status)
+    .map((value) => ({
+      value,
+      label: t(`status_${value}`),
+    }));
 
   const { data: operators_data, isLoading: operators_loading } =
     trpc.adminAuth.listUsersByRole.useQuery({ role: "operator" });

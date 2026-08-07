@@ -50,6 +50,43 @@ export class PromotionReviewService {
     return { items, meta: { page, limit, total_records: Number(total ?? 0), total_pages: Math.ceil(Number(total ?? 0) / limit) } };
   }
 
+  async export_csv(status?: string) {
+    const { items } = await this.list_reviews(1, 100_000, status);
+    const escape = (value: string | number | null | undefined) => {
+      const v = String(value ?? "");
+      return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    };
+    const header = [
+      "id",
+      "promotion_id",
+      "review_type",
+      "status",
+      "reviewer_user_id",
+      "review_note",
+      "reviewed_at",
+      "requested_by_user_id",
+      "created_at",
+      "updated_at",
+    ];
+    const rows = items.map((i) =>
+      [
+        i.id,
+        i.promotion_id,
+        i.review_type,
+        i.status,
+        i.reviewer_user_id,
+        i.review_note,
+        i.reviewed_at,
+        i.requested_by_user_id,
+        i.created_at,
+        i.updated_at,
+      ]
+        .map(escape)
+        .join(","),
+    );
+    return [header.join(","), ...rows].join("\n");
+  }
+
   async get_review_stats() {
     const [[{ pending }], [{ approved }], [{ rejected }]] = await Promise.all([
       db.select({ pending: count() }).from(promotion_reviews).where(eq(promotion_reviews.status, "pending")),

@@ -93,15 +93,17 @@ export class WishlistAnalyticsService {
   }
 
   async get_product_stats(product_id: string) {
-    const [wishlist_count, favorite_count] = await Promise.all([
-      this.event_repo.get_event_count_by_type("add_to_wishlist"),
-      this.event_repo.get_event_count_by_type("favorite_product"),
+    const [wishlist_count, favorite_count, wishlist_conversions] = await Promise.all([
+      this.event_repo.get_event_count_by_type_and_product("add_to_wishlist", product_id),
+      this.event_repo.get_event_count_by_type_and_product("favorite_product", product_id),
+      this.event_repo.get_event_count_by_type_and_product("purchase_from_wishlist", product_id),
     ]);
 
     return {
+      product_id,
       wishlist_count,
       favorite_count,
-      wishlist_conversions: 0,
+      wishlist_conversions,
     };
   }
 

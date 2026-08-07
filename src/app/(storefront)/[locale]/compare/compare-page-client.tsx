@@ -20,6 +20,7 @@ import {
   EmptyContent,
 } from "@/components/ui/empty";
 import { trpc } from "@/components/providers/app-providers";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import { ProductImage } from "@/features/product_information_management/products/components/storefront/product-image";
 import { ProductPrice } from "@/features/product_information_management/products/components/storefront/product-price";
 import { ProductRating } from "@/features/product_information_management/products/components/storefront/product-rating";
@@ -35,6 +36,7 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
   const t = useTranslations("compare");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { add_product } = useStorefrontCart();
 
   const slugs = searchParams.get("slugs")?.split(",").filter(Boolean) ?? initialSlugs;
 
@@ -152,7 +154,12 @@ export function ComparePageClient({ initialSlugs, locale }: ComparePageClientPro
                   currency={product.currency}
                   size="sm"
                 />
-                <Button size="sm" variant="default" className="mt-3 gap-2 rounded-full text-xs">
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="mt-3 gap-2 rounded-full text-xs"
+                  onClick={() => void add_product({ product_id: product.id })}
+                >
                   <ShoppingCart className="h-3.5 w-3.5" />
                   {t("add_to_cart")}
                 </Button>

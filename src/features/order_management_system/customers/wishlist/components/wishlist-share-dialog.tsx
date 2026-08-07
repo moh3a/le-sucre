@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Share2, Copy, Check, Loader2 } from "lucide-react";
+import { Share2, Copy, Check, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { trpc } from "@/components/providers/app-providers";
 import { useWishlistSharing } from "../hooks/use-wishlist";
 
 interface WishlistShareDialogProps {
@@ -35,9 +36,15 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
   const [expiresIn, setExpiresIn] = useState("");
   const [shareUrl, setShareUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const { createLink } = useWishlistSharing();
+  const { createLink, revokeLink } = useWishlistSharing();
   const [isCreating, setIsCreating] = useState(false);
-  const [links, setLinks] = useState<Array<{ id: string; url: string; permission: string }>>([]);
+
+  const { data: links, isLoading: linksLoading } = trpc.wishlistManagement.sharing.listLinks.useQuery(
+    { wishlist_id: wishlistId },
+    { enabled: open },
+  );
+
+  const activeLinks = (links ?? []).filter((link) => link.is_active);
 
   async function handleGenerateLink() {
     setIsCreating(true);
@@ -49,12 +56,20 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
       });
       const url = `${window.location.origin}${result.url}`;
       setShareUrl(url);
-      setLinks((prev) => [...prev, { id: result.id, url, permission: result.permission }]);
       toast.success(t("link_created"));
     } catch {
       toast.error(t("link_created"));
     } finally {
       setIsCreating(false);
+    }
+  }
+
+  async function handleRevoke(tokenId: string) {
+    try {
+      await revokeLink(tokenId);
+      toast.success(t("link_revoked"));
+    } catch {
+      toast.error(t("link_revoked"));
     }
   }
 
@@ -115,22 +130,36 @@ export function WishlistShareDialog({ wishlistId, wishlistName }: WishlistShareD
             </div>
           )}
 
-          {links.length > 0 && (
+          {linksLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+          ) : activeLinks.length > 0 ? (
             <div className="space-y-2">
               <p className="text-sm font-medium">{t("active_links")}</p>
-              {links.map((link) => (
+              {activeLinks.map((link) => (
                 <div
                   key={link.id}
                   className="bg-muted flex items-center justify-between rounded p-2 text-sm"
                 >
-                  <span className="flex-1 truncate">{link.url}</span>
+                  <span className="flex-1 truncate">
+                    {`${window.location.origin}/shared/wishlist/${link.token}`}
+                  </span>
                   <span className="text-muted-foreground ml-2 text-xs capitalize">
                     {link.permission}
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive ml-1 h-6 w-6"
+                    onClick={() => handleRevoke(link.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

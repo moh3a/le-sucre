@@ -36,7 +36,7 @@ export const preorder_allocations = mysqlTable(
     cart_id: varchar("cart_id", { length: 255 }),
     order_item_id: varchar("order_item_id", { length: 255 }),
     quantity: int("quantity").notNull(),
-    status: varchar("status", { length: 32 }).notNull().default("pending"), // pending|confirmed|fulfilled|cancelled
+    status: varchar("status", { length: 32 }).notNull().default("pending"), // pending|confirmed|fulfilled|cancelled|expired
     estimated_available_at: timestamp("estimated_available_at", { mode: "string" }),
     fulfilled_at: timestamp("fulfilled_at", { mode: "string" }),
     user_id: varchar("user_id", { length: 255 }),

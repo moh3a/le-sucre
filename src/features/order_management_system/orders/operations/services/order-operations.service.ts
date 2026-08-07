@@ -2,6 +2,9 @@ import "server-only";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { order_repository } from "@/features/order_management_system/orders/repositories/order.repository";
+import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+import { notification_service } from "@/features/console_dashboard/notifications/services/notification.service";
+import { NOTIFICATION_TYPES } from "@/features/console_dashboard/notifications/constants/notifications";
 import { order_operations_repository as repo } from "../repositories/order-operations.repository";
 
 const OPERATIONS_ERROR = {
@@ -15,6 +18,20 @@ const OPERATIONS_ERROR = {
 };
 
 export class OrderOperationsService {
+  private async notify_order_actor(input: {
+    user_id?: string | null;
+    type: string;
+    order_id: string;
+  }) {
+    if (!input.user_id) return;
+    await notification_service.notify({
+      user_id: input.user_id,
+      type: input.type,
+      reference_type: "order_id",
+      reference_id: input.order_id,
+    });
+  }
+
   async assign_operator(input: { order_id: string; operator_id: string | null; actor_user_id: string; note?: string }) {
     const order = await order_repository.find_by_id(input.order_id);
     if (!order) throw_error(OPERATIONS_ERROR.NOT_FOUND);
@@ -29,6 +46,20 @@ export class OrderOperationsService {
       id: generate_id(), order_id: input.order_id, from_status: order.status, to_status: order.status,
       actor_user_id: input.actor_user_id, note: input.note ?? (input.operator_id ? "Opérateur assigné" : "Opérateur désassigné"),
     });
+    void audit_service.log({
+      actor_user_id: input.actor_user_id,
+      action: "order.assign_operator",
+      resource_type: "order_id",
+      resource_id: input.order_id,
+      metadata: { operator_id: input.operator_id ?? undefined },
+    });
+    if (input.operator_id) {
+      await this.notify_order_actor({
+        user_id: input.operator_id,
+        type: NOTIFICATION_TYPES.ORDER_ASSIGNED,
+        order_id: input.order_id,
+      });
+    }
   }
 
   async get_assignment_history(order_id: string) {
@@ -47,6 +78,11 @@ export class OrderOperationsService {
       id: generate_id(), order_id: input.order_id, from_status: order.status, to_status: order.status,
       actor_user_id: input.escalated_by_user_id, note: `Escalade: ${input.reason}`,
     });
+    await this.notify_order_actor({
+      user_id: input.assigned_to_user_id ?? order.assigned_operator_id,
+      type: NOTIFICATION_TYPES.ORDER_ESCALATED,
+      order_id: input.order_id,
+    });
     return repo.get_escalation(id);
   }
 
@@ -64,6 +100,8 @@ export class OrderOperationsService {
 
   async list_escalations(page = 1, limit = 20, status?: string) { return repo.list_escalations(page, limit, status); }
 
+  async export_escalations_csv(status?: string) { return repo.export_escalations_csv(status); }
+
   async place_on_hold(input: { order_id: string; reason: string; description?: string; held_by_user_id: string }) {
     const order = await order_repository.find_by_id(input.order_id);
     if (!order) throw_error(OPERATIONS_ERROR.NOT_FOUND);
@@ -76,6 +114,11 @@ export class OrderOperationsService {
     await order_repository.insert_status_event({
       id: generate_id(), order_id: input.order_id, from_status: order.status, to_status: "on_hold",
       actor_user_id: input.held_by_user_id, note: `Commande mise en attente: ${input.reason}`,
+    });
+    await this.notify_order_actor({
+      user_id: order.assigned_operator_id,
+      type: NOTIFICATION_TYPES.ORDER_HELD,
+      order_id: input.order_id,
     });
     return repo.get_holds_by_order(input.order_id);
   }
@@ -95,6 +138,12 @@ export class OrderOperationsService {
       id: generate_id(), order_id: hold_record.order_id, from_status: "on_hold", to_status: "processing",
       actor_user_id: input.released_by_user_id, note: `Attente levée: ${input.reason ?? "Libéré"}`,
     });
+    const order = await order_repository.find_by_id(hold_record.order_id);
+    await this.notify_order_actor({
+      user_id: order?.assigned_operator_id,
+      type: NOTIFICATION_TYPES.ORDER_RELEASED,
+      order_id: hold_record.order_id,
+    });
   }
 
   async get_holds(order_id: string) { return repo.get_holds_by_order(order_id); }
@@ -112,6 +161,11 @@ export class OrderOperationsService {
     await order_repository.insert_status_event({
       id: generate_id(), order_id: input.order_id, from_status: order.status, to_status: order.status,
       actor_user_id: input.requested_by_user_id, note: `Demande d'annulation: ${input.reason}`,
+    });
+    await this.notify_order_actor({
+      user_id: order.assigned_operator_id,
+      type: NOTIFICATION_TYPES.ORDER_CANCELLATION_REQUESTED,
+      order_id: input.order_id,
     });
     return repo.get_cancellation_request(id);
   }
@@ -138,6 +192,8 @@ export class OrderOperationsService {
 
   async list_cancellation_requests(page = 1, limit = 20, status?: string) { return repo.list_cancellation_requests(page, limit, status); }
 
+  async export_cancellations_csv(status?: string) { return repo.export_cancellations_csv(status); }
+
   async add_comment(input: { order_id: string; content: string; is_private?: boolean; author_user_id: string }) {
     const order = await order_repository.find_by_id(input.order_id);
     if (!order) throw_error(OPERATIONS_ERROR.NOT_FOUND);
@@ -146,6 +202,12 @@ export class OrderOperationsService {
       content: input.content, is_private: input.is_private ?? true,
     });
     return id;
+  }
+
+  async update_comment(input: { id: string; content: string }) {
+    const existing = await repo.find_comment(input.id);
+    if (!existing) throw_error(OPERATIONS_ERROR.NOT_FOUND);
+    await repo.update_comment(input.id, input.content);
   }
 
   async get_comments(order_id: string, include_private = true) { return repo.get_comments(order_id, include_private); }

@@ -83,6 +83,7 @@ export const orders = mysqlTable(
     notes: text("notes"),
     placed_at: timestamp("placed_at", { mode: "string" }),
     cancelled_at: timestamp("cancelled_at", { mode: "string" }),
+    deleted_at: timestamp("deleted_at", { mode: "string" }),
 
     assigned_operator_id: varchar("assigned_operator_id", { length: 255 }).references(
       () => users.id,

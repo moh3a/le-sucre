@@ -87,6 +87,11 @@ export class PromotionService {
       resource_type: "promotion_id",
       resource_id: created?.id,
     });
+
+    if (created?.id && input.ends_at) {
+      await promotion_scheduler_service.schedule_promotion_expiration(created.id, input.ends_at);
+    }
+
     return created;
   }
 
@@ -125,6 +130,11 @@ export class PromotionService {
       resource_type: "promotion_id",
       resource_id: updated?.id,
     });
+
+    if (updated?.id && input.ends_at) {
+      await promotion_scheduler_service.schedule_promotion_expiration(updated.id, input.ends_at);
+    }
+
     return updated;
   }
 

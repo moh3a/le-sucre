@@ -7,6 +7,7 @@ import {
   ProductCard,
   ProductCardSkeleton,
 } from "@/features/product_information_management/products/components/storefront/product-card";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import type { StorefrontProduct } from "@/components/storefront/types";
 import type { CatalogProductCard as ProductType } from "../types";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
@@ -35,6 +36,7 @@ function to_storefront(p: ProductType): StorefrontProduct {
 
 export function CatalogProductGrid({ products, isLoading, onProductClick }: CatalogProductGridProps) {
   const t = useTranslations("catalog");
+  const { add_product } = useStorefrontCart();
 
   if (isLoading) {
     return (
@@ -68,6 +70,7 @@ export function CatalogProductGrid({ products, isLoading, onProductClick }: Cata
           variant="catalog"
           href={`/p/${product.slug}`}
           onProductClick={() => onProductClick?.(product.id)}
+          onAddToCart={() => void add_product({ product_id: product.id })}
         />
       ))}
     </div>

@@ -8,3 +8,7 @@ export function assert_order_transition(from: string, to: string) {
     throw new ConflictError(`Transition interdite: ${from} → ${to}`);
   }
 }
+
+export function get_allowed_transitions(from: string): string[] {
+  return ORDER_STATUS_TRANSITIONS[from] ?? [];
+}

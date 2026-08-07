@@ -11,6 +11,7 @@ import { WishlistRepository } from "../repositories/wishlist.repository";
 import { WishlistItemRepository } from "../repositories/wishlist_item.repository";
 import { WishlistCacheService } from "./wishlist-cache.service";
 import { WishlistAnalyticsService } from "./wishlist-analytics.service";
+import logger from "@/lib/logger";
 import type {
   create_wishlist_dto,
   update_wishlist_dto,
@@ -361,6 +362,46 @@ export class WishlistService {
   async get_public_wishlist(customer_id: string) {
     const all = await this.repo.find_by_customer(customer_id);
     return all.filter((w) => w.is_public);
+  }
+
+  async refresh_prices_for_product(product_id: string, variant_id: string | null, current_price: string) {
+    try {
+      const items = await this.item_repo.list_by_product(product_id, variant_id);
+      for (const item of items) {
+        await this.item_repo.update_prices(item.id, current_price);
+        await this.cache.invalidate_wishlist(item.wishlist_id);
+      }
+    } catch (error) {
+      logger.error("Failed to refresh wishlist prices:", error);
+    }
+  }
+
+  async mark_purchased(
+    customer_id: string,
+    order_id: string,
+    lines: Array<{ product_id: string; sku_id: string }>,
+  ) {
+    try {
+      for (const line of lines) {
+        const items = await this.item_repo.find_by_customer_and_product(
+          customer_id,
+          line.product_id,
+          line.sku_id,
+        );
+        for (const item of items) {
+          await this.item_repo.mark_as_purchased(item.id, order_id, new Date().toISOString());
+          await this.cache.invalidate_wishlist(item.wishlist_id);
+          await this.analytics.record_event(
+            customer_id,
+            item.wishlist_id,
+            item.product_id,
+            "purchase_from_wishlist",
+          );
+        }
+      }
+    } catch (error) {
+      logger.error("Failed to mark wishlist items as purchased:", error);
+    }
   }
 }
 

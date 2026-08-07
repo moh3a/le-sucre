@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Hash, Hourglass, PackageCheck, PackageX, Search, Settings2, ShoppingCart, Timer, X } from "lucide-react";
+import { Hash, Hourglass, PackageCheck, PackageX, Search, Settings2, ShoppingCart, Timer, X, Clock } from "lucide-react";
 
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
@@ -73,6 +73,7 @@ export function PreordersPageClient() {
               { label: t("stats_confirmed"), value: stats?.confirmed ?? 0, icon: ShoppingCart, color: "info" },
               { label: t("stats_fulfilled"), value: stats?.fulfilled ?? 0, icon: PackageCheck, color: "success" },
               { label: t("stats_cancelled"), value: stats?.cancelled ?? 0, icon: PackageX, color: "error" },
+              { label: t("stats_expired"), value: stats?.expired ?? 0, icon: Clock, color: "warning" },
               { label: t("stats_active_qty"), value: stats?.total_qty_active ?? 0, icon: Timer, color: "default" },
             ]}
           />

@@ -1,9 +1,11 @@
 import { z } from "zod";
 
-import { create_trpc_router } from "@/lib/trpc/router";
+import { create_trpc_router, public_procedure } from "@/lib/trpc/router";
 import { storefront_procedure } from "@/features/authentication_and_authorization/authorization/middleware/rbac";
 import { checkout_service } from "./checkout.service";
 import { checkout_preview_dto, place_order_dto } from "../orders/models/order.dto";
+import { SHIPPING_METHODS } from "./constants/shipping-methods";
+import { CHECKOUT_PAYMENT_METHODS } from "./constants/payment-methods";
 
 export const checkout_router = create_trpc_router({
   preview: storefront_procedure
@@ -23,4 +25,8 @@ export const checkout_router = create_trpc_router({
         user_id: ctx.session?.user?.id ?? null,
       }),
     ),
+
+  shippingMethods: public_procedure.query(() => SHIPPING_METHODS),
+
+  paymentMethods: public_procedure.query(() => CHECKOUT_PAYMENT_METHODS),
 });

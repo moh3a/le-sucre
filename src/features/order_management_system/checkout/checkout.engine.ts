@@ -1,4 +1,5 @@
 import "server-only";
+import { env } from "@/config/env";
 import { cart_discount_service } from "@/features/order_management_system/promotions/services/cart-discount.service";
 
 export type CheckoutLine = {
@@ -15,6 +16,7 @@ export type CheckoutTotals = {
   tax_total: string;
   shipping_total: string;
   grand_total: string;
+  tax_rate: number;
   adjustments: Array<{ type: string; label: string; amount: string }>;
   applied_promotions?: Array<{
     promotion_id: string;
@@ -54,7 +56,7 @@ export class CheckoutEngine {
     });
 
     const after_discount = sub_num - Number(promo.discount_total);
-    const tax_rate = input.tax_rate ?? 0;
+    const tax_rate = input.tax_rate ?? env.CHECKOUT_TAX_RATE;
     const tax_total = after_discount * tax_rate;
     const shipping_total = promo.free_shipping ? 0 : (input.shipping_cost ?? 0);
     const grand = after_discount + tax_total + shipping_total;
@@ -73,6 +75,7 @@ export class CheckoutEngine {
       tax_total: money(tax_total),
       shipping_total: money(shipping_total),
       grand_total: money(grand),
+      tax_rate,
       adjustments,
       applied_promotions: promo.applied,
       flash_prices: promo.flash_prices,

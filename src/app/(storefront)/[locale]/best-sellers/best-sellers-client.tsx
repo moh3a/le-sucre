@@ -20,6 +20,7 @@ import { CircleAlert, Star, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/components/providers/app-providers";
 import { ProductCard } from "@/features/product_information_management/products/components/storefront/product-card";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import type { AppLocale } from "@/i18n/config";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
 
@@ -59,6 +60,7 @@ function toStorefrontProduct(item: {
 
 export function BestSellersContent({ locale }: { locale: AppLocale }) {
   const t = useTranslations("bestSellers");
+  const { add_product } = useStorefrontCart();
 
   const trending_query = trpc.recommendations.trending.useQuery({
     locale,
@@ -248,6 +250,7 @@ export function BestSellersContent({ locale }: { locale: AppLocale }) {
                         key={item.id}
                         product={toStorefrontProduct(item)}
                         variant="catalog"
+                        onAddToCart={() => void add_product({ product_id: item.id })}
                       />
                     ))}
                   </div>

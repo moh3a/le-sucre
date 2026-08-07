@@ -12,6 +12,9 @@ import {
   Loader2,
   Package,
   MoreHorizontal,
+  Check,
+  Search,
+  Star,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,9 +36,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/components/providers/app-providers";
 import {
   Empty,
   EmptyHeader,
@@ -87,8 +99,153 @@ interface WishlistPanelProps {
   onCreateWishlist: (name: string) => Promise<void>;
   onDeleteWishlist: (id: string) => Promise<void>;
   onRemoveItem?: (itemId: string) => Promise<void>;
+  onSetDefault?: (id: string) => Promise<void>;
+  onUpdateItem?: (
+    itemId: string,
+    patch: { quantity?: number; priority?: WishlistPriority; notes?: string },
+  ) => Promise<void>;
   onBulkAdd?: (wishlistId: string, productIds: string[]) => Promise<void>;
   isLoading?: boolean;
+}
+
+const WISHLIST_PRIORITIES: WishlistPriority[] = ["low", "medium", "high", "urgent"];
+
+function BulkAddPicker({
+  open,
+  onOpenChange,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (productIds: string[]) => Promise<void>;
+}) {
+  const t = useTranslations("wishlist");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data, isLoading } = trpc.catalog.search.useQuery(
+    {
+      q: search || undefined,
+      limit: 30,
+      page: 1,
+      sort: "relevance",
+    },
+    { enabled: open, placeholderData: (prev) => prev },
+  );
+
+  const products = data?.items ?? [];
+
+  function toggle(id: string) {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  async function handleSubmit() {
+    if (!selected.length) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmit(selected);
+      setSelected([]);
+      setSearch("");
+      onOpenChange(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>{t("add_products_title")}</DialogTitle>
+          <DialogDescription>{t("add_products_description")}</DialogDescription>
+        </DialogHeader>
+        <div className="relative">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            type="search"
+            placeholder={t("search_products")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="max-h-80 space-y-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="space-y-2 py-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 px-2 py-2">
+                  <Skeleton className="h-12 w-12 shrink-0 rounded-md" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <p className="text-muted-foreground py-8 text-center text-sm">{t("no_results")}</p>
+          ) : (
+            products.map((product) => {
+              const isSelected = selected.includes(product.id);
+              return (
+                <button
+                  key={product.id}
+                  type="button"
+                  onClick={() => toggle(product.id)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-lg border px-2 py-2 text-left transition-colors",
+                    isSelected ? "border-primary bg-primary/5" : "hover:bg-accent",
+                  )}
+                >
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="h-12 w-12 shrink-0 rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center rounded-md text-xs text-muted-foreground">
+                      {product.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{product.name}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {product.min_price} {product.currency}
+                      {product.brand_name ? ` - ${product.brand_name}` : ""}
+                    </p>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+                      isSelected ? "border-primary bg-primary text-primary-foreground" : "border-input",
+                    )}
+                  >
+                    {isSelected && <Check className="h-3.5 w-3.5" />}
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("cancel")}
+          </Button>
+          <Button onClick={handleSubmit} disabled={!selected.length || isSubmitting}>
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              t("add_selected", { count: selected.length })
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function WishlistPanel({
@@ -100,6 +257,9 @@ export function WishlistPanel({
   onCreateWishlist,
   onDeleteWishlist,
   onRemoveItem,
+  onSetDefault,
+  onUpdateItem,
+  onBulkAdd,
   isLoading,
 }: WishlistPanelProps) {
   const t = useTranslations("wishlist");
@@ -107,6 +267,8 @@ export function WishlistPanel({
   const [isCreating, setIsCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [removeTarget, setRemoveTarget] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [updatingPriorityId, setUpdatingPriorityId] = useState<string | null>(null);
 
   const selected = wishlists.find((w) => w.id === selectedWishlistId);
 
@@ -118,6 +280,21 @@ export function WishlistPanel({
       setNewName("");
     } finally {
       setIsCreating(false);
+    }
+  }
+
+  async function handleSetDefault() {
+    if (!selected || !onSetDefault) return;
+    await onSetDefault(selected.id);
+  }
+
+  async function handleUpdatePriority(itemId: string, priority: WishlistPriority) {
+    if (!onUpdateItem) return;
+    setUpdatingPriorityId(itemId);
+    try {
+      await onUpdateItem(itemId, { priority });
+    } finally {
+      setUpdatingPriorityId(null);
     }
   }
 
@@ -225,6 +402,12 @@ export function WishlistPanel({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {onSetDefault && !selected.is_default && (
+                        <DropdownMenuItem onClick={handleSetDefault}>
+                          <Star className="mr-2 h-4 w-4" />
+                          {t("set_default")}
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() =>
                           setDeleteTarget({ id: selected.id, name: selected.name })
@@ -247,9 +430,17 @@ export function WishlistPanel({
       <div className="lg:col-span-2">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Package className="h-5 w-5" />
-              {selected?.name ?? t("items")} ({items?.length ?? 0})
+            <CardTitle className="flex items-center justify-between gap-2 text-lg">
+              <span className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                {selected?.name ?? t("items")} ({items?.length ?? 0})
+              </span>
+              {onBulkAdd && selected && (
+                <Button size="sm" variant="outline" onClick={() => setPickerOpen(true)}>
+                  <Plus className="mr-1 h-4 w-4" />
+                  {t("add_products")}
+                </Button>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -295,15 +486,52 @@ export function WishlistPanel({
                         {item.product?.translations?.[0]?.name ?? item.product_id}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "px-1.5 py-0 text-[10px]",
-                            priorityColors[item.priority as WishlistPriority],
-                          )}
-                        >
-                          {item.priority}
-                        </Badge>
+                        {onUpdateItem ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                className="focus-visible:ring-ring focus-visible:outline-none"
+                                disabled={updatingPriorityId === item.id}
+                              >
+                                <Badge
+                                  variant="secondary"
+                                  className={cn(
+                                    "px-1.5 py-0 text-[10px]",
+                                    priorityColors[item.priority as WishlistPriority],
+                                  )}
+                                >
+                                  {updatingPriorityId === item.id ? (
+                                    <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                                  ) : (
+                                    t(`priority_${item.priority}`)
+                                  )}
+                                </Badge>
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              {WISHLIST_PRIORITIES.map((p) => (
+                                <DropdownMenuItem
+                                  key={p}
+                                  onClick={() => handleUpdatePriority(item.id, p)}
+                                >
+                                  {p === item.priority && <Check className="mr-2 h-4 w-4" />}
+                                  {t(`priority_${p}`)}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "px-1.5 py-0 text-[10px]",
+                              priorityColors[item.priority as WishlistPriority],
+                            )}
+                          >
+                            {t(`priority_${item.priority}`)}
+                          </Badge>
+                        )}
                         {item.is_purchased && (
                           <Badge
                             variant="outline"
@@ -398,6 +626,16 @@ export function WishlistPanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {onBulkAdd && selected && (
+        <BulkAddPicker
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSubmit={async (productIds) => {
+            await onBulkAdd(selected.id, productIds);
+          }}
+        />
+      )}
     </div>
   );
 }

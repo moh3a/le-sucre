@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
-import { Heart, TrendingUp, Package, ShoppingBag, RefreshCw, Loader2 } from "lucide-react";
+import { Heart, TrendingUp, Package, ShoppingBag, RefreshCw, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,7 +26,9 @@ import { toast } from "sonner";
 
 export function AdminWishlistAnalyticsPageClient() {
   const t = useTranslations("wishlist");
+  const utils = trpc.useUtils();
   const [period, setPeriod] = useState("30d");
+  const [exporting, setExporting] = useState(false);
   const {
     data: summary,
     isLoading,
@@ -45,6 +47,7 @@ export function AdminWishlistAnalyticsPageClient() {
     limit: 10,
   });
   const { data: topFavorited } = trpc.wishlistManagement.admin.topFavorited.useQuery({ limit: 10 });
+  const { data: totalFavorites } = trpc.wishlistManagement.admin.totalFavorites.useQuery();
   const invalidateMut = trpc.wishlistManagement.admin.invalidateCache.useMutation({
     onSuccess: () => {
       toast.success(t("cache_invalidated"));
@@ -53,6 +56,34 @@ export function AdminWishlistAnalyticsPageClient() {
       toast.error(t("cache_invalidated"));
     },
   });
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const result = await utils.wishlistManagement.admin.exportAnalytics.fetch({
+        format: "csv",
+        period: period as "7d" | "30d" | "90d" | "1y",
+      });
+      if (result.format !== "csv" || !result.csv) {
+        toast.error(t("export_error"));
+        return;
+      }
+      const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `wishlist-analytics-${period}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success(t("export_success"));
+    } catch {
+      toast.error(t("export_error"));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <QueryGuard query={{ isLoading }}>
@@ -92,12 +123,16 @@ export function AdminWishlistAnalyticsPageClient() {
                 <RefreshCw className="h-4 w-4" />
               )}
             </Button>
+            <Button variant="outline" disabled={exporting} onClick={handleExport}>
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              <span className="ml-2">{t("export")}</span>
+            </Button>
           </div>
         </div>
 
         {
           <>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
@@ -140,6 +175,17 @@ export function AdminWishlistAnalyticsPageClient() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold">{summary?.wishlist_conversion_rate ?? 0}%</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                    <Heart className="h-4 w-4" />
+                    {t("total_favorites")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{totalFavorites ?? 0}</p>
                 </CardContent>
               </Card>
             </div>

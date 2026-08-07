@@ -61,6 +61,10 @@ export const order_operations_router = create_trpc_router({
     .input(z.object({ order_id: z.string(), content: z.string().min(1).max(4096), is_private: z.boolean().default(true) }))
     .mutation(({ ctx, input }) => order_operations_service.add_comment({ ...input, author_user_id: ctx.session!.user.id })),
 
+  orderUpdateComment: permission_procedure(PERMISSIONS.orders_write)
+    .input(z.object({ id: z.string(), content: z.string().min(1).max(4096) }))
+    .mutation(({ input }) => order_operations_service.update_comment(input)),
+
   orderGetComments: permission_procedure(PERMISSIONS.orders_read)
     .input(z.object({ order_id: z.string(), include_private: z.boolean().default(true) }))
     .query(({ input }) => order_operations_service.get_comments(input.order_id, input.include_private)),

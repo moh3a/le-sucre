@@ -26,6 +26,7 @@ export function apply_rule_to_lines(
 
   const scoped_lines = lines.filter((l) => {
     if (rule.scope_type === DISCOUNT_SCOPE.cart) return true;
+    if (rule.scope_type === DISCOUNT_SCOPE.customer) return true;
     if (rule.scope_type === DISCOUNT_SCOPE.product) return l.product_id === rule.scope_id;
     if (rule.scope_type === DISCOUNT_SCOPE.sku) return l.sku_id === rule.scope_id;
     if (rule.scope_type === DISCOUNT_SCOPE.category) return l.category_id === rule.scope_id;

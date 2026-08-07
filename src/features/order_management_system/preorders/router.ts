@@ -22,6 +22,7 @@ export const preorder_router = create_trpc_router({
         quantity: input.quantity,
         user_id: ctx.session?.user?.id,
         contact_name: input.contact_name,
+        contact_email: input.contact_email ?? ctx.session?.user?.email ?? null,
         contact_phone: input.contact_phone ?? null,
       });
       return { ok: true };

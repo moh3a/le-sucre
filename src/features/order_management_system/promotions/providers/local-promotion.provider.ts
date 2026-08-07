@@ -5,14 +5,16 @@ import { promotion_repository } from "../repositories/promotion.repository";
 import { promo_code_repository } from "../repositories/promo-code.repository";
 import { flash_sale_repository } from "../repositories/flash-sale.repository";
 import { bundle_repository } from "../repositories/bundle.repository";
-import { apply_rule_to_lines } from "../engines/discount-calculation.engine";
+import { apply_rule_to_lines, merge_applied_discounts } from "../engines/discount-calculation.engine";
+import type { AppliedDiscount } from "../types";
 import {
   assert_promo_code_window,
   assert_usage_limits,
 } from "../engines/promo-code-validation.engine";
 import { compute_bundle_discount } from "../engines/bundle-pricing.engine";
 import { is_flash_sale_live } from "../engines/flash-sale.engine";
-import { ValidationError } from "@/lib/error_handling";
+import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
+import { CART_DISCOUNT_ERROR } from "../constants/error-codes";
 
 export const local_promotion_provider: PromotionProvider = {
   name: "local",
@@ -20,7 +22,7 @@ export const local_promotion_provider: PromotionProvider = {
     const subtotal_num = lines.reduce((s, l) => s + Number(l.line_total), 0);
     let discount_total = 0;
     let free_shipping = false;
-    const applied = [];
+    let applied: AppliedDiscount[] = [];
     const flash_prices: Record<string, string> = {};
     const adjustments = [];
 
@@ -34,21 +36,32 @@ export const local_promotion_provider: PromotionProvider = {
     }
 
     // 2) Automatic + customer promotions
+    let non_stackable_applied = false;
     const auto_promos = await promotion_repository.list_active_automatic(ctx.user_id);
     for (const promo of auto_promos) {
+      if (non_stackable_applied) break;
       for (const rule of promo.rules) {
         const result = apply_rule_to_lines(rule, lines, subtotal_num - discount_total);
         if (result.amount <= 0 && !result.free_shipping) continue;
+        const merged = merge_applied_discounts(
+          applied,
+          {
+            promotion_id: promo.id,
+            label: promo.name,
+            amount: result.amount,
+            type: rule.discount_type,
+            free_shipping: result.free_shipping,
+          },
+          promo.is_stackable,
+        );
+        if (merged === applied) break;
+        applied = merged;
         discount_total += result.amount;
         free_shipping ||= result.free_shipping;
-        applied.push({
-          promotion_id: promo.id,
-          label: promo.name,
-          amount: result.amount,
-          type: rule.discount_type,
-          free_shipping: result.free_shipping,
-        });
-        if (!promo.is_stackable) break;
+        if (!promo.is_stackable) {
+          non_stackable_applied = true;
+          break;
+        }
       }
     }
 
@@ -69,7 +82,7 @@ export const local_promotion_provider: PromotionProvider = {
     // 4) Promo code
     if (ctx.promo_code) {
       const code_row = await promo_code_repository.find_by_code(ctx.promo_code);
-      if (!code_row) throw new ValidationError("Code promo invalide");
+      if (!code_row) throw_error(CART_DISCOUNT_ERROR.PROMO_CODE_NOT_FOUND);
       assert_promo_code_window(code_row);
       const customer_usage = ctx.user_id
         ? await promo_code_repository.count_customer_usage(code_row.id, ctx.user_id)
@@ -82,11 +95,20 @@ export const local_promotion_provider: PromotionProvider = {
       });
 
       const promo = await promotion_repository.get_with_rules(code_row.promotion_id);
-      if (promo) for (const rule of promo.rules) {
+      if (!promo) throw_error(CART_DISCOUNT_ERROR.PROMO_CODE_NOT_FOUND);
+      if (promo.promotion_type === "customer") {
+        const is_target_customer = promo.rules.some(
+          (r) => r.scope_type === "customer" && r.scope_id === ctx.user_id,
+        );
+        if (!ctx.user_id || !is_target_customer) {
+          throw_error(CART_DISCOUNT_ERROR.CUSTOMER_EXCLUDED);
+        }
+      }
+      const code_discounts: AppliedDiscount[] = [];
+      for (const rule of promo.rules) {
         const result = apply_rule_to_lines(rule, lines, subtotal_num - discount_total);
-        discount_total += result.amount;
-        free_shipping ||= result.free_shipping;
-        applied.push({
+        if (result.amount <= 0 && !result.free_shipping) continue;
+        code_discounts.push({
           promotion_id: promo.id,
           promo_code_id: code_row.id,
           label: code_row.code,
@@ -94,6 +116,17 @@ export const local_promotion_provider: PromotionProvider = {
           type: rule.discount_type,
           free_shipping: result.free_shipping,
         });
+      }
+
+      if (code_discounts.length) {
+        const merged = merge_applied_discounts(applied, code_discounts[0], promo.is_stackable);
+        if (merged === applied) {
+          applied = code_discounts;
+        } else {
+          applied = merged.concat(code_discounts.slice(1));
+        }
+        discount_total = applied.reduce((s, a) => s + a.amount, 0);
+        free_shipping = applied.some((a) => a.free_shipping);
       }
     }
 

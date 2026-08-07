@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/storefront/section-header";
 import { InfoCard } from "@/components/info-card";
 import { CategoryCard } from "@/features/product_information_management/categories/components/storefront/category-card";
-import { ProductCard } from "@/features/product_information_management/products/components/storefront/product-card";
+import { StorefrontProductCard } from "@/features/order_management_system/carts/components/storefront/storefront-product-card";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 import { HeroBannerCarousel } from "@/components/storefront/hero-banner-carousel";
 import { StorefrontSectionRenderer } from "@/features/marketing/campaign/components/storefront/storefront-section-renderer";
@@ -296,7 +296,7 @@ export default async function HomePage({ params }: Props) {
           {flashSaleProducts.length > 0 && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {flashSaleProducts.map((product) => (
-                <ProductCard
+                <StorefrontProductCard
                   key={product.id}
                   product={product}
                   variant="flash-sale"
@@ -325,7 +325,7 @@ export default async function HomePage({ params }: Props) {
           <div className="flex gap-4 overflow-x-auto pb-4">
             {trending.map((product) => (
               <div key={product.id} className="min-w-50 shrink-0">
-                <ProductCard product={product} />
+                <StorefrontProductCard product={product} />
               </div>
             ))}
           </div>
@@ -342,7 +342,7 @@ export default async function HomePage({ params }: Props) {
           />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {newArrivals.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <StorefrontProductCard key={product.id} product={product} />
             ))}
           </div>
         </section>
@@ -358,7 +358,7 @@ export default async function HomePage({ params }: Props) {
           />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {bestSellers.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <StorefrontProductCard key={product.id} product={product} />
             ))}
           </div>
         </section>

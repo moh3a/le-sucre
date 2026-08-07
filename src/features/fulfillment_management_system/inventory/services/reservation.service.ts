@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq, lt } from "drizzle-orm";
 import type { z } from "zod";
 
-import { db } from "@/lib/db";
+import { db, type DbClient } from "@/lib/db";
 
 import type { create_reservation_dto, commit_reservation_dto } from "../models/inventory.dto";
 import { MOVEMENT_TYPES, RESERVATION_STATUS } from "../constants/movement-types";
@@ -18,6 +18,8 @@ import { audit_service } from "@/features/authentication_and_authorization/autho
 import { AUDIT_ACTION } from "../../constants/audit-actions";
 import { forecast_index_service } from "../../forecasting/services/forecast-index.service";
 import { addSeconds, format } from "date-fns";
+
+type Tx = Parameters<Parameters<DbClient["transaction"]>[0]>[0];
 
 export class ReservationService {
   constructor(private readonly repo = inventory_repository) {}
@@ -125,16 +127,19 @@ export class ReservationService {
     return { ok: true };
   }
 
-  async commit(input: z.infer<typeof commit_reservation_dto>) {
-    await db.transaction(async (tx) => {
-      const reservation = await this.repo.get_reservation_for_update(tx, input.id);
+  async commit(
+    input: z.infer<typeof commit_reservation_dto>,
+    tx?: Tx,
+  ) {
+    const run = async (client: Tx) => {
+      const reservation = await this.repo.get_reservation_for_update(client, input.id);
       if (!reservation) throw_error(INVENTORY_ERROR.RESERVATION_NOT_FOUND, { reservation_id: input.id });
       if (reservation.status !== RESERVATION_STATUS.active) {
         throw_error(INVENTORY_ERROR.RESERVATION_NOT_ACTIVE, { reservation_id: input.id, status: reservation.status });
       }
 
       const level = await this.repo.get_level_for_update(
-        tx,
+        client,
         reservation.sku_id,
         reservation.warehouse_id,
       );
@@ -149,17 +154,17 @@ export class ReservationService {
         requested: reservation.quantity,
       });
 
-      const ok = await this.repo.update_level_optimistic(tx, level.id, level.version, {
+      const ok = await this.repo.update_level_optimistic(client, level.id, level.version, {
         quantity_reserved: new_reserved,
         quantity_on_hand: new_on_hand,
       });
       if (!ok) throw_error(INVENTORY_ERROR.VERSION_CONFLICT, { level_id: level.id });
 
-      await this.repo.set_reservation_status(tx, input.id, RESERVATION_STATUS.committed, {
+      await this.repo.set_reservation_status(client, input.id, RESERVATION_STATUS.committed, {
         order_id: input.order_id ?? null,
       });
 
-      await this.repo.insert_movement(tx, {
+      await this.repo.insert_movement(client, {
         sku_id: reservation.sku_id,
         warehouse_id: reservation.warehouse_id,
         movement_type: MOVEMENT_TYPES.sale,
@@ -175,13 +180,19 @@ export class ReservationService {
         resource_id: reservation.id,
       });
       void invalidate_catalog_cache();
-      const [sku] = await tx
+      const [sku] = await client
         .select({ product_id: product_skus.product_id })
         .from(product_skus)
         .where(eq(product_skus.id, reservation.sku_id))
         .limit(1);
       if (sku?.product_id) await invalidate_product_stock_cache(sku.product_id);
-    });
+    };
+
+    if (tx) {
+      await run(tx);
+    } else {
+      await db.transaction(run);
+    }
 
     return { ok: true };
   }

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { CheckCircle2, Download, MoreHorizontal, XCircle } from "lucide-react";
+import { CheckCircle2, Download, Eye, MoreHorizontal, XCircle } from "lucide-react";
 import Link from "next/link";
 
 import { QueryGuard } from "@/components/query-guard";
@@ -29,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import { FollowUpDetailDialog } from "./follow-up-detail-dialog";
 
 const STATUS_STYLES: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   pending: "outline",
@@ -132,6 +133,7 @@ export function FollowUpsTable() {
   const [page] = useQueryState("fuPage", parseAsInteger.withDefault(1));
   const [per_page] = useQueryState("fuPerPage", parseAsInteger.withDefault(20));
   const [status, setStatus] = useQueryState("fuStatus", parseAsString);
+  const [detailId, setDetailId] = React.useState<string | null>(null);
 
   const STATUS_OPTIONS = React.useMemo(
     () => [
@@ -244,6 +246,10 @@ export function FollowUpsTable() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t("actions_title")}</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setDetailId(r.id)}>
+                  <Eye className="mr-2 size-4" />
+                  {t("view_details")}
+                </DropdownMenuItem>
                 {r.order_id && (
                   <DropdownMenuItem asChild>
                     <Link href={`/console/orders/${r.order_id}`}>{t("view_order")}</Link>
@@ -292,36 +298,45 @@ export function FollowUpsTable() {
   });
 
   return (
-    <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}>
-    <DataTable table={table}>
-      <DataTableAdvancedToolbar table={table}>
-        <FacetedFilter
-          title={t("status_column")}
-          options={STATUS_OPTIONS}
-          value={status ?? undefined}
-          onChange={(val) => setStatus(val)}
-        />
-        <DataTableSortList table={table} />
-      </DataTableAdvancedToolbar>
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center gap-2 border-t p-2">
-          <Badge variant="outline">
-            {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
-          </Badge>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href={`/api/admin/follow-ups/export?${new URLSearchParams({
-                ...(status ? { status } : {}),
-              })}`}
-              download="follow-ups.csv"
-            >
-              <Download className="mr-1 h-4 w-4" />
-              {t("export")}
-            </a>
-          </Button>
-        </div>
-      )}
-    </DataTable>
-    </QueryGuard>
+    <>
+      <QueryGuard query={{ isLoading }} loadingFallback={<DataTableSkeleton columnCount={9} rowCount={10} filterCount={1} />}>
+      <DataTable table={table}>
+        <DataTableAdvancedToolbar table={table}>
+          <FacetedFilter
+            title={t("status_column")}
+            options={STATUS_OPTIONS}
+            value={status ?? undefined}
+            onChange={(val) => setStatus(val)}
+          />
+          <DataTableSortList table={table} />
+        </DataTableAdvancedToolbar>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <div className="flex items-center gap-2 border-t p-2">
+            <Badge variant="outline">
+              {t("rows_selected", { count: table.getFilteredSelectedRowModel().rows.length })}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href={`/api/admin/follow-ups/export?${new URLSearchParams({
+                  ...(status ? { status } : {}),
+                })}`}
+                download="follow-ups.csv"
+              >
+                <Download className="mr-1 h-4 w-4" />
+                {t("export")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </DataTable>
+      </QueryGuard>
+      <FollowUpDetailDialog
+        followUpId={detailId}
+        open={detailId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailId(null);
+        }}
+      />
+    </>
   );
 }

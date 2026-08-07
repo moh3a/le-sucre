@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { products } from "@/features/product_information_management/products/schema";
 import { get_promotion_provider } from "../providers/provider-registry";
 import { promotion_cache_service } from "./promotion-cache.service";
-import { PROMOTION_CACHE } from "../constants/cache-keys";
+import { PROMOTION_CACHE, PROMOTION_CACHE_TTL } from "../constants/cache-keys";
 import type { CartDiscountResult, CartLineForPromo } from "../types";
 import { inArray } from "drizzle-orm";
 
@@ -38,7 +38,7 @@ export class CartDiscountService {
       shipping_cost: input.shipping_cost,
     });
 
-    if (!input.promo_code) await promotion_cache_service.set(cache_key, result, 120);
+    if (!input.promo_code) await promotion_cache_service.set(cache_key, result, PROMOTION_CACHE_TTL.cart);
     return result;
   }
 

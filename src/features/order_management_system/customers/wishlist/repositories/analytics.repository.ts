@@ -29,6 +29,22 @@ export class WishlistAnalyticsRepository {
     return Number(row.total);
   }
 
+  async get_event_count_by_type_and_product(
+    event_type: string,
+    product_id: string,
+  ): Promise<number> {
+    const [row] = await db
+      .select({ total: count() })
+      .from(wishlist_analytics_events)
+      .where(
+        and(
+          eq(wishlist_analytics_events.event_type, event_type),
+          eq(wishlist_analytics_events.product_id, product_id),
+        ),
+      );
+    return Number(row.total);
+  }
+
   async get_growth_data(
     period_days: number,
   ): Promise<Array<{ date: string; count: number }>> {

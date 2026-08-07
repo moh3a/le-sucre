@@ -27,14 +27,25 @@ export const wishlist_admin_router = create_trpc_router({
     .input(z.object({ limit: z.number().default(10) }))
     .query(({ input }) => favorites_service.get_top_favorited(input.limit)),
 
-  topWishedProducts: permission_procedure(PERMISSIONS.analytics_read)
+  topWishedProducts: permission_procedure(PERMISSIONS.wishlists_analytics)
     .input(wishlist_analytics_query_dto)
     .query(async ({ input }) => {
       const summary = await wishlist_analytics_service.get_summary(input);
       return summary.most_wished_products;
     }),
 
-  exportAnalytics: permission_procedure(PERMISSIONS.analytics_read)
+  productStats: permission_procedure(PERMISSIONS.wishlists_analytics)
+    .input(z.object({ product_id: z.string().min(1) }))
+    .query(({ input }) => wishlist_analytics_service.get_product_stats(input.product_id)),
+
+  totalFavorites: permission_procedure(PERMISSIONS.wishlists_analytics)
+    .query(() => favorites_service.get_total_favorites()),
+
+  customerFavoriteCount: permission_procedure(PERMISSIONS.wishlists_analytics)
+    .input(z.object({ customer_id: z.string().min(1) }))
+    .query(({ input }) => favorites_service.get_customer_favorite_count(input.customer_id)),
+
+  exportAnalytics: permission_procedure(PERMISSIONS.analytics_export)
     .input(wishlist_analytics_export_dto)
     .query(async ({ input }) => {
       const data = await wishlist_analytics_service.get_summary(input);
@@ -52,6 +63,6 @@ export const wishlist_admin_router = create_trpc_router({
       return { data, format: "json" };
     }),
 
-  invalidateCache: permission_procedure(PERMISSIONS.analytics_read)
+  invalidateCache: permission_procedure(PERMISSIONS.wishlists_write)
     .mutation(() => wishlist_analytics_service.invalidate_cache()),
 });

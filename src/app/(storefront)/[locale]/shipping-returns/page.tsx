@@ -7,16 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StorefrontBreadcrumbs } from "@/components/storefront/storefront-breadcrumbs";
 import { Link } from "@/i18n/navigation";
+import { SHIPPING_METHODS } from "@/features/order_management_system/checkout/constants/shipping-methods";
 
 type Props = {
   params: Promise<{ locale: string }>;
-};
-
-type ShippingMethod = {
-  labelKey: string;
-  costKey: string;
-  delayKey: string;
-  badgeKey: string;
 };
 
 type ReturnStep = {
@@ -25,32 +19,16 @@ type ReturnStep = {
   descKey: string;
 };
 
-const SHIPPING_METHODS: ShippingMethod[] = [
-  {
-    labelKey: "method_standard",
-    costKey: "cost_standard",
-    delayKey: "delay_standard",
-    badgeKey: "badge_economical",
-  },
-  {
-    labelKey: "method_express",
-    costKey: "cost_express",
-    delayKey: "delay_express",
-    badgeKey: "badge_popular",
-  },
-  {
-    labelKey: "method_relay",
-    costKey: "cost_relay",
-    delayKey: "delay_standard",
-    badgeKey: "badge_economical",
-  },
-  {
-    labelKey: "method_free",
-    costKey: "cost_free",
-    delayKey: "delay_standard",
-    badgeKey: "badge_from",
-  },
-] as const;
+const BADGE_BY_METHOD: Record<string, string> = {
+  standard: "badge_economical",
+  express: "badge_popular",
+  sameday: "badge_sameday",
+};
+
+function formatCost(cost: number, locale: string, freeLabel: string) {
+  if (cost === 0) return freeLabel;
+  return `${new Intl.NumberFormat(locale === "ar" ? "ar-DZ" : locale).format(cost)} DZD`;
+}
 
 const RETURN_STEPS: ReturnStep[] = [
   { icon: RotateCcw, titleKey: "step1_title", descKey: "step1_desc" },
@@ -72,6 +50,7 @@ export default async function ShippingReturnsPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "shippingReturns" });
   const tBc = await getTranslations({ locale, namespace: "breadcrumb" });
+  const tCheckout = await getTranslations({ locale, namespace: "checkout" });
 
   return (
     <div className="container mx-auto space-y-12 px-4 py-8">
@@ -136,12 +115,12 @@ export default async function ShippingReturnsPage({ params }: Props) {
               </thead>
               <tbody>
                 {SHIPPING_METHODS.map((m) => (
-                  <tr key={m.labelKey} className="border-b last:border-0">
-                    <td className="p-4 font-medium">{t(m.labelKey)}</td>
-                    <td className="p-4">{t(m.costKey)}</td>
-                    <td className="p-4">{t(m.delayKey)}</td>
+                  <tr key={m.id} className="border-b last:border-0">
+                    <td className="p-4 font-medium">{tCheckout(m.name_key)}</td>
+                    <td className="p-4">{formatCost(m.cost, locale, tCheckout("free"))}</td>
+                    <td className="p-4">{tCheckout(m.description_key)}</td>
                     <td className="p-4 text-right">
-                      <Badge variant="secondary">{t(m.badgeKey)}</Badge>
+                      <Badge variant="secondary">{t(BADGE_BY_METHOD[m.id])}</Badge>
                     </td>
                   </tr>
                 ))}

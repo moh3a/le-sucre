@@ -1,13 +1,16 @@
 import "server-only";
 import { and, count, eq, sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { db, type DbClient } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import { promo_codes, promotion_redemptions } from "../schema";
 
+type Tx = Parameters<Parameters<DbClient["transaction"]>[0]>[0];
+
 export class PromoCodeRepository {
-  async find_by_code(code: string) {
+  async find_by_code(code: string, tx?: Tx) {
+    const client = tx ?? db;
     const normalized = code.trim().toUpperCase();
-    const [row] = await db
+    const [row] = await client
       .select()
       .from(promo_codes)
       .where(eq(promo_codes.code, normalized))
@@ -28,8 +31,9 @@ export class PromoCodeRepository {
     return Number(total ?? 0);
   }
 
-  async increment_usage(promo_code_id: string) {
-    await db
+  async increment_usage(promo_code_id: string, tx?: Tx) {
+    const client = tx ?? db;
+    await client
       .update(promo_codes)
       .set({ usage_count: sql`${promo_codes.usage_count} + 1` })
       .where(eq(promo_codes.id, promo_code_id));

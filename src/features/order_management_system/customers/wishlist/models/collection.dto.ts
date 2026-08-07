@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { urlSchema } from "@/lib/validations";
+import { wishlist_name_validator } from "../validators/wishlist.validator";
 
 export const create_collection_dto = z.object({
-  name: z.string().min(1).max(255),
+  name: wishlist_name_validator,
   description: z.string().max(5000).optional().nullable(),
   cover_image_url: urlSchema.max(2048).optional().nullable(),
   is_public: z.boolean().default(false),
@@ -11,7 +12,7 @@ export const create_collection_dto = z.object({
 
 export const update_collection_dto = z.object({
   id: z.string().min(1),
-  name: z.string().min(1).max(255).optional(),
+  name: wishlist_name_validator.optional(),
   description: z.string().max(5000).optional().nullable(),
   cover_image_url: urlSchema.max(2048).optional().nullable(),
   is_public: z.boolean().optional(),

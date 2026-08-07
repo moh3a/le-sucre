@@ -71,6 +71,49 @@ export class OrderOperationsRepository {
     };
   }
 
+  async export_escalations_csv(status?: string) {
+    const { items } = await this.list_escalations(1, 100_000, status);
+    const escape = (value: string | number | null | undefined | boolean) => {
+      const v = String(value ?? "");
+      return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    };
+    const header = [
+      "id",
+      "order_id",
+      "reason",
+      "description",
+      "priority",
+      "status",
+      "escalated_by_user_id",
+      "assigned_to_user_id",
+      "resolution",
+      "resolved_by_user_id",
+      "resolved_at",
+      "created_at",
+      "updated_at",
+    ];
+    const rows = items.map((i) =>
+      [
+        i.id,
+        i.order_id,
+        i.reason,
+        i.description,
+        i.priority,
+        i.status,
+        i.escalated_by_user_id,
+        i.assigned_to_user_id,
+        i.resolution,
+        i.resolved_by_user_id,
+        i.resolved_at,
+        i.created_at,
+        i.updated_at,
+      ]
+        .map(escape)
+        .join(","),
+    );
+    return [header.join(","), ...rows].join("\n");
+  }
+
   async insert_hold(input: typeof order_holds.$inferInsert) {
     const [created] = await db.insert(order_holds).values(input).$returningId();
     return created.id;
@@ -152,9 +195,60 @@ export class OrderOperationsRepository {
     };
   }
 
+  async export_cancellations_csv(status?: string) {
+    const { items } = await this.list_cancellation_requests(1, 100_000, status);
+    const escape = (value: string | number | null | undefined | boolean) => {
+      const v = String(value ?? "");
+      return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    };
+    const header = [
+      "id",
+      "order_id",
+      "requested_by_user_id",
+      "reason",
+      "description",
+      "status",
+      "reviewed_by_user_id",
+      "review_note",
+      "reviewed_at",
+      "refund_processed",
+      "refund_amount",
+      "created_at",
+      "updated_at",
+    ];
+    const rows = items.map((i) =>
+      [
+        i.id,
+        i.order_id,
+        i.requested_by_user_id,
+        i.reason,
+        i.description,
+        i.status,
+        i.reviewed_by_user_id,
+        i.review_note,
+        i.reviewed_at,
+        i.refund_processed,
+        i.refund_amount,
+        i.created_at,
+        i.updated_at,
+      ]
+        .map(escape)
+        .join(","),
+    );
+    return [header.join(","), ...rows].join("\n");
+  }
+
   async insert_comment(input: typeof order_comments.$inferInsert) {
     const [created] = await db.insert(order_comments).values(input).$returningId();
     return created.id;
+  }
+
+  async find_comment(id: string) {
+    return db.select().from(order_comments).where(eq(order_comments.id, id)).limit(1).then((r) => r[0] ?? null);
+  }
+
+  async update_comment(id: string, content: string) {
+    await db.update(order_comments).set({ content }).where(eq(order_comments.id, id));
   }
 
   async get_comments(order_id: string, include_private = true) {

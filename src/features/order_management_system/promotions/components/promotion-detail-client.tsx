@@ -7,8 +7,10 @@ import { useTranslations } from "next-intl";
 import {
   BadgePercent,
   Calendar,
+  Clock,
   DollarSign,
   ExternalLink,
+  Eye,
   Hash,
   Layers,
   Pencil,
@@ -18,8 +20,11 @@ import {
   Zap,
 } from "lucide-react";
 
+import type { inferRouterOutputs } from "@trpc/server";
 import { QueryGuard } from "@/components/query-guard";
 import { trpc } from "@/components/providers/app-providers";
+import { toast } from "sonner";
+import type { AppRouter } from "@/lib/trpc/server";
 import { ConsolePageShell } from "@/components/console/console-page-shell";
 import { StatsGrid } from "@/components/console/stats-grid";
 import type { StatItem } from "@/components/console/stats-grid";
@@ -31,8 +36,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
 import { PromotionEditDialog } from "./promotion-edit-dialog";
+import { CreateFlashSaleDialog } from "./create-flash-sale-dialog";
+import { CreateBundleDialog } from "./create-bundle-dialog";
+import { PromoCodeForm } from "./promo-code-form";
 
 type PromotionDetailClientProps = { promotion_id: string };
+
+type PromotionDetail = NonNullable<inferRouterOutputs<AppRouter>["promotions"]["byId"]>;
+type DetailT = (key: string, values?: Record<string, string>) => string;
 
 const promotion_detail_tab_schema = z.enum([
   "overview",
@@ -64,9 +75,9 @@ function OverviewTab({
   rules,
   t,
 }: {
-  promotion: NonNullable<ReturnType<typeof trpc.promotions.byId.useQuery>["data"]>;
-  rules: NonNullable<ReturnType<typeof trpc.promotions.byId.useQuery>["data"]>["rules"];
-  t: (key: string) => string;
+  promotion: PromotionDetail;
+  rules: PromotionDetail["rules"];
+  t: DetailT;
 }) {
   return (
     <div className="space-y-4">
@@ -192,63 +203,71 @@ function CodesTab({
   t,
 }: {
   promotion_id: string;
-  t: (key: string) => string;
+  t: DetailT;
 }) {
   const { data: codes, isLoading } = trpc.promotions.promoCodes.useQuery({ promotion_id });
 
-  if (isLoading) {
-    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>;
-  }
-
-  if (!codes || codes.length === 0) {
-    return (
-      <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-        <Ticket className="mb-2 h-10 w-10" />
-        <p>{t("codes_empty")}</p>
-      </div>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">{t("codes_title")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="px-3 py-2 text-left font-medium">{t("code_column")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("code_usage_column")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("code_global_limit_column")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("code_per_customer_limit_column")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("code_active_column")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("code_starts_at_column")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("code_ends_at_column")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {codes.map((code) => (
-                <tr key={code.id} className="border-b last:border-b-0">
-                  <td className="px-3 py-2 font-mono font-medium">{code.code}</td>
-                  <td className="px-3 py-2 tabular-nums">{code.usage_count}{code.usage_limit ? ` / ${code.usage_limit}` : ""}</td>
-                  <td className="px-3 py-2 tabular-nums">{code.usage_limit ? code.usage_limit.toLocaleString("fr-FR") : t("unlimited")}</td>
-                  <td className="px-3 py-2 tabular-nums">{code.per_customer_limit ?? 1}</td>
-                  <td className="px-3 py-2">
-                    <Badge variant={code.is_active ? "default" : "outline"}>
-                      {code.is_active ? t("yes") : t("no")}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{code.starts_at ? formatDate(code.starts_at) : "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{code.ends_at ? formatDate(code.ends_at) : "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{t("codes_title")}</h3>
+      </div>
+
+      <PromoCodeForm promotion_id={promotion_id} />
+
+      {isLoading && (
+        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+      )}
+
+      {!isLoading && (!codes || codes.length === 0) && (
+        <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+          <Ticket className="mb-2 h-10 w-10" />
+          <p>{t("codes_empty")}</p>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {!isLoading && codes && codes.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">{t("codes_title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="px-3 py-2 text-left font-medium">{t("code_column")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("code_usage_column")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("code_global_limit_column")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("code_per_customer_limit_column")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("code_active_column")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("code_starts_at_column")}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t("code_ends_at_column")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {codes.map((code) => (
+                    <tr key={code.id} className="border-b last:border-b-0">
+                      <td className="px-3 py-2 font-mono font-medium">{code.code}</td>
+                      <td className="px-3 py-2 tabular-nums">{code.usage_count}{code.usage_limit ? ` / ${code.usage_limit}` : ""}</td>
+                      <td className="px-3 py-2 tabular-nums">{code.usage_limit ? code.usage_limit.toLocaleString("fr-FR") : t("unlimited")}</td>
+                      <td className="px-3 py-2 tabular-nums">{code.per_customer_limit ?? 1}</td>
+                      <td className="px-3 py-2">
+                        <Badge variant={code.is_active ? "default" : "outline"}>
+                          {code.is_active ? t("yes") : t("no")}
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">{code.starts_at ? formatDate(code.starts_at) : "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{code.ends_at ? formatDate(code.ends_at) : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
 
@@ -257,76 +276,83 @@ function FlashSalesTab({
   t,
 }: {
   promotion_id: string;
-  t: (key: string) => string;
+  t: DetailT;
 }) {
   const { data: sales, isLoading } = trpc.promotions.flashSales.useQuery({ promotion_id });
 
-  if (isLoading) {
-    return <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}</div>;
-  }
-
-  if (!sales || sales.length === 0) {
-    return (
-      <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-        <Zap className="mb-2 h-10 w-10" />
-        <p>{t("flash_sales_empty")}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      {sales.map((sale) => (
-        <Card key={sale.id}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{sale.title}</CardTitle>
-              <Badge variant={sale.status === "active" ? "default" : "secondary"}>
-                {t(`status_${sale.status}`)}
-              </Badge>
-            </div>
-            <div className="text-muted-foreground flex items-center gap-4 text-sm">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {formatDate(sale.starts_at)} — {formatDate(sale.ends_at)}
-              </span>
-              <span className="flex items-center gap-1">
-                <ShoppingCart className="h-3.5 w-3.5" />
-                {sale.sold_total_units ?? 0}{sale.max_total_units ? ` / ${sale.max_total_units}` : ""} {t("flash_sale_sold_column")}
-              </span>
-            </div>
-          </CardHeader>
-          {sale.items && sale.items.length > 0 && (
-            <CardContent>
-              <h4 className="mb-2 text-sm font-medium">{t("flash_sale_items_title")}</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-3 py-2 text-left font-medium">{t("flash_sale_sku_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("flash_sale_product_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("flash_sale_flash_price_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("flash_sale_max_qty_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("flash_sale_sold_qty_column")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sale.items.map((item) => (
-                      <tr key={item.id} className="border-b last:border-b-0">
-                        <td className="px-3 py-2 font-mono text-xs">{item.sku_id.slice(0, 16)}…</td>
-                        <td className="px-3 py-2 font-mono text-xs">{item.product_id.slice(0, 16)}…</td>
-                        <td className="px-3 py-2 font-medium tabular-nums">{Number(item.flash_price).toLocaleString("fr-FR")} DZD</td>
-                        <td className="px-3 py-2 tabular-nums">{item.max_quantity}</td>
-                        <td className="px-3 py-2 tabular-nums">{item.sold_quantity}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          )}
-        </Card>
-      ))}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{t("flash_sales_title")}</h3>
+        <CreateFlashSaleDialog promotion_id={promotion_id} />
+      </div>
+
+      {isLoading && (
+        <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}</div>
+      )}
+
+      {!isLoading && (!sales || sales.length === 0) && (
+        <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+          <Zap className="mb-2 h-10 w-10" />
+          <p>{t("flash_sales_empty")}</p>
+        </div>
+      )}
+
+      {!isLoading && sales && sales.length > 0 && (
+        <div className="space-y-4">
+          {sales.map((sale) => (
+            <Card key={sale.id}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{sale.title}</CardTitle>
+                  <Badge variant={sale.status === "active" ? "default" : "secondary"}>
+                    {t(`status_${sale.status}`)}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground flex items-center gap-4 text-sm">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(sale.starts_at)} — {formatDate(sale.ends_at)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                    {sale.sold_total_units ?? 0}{sale.max_total_units ? ` / ${sale.max_total_units}` : ""} {t("flash_sale_sold_column")}
+                  </span>
+                </div>
+              </CardHeader>
+              {sale.items && sale.items.length > 0 && (
+                <CardContent>
+                  <h4 className="mb-2 text-sm font-medium">{t("flash_sale_items_title")}</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="px-3 py-2 text-left font-medium">{t("flash_sale_sku_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("flash_sale_product_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("flash_sale_flash_price_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("flash_sale_max_qty_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("flash_sale_sold_qty_column")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sale.items.map((item) => (
+                          <tr key={item.id} className="border-b last:border-b-0">
+                            <td className="px-3 py-2 font-mono text-xs">{item.sku_id.slice(0, 16)}…</td>
+                            <td className="px-3 py-2 font-mono text-xs">{item.product_id.slice(0, 16)}…</td>
+                            <td className="px-3 py-2 font-medium tabular-nums">{Number(item.flash_price).toLocaleString("fr-FR")} DZD</td>
+                            <td className="px-3 py-2 tabular-nums">{item.max_quantity}</td>
+                            <td className="px-3 py-2 tabular-nums">{item.sold_quantity}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -336,77 +362,84 @@ function BundlesTab({
   t,
 }: {
   promotion_id: string;
-  t: (key: string) => string;
+  t: DetailT;
 }) {
   const { data: bundles, isLoading } = trpc.promotions.bundles.useQuery({ promotion_id });
 
-  if (isLoading) {
-    return <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}</div>;
-  }
-
-  if (!bundles || bundles.length === 0) {
-    return (
-      <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-        <Layers className="mb-2 h-10 w-10" />
-        <p>{t("bundles_empty")}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      {bundles.map((bundle) => (
-        <Card key={bundle.id}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{bundle.name}</CardTitle>
-              <Badge variant="outline">{bundle.bundle_type}</Badge>
-            </div>
-            <div className="text-muted-foreground flex items-center gap-4 text-sm">
-              {bundle.bundle_price && (
-                <span className="tabular-nums">{Number(bundle.bundle_price).toLocaleString("fr-FR")} DZD</span>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{t("bundles_title")}</h3>
+        <CreateBundleDialog promotion_id={promotion_id} />
+      </div>
+
+      {isLoading && (
+        <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}</div>
+      )}
+
+      {!isLoading && (!bundles || bundles.length === 0) && (
+        <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
+          <Layers className="mb-2 h-10 w-10" />
+          <p>{t("bundles_empty")}</p>
+        </div>
+      )}
+
+      {!isLoading && bundles && bundles.length > 0 && (
+        <div className="space-y-4">
+          {bundles.map((bundle) => (
+            <Card key={bundle.id}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{bundle.name}</CardTitle>
+                  <Badge variant="outline">{bundle.bundle_type}</Badge>
+                </div>
+                <div className="text-muted-foreground flex items-center gap-4 text-sm">
+                  {bundle.bundle_price && (
+                    <span className="tabular-nums">{Number(bundle.bundle_price).toLocaleString("fr-FR")} DZD</span>
+                  )}
+                  {bundle.discount_percent && (
+                    <span className="tabular-nums">{bundle.discount_percent}%</span>
+                  )}
+                  {bundle.buy_quantity != null && bundle.get_quantity != null && (
+                    <span>Buy {bundle.buy_quantity} Get {bundle.get_quantity}</span>
+                  )}
+                </div>
+              </CardHeader>
+              {bundle.items && bundle.items.length > 0 && (
+                <CardContent>
+                  <h4 className="mb-2 text-sm font-medium">{t("bundle_items_title")}</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="px-3 py-2 text-left font-medium">{t("bundle_item_product_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("bundle_item_sku_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("bundle_item_quantity_column")}</th>
+                          <th className="px-3 py-2 text-left font-medium">{t("bundle_item_required_column")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bundle.items.map((item) => (
+                          <tr key={item.id} className="border-b last:border-b-0">
+                            <td className="px-3 py-2 font-mono text-xs">{item.product_id ? `${item.product_id.slice(0, 16)}…` : "—"}</td>
+                            <td className="px-3 py-2 font-mono text-xs">{item.sku_id ? `${item.sku_id.slice(0, 16)}…` : "—"}</td>
+                            <td className="px-3 py-2 tabular-nums">{item.quantity}</td>
+                            <td className="px-3 py-2">
+                              <Badge variant={item.is_required ? "default" : "outline"}>
+                                {item.is_required ? t("yes") : t("no")}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
               )}
-              {bundle.discount_percent && (
-                <span className="tabular-nums">{bundle.discount_percent}%</span>
-              )}
-              {bundle.buy_quantity != null && bundle.get_quantity != null && (
-                <span>Buy {bundle.buy_quantity} Get {bundle.get_quantity}</span>
-              )}
-            </div>
-          </CardHeader>
-          {bundle.items && bundle.items.length > 0 && (
-            <CardContent>
-              <h4 className="mb-2 text-sm font-medium">{t("bundle_items_title")}</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="px-3 py-2 text-left font-medium">{t("bundle_item_product_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("bundle_item_sku_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("bundle_item_quantity_column")}</th>
-                      <th className="px-3 py-2 text-left font-medium">{t("bundle_item_required_column")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bundle.items.map((item) => (
-                      <tr key={item.id} className="border-b last:border-b-0">
-                        <td className="px-3 py-2 font-mono text-xs">{item.product_id ? `${item.product_id.slice(0, 16)}…` : "—"}</td>
-                        <td className="px-3 py-2 font-mono text-xs">{item.sku_id ? `${item.sku_id.slice(0, 16)}…` : "—"}</td>
-                        <td className="px-3 py-2 tabular-nums">{item.quantity}</td>
-                        <td className="px-3 py-2">
-                          <Badge variant={item.is_required ? "default" : "outline"}>
-                            {item.is_required ? t("yes") : t("no")}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          )}
-        </Card>
-      ))}
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -426,7 +459,7 @@ function OrdersTab({
   t,
 }: {
   promotion_id: string;
-  t: (key: string) => string;
+  t: DetailT;
 }) {
   const [page, set_page] = useState(1);
   const { data, isLoading } = trpc.promotions.ordersByPromotion.useQuery({
@@ -539,7 +572,7 @@ function UsageTab({
   t,
 }: {
   promotion_id: string;
-  t: (key: string) => string;
+  t: DetailT;
 }) {
   const [page, set_page] = useState(1);
   const { data, isLoading } = trpc.promotions.redemptions.useQuery({
@@ -627,6 +660,7 @@ export function PromotionDetailClient({ promotion_id }: PromotionDetailClientPro
   const router = useRouter();
   const search_params = useSearchParams();
   const [edit_open, set_edit_open] = useState(false);
+  const utils = trpc.useUtils();
 
   const parsed = promotion_detail_tab_schema.safeParse(search_params.get("tab"));
   const active_tab = parsed.success ? parsed.data : "overview";
@@ -642,6 +676,21 @@ export function PromotionDetailClient({ promotion_id }: PromotionDetailClientPro
 
   const { data: promotion, isLoading: promo_loading } = trpc.promotions.byId.useQuery({ id: promotion_id });
   const { data: stats, isLoading: stats_loading } = trpc.promotions.detailStats.useQuery({ promotion_id });
+  const { data: reviews } = trpc.operations.promotionGetReviews.useQuery(
+    { promotion_id },
+    { enabled: !!promotion },
+  );
+
+  const request_review = trpc.operations.promotionRequestReview.useMutation({
+    onSuccess: () => {
+      toast.success(t("review_requested"));
+      utils.operations.promotionGetReviews.invalidate({ promotion_id });
+      utils.operations.promotionGetReviewStats.invalidate();
+    },
+    onError: (err) => toast.error(err.message || t("review_request_error")),
+  });
+
+  const has_pending_review = reviews?.some((r) => r.status === "pending") ?? false;
 
   const is_loading = promo_loading || stats_loading;
 
@@ -668,13 +717,29 @@ export function PromotionDetailClient({ promotion_id }: PromotionDetailClientPro
           subtitle={`${t(`type_${promotion.promotion_type}`)} · ${t(`status_${promotion.status}`)}`}
           actions={
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={has_pending_review || request_review.isPending}
+                onClick={() => request_review.mutate({ promotion_id, review_type: promotion.promotion_type })}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                {t("review_button")}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => set_edit_open(true)}>
                 <Pencil className="mr-2 h-4 w-4" />
                 {t("edit_button")}
               </Button>
-              <Badge variant={STATUS_BADGE_VARIANTS[promotion.status] ?? "outline"}>
-                {t(`status_${promotion.status}`)}
-              </Badge>
+              {has_pending_review ? (
+                <Badge variant="secondary">
+                  <Clock className="mr-1 h-3 w-3" />
+                  {t("review_pending_badge")}
+                </Badge>
+              ) : (
+                <Badge variant={STATUS_BADGE_VARIANTS[promotion.status] ?? "outline"}>
+                  {t(`status_${promotion.status}`)}
+                </Badge>
+              )}
             </div>
           }
           stats={

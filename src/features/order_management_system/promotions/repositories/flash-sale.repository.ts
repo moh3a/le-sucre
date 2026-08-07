@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { generate_id } from "@/lib/utils";
 import { flash_sales, flash_sale_items } from "../schema";
 import { promotion_cache_service } from "../services/promotion-cache.service";
-import { PROMOTION_CACHE } from "../constants/cache-keys";
+import { PROMOTION_CACHE, PROMOTION_CACHE_TTL } from "../constants/cache-keys";
 import { format } from "date-fns";
 
 export class FlashSaleRepository {
@@ -36,7 +36,7 @@ export class FlashSaleRepository {
       items: items.filter((i) => i.flash_sale_id === sale.id),
     }));
 
-    await promotion_cache_service.set(PROMOTION_CACHE.flash(), grouped, 180);
+    await promotion_cache_service.set(PROMOTION_CACHE.flash(), grouped, PROMOTION_CACHE_TTL.flash);
     return grouped;
   }
 

@@ -34,6 +34,7 @@ import { ColorSwatchSelector } from "@/components/ui/color-swatch-selector";
 import { authClient } from "@/lib/auth/client";
 import type { StorefrontProduct } from "@/components/storefront/types";
 import { AppLocale } from "@/i18n/config";
+import { useStorefrontCart } from "@/features/order_management_system/carts/hooks/use-storefront-cart";
 import {
   Empty,
   EmptyHeader,
@@ -61,6 +62,7 @@ export function ProductDetailClient({ slug, locale }: Props) {
   const t = useTranslations("product_detail");
   const sessionKey = useSessionKey();
   const { data: session } = authClient.useSession();
+  const { add_item } = useStorefrontCart();
 
   const product_query = trpc.products.getBySlug.useQuery({ slug, locale });
   const product_id = product_query.data?.product?.id;
@@ -279,7 +281,10 @@ export function ProductDetailClient({ slug, locale }: Props) {
             sku_id={selected_sku_id}
             session={session ?? null}
             create_preorder={create_preorder}
-            onAddToCart={() => {}}
+            onAddToCart={(quantity) => {
+              if (!selected_sku_id) return;
+              void add_item({ sku_id: selected_sku_id, quantity });
+            }}
             unit_name={unit_name}
             pieces_per_unit={pieces_per_unit}
           />
@@ -552,6 +557,7 @@ function QuantityAndCartSection({
       sku_id: string;
       quantity: number;
       contact_name?: string;
+      contact_email?: string;
       contact_phone?: string;
     }) => Promise<{ ok: boolean }>;
     isPending: boolean;
@@ -580,6 +586,7 @@ function QuantityAndCartSection({
       sku_id,
       quantity: effectiveQuantity,
       contact_name: session?.user?.name ?? undefined,
+      contact_email: session?.user?.email ?? undefined,
     });
     setSubmitted(true);
   }

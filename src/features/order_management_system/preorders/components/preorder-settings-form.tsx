@@ -2,6 +2,7 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -103,7 +104,7 @@ export function PreorderSettingsForm({
       allow_backorder: values.allow_backorder,
       max_preorder_qty: values.max_preorder_qty ? Number(values.max_preorder_qty) : null,
       estimated_available_at: values.estimated_available_at
-        ? new Date(values.estimated_available_at).toISOString()
+        ? format(new Date(values.estimated_available_at), "yyyy-MM-dd HH:mm:ss")
         : null,
       deposit_percent: Number(values.deposit_percent),
       lead_time_days: Number(values.lead_time_days),

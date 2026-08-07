@@ -3,9 +3,11 @@ import "server-only";
 import { and, count, desc, eq, lte, or, like, sql } from "drizzle-orm";
 import { format, subDays } from "date-fns";
 
-import { db } from "@/lib/db";
+import { db, type DbClient } from "@/lib/db";
 import { carts, cart_items } from "../schema";
 import { users } from "@/features/authentication_and_authorization/auth/schema";
+
+type Tx = Parameters<Parameters<DbClient["transaction"]>[0]>[0];
 
 export class CartRepository {
   async find_by_id(id: string) {
@@ -82,8 +84,9 @@ export class CartRepository {
     await db.delete(carts).where(eq(carts.id, cart_id));
   }
 
-  async mark_converted(cart_id: string) {
-    return await db.update(carts).set({ status: "converted" }).where(eq(carts.id, cart_id));
+  async mark_converted(cart_id: string, tx?: Tx) {
+    const client = tx ?? db;
+    return await client.update(carts).set({ status: "converted" }).where(eq(carts.id, cart_id));
   }
 
   async find_by_user_id(user_id: string) {

@@ -117,14 +117,16 @@ export const order_router = create_trpc_router({
       order_service.admin_update_shipping({ ...input, actor_user_id: ctx.session!.user.id }),
     ),
 
-  adminCheckDependencies: permission_procedure(PERMISSIONS.orders_read)
-    .input(z.object({ order_id: z.string().min(1).max(255) }))
-    .query(({ input }) => order_service.admin_check_dependencies(input.order_id)),
-
   adminDelete: permission_procedure(PERMISSIONS.orders_write)
     .input(z.object({ order_id: z.string().min(1).max(255) }))
     .mutation(({ ctx, input }) =>
       order_service.admin_delete(input.order_id, ctx.session!.user.id),
+    ),
+
+  adminRestore: permission_procedure(PERMISSIONS.orders_write)
+    .input(z.object({ order_id: z.string().min(1).max(255) }))
+    .mutation(({ ctx, input }) =>
+      order_service.admin_restore(input.order_id, ctx.session!.user.id),
     ),
 
   trackOrder: public_procedure

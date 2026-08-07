@@ -3,6 +3,7 @@ export const PREORDER_ALLOCATION_STATUS = {
   confirmed: "confirmed",
   fulfilled: "fulfilled",
   cancelled: "cancelled",
+  expired: "expired",
 } as const;
 
 export const PREORDER_LINE_STATUS = {

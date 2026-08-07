@@ -28,6 +28,7 @@ import { build_option_signature, build_sku_code } from "../engines/option-signat
 import { resolve_unit_price } from "../engines/pricing.engine";
 import { get_product_price_range } from "../engines/price-aggregation.engine";
 import { product_units_repository } from "@/features/product_information_management/products/repositories/product-units.repository";
+import { wishlist_service } from "@/features/order_management_system/customers/wishlist/services/wishlist.service";
 import type { SkuListRow } from "../types";
 
 function group_sku_rows(
@@ -197,6 +198,22 @@ export class SkuService {
       ...(input.metadata !== undefined && { metadata: input.metadata }),
     });
 
+    if (input.base_price !== undefined || input.offer_price !== undefined) {
+      const effective_price =
+        input.offer_price != null
+          ? String(input.offer_price)
+          : input.base_price != null
+            ? String(input.base_price)
+            : null;
+      if (effective_price) {
+        void wishlist_service.refresh_prices_for_product(
+          current.product_id,
+          input.id,
+          effective_price,
+        );
+      }
+    }
+
     return this.get_by_id(input.id);
   }
 
@@ -295,6 +312,20 @@ export class SkuService {
       });
     } catch {
       throw_error(SKU_ERROR.DATABASE_OPERATION_FAILED);
+    }
+
+    if (input.base_price !== undefined || input.offer_price !== undefined) {
+      const effective_price =
+        input.offer_price != null
+          ? String(input.offer_price)
+          : input.base_price != null
+            ? String(input.base_price)
+            : null;
+      if (effective_price) {
+        for (const sku of existing) {
+          void wishlist_service.refresh_prices_for_product(sku.product_id, sku.id, effective_price);
+        }
+      }
     }
 
     return { ok: true };

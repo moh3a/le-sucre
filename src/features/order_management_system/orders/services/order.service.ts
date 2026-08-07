@@ -22,6 +22,13 @@ import { compute_line_capture_amount } from "../../preorders/preorder-checkout.h
 import { FULFILLMENT_TYPE, PREORDER_LINE_STATUS } from "../../preorders/constants/preorder-status";
 import { preorder_repository } from "../../preorders/repositories/preorder.repository";
 import { promo_code_repository } from "../../promotions/repositories/promo-code.repository";
+import { flash_sale_repository } from "../../promotions/repositories/flash-sale.repository";
+import {
+  is_flash_sale_live,
+  reserve_flash_sale_units,
+  release_flash_sale_units_for_order,
+} from "../../promotions/engines/flash-sale.engine";
+import { invalidate_promotion_cache } from "../../promotions/helpers/invalidate-promotion-cache.helper";
 import { track_promotion_redemption } from "../../promotions/analytics/promotion-analytics.hook";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
 import { user_repository } from "@/features/authentication_and_authorization/auth/repositories/user.repository";
@@ -32,6 +39,7 @@ import { reservation_service } from "@/features/fulfillment_management_system/in
 import { invoice_service } from "@/features/payment_management_system/billing/services/invoice.service";
 import { crm_sync_service } from "@/features/marketing/crm_integration/services/crm-sync.service";
 import { order_items, orders } from "../schema";
+import { wishlist_service } from "../../customers/wishlist/services/wishlist.service";
 import { db } from "@/lib/db";
 import { AppError } from "@/lib/error_handling";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
@@ -40,6 +48,7 @@ import { CART_ERROR } from "../../carts/constants/error-codes";
 import { generate_id } from "@/lib/utils";
 import { format } from "date-fns";
 import { cart_service } from "../../carts/cart.service";
+import { cart_repository } from "../../carts/repository";
 import { assert_order_transition } from "../order-lifecycle.engine";
 import { shipping_repository } from "@/features/fulfillment_management_system/shipping/repository";
 import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
@@ -119,232 +128,284 @@ export class OrderService {
       const existing = await this.repo.find_by_idempotency(input.idempotency_key);
       if (existing) return this.repo.get_full(existing.id);
 
-      const [cart] = await db.select().from(carts).where(eq(carts.id, input.cart_id)).limit(1);
-      if (!cart || cart.status !== "active") throw_error(ORDER_ERROR.CART_NOT_FOUND);
+      const placed = await db.transaction(async (tx) => {
+        const [cart] = await tx.select().from(carts).where(eq(carts.id, input.cart_id)).limit(1);
+        if (!cart || cart.status !== "active") throw_error(ORDER_ERROR.CART_NOT_FOUND);
 
-      const items = await db.select().from(cart_items).where(eq(cart_items.cart_id, input.cart_id));
-      if (!items.length) throw_error(ORDER_ERROR.INSUFFICIENT_STOCK);
+        const items = await tx.select().from(cart_items).where(eq(cart_items.cart_id, input.cart_id));
+        if (!items.length) throw_error(ORDER_ERROR.INSUFFICIENT_STOCK);
 
-      const lines = items.map((i) => ({
-        sku_id: i.sku_id,
-        product_id: i.product_id,
-        quantity: i.quantity,
-        unit_price: String(i.unit_price),
-        line_total: (Number(i.unit_price) * i.quantity).toFixed(2),
-      }));
-
-      const totals = await checkout_engine.compute({
-        lines,
-        discount_code: input.discount_code,
-        shipping_cost: input.shipping_cost,
-        tax_rate: input.tax_rate,
-      });
-
-    const order_number = await build_order_number();
-
-    const order_id = await this.repo.create_order({
-      id: generate_id(),
-      order_number,
-      user_id: input.user_id ?? null,
-      guest_phone: input.user_id ? null : (input.guest_phone ?? null),
-      cart_id: input.cart_id,
-      currency: cart.currency,
-      channel: cart.channel,
-      status: "pending_payment",
-      payment_status: "pending",
-      fulfillment_status: "unfulfilled",
-      subtotal: totals.subtotal,
-      discount_total: totals.discount_total,
-      tax_total: totals.tax_total,
-      shipping_total: totals.shipping_total,
-      grand_total: totals.grand_total,
-      shipping_address: input.shipping_address,
-      billing_address: input.billing_address ?? null,
-      idempotency_key: input.idempotency_key,
-      payment_provider: input.payment_provider ?? null,
-      placed_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-    });
-
-    const allocation_ids = items
-      .map((i) => i.preorder_allocation_id)
-      .filter((id): id is string => !!id);
-    const allocation_etas = new Map<string, string | null>();
-    if (allocation_ids.length) {
-      const allocs = await db
-        .select({
-          id: preorder_allocations.id,
-          estimated_available_at: preorder_allocations.estimated_available_at,
-        })
-        .from(preorder_allocations)
-        .where(inArray(preorder_allocations.id, allocation_ids));
-      for (const a of allocs) allocation_etas.set(a.id, a.estimated_available_at);
-    }
-
-    const item_inserts = await Promise.all(
-      items.map(async (line) => {
-        const [sku] = await db
-          .select({ sku_code: product_skus.sku_code })
-          .from(product_skus)
-          .where(eq(product_skus.id, line.sku_id))
-          .limit(1);
-
-        const [tr] = await db
-          .select({ name: product_translations.name })
-          .from(product_translations)
-          .where(
-            and(
-              eq(product_translations.product_id, line.product_id),
-              eq(product_translations.locale, "fr"),
-            ),
-          )
-          .limit(1);
-
-        const fulfillment_type = line.fulfillment_type ?? FULFILLMENT_TYPE.standard;
-        const is_preorder_line =
-          fulfillment_type === FULFILLMENT_TYPE.preorder ||
-          fulfillment_type === FULFILLMENT_TYPE.backorder;
-
-        let deposit_percent = 100;
-        if (is_preorder_line) {
-          const settings = await preorder_repository.get_settings(line.sku_id);
-          deposit_percent = Number(settings?.deposit_percent ?? 100);
+        const flash_map = new Map<string, { flash_sale_id: string; flash_price: string }>();
+        for (const sale of await flash_sale_repository.list_active_with_items()) {
+          if (!is_flash_sale_live(sale)) continue;
+          for (const item of sale.items) {
+            flash_map.set(item.sku_id, {
+              flash_sale_id: sale.id,
+              flash_price: String(item.flash_price),
+            });
+          }
         }
 
-        const item_id = generate_id();
-
-        return {
-          id: item_id,
-          order_id,
-          sku_id: line.sku_id,
-          product_id: line.product_id,
-          sku_code: sku?.sku_code ?? line.sku_id,
-          product_name: tr?.name ?? line.product_id,
-          quantity: line.quantity,
-          unit_price: String(line.unit_price),
-          line_total: (Number(line.unit_price) * line.quantity).toFixed(2),
-          currency: line.currency,
-          reservation_id: is_preorder_line ? null : (line.reservation_id ?? null),
-          fulfillment_type,
-          preorder_status: is_preorder_line ? PREORDER_LINE_STATUS.pending_stock : null,
-          estimated_available_at: is_preorder_line
-            ? (allocation_etas.get(line.preorder_allocation_id ?? "") ?? null)
-            : null,
-          preorder_allocation_id: line.preorder_allocation_id ?? null,
-          payment_capture_mode: deposit_percent < 100 ? "deposit" : "full",
-          metadata:
-            is_preorder_line && deposit_percent < 100
-              ? {
-                  deposit_percent,
-                  deposit_amount: compute_line_capture_amount(
-                    String(line.unit_price),
-                    line.quantity,
-                    deposit_percent,
-                  ),
-                }
-              : {},
-          _deposit_percent: deposit_percent,
-          _confirm_allocation: is_preorder_line ? line.preorder_allocation_id : null,
-        };
-      }),
-    );
-
-    const normalized_items = item_inserts.map(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ({ _deposit_percent, _confirm_allocation, ...row }) => row,
-    );
-    await this.repo.insert_items(normalized_items);
-
-    await this.repo.insert_adjustments(
-      totals.adjustments.map((a) => ({
-        id: generate_id(),
-        order_id,
-        type: a.type,
-        label: a.label,
-        amount: a.amount.startsWith("-") ? a.amount.slice(1) : a.amount,
-        currency: cart.currency,
-      })),
-    );
-
-    if (input.discount_code) {
-      const code_row = await promo_code_repository.find_by_code(input.discount_code);
-      if (code_row) {
-        await promo_code_repository.increment_usage(code_row.id);
-        await track_promotion_redemption({
-          promotion_id: code_row.promotion_id,
-          promo_code_id: code_row.id,
-          order_id,
-          user_id: input.user_id ?? null,
-          discount_amount: totals.discount_total,
+        const lines = items.map((i) => {
+          const flash = flash_map.get(i.sku_id);
+          const unit_price = flash?.flash_price ?? String(i.unit_price);
+          return {
+            sku_id: i.sku_id,
+            product_id: i.product_id,
+            quantity: i.quantity,
+            unit_price,
+            line_total: (Number(unit_price) * i.quantity).toFixed(2),
+            flash_sale_id: flash?.flash_sale_id ?? null,
+          };
         });
-      }
-    }
 
-    let has_deposit_lines = false;
-    for (const raw of item_inserts) {
-      if (raw._confirm_allocation) {
-        await preorder_allocation_service.confirm_for_order(
-          raw._confirm_allocation,
+        const totals = await checkout_engine.compute({
+          lines,
+          discount_code: input.discount_code,
+          shipping_cost: input.shipping_cost,
+          tax_rate: input.tax_rate,
+        });
+
+        for (const line of lines) {
+          if (line.flash_sale_id) {
+            await reserve_flash_sale_units(line.flash_sale_id, line.sku_id, line.quantity, tx);
+          }
+        }
+
+        const order_number = await build_order_number();
+
+        const order_id = await this.repo.create_order(
+          {
+            id: generate_id(),
+            order_number,
+            user_id: input.user_id ?? null,
+            guest_phone: input.user_id ? null : (input.guest_phone ?? null),
+            cart_id: input.cart_id,
+            currency: cart.currency,
+            channel: cart.channel,
+            status: "pending_payment",
+            payment_status: "pending",
+            fulfillment_status: "unfulfilled",
+            subtotal: totals.subtotal,
+            discount_total: totals.discount_total,
+            tax_total: totals.tax_total,
+            shipping_total: totals.shipping_total,
+            grand_total: totals.grand_total,
+            shipping_address: input.shipping_address,
+            billing_address: input.billing_address ?? null,
+            idempotency_key: input.idempotency_key,
+            payment_provider: input.payment_provider ?? null,
+            placed_at: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+          },
+          tx,
+        );
+
+        const allocation_ids = items
+          .map((i) => i.preorder_allocation_id)
+          .filter((id): id is string => !!id);
+        const allocation_etas = new Map<string, string | null>();
+        if (allocation_ids.length) {
+          const allocs = await tx
+            .select({
+              id: preorder_allocations.id,
+              estimated_available_at: preorder_allocations.estimated_available_at,
+            })
+            .from(preorder_allocations)
+            .where(inArray(preorder_allocations.id, allocation_ids));
+          for (const a of allocs) allocation_etas.set(a.id, a.estimated_available_at);
+        }
+
+        const item_inserts = await Promise.all(
+          items.map(async (line) => {
+            const [sku] = await tx
+              .select({ sku_code: product_skus.sku_code })
+              .from(product_skus)
+              .where(eq(product_skus.id, line.sku_id))
+              .limit(1);
+
+            const [tr] = await tx
+              .select({ name: product_translations.name })
+              .from(product_translations)
+              .where(
+                and(
+                  eq(product_translations.product_id, line.product_id),
+                  eq(product_translations.locale, "fr"),
+                ),
+              )
+              .limit(1);
+
+            const fulfillment_type = line.fulfillment_type ?? FULFILLMENT_TYPE.standard;
+            const is_preorder_line =
+              fulfillment_type === FULFILLMENT_TYPE.preorder ||
+              fulfillment_type === FULFILLMENT_TYPE.backorder;
+
+            let deposit_percent = 100;
+            if (is_preorder_line) {
+              const settings = await preorder_repository.get_settings(line.sku_id, tx);
+              deposit_percent = Number(settings?.deposit_percent ?? 100);
+            }
+
+            const item_id = generate_id();
+            const flash = flash_map.get(line.sku_id);
+            const unit_price = flash?.flash_price ?? String(line.unit_price);
+
+            return {
+              id: item_id,
+              order_id,
+              sku_id: line.sku_id,
+              product_id: line.product_id,
+              sku_code: sku?.sku_code ?? line.sku_id,
+              product_name: tr?.name ?? line.product_id,
+              quantity: line.quantity,
+              unit_price,
+              line_total: (Number(unit_price) * line.quantity).toFixed(2),
+              currency: line.currency,
+              reservation_id: is_preorder_line ? null : (line.reservation_id ?? null),
+              fulfillment_type,
+              preorder_status: is_preorder_line ? PREORDER_LINE_STATUS.pending_stock : null,
+              estimated_available_at: is_preorder_line
+                ? (allocation_etas.get(line.preorder_allocation_id ?? "") ?? null)
+                : null,
+              preorder_allocation_id: line.preorder_allocation_id ?? null,
+              payment_capture_mode: deposit_percent < 100 ? "deposit" : "full",
+              metadata: {
+                ...(is_preorder_line && deposit_percent < 100
+                  ? {
+                      deposit_percent,
+                      deposit_amount: compute_line_capture_amount(
+                        String(line.unit_price),
+                        line.quantity,
+                        deposit_percent,
+                      ),
+                    }
+                  : {}),
+                ...(flash ? { flash_sale_id: flash.flash_sale_id } : {}),
+              },
+              _deposit_percent: deposit_percent,
+              _confirm_allocation: is_preorder_line ? line.preorder_allocation_id : null,
+            };
+          }),
+        );
+
+        const normalized_items = item_inserts.map(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ({ _deposit_percent, _confirm_allocation, ...row }) => row,
+        );
+        await this.repo.insert_items(normalized_items, tx);
+
+        await this.repo.insert_adjustments(
+          totals.adjustments.map((a) => ({
+            id: generate_id(),
+            order_id,
+            type: a.type,
+            label: a.label,
+            amount: a.amount.startsWith("-") ? a.amount.slice(1) : a.amount,
+            currency: cart.currency,
+          })),
+          tx,
+        );
+
+        if (input.discount_code) {
+          const code_row = await promo_code_repository.find_by_code(input.discount_code, tx);
+          if (code_row) {
+            await promo_code_repository.increment_usage(code_row.id, tx);
+            await track_promotion_redemption(
+              {
+                promotion_id: code_row.promotion_id,
+                promo_code_id: code_row.id,
+                order_id,
+                user_id: input.user_id ?? null,
+                discount_amount: totals.discount_total,
+              },
+              tx,
+            );
+          }
+        }
+
+        let has_deposit_lines = false;
+        for (const raw of item_inserts) {
+          if (raw._confirm_allocation) {
+            await preorder_allocation_service.confirm_for_order(
+              raw._confirm_allocation,
+              order_id,
+              raw.id,
+              tx,
+            );
+          }
+          if (raw.payment_capture_mode === "deposit") has_deposit_lines = true;
+
+          if (raw.reservation_id) {
+            await reservation_service.commit({ id: raw.reservation_id, order_id }, tx);
+          }
+        }
+
+        if (has_deposit_lines) {
+          await this.repo.update_order_status(
+            order_id,
+            "pending_payment",
+            { payment_status: "partially_paid" },
+            tx,
+          );
+        }
+
+        await cart_repository.mark_converted(input.cart_id, tx);
+
+        return { order_id, order_number, totals, item_inserts };
+      });
+
+      const { order_id, order_number, totals, item_inserts } = placed;
+
+      void audit_service.log({
+        action: "order.place_from_cart",
+        resource_type: "cart_id",
+        resource_id: input.cart_id,
+      });
+
+      void event_ingestion_service.track_purchase({
+        order_id,
+        user_id: input.user_id,
+        revenue: totals.grand_total,
+        lines: item_inserts.map((i) => ({
+          product_id: i.product_id,
+          sku_id: i.sku_id,
+          quantity: i.quantity,
+        })),
+      });
+
+      if (input.user_id) {
+        void wishlist_service.mark_purchased(
+          input.user_id,
           order_id,
-          raw.id,
+          item_inserts.map((i) => ({ product_id: i.product_id, sku_id: i.sku_id })),
         );
       }
-      if (raw.payment_capture_mode === "deposit") has_deposit_lines = true;
 
-      if (raw.reservation_id) {
-        await reservation_service.commit({ id: raw.reservation_id, order_id });
-      }
-    }
-
-    if (has_deposit_lines) {
-      await this.repo.update_order_status(order_id, "pending_payment", {
-        payment_status: "partially_paid",
-      });
-    }
-
-    await db.update(carts).set({ status: "converted" }).where(eq(carts.id, input.cart_id));
-    void audit_service.log({
-      action: "order.place_from_cart",
-      resource_type: "cart_id",
-      resource_id: input.cart_id,
-    });
-
-    void event_ingestion_service.track_purchase({
-      order_id,
-      user_id: input.user_id,
-      revenue: totals.grand_total,
-      lines: item_inserts.map((i) => ({
-        product_id: i.product_id,
-        sku_id: i.sku_id,
-        quantity: i.quantity,
-      })),
-    });
-
-    void invoice_service.generate_order_invoice(order_id).catch((err) => {
-      logger.error("Failed to auto-generate invoice:", err);
-    });
-
-    void crm_sync_service
-      .sync_order_to_crm({
-        order_id,
-        order_number,
-        grand_total: totals.grand_total,
-        shipping_address: input.shipping_address,
-        guest_phone: input.guest_phone,
-        user_id: input.user_id,
-      })
-      .catch((err) => {
-        logger.error("Failed to sync order to CRM:", err);
+      void invoice_service.generate_order_invoice(order_id).catch((err) => {
+        logger.error("Failed to auto-generate invoice:", err);
       });
 
-    dispatch_task_creation({
-      task_type: "order_assignment",
-      title: build_auto_task_title("order_assignment", { order_number }),
-      reference_type: "order",
-      reference_id: order_id,
-      created_by_user_id: input.actor_user_id ?? null,
-    });
+      void crm_sync_service
+        .sync_order_to_crm({
+          order_id,
+          order_number,
+          grand_total: totals.grand_total,
+          shipping_address: input.shipping_address,
+          guest_phone: input.guest_phone,
+          user_id: input.user_id,
+        })
+        .catch((err) => {
+          logger.error("Failed to sync order to CRM:", err);
+        });
 
-    return this.repo.get_full(order_id);
+      dispatch_task_creation({
+        task_type: "order_assignment",
+        title: build_auto_task_title("order_assignment", { order_number }),
+        reference_type: "order",
+        reference_id: order_id,
+        created_by_user_id: input.actor_user_id ?? null,
+      });
+
+      return this.repo.get_full(order_id);
     } catch (error) {
       rethrow_as_order_error(error);
     }
@@ -413,21 +474,39 @@ export class OrderService {
 
     const cancelled_or_refunded = input.status === "cancelled" || input.status === "refunded";
 
-    await this.repo.update_order_status(input.order_id, input.status, {
-      ...(cancelled_or_refunded ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") } : {}),
-      ...(input.status === "failed_delivery" || input.status === "refunded"
-        ? { fulfillment_status: "returned" }
-        : {}),
+    await db.transaction(async (tx) => {
+      await this.repo.update_order_status(
+        input.order_id,
+        input.status,
+        {
+          ...(cancelled_or_refunded
+            ? { cancelled_at: format(new Date(), "yyyy-MM-dd HH:mm:ss") }
+            : {}),
+          ...(input.status === "failed_delivery" || input.status === "refunded"
+            ? { fulfillment_status: "returned" }
+            : {}),
+        },
+        tx,
+      );
+
+      if (cancelled_or_refunded) {
+        await release_flash_sale_units_for_order(input.order_id, tx);
+      }
+
+      await this.repo.insert_status_event(
+        {
+          id: generate_id(),
+          order_id: input.order_id,
+          from_status: current.status,
+          to_status: input.status,
+          actor_user_id: input.actor_user_id,
+          note: input.note ?? null,
+        },
+        tx,
+      );
     });
 
-    await this.repo.insert_status_event({
-      id: generate_id(),
-      order_id: input.order_id,
-      from_status: current.status,
-      to_status: input.status,
-      actor_user_id: input.actor_user_id,
-      note: input.note ?? null,
-    });
+    if (cancelled_or_refunded) void invalidate_promotion_cache();
 
     void audit_service.log({
       action: "order.status.transition",
@@ -752,12 +831,6 @@ export class OrderService {
     return this.repo.get_full(input.order_id);
   }
 
-  async admin_check_dependencies(order_id: string) {
-    const current = await this.repo.find_by_id(order_id);
-    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
-    return this.repo.find_related_counts(order_id);
-  }
-
   async admin_delete(order_id: string, actor_user_id: string) {
     const current = await this.repo.find_by_id(order_id);
     if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
@@ -767,6 +840,23 @@ export class OrderService {
     void audit_service.log({
       actor_user_id,
       action: "order.delete",
+      resource_type: "order_id",
+      resource_id: order_id,
+      metadata: { order_number: current.order_number },
+    });
+
+    return { ok: true as const };
+  }
+
+  async admin_restore(order_id: string, actor_user_id: string) {
+    const current = await this.repo.find_any_by_id(order_id);
+    if (!current) throw_error(ORDER_ERROR.NOT_FOUND);
+
+    await this.repo.restore_order(order_id);
+
+    void audit_service.log({
+      actor_user_id,
+      action: "order.restore",
       resource_type: "order_id",
       resource_id: order_id,
       metadata: { order_number: current.order_number },

@@ -1,12 +1,14 @@
-// services/preorder-allocation.service.ts
 import "server-only";
-import { db } from "@/lib/db";
+import { db, type DbClient } from "@/lib/db";
+import { addHours, format } from "date-fns";
 import { generate_id } from "@/lib/utils";
 import { throw_error } from "@/features/fulfillment_management_system/shared/error-codes";
 import { PREORDER_ERROR } from "../constants/error-codes";
 import { preorder_repository } from "../repositories/preorder.repository";
 import { PREORDER_ALLOCATION_STATUS } from "../constants/preorder-status";
 import { audit_service } from "@/features/authentication_and_authorization/authorization/services/audit.service";
+
+type Tx = Parameters<Parameters<DbClient["transaction"]>[0]>[0];
 
 export class PreorderAllocationService {
   private async reserve_allocation(input: {
@@ -67,6 +69,7 @@ export class PreorderAllocationService {
     quantity: number;
     user_id?: string | null;
     contact_name?: string | null;
+    contact_email?: string | null;
     contact_phone?: string | null;
   }) {
     return this.reserve_allocation({
@@ -74,16 +77,27 @@ export class PreorderAllocationService {
       quantity: input.quantity,
       user_id: input.user_id ?? null,
       contact_name: input.contact_name ?? null,
+      contact_email: input.contact_email ?? null,
       contact_phone: input.contact_phone ?? null,
     });
   }
 
-  async confirm_for_order(allocation_id: string, order_id: string, order_item_id: string) {
-    await preorder_repository.confirm_allocation(allocation_id, order_id, order_item_id);
+  async confirm_for_order(
+    allocation_id: string,
+    order_id: string,
+    order_item_id: string,
+    tx?: Tx,
+  ) {
+    await preorder_repository.confirm_allocation(allocation_id, order_id, order_item_id, tx);
   }
 
   async cancel(allocation_id: string) {
     await preorder_repository.cancel_allocation(allocation_id);
+  }
+
+  async expire_stale(max_age_hours = 24 * 7) {
+    const cutoff = format(addHours(new Date(), -max_age_hours), "yyyy-MM-dd HH:mm:ss");
+    return preorder_repository.expire_stale_pending(cutoff);
   }
 }
 export const preorder_allocation_service = new PreorderAllocationService();

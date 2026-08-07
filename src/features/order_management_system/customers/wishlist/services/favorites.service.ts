@@ -124,6 +124,14 @@ export class FavoritesService {
     ]);
     return { products, brands, categories };
   }
+
+  async get_total_favorites() {
+    return this.repo.get_total_favorites();
+  }
+
+  async get_customer_favorite_count(customer_id: string) {
+    return this.repo.get_customer_favorites_count(customer_id);
+  }
 }
 
 export const favorites_service = new FavoritesService();

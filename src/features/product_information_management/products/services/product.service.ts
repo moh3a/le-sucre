@@ -28,6 +28,7 @@ import { brand_service } from "@/features/product_information_management/brands/
 import { review_service } from "@/features/product_information_management/reviews/services/review.service";
 import { variant_service } from "@/features/product_information_management/variants/services/variant.service";
 import { sku_service } from "@/features/product_information_management/variants/services/sku.service";
+import { wishlist_service } from "@/features/order_management_system/customers/wishlist/services/wishlist.service";
 import { availability_service } from "@/features/order_management_system/preorders/services/availability.service";
 import { dispatch_task_creation } from "@/features/console_dashboard/tasks/services/admin-task.service";
 import { build_auto_task_title } from "@/features/console_dashboard/tasks/auto-task-title.helper";
@@ -416,6 +417,18 @@ export class ProductService {
     void invalidate_catalog_cache();
     void invalidate_recommendations_for_product(input.id);
     void indexing_service.enqueue("reindex_product", { product_id: input.id });
+
+    if (input.base_price !== undefined || input.offer_price !== undefined) {
+      const effective_price =
+        input.offer_price != null
+          ? String(input.offer_price)
+          : input.base_price != null
+            ? String(input.base_price)
+            : null;
+      if (effective_price) {
+        void wishlist_service.refresh_prices_for_product(input.id, null, effective_price);
+      }
+    }
 
     void audit_service.log({
       action: AUDIT_ACTION.PRODUCT_UPDATED,
